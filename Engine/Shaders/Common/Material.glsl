@@ -11,6 +11,9 @@ struct Material {
 	uint normalIndex;
 	uint metallicIndex;
 	uint roughnessIndex;
+	float metalness;
+	float roughness;
+	vec2 padding;
 }; 
 
 layout(buffer_reference, std430) readonly buffer MaterialBuffer { 

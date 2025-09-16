@@ -43,10 +43,10 @@ void Materialized::UploadMaterialDataToGpu()
 
             while (true)
             {
-                bool albedoReady = !material.albedo || (material.albedo->state == LoadState::Ready || material.albedo->state == LoadState::Failed);
-                bool normalReady = !material.normal || (material.normal->state == LoadState::Ready || material.normal->state == LoadState::Failed);
-                bool metallicReady = !material.metallic || (material.metallic->state == LoadState::Ready || material.metallic->state == LoadState::Failed);
-                bool roughnessReady = !material.roughness || (material.roughness->state == LoadState::Ready || material.roughness->state == LoadState::Failed);
+                bool albedoReady = !material.albedoTexture || (material.albedoTexture->state == LoadState::Ready || material.albedoTexture->state == LoadState::Failed);
+                bool normalReady = !material.normalTexture || (material.normalTexture->state == LoadState::Ready || material.normalTexture->state == LoadState::Failed);
+                bool metallicReady = !material.metalnessTexture || (material.metalnessTexture->state == LoadState::Ready || material.metalnessTexture->state == LoadState::Failed);
+                bool roughnessReady = !material.roughnessTexture || (material.roughnessTexture->state == LoadState::Ready || material.roughnessTexture->state == LoadState::Failed);
             
                 if (albedoReady && normalReady && metallicReady && roughnessReady)
                     break;

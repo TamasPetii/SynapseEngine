@@ -21,6 +21,7 @@ namespace Vk
 		VkImageAspectFlagBits aspectFlag;
 		VkMemoryPropertyFlags memoryProperties;
 		uint32_t mipmapLevel = 1;
+		std::unordered_map<std::string, VkComponentMapping> swizzles;
 	};
 
 	class ENGINE_API Image
@@ -43,12 +44,15 @@ namespace Vk
 	private:
 		VkImageCreateInfo BuildImageInfo();
 		VkImageViewCreateInfo BuildImageViewInfo();
+		VkImageViewCreateInfo BuildImageViewSwizzledInfo(const VkComponentMapping& swizzle);
 	private:
 		uint32_t descriptorArrayIndex = UINT32_MAX;
 		VkImage image = VK_NULL_HANDLE;
 		VkImageView imageView = VK_NULL_HANDLE;
 		VkDeviceMemory imageMemory = VK_NULL_HANDLE;
 		ImageSpecification specification;
+
+		std::unordered_map<std::string, VkImageView> swizzledImageViews;
 
 		friend class Memory;
 	};

@@ -803,5 +803,6 @@
     <None Include="Shaders\OcclusionCulling.vert" />
     <None Include="Shaders\OcclusionCulling.frag" />
     <None Include="Shaders\Common\Render\Occlusion.glsl" />
+    <None Include="Shaders\Common\Pbr.glsl" />
   </ItemGroup>
 </Project>

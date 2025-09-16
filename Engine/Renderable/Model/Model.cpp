@@ -288,7 +288,7 @@ void Model::ProcessMaterial(const aiScene* scene, uint32_t materialIndex)
         unsigned int uvIndex = 0;
         material->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        materialComponent.albedo = imageManager->LoadImage(real_path, true); 
+        materialComponent.albedoTexture = imageManager->LoadImage(real_path, true);
     }
 
     //Normals texture
@@ -298,27 +298,27 @@ void Model::ProcessMaterial(const aiScene* scene, uint32_t materialIndex)
         unsigned int uvIndex = 0;
         material->GetTexture(aiTextureType_NORMALS, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        materialComponent.normal = imageManager->LoadImage(real_path, false);
+        materialComponent.normalTexture = imageManager->LoadImage(real_path, false);
     }
 
     //Height texture
-    if (material->GetTextureCount(aiTextureType_HEIGHT) > 0 && materialComponent.normal == nullptr)
+    if (material->GetTextureCount(aiTextureType_HEIGHT) > 0 && materialComponent.normalTexture == nullptr)
     {
         aiString path;
         unsigned int uvIndex = 0;
         material->GetTexture(aiTextureType_HEIGHT, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        materialComponent.normal = imageManager->LoadImage(real_path, true);
+        materialComponent.normalTexture = imageManager->LoadImage(real_path, true);
     }
 
     //Displacement
-    if (material->GetTextureCount(aiTextureType_DISPLACEMENT) > 0 && materialComponent.normal == nullptr)
+    if (material->GetTextureCount(aiTextureType_DISPLACEMENT) > 0 && materialComponent.normalTexture == nullptr)
     {
         aiString path;
         unsigned int uvIndex = 0;
         material->GetTexture(aiTextureType_DISPLACEMENT, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        materialComponent.normal = imageManager->LoadImage(real_path, true);
+        materialComponent.normalTexture = imageManager->LoadImage(real_path, true);
     }
 
     //Metallic Texture
@@ -328,7 +328,7 @@ void Model::ProcessMaterial(const aiScene* scene, uint32_t materialIndex)
         unsigned int uvIndex = 0;
         material->GetTexture(aiTextureType_METALNESS, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        materialComponent.metallic = imageManager->LoadImage(real_path, true);
+        materialComponent.metalnessTexture = imageManager->LoadImage(real_path, true);
     }
 
     //Roughness Texture
@@ -338,7 +338,7 @@ void Model::ProcessMaterial(const aiScene* scene, uint32_t materialIndex)
         unsigned int uvIndex = 0;
         material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        materialComponent.roughness = imageManager->LoadImage(real_path, true);
+        materialComponent.roughnessTexture = imageManager->LoadImage(real_path, true);
     }
 
     aiColor3D diffuseColor(1.f, 1.f, 1.f);

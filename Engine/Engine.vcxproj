@@ -420,6 +420,7 @@
     <None Include="Shaders\Basic.frag" />
     <None Include="Shaders\Basic.vert" />
     <None Include="Shaders\Common\Light\SpotLight.glsl" />
+    <None Include="Shaders\Common\Pbr.glsl" />
     <None Include="Shaders\Common\Render\Occlusion.glsl" />
     <None Include="Shaders\DeferredSpotLight.frag" />
     <None Include="Shaders\DeferredSpotLight.vert" />

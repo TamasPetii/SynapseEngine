@@ -109,7 +109,7 @@ void Gui::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> regist
 
 	auto& textureSet = imguiDescriptorSets[frameIndex];
 	windows["Viewport"]->Render(registry, resourceManager, textureSet, frameIndex);
-	//windows["Entity"]->Render(registry, resourceManager, textureSet, frameIndex);
+	windows["Entity"]->Render(registry, resourceManager, textureSet, frameIndex);
 	windows["Component"]->Render(registry, resourceManager, textureSet, frameIndex);
 	windows["GlobalSettings"]->Render(registry, resourceManager, textureSet, frameIndex);
 	windows["BenchmarkWindow"]->Render(registry, resourceManager, textureSet, frameIndex);

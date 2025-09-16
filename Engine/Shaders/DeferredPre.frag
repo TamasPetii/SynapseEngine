@@ -56,19 +56,16 @@ void main()
 		normal *= (0.5 - ((fs_in_index.w >> DIRECTX_NORMALS_BIT_INDEX) & 1)) * 2.0;
 	}
 
-	float metallic = 0.0;
+	float metallic = materialBuffer.materials[materialIndex].metalness;
 	if(materialBuffer.materials[materialIndex].metallicIndex != uint(INVALID_IMAGE_INDEX))
 		metallic = sampleTexture2D(materialBuffer.materials[materialIndex].metallicIndex, LINEAR_ANISOTROPY_SAMPLER_ID, fs_in_tex).x;
 
-	float roughness = 0.0;
+	float roughness = materialBuffer.materials[materialIndex].roughness;
 	if(materialBuffer.materials[materialIndex].roughnessIndex != uint(INVALID_IMAGE_INDEX))
 		roughness = sampleTexture2D(materialBuffer.materials[materialIndex].roughnessIndex, LINEAR_ANISOTROPY_SAMPLER_ID, fs_in_tex).x;
 	
 	fs_out_pos = vec4(fs_in_pos, 1);
-	fs_out_color = vec4(albedo.xyz, 1);
-	fs_out_normal = vec4(normal, 1);
+	fs_out_color = vec4(albedo.xyz, metallic);
+	fs_out_normal = vec4(normal, roughness);
 	fs_out_entity = fs_in_index.x;
-
-	//fs_out_color = vec4(albedo.xyz, metallic);
-	//fs_out_normal = vec4(normal, roughness);
 }

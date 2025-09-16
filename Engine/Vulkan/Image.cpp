@@ -216,6 +216,13 @@ void Vk::Image::Init()
 
 	auto imageViewInfo = BuildImageViewInfo();
 	VK_CHECK_MESSAGE(vkCreateImageView(device->Value(), &imageViewInfo, nullptr, &imageView), "Failed to create texture image view!");
+
+	for (auto& [name, swizzle] : specification.swizzles)
+	{
+		swizzledImageViews.insert(std::make_pair(name, VK_NULL_HANDLE));
+		auto imageViewSwizzleInfo = BuildImageViewSwizzledInfo(swizzle);
+		VK_CHECK_MESSAGE(vkCreateImageView(device->Value(), &imageViewSwizzleInfo, nullptr, &swizzledImageViews.at(name)), "Failed to create texture image view!");
+	}
 }
 
 void Vk::Image::Destroy()
@@ -268,6 +275,23 @@ VkImageViewCreateInfo Vk::Image::BuildImageViewInfo()
 	viewInfo.subresourceRange.levelCount = specification.mipmapLevel;
 	viewInfo.subresourceRange.baseArrayLayer = 0;
 	viewInfo.subresourceRange.layerCount = 1;
+
+	return viewInfo;
+}
+
+VkImageViewCreateInfo Vk::Image::BuildImageViewSwizzledInfo(const VkComponentMapping& swizzle)
+{
+	VkImageViewCreateInfo viewInfo{};
+	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	viewInfo.image = image;
+	viewInfo.viewType = specification.viewType;
+	viewInfo.format = specification.format;
+	viewInfo.subresourceRange.aspectMask = specification.aspectFlag;
+	viewInfo.subresourceRange.baseMipLevel = 0;
+	viewInfo.subresourceRange.levelCount = specification.mipmapLevel;
+	viewInfo.subresourceRange.baseArrayLayer = 0;
+	viewInfo.subresourceRange.layerCount = 1;
+	viewInfo.components = swizzle;
 
 	return viewInfo;
 }

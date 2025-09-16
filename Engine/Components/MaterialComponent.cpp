@@ -4,10 +4,12 @@ MaterialComponent::MaterialComponent() :
 	useBloom(false),
 	color(1, 1, 1, 1),
 	uvScale(1, 1),
-	albedo(nullptr),
-	normal(nullptr),
-	metallic(nullptr),
-	roughness(nullptr)
+	albedoTexture(nullptr),
+	normalTexture(nullptr),
+	metalnessTexture(nullptr),
+	roughnessTexture(nullptr),
+	metalness(0.f),
+	roughness(1.f)
 {
 }
 
@@ -15,10 +17,13 @@ MaterialComponentGPU::MaterialComponentGPU(const MaterialComponent& component) :
 	color(component.color),
 	uvScale(component.uvScale),
 	bloom(component.useBloom ? 1 : 0, 0),
-	albedoIndex(component.albedo ? component.albedo->GetDescriptorArrayIndex() : UINT32_MAX),
-	normalIndex(component.normal ? component.normal->GetDescriptorArrayIndex() : UINT32_MAX),
-	metallicIndex(component.metallic ? component.metallic->GetDescriptorArrayIndex() : UINT32_MAX),
-	roughnessIndex(component.roughness ? component.roughness->GetDescriptorArrayIndex() : UINT32_MAX)
+	albedoIndex(component.albedoTexture ? component.albedoTexture->GetDescriptorArrayIndex() : UINT32_MAX),
+	normalIndex(component.normalTexture ? component.normalTexture->GetDescriptorArrayIndex() : UINT32_MAX),
+	metallicIndex(component.metalnessTexture ? component.metalnessTexture->GetDescriptorArrayIndex() : UINT32_MAX),
+	roughnessIndex(component.roughnessTexture ? component.roughnessTexture->GetDescriptorArrayIndex() : UINT32_MAX),
+	metalness(component.metalness),
+	roughness(component.roughness),
+	padding(0)
 {
 
 }

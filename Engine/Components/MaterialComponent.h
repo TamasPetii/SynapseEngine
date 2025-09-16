@@ -10,10 +10,12 @@ struct ENGINE_API MaterialComponent : public Component
 	bool useBloom;
 	glm::vec4 color;
 	glm::vec2 uvScale;
-	std::shared_ptr<ImageTexture> albedo;
-	std::shared_ptr<ImageTexture> normal;
-	std::shared_ptr<ImageTexture> metallic;
-	std::shared_ptr<ImageTexture> roughness;
+	float metalness;
+	float roughness;
+	std::shared_ptr<ImageTexture> albedoTexture;
+	std::shared_ptr<ImageTexture> normalTexture;
+	std::shared_ptr<ImageTexture> metalnessTexture;
+	std::shared_ptr<ImageTexture> roughnessTexture;
 };
 
 struct ENGINE_API MaterialComponentGPU
@@ -27,4 +29,7 @@ struct ENGINE_API MaterialComponentGPU
 	uint32_t normalIndex;
 	uint32_t metallicIndex;
 	uint32_t roughnessIndex;
+	float metalness;
+	float roughness;
+	glm::vec2 padding;
 };

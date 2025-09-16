@@ -2,6 +2,7 @@
 
 #include "Common/Camera.glsl"
 #include "Common/Light/DirectionLight.glsl"
+#include "Common/Pbr.glsl"
 
 layout(location = 0) in vec2 fs_in_tex;
 layout(location = 1) in flat uint fs_in_id;
@@ -20,15 +21,33 @@ layout( push_constant ) uniform constants
 	uint cameraIndex;
 } PushConstants;
 
+float EvalDirlightAttenuation()
+{
+	return 1.0;
+}
+
 void main()
 {
 	vec3 position = texture(u_positionTexture, fs_in_tex).xyz;
-    vec3 color = texture(u_colorTexture, fs_in_tex).xyz;
-	vec3 normal = texture(u_normalTexture, fs_in_tex).xyz;
 
-	//With viewProj will be bad..., too much data
-	DirectionLight light = DirectionLightBuffer(PushConstants.directionLightBuffer).lights[fs_in_id];
+	vec4 albedoMetal = texture(u_colorTexture, fs_in_tex);
+	vec4 normalRough = texture(u_normalTexture, fs_in_tex);
 
-	float cosa = clamp(dot(normal, -light.direction), 0, 1);
-	fs_out_col = vec4(cosa * color * light.color * 1.25, 1);
+	vec3 albedo = albedoMetal.xyz;
+	vec3 normal = normalize(normalRough.xyz);
+	float metalness = albedoMetal.w;
+	float roughness = normalRough.w;
+
+	DirectionLightBuffer dlBuffer = DirectionLightBuffer(PushConstants.directionLightBuffer);
+
+	vec3 toEye = normalize(CameraBuffer(PushConstants.cameraBuffer).cameras[PushConstants.cameraIndex].eye.xyz);
+	vec3 toLight = normalize(-dlBuffer.lights[fs_in_id].direction);
+	vec3 lightColor = dlBuffer.lights[fs_in_id].color;
+	float attenuation = EvalDirlightAttenuation();
+	
+	vec3 Lo = ShadePhysicallyBased(albedo, normal, toEye, toLight, roughness, metalness, lightColor, attenuation);
+
+	//Todo: Post process gamma correction + ambient in other shader
+
+	fs_out_col = vec4(Lo, 1);
 }
