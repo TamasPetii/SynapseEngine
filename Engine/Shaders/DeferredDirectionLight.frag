@@ -28,8 +28,9 @@ float EvalDirlightAttenuation()
 
 void main()
 {
-	vec3 position = texture(u_positionTexture, fs_in_tex).xyz;
+	DirectionLightBuffer dlBuffer = DirectionLightBuffer(PushConstants.directionLightBuffer);
 
+	vec3 position = texture(u_positionTexture, fs_in_tex).xyz;
 	vec4 albedoMetal = texture(u_colorTexture, fs_in_tex);
 	vec4 normalRough = texture(u_normalTexture, fs_in_tex);
 
@@ -38,9 +39,7 @@ void main()
 	float metalness = albedoMetal.w;
 	float roughness = normalRough.w;
 
-	DirectionLightBuffer dlBuffer = DirectionLightBuffer(PushConstants.directionLightBuffer);
-
-	vec3 toEye = normalize(CameraBuffer(PushConstants.cameraBuffer).cameras[PushConstants.cameraIndex].eye.xyz);
+	vec3 toEye = normalize(CameraBuffer(PushConstants.cameraBuffer).cameras[PushConstants.cameraIndex].eye.xyz - position);
 	vec3 toLight = normalize(-dlBuffer.lights[fs_in_id].direction);
 	vec3 lightColor = dlBuffer.lights[fs_in_id].color;
 	float attenuation = EvalDirlightAttenuation();

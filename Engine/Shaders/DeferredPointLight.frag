@@ -2,6 +2,7 @@
 
 #include "Common/Camera.glsl"
 #include "Common/Light/PointLight.glsl"
+#include "Common/Pbr.glsl"
 
 layout(location = 0) in flat uint fs_in_id;
 layout(location = 0) out vec4 fs_out_col;
@@ -23,21 +24,39 @@ layout( push_constant ) uniform constants
 	uint padding;
 } PushConstants;
 
+float EvalPointlightAttenuation()
+{
+	return 1.0;
+}
+
 void main()
 {
+	PointLightBuffer plBuffer = PointLightBuffer(PushConstants.pointLightBuffer);
+
 	vec2 fs_in_tex = gl_FragCoord.xy / PushConstants.viewPortSize;
+
 	vec3 position = texture(u_positionTexture, fs_in_tex).xyz;
 
-	PointLight light = PointLightBuffer(PushConstants.pointLightBuffer).lights[fs_in_id]; //With viewProj will be bad..., to much data
-		
-	if(distance(position, light.position) > light.radius)
+	//Box is rendered for pointlights, need to discard fragments that are outside of the sphere volume
+	if(distance(position, plBuffer.lights[fs_in_id].position) > plBuffer.lights[fs_in_id].radius)
 		discard;
 
-    vec3 color = texture(u_colorTexture, fs_in_tex).xyz;
-	vec3 normal = texture(u_normalTexture, fs_in_tex).xyz;
+	vec4 albedoMetal = texture(u_colorTexture, fs_in_tex);
+	vec4 normalRough = texture(u_normalTexture, fs_in_tex);
 
-	vec3 toLight = normalize(light.position - position);
+	vec3 albedo = albedoMetal.xyz;
+	vec3 normal = normalize(normalRough.xyz);
+	float metalness = albedoMetal.w;
+	float roughness = normalRough.w;
 
-	float cosa = clamp(dot(normal, toLight), 0, 1);
-	fs_out_col = vec4(cosa * light.color, 1);
+	vec3 toEye = normalize(CameraBuffer(PushConstants.cameraBuffer).cameras[PushConstants.cameraIndex].eye.xyz - position);
+	vec3 toLight = normalize(plBuffer.lights[fs_in_id].position - position);
+	vec3 lightColor = plBuffer.lights[fs_in_id].color;
+	float attenuation = EvalPointlightAttenuation();
+	
+	vec3 Lo = ShadePhysicallyBased(albedo, normal, toEye, toLight, roughness, metalness, lightColor, attenuation);
+
+	//Todo: Post process gamma correction + ambient in other shader
+
+	fs_out_col = vec4(Lo, 1);
 }

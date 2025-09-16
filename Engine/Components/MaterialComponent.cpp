@@ -8,7 +8,7 @@ MaterialComponent::MaterialComponent() :
 	normalTexture(nullptr),
 	metalnessTexture(nullptr),
 	roughnessTexture(nullptr),
-	metalness(0.f),
+	metalness(1.f),
 	roughness(1.f)
 {
 }

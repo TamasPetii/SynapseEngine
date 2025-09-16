@@ -5,6 +5,7 @@
 #include <ranges>
 #include <future>
 #include <thread>
+#include <print>
 #include "Engine/Vulkan/VulkanContext.h"
 
 Model::Model(std::shared_ptr<ImageManager> imageManager, uint32_t addressArrayIndex) :
