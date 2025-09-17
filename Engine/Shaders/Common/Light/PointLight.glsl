@@ -2,6 +2,9 @@
 #extension GL_EXT_buffer_reference_uvec2 : require
 #extension GL_EXT_nonuniform_qualifier : require
 
+const uint SHADOW_BIT   = 0u;
+const uint FALLOFF_BIT  = 1u;
+
 struct PointLight {
 	vec3 color;
 	float strength;

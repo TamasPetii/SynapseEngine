@@ -24,9 +24,31 @@ layout( push_constant ) uniform constants
 	uint padding;
 } PushConstants;
 
-float EvalPointlightAttenuation()
+float EvalPointlightAttenuation(PointLightBuffer plBuffer, uint lightIndex, vec3 toLight)
 {
-	return 1.0;
+	float attenuation = 1.0;
+	float dist = length(toLight);
+
+	float lightRadius = plBuffer.lights[lightIndex].radius;
+	float lightWeakenDistance = plBuffer.lights[lightIndex].weakenDistance;
+	
+    if (dist <= lightWeakenDistance)
+        return 1.0;
+
+    if (dist >= lightRadius)
+        return 0.0;
+
+    float t = (dist - lightWeakenDistance) / (lightRadius - lightWeakenDistance);
+    t = clamp(t, 0.0, 1.0);
+	
+	//Quadratic Interpolation -> Second bit in bitflag
+    if (((plBuffer.lights[lightIndex].bitflag >> FALLOFF_BIT) & 1u) != 0) {
+		return 1.0 - (t * t);	
+    } 
+	//Linear Interpolation
+	else {
+		return 1.0 - t;
+    }
 }
 
 void main()
@@ -50,11 +72,13 @@ void main()
 	float roughness = normalRough.w;
 
 	vec3 toEye = normalize(CameraBuffer(PushConstants.cameraBuffer).cameras[PushConstants.cameraIndex].eye.xyz - position);
-	vec3 toLight = normalize(plBuffer.lights[fs_in_id].position - position);
-	vec3 lightColor = plBuffer.lights[fs_in_id].color;
-	float attenuation = EvalPointlightAttenuation();
+	vec3 toLightNotNorm = plBuffer.lights[fs_in_id].position - position;
+	vec3 toLight = normalize(toLightNotNorm);
 	
-	vec3 Lo = ShadePhysicallyBased(albedo, normal, toEye, toLight, roughness, metalness, lightColor, attenuation);
+	vec3 lightColor = plBuffer.lights[fs_in_id].color;
+	float attenuation = EvalPointlightAttenuation(plBuffer, fs_in_id, toLightNotNorm);
+	
+	vec3 Lo = ShadePhysicallyBased(albedo, normal, toEye, toLight, roughness, metalness, lightColor, attenuation, plBuffer.lights[fs_in_id].strength);
 
 	//Todo: Post process gamma correction + ambient in other shader
 

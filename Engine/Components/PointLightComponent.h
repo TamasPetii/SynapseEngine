@@ -46,6 +46,6 @@ struct ENGINE_API PointLightGPU
 	float shininess;
 	float radius;
 	float weakenDistance;
-	uint32_t padding;
 	uint32_t bitflag;
+	uint32_t padding;
 };

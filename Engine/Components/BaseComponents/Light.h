@@ -7,6 +7,12 @@
 #include <memory>
 #include <array>
 
+enum LightFalloff
+{
+	LINEAR = 0,
+	QUADRATIC = 1
+};
+
 struct ENGINE_API LightShadowFrameBuffer : public VersionIndexed
 {
 	std::shared_ptr<Vk::FrameBuffer> frameBuffer = nullptr;
@@ -29,4 +35,5 @@ struct ENGINE_API Light
 	glm::vec3 color;
 	float strength;
 	float shininess;
+	LightFalloff falloff;
 };

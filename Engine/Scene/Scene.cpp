@@ -59,7 +59,7 @@ void Scene::InitializeRegistry()
 		registry->AddComponents<TransformComponent, SpotLightComponent>(entity);
 	}
 
-	for (int i = 0; i < 100; ++i)
+	for (int i = 0; i < 10000; ++i)
 	{
 		auto entity = registry->CreateEntity();
 		registry->AddComponents<TransformComponent, PointLightComponent>(entity);
@@ -67,7 +67,6 @@ void Scene::InitializeRegistry()
 		registry->GetComponent<PointLightComponent>(entity).color = glm::vec3(dist(rng), dist(rng), dist(rng));
 	}
 
-	/*
 	{
 		auto entity = registry->CreateEntity();
 		registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
@@ -83,8 +82,8 @@ void Scene::InitializeRegistry()
 		modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/Bistro_v5_2/BistroExterior.fbx");
 		modelComponent.hasDirectxNormals = true;
 	}
-	*/
 
+	/*
 	{
 		auto entity = registry->CreateEntity();
 		registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
@@ -92,6 +91,7 @@ void Scene::InitializeRegistry()
 		transformComponent.scale = glm::vec3(0.01);
 		modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/main1_sponza/NewSponza_Main_Yup_003.fbx");
 	}
+	*/
 
 	/*
 

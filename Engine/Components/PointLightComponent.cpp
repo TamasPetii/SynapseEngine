@@ -10,6 +10,10 @@ PointLightComponent::PointLightComponent() :
 	weakenDistance(0.f),
 	transform(glm::mat4(1))
 {
+	radius = 3.f;
+	strength = 5.f;
+	weakenDistance = 0.0f;
+	falloff = LightFalloff::QUADRATIC;
 }
 
 PointLightGPU::PointLightGPU(const PointLightComponent& pointLightComponent) :
@@ -22,4 +26,5 @@ PointLightGPU::PointLightGPU(const PointLightComponent& pointLightComponent) :
 	bitflag(0)
 {
 	bitflag |= (pointLightComponent.shadow.use ? 1u : 0u) << 0; // Bit 0 = Simulate Shadow?
+	bitflag |= (pointLightComponent.falloff == LightFalloff::QUADRATIC ? 1u : 0u) << 1; // Bit 1 = Quadratic/Linear
 }

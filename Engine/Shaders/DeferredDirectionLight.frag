@@ -44,7 +44,7 @@ void main()
 	vec3 lightColor = dlBuffer.lights[fs_in_id].color;
 	float attenuation = EvalDirlightAttenuation();
 	
-	vec3 Lo = ShadePhysicallyBased(albedo, normal, toEye, toLight, roughness, metalness, lightColor, attenuation);
+	vec3 Lo = ShadePhysicallyBased(albedo, normal, toEye, toLight, roughness, metalness, lightColor, attenuation, dlBuffer.lights[fs_in_id].strength);
 
 	//Todo: Post process gamma correction + ambient in other shader
 

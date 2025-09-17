@@ -53,7 +53,7 @@ float GeometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 }
 
 //This function returns the radiant from a light source
-vec3 ShadePhysicallyBased(vec3 albedo, vec3 normal, vec3 toEye, vec3 toLight, float roughness, float metalness, vec3 lightColor, float attenuation)
+vec3 ShadePhysicallyBased(vec3 albedo, vec3 normal, vec3 toEye, vec3 toLight, float roughness, float metalness, vec3 lightColor, float attenuation, float strength)
 {
     vec3 F0 = vec3(0.04); 
     F0 = mix(F0, albedo, metalness);
@@ -64,7 +64,7 @@ vec3 ShadePhysicallyBased(vec3 albedo, vec3 normal, vec3 toEye, vec3 toLight, fl
     vec3 L = toLight;
     vec3 H = normalize(V + L);
 
-    vec3 radiance = lightColor * attenuation;   
+    vec3 radiance = lightColor * attenuation * strength;   
         
     // cook-torrance brdf
     float NDF = DistributionGGX(N, H, roughness);        
