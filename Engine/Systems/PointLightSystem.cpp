@@ -55,7 +55,7 @@ void PointLightSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_
 				auto& transformComponent = transformPool->GetData(entity);
 				auto& pointLightComponent = pointLightPool->GetData(entity);
 
-				pointLightComponent.position = glm::vec3(transformComponent.transform * glm::vec4(0.f, 0.f, 0.f, 1.f));
+				pointLightComponent.position = glm::vec3(transformComponent.transform * defaultLightPosition);
 
 				glm::vec3 scale;
 				scale.x = glm::length(glm::vec3(transformComponent.transform[0]));
@@ -108,6 +108,9 @@ void PointLightSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::sh
 	auto pointLightTransformBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("PointLightTransform", frameIndex);
 	auto pointLightTransformBufferHandler = static_cast<glm::mat4*>(pointLightTransformBuffer->buffer->GetHandler());
 
+	auto pointLightBillboardBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("PointLightBillboard", frameIndex);
+	auto pointLightBillboardBufferHandler = static_cast<glm::vec4*>(pointLightBillboardBuffer->buffer->GetHandler());
+
 	std::for_each(std::execution::par_unseq, pointLightPool->GetDenseIndices().begin(), pointLightPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			auto& pointLightComponent = pointLightPool->GetData(entity);
@@ -125,6 +128,13 @@ void PointLightSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::sh
 			{
 				pointLightTransformBuffer->versions[pointLightIndex] = pointLightComponent.version;
 				pointLightTransformBufferHandler[pointLightIndex] = pointLightComponent.transform;
+			}
+
+			[[unlikely]]
+			if (pointLightBillboardBuffer->versions[pointLightIndex] != pointLightComponent.version)
+			{
+				pointLightBillboardBuffer->versions[pointLightIndex] = pointLightComponent.version;
+				pointLightBillboardBufferHandler[pointLightIndex] = glm::vec4(pointLightComponent.position, entity);
 			}
 		}
 	);

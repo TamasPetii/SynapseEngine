@@ -7,6 +7,8 @@
 #include <memory>
 #include <array>
 
+constexpr glm::vec4 defaultLightPosition = glm::vec4(0.f, 0.f, 0.f, 1.f);
+
 enum LightFalloff
 {
 	LINEAR = 0,

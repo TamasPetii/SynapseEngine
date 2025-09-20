@@ -402,6 +402,9 @@
     <ClInclude Include="Render\Renderers\OcclusionCuller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Renderers\BillboardRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -764,6 +767,9 @@
     <ClCompile Include="Render\Renderers\OcclusionCuller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Renderers\BillboardRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Registry\Registry.inl">
@@ -807,5 +813,9 @@
     <None Include="Shaders\DeferredAmbient.vert" />
     <None Include="Shaders\DeferredAmbient.frag" />
     <None Include="Shaders\Common\Shape\ShapeBufferAddresses.glsl" />
+    <None Include="Shaders\Billboard.vert" />
+    <None Include="Shaders\Billboard.frag" />
+    <None Include="Shaders\Billboard.geom" />
+    <None Include="Shaders\Common\Position.glsl" />
   </ItemGroup>
 </Project>

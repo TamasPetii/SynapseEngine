@@ -163,6 +163,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Render\Renderers\BillboardRenderer.h" />
     <ClInclude Include="Components\BaseComponents\Component.h" />
     <ClInclude Include="Components\RenderIndicesComponent.h" />
     <ClInclude Include="Components\DirectionLightComponent.h" />
@@ -294,6 +295,7 @@
     <ClInclude Include="Vulkan\VulkanMutex.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Render\Renderers\BillboardRenderer.cpp" />
     <ClCompile Include="Components\BaseComponents\Component.cpp" />
     <ClCompile Include="Components\RenderIndicesComponent.cpp" />
     <ClCompile Include="Components\DirectionLightComponent.cpp" />
@@ -419,8 +421,12 @@
     <None Include="Registry\Registry.inl" />
     <None Include="Shaders\Basic.frag" />
     <None Include="Shaders\Basic.vert" />
+    <None Include="Shaders\Billboard.frag" />
+    <None Include="Shaders\Billboard.geom" />
+    <None Include="Shaders\Billboard.vert" />
     <None Include="Shaders\Common\Light\SpotLight.glsl" />
     <None Include="Shaders\Common\Pbr.glsl" />
+    <None Include="Shaders\Common\Position.glsl" />
     <None Include="Shaders\Common\Render\Occlusion.glsl" />
     <None Include="Shaders\Common\Shape\ShapeBufferAddresses.glsl" />
     <None Include="Shaders\DeferredAmbient.frag" />

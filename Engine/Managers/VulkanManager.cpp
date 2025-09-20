@@ -456,6 +456,11 @@ void VulkanManager::InitShaderModuls()
 	//OcclusionCulling
 	RegisterShaderModule("OcclusionCullingVert", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/OcclusionCulling.vert", VK_SHADER_STAGE_VERTEX_BIT));
 	RegisterShaderModule("OcclusionCullingFrag", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/OcclusionCulling.frag", VK_SHADER_STAGE_FRAGMENT_BIT));
+
+	//Billboard
+	RegisterShaderModule("BillboardVert", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/Billboard.vert", VK_SHADER_STAGE_VERTEX_BIT));
+	RegisterShaderModule("BillboardGeom", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/Billboard.geom", VK_SHADER_STAGE_GEOMETRY_BIT));
+	RegisterShaderModule("BillboardFrag", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/Billboard.frag", VK_SHADER_STAGE_FRAGMENT_BIT));
 }
 
 void VulkanManager::InitGraphicsPipelines()
@@ -635,6 +640,34 @@ void VulkanManager::InitGraphicsPipelines()
 			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
 
 		RegisterGraphicsPipeline("OcclusionCulling", pipelineBuilder.BuildDynamic());
+	}
+
+	{
+		uint32_t pushConsantSize = sizeof(BillboardPushConstants);
+
+		Vk::GraphicsPipelineBuilder pipelineBuilder;
+		pipelineBuilder
+			.ResetToDefault()
+			.AddShaderStage(shaderModuls["BillboardVert"])
+			.AddShaderStage(shaderModuls["BillboardGeom"])
+			.AddShaderStage(shaderModuls["BillboardFrag"])
+			.AddDynamicState(VK_DYNAMIC_STATE_VIEWPORT)
+			.AddDynamicState(VK_DYNAMIC_STATE_SCISSOR)
+			.SetVertexInput({}, {})
+			.SetPrimitiveTopology(VK_PRIMITIVE_TOPOLOGY_POINT_LIST)
+			.SetRasterization(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE)
+			.SetMultisampling(VK_SAMPLE_COUNT_1_BIT)
+			.SetDepthStencil(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS)
+			.SetColorBlend(VK_FALSE)
+			.AddColorBlendAttachment(VK_FALSE)
+			.AddColorBlendAttachment(VK_FALSE)
+			.SetColorAttachmentFormats(VK_FORMAT_R16G16B16A16_SFLOAT, 0)
+			.SetColorAttachmentFormats(VK_FORMAT_R32_UINT, 1)
+			.SetDepthAttachmentFormat(VK_FORMAT_D32_SFLOAT)
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
+			.AddDescriptorSetLayout(GetDescriptorSet("LoadedImages")->Layout());
+
+		RegisterGraphicsPipeline("Billboard", pipelineBuilder.BuildDynamic());
 	}
 }
 

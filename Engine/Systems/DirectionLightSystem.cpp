@@ -52,6 +52,7 @@ void DirectionLightSystem::OnUpdate(std::shared_ptr<Registry> registry, std::sha
 				auto& transformComponent = transformPool->GetData(entity);
 				auto& directionLightComponent = directionLightPool->GetData(entity);
 
+				directionLightComponent.position = glm::vec3(transformComponent.transform * defaultLightPosition);
 				directionLightComponent.direction = glm::normalize(glm::vec3(transformComponent.transform * glm::vec4(defaultDirectionLightDirection, 0.f)));
 
 				//Todo: ViewProj calculation
@@ -82,7 +83,7 @@ void DirectionLightSystem::OnFinish(std::shared_ptr<Registry> registry)
 
 void DirectionLightSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
 {
-	auto directionLightPool = registry->GetPool<DirectionLightComponent>();
+	auto [directionLightPool] = registry->GetPools<DirectionLightComponent>();
 
 	if (!directionLightPool)
 		return;
@@ -90,15 +91,26 @@ void DirectionLightSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std
 	auto directionLightComponentBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("DirectionLightData", frameIndex);
 	auto directionLightComponentBufferHandler = static_cast<DirectionLightGPU*>(directionLightComponentBuffer->buffer->GetHandler());
 
+	auto directionLightBillboardBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("DirectionLightBillboard", frameIndex);
+	auto directionLightBillboardBufferHandler = static_cast<glm::vec4*>(directionLightBillboardBuffer->buffer->GetHandler());
+
 	std::for_each(std::execution::par_unseq, directionLightPool->GetDenseIndices().begin(), directionLightPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			auto& directionLightComponent = directionLightPool->GetData(entity);
 			auto directionLightIndex = directionLightPool->GetDenseIndex(entity);
 
+			[[unlikely]]
 			if (directionLightComponentBuffer->versions[directionLightIndex] != directionLightComponent.version)
 			{
 				directionLightComponentBuffer->versions[directionLightIndex] = directionLightComponent.version;
 				directionLightComponentBufferHandler[directionLightIndex] = DirectionLightGPU(directionLightComponent);
+			}
+
+			[[unlikely]]
+			if (directionLightBillboardBuffer->versions[directionLightIndex] != directionLightComponent.version)
+			{
+				directionLightBillboardBuffer->versions[directionLightIndex] = directionLightComponent.version;
+				directionLightBillboardBufferHandler[directionLightIndex] = glm::vec4(directionLightComponent.position, entity);
 			}
 		}
 	);

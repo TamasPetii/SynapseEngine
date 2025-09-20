@@ -3,6 +3,7 @@
 #include "Renderers/GeometryRenderer.h"
 #include "Renderers/GuiRenderer.h"
 #include "Renderers/WireframeRenderer.h"
+#include "Renderers/BillboardRenderer.h"
 #include "Engine/Vulkan/VulkanMutex.h"
 
 Renderer::Renderer()
@@ -51,6 +52,7 @@ void Renderer::Render(std::shared_ptr<Registry> registry, std::shared_ptr<Resour
 	GeometryRenderer::Render(commandBuffer, registry, resourceManager, frameIndex);
 	DeferredRenderer::Render(commandBuffer, registry, resourceManager, frameIndex);
 	WireframeRenderer::Render(commandBuffer, registry, resourceManager, frameIndex);
+	BillboardRenderer::Render(commandBuffer, registry, resourceManager, frameIndex);
 	GuiRenderer::Render(commandBuffer, registry, resourceManager, frameIndex, imageIndex, guiRenderFunction);
 
 	Vk::Image::TransitionImageLayoutDynamic(commandBuffer, swapChain->GetImages()[imageIndex],

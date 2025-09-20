@@ -79,3 +79,12 @@ struct BoundingVolumeRendererPushConstants
 	glm::vec3 padding;
 	uint32_t cameraIndex;
 };
+
+struct BillboardPushConstants
+{
+	VkDeviceAddress cameraBuffer;
+	VkDeviceAddress positionBufferAddress;
+	VkDeviceAddress instanceBufferAddress;
+	uint32_t cameraIndex;
+	uint32_t iconIndex;
+};

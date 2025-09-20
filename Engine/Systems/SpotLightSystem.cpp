@@ -56,7 +56,7 @@ void SpotLightSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_p
 				auto& transformComponent = transformPool->GetData(entity);
 				auto& spotLightComponent = spotLightPool->GetData(entity);
 
-				spotLightComponent.position = glm::vec3(transformComponent.transform * glm::vec4(0.f, 0.f, 0.f, 1.f));
+				spotLightComponent.position = glm::vec3(transformComponent.transform * defaultLightPosition);
 				spotLightComponent.direction = glm::normalize(glm::vec3(transformComponent.transform * glm::vec4(defaultSpotLightDirection, 0.f)));
 
 				glm::vec3 scale;
@@ -120,6 +120,9 @@ void SpotLightSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::sha
 	auto spotLightTransformBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightTransform", frameIndex);
 	auto spotLightTransformBufferHandler = static_cast<glm::mat4*>(spotLightTransformBuffer->buffer->GetHandler());
 
+	auto spotLightBillboardBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightBillboard", frameIndex);
+	auto spotLightBillboardBufferHandler = static_cast<glm::vec4*>(spotLightBillboardBuffer->buffer->GetHandler());
+
 	std::for_each(std::execution::par_unseq, spotLightPool->GetDenseIndices().begin(), spotLightPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			auto& spotLightComponent = spotLightPool->GetData(entity);
@@ -137,6 +140,13 @@ void SpotLightSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::sha
 			{
 				spotLightTransformBuffer->versions[spotLightIndex] = spotLightComponent.version;
 				spotLightTransformBufferHandler[spotLightIndex] = spotLightComponent.transform;
+			}
+
+			[[unlikely]]
+			if (spotLightBillboardBuffer->versions[spotLightIndex] != spotLightComponent.version)
+			{
+				spotLightBillboardBuffer->versions[spotLightIndex] = spotLightComponent.version;
+				spotLightBillboardBufferHandler[spotLightIndex] = glm::vec4(spotLightComponent.position, entity);
 			}
 		}
 	);

@@ -9,6 +9,8 @@
 
 constexpr glm::vec3 defaultDirectionLightDirection = glm::vec3(0.f, -1.f, 0.f);
 
+class DirectionLightSystem;
+
 struct ENGINE_API DirectionLightShadow : public LightShadow
 {
 	DirectionLightShadow();
@@ -23,6 +25,9 @@ struct ENGINE_API DirectionLightComponent : public Light, public Component
 
 	glm::vec3 direction; //Mapped to transform component rotation!
 	DirectionLightShadow shadow;
+private:
+	glm::vec3 position;
+	friend class DirectionLightSystem;
 };
 
 struct ENGINE_API DirectionLightGPU

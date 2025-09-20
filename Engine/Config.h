@@ -14,6 +14,13 @@ struct ENGINE_API GlobalConfig
 		static inline bool showSpotLights = false;
 	};
 
+	struct ENGINE_API BillboardConfig
+	{
+		static inline bool showDirectionLights = true;
+		static inline bool showPointLights = true;
+		static inline bool showSpotLights = true;
+	};
+
 	struct ENGINE_API FrameConfig
 	{
 		static inline constexpr uint32_t maxFramesInFlights = 3;
