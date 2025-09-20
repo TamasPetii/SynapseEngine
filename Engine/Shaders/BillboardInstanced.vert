@@ -14,6 +14,7 @@ layout( push_constant ) uniform constants
 
 void main()
 {
-	gl_Position = PositionBuffer(PushConstants.positionBufferAddress).positions[gl_VertexIndex];
+	uint index = InstanceIndexBuffer(PushConstants.instanceBufferAddress).indices[gl_VertexIndex];
+	gl_Position = PositionBuffer(PushConstants.positionBufferAddress).positions[index];
 	//position.w is gonna be entity index!!!
 }

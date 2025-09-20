@@ -819,9 +819,10 @@
     <None Include="Shaders\DeferredAmbient.vert" />
     <None Include="Shaders\DeferredAmbient.frag" />
     <None Include="Shaders\Common\Shape\ShapeBufferAddresses.glsl" />
-    <None Include="Shaders\Billboard.vert" />
+    <None Include="Shaders\BillboardInstanced.vert" />
     <None Include="Shaders\Billboard.frag" />
     <None Include="Shaders\Billboard.geom" />
     <None Include="Shaders\Common\Position.glsl" />
+    <None Include="Shaders\Billboard.vert" />
   </ItemGroup>
 </Project>

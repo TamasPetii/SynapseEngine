@@ -64,7 +64,8 @@ void BillboardRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Re
 			}
 		};
 
-	/*
+	//Instanced culled -> Use BillboardInstanced pipeline!
+
 	if (auto directionLightPool = registry->GetPool<DirectionLightComponent>())
 	{
 		uint32_t count = directionLightPool->GetDenseSize();
@@ -72,7 +73,6 @@ void BillboardRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Re
 		if (GlobalConfig::BillboardConfig::showPointLights)
 			RenderBillboard("DirectionLightBillboard", "PointLightTransform", count, directionLightIcon->GetDescriptorArrayIndex());
 	}
-	*/
 
 	if (auto pointLightPool = registry->GetPool<PointLightComponent>())
 	{
