@@ -211,7 +211,14 @@ bool InstanceSystem::IsCameraInsidePointLightCubeVolume(const PointLightComponen
 
 bool InstanceSystem::IsCameraInsideSpotLightConeVolume(const SpotLightComponent& spotLightComponent, const CameraComponent& cameraComponent)
 {
-	return false;
+
+	glm::vec3 fromSpotToCamera = cameraComponent.position - spotLightComponent.position;
+	glm::vec3 fromSpotToCameraNorm = glm::normalize(fromSpotToCamera);
+	glm::vec3 spotDirNorm = glm::normalize(spotLightComponent.direction);
+	float alpha = glm::dot(spotDirNorm, fromSpotToCameraNorm); // Angle: tells if we are inside of the cone
+	float delta = glm::dot(spotDirNorm, fromSpotToCamera); //The projected length to check if its inside the far plane
+
+	return !(alpha < spotLightComponent.angles.w || delta > spotLightComponent.length);
 }
 
 void InstanceSystem::UpdateSpotLightInstances(std::shared_ptr<Registry> registry)

@@ -24,31 +24,20 @@ layout( push_constant ) uniform constants
 	uint padding;
 } PushConstants;
 
-float EvalSpotlightAttenuation(SpotLightBuffer plBuffer, uint lightIndex, vec3 toLight)
+float EvalSpotlightAttenuation(SpotLightBuffer slBuffer, uint lightIndex, vec3 toLight)
 {
-	return 1.0;
-/*
-	float attenuation = 1.0;
-	float dist = length(toLight);
+	float cosTheta = dot(normalize(slBuffer.lights[fs_in_id].direction), normalize(-toLight));
 
-	float lightRadius = plBuffer.lights[lightIndex].radius;
-	float lightWeakenDistance = plBuffer.lights[lightIndex].weakenDistance;
-	
-    if (dist <= lightWeakenDistance)
-        return 1.0;
-	
-	//Quadratic Interpolation -> Second bit in bitflag
-    if (((plBuffer.lights[lightIndex].bitflag >> FALLOFF_BIT) & 1u) != 0) {
-		dist -= lightWeakenDistance;
-		return 1.0 / (dist * dist + 0.00001); //Not looking good visually...
-    } 
-	//Linear Interpolation
-	else {
-		float t = (dist - lightWeakenDistance) / (lightRadius - lightWeakenDistance);
-		t = clamp(t, 0.0, 1.0);
-		return 1.0 - t;
-    }
-*/
+	if(cosTheta >= slBuffer.lights[fs_in_id].angles.z)
+		return 1.0;
+
+	float theta = degrees(acos(cosTheta));
+	float angularAttenuation = clamp((slBuffer.lights[fs_in_id].angles.y - theta) / (slBuffer.lights[fs_in_id].angles.y - slBuffer.lights[fs_in_id].angles.x), 0.0, 1.0);
+
+	float dist = length(toLight);
+	float distanceAttenuation = 1.0 / (dist * dist);
+
+	return angularAttenuation;
 }
 
 void main()

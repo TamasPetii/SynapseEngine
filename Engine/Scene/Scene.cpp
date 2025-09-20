@@ -93,7 +93,7 @@ void Scene::InitializeRegistry()
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, SpotLightComponent>(entity);
 				registry->GetComponent<TransformComponent>(entity).translation = glm::vec3(dist(rng), dist(rng), dist(rng)) * 50.f;
-				registry->GetComponent<TransformComponent>(entity).scale = glm::vec3(5.f, 25.f, 25.f);
+				registry->GetComponent<TransformComponent>(entity).scale = glm::vec3(25.f, 10.f, 25.f);
 				registry->GetComponent<SpotLightComponent>(entity).color = glm::vec3(dist(rng), dist(rng), dist(rng));
 				registry->SetParent(entity, spotLightParent);
 			}

@@ -64,8 +64,8 @@ void SpotLightSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_p
 				scale.y = glm::length(glm::vec3(transformComponent.transform[1]));
 				scale.z = glm::length(glm::vec3(transformComponent.transform[2]));
 
-				spotLightComponent.length = scale.y;
-				spotLightComponent.angles.x = scale.x;
+				spotLightComponent.length = scale.x;
+				spotLightComponent.angles.x = scale.y;
 				spotLightComponent.angles.y = scale.z;
 				spotLightComponent.angles.z = glm::cos(glm::radians(spotLightComponent.angles.x));
 				spotLightComponent.angles.w = glm::cos(glm::radians(spotLightComponent.angles.y));
