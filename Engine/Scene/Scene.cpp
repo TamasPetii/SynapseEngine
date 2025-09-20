@@ -93,6 +93,7 @@ void Scene::InitializeRegistry()
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, SpotLightComponent>(entity);
 				registry->GetComponent<TransformComponent>(entity).translation = glm::vec3(dist(rng), dist(rng), dist(rng)) * 50.f;
+				registry->GetComponent<TransformComponent>(entity).scale = glm::vec3(5.f, 25.f, 25.f);
 				registry->GetComponent<SpotLightComponent>(entity).color = glm::vec3(dist(rng), dist(rng), dist(rng));
 				registry->SetParent(entity, spotLightParent);
 			}
@@ -113,7 +114,7 @@ void Scene::InitializeRegistry()
 				registry->AddComponents<TransformComponent, MaterialComponent, ShapeComponent, DefaultColliderComponent>(entity);
 
 				auto [transformComponent, materialComponent, shapeComponent] = registry->GetComponents<TransformComponent, MaterialComponent, ShapeComponent>(entity);
-				transformComponent.translation = 5.f * glm::vec3(x, y, 0);
+				transformComponent.translation = 2.f * glm::vec3(x, y, 0);
 
 				materialComponent.color = glm::vec4(dist(rng), dist(rng), dist(rng), 1);
 				materialComponent.roughness = x / 10.f;

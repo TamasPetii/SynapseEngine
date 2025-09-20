@@ -11,7 +11,6 @@ SpotLightComponent::SpotLightComponent() :
 {
 }
 
-
 SpotLightGPU::SpotLightGPU(const SpotLightComponent& spotLightComponent) :
 	color(spotLightComponent.color),
 	strength(spotLightComponent.strength),
