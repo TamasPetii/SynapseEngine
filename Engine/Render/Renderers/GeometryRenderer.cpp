@@ -4,7 +4,11 @@
 #include <execution>
 #include "Engine/Components/AnimationComponent.h"
 
-void GeometryRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
+void GeometryRenderer::Initialize(std::shared_ptr<ResourceManager> resourceManager)
+{
+}
+
+void GeometryRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex, std::function<void()> renderFunction)
 {
 	auto vulkanContext = Vk::VulkanContext::GetContext();
 	auto device = vulkanContext->GetDevice();

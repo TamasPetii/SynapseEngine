@@ -9,7 +9,7 @@
 
 #include "Engine/Timer/Timer.h"
 #include "Engine/Scene/Scene.h"
-#include "Engine/Render/Renderer.h"
+#include "Engine/Render/RenderManager.h"
 #include "Engine/Managers/ResourceManager.h"
 #include "Engine/Managers/InputManager.h"
 
@@ -34,6 +34,6 @@ private:
 	uint32_t frameIndex = 0;
 	std::shared_ptr<Scene> scene;
 	std::shared_ptr<Timer> frameTimer;
-	std::shared_ptr<Renderer> renderer;
+	std::shared_ptr<RenderManager> renderManager;
 	std::shared_ptr<ResourceManager> resourceManager;
 };

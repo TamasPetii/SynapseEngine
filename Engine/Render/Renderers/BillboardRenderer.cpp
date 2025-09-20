@@ -6,7 +6,14 @@
 #include "Engine/Components/PointLightComponent.h"
 #include "Engine/Components/SpotLightComponent.h"
 
-void BillboardRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
+void BillboardRenderer::Initialize(std::shared_ptr<ResourceManager> resourceManager)
+{
+	directionLightIcon = resourceManager->GetImageManager()->LoadImage("../Assets/Engine/Icons/DirectionLight.png", ImageLoadMode::Sync, false);
+	pointLightIcon = resourceManager->GetImageManager()->LoadImage("../Assets/Engine/Icons/PointLight.png", ImageLoadMode::Sync, false);
+	spotLightIcon = resourceManager->GetImageManager()->LoadImage("../Assets/Engine/Icons/SpotLight.png", ImageLoadMode::Sync, false);
+}
+
+void BillboardRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex, std::function<void()> renderFunction)
 {
 	auto vulkanContext = Vk::VulkanContext::GetContext();
 	auto device = vulkanContext->GetDevice();
@@ -41,7 +48,7 @@ void BillboardRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Re
 	auto textureDescriptorSet = resourceManager->GetVulkanManager()->GetDescriptorSet("LoadedImages");
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetLayout(), 0, 1, &textureDescriptorSet->Value(), 0, nullptr);
 
-	auto RenderBillboard = [&](const std::string& billboardBufferName, const std::string& instanceBufferName, uint32_t instanceCount) -> void
+	auto RenderBillboard = [&](const std::string& billboardBufferName, const std::string& instanceBufferName, uint32_t instanceCount, uint32_t iconIndex) -> void
 		{
 			if (instanceCount > 0)
 			{
@@ -50,7 +57,7 @@ void BillboardRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Re
 				pushConstants.cameraBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraData", frameIndex)->buffer->GetAddress();
 				pushConstants.positionBufferAddress = resourceManager->GetComponentBufferManager()->GetComponentBuffer(billboardBufferName, frameIndex)->buffer->GetAddress();
 				pushConstants.instanceBufferAddress = resourceManager->GetComponentBufferManager()->GetComponentBuffer(instanceBufferName, frameIndex)->buffer->GetAddress();
-				pushConstants.iconIndex = 0;
+				pushConstants.iconIndex = iconIndex;
 
 				vkCmdPushConstants(commandBuffer, pipeline->GetLayout(), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(BillboardPushConstants), &pushConstants);
 				vkCmdDraw(commandBuffer, instanceCount, 1, 0, 0);
@@ -63,7 +70,7 @@ void BillboardRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Re
 		uint32_t count = directionLightPool->GetDenseSize();
 
 		if (GlobalConfig::BillboardConfig::showPointLights)
-			RenderBillboard("DirectionLightBillboard", "PointLightTransform", count);
+			RenderBillboard("DirectionLightBillboard", "PointLightTransform", count, directionLightIcon->GetDescriptorArrayIndex());
 	}
 	*/
 
@@ -72,7 +79,7 @@ void BillboardRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Re
 		uint32_t count = pointLightPool->GetDenseSize();
 
 		if (GlobalConfig::BillboardConfig::showPointLights)
-			RenderBillboard("PointLightBillboard", "PointLightInstanceIndices", count);
+			RenderBillboard("PointLightBillboard", "PointLightInstanceIndices", count, pointLightIcon->GetDescriptorArrayIndex());
 	}
 
 	if (auto spotLightPool = registry->GetPool<SpotLightComponent>())
@@ -80,7 +87,7 @@ void BillboardRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Re
 		uint32_t count = spotLightPool->GetDenseSize();
 
 		if (GlobalConfig::BillboardConfig::showSpotLights)
-			RenderBillboard("SpotLightBillboard", "SpotLightInstanceIndices", count);
+			RenderBillboard("SpotLightBillboard", "SpotLightInstanceIndices", count, spotLightIcon->GetDescriptorArrayIndex());
 	}
 
 	vkCmdEndRendering(commandBuffer);

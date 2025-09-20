@@ -5,7 +5,11 @@
 #include "Engine/Render/GpuStructs.h"
 #include "OcclusionCuller.h"
 
-void DeferredRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
+void DeferredRenderer::Initialize(std::shared_ptr<ResourceManager> resourceManager)
+{
+}
+
+void DeferredRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex, std::function<void()> renderFunction)
 {
 	auto frameBuffer = resourceManager->GetVulkanManager()->GetFrameDependentFrameBuffer("Main", frameIndex);
 

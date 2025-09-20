@@ -6,7 +6,11 @@
 #include "Engine/Components/PointLightComponent.h"
 #include "Engine/Components/SpotLightComponent.h"
 
-void WireframeRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
+void WireframeRenderer::Initialize(std::shared_ptr<ResourceManager> resourceManager)
+{
+}
+
+void WireframeRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex, std::function<void()> renderFunction)
 {
 	auto vulkanContext = Vk::VulkanContext::GetContext();
 	auto device = vulkanContext->GetDevice();

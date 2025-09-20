@@ -15,6 +15,12 @@
 #include "BaseManagers/AsyncManager.h"
 #include "BaseManagers/BatchedGpuUploadedManager.h"
 
+enum class ImageLoadMode
+{
+	Sync,
+	Async
+};
+
 class ENGINE_API ImageManager : public ArrayIndexedManager, public AsyncManager<std::string>, public AsyncBatchedGpuUploadedManager<ImageTexture, 32>
 {
 public:
@@ -26,7 +32,7 @@ public:
 
 	void Update();
 	std::shared_ptr<ImageTexture> GetImage(const std::string& path);
-	std::shared_ptr<ImageTexture> LoadImage(const std::string& path, bool generateMipMap = true);
+	std::shared_ptr<ImageTexture> LoadImage(const std::string& path, const ImageLoadMode& mode = ImageLoadMode::Async, bool generateMipMap = true);
 private:
 	std::shared_ptr<VulkanManager> vulkanManager = nullptr;
 	std::unordered_map<std::string, std::shared_ptr<ImageTexture>> images;

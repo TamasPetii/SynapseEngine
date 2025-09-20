@@ -87,7 +87,7 @@
     <ClInclude Include="Render\Vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Renderer.h">
+    <ClInclude Include="Render\RenderManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vulkan\DynamicRendering.h">
@@ -405,6 +405,9 @@
     <ClInclude Include="Render\Renderers\BillboardRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Renderers\Renderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -467,7 +470,7 @@
     <ClCompile Include="Render\Vertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Renderer.cpp">
+    <ClCompile Include="Render\RenderManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Vulkan\DynamicRendering.cpp">
@@ -768,6 +771,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Renderers\BillboardRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Renderers\Renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -163,6 +163,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Render\Renderers\Renderer.h" />
     <ClInclude Include="Render\Renderers\BillboardRenderer.h" />
     <ClInclude Include="Components\BaseComponents\Component.h" />
     <ClInclude Include="Components\RenderIndicesComponent.h" />
@@ -268,7 +269,7 @@
     <ClInclude Include="Vulkan\ImageSampler.h" />
     <ClInclude Include="Vulkan\DynamicRendering.h" />
     <ClInclude Include="Engine.h" />
-    <ClInclude Include="Render\Renderer.h" />
+    <ClInclude Include="Render\RenderManager.h" />
     <ClInclude Include="Render\Vertex.h" />
     <ClInclude Include="Vulkan\Memory.h" />
     <ClInclude Include="Vulkan\Image.h" />
@@ -295,6 +296,7 @@
     <ClInclude Include="Vulkan\VulkanMutex.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Render\Renderers\Renderer.cpp" />
     <ClCompile Include="Render\Renderers\BillboardRenderer.cpp" />
     <ClCompile Include="Components\BaseComponents\Component.cpp" />
     <ClCompile Include="Components\RenderIndicesComponent.cpp" />
@@ -395,7 +397,7 @@
     <ClCompile Include="Vulkan\Buffer.cpp" />
     <ClCompile Include="Vulkan\ImageSampler.cpp" />
     <ClCompile Include="Vulkan\DynamicRendering.cpp" />
-    <ClCompile Include="Render\Renderer.cpp" />
+    <ClCompile Include="Render\RenderManager.cpp" />
     <ClCompile Include="Render\Vertex.cpp" />
     <ClCompile Include="Vulkan\Memory.cpp" />
     <ClCompile Include="Vulkan\Image.cpp" />

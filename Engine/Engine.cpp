@@ -13,7 +13,7 @@ Engine::~Engine()
 void Engine::Cleanup()
 {
 	frameTimer.reset();
-	renderer.reset();
+	renderManager.reset();
 	scene.reset();
 	resourceManager.reset();
 	Vk::VulkanContext::DestroyContext();
@@ -30,8 +30,8 @@ void Engine::Initialize()
 	vulkanContext->Init();
 
 	frameTimer = std::make_shared<Timer>();
-	renderer = std::make_shared<Renderer>();
 	resourceManager = std::make_shared<ResourceManager>();
+	renderManager = std::make_shared<RenderManager>(resourceManager);
 	scene = std::make_shared<Scene>(resourceManager);
 }
 
@@ -55,13 +55,13 @@ void Engine::SetWindowExtentFunction(const std::function<std::pair<int, int>()>&
 
 void Engine::SetGuiRenderFunction(const std::function<void(VkCommandBuffer, std::shared_ptr<Registry>, std::shared_ptr<ResourceManager>, uint32_t)>& function)
 {
-	if (renderer)
-		renderer->SetGuiRenderFunction(function);
+	if (renderManager)
+		renderManager->SetGuiRenderFunction(function);
 }
 
 void Engine::WindowResizeEvent()
 {
-	renderer->RecreateSwapChain();
+	renderManager->RecreateSwapChain();
 }
 
 void Engine::Update()
@@ -101,7 +101,7 @@ void Engine::UpdateGPU()
 
 void Engine::Render()
 {
-	renderer->Render(scene->GetRegistry(), resourceManager, frameIndex);
+	renderManager->Render(scene->GetRegistry(), frameIndex);
 }
 
 void Engine::SimulateFrame()

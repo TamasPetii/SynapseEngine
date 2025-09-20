@@ -1,12 +1,14 @@
 #pragma once
-#include "Engine/Vulkan/VulkanContext.h"
-#include "Engine/Vulkan/DynamicRendering.h"
-#include "Engine/Managers/ResourceManager.h"
-#include "Engine/Registry/Registry.h"
+#include "Renderer.h"
 
-class BillboardRenderer
+class BillboardRenderer : public Renderer
 {
 public:
-	static void Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex);
+	void Initialize(std::shared_ptr<ResourceManager> resourceManager) override;
+	void Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex, std::function<void()> renderFunction = nullptr) override;
+private:
+	std::shared_ptr<ImageTexture> directionLightIcon = nullptr;
+	std::shared_ptr<ImageTexture> pointLightIcon = nullptr;
+	std::shared_ptr<ImageTexture> spotLightIcon = nullptr;
 };
 

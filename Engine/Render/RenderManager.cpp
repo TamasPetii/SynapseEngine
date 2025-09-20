@@ -1,4 +1,4 @@
-#include "Renderer.h"
+#include "RenderManager.h"
 #include "Renderers/DeferredRenderer.h"
 #include "Renderers/GeometryRenderer.h"
 #include "Renderers/GuiRenderer.h"
@@ -6,22 +6,23 @@
 #include "Renderers/BillboardRenderer.h"
 #include "Engine/Vulkan/VulkanMutex.h"
 
-Renderer::Renderer()
+RenderManager::RenderManager(std::shared_ptr<ResourceManager> resourceManager) : 
+	resourceManager(resourceManager)
 {
 	Init();
 }
 
-Renderer::~Renderer()
+RenderManager::~RenderManager()
 {
 	Destroy();
 }
 
-void Renderer::SetGuiRenderFunction(const std::function<void(VkCommandBuffer, std::shared_ptr<Registry>, std::shared_ptr<ResourceManager>, uint32_t)>& function)
+void RenderManager::SetGuiRenderFunction(const std::function<void(VkCommandBuffer, std::shared_ptr<Registry>, std::shared_ptr<ResourceManager>, uint32_t)>& function)
 {
 	guiRenderFunction = function;
 }
 
-void Renderer::Render(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
+void RenderManager::Render(std::shared_ptr<Registry> registry, uint32_t frameIndex)
 {
 	//Engine handles waiting for fence
 	resourceManager->GetVulkanManager()->ResizeMarkedFrameBuffers(frameIndex);
@@ -49,10 +50,11 @@ void Renderer::Render(std::shared_ptr<Registry> registry, std::shared_ptr<Resour
 
 	VK_CHECK_MESSAGE(vkBeginCommandBuffer(commandBuffer, &beginInfo), "Failed to begin recording command buffer!");
 
-	GeometryRenderer::Render(commandBuffer, registry, resourceManager, frameIndex);
-	DeferredRenderer::Render(commandBuffer, registry, resourceManager, frameIndex);
-	WireframeRenderer::Render(commandBuffer, registry, resourceManager, frameIndex);
-	BillboardRenderer::Render(commandBuffer, registry, resourceManager, frameIndex);
+	renderers["GeometryRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
+	renderers["DeferredRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
+	renderers["WireframeRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
+	renderers["BillboardRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
+
 	GuiRenderer::Render(commandBuffer, registry, resourceManager, frameIndex, imageIndex, guiRenderFunction);
 
 	Vk::Image::TransitionImageLayoutDynamic(commandBuffer, swapChain->GetImages()[imageIndex],
@@ -110,13 +112,14 @@ void Renderer::Render(std::shared_ptr<Registry> registry, std::shared_ptr<Resour
 	result = vkQueuePresentKHR(presentQueue, &presentInfo);
 }
 
-void Renderer::Init()
+void RenderManager::Init()
 {
 	InitCommandPool();
 	InitCommandBuffer();
+	InitRenderers();
 }
 
-void Renderer::Destroy()
+void RenderManager::Destroy()
 {
 	auto device = Vk::VulkanContext::GetContext()->GetDevice();
 	vkDeviceWaitIdle(device->Value());
@@ -127,7 +130,22 @@ void Renderer::Destroy()
 	}
 }
 
-void Renderer::InitCommandPool()
+void RenderManager::InitRenderers()
+{
+	renderers["GeometryRenderer"] = std::make_shared<GeometryRenderer>();
+	renderers["GeometryRenderer"]->Initialize(resourceManager);
+
+	renderers["DeferredRenderer"] = std::make_shared<DeferredRenderer>();
+	renderers["DeferredRenderer"]->Initialize(resourceManager);
+
+	renderers["WireframeRenderer"] = std::make_shared<WireframeRenderer>();
+	renderers["WireframeRenderer"]->Initialize(resourceManager);
+
+	renderers["BillboardRenderer"] = std::make_shared<BillboardRenderer>();
+	renderers["BillboardRenderer"]->Initialize(resourceManager);
+}
+
+void RenderManager::InitCommandPool()
 {
 	auto device = Vk::VulkanContext::GetContext()->GetDevice();
 	auto& queueFamilyIndices = Vk::VulkanContext::GetContext()->GetPhysicalDevice()->GetQueueFamilyIndices();
@@ -141,7 +159,7 @@ void Renderer::InitCommandPool()
 		VK_CHECK_MESSAGE(vkCreateCommandPool(device->Value(), &poolInfo, nullptr, &commandPools[i]), "Failed to create command pool!");
 }
 
-void Renderer::InitCommandBuffer()
+void RenderManager::InitCommandBuffer()
 {
 	auto device = Vk::VulkanContext::GetContext()->GetDevice();
 
@@ -156,7 +174,7 @@ void Renderer::InitCommandBuffer()
 		VK_CHECK_MESSAGE(vkAllocateCommandBuffers(device->Value(), &allocInfo, &commandBuffers[i]), "Failed to allocate command buffers!");
 	}
 }
-void Renderer::RecreateSwapChain()
+void RenderManager::RecreateSwapChain()
 {
 	auto device = Vk::VulkanContext::GetContext()->GetDevice();
 	vkDeviceWaitIdle(device->Value());

@@ -1,8 +1,5 @@
 #pragma once
-#include "Engine/Vulkan/VulkanContext.h"
-#include "Engine/Registry/Registry.h"
-#include "Engine/Managers/ResourceManager.h"
-#include "Engine/Vulkan/DynamicRendering.h"
+#include "Renderer.h"
 
 class GuiRenderer
 {

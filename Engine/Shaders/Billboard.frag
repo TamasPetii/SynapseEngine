@@ -19,9 +19,7 @@ layout( push_constant ) uniform constants
 
 void main()
 {
-	//vec4 color = sampleTexture2D(PushConstants.iconIndex, LINEAR_ANISOTROPY_SAMPLER_ID, fs_in_tex);
-
-	vec4 color = vec4(1,0,0,1);
+	vec4 color = sampleTexture2D(PushConstants.iconIndex, LINEAR_ANISOTROPY_SAMPLER_ID, vec2(fs_in_tex.x, 1.0 - fs_in_tex.y));
 
 	if(color.w < 0.05)
 		discard;

@@ -37,12 +37,6 @@ void Scene::InitializeRegistry()
 	std::uniform_real_distribution<float> dist(0, 1);
 	std::uniform_int_distribution<uint32_t> distAnimation(0, 3);
 
-	/*
-	std::string imagePath = "../Assets/Texture.jpg";
-	resourceManager->GetImageManager()->LoadImage(imagePath, false);
-	resourceManager->GetImageManager()->WaitForImageFuture(imagePath);
-	*/
-
 	{ //Camera
 		auto entity = registry->CreateEntity();
 		registry->AddComponents<TransformComponent, CameraComponent>(entity);

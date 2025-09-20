@@ -21,7 +21,7 @@ std::shared_ptr<ImageTexture> ImageManager::GetImage(const std::string& path)
 	return images.at(path);
 }
 
-std::shared_ptr<ImageTexture> ImageManager::LoadImage(const std::string& path, bool generateMipMap)
+std::shared_ptr<ImageTexture> ImageManager::LoadImage(const std::string& path, const ImageLoadMode& mode, bool generateMipMap)
 {
     std::lock_guard<std::mutex> lock(asyncMutex);
 
@@ -33,7 +33,21 @@ std::shared_ptr<ImageTexture> ImageManager::LoadImage(const std::string& path, b
 	std::shared_ptr<ImageTexture> imageTexture = std::make_shared<ImageTexture>(GetAvailableIndex());
 	images[path] = imageTexture;
 
-    futures.emplace(path, std::async(std::launch::async, &ImageTexture::Load, images.at(path), path, generateMipMap));
+    if (mode == ImageLoadMode::Async)
+    {
+        futures.emplace(path, std::async(std::launch::async, &ImageTexture::Load, images.at(path), path, generateMipMap));
+    }
+    else
+    {
+        imageTexture->Load(path, generateMipMap);
+
+        std::vector<VkCommandBufferSubmitInfo> submitInfos = { static_cast<BatchUploaded*>(imageTexture.get())->GetCommandBufferSubmitInfo() };
+        Vk::VulkanContext::GetContext()->GetImmediateQueue()->SubmitGraphics(submitInfos);
+        static_cast<BatchUploaded*>(imageTexture.get())->DestoryCommandPoolAndBuffer();
+        
+        imageTexture->state = LoadState::Ready;
+        vulkanManager->GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Images", imageTexture->GetImage()->GetImageView(), VK_NULL_HANDLE, imageTexture->GetImage()->GetDescriptorArrayIndex());
+    }
 
 	return images.at(path);
 }

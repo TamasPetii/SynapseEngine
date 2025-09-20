@@ -1,15 +1,13 @@
 #pragma once
-#include "Engine/Vulkan/VulkanContext.h"
-#include "Engine/Registry/Registry.h"
-#include "Engine/Managers/ResourceManager.h"
-#include "Engine/Vulkan/DynamicRendering.h"
+#include "Renderer.h"
 
-class GeometryRenderer
+class GeometryRenderer : public Renderer
 {
 public:
-	static void Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex);
+	void Initialize(std::shared_ptr<ResourceManager> resourceManager) override;
+	void Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex, std::function<void()> renderFunction = nullptr) override;
 private:
-	static void RenderShapesInstanced(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex);
-	static void RenderModelsInstanced(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex);
+	void RenderShapesInstanced(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex);
+	void RenderModelsInstanced(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex);
 };
 
