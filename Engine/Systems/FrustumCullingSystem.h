@@ -12,5 +12,6 @@ public:
 private:
 	void DefaultColliderCulling(std::shared_ptr<Registry> registry, FrustumCollider* cameraCollider);
 	void PointLightCulling(std::shared_ptr<Registry> registry, FrustumCollider* cameraCollider);
+	void SpotLightCulling(std::shared_ptr<Registry> registry, FrustumCollider* cameraCollider);
 };
 

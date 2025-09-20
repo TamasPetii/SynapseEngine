@@ -23,6 +23,8 @@ struct ENGINE_API SpotLightShadow : public LightShadow
 struct ENGINE_API SpotLightComponent : public Light, public Component, public FrustumCullable
 {
 	SpotLightComponent();
+	static inline uint32_t instanceCount = 0; //Probably problematic with more scenes on the fly
+	static inline std::vector<uint32_t> instanceIndices;
 
 	glm::vec3 position; //Mapped to transform component translation!
 	glm::vec3 direction; //Mapped to transform component rotation!
@@ -45,7 +47,7 @@ struct ENGINE_API SpotLightGPU
 	float shininess;
 	glm::vec3 direction;
 	float length;
-	glm::vec4 angles; //xy = inner/outer | zw = cos(innver)/cos(outer)
+	glm::vec4 angles; //xy = inner/outer | zw = cos(inner)/cos(outer)
 	glm::vec3 padding;
 	uint32_t bitflag;
 };

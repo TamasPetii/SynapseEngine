@@ -88,7 +88,7 @@ void Scene::InitializeRegistry()
 
 		//Spot Lights
 		{
-			for (int i = 0; i < 100; ++i)
+			for (int i = 0; i < 5; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, SpotLightComponent>(entity);
@@ -458,4 +458,6 @@ void Scene::UpdateComponentBuffers(uint32_t frameIndex)
 	RecalculateGpuBufferSize<PointLightComponent, uint32_t>("PointLightOcclusionIndices", frameIndex);
 	RecalculateGpuBufferSize<SpotLightComponent, SpotLightGPU>("SpotLightData", frameIndex);
 	RecalculateGpuBufferSize<SpotLightComponent, glm::mat4>("SpotLightTransform", frameIndex);
+	RecalculateGpuBufferSize<SpotLightComponent, uint32_t>("SpotLightInstanceIndices", frameIndex);
+	RecalculateGpuBufferSize<SpotLightComponent, uint32_t>("SpotLightOcclusionIndices", frameIndex);
 }

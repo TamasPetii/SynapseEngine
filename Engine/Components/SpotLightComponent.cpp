@@ -9,6 +9,7 @@ SpotLightComponent::SpotLightComponent() :
 	position(glm::vec3(0.f)),
 	transform(glm::mat4(1))
 {
+	strength = 5.f;
 }
 
 SpotLightGPU::SpotLightGPU(const SpotLightComponent& spotLightComponent) :

@@ -8,8 +8,8 @@ struct SpotLight {
 	vec3 position;
 	float shininess;
 	vec3 direction;
-	float length;
-	vec3 angles;
+	float len;
+	vec4 angles;
 	vec3 padding;
 	uint bitflag;
 }; 

@@ -59,13 +59,14 @@ struct DeferredPointLightPushConstants
 struct DeferredSpotLightPushConstants
 {
 	VkDeviceAddress cameraBuffer;
-	VkDeviceAddress pointLightBufferAddress;
+	VkDeviceAddress spotLightBufferAddress;
 	VkDeviceAddress transformBufferAddress;
+	VkDeviceAddress instanceBufferAddress;
 	VkDeviceAddress vertexBufferAddress;
 	VkDeviceAddress indexBufferAddress;
 	glm::vec2 viewPortSize;
-	glm::vec3 padding;
 	uint32_t cameraIndex;
+	uint32_t padding;
 };
 
 struct BoundingVolumeRendererPushConstants

@@ -11,6 +11,7 @@
 #include "Engine/Physics/Tester/TesterFrustum.h"
 #include "Engine/Systems/CameraSystem.h"
 #include "Engine/Components/PointLightComponent.h"
+#include "Engine/Components/SpotLightComponent.h"
 
 void FrustumCullingSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex, float deltaTime)
 {
@@ -48,6 +49,7 @@ void FrustumCullingSystem::OnUpdate(std::shared_ptr<Registry> registry, std::sha
 
 	DefaultColliderCulling(registry, &frustumCollider);
 	PointLightCulling(registry, &frustumCollider);
+	SpotLightCulling(registry, &frustumCollider);
 }
 
 void FrustumCullingSystem::OnFinish(std::shared_ptr<Registry> registry)
@@ -102,6 +104,30 @@ void FrustumCullingSystem::PointLightCulling(std::shared_ptr<Registry> registry,
 				if (TesterFrustum::Test(cameraCollider, &collider))
 				{
 					pointLightComponent.toRender = true;
+				}
+			}
+		}
+	);
+}
+
+void FrustumCullingSystem::SpotLightCulling(std::shared_ptr<Registry> registry, FrustumCollider* cameraCollider)
+{
+	auto [spotLightPool, transformPool] = registry->GetPools<SpotLightComponent, TransformComponent>();
+	if (!spotLightPool || !transformPool)
+		return;
+
+	std::for_each(std::execution::par_unseq, spotLightPool->GetDenseIndices().begin(), spotLightPool->GetDenseIndices().end(),
+		[&](const Entity& entity) -> void {
+			if (transformPool->HasComponent(entity))
+			{
+				auto& spotLightComponent = spotLightPool->GetData(entity);
+
+				//Todo: Cone collider ->
+
+				//if (TesterFrustum::Test(cameraCollider, &collider))
+				if (true)
+				{
+					spotLightComponent.toRender = true;
 				}
 			}
 		}

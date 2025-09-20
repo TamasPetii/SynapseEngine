@@ -445,7 +445,7 @@ void VulkanManager::InitShaderModuls()
 	RegisterShaderModule("DeferredPointLightVert", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/DeferredPointLight.vert", VK_SHADER_STAGE_VERTEX_BIT));
 	RegisterShaderModule("DeferredPointLightFrag", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/DeferredPointLight.frag", VK_SHADER_STAGE_FRAGMENT_BIT));
 
-	//Deferred Point Light Shaders
+	//Deferred Spot Light Shaders
 	RegisterShaderModule("DeferredSpotLightVert", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/DeferredSpotLight.vert", VK_SHADER_STAGE_VERTEX_BIT));
 	RegisterShaderModule("DeferredSpotLightFrag", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/DeferredSpotLight.frag", VK_SHADER_STAGE_FRAGMENT_BIT));
 

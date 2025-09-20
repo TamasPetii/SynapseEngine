@@ -5,6 +5,7 @@
 #include "Engine/Components/ShapeComponent.h"
 #include "Engine/Components/TransformComponent.h"
 #include "Engine/Components/PointLightComponent.h"
+#include "Engine/Components/SpotLightComponent.h"
 
 #include <future>
 #include <thread>
@@ -18,10 +19,12 @@ void InstanceSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_pt
 	auto futureShape = std::async(std::launch::async, &InstanceSystem::UpdateShapeInstances, this, registry, resourceManager);
 	auto futureModel = std::async(std::launch::async, &InstanceSystem::UpdateModelInstances, this, registry, resourceManager);
 	auto futurePointLight = std::async(std::launch::async, &InstanceSystem::UpdatePointLightInstances, this, registry);
+	auto futureSpotLight = std::async(std::launch::async, &InstanceSystem::UpdateSpotLightInstances, this, registry);
 
 	futureShape.get();
 	futureModel.get();
 	futurePointLight.get();
+	futureSpotLight.get();
 }
 
 void InstanceSystem::OnFinish(std::shared_ptr<Registry> registry)
@@ -33,9 +36,12 @@ void InstanceSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shar
 	auto futureShapeGpu = std::async(std::launch::async, &InstanceSystem::UpdateShapeInstancesGpu, this, resourceManager, frameIndex);
 	auto futureModelGpu = std::async(std::launch::async, &InstanceSystem::UpdateModelInstancesGpu, this, resourceManager, frameIndex);
 	auto futurePointLightGpu = std::async(std::launch::async, &InstanceSystem::UpdatePointLightInstancesGpu, this, registry, resourceManager, frameIndex);
+	auto futureSpotLightGpu = std::async(std::launch::async, &InstanceSystem::UpdateSpotLightInstancesGpu, this, registry, resourceManager, frameIndex);
 
 	futureShapeGpu.get();
 	futureModelGpu.get();
+	futurePointLightGpu.get();
+	futureSpotLightGpu.get();
 }
 
 void InstanceSystem::UpdateShapeInstances(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager)
@@ -201,4 +207,84 @@ bool InstanceSystem::IsCameraInsidePointLightCubeVolume(const PointLightComponen
 {
 	glm::vec3 difference = glm::abs(pointLightComponent.position - cameraComponent.position) - 0.01f;
 	return difference.x < pointLightComponent.radius && difference.y < pointLightComponent.radius && difference.z < pointLightComponent.radius;
+}
+
+bool InstanceSystem::IsCameraInsideSpotLightConeVolume(const SpotLightComponent& spotLightComponent, const CameraComponent& cameraComponent)
+{
+	return false;
+}
+
+void InstanceSystem::UpdateSpotLightInstances(std::shared_ptr<Registry> registry)
+{
+	auto spotLightPool = registry->GetPool<SpotLightComponent>();
+	if (!spotLightPool)
+		return;
+
+	SpotLightComponent::instanceCount = 0;
+	SpotLightComponent::instanceIndices.clear();
+	SpotLightComponent::instanceIndices.reserve(spotLightPool->GetDenseSize());
+
+	std::for_each(std::execution::seq, spotLightPool->GetDenseIndices().begin(), spotLightPool->GetDenseIndices().end(),
+		[&](Entity entity) -> void {
+			auto& spotLightComponent = spotLightPool->GetData(entity);
+
+			if (spotLightComponent.toRender)
+			{
+				SpotLightComponent::instanceIndices.push_back(spotLightPool->GetDenseIndex(entity));
+				SpotLightComponent::instanceCount++;
+			}
+		}
+	);
+
+	SpotLightComponent::instanceIndices.resize(SpotLightComponent::instanceCount);
+}
+
+void InstanceSystem::UpdateSpotLightInstancesGpu(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
+{
+	auto spotLightPool = registry->GetPool<SpotLightComponent>();
+	if (!spotLightPool || SpotLightComponent::instanceCount == 0)
+		return;
+
+	{
+		VkDeviceSize bufferSize = sizeof(uint32_t) * SpotLightComponent::instanceCount;
+		auto spotLightInstanceIndicesBufferHandler = resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightInstanceIndices", frameIndex)->buffer->GetHandler();
+		memcpy(spotLightInstanceIndicesBufferHandler, SpotLightComponent::instanceIndices.data(), (size_t)bufferSize);
+	}
+
+	{
+		VkDeviceSize bufferSize = sizeof(uint32_t) * SpotLightComponent::instanceCount;
+		auto spotLightOcclusionIndicesBufferHandler = resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightOcclusionIndices", frameIndex)->buffer->GetHandler();
+		memset(spotLightOcclusionIndicesBufferHandler, 0, (size_t)bufferSize);
+	}
+}
+
+void InstanceSystem::UpdateSpotLightInstancesWithOcclusion(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
+{
+	auto [spotLightPool, cameraPool] = registry->GetPools<SpotLightComponent, CameraComponent>();
+
+	if (!spotLightPool || !cameraPool || SpotLightComponent::instanceCount == 0)
+		return;
+
+	auto mainCameraEntity = CameraSystem::GetMainCameraEntity(registry);
+	auto& cameraComponent = cameraPool->GetData(mainCameraEntity);
+
+	auto spotLightOcclusionIndicesBufferHandler = static_cast<uint32_t*>(resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightOcclusionIndices", frameIndex)->buffer->GetHandler());
+
+	uint32_t currentIndex = 0;
+	for (uint32_t i = 0; i < SpotLightComponent::instanceCount; ++i)
+	{
+		auto& spotLightComponent = spotLightPool->GetDenseData()[SpotLightComponent::instanceIndices[i]];
+
+		//Camera in inside the light volume it won't be rendered which means no fragments created because of Back Face Culling.
+		//In this case we still need to add the instance index to the final instance indices list.
+		if (spotLightOcclusionIndicesBufferHandler[i] == 1 || IsCameraInsideSpotLightConeVolume(spotLightComponent, cameraComponent))
+			SpotLightComponent::instanceIndices[currentIndex++] = SpotLightComponent::instanceIndices[i];
+	}
+
+	SpotLightComponent::instanceCount = currentIndex;
+	SpotLightComponent::instanceIndices.resize(SpotLightComponent::instanceCount);
+
+	VkDeviceSize bufferSize = sizeof(uint32_t) * SpotLightComponent::instanceCount;
+	auto spotLightInstanceIndicesBufferHandler = resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightInstanceIndices", frameIndex)->buffer->GetHandler();
+	memcpy(spotLightInstanceIndicesBufferHandler, SpotLightComponent::instanceIndices.data(), (size_t)bufferSize);
 }

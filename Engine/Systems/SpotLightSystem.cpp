@@ -68,7 +68,7 @@ void SpotLightSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_p
 				spotLightComponent.angles.x = scale.x;
 				spotLightComponent.angles.y = scale.z;
 				spotLightComponent.angles.z = glm::cos(glm::radians(spotLightComponent.angles.x));
-				spotLightComponent.angles.w = glm::cos(glm::radians(spotLightComponent.angles.z));
+				spotLightComponent.angles.w = glm::cos(glm::radians(spotLightComponent.angles.y));
 
 				float scaleY = 0.5 * spotLightComponent.length;
 				float scaleXZ = glm::tan(glm::radians(spotLightComponent.angles.y)) * scaleY * 2;

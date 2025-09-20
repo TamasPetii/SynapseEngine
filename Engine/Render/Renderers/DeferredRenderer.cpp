@@ -47,7 +47,7 @@ void DeferredRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Reg
 	OcclusionCuller::CullLights(registry, resourceManager, frameIndex);
 	RenderDirectionLights(commandBuffer, registry, resourceManager, frameIndex);
 	RenderPointLights(commandBuffer, registry, resourceManager, frameIndex);
-	//RenderSpotLights(commandBuffer, registry, resourceManager, frameIndex);
+	RenderSpotLights(commandBuffer, registry, resourceManager, frameIndex);
 }
 
 void DeferredRenderer::RenderDirectionLights(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
@@ -204,11 +204,12 @@ void DeferredRenderer::RenderSpotLights(VkCommandBuffer commandBuffer, std::shar
 
 	auto shape = resourceManager->GetGeometryManager()->GetShape("Cone");
 
-	DeferredPointLightPushConstants pushConstants;
+	DeferredSpotLightPushConstants pushConstants;
 	pushConstants.cameraIndex = 0; //TODO: MAIN CAMERA
 	pushConstants.cameraBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraData", frameIndex)->buffer->GetAddress();
-	pushConstants.pointLightBufferAddress = resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightData", frameIndex)->buffer->GetAddress();
+	pushConstants.spotLightBufferAddress = resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightData", frameIndex)->buffer->GetAddress();
 	pushConstants.transformBufferAddress = resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightTransform", frameIndex)->buffer->GetAddress();
+	pushConstants.instanceBufferAddress = resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightInstanceIndices", frameIndex)->buffer->GetAddress();
 	pushConstants.vertexBufferAddress = shape->GetVertexBuffer()->GetAddress();
 	pushConstants.indexBufferAddress = shape->GetIndexBuffer()->GetAddress();
 	pushConstants.viewPortSize = glm::vec2(viewport.width, viewport.height);
@@ -220,7 +221,7 @@ void DeferredRenderer::RenderSpotLights(VkCommandBuffer commandBuffer, std::shar
 
 	//TODO: BIND Spot LIGHT DYNAMIC DESCRIPTOR ARRAY INDICES
 
-	vkCmdDraw(commandBuffer, shape->GetIndexCount(), spotLightPool->GetDenseSize(), 0, 0);
+	vkCmdDraw(commandBuffer, shape->GetIndexCount(), SpotLightComponent::instanceCount, 0, 0);
 
 	vkCmdEndRendering(commandBuffer);
 }
