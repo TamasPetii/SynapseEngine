@@ -19,7 +19,7 @@ void EntityWindow::DisplayEntity(std::shared_ptr<Registry> registry, Entity enti
 	if (registry->GetActiveEntity() == entity)
 		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1, 1, 0, 1));
 
-	bool open = ImGui::TreeNodeEx(std::to_string(entity).c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_DefaultOpen);
+	bool open = ImGui::TreeNodeEx(std::to_string(entity).c_str(), ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick);
 
 	if (registry->GetActiveEntity() == entity)
 		ImGui::PopStyleColor();

@@ -2,7 +2,7 @@
 #extension GL_EXT_buffer_reference_uvec2 : require
 #define INVALID_RENDER_INDEX 0xFFFFFFFFu
 
-struct RenderIndices
+struct ModelRenderIndices
 {
 	uint entityIndex;
 	uint transformIndex;
@@ -12,6 +12,19 @@ struct RenderIndices
 	uint bitflag;
 };
 
-layout(buffer_reference, std430) readonly buffer RenderIndicesBuffer {
-	RenderIndices indices[];
+layout(buffer_reference, std430) readonly buffer ModelRenderIndicesBuffer {
+	ModelRenderIndices indices[];
+};
+
+struct ShapeRenderIndices
+{
+	uint entityIndex;
+	uint transformIndex;
+	uint shapeIndex; //This is the loaded shape array index! This is not the shape component dense index!!
+	uint materialIndex;
+	uint bitflag;
+};
+
+layout(buffer_reference, std430) readonly buffer ShapeRenderIndicesBuffer {
+	ShapeRenderIndices indices[];
 };

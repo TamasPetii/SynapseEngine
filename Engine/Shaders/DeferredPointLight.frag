@@ -34,19 +34,16 @@ float EvalPointlightAttenuation(PointLightBuffer plBuffer, uint lightIndex, vec3
 	
     if (dist <= lightWeakenDistance)
         return 1.0;
-
-    if (dist >= lightRadius)
-        return 0.0;
-
-    float t = (dist - lightWeakenDistance) / (lightRadius - lightWeakenDistance);
-    t = clamp(t, 0.0, 1.0);
 	
 	//Quadratic Interpolation -> Second bit in bitflag
     if (((plBuffer.lights[lightIndex].bitflag >> FALLOFF_BIT) & 1u) != 0) {
-		return 1.0 - (t * t);	
+		dist -= lightWeakenDistance;
+		return 1.0 / (dist * dist + 0.00001); //Not looking good visually...
     } 
 	//Linear Interpolation
 	else {
+		float t = (dist - lightWeakenDistance) / (lightRadius - lightWeakenDistance);
+		t = clamp(t, 0.0, 1.0);
 		return 1.0 - t;
     }
 }

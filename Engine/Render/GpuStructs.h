@@ -11,13 +11,17 @@ struct GeometryRendererPushConstants
 	VkDeviceAddress cameraBuffer;
 	VkDeviceAddress transformBuffer;
 	VkDeviceAddress instanceIndexBuffer;
-	VkDeviceAddress renderIndicesBuffer;
+	VkDeviceAddress modelRenderIndicesBuffer;
 	VkDeviceAddress modelBufferAddresses;
 	VkDeviceAddress animationTransformBufferAddresses;
 	VkDeviceAddress animationVertexBoneBufferAddresses;
+	VkDeviceAddress shapeRenderIndicesBuffer;
+	VkDeviceAddress shapeBufferAddresses;
+	VkDeviceAddress materialBuffer;
 	uint32_t renderMode;
 	uint32_t cameraIndex;
 };
+
 struct OcclusionCullingPushConstants
 {
 	VkDeviceAddress cameraBuffer;

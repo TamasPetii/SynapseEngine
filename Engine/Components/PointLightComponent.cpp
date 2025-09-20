@@ -10,7 +10,7 @@ PointLightComponent::PointLightComponent() :
 	weakenDistance(0.f),
 	transform(glm::mat4(1))
 {
-	radius = 3.f;
+	radius = 5.f;
 	strength = 5.f;
 	weakenDistance = 0.0f;
 	falloff = LightFalloff::QUADRATIC;

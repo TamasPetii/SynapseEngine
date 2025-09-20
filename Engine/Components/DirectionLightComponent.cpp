@@ -7,6 +7,7 @@ DirectionLightShadow::DirectionLightShadow()
 DirectionLightComponent::DirectionLightComponent() : 
 	direction(defaultDirectionLightDirection)
 {
+	strength = 5.f;
 }
 
 

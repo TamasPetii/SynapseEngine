@@ -50,7 +50,7 @@ void ModelSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_
 		return;
 
 	auto renderIndicesBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("ModelRenderIndicesData", frameIndex);
-	auto renderIndicesBufferHandler = static_cast<RenderIndicesGPU*>(renderIndicesBuffer->buffer->GetHandler());
+	auto renderIndicesBufferHandler = static_cast<ModelRenderIndicesGPU*>(renderIndicesBuffer->buffer->GetHandler());
 
 	std::for_each(std::execution::par_unseq, modelPool->GetDenseIndices().begin(), modelPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
@@ -66,7 +66,7 @@ void ModelSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_
 				flags |= (modelComponent.receiveShadow ? 1u : 0u) << 0;        // Bit 0
 				flags |= (modelComponent.hasDirectxNormals ? 1u : 0u) << 1;    // Bit 1
 
-				auto renderIndices = RenderIndicesGPU{
+				auto renderIndices = ModelRenderIndicesGPU{
 					.entityIndex = entity,
 					.transformIndex = transformPool && transformPool->HasComponent(entity) ? transformPool->GetDenseIndex(entity) : UINT32_MAX,
 					.modelIndex = hasModel ? modelComponent.model->GetAddressArrayIndex() : UINT32_MAX,

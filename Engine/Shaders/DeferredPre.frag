@@ -24,10 +24,13 @@ layout( push_constant ) uniform constants
 	uvec2 cameraBuffer;
 	uvec2 transformBuffer;
 	uvec2 instanceIndexBuffer;
-	uvec2 renderIndicesBuffer;
+	uvec2 modelRenderIndicesBuffer;
 	uvec2 modelBufferAddresses;
 	uvec2 animationTransformBufferAddresses;
 	uvec2 animationVertexBoneBufferAddresses;
+	uvec2 shapeRenderIndicesBuffer;
+	uvec2 shapeBufferAddresses;
+	uvec2 materialBuffer;
 	uint renderMode;
 	uint cameraIndex;
 } PushConstants;
@@ -35,10 +38,10 @@ layout( push_constant ) uniform constants
 void main() 
 {
 	//TODO: CHECK FOR INVALID MATERIAL INDEX -> LOAD INVALID MATERIAL 
-	uint modelIndex = fs_in_index.y;
+	uint meshIndex = fs_in_index.y;
 	uint materialIndex = fs_in_index.z;
 
-	MaterialBuffer materialBuffer = MaterialBuffer(ModelDeviceAddressesBuffer(PushConstants.modelBufferAddresses).deviceAddresses[modelIndex].materialBuffer);
+	MaterialBuffer materialBuffer = PushConstants.renderMode == MODEL_INSTANCED ? MaterialBuffer(ModelDeviceAddressesBuffer(PushConstants.modelBufferAddresses).deviceAddresses[meshIndex].materialBuffer) : MaterialBuffer(PushConstants.materialBuffer);
 
 	vec4 albedo = materialBuffer.materials[materialIndex].color;
 	if(materialBuffer.materials[materialIndex].albedoIndex != uint(INVALID_IMAGE_INDEX))

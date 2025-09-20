@@ -21,7 +21,7 @@ Entity Registry::CreateEntity()
 		destroyedEntities.erase(it);
 	}
 
-	AddComponents<ComponentBitsetMask, Relationship, RenderIndicesComponent>(entity);
+	AddComponents<ComponentBitsetMask, Relationship>(entity);
 	levels[0].insert(entity);
 	return entity;
 }

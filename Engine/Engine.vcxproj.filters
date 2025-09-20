@@ -806,5 +806,6 @@
     <None Include="Shaders\Common\Pbr.glsl" />
     <None Include="Shaders\DeferredAmbient.vert" />
     <None Include="Shaders\DeferredAmbient.frag" />
+    <None Include="Shaders\Common\Shape\ShapeBufferAddresses.glsl" />
   </ItemGroup>
 </Project>
