@@ -34,6 +34,8 @@ void MaterialManager::Update()
 			static_cast<MaterialGPU*>(deviceAddresses->GetHandler())[material->GetBufferArrayIndex()] = MaterialGPU(material);
 			material->ResetBit<UPDATE_BIT>();
 
+			std::cout << "Material Updated" << std::endl;
+
 			// Only if the index changed -> So shape/material can track it -> But no changes currently with this logics
 			// material->SetBit<CHANGED_BIT>(); 
 		}

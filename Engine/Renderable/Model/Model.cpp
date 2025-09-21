@@ -295,7 +295,7 @@ void Model::ProcessMaterial(const aiScene* scene, uint32_t materialIndex)
         unsigned int uvIndex = 0;
         materialAI->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        material->albedoTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [&]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
+        material->albedoTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [materialName, this]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
     }
 
     //Normals texture
@@ -305,7 +305,7 @@ void Model::ProcessMaterial(const aiScene* scene, uint32_t materialIndex)
         unsigned int uvIndex = 0;
         materialAI->GetTexture(aiTextureType_NORMALS, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        material->normalTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [&]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
+        material->normalTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [materialName, this]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
     }
 
     //Height texture
@@ -315,7 +315,7 @@ void Model::ProcessMaterial(const aiScene* scene, uint32_t materialIndex)
         unsigned int uvIndex = 0;
         materialAI->GetTexture(aiTextureType_HEIGHT, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        material->normalTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [&]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
+        material->normalTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [materialName, this]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
     }
 
     //Displacement
@@ -325,7 +325,7 @@ void Model::ProcessMaterial(const aiScene* scene, uint32_t materialIndex)
         unsigned int uvIndex = 0;
         materialAI->GetTexture(aiTextureType_DISPLACEMENT, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        material->normalTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [&]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
+        material->normalTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [materialName, this]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
     }
 
     //Metallic Texture
@@ -335,7 +335,7 @@ void Model::ProcessMaterial(const aiScene* scene, uint32_t materialIndex)
         unsigned int uvIndex = 0;
         materialAI->GetTexture(aiTextureType_METALNESS, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        material->metalnessTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [&]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
+        material->metalnessTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [materialName, this]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
     }
 
     //Roughness Texture
@@ -345,7 +345,7 @@ void Model::ProcessMaterial(const aiScene* scene, uint32_t materialIndex)
         unsigned int uvIndex = 0;
         materialAI->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        material->roughnessTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [&]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
+        material->roughnessTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [materialName, this]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
     }
 
     aiColor3D diffuseColor(1.f, 1.f, 1.f);
