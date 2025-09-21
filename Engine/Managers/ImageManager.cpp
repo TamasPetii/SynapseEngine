@@ -1,4 +1,5 @@
 #include "ImageManager.h"
+#include <iostream>
 
 ImageManager::ImageManager(std::shared_ptr<VulkanManager> vulkanManager) : 
     ArrayIndexedManager(),
@@ -49,6 +50,9 @@ std::shared_ptr<ImageTexture> ImageManager::LoadImage(const std::string& path, c
         
         imageTexture->state = LoadState::Ready;
         vulkanManager->GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Images", imageTexture->GetImage()->GetImageView(), VK_NULL_HANDLE, imageTexture->GetBufferArrayIndex());
+    
+        if (onFinished)
+            onFinished();
     }
 
 	return images.at(path);
@@ -84,6 +88,8 @@ void ImageManager::Update()
         {
             vulkanManager->GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Images", image->GetImage()->GetImageView(), VK_NULL_HANDLE, image->GetBufferArrayIndex());
             image->state = LoadState::Ready;
+
+            std::cout << std::format("Image loaded and ready, on index = {}", image->GetBufferArrayIndex()) << std::endl;
 
             auto onFinish = onFinishFunctions[image->GetPath()];
             
