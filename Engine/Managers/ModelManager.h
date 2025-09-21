@@ -22,7 +22,7 @@ struct ENGINE_API ModelDevicesAddresses
 class ENGINE_API ModelManager : public DeviceAddressedManager<ModelDevicesAddresses>, public AsyncManager<std::string>
 {
 public:
-	ModelManager(std::shared_ptr<ImageManager> imageManager);
+	ModelManager(std::shared_ptr<ImageManager> imageManager, std::shared_ptr<MaterialManager> materialManager);
 	~ModelManager();
 	ModelManager(const ModelManager&) = delete;
 	ModelManager& operator=(const ModelManager&) = delete;
@@ -33,6 +33,7 @@ public:
 	void Update();
 private:
 	std::shared_ptr<ImageManager> imageManager = nullptr;
+	std::shared_ptr<MaterialManager> materialManager = nullptr;
 	std::unordered_map<std::string, std::shared_ptr<Model>> models;
 };
 

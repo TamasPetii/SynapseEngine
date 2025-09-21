@@ -17,6 +17,7 @@ struct GeometryRendererPushConstants
 	VkDeviceAddress animationVertexBoneBufferAddresses;
 	VkDeviceAddress shapeRenderIndicesBuffer;
 	VkDeviceAddress shapeBufferAddresses;
+	VkDeviceAddress shapeMaterialIndicesBuffer;
 	VkDeviceAddress materialBuffer;
 	uint32_t renderMode;
 	uint32_t cameraIndex;

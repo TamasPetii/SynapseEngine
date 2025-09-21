@@ -89,6 +89,7 @@ void Engine::Update()
 	resourceManager->GetModelManager()->Update();
 	resourceManager->GetImageManager()->Update();
 	resourceManager->GetAnimationManager()->Update();
+	resourceManager->GetMaterialManager()->Update();
 
 	scene->Update(frameTimer, frameIndex);
 	InputManager::Instance()->UpdatePrevious();

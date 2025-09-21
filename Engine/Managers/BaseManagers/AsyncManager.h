@@ -24,8 +24,8 @@ protected:
 	std::vector<T> CompleteFinishedFutures();
 protected:
 	std::mutex asyncMutex;
-	std::unordered_map<T, std::future<void>> futures;
     std::stringstream log;
+	std::unordered_map<T, std::future<void>> futures;
 };
 
 template <Hashable T>

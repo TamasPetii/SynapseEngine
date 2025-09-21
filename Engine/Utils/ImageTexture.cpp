@@ -55,13 +55,14 @@ VkFormat GliFormatToVulkan(gli::format format)
 }
 
 
-ImageTexture::ImageTexture(uint32_t descriptorArrayIndex) :
-	descriptorArrayIndex(descriptorArrayIndex)
+ImageTexture::ImageTexture()
 {
 }
 
 void ImageTexture::Load(const std::string& path, bool generateMipMap)
 {
+	this->path = path;
+
 	std::string extension = std::filesystem::path(path).extension().string();
 	if (extension == ".dds")
 		CreateVulkanImageWithGli(path);
@@ -99,7 +100,7 @@ void ImageTexture::CreateVulkanImageWithGli(const std::string& path)
 	imageSpec.aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
 	imageSpec.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 	imageSpec.mipmapLevel = mipMapLevel;
-	image = std::make_unique<Vk::Image>(imageSpec, descriptorArrayIndex);
+	image = std::make_unique<Vk::Image>(imageSpec);
 
 	VkDeviceSize totalSize = 0;
 	std::vector<VkDeviceSize> offsets;
@@ -194,7 +195,7 @@ void ImageTexture::CreateVulkanImageWithStb(const std::string& path, bool genera
 	imageSpec.aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
 	imageSpec.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 	imageSpec.mipmapLevel = mipMapLevel;
-	image = std::make_unique<Vk::Image>(imageSpec, descriptorArrayIndex);
+	image = std::make_unique<Vk::Image>(imageSpec);
 
 	BatchUploaded::CreateCommandPoolAndBuffer();
 	BatchUploaded::BeginCommandBuffer();

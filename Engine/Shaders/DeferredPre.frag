@@ -30,6 +30,7 @@ layout( push_constant ) uniform constants
 	uvec2 animationVertexBoneBufferAddresses;
 	uvec2 shapeRenderIndicesBuffer;
 	uvec2 shapeBufferAddresses;
+	uvec2 shapeMaterialIndicesBuffer;
 	uvec2 materialBuffer;
 	uint renderMode;
 	uint cameraIndex;
@@ -41,7 +42,7 @@ void main()
 	uint meshIndex = fs_in_index.y;
 	uint materialIndex = fs_in_index.z;
 
-	MaterialBuffer materialBuffer = PushConstants.renderMode == MODEL_INSTANCED ? MaterialBuffer(ModelDeviceAddressesBuffer(PushConstants.modelBufferAddresses).deviceAddresses[meshIndex].materialBuffer) : MaterialBuffer(PushConstants.materialBuffer);
+	MaterialBuffer materialBuffer = MaterialBuffer(PushConstants.materialBuffer);
 
 	vec4 albedo = materialBuffer.materials[materialIndex].color;
 	if(materialBuffer.materials[materialIndex].albedoIndex != uint(INVALID_IMAGE_INDEX))

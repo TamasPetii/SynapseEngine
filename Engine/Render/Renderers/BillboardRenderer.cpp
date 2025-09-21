@@ -71,7 +71,7 @@ void BillboardRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Re
 		uint32_t count = directionLightPool->GetDenseSize();
 
 		if (GlobalConfig::BillboardConfig::showPointLights)
-			RenderBillboard("DirectionLightBillboard", "PointLightTransform", count, directionLightIcon->GetDescriptorArrayIndex());
+			RenderBillboard("DirectionLightBillboard", "PointLightTransform", count, directionLightIcon->GetBufferArrayIndex());
 	}
 
 	if (auto pointLightPool = registry->GetPool<PointLightComponent>())
@@ -79,7 +79,7 @@ void BillboardRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Re
 		uint32_t count = pointLightPool->GetDenseSize();
 
 		if (GlobalConfig::BillboardConfig::showPointLights)
-			RenderBillboard("PointLightBillboard", "PointLightInstanceIndices", count, pointLightIcon->GetDescriptorArrayIndex());
+			RenderBillboard("PointLightBillboard", "PointLightInstanceIndices", count, pointLightIcon->GetBufferArrayIndex());
 	}
 
 	if (auto spotLightPool = registry->GetPool<SpotLightComponent>())
@@ -87,7 +87,7 @@ void BillboardRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Re
 		uint32_t count = spotLightPool->GetDenseSize();
 
 		if (GlobalConfig::BillboardConfig::showSpotLights)
-			RenderBillboard("SpotLightBillboard", "SpotLightInstanceIndices", count, spotLightIcon->GetDescriptorArrayIndex());
+			RenderBillboard("SpotLightBillboard", "SpotLightInstanceIndices", count, spotLightIcon->GetBufferArrayIndex());
 	}
 
 	vkCmdEndRendering(commandBuffer);

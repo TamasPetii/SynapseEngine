@@ -1,9 +1,8 @@
 #include "Image.h"
 #include "Memory.h"
 
-Vk::Image::Image(const ImageSpecification& specification, uint32_t descriptorArrayIndex) :
-	specification(specification),
-	descriptorArrayIndex(descriptorArrayIndex)
+Vk::Image::Image(const ImageSpecification& specification) :
+	specification(specification)
 {
 	Init();
 }
@@ -21,11 +20,6 @@ const VkImage Vk::Image::Value() const
 const VkImageView& Vk::Image::GetImageView() const
 {
 	return imageView;
-}
-
-const uint32_t Vk::Image::GetDescriptorArrayIndex() const
-{
-	return descriptorArrayIndex;
 }
 
 void Vk::Image::TransitionImageLayout(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout srcLayout, VkPipelineStageFlags srcStageFlags, VkAccessFlags srcAccessMask, VkImageLayout dstLayout, VkPipelineStageFlags dstStageFlags, VkAccessFlags dstAccessMask, uint32_t mipmapLevel)

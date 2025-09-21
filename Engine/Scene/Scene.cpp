@@ -100,6 +100,8 @@ void Scene::InitializeRegistry()
 		auto shapeParent = registry->CreateEntity();
 		registry->AddComponents<TransformComponent>(shapeParent);
 
+		int counter = 0;
+
 		for (uint32_t x = 0; x < 10; ++x)
 		{
 			for (uint32_t y = 0; y < 10; ++y)
@@ -110,9 +112,13 @@ void Scene::InitializeRegistry()
 				auto [transformComponent, materialComponent, shapeComponent] = registry->GetComponents<TransformComponent, MaterialComponent, ShapeComponent>(entity);
 				transformComponent.translation = 2.f * glm::vec3(x, y, 0);
 
-				materialComponent.color = glm::vec4(dist(rng), dist(rng), dist(rng), 1);
-				materialComponent.roughness = x / 10.f;
-				materialComponent.metalness = y / 10.f;
+				std::string materialName = std::to_string(counter++);
+				auto [material, wasLoaded] = resourceManager->GetMaterialManager()->RegisterMaterial(materialName);
+				material->color = glm::vec4(dist(rng), dist(rng), dist(rng), 1);
+				material->roughness = x / 10.f;
+				material->metalness = y / 10.f;
+
+				materialComponent.material = material;
 			
 				shapeComponent.shape = resourceManager->GetGeometryManager()->GetShape("Sphere");
 
@@ -438,7 +444,7 @@ void Scene::UpdateComponentBuffers(uint32_t frameIndex)
 {
 	RecalculateGpuBufferSize<TransformComponent, TransformComponentGPU>("TransformData", frameIndex);
 	RecalculateGpuBufferSize<CameraComponent, CameraComponentGPU>("CameraData", frameIndex);
-	RecalculateGpuBufferSize<MaterialComponent, MaterialComponentGPU>("MaterialData", frameIndex);
+	RecalculateGpuBufferSize<MaterialComponent, uint32_t>("MaterialData", frameIndex);
 	RecalculateGpuBufferSize<ShapeComponent, ShapeRenderIndicesGPU>("ShapeRenderIndicesData", frameIndex);
 	RecalculateGpuBufferSize<ModelComponent, ModelRenderIndicesGPU>("ModelRenderIndicesData", frameIndex);
 	RecalculateGpuBufferSize<DefaultColliderComponent, glm::mat4>("DefaultColliderAabbData", frameIndex);

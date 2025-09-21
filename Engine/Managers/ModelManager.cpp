@@ -1,8 +1,9 @@
 #include "ModelManager.h"
 #include "Engine/Timer/Timer.h"
 
-ModelManager::ModelManager(std::shared_ptr<ImageManager> imageManager) : 
-    imageManager(imageManager)
+ModelManager::ModelManager(std::shared_ptr<ImageManager> imageManager, std::shared_ptr<MaterialManager> materialManager) :
+    imageManager(imageManager),
+    materialManager(materialManager)
 {
 }
 
@@ -20,7 +21,9 @@ std::shared_ptr<Model> ModelManager::LoadModel(const std::string& path)
 
     log << std::format("[Model Thread Started] : {}", path) << "\n";
 
-    std::shared_ptr<Model> model = std::make_shared<Model>(imageManager, GetAvailableIndex());
+    std::shared_ptr<Model> model = std::make_shared<Model>(imageManager, materialManager);
+    model->SetBufferArrayIndex(GetAvailableIndex());
+
     models[path] = model;
 
     futures.emplace(path, std::async(std::launch::async, &Model::Load, models.at(path), path));
@@ -51,7 +54,7 @@ void ModelManager::Update()
         auto model = models.at(path);
         if (model && model->state == LoadState::GpuUploaded)
         {
-            static_cast<ModelDevicesAddresses*>(deviceAddresses->GetHandler())[model->GetAddressArrayIndex()] = ModelDevicesAddresses{
+            static_cast<ModelDevicesAddresses*>(deviceAddresses->GetHandler())[model->GetBufferArrayIndex()] = ModelDevicesAddresses{
                 .vertexBufferAddress = model->GetVertexBuffer()->GetAddress(),
                 .indexBufferAddress = model->GetIndexBuffer()->GetAddress(),
                 .materialBufferAddress = model->GetMaterialBuffer()->GetAddress(),

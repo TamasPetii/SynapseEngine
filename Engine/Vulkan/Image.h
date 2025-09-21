@@ -27,13 +27,12 @@ namespace Vk
 	class ENGINE_API Image
 	{
 	public:
-		Image(const ImageSpecification& specification, uint32_t descriptorArrayIndex = UINT32_MAX);
+		Image(const ImageSpecification& specification);
 		~Image();
 		void Init();
 		void Destroy();
 		const VkImage Value() const;
 		const VkImageView& GetImageView() const;
-		const uint32_t GetDescriptorArrayIndex() const;
 		static bool IsDepthFormat(VkFormat format);
 		static void CopyImageToImage(VkCommandBuffer commandBuffer, VkImage srcImage, VkExtent2D srcSize, VkImage dstImage, VkExtent2D dstSize);
 		static void CopyImageToImageDynamic(VkCommandBuffer commandBuffer, VkImage srcImage, VkExtent2D srcSize, uint32_t srcBaseMipMap, VkImage dstImage, VkExtent2D dstSize, uint32_t dstBaseMipMap);
@@ -46,7 +45,6 @@ namespace Vk
 		VkImageViewCreateInfo BuildImageViewInfo();
 		VkImageViewCreateInfo BuildImageViewSwizzledInfo(const VkComponentMapping& swizzle);
 	private:
-		uint32_t descriptorArrayIndex = UINT32_MAX;
 		VkImage image = VK_NULL_HANDLE;
 		VkImageView imageView = VK_NULL_HANDLE;
 		VkDeviceMemory imageMemory = VK_NULL_HANDLE;

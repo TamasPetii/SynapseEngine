@@ -21,7 +21,7 @@ std::shared_ptr<ImageTexture> ImageManager::GetImage(const std::string& path)
 	return images.at(path);
 }
 
-std::shared_ptr<ImageTexture> ImageManager::LoadImage(const std::string& path, const ImageLoadMode& mode, bool generateMipMap)
+std::shared_ptr<ImageTexture> ImageManager::LoadImage(const std::string& path, const ImageLoadMode& mode, bool generateMipMap, std::function<void()> onFinished)
 {
     std::lock_guard<std::mutex> lock(asyncMutex);
 
@@ -30,12 +30,14 @@ std::shared_ptr<ImageTexture> ImageManager::LoadImage(const std::string& path, c
 
     log << std::format("[Image Thread Started] : {}", path) << "\n";
 
-	std::shared_ptr<ImageTexture> imageTexture = std::make_shared<ImageTexture>(GetAvailableIndex());
+	std::shared_ptr<ImageTexture> imageTexture = std::make_shared<ImageTexture>();
+    imageTexture->SetBufferArrayIndex(GetAvailableIndex());
 	images[path] = imageTexture;
 
     if (mode == ImageLoadMode::Async)
     {
         futures.emplace(path, std::async(std::launch::async, &ImageTexture::Load, images.at(path), path, generateMipMap));
+        onFinishFunctions.emplace(path, onFinished);
     }
     else
     {
@@ -46,7 +48,7 @@ std::shared_ptr<ImageTexture> ImageManager::LoadImage(const std::string& path, c
         static_cast<BatchUploaded*>(imageTexture.get())->DestoryCommandPoolAndBuffer();
         
         imageTexture->state = LoadState::Ready;
-        vulkanManager->GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Images", imageTexture->GetImage()->GetImageView(), VK_NULL_HANDLE, imageTexture->GetImage()->GetDescriptorArrayIndex());
+        vulkanManager->GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Images", imageTexture->GetImage()->GetImageView(), VK_NULL_HANDLE, imageTexture->GetBufferArrayIndex());
     }
 
 	return images.at(path);
@@ -80,8 +82,15 @@ void ImageManager::Update()
     {
         if (image && image->state == LoadState::GpuUploaded)
         {
-            vulkanManager->GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Images", image->GetImage()->GetImageView(), VK_NULL_HANDLE, image->GetImage()->GetDescriptorArrayIndex());
+            vulkanManager->GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Images", image->GetImage()->GetImageView(), VK_NULL_HANDLE, image->GetBufferArrayIndex());
             image->state = LoadState::Ready;
+
+            auto onFinish = onFinishFunctions[image->GetPath()];
+            
+            if (onFinish)
+                onFinish();
+
+            onFinishFunctions.erase(image->GetPath());
         }   
     }
 }

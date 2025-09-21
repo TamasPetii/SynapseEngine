@@ -69,7 +69,7 @@ void ShapeSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_
 				auto renderIndices = ShapeRenderIndicesGPU{
 					.entityIndex = entity,
 					.transformIndex = transformPool && transformPool->HasComponent(entity) ? transformPool->GetDenseIndex(entity) : UINT32_MAX,
-					.shapeIndex = shapeComponent.shape->GetDescriptorArrayIndex(),
+					.shapeIndex = shapeComponent.shape->GetBufferArrayIndex(),
 					.materialIndex = materialPool && materialPool->HasComponent(entity) ? materialPool->GetDenseIndex(entity) : UINT32_MAX,
 					.bitflag = flags
 				};

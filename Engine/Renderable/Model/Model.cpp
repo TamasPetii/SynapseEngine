@@ -8,9 +8,9 @@
 #include <print>
 #include "Engine/Vulkan/VulkanContext.h"
 
-Model::Model(std::shared_ptr<ImageManager> imageManager, uint32_t addressArrayIndex) :
+Model::Model(std::shared_ptr<ImageManager> imageManager, std::shared_ptr<MaterialManager> materialManager) :
     imageManager(imageManager),
-    addressArrayIndex(addressArrayIndex)
+    materialManager(materialManager)
 {
 }
 
@@ -52,7 +52,7 @@ void Model::UploadToGpu()
 
     Renderable::UploadToGpu();
     Model::UploadNodeTransformDataToGpu();
-    Materialized::UploadMaterialDataToGpu();
+    Materialized::UploadMaterialDataToGpu(materialManager);
 }
 
 void Model::PopulateSurfacePoints()
@@ -279,74 +279,79 @@ void Model::ProcessMaterials(const aiScene* scene)
 
 void Model::ProcessMaterial(const aiScene* scene, uint32_t materialIndex)
 {
-    aiMaterial* material = scene->mMaterials[materialIndex];
-    MaterialComponent materialComponent;
+    aiMaterial* materialAI = scene->mMaterials[materialIndex];
+    std::string materialName = std::string(materialAI->GetName().C_Str());
+    
+    auto [material, wasLoaded] = materialManager->RegisterMaterial(materialName);
+    materials[materialIndex] = material;
+
+    if (wasLoaded)
+        return;
 
     //Diffuse texture
-    if (material->GetTextureCount(aiTextureType_DIFFUSE) > 0)
+    if (materialAI->GetTextureCount(aiTextureType_DIFFUSE) > 0)
     {
         aiString path;
         unsigned int uvIndex = 0;
-        material->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, &uvIndex);
+        materialAI->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        materialComponent.albedoTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true);
+        material->albedoTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [&]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
     }
 
     //Normals texture
-    if (material->GetTextureCount(aiTextureType_NORMALS) > 0)
+    if (materialAI->GetTextureCount(aiTextureType_NORMALS) > 0)
     {
         aiString path;
         unsigned int uvIndex = 0;
-        material->GetTexture(aiTextureType_NORMALS, 0, &path, NULL, &uvIndex);
+        materialAI->GetTexture(aiTextureType_NORMALS, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        materialComponent.normalTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, false);
+        material->normalTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [&]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
     }
 
     //Height texture
-    if (material->GetTextureCount(aiTextureType_HEIGHT) > 0 && materialComponent.normalTexture == nullptr)
+    if (materialAI->GetTextureCount(aiTextureType_HEIGHT) > 0 && material->normalTexture == nullptr)
     {
         aiString path;
         unsigned int uvIndex = 0;
-        material->GetTexture(aiTextureType_HEIGHT, 0, &path, NULL, &uvIndex);
+        materialAI->GetTexture(aiTextureType_HEIGHT, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        materialComponent.normalTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true);
+        material->normalTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [&]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
     }
 
     //Displacement
-    if (material->GetTextureCount(aiTextureType_DISPLACEMENT) > 0 && materialComponent.normalTexture == nullptr)
+    if (materialAI->GetTextureCount(aiTextureType_DISPLACEMENT) > 0 && material->normalTexture == nullptr)
     {
         aiString path;
         unsigned int uvIndex = 0;
-        material->GetTexture(aiTextureType_DISPLACEMENT, 0, &path, NULL, &uvIndex);
+        materialAI->GetTexture(aiTextureType_DISPLACEMENT, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        materialComponent.normalTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true);
+        material->normalTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [&]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
     }
 
     //Metallic Texture
-    if (material->GetTextureCount(aiTextureType_METALNESS) > 0)
+    if (materialAI->GetTextureCount(aiTextureType_METALNESS) > 0)
     {
         aiString path;
         unsigned int uvIndex = 0;
-        material->GetTexture(aiTextureType_METALNESS, 0, &path, NULL, &uvIndex);
+        materialAI->GetTexture(aiTextureType_METALNESS, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        materialComponent.metalnessTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true);
+        material->metalnessTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [&]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
     }
 
     //Roughness Texture
-    if (material->GetTextureCount(aiTextureType_DIFFUSE_ROUGHNESS) > 0)
+    if (materialAI->GetTextureCount(aiTextureType_DIFFUSE_ROUGHNESS) > 0)
     {
         aiString path;
         unsigned int uvIndex = 0;
-        material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &path, NULL, &uvIndex);
+        materialAI->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        materialComponent.roughnessTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true);
+        material->roughnessTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [&]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
     }
 
     aiColor3D diffuseColor(1.f, 1.f, 1.f);
-    material->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColor);
-    materialComponent.color = glm::vec4(Assimp::ConvertAssimpToGlm(diffuseColor), 1);
-
-    materials[materialIndex] = materialComponent;
+    materialAI->Get(AI_MATKEY_COLOR_DIFFUSE, diffuseColor);
+    material->color = glm::vec4(Assimp::ConvertAssimpToGlm(diffuseColor), 1);
+    material->SetBit<UPDATE_BIT>();
 }
 
 void Model::UploadNodeTransformDataToGpu()

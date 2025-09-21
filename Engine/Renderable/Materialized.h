@@ -4,15 +4,17 @@
 #include "Engine/Config.h"
 #include "Engine/Vulkan/Buffer.h"
 #include "Engine/Vulkan/VulkanContext.h"
-#include "Engine/Components/MaterialComponent.h"
+#include "Engine/Utils/Material.h"
+
+class MaterialManager;
 
 class ENGINE_API Materialized
 {
 public:
 	std::shared_ptr<Vk::Buffer> GetMaterialBuffer();
-	virtual void UploadMaterialDataToGpu();
+	virtual void UploadMaterialDataToGpu(std::shared_ptr<MaterialManager> materialManager);
 protected:
-	std::vector<MaterialComponent> materials;
+	std::vector<std::shared_ptr<Material>> materials;
 	std::shared_ptr<Vk::Buffer> materialBuffer;
 };
 

@@ -35,6 +35,7 @@ layout( push_constant ) uniform constants
 	uvec2 animationVertexBoneBufferAddresses;
 	uvec2 shapeRenderIndicesBuffer;
 	uvec2 shapeBufferAddresses;
+	uvec2 shapeMaterialIndicesBuffer;
 	uvec2 materialBuffer;
 	uint renderMode;
 	uint cameraIndex;
@@ -63,8 +64,8 @@ void main()
 
 		vertexIndex = IndexBuffer(ModelDeviceAddressesBuffer(PushConstants.modelBufferAddresses).deviceAddresses[meshIndex].indexBuffer).indices[gl_VertexIndex];	
 		v = VertexBuffer(ModelDeviceAddressesBuffer(PushConstants.modelBufferAddresses).deviceAddresses[meshIndex].vertexBuffer).vertices[vertexIndex];
-	
-		materialIndex = v.matIndex;
+		
+		materialIndex = MaterialIndexBuffer(ModelDeviceAddressesBuffer(PushConstants.modelBufferAddresses).deviceAddresses[meshIndex].materialIndexBuffer).materialIndices[v.matIndex];
 	}
 	else if(PushConstants.renderMode == SHAPE_INSTANCED)
 	{
@@ -72,11 +73,12 @@ void main()
 		entityIndex = renderIndices.entityIndex;
 		transformIndex = renderIndices.transformIndex;
 		meshIndex = renderIndices.shapeIndex;
-		materialIndex = renderIndices.materialIndex;
 		bitflag = renderIndices.bitflag;
 
 		vertexIndex = IndexBuffer(ShapeDeviceAddressesBuffer(PushConstants.shapeBufferAddresses).deviceAddresses[meshIndex].indexBuffer).indices[gl_VertexIndex];	
 		v = VertexBuffer(ShapeDeviceAddressesBuffer(PushConstants.shapeBufferAddresses).deviceAddresses[meshIndex].vertexBuffer).vertices[vertexIndex];
+		
+		materialIndex = MaterialIndexBuffer(PushConstants.shapeMaterialIndicesBuffer).materialIndices[renderIndices.materialIndex];
 	}
 
 	vec4 position = vec4(v.position, 1.0);

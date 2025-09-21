@@ -163,6 +163,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Utils\BitsetFlagged.h" />
+    <ClInclude Include="Utils\BitsetFlag.h" />
+    <ClInclude Include="Utils\BufferArrayIndexed.h" />
+    <ClInclude Include="Managers\MaterialManager.h" />
+    <ClInclude Include="Utils\Material.h" />
     <ClInclude Include="Render\Renderers\Renderer.h" />
     <ClInclude Include="Render\Renderers\BillboardRenderer.h" />
     <ClInclude Include="Components\BaseComponents\Component.h" />
@@ -296,6 +301,10 @@
     <ClInclude Include="Vulkan\VulkanMutex.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Utils\BitsetFlagged.cpp" />
+    <ClCompile Include="Utils\BufferArrayIndexed.cpp" />
+    <ClCompile Include="Managers\MaterialManager.cpp" />
+    <ClCompile Include="Utils\Material.cpp" />
     <ClCompile Include="Render\Renderers\Renderer.cpp" />
     <ClCompile Include="Render\Renderers\BillboardRenderer.cpp" />
     <ClCompile Include="Components\BaseComponents\Component.cpp" />

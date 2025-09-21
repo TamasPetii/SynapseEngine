@@ -45,7 +45,7 @@ void MaterialSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shar
 		return;
 
 	auto componentBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("MaterialData", frameIndex);
-	auto bufferHandler = static_cast<MaterialComponentGPU*>(componentBuffer->buffer->GetHandler());
+	auto bufferHandler = static_cast<uint32_t*>(componentBuffer->buffer->GetHandler());
 
 	std::for_each(std::execution::par_unseq, materialPool->GetDenseIndices().begin(), materialPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
@@ -53,10 +53,10 @@ void MaterialSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shar
 			auto materialIndex = materialPool->GetDenseIndex(entity);
 
 			[[unlikely]]
-			if (componentBuffer->versions[materialIndex] != materialComponent.version)
+			if (componentBuffer->versions[materialIndex] != materialComponent.version && materialComponent.material != nullptr)
 			{
 				componentBuffer->versions[materialIndex] = materialComponent.version;
-				bufferHandler[materialIndex] = MaterialComponentGPU(materialComponent);
+				bufferHandler[materialIndex] = materialComponent.material->GetBufferArrayIndex();
 			}
 		}
 	);
