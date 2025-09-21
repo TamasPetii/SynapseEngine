@@ -10,6 +10,8 @@
 *.fbx
 *.mtl
 *.tga
+*.mtlx
+*.usdc
 
 # User-specific files
 *.spv

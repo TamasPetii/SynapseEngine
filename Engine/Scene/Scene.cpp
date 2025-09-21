@@ -114,6 +114,12 @@ void Scene::InitializeRegistry()
 
 				std::string materialName = std::to_string(counter++);
 				auto [material, wasLoaded] = resourceManager->GetMaterialManager()->RegisterMaterial(materialName);
+
+				material->albedoTexture = resourceManager->GetImageManager()->LoadImage("C:/Users/User/Desktop/VulkanEngine/Assets/Engine/Pbr/Metal/Metal053C_4K-PNG_Color.png", ImageLoadMode::Sync, true, [material]() -> void {material->SetBit<UPDATE_BIT>(); });
+				//material->normalTexture = resourceManager->GetImageManager()->LoadImage("C:/Users/User/Desktop/VulkanEngine/Assets/Engine/Pbr/Metal/Metal053C_4K-PNG_NormalGL.png", ImageLoadMode::Sync, false, [material]() -> void {material->SetBit<UPDATE_BIT>(); });
+				material->roughnessTexture = resourceManager->GetImageManager()->LoadImage("C:/Users/User/Desktop/VulkanEngine/Assets/Engine/Pbr/Metal/Metal053C_4K-PNG_Roughness.png", ImageLoadMode::Sync, true, [material]() -> void {material->SetBit<UPDATE_BIT>(); });
+				material->metalnessTexture = resourceManager->GetImageManager()->LoadImage("C:/Users/User/Desktop/VulkanEngine/Assets/Engine/Pbr/Metal/Metal053C_4K-PNG_Metalness.png", ImageLoadMode::Sync, true, [material]() -> void {material->SetBit<UPDATE_BIT>(); });
+
 				material->color = glm::vec4(dist(rng), dist(rng), dist(rng), 1);
 				material->roughness = x / 10.f;
 				material->metalness = y / 10.f;
@@ -132,6 +138,7 @@ void Scene::InitializeRegistry()
 		auto modelParent = registry->CreateEntity();
 		registry->AddComponents<TransformComponent>(modelParent);
 
+		/*
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
@@ -151,8 +158,8 @@ void Scene::InitializeRegistry()
 
 			registry->SetParent(entity, modelParent);
 		}
+		*/
 
-		/*
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
@@ -160,7 +167,6 @@ void Scene::InitializeRegistry()
 			transformComponent.scale = glm::vec3(0.01);
 			modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/main1_sponza/NewSponza_Main_Yup_003.fbx");
 		}
-		*/
 
 		/*
 		{

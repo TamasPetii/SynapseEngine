@@ -29,7 +29,7 @@ std::shared_ptr<ImageTexture> ImageManager::LoadImage(const std::string& path, c
 	if (images.find(path) != images.end())
 		return images.at(path);
 
-    log << std::format("[Image Thread Started] : {}", path) << "\n";
+    std::cout << std::format("[Image Thread Started] : {}", path) << "\n";
 
 	std::shared_ptr<ImageTexture> imageTexture = std::make_shared<ImageTexture>();
     imageTexture->SetBufferArrayIndex(GetAvailableIndex());
@@ -38,6 +38,14 @@ std::shared_ptr<ImageTexture> ImageManager::LoadImage(const std::string& path, c
     if (mode == ImageLoadMode::Async)
     {
         futures.emplace(path, std::async(std::launch::async, &ImageTexture::Load, images.at(path), path, generateMipMap));
+
+        /*
+        futures.emplace(path, std::async(std::launch::async, [=]() {
+            std::this_thread::sleep_for(std::chrono::seconds(5));
+            images.at(path)->Load(path, generateMipMap);
+            }));
+        */
+
         onFinishFunctions.emplace(path, onFinished);
     }
     else

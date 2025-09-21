@@ -16,6 +16,11 @@
 
 //Todo: Make full dynamic material manager with component pool???
 
+/* Bug Alert
+What if multiple materials use the same texture? Only the first one processing the texture will get called by onFinish()???
+So in case of other materials finished (Other textures loaded), they wont get triggered!!
+*/
+
 class ENGINE_API MaterialManager : public DeviceAddressedManager<MaterialGPU>
 {
 public:

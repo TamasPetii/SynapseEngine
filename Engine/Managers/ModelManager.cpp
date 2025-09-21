@@ -62,6 +62,8 @@ void ModelManager::Update()
             };
             
             model->state = LoadState::Ready;
+
+            std::cout << "MODEL LOADED ASYNC!" << std::endl;
         }
     }
 }

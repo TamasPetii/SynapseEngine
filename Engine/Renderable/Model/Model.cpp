@@ -305,7 +305,7 @@ void Model::ProcessMaterial(const aiScene* scene, uint32_t materialIndex)
         unsigned int uvIndex = 0;
         materialAI->GetTexture(aiTextureType_NORMALS, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        material->normalTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [materialName, this]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
+        material->normalTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, false, [materialName, this]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
     }
 
     //Height texture
@@ -315,7 +315,7 @@ void Model::ProcessMaterial(const aiScene* scene, uint32_t materialIndex)
         unsigned int uvIndex = 0;
         materialAI->GetTexture(aiTextureType_HEIGHT, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        material->normalTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [materialName, this]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
+        material->normalTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, false, [materialName, this]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
     }
 
     //Displacement
@@ -325,7 +325,7 @@ void Model::ProcessMaterial(const aiScene* scene, uint32_t materialIndex)
         unsigned int uvIndex = 0;
         materialAI->GetTexture(aiTextureType_DISPLACEMENT, 0, &path, NULL, &uvIndex);
         std::string real_path = directory + "/" + std::string(path.C_Str());
-        material->normalTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, true, [materialName, this]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
+        material->normalTexture = imageManager->LoadImage(real_path, ImageLoadMode::Async, false, [materialName, this]() -> void { materialManager->GetMaterial(materialName)->SetBit<UPDATE_BIT>(); });
     }
 
     //Metallic Texture
