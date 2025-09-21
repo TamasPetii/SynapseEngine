@@ -283,11 +283,10 @@ void Model::ProcessMaterial(const aiScene* scene, uint32_t materialIndex)
     std::string materialName = std::string(materialAI->GetName().C_Str());
     
     auto [material, wasLoaded] = materialManager->RegisterMaterial(materialName);
+    materials[materialIndex] = material;
 
     if (wasLoaded)
         return;
-
-    materials[materialIndex] = material;
 
     //Diffuse texture
     if (materialAI->GetTextureCount(aiTextureType_DIFFUSE) > 0)
