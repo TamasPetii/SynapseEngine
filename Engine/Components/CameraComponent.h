@@ -48,3 +48,8 @@ public:
 	glm::mat4 viewProjInv;
 	glm::vec4 eye;
 };
+
+struct ENGINE_API CameraFrustumGPU
+{
+	glm::vec4 faces[6]; //vec3 normal + float distance
+};

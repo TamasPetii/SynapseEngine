@@ -7,7 +7,7 @@ void MaterialSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_pt
 	if (!materialPool)
 		return;
 
-	std::for_each(std::execution::par_unseq, materialPool->GetDenseIndices().begin(), materialPool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, materialPool->GetDenseIndices().begin(), materialPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void
 		{
 			[[unlikely]]
@@ -28,7 +28,7 @@ void MaterialSystem::OnFinish(std::shared_ptr<Registry> registry)
 	if (!materialPool)
 		return;
 
-	std::for_each(std::execution::par_unseq, materialPool->GetDenseIndices().begin(), materialPool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, materialPool->GetDenseIndices().begin(), materialPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			[[unlikely]]
 			if(materialPool->IsBitSet<CHANGED_BIT>(entity))
@@ -47,7 +47,7 @@ void MaterialSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shar
 	auto componentBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("MaterialData", frameIndex);
 	auto bufferHandler = static_cast<uint32_t*>(componentBuffer->buffer->GetHandler());
 
-	std::for_each(std::execution::par_unseq, materialPool->GetDenseIndices().begin(), materialPool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, materialPool->GetDenseIndices().begin(), materialPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			auto& materialComponent = materialPool->GetData(entity);
 			auto materialIndex = materialPool->GetDenseIndex(entity);

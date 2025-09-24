@@ -851,5 +851,7 @@
     <None Include="Shaders\Billboard.geom" />
     <None Include="Shaders\Common\Position.glsl" />
     <None Include="Shaders\Billboard.vert" />
+    <None Include="Shaders\Culling.comp" />
+    <None Include="Shaders\Common\Render\DefaultCollider.glsl" />
   </ItemGroup>
 </Project>

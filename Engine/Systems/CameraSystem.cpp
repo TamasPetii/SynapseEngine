@@ -5,6 +5,8 @@
 #include <glm/gtx/transform2.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Engine/Physics/Collider/FrustumCollider.h"
+
 void CameraSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex, float deltaTime)
 {
 	auto inputManager = InputManager::Instance();
@@ -13,7 +15,7 @@ void CameraSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_ptr<
 	if (!transformPool || !cameraPool)
 		return;
 
-	std::for_each(std::execution::par_unseq, cameraPool->GetDenseIndices().begin(), cameraPool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, cameraPool->GetDenseIndices().begin(), cameraPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void
 		{
 			if (inputManager->IsKeyHeld(KEY_W) || inputManager->IsKeyHeld(KEY_S) || inputManager->IsKeyHeld(KEY_A) || inputManager->IsKeyHeld(KEY_D) || inputManager->IsButtonHeld(BUTTON_RIGHT))
@@ -81,7 +83,7 @@ void CameraSystem::OnFinish(std::shared_ptr<Registry> registry)
 	if (!cameraPool)
 		return;
 
-	std::for_each(std::execution::par_unseq, cameraPool->GetDenseIndices().begin(), cameraPool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, cameraPool->GetDenseIndices().begin(), cameraPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			if(cameraPool->IsBitSet<CHANGED_BIT>(entity))
 				cameraPool->GetBitset(entity).reset();
@@ -99,7 +101,10 @@ void CameraSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared
 	auto componentBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraData", frameIndex);
 	auto bufferHandler = static_cast<CameraComponentGPU*>(componentBuffer->buffer->GetHandler());
 
-	std::for_each(std::execution::par_unseq, cameraPool->GetDenseIndices().begin(), cameraPool->GetDenseIndices().end(),
+	auto cameraFrustumBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraFrustumData", frameIndex);
+	auto cameraFrustumBufferHandler = static_cast<CameraFrustumGPU*>(cameraFrustumBuffer->buffer->GetHandler());
+
+	std::for_each(std::execution::par, cameraPool->GetDenseIndices().begin(), cameraPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			auto& cameraComponent = cameraPool->GetData(entity);
 			auto cameraIndex = cameraPool->GetDenseIndex(entity);
@@ -114,6 +119,40 @@ void CameraSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared
 				component.viewProj = component.proj * component.view;
 				component.viewProjInv = glm::inverse(component.viewProj);
 				bufferHandler[cameraIndex] = CameraComponentGPU(component);
+			}
+
+			if (cameraFrustumBuffer->versions[cameraIndex] != cameraComponent.version)
+			{
+				cameraFrustumBuffer->versions[cameraIndex] = cameraComponent.version;
+
+				float fovY = glm::radians(cameraComponent.fov);
+				float aspectRatio = cameraComponent.width / cameraComponent.height;
+				float halfV = cameraComponent.farPlane * tanf(fovY * 0.5f);
+				float halfH = halfV * aspectRatio;
+
+				//Todo: Function that handles this
+
+				CameraFrustumGPU cameraFrustum;
+
+				//NearFace
+				cameraFrustum.faces[0] = FrustumFace(cameraComponent.direction, cameraComponent.position + cameraComponent.direction * cameraComponent.nearPlane);
+
+				//RightFace
+				cameraFrustum.faces[1] = FrustumFace(-glm::cross(glm::normalize(cameraComponent.direction * cameraComponent.farPlane + cameraComponent.right * halfH), cameraComponent.up), cameraComponent.position);
+
+				//LeftFace
+				cameraFrustum.faces[2] = FrustumFace(-glm::cross(cameraComponent.up, glm::normalize(cameraComponent.direction * cameraComponent.farPlane - cameraComponent.right * halfH)), cameraComponent.position);
+
+				//TopFace
+				cameraFrustum.faces[3] = FrustumFace(-glm::cross(cameraComponent.right, glm::normalize(cameraComponent.direction * cameraComponent.farPlane + cameraComponent.up * halfV)), cameraComponent.position);
+
+				//BottomFace
+				cameraFrustum.faces[4] = FrustumFace(-glm::cross(glm::normalize(cameraComponent.direction * cameraComponent.farPlane - cameraComponent.up * halfV), cameraComponent.right), cameraComponent.position);
+
+				//FarFace
+				cameraFrustum.faces[5] = FrustumFace(-cameraComponent.direction, cameraComponent.position + cameraComponent.direction * cameraComponent.farPlane);
+			
+				cameraFrustumBufferHandler[cameraIndex] = cameraFrustum;
 			}
 		}
 	);

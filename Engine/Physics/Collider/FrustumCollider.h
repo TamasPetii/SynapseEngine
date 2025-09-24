@@ -9,6 +9,11 @@ struct ENGINE_API FrustumFace
 	FrustumFace(const glm::vec3& normal, float distance);
 	FrustumFace(const glm::vec3& normal, const glm::vec3 point);
 
+	operator glm::vec4() const
+	{
+		return glm::vec4(normal, distance);
+	}
+
 	glm::vec3 normal;
 	float distance;
 };

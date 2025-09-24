@@ -41,7 +41,7 @@ std::shared_ptr<ImageTexture> ImageManager::LoadImage(const std::string& path, c
 
         /*
         futures.emplace(path, std::async(std::launch::async, [=]() {
-            std::this_thread::sleep_for(std::chrono::seconds(5));
+            std::this_thread::sleep_for(std::chrono::seconds(10));
             images.at(path)->Load(path, generateMipMap);
             }));
         */

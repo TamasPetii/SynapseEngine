@@ -10,7 +10,7 @@ void DefaultColliderSystem::OnUpdate(std::shared_ptr<Registry> registry, std::sh
 	if (!defaultColliderPool || !transformPool)
 		return;
 
-	std::for_each(std::execution::par_unseq, defaultColliderPool->GetDenseIndices().begin(), defaultColliderPool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, defaultColliderPool->GetDenseIndices().begin(), defaultColliderPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void
 		{
 			bool isShape = shapePool && shapePool->HasComponent(entity) && shapePool->GetData(entity).shape;
@@ -58,7 +58,7 @@ void DefaultColliderSystem::OnFinish(std::shared_ptr<Registry> registry)
 	if (!defaultColliderPool || !transformPool)
 		return;
 
-	std::for_each(std::execution::par_unseq, defaultColliderPool->GetDenseIndices().begin(), defaultColliderPool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, defaultColliderPool->GetDenseIndices().begin(), defaultColliderPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			[[unlikely]]
 			if(defaultColliderPool->IsBitSet<CHANGED_BIT>(entity))
@@ -83,7 +83,10 @@ void DefaultColliderSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, st
 	auto componentBufferSphere = resourceManager->GetComponentBufferManager()->GetComponentBuffer("DefaultColliderSphereData", frameIndex);
 	auto bufferHandlerSphere = static_cast<glm::mat4*>(componentBufferSphere->buffer->GetHandler());
 
-	std::for_each(std::execution::par_unseq, defaultColliderPool->GetDenseIndices().begin(), defaultColliderPool->GetDenseIndices().end(),
+	auto defaultColliderBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("DefaultColliderData", frameIndex);
+	auto defaultColliderHandler = static_cast<DefaultColliderGPU*>(defaultColliderBuffer->buffer->GetHandler());
+
+	std::for_each(std::execution::par, defaultColliderPool->GetDenseIndices().begin(), defaultColliderPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			if (transformPool->HasComponent(entity))
 			{
@@ -110,6 +113,18 @@ void DefaultColliderSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, st
 				{
 					componentBufferSphere->versions[defaultColliderIndex] = defaultColliderComponent.version;
 					bufferHandlerSphere[defaultColliderIndex] = glm::translate(defaultColliderComponent.origin) * glm::scale(glm::vec3(defaultColliderComponent.radius));
+				}
+						
+				if (defaultColliderBuffer->versions[defaultColliderIndex] != defaultColliderComponent.version)
+				{
+					defaultColliderBuffer->versions[defaultColliderIndex] = defaultColliderComponent.version;
+
+					bool isShape = shapePool && shapePool->HasComponent(entity) && shapePool->GetData(entity).shape;
+					bool isModel = modelPool && modelPool->HasComponent(entity) && modelPool->GetData(entity).model && modelPool->GetData(entity).model->state == LoadState::Ready;
+
+					uint32_t objectIndex = isShape ? shapePool->GetDenseIndex(entity) : isModel ? modelPool->GetDenseIndex(entity) : UINT32_MAX;
+
+					defaultColliderHandler[defaultColliderIndex] = DefaultColliderGPU(defaultColliderComponent, objectIndex, isModel);
 				}
 			}
 		}

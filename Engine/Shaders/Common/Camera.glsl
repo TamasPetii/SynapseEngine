@@ -10,6 +10,7 @@ struct Camera
 	mat4 viewProj;
 	mat4 viewProjInv;
 	vec4 eye;
+
 };
 
 layout(buffer_reference, std430) readonly buffer CameraBuffer { 

@@ -90,6 +90,10 @@ void Vk::PhysicalDevice::Init(std::span<const char*> deviceExtensions)
 	std::cout << std::format("Max Image Array Layers: {}\n", limits.maxImageArrayLayers);
 	std::cout << std::format("Max Texel Buffer Elements: {}\n", limits.maxTexelBufferElements);
 	std::cout << std::format("Max Sampler Allocation Count: {}\n", limits.maxSamplerAllocationCount);
+
+	std::cout << std::format("Max Compute Wrok Group Count: {}, {}, {}\n", limits.maxComputeWorkGroupCount[0], limits.maxComputeWorkGroupCount[1], limits.maxComputeWorkGroupCount[2]);
+	std::cout << std::format("Max Compute Wrok Group Size: {}, {}, {}\n", limits.maxComputeWorkGroupSize[0], limits.maxComputeWorkGroupSize[1], limits.maxComputeWorkGroupSize[2]);
+	std::cout << std::format("Max Compute Work Group Invocation {}\n", limits.maxComputeWorkGroupInvocations);
 }
 
 void Vk::PhysicalDevice::Destroy()

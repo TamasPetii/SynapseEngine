@@ -102,6 +102,7 @@ void Scene::InitializeRegistry()
 
 		int counter = 0;
 
+		/*
 		for (uint32_t x = 0; x < 10; ++x)
 		{
 			for (uint32_t y = 0; y < 10; ++y)
@@ -115,10 +116,10 @@ void Scene::InitializeRegistry()
 				std::string materialName = std::to_string(counter++);
 				auto [material, wasLoaded] = resourceManager->GetMaterialManager()->RegisterMaterial(materialName);
 
-				material->albedoTexture = resourceManager->GetImageManager()->LoadImage("C:/Users/User/Desktop/VulkanEngine/Assets/Engine/Pbr/Metal/Metal053C_4K-PNG_Color.png", ImageLoadMode::Sync, true, [material]() -> void {material->SetBit<UPDATE_BIT>(); });
+				//material->albedoTexture = resourceManager->GetImageManager()->LoadImage("C:/Users/User/Desktop/VulkanEngine/Assets/Engine/Pbr/Metal/Metal053C_4K-PNG_Color.png", ImageLoadMode::Sync, true, [material]() -> void {material->SetBit<UPDATE_BIT>(); });
 				//material->normalTexture = resourceManager->GetImageManager()->LoadImage("C:/Users/User/Desktop/VulkanEngine/Assets/Engine/Pbr/Metal/Metal053C_4K-PNG_NormalGL.png", ImageLoadMode::Sync, false, [material]() -> void {material->SetBit<UPDATE_BIT>(); });
-				material->roughnessTexture = resourceManager->GetImageManager()->LoadImage("C:/Users/User/Desktop/VulkanEngine/Assets/Engine/Pbr/Metal/Metal053C_4K-PNG_Roughness.png", ImageLoadMode::Sync, true, [material]() -> void {material->SetBit<UPDATE_BIT>(); });
-				material->metalnessTexture = resourceManager->GetImageManager()->LoadImage("C:/Users/User/Desktop/VulkanEngine/Assets/Engine/Pbr/Metal/Metal053C_4K-PNG_Metalness.png", ImageLoadMode::Sync, true, [material]() -> void {material->SetBit<UPDATE_BIT>(); });
+				//material->roughnessTexture = resourceManager->GetImageManager()->LoadImage("C:/Users/User/Desktop/VulkanEngine/Assets/Engine/Pbr/Metal/Metal053C_4K-PNG_Roughness.png", ImageLoadMode::Sync, true, [material]() -> void {material->SetBit<UPDATE_BIT>(); });
+				//material->metalnessTexture = resourceManager->GetImageManager()->LoadImage("C:/Users/User/Desktop/VulkanEngine/Assets/Engine/Pbr/Metal/Metal053C_4K-PNG_Metalness.png", ImageLoadMode::Sync, true, [material]() -> void {material->SetBit<UPDATE_BIT>(); });
 
 				material->color = glm::vec4(dist(rng), dist(rng), dist(rng), 1);
 				material->roughness = x / 10.f;
@@ -131,6 +132,28 @@ void Scene::InitializeRegistry()
 				registry->SetParent(entity, shapeParent);
 			}
 		}
+		*/
+
+		std::string materialName = std::to_string(counter++);
+		auto [material, wasLoaded] = resourceManager->GetMaterialManager()->RegisterMaterial(materialName);
+
+		for (uint32_t x = 0; x < 100; ++x)
+		{
+			for (uint32_t y = 0; y < 100; ++y)
+			{
+				auto entity = registry->CreateEntity();
+				registry->AddComponents<TransformComponent, MaterialComponent, ShapeComponent, DefaultColliderComponent>(entity);
+
+				auto [transformComponent, materialComponent, shapeComponent] = registry->GetComponents<TransformComponent, MaterialComponent, ShapeComponent>(entity);
+				transformComponent.translation = 3.f * glm::vec3(x, y, 0);
+
+				materialComponent.material = material;
+
+				shapeComponent.shape = resourceManager->GetGeometryManager()->GetShape("Cube");
+
+				registry->SetParent(entity, shapeParent);
+			}
+		}
 	}
 
 	//Models
@@ -139,6 +162,7 @@ void Scene::InitializeRegistry()
 		registry->AddComponents<TransformComponent>(modelParent);
 
 		/*
+
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
@@ -158,8 +182,10 @@ void Scene::InitializeRegistry()
 
 			registry->SetParent(entity, modelParent);
 		}
+
 		*/
 
+		/*
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
@@ -167,6 +193,7 @@ void Scene::InitializeRegistry()
 			transformComponent.scale = glm::vec3(0.01);
 			modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/main1_sponza/NewSponza_Main_Yup_003.fbx");
 		}
+		*/
 
 		/*
 		{
@@ -211,6 +238,8 @@ void Scene::InitializeRegistry()
 		auto animationParent = registry->CreateEntity();
 		registry->AddComponents<TransformComponent>(animationParent);
 
+		/*
+
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
@@ -232,6 +261,8 @@ void Scene::InitializeRegistry()
 
 			registry->SetParent(entity, animationParent);
 		}
+
+		*/
 
 		/*
 	{
@@ -450,12 +481,15 @@ void Scene::UpdateComponentBuffers(uint32_t frameIndex)
 {
 	RecalculateGpuBufferSize<TransformComponent, TransformComponentGPU>("TransformData", frameIndex);
 	RecalculateGpuBufferSize<CameraComponent, CameraComponentGPU>("CameraData", frameIndex);
+	RecalculateGpuBufferSize<CameraComponent, CameraFrustumGPU>("CameraFrustumData", frameIndex);
+
 	RecalculateGpuBufferSize<MaterialComponent, uint32_t>("MaterialData", frameIndex);
 	RecalculateGpuBufferSize<ShapeComponent, ShapeRenderIndicesGPU>("ShapeRenderIndicesData", frameIndex);
 	RecalculateGpuBufferSize<ModelComponent, ModelRenderIndicesGPU>("ModelRenderIndicesData", frameIndex);
 	RecalculateGpuBufferSize<DefaultColliderComponent, glm::mat4>("DefaultColliderAabbData", frameIndex);
 	RecalculateGpuBufferSize<DefaultColliderComponent, glm::mat4>("DefaultColliderObbData", frameIndex);
 	RecalculateGpuBufferSize<DefaultColliderComponent, glm::mat4>("DefaultColliderSphereData", frameIndex);
+	RecalculateGpuBufferSize<DefaultColliderComponent, DefaultColliderGPU>("DefaultColliderData", frameIndex);
 	RecalculateGpuBufferSize<AnimationComponent, VkDeviceAddress>("AnimationNodeTransformDeviceAddressesBuffers", frameIndex);
 	
 	RecalculateGpuBufferSize<DirectionLightComponent, DirectionLightGPU>("DirectionLightData", frameIndex);
@@ -472,4 +506,6 @@ void Scene::UpdateComponentBuffers(uint32_t frameIndex)
 	RecalculateGpuBufferSize<SpotLightComponent, uint32_t>("SpotLightInstanceIndices", frameIndex);
 	RecalculateGpuBufferSize<SpotLightComponent, uint32_t>("SpotLightOcclusionIndices", frameIndex);
 	RecalculateGpuBufferSize<SpotLightComponent, glm::vec4>("SpotLightBillboard", frameIndex);
+
+	
 }

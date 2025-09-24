@@ -66,7 +66,7 @@ void FrustumCullingSystem::DefaultColliderCulling(std::shared_ptr<Registry> regi
 	if (!defaultColliderPool || !transformPool)
 		return;
 
-	std::for_each(std::execution::par_unseq, defaultColliderPool->GetDenseIndices().begin(), defaultColliderPool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, defaultColliderPool->GetDenseIndices().begin(), defaultColliderPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			bool hasShape = shapePool && shapePool->HasComponent(entity) && shapePool->GetData(entity).shape;
 			bool hasModel = modelPool && modelPool->HasComponent(entity) && modelPool->GetData(entity).model && modelPool->GetData(entity).model->state == LoadState::Ready;
@@ -91,7 +91,7 @@ void FrustumCullingSystem::PointLightCulling(std::shared_ptr<Registry> registry,
 	if (!pointLightPool || !transformPool)
 		return;
 
-	std::for_each(std::execution::par_unseq, pointLightPool->GetDenseIndices().begin(), pointLightPool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, pointLightPool->GetDenseIndices().begin(), pointLightPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			if (transformPool->HasComponent(entity))
 			{
@@ -116,7 +116,7 @@ void FrustumCullingSystem::SpotLightCulling(std::shared_ptr<Registry> registry, 
 	if (!spotLightPool || !transformPool)
 		return;
 
-	std::for_each(std::execution::par_unseq, spotLightPool->GetDenseIndices().begin(), spotLightPool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, spotLightPool->GetDenseIndices().begin(), spotLightPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			if (transformPool->HasComponent(entity))
 			{

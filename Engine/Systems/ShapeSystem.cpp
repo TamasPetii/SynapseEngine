@@ -12,7 +12,7 @@ void ShapeSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_ptr<R
 	if (!shapePool)
 		return;
 
-	std::for_each(std::execution::par_unseq, shapePool->GetDenseIndices().begin(), shapePool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, shapePool->GetDenseIndices().begin(), shapePool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			[[unlikely]]
 			if (shapePool->IsBitSet<UPDATE_BIT>(entity) ||
@@ -33,7 +33,7 @@ void ShapeSystem::OnFinish(std::shared_ptr<Registry> registry)
 	if (!shapePool)
 		return;
 
-	std::for_each(std::execution::par_unseq, shapePool->GetDenseIndices().begin(), shapePool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, shapePool->GetDenseIndices().begin(), shapePool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			shapePool->GetData(entity).toRender = false;
 
@@ -54,7 +54,7 @@ void ShapeSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_
 	auto renderIndicesBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("ShapeRenderIndicesData", frameIndex);
 	auto renderIndicesBufferHandler = static_cast<ShapeRenderIndicesGPU*>(renderIndicesBuffer->buffer->GetHandler());
 
-	std::for_each(std::execution::par_unseq, shapePool->GetDenseIndices().begin(), shapePool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, shapePool->GetDenseIndices().begin(), shapePool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			auto& shapeComponent = shapePool->GetData(entity);
 			auto shapeIndex = shapePool->GetDenseIndex(entity);

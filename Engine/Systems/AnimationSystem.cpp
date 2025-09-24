@@ -46,7 +46,7 @@ void AnimationSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_p
 		}
 	);
 
-	std::for_each(std::execution::par_unseq, animationPool->GetDenseIndices().begin(), animationPool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, animationPool->GetDenseIndices().begin(), animationPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			if (animationPool->GetData(entity).animation &&
 				animationPool->GetData(entity).animation->state == LoadState::Ready &&
@@ -98,7 +98,7 @@ void AnimationSystem::OnFinish(std::shared_ptr<Registry> registry)
 	if (!animationPool)
 		return;
 
-	std::for_each(std::execution::par_unseq, animationPool->GetDenseIndices().begin(), animationPool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, animationPool->GetDenseIndices().begin(), animationPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			[[unlikely]]
 			if (animationPool->IsBitSet<CHANGED_BIT>(entity))
@@ -117,7 +117,7 @@ void AnimationSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::sha
 	auto animationNodeTransformBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("AnimationNodeTransformDeviceAddressesBuffers", frameIndex);
 	auto animationNodeTransformBufferHandler = static_cast<VkDeviceAddress*>(animationNodeTransformBuffer->buffer->GetHandler());
 
-	std::for_each(std::execution::par_unseq, animationPool->GetDenseIndices().begin(), animationPool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, animationPool->GetDenseIndices().begin(), animationPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			if (animationPool->GetData(entity).animation &&
 				animationPool->GetData(entity).animation->state == LoadState::Ready &&

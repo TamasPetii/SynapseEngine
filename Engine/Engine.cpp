@@ -68,10 +68,13 @@ void Engine::Update()
 {
 	static float time = 0;
 	static int counter = 0;
+	static float resourceUpdateTime = 0;
+	static float resourceUpdateTargetTime = 1.0f / 60.0f;
 
 	frameTimer->Update();
 
 	time += frameTimer->GetFrameDeltaTime();
+	resourceUpdateTime += frameTimer->GetFrameDeltaTime();
 	counter++;
 
 	if (time > 1)
@@ -90,6 +93,19 @@ void Engine::Update()
 	resourceManager->GetImageManager()->Update();
 	resourceManager->GetAnimationManager()->Update();
 	resourceManager->GetMaterialManager()->Update();
+
+	/*
+	if (resourceUpdateTime >= resourceUpdateTargetTime)
+	{
+		resourceManager->GetModelManager()->Update();
+		resourceManager->GetImageManager()->Update();
+		resourceManager->GetAnimationManager()->Update();
+		resourceManager->GetMaterialManager()->Update();
+		resourceUpdateTime -= resourceUpdateTargetTime;
+
+		std::cout << std::format("Resources Update: {}", resourceUpdateTime) << std::endl;
+	}
+	*/
 
 	scene->Update(frameTimer, frameIndex);
 	InputManager::Instance()->UpdatePrevious();

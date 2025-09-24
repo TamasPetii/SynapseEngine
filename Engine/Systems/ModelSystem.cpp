@@ -12,7 +12,7 @@ void ModelSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_ptr<R
 	if (!modelPool)
 		return;
 
-	std::for_each(std::execution::par_unseq, modelPool->GetDenseIndices().begin(), modelPool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, modelPool->GetDenseIndices().begin(), modelPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			[[unlikely]]
 			if (modelPool->IsBitSet<UPDATE_BIT>(entity) || (transformPool && transformPool->HasComponent(entity) && transformPool->IsBitSet<INDEX_CHANGED_BIT>(entity)))
@@ -31,7 +31,7 @@ void ModelSystem::OnFinish(std::shared_ptr<Registry> registry)
 	if (!modelPool)
 		return;
 
-	std::for_each(std::execution::par_unseq, modelPool->GetDenseIndices().begin(), modelPool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, modelPool->GetDenseIndices().begin(), modelPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			modelPool->GetData(entity).toRender = false;
 
@@ -52,7 +52,7 @@ void ModelSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_
 	auto renderIndicesBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("ModelRenderIndicesData", frameIndex);
 	auto renderIndicesBufferHandler = static_cast<ModelRenderIndicesGPU*>(renderIndicesBuffer->buffer->GetHandler());
 
-	std::for_each(std::execution::par_unseq, modelPool->GetDenseIndices().begin(), modelPool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, modelPool->GetDenseIndices().begin(), modelPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			auto& modelComponent = modelPool->GetData(entity);
 			auto modelIndex = modelPool->GetDenseIndex(entity);
@@ -77,7 +77,6 @@ void ModelSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_
 
 				renderIndicesBufferHandler[modelIndex] = renderIndices;
 			}
-
 
 			//MAYBE EACH SYSTEM UPDATES ITS INDEX????
 

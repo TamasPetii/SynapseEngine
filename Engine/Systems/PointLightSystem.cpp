@@ -48,7 +48,7 @@ void PointLightSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_
 		}
 	);
 
-	std::for_each(std::execution::par_unseq, pointLightPool->GetDenseIndices().begin(), pointLightPool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, pointLightPool->GetDenseIndices().begin(), pointLightPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			if (transformPool->HasComponent(entity) && (pointLightPool->IsBitSet<UPDATE_BIT>(entity) || transformPool->IsBitSet<CHANGED_BIT>(entity)))
 			{
@@ -84,7 +84,7 @@ void PointLightSystem::OnFinish(std::shared_ptr<Registry> registry)
 	if (!pointLightPool)
 		return;
 
-	std::for_each(std::execution::par_unseq, pointLightPool->GetDenseIndices().begin(), pointLightPool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, pointLightPool->GetDenseIndices().begin(), pointLightPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			pointLightPool->GetData(entity).toRender = false;
 
@@ -111,7 +111,7 @@ void PointLightSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::sh
 	auto pointLightBillboardBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("PointLightBillboard", frameIndex);
 	auto pointLightBillboardBufferHandler = static_cast<glm::vec4*>(pointLightBillboardBuffer->buffer->GetHandler());
 
-	std::for_each(std::execution::par_unseq, pointLightPool->GetDenseIndices().begin(), pointLightPool->GetDenseIndices().end(),
+	std::for_each(std::execution::par, pointLightPool->GetDenseIndices().begin(), pointLightPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			auto& pointLightComponent = pointLightPool->GetData(entity);
 			auto pointLightIndex = pointLightPool->GetDenseIndex(entity);
