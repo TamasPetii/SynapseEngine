@@ -29,6 +29,7 @@ namespace Vk
 		ComputePipelineBuilder& AddShaderStage(std::shared_ptr<ShaderModule> shader);
 		ComputePipelineBuilder& AddPushConstant(uint32_t offset, uint32_t size, VkShaderStageFlags stages);
 		ComputePipelineBuilder& AddDescriptorSetLayout(VkDescriptorSetLayout layout);
+		std::shared_ptr<ComputePipeline> BuildDynamic();
 	private:
 		ComputePipelineConfig config;
 	};

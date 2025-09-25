@@ -59,3 +59,8 @@ Vk::ComputePipelineBuilder& Vk::ComputePipelineBuilder::AddDescriptorSetLayout(V
 	config.descriptorLayouts.push_back(layout);
 	return *this;
 }
+
+std::shared_ptr<Vk::ComputePipeline> Vk::ComputePipelineBuilder::BuildDynamic()
+{
+	return std::make_shared<ComputePipeline>(config);
+}

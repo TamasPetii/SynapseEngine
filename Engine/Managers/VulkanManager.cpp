@@ -19,6 +19,7 @@ void VulkanManager::Initialize()
 	InitFrameBuffers();
 	InitDescriptors();
 	InitGraphicsPipelines();
+	InitComputePipelines();
 	InitFences();
 	InitSemaphores();
 }
@@ -90,6 +91,19 @@ std::shared_ptr<Vk::GraphicsPipeline> VulkanManager::GetGraphicsPipeline(const s
 		return nullptr;
 
 	return graphicsPipelines.at(name);
+}
+
+void VulkanManager::RegisterComputePipeline(const std::string& name, std::shared_ptr<Vk::ComputePipeline> computePipeline)
+{
+	computePipelines[name] = computePipeline;
+}
+
+std::shared_ptr<Vk::ComputePipeline> VulkanManager::GetComputePipeline(const std::string& name) const
+{
+	if (computePipelines.find(name) == computePipelines.end())
+		return nullptr;
+
+	return computePipelines.at(name);
 }
 
 void VulkanManager::MarkFrameBufferToResize(const std::string& name, uint32_t index, uint32_t width, uint32_t height)
@@ -700,6 +714,22 @@ void VulkanManager::InitGraphicsPipelines()
 			.AddDescriptorSetLayout(GetDescriptorSet("LoadedImages")->Layout());
 
 		RegisterGraphicsPipeline("BillboardInstanced", pipelineBuilder.BuildDynamic());
+	}
+
+	
+}
+
+void VulkanManager::InitComputePipelines()
+{
+	{
+		uint32_t pushConsantSize = sizeof(CullingPushConstants);
+
+		Vk::ComputePipelineBuilder pipelineBuilder;
+		pipelineBuilder
+			.AddShaderStage(shaderModuls["CullingComp"])
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT);
+
+		RegisterComputePipeline("Culling", pipelineBuilder.BuildDynamic());
 	}
 }
 

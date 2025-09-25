@@ -15,6 +15,7 @@
 #include "Engine/Vulkan/DescriptorSet.h"
 #include "Engine/Vulkan/Fence.h"
 #include "Engine/Vulkan/Semaphore.h"
+#include "Engine/Vulkan/ComputePipeline.h"
 
 class ENGINE_API VulkanManager
 {
@@ -40,6 +41,10 @@ public:
 	//Graphics Pipelines
 	void RegisterGraphicsPipeline(const std::string& name, std::shared_ptr<Vk::GraphicsPipeline> graphicsPipeline);
 	std::shared_ptr<Vk::GraphicsPipeline> GetGraphicsPipeline(const std::string& name) const;
+
+	//Compute Pipelines
+	void RegisterComputePipeline(const std::string& name, std::shared_ptr<Vk::ComputePipeline> computePipeline);
+	std::shared_ptr<Vk::ComputePipeline> GetComputePipeline(const std::string& name) const;
 
 	//FrameBuffers
 	void MarkFrameBufferToResize(const std::string& name, uint32_t index, uint32_t width, uint32_t height);
@@ -72,6 +77,7 @@ private:
 	void InitFrameBuffers();
 	void InitDescriptors();
 	void InitGraphicsPipelines();
+	void InitComputePipelines();
 	void InitFences();
 	void InitSemaphores();
 private:
@@ -82,6 +88,7 @@ private:
 	std::unordered_map<std::string, std::shared_ptr<Vk::ShaderModule>> shaderModuls;
 	std::unordered_map<std::string, std::shared_ptr<Vk::DescriptorPool>> descriptorPools;
 	std::unordered_map<std::string, std::shared_ptr<Vk::GraphicsPipeline>> graphicsPipelines;
+	std::unordered_map<std::string, std::shared_ptr<Vk::ComputePipeline>> computePipelines;
 	std::unordered_map<std::string, std::shared_ptr<Vk::DescriptorSet>> descriptorSets;
 	std::unordered_map<std::string, std::array<std::shared_ptr<Vk::FrameBuffer>, GlobalConfig::FrameConfig::maxFramesInFlights>> frameDependentBuffers;
 	std::unordered_map<std::string, std::array<std::shared_ptr<Vk::FrameBuffer>, GlobalConfig::FrameConfig::maxFramesInFlights>> frameDependentFrameBuffers;
