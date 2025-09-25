@@ -135,22 +135,22 @@ void CameraSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared
 				CameraFrustumGPU cameraFrustum;
 
 				//NearFace
-				cameraFrustum.faces[0] = FrustumFace(cameraComponent.direction, cameraComponent.position + cameraComponent.direction * cameraComponent.nearPlane);
+				cameraFrustum.near= FrustumFace(cameraComponent.direction, cameraComponent.position + cameraComponent.direction * cameraComponent.nearPlane);
 
 				//RightFace
-				cameraFrustum.faces[1] = FrustumFace(-glm::cross(glm::normalize(cameraComponent.direction * cameraComponent.farPlane + cameraComponent.right * halfH), cameraComponent.up), cameraComponent.position);
+				cameraFrustum.right = FrustumFace(-glm::cross(glm::normalize(cameraComponent.direction * cameraComponent.farPlane + cameraComponent.right * halfH), cameraComponent.up), cameraComponent.position);
 
 				//LeftFace
-				cameraFrustum.faces[2] = FrustumFace(-glm::cross(cameraComponent.up, glm::normalize(cameraComponent.direction * cameraComponent.farPlane - cameraComponent.right * halfH)), cameraComponent.position);
+				cameraFrustum.left = FrustumFace(-glm::cross(cameraComponent.up, glm::normalize(cameraComponent.direction * cameraComponent.farPlane - cameraComponent.right * halfH)), cameraComponent.position);
 
 				//TopFace
-				cameraFrustum.faces[3] = FrustumFace(-glm::cross(cameraComponent.right, glm::normalize(cameraComponent.direction * cameraComponent.farPlane + cameraComponent.up * halfV)), cameraComponent.position);
+				cameraFrustum.top = FrustumFace(-glm::cross(cameraComponent.right, glm::normalize(cameraComponent.direction * cameraComponent.farPlane + cameraComponent.up * halfV)), cameraComponent.position);
 
 				//BottomFace
-				cameraFrustum.faces[4] = FrustumFace(-glm::cross(glm::normalize(cameraComponent.direction * cameraComponent.farPlane - cameraComponent.up * halfV), cameraComponent.right), cameraComponent.position);
+				cameraFrustum.bottom = FrustumFace(-glm::cross(glm::normalize(cameraComponent.direction * cameraComponent.farPlane - cameraComponent.up * halfV), cameraComponent.right), cameraComponent.position);
 
 				//FarFace
-				cameraFrustum.faces[5] = FrustumFace(-cameraComponent.direction, cameraComponent.position + cameraComponent.direction * cameraComponent.farPlane);
+				cameraFrustum.far = FrustumFace(-cameraComponent.direction, cameraComponent.position + cameraComponent.direction * cameraComponent.farPlane);
 			
 				cameraFrustumBufferHandler[cameraIndex] = cameraFrustum;
 			}

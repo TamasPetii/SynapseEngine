@@ -10,9 +10,23 @@ struct Camera
 	mat4 viewProj;
 	mat4 viewProjInv;
 	vec4 eye;
-
 };
 
 layout(buffer_reference, std430) readonly buffer CameraBuffer { 
 	Camera cameras[];
+};
+
+struct CameraFrustum
+{
+	//vec3 normal + float distance
+	vec4 near;
+	vec4 right;
+	vec4 left;
+	vec4 top;
+	vec4 bottom;
+	vec4 far;
+};
+
+layout(buffer_reference, std430) readonly buffer CameraFrustumBuffer { 
+	CameraFrustum frustums[];
 };

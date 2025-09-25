@@ -462,6 +462,9 @@ void VulkanManager::InitShaderModuls()
 	RegisterShaderModule("BillboardVert", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/Billboard.vert", VK_SHADER_STAGE_VERTEX_BIT));
 	RegisterShaderModule("BillboardGeom", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/Billboard.geom", VK_SHADER_STAGE_GEOMETRY_BIT));
 	RegisterShaderModule("BillboardFrag", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/Billboard.frag", VK_SHADER_STAGE_FRAGMENT_BIT));
+
+	//Frustum Culling
+	RegisterShaderModule("CullingComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/Culling.comp", VK_SHADER_STAGE_COMPUTE_BIT));
 }
 
 void VulkanManager::InitGraphicsPipelines()

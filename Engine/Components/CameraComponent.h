@@ -51,5 +51,10 @@ public:
 
 struct ENGINE_API CameraFrustumGPU
 {
-	glm::vec4 faces[6]; //vec3 normal + float distance
+	glm::vec4 near;
+	glm::vec4 right;
+	glm::vec4 left;
+	glm::vec4 top;
+	glm::vec4 bottom;
+	glm::vec4 far;
 };

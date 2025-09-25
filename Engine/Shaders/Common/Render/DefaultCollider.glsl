@@ -1,12 +1,14 @@
 #extension GL_EXT_buffer_reference : require
 #extension GL_EXT_buffer_reference_uvec2 : require
 
+const uint COLLIDER_MODEL_BIT = 1u << 0u;
+
 struct DefaultCollider
 {
 	vec3 aabbOrigin;
-	uint32_t objectIndex;
+	uint objectIndex;
 	vec3 aabbExtents;
-	uint32_t bitflag;
+	uint bitflag;
 	vec3 sphereOrigin;
 	float sphereRadius;
 };
@@ -15,4 +17,3 @@ struct DefaultCollider
 layout(buffer_reference, std430) readonly buffer DefaultColliderBuffer {
 	DefaultCollider colliders[];
 };
-

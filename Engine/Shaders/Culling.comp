@@ -1,31 +1,85 @@
 #version 460
 
-layout (local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
-
+#include "Common/Camera.glsl"
 #include "Common/Render/RenderIndices.glsl"
-#include "Common/Render/DefaultCollider.glsl"
 #include "Common/Model/ModelBufferAddresses.glsl"
-#include "Common/Shape/ShapeDeviceAddresses.glsl"
+#include "Common/Shape/ShapeBufferAddresses.glsl"
+#include "Common/Render/DefaultCollider.glsl"
 
-layout( push_constant ) uniform constants
+layout( push_constant) uniform constants
 {	
-	uint cameraIndex;
-	uvec2 cameraBuffer;
-
+	uvec2 cameraFrustumBuffer;
 	uvec2 modelRenderIndicesBuffer;
-	uvec2 modelBufferAddresses
-
+	uvec2 modelBufferAddresses;
 	uvec2 shapeRenderIndicesBuffer;
 	uvec2 shapeBufferAddresses;
-
 	uvec2 defaultColliderBuffer;
-	
+	uint cameraIndex;
+	uint defaultColliderCount;	
 } PushConstants;
+
+layout (local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+bool IsVisibleAABB(uint colliderIndex, CameraFrustumBuffer cameraBuffer, DefaultColliderBuffer defaultColliderBuffer)
+{	
+	vec3 aabbExtents = defaultColliderBuffer.colliders[colliderIndex].aabbExtents;
+	vec3 aabbOrigin = defaultColliderBuffer.colliders[colliderIndex].aabbOrigin;
+
+	bool visible = true;
+
+	visible = visible && (-dot(aabbExtents, abs(cameraBuffer.frustums[PushConstants.cameraIndex].near.xyz))   <= dot(cameraBuffer.frustums[PushConstants.cameraIndex].near.xyz, aabbOrigin) - cameraBuffer.frustums[PushConstants.cameraIndex].near.w);
+	visible = visible && (-dot(aabbExtents, abs(cameraBuffer.frustums[PushConstants.cameraIndex].right.xyz))  <= dot(cameraBuffer.frustums[PushConstants.cameraIndex].right.xyz, aabbOrigin) - cameraBuffer.frustums[PushConstants.cameraIndex].right.w);
+	visible = visible && (-dot(aabbExtents, abs(cameraBuffer.frustums[PushConstants.cameraIndex].left.xyz))   <= dot(cameraBuffer.frustums[PushConstants.cameraIndex].left.xyz, aabbOrigin) - cameraBuffer.frustums[PushConstants.cameraIndex].left.w);
+	visible = visible && (-dot(aabbExtents, abs(cameraBuffer.frustums[PushConstants.cameraIndex].top.xyz))    <= dot(cameraBuffer.frustums[PushConstants.cameraIndex].top.xyz, aabbOrigin) - cameraBuffer.frustums[PushConstants.cameraIndex].top.w);
+	visible = visible && (-dot(aabbExtents, abs(cameraBuffer.frustums[PushConstants.cameraIndex].bottom.xyz)) <= dot(cameraBuffer.frustums[PushConstants.cameraIndex].bottom.xyz, aabbOrigin) - cameraBuffer.frustums[PushConstants.cameraIndex].bottom.w);
+	visible = visible && (-dot(aabbExtents, abs(cameraBuffer.frustums[PushConstants.cameraIndex].far.xyz))    <= dot(cameraBuffer.frustums[PushConstants.cameraIndex].far.xyz, aabbOrigin) - cameraBuffer.frustums[PushConstants.cameraIndex].far.w);
+
+	return visible;
+}
+
+bool IsVisibleSphere(uint colliderIndex, CameraFrustumBuffer cameraBuffer, DefaultColliderBuffer defaultColliderBuffer)
+{	
+	vec3 sphereOrigin = defaultColliderBuffer.colliders[colliderIndex].sphereOrigin;
+	float sphereRadius = defaultColliderBuffer.colliders[colliderIndex].sphereRadius;
+
+	bool visible = true;
+
+	visible = visible && (dot(cameraBuffer.frustums[PushConstants.cameraIndex].near.xyz, sphereOrigin) - cameraBuffer.frustums[PushConstants.cameraIndex].near.w > -sphereRadius);
+	visible = visible && (dot(cameraBuffer.frustums[PushConstants.cameraIndex].right.xyz, sphereOrigin) - cameraBuffer.frustums[PushConstants.cameraIndex].right.w > -sphereRadius);
+	visible = visible && (dot(cameraBuffer.frustums[PushConstants.cameraIndex].left.xyz, sphereOrigin) - cameraBuffer.frustums[PushConstants.cameraIndex].left.w > -sphereRadius);
+	visible = visible && (dot(cameraBuffer.frustums[PushConstants.cameraIndex].top.xyz, sphereOrigin) - cameraBuffer.frustums[PushConstants.cameraIndex].top.w > -sphereRadius);
+	visible = visible && (dot(cameraBuffer.frustums[PushConstants.cameraIndex].bottom.xyz, sphereOrigin) - cameraBuffer.frustums[PushConstants.cameraIndex].bottom.w > -sphereRadius);
+	visible = visible && (dot(cameraBuffer.frustums[PushConstants.cameraIndex].far.xyz, sphereOrigin) - cameraBuffer.frustums[PushConstants.cameraIndex].far.w > -sphereRadius);
+
+	return visible;
+}
+
+bool IsVisible(uint colliderIndex)
+{
+	CameraFrustumBuffer cameraBuffer = CameraFrustumBuffer(PushConstants.cameraFrustumBuffer);
+	DefaultColliderBuffer defaultColliderBuffer = DefaultColliderBuffer(PushConstants.defaultColliderBuffer);
+
+	return IsVisibleAABB(colliderIndex, cameraBuffer, defaultColliderBuffer);
+}
 
 void main()
 {
-	uint id = gl_GlobalInvocationID.x;
+	uint globalIndex = gl_GlobalInvocationID.x;
 
-	//Todo: Finish implementation?
-	//Todo: Where to place the instance index buffer?
+	if(globalIndex >= PushConstants.defaultColliderCount)
+		return;
+
+	uint objectIndex = DefaultColliderBuffer(PushConstants.defaultColliderBuffer).colliders[globalIndex].objectIndex;
+
+	if(objectIndex == INVALID_RENDER_INDEX)
+		return;
+
+	if(IsVisible(globalIndex))
+	{
+		bool isModel = (DefaultColliderBuffer(PushConstants.defaultColliderBuffer).colliders[globalIndex].bitflag & COLLIDER_MODEL_BIT) != 0u;
+
+		//Todo: Get index, with atomicAdd
+		//Todo: Get instance buffer, append objectIndex to it
+		//Todo: Indirect buffer setup	
+	}
 }
