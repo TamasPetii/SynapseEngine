@@ -34,8 +34,8 @@ struct ENGINE_API GlobalConfig
 
 	struct ENGINE_API BufferConfig
 	{
-		static constexpr uint32_t instanceBufferBaseSize = 32;
-		static constexpr uint32_t materialBufferBaseSize = 32;
+		static constexpr uint32_t materialBufferBaseSize = 16;
+		static constexpr uint32_t instanceBufferBaseSize = 64;
 		static constexpr uint32_t modelAddressBufferBaseSize = 16;
 		static constexpr uint32_t shapeAddressBufferBaseSize = 16;
 		static constexpr uint32_t animationBufferBaseSize = 16;

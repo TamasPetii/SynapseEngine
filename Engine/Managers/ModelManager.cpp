@@ -52,6 +52,15 @@ void ModelManager::Update(uint32_t frameIndex)
     
     //Todo: Mechanism to handle model delete, shrink buffer and reassign model's buffer array index!
     DeviceAddressedManager<ModelDeviceAddresses>::Update(frameIndex, ArrayIndexedManager::GetCurrentCount(), GlobalConfig::BufferConfig::modelAddressBufferBaseSize);
+    DrawIndirectManager::Update(frameIndex, ArrayIndexedManager::GetCurrentCount(), GlobalConfig::BufferConfig::modelAddressBufferBaseSize);
+
+    for (auto& [path, versionedObject] : models)
+    {
+        auto model = versionedObject->object;
+
+        if (model)
+            DrawIndirectManager::UpdateInstanceBuffer(frameIndex, model->GetBufferArrayIndex(), model.use_count());
+    }
 
     auto completedFutures = AsyncManager::CompleteFinishedFutures();
 
@@ -69,7 +78,8 @@ void ModelManager::Update(uint32_t frameIndex)
     {
         auto model = versionedObject->object;
 
-        //Model state ready??? Should tell if its uploaded to gpu or not??? But for multiple frames idk...
+        //Important: The buffers will be resized and regenerated at the same time! So model->version can be used to handle both!!!
+
         if (model && model->state == LoadState::Ready && deviceAddressBuffers[frameIndex]->version != versionedObject->versions[frameIndex])
         {
             versionedObject->versions[frameIndex] = deviceAddressBuffers[frameIndex]->version;
@@ -82,21 +92,23 @@ void ModelManager::Update(uint32_t frameIndex)
                 .nodeTransformBufferAddress = model->GetNodeTransformBuffer()->GetAddress()
             };
 
-            std::cout << std::format("Model {} updated in frame {} with version {}", path, frameIndex, versionedObject->versions[frameIndex]) << std::endl;
+            std::cout << std::format("Model addresses {} updated in frame {} with version {}", path, frameIndex, versionedObject->versions[frameIndex]) << std::endl;
+        }
+
+        //Todo: Handle model LOD???
+        if (model && model->state == LoadState::Ready && indirectCommandBuffers[frameIndex]->version != versionedObject->versions[frameIndex])
+        {
+            versionedObject->versions[frameIndex] = indirectCommandBuffers[frameIndex]->version;
+            
+            auto bufferHandler = static_cast<VkDrawIndirectCommand*>(indirectCommandBuffers[frameIndex]->buffer->GetHandler());
+            bufferHandler[model->GetBufferArrayIndex()] = VkDrawIndirectCommand{
+                .vertexCount = model->GetIndexCount(),
+                .instanceCount = 0,
+                .firstVertex = 0,
+                .firstInstance = 0,
+            };
+
+            std::cout << std::format("Model drawIndirectCommand {} updated in frame {} with version {}", path, frameIndex, versionedObject->versions[frameIndex]) << std::endl;
         }
     }
-
-    /*
-    //Todo: GPU LOD?
-    for (uint32_t frameIndex = 0; frameIndex < indirectCommandBuffers.size(); ++frameIndex)
-    {
-        static_cast<VkDrawIndirectCommand*>(indirectCommandBuffers[frameIndex]->GetHandler())[model->GetBufferArrayIndex()] = VkDrawIndirectCommand{
-            .vertexCount = model->GetIndexCount(),
-            .instanceCount = 0,
-            .firstVertex = 0,
-            .firstInstance = 0
-        };
-        .instanceIndexBufferAddress = model->GetInstanceIndexBuffer()->GetAddress()
-    }
-    */
 }

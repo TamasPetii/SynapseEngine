@@ -21,7 +21,7 @@ struct ENGINE_API ModelDeviceAddresses
 	VkDeviceAddress nodeTransformBufferAddress;
 };
 
-class ENGINE_API ModelManager : public DeviceAddressedManager<ModelDeviceAddresses>, public AsyncManager<std::string>
+class ENGINE_API ModelManager : public DeviceAddressedManager<ModelDeviceAddresses>, public AsyncManager<std::string>, public DrawIndirectManager
 {
 public:
 	ModelManager(std::shared_ptr<ImageManager> imageManager, std::shared_ptr<MaterialManager> materialManager);
