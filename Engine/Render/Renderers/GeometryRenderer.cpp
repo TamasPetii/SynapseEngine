@@ -14,7 +14,8 @@ void GeometryRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Reg
 	auto device = vulkanContext->GetDevice();
 	auto graphicsQueue = device->GetQueue(Vk::QueueType::GRAPHICS);
 	auto frameBuffer = resourceManager->GetVulkanManager()->GetFrameDependentFrameBuffer("Main", frameIndex);
-	auto pipeline = resourceManager->GetVulkanManager()->GetGraphicsPipeline("DeferredPre");
+	//auto pipeline = resourceManager->GetVulkanManager()->GetGraphicsPipeline("DeferredPre");
+	auto pipeline = resourceManager->GetVulkanManager()->GetGraphicsPipeline("DeferredPreIndirect");
 
 	VkClearValue colorClearValue{};
 	colorClearValue.color.float32[0] = 0.f;
@@ -78,8 +79,10 @@ void GeometryRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Reg
 	auto textureDescriptorSet = resourceManager->GetVulkanManager()->GetDescriptorSet("LoadedImages");
 	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetLayout(), 0, 1, &textureDescriptorSet->Value(), 0, nullptr);
 
-	RenderShapesInstanced(commandBuffer, pipeline->GetLayout(), resourceManager, frameIndex);
-	RenderModelsInstanced(commandBuffer, pipeline->GetLayout(), resourceManager, frameIndex);
+	//RenderShapesInstanced(commandBuffer, pipeline->GetLayout(), resourceManager, frameIndex);
+	//RenderModelsInstanced(commandBuffer, pipeline->GetLayout(), resourceManager, frameIndex);
+	RenderShapesInstancedIndirect(commandBuffer, pipeline->GetLayout(), resourceManager, frameIndex);
+	RenderModelsInstancedIndirect(commandBuffer, pipeline->GetLayout(), resourceManager, frameIndex);
 	vkCmdEndRendering(commandBuffer);
 }
 
@@ -143,10 +146,80 @@ void GeometryRenderer::RenderModelsInstanced(VkCommandBuffer commandBuffer, VkPi
 
 				vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(GeometryRendererPushConstants), &pushConstants);					
 				vkCmdDraw(commandBuffer, model->GetIndexCount(), model->GetInstanceCount(), 0, 0);
-
-				//vkCmdDrawIndirect();
-				//vkCmdDrawIndirectCount();
 			}
 		}
 	);
+}
+
+void GeometryRenderer::RenderShapesInstancedIndirect(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
+{
+	auto geometryManager = resourceManager->GetGeometryManager();
+
+	GeometryRendererIndirectPushConstants pushConstants;
+	pushConstants.renderMode = SHAPE_INSTANCED;
+	pushConstants.cameraIndex = 0;
+	pushConstants.cameraBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraData", frameIndex)->buffer->GetAddress();
+	pushConstants.transformBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("TransformData", frameIndex)->buffer->GetAddress();
+	pushConstants.instanceIndexAddressBuffer = geometryManager->GetInstanceIndexAddressBuffer(frameIndex)->buffer->GetAddress();
+	pushConstants.shapeRenderIndicesBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("ShapeRenderIndicesData", frameIndex)->buffer->GetAddress();
+	pushConstants.shapeBufferAddresses = geometryManager->GetDeviceAddressesBuffer(frameIndex)->buffer->GetAddress();
+	pushConstants.shapeMaterialIndicesBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("MaterialData", frameIndex)->buffer->GetAddress();
+	pushConstants.materialBuffer = resourceManager->GetMaterialManager()->GetDeviceAddressesBuffer(frameIndex)->buffer->GetAddress();
+
+	VkDeviceSize bufferSize = sizeof(uint32_t);
+	uint32_t shapeCount = geometryManager->GetCurrentCount();
+	auto shapeIndirectCountBuffer = geometryManager->GetIndirectCountBuffers(frameIndex);
+	auto shapeIndirectCountBufferHandler = shapeIndirectCountBuffer->GetHandler();
+	memcpy(shapeIndirectCountBufferHandler, &shapeCount, (size_t)bufferSize);
+
+	vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(GeometryRendererIndirectPushConstants), &pushConstants);
+	vkCmdDrawIndirectCount(commandBuffer, geometryManager->GetIndirectDrawBuffer(frameIndex)->buffer->Value(), 0, shapeIndirectCountBuffer->Value(), 0, geometryManager->GetIndirectDrawBuffer(frameIndex)->size, sizeof(VkDrawIndirectCommand));
+}
+
+void GeometryRenderer::RenderModelsInstancedIndirect(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
+{
+	auto modelManager = resourceManager->GetModelManager();
+
+	GeometryRendererIndirectPushConstants pushConstants;
+	pushConstants.renderMode = MODEL_INSTANCED;
+	pushConstants.cameraIndex = 0;
+	pushConstants.cameraBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraData", frameIndex)->buffer->GetAddress();
+	pushConstants.transformBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("TransformData", frameIndex)->buffer->GetAddress();
+	pushConstants.instanceIndexAddressBuffer = modelManager->GetInstanceIndexAddressBuffer(frameIndex)->buffer->GetAddress();
+	pushConstants.modelRenderIndicesBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("ModelRenderIndicesData", frameIndex)->buffer->GetAddress();
+	pushConstants.modelBufferAddresses = modelManager->GetDeviceAddressesBuffer(frameIndex)->buffer->GetAddress();
+	pushConstants.animationTransformBufferAddresses = resourceManager->GetComponentBufferManager()->GetComponentBuffer("AnimationNodeTransformDeviceAddressesBuffers", frameIndex)->buffer->GetAddress();
+	pushConstants.animationVertexBoneBufferAddresses = resourceManager->GetAnimationManager()->GetDeviceAddressesBuffer(frameIndex)->buffer->GetAddress();
+	pushConstants.materialBuffer = resourceManager->GetMaterialManager()->GetDeviceAddressesBuffer(frameIndex)->buffer->GetAddress();
+
+	VkDeviceSize bufferSize = sizeof(uint32_t);
+	uint32_t modelCount = modelManager->GetCurrentCount();
+	auto modelIndirectCountBuffer = modelManager->GetIndirectCountBuffers(frameIndex);
+	auto modelIndirectCountBufferHandler = modelIndirectCountBuffer->GetHandler();
+	memcpy(modelIndirectCountBufferHandler, &modelCount, (size_t)bufferSize);
+
+	{ //Debug
+		/*
+		std::cout << "[GeometryRenderer::RenderModelsInstancedIndirect]" << std::endl;
+
+		auto indirectCommandBufferHandler = static_cast<VkDrawIndirectCommand*>(modelManager->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler());
+		
+		for (int i = 0; i < modelManager->GetCurrentCount(); ++i)
+		{
+			std::cout << std::format("Model {}: {} {} {} {}", i, indirectCommandBufferHandler[i].vertexCount, indirectCommandBufferHandler[i].instanceCount, indirectCommandBufferHandler[i].firstInstance, indirectCommandBufferHandler[i].firstVertex) << std::endl;
+		
+			auto instanceBufferHanlder = static_cast<uint32_t*>(modelManager->GetInstanceIndexBuffer(frameIndex, i)->buffer->GetHandler());
+			
+			for (int j = 0; j < modelManager->GetInstanceIndexBuffer(frameIndex, i)->size; ++j)
+			{
+				std::cout << instanceBufferHanlder[j] << " ";
+			}
+
+			std::cout << std::endl;
+		}
+		*/
+	}
+
+	vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(GeometryRendererPushConstants), &pushConstants);
+	vkCmdDrawIndirectCount(commandBuffer, modelManager->GetIndirectDrawBuffer(frameIndex)->buffer->Value(), 0, modelIndirectCountBuffer->Value(), 0, modelManager->GetIndirectDrawBuffer(frameIndex)->size, sizeof(VkDrawIndirectCommand));
 }

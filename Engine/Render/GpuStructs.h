@@ -106,3 +106,20 @@ struct CullingPushConstants
 	uint32_t cameraIndex;
 	uint32_t defaultColliderCount;
 };
+
+struct GeometryRendererIndirectPushConstants
+{
+	VkDeviceAddress cameraBuffer;
+	VkDeviceAddress transformBuffer;
+	VkDeviceAddress instanceIndexAddressBuffer;
+	VkDeviceAddress modelRenderIndicesBuffer;
+	VkDeviceAddress modelBufferAddresses;
+	VkDeviceAddress animationTransformBufferAddresses;
+	VkDeviceAddress animationVertexBoneBufferAddresses;
+	VkDeviceAddress shapeRenderIndicesBuffer;
+	VkDeviceAddress shapeBufferAddresses;
+	VkDeviceAddress shapeMaterialIndicesBuffer;
+	VkDeviceAddress materialBuffer;
+	uint32_t renderMode;
+	uint32_t cameraIndex;
+};

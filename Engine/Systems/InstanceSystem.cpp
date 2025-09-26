@@ -33,8 +33,8 @@ void InstanceSystem::OnFinish(std::shared_ptr<Registry> registry)
 
 void InstanceSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
 {
-	auto futureShapeGpu = std::async(std::launch::async, &InstanceSystem::UpdateShapeInstancesGpu, this, resourceManager, frameIndex);
-	auto futureModelGpu = std::async(std::launch::async, &InstanceSystem::UpdateModelInstancesGpu, this, resourceManager, frameIndex);
+	auto futureShapeGpu = std::async(std::launch::async, &InstanceSystem::UpdateShapeInstancesGpuIndirectDraw, this, resourceManager, frameIndex);
+	auto futureModelGpu = std::async(std::launch::async, &InstanceSystem::UpdateModelInstancesGpuIndirectDraw, this, resourceManager, frameIndex);
 	auto futurePointLightGpu = std::async(std::launch::async, &InstanceSystem::UpdatePointLightInstancesGpu, this, registry, resourceManager, frameIndex);
 	auto futureSpotLightGpu = std::async(std::launch::async, &InstanceSystem::UpdateSpotLightInstancesGpu, this, registry, resourceManager, frameIndex);
 
@@ -99,6 +99,38 @@ void InstanceSystem::UpdateShapeInstancesGpu(std::shared_ptr<ResourceManager> re
 	);
 }
 
+void InstanceSystem::UpdateShapeInstancesGpuIndirectDraw(std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
+{
+	auto geometryManager = resourceManager->GetGeometryManager();	
+	auto shapeIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(geometryManager->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler());
+	
+	std::for_each(std::execution::seq, geometryManager->GetShapes().begin(), geometryManager->GetShapes().end(),
+		[&](const auto& data) -> void
+		{
+			if (data.second == nullptr)
+				return;
+
+			auto shape = data.second->object;
+
+			//Todo: On shape deletion instanceCount has to be 0!!
+			if (shape)
+			{
+				uint32_t instanceCount = shape->GetInstanceIndices().size();
+
+				//Update insatnce index buffer with visible model indices
+				VkDeviceSize bufferSize = sizeof(uint32_t) * instanceCount;
+				auto shapeInstanceIndexBufferHandler = geometryManager->GetInstanceIndexBuffer(frameIndex, shape->GetBufferArrayIndex())->buffer->GetHandler();
+				memcpy(shapeInstanceIndexBufferHandler, shape->GetInstanceIndices().data(), (size_t)bufferSize);
+
+				//Update indirect draw buffer with instance count!
+				shapeIndirectDrawBufferHandler[shape->GetBufferArrayIndex()].instanceCount = instanceCount;
+
+				shape->ClearInstanceIndices();
+			}
+		}
+	);
+}
+
 void InstanceSystem::UpdateModelInstances(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager)
 {
 	auto modelManager = resourceManager->GetModelManager();
@@ -154,6 +186,38 @@ void InstanceSystem::UpdateModelInstancesGpu(std::shared_ptr<ResourceManager> re
 
 			if(model && model->state == LoadState::Ready)
 				model->UploadInstanceDataToGPU(model.use_count(), frameIndex);
+		}
+	);
+}
+
+void InstanceSystem::UpdateModelInstancesGpuIndirectDraw(std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
+{
+	auto modelManager = resourceManager->GetModelManager();
+	auto modelIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(modelManager->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler());
+
+	std::for_each(std::execution::seq, modelManager->GetModels().begin(), modelManager->GetModels().end(),
+		[&](const auto& data) -> void
+		{
+			if (data.second == nullptr)
+				return;
+
+			auto model = data.second->object;
+
+			//Todo: On model deletion instanceCount has to be 0!!
+			if (model && model->state == LoadState::Ready)
+			{
+				uint32_t instanceCount = model->GetInstanceIndices().size();
+
+				//Update insatnce index buffer with visible model indices
+				VkDeviceSize bufferSize = sizeof(uint32_t) * instanceCount;
+				auto modelInstanceIndexBufferHandler = modelManager->GetInstanceIndexBuffer(frameIndex, model->GetBufferArrayIndex())->buffer->GetHandler();
+				memcpy(modelInstanceIndexBufferHandler, model->GetInstanceIndices().data(), (size_t)bufferSize);
+
+				//Update indirect draw buffer with instance count!
+				modelIndirectDrawBufferHandler[model->GetBufferArrayIndex()].instanceCount = instanceCount;
+
+				model->ClearInstanceIndices();
+			}	
 		}
 	);
 }

@@ -869,5 +869,7 @@
     <None Include="Shaders\Culling.comp" />
     <None Include="Shaders\Common\Render\DefaultCollider.glsl" />
     <None Include="Shaders\Common\Render\DrawIndirectCommand.glsl" />
+    <None Include="Shaders\DeferredPreIndirect.vert" />
+    <None Include="Shaders\DeferredPreIndirect.frag" />
   </ItemGroup>
 </Project>

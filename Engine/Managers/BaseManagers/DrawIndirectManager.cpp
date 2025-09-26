@@ -6,6 +6,13 @@ DrawIndirectManager::DrawIndirectManager()
     {
         indirectCommandBuffers[i] = std::make_shared<DynamicSizeBuffer>();
         instanceIndexAddressBuffers[i] = std::make_shared<DynamicSizeBuffer>();
+
+        Vk::BufferConfig config;
+        config.size = sizeof(uint32_t);
+        config.usage = VK_BUFFER_USAGE_2_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_2_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_2_INDIRECT_BUFFER_BIT;
+        config.memoryProperties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
+        indirectCountBuffers[i] = std::make_shared<Vk::Buffer>(config);
+        indirectCountBuffers[i]->MapMemory();
     }
 }
 

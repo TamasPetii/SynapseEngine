@@ -66,6 +66,7 @@ void Vk::Device::Init(std::span<const char*> deviceExtensions)
 	deviceFeatures12.descriptorBindingPartiallyBound = VK_TRUE;
 	deviceFeatures12.descriptorBindingVariableDescriptorCount = VK_TRUE;
 	deviceFeatures12.runtimeDescriptorArray = VK_TRUE;
+	deviceFeatures12.drawIndirectCount = VK_TRUE;
 	deviceFeatures12.pNext = &deviceFeatures11;
 
 	VkPhysicalDeviceVulkan13Features deviceFeatures13 = {};

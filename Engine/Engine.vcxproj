@@ -451,6 +451,8 @@
     <None Include="Shaders\Culling.comp" />
     <None Include="Shaders\DeferredAmbient.frag" />
     <None Include="Shaders\DeferredAmbient.vert" />
+    <None Include="Shaders\DeferredPreIndirect.frag" />
+    <None Include="Shaders\DeferredPreIndirect.vert" />
     <None Include="Shaders\DeferredSpotLight.frag" />
     <None Include="Shaders\DeferredSpotLight.vert" />
     <None Include="Shaders\OcclusionCulling.frag" />

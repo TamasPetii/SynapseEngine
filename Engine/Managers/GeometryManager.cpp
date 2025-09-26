@@ -63,6 +63,15 @@ std::shared_ptr<Shape> GeometryManager::GetShape(const std::string& name) const
 void GeometryManager::Update(uint32_t frameIndex)
 {
 	DeviceAddressedManager<ShapeDeviceAddresses>::Update(frameIndex, ArrayIndexedManager::GetCurrentCount(), GlobalConfig::BufferConfig::shapeAddressBufferBaseSize);
+	DrawIndirectManager::Update(frameIndex, ArrayIndexedManager::GetCurrentCount(), GlobalConfig::BufferConfig::shapeAddressBufferBaseSize);
+
+	for (auto& [path, versionedObject] : shapes)
+	{
+		auto shape = versionedObject->object;
+
+		if (shape)
+			DrawIndirectManager::UpdateInstanceBuffer(frameIndex, shape->GetBufferArrayIndex(), shape.use_count());
+	}
 
 	for (auto& [name, versionedObject] : shapes)
 	{
@@ -79,6 +88,22 @@ void GeometryManager::Update(uint32_t frameIndex)
 			};
 
 			std::cout << std::format("Shape {} updated in frame {} with version {}", name, frameIndex, versionedObject->versions[frameIndex]) << std::endl;
+		}
+
+		//Todo: Handle model LOD???
+		if (shape && indirectCommandBuffers[frameIndex]->version != versionedObject->versions[frameIndex])
+		{
+			versionedObject->versions[frameIndex] = indirectCommandBuffers[frameIndex]->version;
+
+			auto bufferHandler = static_cast<VkDrawIndirectCommand*>(indirectCommandBuffers[frameIndex]->buffer->GetHandler());
+			bufferHandler[shape->GetBufferArrayIndex()] = VkDrawIndirectCommand{
+				.vertexCount = shape->GetIndexCount(),
+				.instanceCount = 0,
+				.firstVertex = 0,
+				.firstInstance = 0,
+			};
+
+			std::cout << std::format("Shape drawIndirectCommand {} updated in frame {} with version {}", name, frameIndex, versionedObject->versions[frameIndex]) << std::endl;
 		}
 	}
 }

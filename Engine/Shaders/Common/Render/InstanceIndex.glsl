@@ -4,3 +4,7 @@
 layout(buffer_reference, std430) readonly buffer InstanceIndexBuffer {
 	uint indices[];
 };
+
+layout(buffer_reference, std430) readonly buffer InstanceIndexAddressBuffer {
+	uvec2 deviceAddresses[];
+};

@@ -451,6 +451,10 @@ void VulkanManager::InitShaderModuls()
 	RegisterShaderModule("DeferredPreVert", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/DeferredPre.vert", VK_SHADER_STAGE_VERTEX_BIT));
 	RegisterShaderModule("DeferredPreFrag", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/DeferredPre.frag", VK_SHADER_STAGE_FRAGMENT_BIT));
 
+	//Geometry Shaders Indirect (Deferred Pre)
+	RegisterShaderModule("DeferredPreIndirectVert", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/DeferredPreIndirect.vert", VK_SHADER_STAGE_VERTEX_BIT));
+	RegisterShaderModule("DeferredPreIndirectFrag", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/DeferredPreIndirect.frag", VK_SHADER_STAGE_FRAGMENT_BIT));
+
 	//Deferred Direction Light Shaders
 	RegisterShaderModule("DeferredDirectionLightVert", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/DeferredDirectionLight.vert", VK_SHADER_STAGE_VERTEX_BIT));
 	RegisterShaderModule("DeferredDirectionLightFrag", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/DeferredDirectionLight.frag", VK_SHADER_STAGE_FRAGMENT_BIT));
@@ -536,6 +540,37 @@ void VulkanManager::InitGraphicsPipelines()
 			.AddDescriptorSetLayout(GetDescriptorSet("LoadedImages")->Layout());
 
 		RegisterGraphicsPipeline("DeferredPre", pipelineBuilder.BuildDynamic());
+	}
+
+	{
+		uint32_t pushConsantSize = sizeof(GeometryRendererIndirectPushConstants);
+
+		Vk::GraphicsPipelineBuilder pipelineBuilder;
+		pipelineBuilder
+			.ResetToDefault()
+			.AddShaderStage(shaderModuls["DeferredPreIndirectVert"])
+			.AddShaderStage(shaderModuls["DeferredPreIndirectFrag"])
+			.AddDynamicState(VK_DYNAMIC_STATE_VIEWPORT)
+			.AddDynamicState(VK_DYNAMIC_STATE_SCISSOR)
+			.SetVertexInput({}, {})
+			.SetPrimitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
+			.SetRasterization(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_COUNTER_CLOCKWISE)
+			.SetMultisampling(VK_SAMPLE_COUNT_1_BIT)
+			.SetDepthStencil(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS)
+			.SetColorBlend(VK_FALSE)
+			.AddColorBlendAttachment(VK_FALSE)
+			.AddColorBlendAttachment(VK_FALSE)
+			.AddColorBlendAttachment(VK_FALSE)
+			.AddColorBlendAttachment(VK_FALSE)
+			.SetColorAttachmentFormats(VK_FORMAT_R32G32B32A32_SFLOAT, 0)
+			.SetColorAttachmentFormats(VK_FORMAT_R16G16B16A16_SFLOAT, 1)
+			.SetColorAttachmentFormats(VK_FORMAT_R16G16B16A16_SFLOAT, 2)
+			.SetColorAttachmentFormats(VK_FORMAT_R32_UINT, 3)
+			.SetDepthAttachmentFormat(VK_FORMAT_D32_SFLOAT)
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
+			.AddDescriptorSetLayout(GetDescriptorSet("LoadedImages")->Layout());
+
+		RegisterGraphicsPipeline("DeferredPreIndirect", pipelineBuilder.BuildDynamic());
 	}
 
 	{
