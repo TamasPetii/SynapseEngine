@@ -1,5 +1,6 @@
 #version 460
-#extension GL_ARB_shader_draw_parameters : enable
+
+#extension GL_ARB_shader_draw_parameters : require
 
 #include "Common/Animation/AnimationNodeTransform.glsl"
 #include "Common/Animation/AnimationVertexBone.glsl"

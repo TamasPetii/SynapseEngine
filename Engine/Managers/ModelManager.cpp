@@ -78,11 +78,11 @@ void ModelManager::Update(uint32_t frameIndex)
     {
         auto model = versionedObject->object;
 
-        //Important: The buffers will be resized and regenerated at the same time! So model->version can be used to handle both!!!
+        bool versionChanged = false;
 
         if (model && model->state == LoadState::Ready && deviceAddressBuffers[frameIndex]->version != versionedObject->versions[frameIndex])
         {
-            versionedObject->versions[frameIndex] = deviceAddressBuffers[frameIndex]->version;
+            versionChanged = true;
 
             auto bufferHandler = static_cast<ModelDeviceAddresses*>(deviceAddressBuffers[frameIndex]->buffer->GetHandler());
             bufferHandler[model->GetBufferArrayIndex()] = ModelDeviceAddresses{
@@ -98,8 +98,8 @@ void ModelManager::Update(uint32_t frameIndex)
         //Todo: Handle model LOD???
         if (model && model->state == LoadState::Ready && indirectCommandBuffers[frameIndex]->version != versionedObject->versions[frameIndex])
         {
-            versionedObject->versions[frameIndex] = indirectCommandBuffers[frameIndex]->version;
-            
+            versionChanged = true;
+
             auto bufferHandler = static_cast<VkDrawIndirectCommand*>(indirectCommandBuffers[frameIndex]->buffer->GetHandler());
             bufferHandler[model->GetBufferArrayIndex()] = VkDrawIndirectCommand{
                 .vertexCount = model->GetIndexCount(),
@@ -110,5 +110,8 @@ void ModelManager::Update(uint32_t frameIndex)
 
             std::cout << std::format("Model drawIndirectCommand {} updated in frame {} with version {}", path, frameIndex, versionedObject->versions[frameIndex]) << std::endl;
         }
+        //Important: The buffers will be resized and regenerated at the same time! So model->version can be used to handle both!!!
+        if(versionChanged)
+            versionedObject->versions[frameIndex] = indirectCommandBuffers[frameIndex]->version;
     }
 }

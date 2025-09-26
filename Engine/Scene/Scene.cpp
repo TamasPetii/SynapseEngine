@@ -161,7 +161,7 @@ void Scene::InitializeRegistry()
 		auto modelParent = registry->CreateEntity();
 		registry->AddComponents<TransformComponent>(modelParent);
 
-		for(uint32_t i = 0; i < 20; i++)
+		for(uint32_t i = 0; i < 20000; i++)
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);

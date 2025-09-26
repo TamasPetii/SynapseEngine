@@ -220,6 +220,6 @@ void GeometryRenderer::RenderModelsInstancedIndirect(VkCommandBuffer commandBuff
 		*/
 	}
 
-	vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(GeometryRendererPushConstants), &pushConstants);
+	vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(GeometryRendererIndirectPushConstants), &pushConstants);
 	vkCmdDrawIndirectCount(commandBuffer, modelManager->GetIndirectDrawBuffer(frameIndex)->buffer->Value(), 0, modelIndirectCountBuffer->Value(), 0, modelManager->GetIndirectDrawBuffer(frameIndex)->size, sizeof(VkDrawIndirectCommand));
 }

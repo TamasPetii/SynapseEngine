@@ -77,9 +77,11 @@ void GeometryManager::Update(uint32_t frameIndex)
 	{
 		auto shape = versionedObject->object;
 
+		bool versionChanged = false;
+
 		if (shape && deviceAddressBuffers[frameIndex]->version != versionedObject->versions[frameIndex])
 		{
-			versionedObject->versions[frameIndex] = deviceAddressBuffers[frameIndex]->version;
+			versionChanged = true;
 
 			auto bufferHandler = static_cast<ShapeDeviceAddresses*>(deviceAddressBuffers[frameIndex]->buffer->GetHandler());
 			bufferHandler[shape->GetBufferArrayIndex()] = ShapeDeviceAddresses{
@@ -93,7 +95,7 @@ void GeometryManager::Update(uint32_t frameIndex)
 		//Todo: Handle model LOD???
 		if (shape && indirectCommandBuffers[frameIndex]->version != versionedObject->versions[frameIndex])
 		{
-			versionedObject->versions[frameIndex] = indirectCommandBuffers[frameIndex]->version;
+			versionChanged = true;
 
 			auto bufferHandler = static_cast<VkDrawIndirectCommand*>(indirectCommandBuffers[frameIndex]->buffer->GetHandler());
 			bufferHandler[shape->GetBufferArrayIndex()] = VkDrawIndirectCommand{
@@ -105,5 +107,9 @@ void GeometryManager::Update(uint32_t frameIndex)
 
 			std::cout << std::format("Shape drawIndirectCommand {} updated in frame {} with version {}", name, frameIndex, versionedObject->versions[frameIndex]) << std::endl;
 		}
+
+		//Important: The buffers will be resized and regenerated at the same time! So model->version can be used to handle both!!!
+		if(versionChanged)
+			versionedObject->versions[frameIndex] = indirectCommandBuffers[frameIndex]->version;
 	}
 }
