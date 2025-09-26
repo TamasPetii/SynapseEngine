@@ -36,6 +36,7 @@ void Scene::InitializeRegistry()
 	std::mt19937 rng(dev());
 	std::uniform_real_distribution<float> dist(0, 1);
 	std::uniform_int_distribution<uint32_t> distAnimation(0, 3);
+	std::uniform_int_distribution<uint32_t> distShape(0, 4);
 
 	{ //Camera
 		auto entity = registry->CreateEntity();
@@ -65,30 +66,41 @@ void Scene::InitializeRegistry()
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, DirectionLightComponent>(entity);
-			registry->SetParent(entity, directionLightParent);
+			registry->GetComponent<DirectionLightComponent>(entity).strength = 0.f;
+			registry->SetParent(entity, directionLightParent);		
 		}
 
 		//Point Lights
 		{
-			for (int i = 0; i < 100; ++i)
+			for (int i = 0; i < 2500; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, PointLightComponent>(entity);
-				registry->GetComponent<TransformComponent>(entity).translation = glm::vec3(dist(rng), dist(rng), dist(rng)) * 50.f;
-				registry->GetComponent<PointLightComponent>(entity).color = glm::vec3(dist(rng), dist(rng), dist(rng));
+				auto [transformComponent, pointLightComponent] = registry->GetComponents<TransformComponent, PointLightComponent>(entity);
+
+				transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 50.f;
+				transformComponent.rotation = glm::vec3(dist(rng), dist(rng), dist(rng)) * 180.f;
+				transformComponent.scale = glm::vec3(dist(rng)) * 8.f;
+
+				pointLightComponent.color = glm::vec3(dist(rng), dist(rng), dist(rng));
 				registry->SetParent(entity, pointLightParent);
 			}
 		}
 
 		//Spot Lights
 		{
-			for (int i = 0; i < 5; ++i)
+			for (int i = 0; i < 2500; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, SpotLightComponent>(entity);
-				registry->GetComponent<TransformComponent>(entity).translation = glm::vec3(dist(rng), dist(rng), dist(rng)) * 50.f;
-				registry->GetComponent<TransformComponent>(entity).scale = glm::vec3(25.f, 10.f, 25.f);
-				registry->GetComponent<SpotLightComponent>(entity).color = glm::vec3(dist(rng), dist(rng), dist(rng));
+				auto [transformComponent, spotLightComponent] = registry->GetComponents<TransformComponent, SpotLightComponent>(entity);
+				
+				transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 50.f;
+				transformComponent.rotation = glm::vec3(dist(rng), dist(rng), dist(rng)) * 180.f;
+				transformComponent.scale = glm::vec3(1.f, 5.f, 10.f) + glm::vec3(dist(rng), dist(rng), dist(rng)) * glm::vec3(25.f, 10.f, 25.f);
+				
+				spotLightComponent.color = glm::vec3(dist(rng), dist(rng), dist(rng));
+
 				registry->SetParent(entity, spotLightParent);
 			}
 		}
@@ -100,59 +112,35 @@ void Scene::InitializeRegistry()
 		auto shapeParent = registry->CreateEntity();
 		registry->AddComponents<TransformComponent>(shapeParent);
 
-		int counter = 0;
+		std::vector<std::string> shapeNames = {
+			"Cube",
+			"Sphere",
+			"Cone",
+			"Cylinder",
+			"Torus"
+		};
 
-		/*
-		for (uint32_t x = 0; x < 10; ++x)
+		for (uint32_t i = 0; i < 10000; ++i)
 		{
-			for (uint32_t y = 0; y < 10; ++y)
-			{
-				auto entity = registry->CreateEntity();
-				registry->AddComponents<TransformComponent, MaterialComponent, ShapeComponent, DefaultColliderComponent>(entity);
+			std::string materialName = "Shape" + std::to_string(i++);
+			auto [material, wasLoaded] = resourceManager->GetMaterialManager()->RegisterMaterial(materialName);
+			material->color = glm::vec4(dist(rng), dist(rng), dist(rng), 1.f);
+			material->roughness = dist(rng);
+			material->metalness = dist(rng);
+			material->SetBit<UPDATE_BIT>();
 
-				auto [transformComponent, materialComponent, shapeComponent] = registry->GetComponents<TransformComponent, MaterialComponent, ShapeComponent>(entity);
-				transformComponent.translation = 2.f * glm::vec3(x, y, 0);
+			auto entity = registry->CreateEntity();
+			registry->AddComponents<TransformComponent, MaterialComponent, ShapeComponent, DefaultColliderComponent>(entity);
 
-				std::string materialName = std::to_string(counter++);
-				auto [material, wasLoaded] = resourceManager->GetMaterialManager()->RegisterMaterial(materialName);
+			auto [transformComponent, materialComponent, shapeComponent] = registry->GetComponents<TransformComponent, MaterialComponent, ShapeComponent>(entity);
+			transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 50.f;
+			transformComponent.rotation = glm::vec3(dist(rng), dist(rng), dist(rng)) * 180.f;
 
-				//material->albedoTexture = resourceManager->GetImageManager()->LoadImage("C:/Users/User/Desktop/VulkanEngine/Assets/Engine/Pbr/Metal/Metal053C_4K-PNG_Color.png", ImageLoadMode::Sync, true, [material]() -> void {material->SetBit<UPDATE_BIT>(); });
-				//material->normalTexture = resourceManager->GetImageManager()->LoadImage("C:/Users/User/Desktop/VulkanEngine/Assets/Engine/Pbr/Metal/Metal053C_4K-PNG_NormalGL.png", ImageLoadMode::Sync, false, [material]() -> void {material->SetBit<UPDATE_BIT>(); });
-				//material->roughnessTexture = resourceManager->GetImageManager()->LoadImage("C:/Users/User/Desktop/VulkanEngine/Assets/Engine/Pbr/Metal/Metal053C_4K-PNG_Roughness.png", ImageLoadMode::Sync, true, [material]() -> void {material->SetBit<UPDATE_BIT>(); });
-				//material->metalnessTexture = resourceManager->GetImageManager()->LoadImage("C:/Users/User/Desktop/VulkanEngine/Assets/Engine/Pbr/Metal/Metal053C_4K-PNG_Metalness.png", ImageLoadMode::Sync, true, [material]() -> void {material->SetBit<UPDATE_BIT>(); });
+			materialComponent.material = material;
 
-				material->color = glm::vec4(dist(rng), dist(rng), dist(rng), 1);
-				material->roughness = x / 10.f;
-				material->metalness = y / 10.f;
+			shapeComponent.shape = resourceManager->GetGeometryManager()->GetShape(shapeNames[distShape(rng)]);
 
-				materialComponent.material = material;
-			
-				shapeComponent.shape = resourceManager->GetGeometryManager()->GetShape("Sphere");
-
-				registry->SetParent(entity, shapeParent);
-			}
-		}
-		*/
-
-		std::string materialName = std::to_string(counter++);
-		auto [material, wasLoaded] = resourceManager->GetMaterialManager()->RegisterMaterial(materialName);
-
-		for (uint32_t x = 0; x < 10; ++x)
-		{
-			for (uint32_t y = 0; y < 10; ++y)
-			{
-				auto entity = registry->CreateEntity();
-				registry->AddComponents<TransformComponent, MaterialComponent, ShapeComponent, DefaultColliderComponent>(entity);
-
-				auto [transformComponent, materialComponent, shapeComponent] = registry->GetComponents<TransformComponent, MaterialComponent, ShapeComponent>(entity);
-				transformComponent.translation = 3.f * glm::vec3(x, y, 0);
-
-				materialComponent.material = material;
-
-				shapeComponent.shape = resourceManager->GetGeometryManager()->GetShape("Cube");
-
-				registry->SetParent(entity, shapeParent);
-			}
+			registry->SetParent(entity, shapeParent);
 		}
 	}
 
@@ -161,14 +149,26 @@ void Scene::InitializeRegistry()
 		auto modelParent = registry->CreateEntity();
 		registry->AddComponents<TransformComponent>(modelParent);
 
-		for(uint32_t i = 0; i < 20000; i++)
+		for(uint32_t i = 0; i < 0; i++)
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
 			auto [transformComponent, modelComponent] = registry->GetComponents<TransformComponent, ModelComponent>(entity);
 			modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/Models/Pikachu/model.obj");
-			transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 25.f;
+			transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 50.f;
 			transformComponent.rotation = glm::vec3(dist(rng), dist(rng), dist(rng)) * 180.f;
+			registry->SetParent(entity, modelParent);
+		}
+
+		for (uint32_t i = 0; i < 0; i++)
+		{
+			auto entity = registry->CreateEntity();
+			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
+			auto [transformComponent, modelComponent] = registry->GetComponents<TransformComponent, ModelComponent>(entity);
+			modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/Models/Otter/RiverOtter.obj");
+			transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 50.f;
+			transformComponent.rotation = glm::vec3(dist(rng), dist(rng), dist(rng)) * 180.f;
+			transformComponent.scale = glm::vec3(0.5);
 			registry->SetParent(entity, modelParent);
 		}
 
@@ -249,65 +249,18 @@ void Scene::InitializeRegistry()
 		auto animationParent = registry->CreateEntity();
 		registry->AddComponents<TransformComponent>(animationParent);
 
-		/*
-
-		{
-			auto entity = registry->CreateEntity();
-			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
-			auto [transformComponent, modelComponent] = registry->GetComponents<TransformComponent, ModelComponent>(entity);
-			modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/Animations/Worker_Standing.dae");
-			transformComponent.translation = 100.f * glm::vec3(dist(rng), 0, dist(rng));
-
-			registry->SetParent(entity, animationParent);
-		}
-
-		for (uint32_t i = 0; i < 25; ++i)
+		for (uint32_t i = 0; i < 0; ++i)
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, ModelComponent, AnimationComponent, DefaultColliderComponent>(entity);
 			auto [transformComponent, modelComponent, animationComponent] = registry->GetComponents<TransformComponent, ModelComponent, AnimationComponent>(entity);
 			modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/Animations/Worker_Standing.dae");
 			animationComponent.animation = resourceManager->GetAnimationManager()->LoadAnimation(animationPaths[distAnimation(rng)]);
-			transformComponent.translation = 100.f * glm::vec3(dist(rng), 0, dist(rng));
+			transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 50.f;
+			transformComponent.rotation = glm::vec3(dist(rng), dist(rng), dist(rng)) * 180.f;
 
 			registry->SetParent(entity, animationParent);
 		}
-
-		*/
-
-		/*
-	{
-		auto entity = registry->CreateEntity();
-		registry->AddComponents<TransformComponent, ModelComponent, AnimationComponent, DefaultColliderComponent>(entity);
-		auto [transformComponent, modelComponent, animationComponent] = registry->GetComponents<TransformComponent, ModelComponent, AnimationComponent>(entity);
-		modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/Animations/Worker_Standing.dae");
-		animationComponent.animation = resourceManager->GetAnimationManager()->LoadAnimation("C:/Users/User/Desktop/Animations/Worker_Standing.dae");
-	}
-
-	{
-		auto entity = registry->CreateEntity();
-		registry->AddComponents<TransformComponent, ModelComponent, AnimationComponent, DefaultColliderComponent>(entity);
-		auto [transformComponent, modelComponent, animationComponent] = registry->GetComponents<TransformComponent, ModelComponent, AnimationComponent>(entity);
-		modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/Animations/Worker_Standing.dae");
-		animationComponent.animation = resourceManager->GetAnimationManager()->LoadAnimation("C:/Users/User/Desktop/Animations/Worker_Walking.dae");
-	}
-
-	{
-		auto entity = registry->CreateEntity();
-		registry->AddComponents<TransformComponent, ModelComponent, AnimationComponent, DefaultColliderComponent>(entity);
-		auto [transformComponent, modelComponent, animationComponent] = registry->GetComponents<TransformComponent, ModelComponent, AnimationComponent>(entity);
-		modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/Animations/Worker_Standing.dae");
-		animationComponent.animation = resourceManager->GetAnimationManager()->LoadAnimation("C:/Users/User/Desktop/Animations/Worker_Running.dae");
-	}
-
-	{
-		auto entity = registry->CreateEntity();
-		registry->AddComponents<TransformComponent, ModelComponent, AnimationComponent, DefaultColliderComponent>(entity);
-		auto [transformComponent, modelComponent, animationComponent] = registry->GetComponents<TransformComponent, ModelComponent, AnimationComponent>(entity);
-		modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/Animations/Worker_Standing.dae");
-		animationComponent.animation = resourceManager->GetAnimationManager()->LoadAnimation("C:/Users/User/Desktop/Animations/Worker_Dancing.dae");
-	}
-	*/
 	}
 }
 

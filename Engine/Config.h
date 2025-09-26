@@ -12,6 +12,7 @@ struct ENGINE_API GlobalConfig
 		static inline bool showColliderSphere = false;
 		static inline bool showPointLights = false;
 		static inline bool showSpotLights = false;
+		static inline bool showLightBillboards = true;
 	};
 
 	struct ENGINE_API BillboardConfig
@@ -24,7 +25,7 @@ struct ENGINE_API GlobalConfig
 	struct ENGINE_API FrameConfig
 	{
 		static inline constexpr uint32_t maxFramesInFlights = 3;
-		static inline uint32_t framesInFlight = 2;
+		static inline uint32_t framesInFlight = 1;
 	};
 
 	struct ENGINE_API World

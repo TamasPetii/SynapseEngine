@@ -56,6 +56,10 @@ void GlobalSettingsWindow::Render(std::shared_ptr<Registry> registry, std::share
 					ImGui::Text("Spot Light Volume");
 					ImGui::SameLine(offset);
 					ImGui::Checkbox("##Spot Light Volume", &GlobalConfig::WireframeConfig::showSpotLights);
+
+					ImGui::Text("Light Billboards");
+					ImGui::SameLine(offset);
+					ImGui::Checkbox("##Light Billboards", &GlobalConfig::WireframeConfig::showLightBillboards);
 				}
 			);
 		}

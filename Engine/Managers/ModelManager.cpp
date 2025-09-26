@@ -66,7 +66,7 @@ void ModelManager::Update(uint32_t frameIndex)
 
     for (auto path : completedFutures)
     {
-        log << std::format("[Model Thread Finished] : {}", path) << "\n";
+        std::cout << std::format("[Model Thread Finished] : {}", path) << "\n";
 
         auto model = models.at(path)->object;
 
@@ -105,7 +105,7 @@ void ModelManager::Update(uint32_t frameIndex)
                 .vertexCount = model->GetIndexCount(),
                 .instanceCount = 0,
                 .firstVertex = 0,
-                .firstInstance = 0,
+                .firstInstance = 0
             };
 
             std::cout << std::format("Model drawIndirectCommand {} updated in frame {} with version {}", path, frameIndex, versionedObject->versions[frameIndex]) << std::endl;

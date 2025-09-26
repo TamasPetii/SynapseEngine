@@ -15,6 +15,9 @@ void BillboardRenderer::Initialize(std::shared_ptr<ResourceManager> resourceMana
 
 void BillboardRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex, std::function<void()> renderFunction)
 {
+	if (!GlobalConfig::WireframeConfig::showLightBillboards)
+		return;
+
 	auto vulkanContext = Vk::VulkanContext::GetContext();
 	auto device = vulkanContext->GetDevice();
 	auto graphicsQueue = device->GetQueue(Vk::QueueType::GRAPHICS);
@@ -89,6 +92,7 @@ void BillboardRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Re
 		if (GlobalConfig::BillboardConfig::showSpotLights)
 			RenderBillboard("SpotLightBillboard", "SpotLightInstanceIndices", count, spotLightIcon->GetBufferArrayIndex());
 	}
+
 
 	vkCmdEndRendering(commandBuffer);
 }

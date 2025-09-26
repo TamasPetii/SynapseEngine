@@ -14,7 +14,7 @@ void Instanceable::UploadInstanceDataToGPU(uint32_t maxInstanceCount, uint32_t f
 	//Upload the vertices to the gpu
 	{
 		constexpr uint32_t instanceBlockSize = 128;
-		uint32_t requiredSize = static_cast<uint32_t>(std::ceil(maxInstanceCount / (float)instanceBlockSize)) * instanceBlockSize;
+		uint32_t requiredSize = static_cast<uint32_t>(std::ceil((maxInstanceCount + 1) / (float)instanceBlockSize)) * instanceBlockSize;
 
 		if (instanceIndexBuffers[frameIndex].first == nullptr || instanceIndexBuffers[frameIndex].second != requiredSize)
 		{

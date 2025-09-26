@@ -19,7 +19,7 @@ DrawIndirectManager::DrawIndirectManager()
 void DrawIndirectManager::Update(uint32_t frameIndex, uint32_t count, uint32_t bufferBaseSize)
 {
     { //Instance Address Buffer and Instance Index Buffers
-        uint32_t requiredSize = static_cast<uint32_t>(std::ceil(count / (float)bufferBaseSize)) * bufferBaseSize;
+        uint32_t requiredSize = static_cast<uint32_t>(std::ceil((count + 1) / (float)bufferBaseSize)) * bufferBaseSize;
 
         if (instanceIndexAddressBuffers[frameIndex]->buffer == nullptr || instanceIndexAddressBuffers[frameIndex]->size != requiredSize)
         {
@@ -53,7 +53,7 @@ void DrawIndirectManager::Update(uint32_t frameIndex, uint32_t count, uint32_t b
     }
 
     { //Draw Indirect Command Buffer
-        uint32_t requiredSize = static_cast<uint32_t>(std::ceil(count / (float)bufferBaseSize)) * bufferBaseSize;
+        uint32_t requiredSize = static_cast<uint32_t>(std::ceil((count + 1) / (float)bufferBaseSize)) * bufferBaseSize;
 
         if (indirectCommandBuffers[frameIndex]->buffer == nullptr || indirectCommandBuffers[frameIndex]->size != requiredSize)
         {
@@ -76,7 +76,7 @@ void DrawIndirectManager::UpdateInstanceBuffer(uint32_t frameIndex, uint32_t buf
 {
     { //Instance Index Buffers
         uint32_t baseBufferSize = GlobalConfig::BufferConfig::instanceBufferBaseSize;
-        uint32_t requiredSize = static_cast<uint32_t>(std::ceil(count / (float)baseBufferSize)) * baseBufferSize;
+        uint32_t requiredSize = static_cast<uint32_t>(std::ceil((count + 1) / (float)baseBufferSize)) * baseBufferSize;
 
         if (instanceIndexBuffers[frameIndex][bufferIndex]->object == nullptr)
             return;

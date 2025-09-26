@@ -37,7 +37,7 @@ inline void ComponentBufferManager::RecreateBuffer(const std::string& name, uint
 	auto& [config, buffer] = buffers.at(name);
 
 	uint32_t bufferBaseSize = GlobalConfig::BufferConfig::componentBufferBaseSize;
-	uint32_t requiredSize = static_cast<uint32_t>(std::ceil(size / (float)bufferBaseSize)) * bufferBaseSize;
+	uint32_t requiredSize = static_cast<uint32_t>(std::ceil((size + 1) / (float)bufferBaseSize)) * bufferBaseSize;
 	auto& componentBuffer = buffer.at(frameInFlightIndex);
 
 	if (componentBuffer.versions.size() != requiredSize)

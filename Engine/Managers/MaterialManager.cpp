@@ -37,6 +37,7 @@ void MaterialManager::Update(uint32_t frameIndex)
 		if (material == nullptr)
 			continue;
 
+		//Problematic with multiple frames!!
 		if (material->IsBitSet<UPDATE_BIT>() || deviceAddressBuffers[frameIndex]->version != versionedObject->versions[frameIndex])
 		{
 			versionedObject->versions[frameIndex] = deviceAddressBuffers[frameIndex]->version;
