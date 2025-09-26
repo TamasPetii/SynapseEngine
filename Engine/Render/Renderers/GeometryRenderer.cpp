@@ -87,8 +87,13 @@ void GeometryRenderer::RenderShapesInstanced(VkCommandBuffer commandBuffer, VkPi
 {
 	auto geometryManager = resourceManager->GetGeometryManager();
 	std::for_each(std::execution::seq, geometryManager->GetShapes().begin(), geometryManager->GetShapes().end(),
-		[&](const std::pair<std::string, std::shared_ptr<Shape>>& data) -> void {
-			auto shape = data.second;
+		[&](const auto& data) -> void 
+		{
+			if (data.second == nullptr)
+				return;
+
+			auto shape = data.second->object;
+
 			if (shape->GetInstanceCount() > 0)
 			{
 				GeometryRendererPushConstants pushConstants;
@@ -98,9 +103,9 @@ void GeometryRenderer::RenderShapesInstanced(VkCommandBuffer commandBuffer, VkPi
 				pushConstants.transformBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("TransformData", frameIndex)->buffer->GetAddress();
 				pushConstants.instanceIndexBuffer = shape->GetInstanceIndexBuffer(frameIndex)->GetAddress(); // This could be included into model device addresses -> Better for gpu driven rendering
 				pushConstants.shapeRenderIndicesBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("ShapeRenderIndicesData", frameIndex)->buffer->GetAddress();
-				pushConstants.shapeBufferAddresses = resourceManager->GetGeometryManager()->GetDeviceAddressesBuffer()->GetAddress();
+				pushConstants.shapeBufferAddresses = resourceManager->GetGeometryManager()->GetDeviceAddressesBuffer(frameIndex)->buffer->GetAddress();
 				pushConstants.shapeMaterialIndicesBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("MaterialData", frameIndex)->buffer->GetAddress();
-				pushConstants.materialBuffer = resourceManager->GetMaterialManager()->GetDeviceAddressesBuffer()->GetAddress();
+				pushConstants.materialBuffer = resourceManager->GetMaterialManager()->GetDeviceAddressesBuffer(frameIndex)->buffer->GetAddress();
 
 
 				vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(GeometryRendererPushConstants), &pushConstants);
@@ -114,8 +119,13 @@ void GeometryRenderer::RenderModelsInstanced(VkCommandBuffer commandBuffer, VkPi
 {
 	auto modelManager = resourceManager->GetModelManager();
 	std::for_each(std::execution::seq, modelManager->GetModels().begin(), modelManager->GetModels().end(),
-		[&](const std::pair<std::string, std::shared_ptr<Model>>& data) -> void {
-			auto model = data.second;
+		[&](const auto& data) -> void 
+		{
+			if (data.second == nullptr)
+				return;
+
+			auto model = data.second->object;
+
 			if (model && model->state == LoadState::Ready && model->GetInstanceCount() > 0)
 			{
 				//Global buffers could be uploaded once / model pass
@@ -126,10 +136,10 @@ void GeometryRenderer::RenderModelsInstanced(VkCommandBuffer commandBuffer, VkPi
 				pushConstants.transformBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("TransformData", frameIndex)->buffer->GetAddress();
 				pushConstants.instanceIndexBuffer = model->GetInstanceIndexBuffer(frameIndex)->GetAddress(); // This could be included into model device addresses -> Better for gpu driven rendering
 				pushConstants.modelRenderIndicesBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("ModelRenderIndicesData", frameIndex)->buffer->GetAddress();
-				pushConstants.modelBufferAddresses = resourceManager->GetModelManager()->GetDeviceAddressesBuffer()->GetAddress();
+				pushConstants.modelBufferAddresses = resourceManager->GetModelManager()->GetDeviceAddressesBuffer(frameIndex)->buffer->GetAddress();
 				pushConstants.animationTransformBufferAddresses = resourceManager->GetComponentBufferManager()->GetComponentBuffer("AnimationNodeTransformDeviceAddressesBuffers", frameIndex)->buffer->GetAddress();
-				pushConstants.animationVertexBoneBufferAddresses = resourceManager->GetAnimationManager()->GetDeviceAddressesBuffer()->GetAddress();
-				pushConstants.materialBuffer = resourceManager->GetMaterialManager()->GetDeviceAddressesBuffer()->GetAddress();
+				pushConstants.animationVertexBoneBufferAddresses = resourceManager->GetAnimationManager()->GetDeviceAddressesBuffer(frameIndex)->buffer->GetAddress();
+				pushConstants.materialBuffer = resourceManager->GetMaterialManager()->GetDeviceAddressesBuffer(frameIndex)->buffer->GetAddress();
 
 				vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(GeometryRendererPushConstants), &pushConstants);					
 				vkCmdDraw(commandBuffer, model->GetIndexCount(), model->GetInstanceCount(), 0, 0);

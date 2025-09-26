@@ -5,20 +5,27 @@
 #include "Common/Model/ModelBufferAddresses.glsl"
 #include "Common/Shape/ShapeBufferAddresses.glsl"
 #include "Common/Render/DefaultCollider.glsl"
+#include "Common/Render/DrawIndirectCommand.glsl"
+#include "Common/Render/InstanceIndex.glsl"
 
 layout( push_constant) uniform constants
 {	
 	uvec2 cameraFrustumBuffer;
+	uvec2 defaultColliderBuffer;
+
 	uvec2 modelRenderIndicesBuffer;
 	uvec2 modelBufferAddresses;
+	uvec2 modelDrawIndirectCommandBuffer;
+
 	uvec2 shapeRenderIndicesBuffer;
 	uvec2 shapeBufferAddresses;
-	uvec2 defaultColliderBuffer;
+	uvec2 shapeDrawIndirectCommandBuffer;
+
 	uint cameraIndex;
 	uint defaultColliderCount;	
 } PushConstants;
 
-layout (local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
 bool IsVisibleAABB(uint colliderIndex, CameraFrustumBuffer cameraBuffer, DefaultColliderBuffer defaultColliderBuffer)
 {	
@@ -69,6 +76,7 @@ void main()
 	if(globalIndex >= PushConstants.defaultColliderCount)
 		return;
 
+	//Object index is the dense component index in model/shape pool!
 	uint objectIndex = DefaultColliderBuffer(PushConstants.defaultColliderBuffer).colliders[globalIndex].objectIndex;
 
 	if(objectIndex == INVALID_RENDER_INDEX)
@@ -78,8 +86,16 @@ void main()
 	{
 		bool isModel = (DefaultColliderBuffer(PushConstants.defaultColliderBuffer).colliders[globalIndex].bitflag & COLLIDER_MODEL_BIT) != 0u;
 
-		//Todo: Get index, with atomicAdd
+		if(isModel)
+		{
+			uint modelIndex = ModelRenderIndicesBuffer(PushConstants.modelRenderIndicesBuffer).indices[objectIndex].modelIndex;
+			
+			//Indirect buffer instance count increase
+			uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(PushConstants.modelDrawIndirectCommandBuffer).commands[modelIndex].instanceCount, 1);
+			
+			//ModelDeviceAddressesBuffer(PushConstants.modelBufferAddresses).deviceAddresses[modelIndex].
+		}
+
 		//Todo: Get instance buffer, append objectIndex to it
-		//Todo: Indirect buffer setup	
 	}
 }

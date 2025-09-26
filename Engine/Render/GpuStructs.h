@@ -93,11 +93,16 @@ struct BillboardPushConstants
 struct CullingPushConstants
 {
 	VkDeviceAddress cameraFrustumBuffer;
+	VkDeviceAddress defaultColliderBuffer;
+
 	VkDeviceAddress modelRenderIndicesBuffer;
 	VkDeviceAddress modelBufferAddresses;
+	VkDeviceAddress modelDrawIndirectCommandBuffer;
+
 	VkDeviceAddress shapeRenderIndicesBuffer;
 	VkDeviceAddress shapeBufferAddresses;
-	VkDeviceAddress defaultColliderBuffer;
+	VkDeviceAddress shapeDrawIndirectCommandBuffer;
+
 	uint32_t cameraIndex;
 	uint32_t defaultColliderCount;
 };

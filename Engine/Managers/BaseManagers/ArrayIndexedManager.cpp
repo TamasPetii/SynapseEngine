@@ -11,3 +11,8 @@ uint32_t ArrayIndexedManager::GetAvailableIndex()
 	availableIndices.erase(index);
 	return index;
 }
+
+uint32_t ArrayIndexedManager::GetCurrentCount()
+{
+	return counter;
+}

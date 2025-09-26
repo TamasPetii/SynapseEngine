@@ -89,10 +89,11 @@ void Engine::Update()
 	}
 
 	resourceManager->GetBenchmarkManager()->AddToCounter();
-	resourceManager->GetModelManager()->Update();
+	resourceManager->GetModelManager()->Update(frameIndex);
+	resourceManager->GetGeometryManager()->Update(frameIndex);
 	resourceManager->GetImageManager()->Update();
-	resourceManager->GetAnimationManager()->Update();
-	resourceManager->GetMaterialManager()->Update();
+	resourceManager->GetMaterialManager()->Update(frameIndex);
+	resourceManager->GetAnimationManager()->Update(frameIndex);
 
 	/*
 	if (resourceUpdateTime >= resourceUpdateTargetTime)

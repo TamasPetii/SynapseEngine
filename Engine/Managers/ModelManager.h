@@ -10,8 +10,10 @@
 #include "Engine/Renderable/Model/Model.h"
 #include "BaseManagers/DeviceAddressedManager.h"
 #include "BaseManagers/AsyncManager.h"
+#include "BaseManagers/DrawIndirectManager.h"
+#include "Engine/Utils/VersionedObject.h"
 
-struct ENGINE_API ModelDevicesAddresses
+struct ENGINE_API ModelDeviceAddresses
 {
 	VkDeviceAddress vertexBufferAddress;
 	VkDeviceAddress indexBufferAddress;
@@ -19,7 +21,7 @@ struct ENGINE_API ModelDevicesAddresses
 	VkDeviceAddress nodeTransformBufferAddress;
 };
 
-class ENGINE_API ModelManager : public DeviceAddressedManager<ModelDevicesAddresses>, public AsyncManager<std::string>
+class ENGINE_API ModelManager : public DeviceAddressedManager<ModelDeviceAddresses>, public AsyncManager<std::string>
 {
 public:
 	ModelManager(std::shared_ptr<ImageManager> imageManager, std::shared_ptr<MaterialManager> materialManager);
@@ -30,10 +32,10 @@ public:
 	std::shared_ptr<Model> LoadModel(const std::string& path);
 	std::shared_ptr<Model> GetModel(const std::string& path);
 	const auto& GetModels() { return models; }
-	void Update();
+	void Update(uint32_t frameIndex);
 private:
 	std::shared_ptr<ImageManager> imageManager = nullptr;
 	std::shared_ptr<MaterialManager> materialManager = nullptr;
-	std::unordered_map<std::string, std::shared_ptr<Model>> models;
+	std::unordered_map<std::string, std::shared_ptr<VersionedObject<Model>>> models;
 };
 

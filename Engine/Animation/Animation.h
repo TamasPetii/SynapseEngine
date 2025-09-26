@@ -13,8 +13,9 @@
 #include <Assimp/scene.h>
 
 #include "Engine/Components/DefaultColliderComponent.h"
+#include "Engine/Utils/BufferArrayIndexed.h"
 
-class ENGINE_API Animation : public AsyncLoaded
+class ENGINE_API Animation : public AsyncLoaded, public BufferArrayIndexed
 {
 public:
 	struct ENGINE_API VertexBoneData
@@ -42,14 +43,13 @@ public:
 		uint32_t parentIndex = UINT32_MAX;
 	};
 public:
-	Animation(uint32_t addressArrayIndex) : addressArrayIndex(addressArrayIndex) {}
+	Animation() = default;
 	void Load(const std::string& path);
 	auto GetDuration() { return duration; }
 	auto GetTicksPerSeconds() { return ticksPerSecond; }
 	auto GetVertexCount() { return vertexCount; }
 	auto GetBoneCount() { return boneCount; }
 	auto GetMeshCount() { return meshCount; }
-	auto GetAddressArrayIndex() { return addressArrayIndex; }
 	const auto& GetBoneIndexMap() { return boneIndexMap; }
 	const auto& GetNodeProcessInfo() { return nodeProcessInfos; }
 	const auto& GetBoneProcessInfo() { return boneProcessInfos; }
@@ -60,8 +60,6 @@ private:
 	void ProcessMeshVertexBones();
 	void ProcessMeshVertexBone(const MeshProcessInfo& meshProcessInfo);
 	void InitVertexBoneBuffer();
-
-	uint32_t addressArrayIndex;
 
 	double duration;
 	double ticksPerSecond;

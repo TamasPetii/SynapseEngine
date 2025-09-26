@@ -8,6 +8,7 @@ class ENGINE_API ArrayIndexedManager
 {
 protected:
 	uint32_t GetAvailableIndex();
+	uint32_t GetCurrentCount();
 protected:
 	std::mutex availableIndexMutex;
 	std::atomic<uint32_t> counter = 0;

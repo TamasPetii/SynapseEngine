@@ -70,7 +70,7 @@ void ModelSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_
 					.entityIndex = entity,
 					.transformIndex = transformPool && transformPool->HasComponent(entity) ? transformPool->GetDenseIndex(entity) : UINT32_MAX,
 					.modelIndex = hasModel ? modelComponent.model->GetBufferArrayIndex() : UINT32_MAX,
-					.animationIndex = hasAnimation ? animationPool->GetData(entity).animation->GetAddressArrayIndex() : UINT32_MAX,
+					.animationIndex = hasAnimation ? animationPool->GetData(entity).animation->GetBufferArrayIndex() : UINT32_MAX,
 					.animationTransformIndex = hasAnimation ? animationPool->GetDenseIndex(entity) : UINT32_MAX,
 					.bitflag = flags
 				};

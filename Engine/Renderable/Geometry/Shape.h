@@ -7,6 +7,8 @@
 
 class ENGINE_API Shape : public Renderable, public Instanceable, public BoundingVolume, public BufferArrayIndexed
 {
+public:
+	Shape() = default;
 protected:
 	void Initialize();
 	virtual void GenerateVertices() = 0;

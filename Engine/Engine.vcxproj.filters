@@ -423,6 +423,15 @@
     <ClInclude Include="Utils\BitsetFlagged.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Managers\BaseManagers\DrawIndirectManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Managers\BaseManagers\DynamicSizeBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\VersionedObject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -803,6 +812,12 @@
     <ClCompile Include="Utils\BitsetFlagged.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Managers\BaseManagers\DrawIndirectManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\VersionedObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Registry\Registry.inl">
@@ -853,5 +868,6 @@
     <None Include="Shaders\Billboard.vert" />
     <None Include="Shaders\Culling.comp" />
     <None Include="Shaders\Common\Render\DefaultCollider.glsl" />
+    <None Include="Shaders\Common\Render\DrawIndirectCommand.glsl" />
   </ItemGroup>
 </Project>

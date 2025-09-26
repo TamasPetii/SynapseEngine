@@ -14,6 +14,8 @@ struct ComponentBuffer
 	std::vector<uint32_t> versions;
 };
 
+//Todo: Refactor
+
 class ENGINE_API ComponentBufferManager
 {
 public:
@@ -23,7 +25,6 @@ public:
 	template<typename T>
 	void RecreateBuffer(const std::string& name, uint32_t size, uint32_t frameInFlightIndex);
 private:
-	uint32_t bufferBlockSize = 256;
 	std::unordered_map<std::string, std::pair<Vk::BufferConfig, std::array<ComponentBuffer, GlobalConfig::FrameConfig::maxFramesInFlights>>> buffers;
 };
 
@@ -34,7 +35,9 @@ inline void ComponentBufferManager::RecreateBuffer(const std::string& name, uint
 		return;
 
 	auto& [config, buffer] = buffers.at(name);
-	uint32_t requiredSize = static_cast<uint32_t>(std::ceil(size / (float)bufferBlockSize)) * bufferBlockSize;
+
+	uint32_t bufferBaseSize = GlobalConfig::BufferConfig::componentBufferBaseSize;
+	uint32_t requiredSize = static_cast<uint32_t>(std::ceil(size / (float)bufferBaseSize)) * bufferBaseSize;
 	auto& componentBuffer = buffer.at(frameInFlightIndex);
 
 	if (componentBuffer.versions.size() != requiredSize)

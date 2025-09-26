@@ -47,8 +47,13 @@ void InstanceSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shar
 void InstanceSystem::UpdateShapeInstances(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager)
 {
 	auto geometryManager = resourceManager->GetGeometryManager();
-	for (auto& [name, shape] : geometryManager->GetShapes())
+	for (auto& [name, versionedObject] : geometryManager->GetShapes())
 	{
+		if (versionedObject == nullptr)
+			continue;
+
+		auto shape = versionedObject->object;
+
 		shape->ResetInstanceCount();
 		shape->ReserveInstances(shape.use_count());
 	}
@@ -66,16 +71,30 @@ void InstanceSystem::UpdateShapeInstances(std::shared_ptr<Registry> registry, st
 		}
 	);
 
-	for (auto& [name, shape] : geometryManager->GetShapes())
+	for (auto& [name, versionedObject] : geometryManager->GetShapes())
+	{
+		if (versionedObject == nullptr)
+			continue;
+
+		auto shape = versionedObject->object;
+
 		shape->ShrinkInstances();
+	}
 }
 
 void InstanceSystem::UpdateShapeInstancesGpu(std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
 {
 	auto geometryManager = resourceManager->GetGeometryManager();
 	std::for_each(std::execution::par, geometryManager->GetShapes().begin(), geometryManager->GetShapes().end(),
-		[&](const std::pair<std::string, std::shared_ptr<Shape>>& data) -> void {
-			data.second->UploadInstanceDataToGPU(data.second.use_count(), frameIndex);
+		[&](const auto& data) -> void 
+		{
+			if (data.second == nullptr)
+				return;
+
+			auto shape = data.second->object;
+
+			if (shape)
+				shape->UploadInstanceDataToGPU(shape.use_count(), frameIndex);
 		}
 	);
 }
@@ -83,8 +102,13 @@ void InstanceSystem::UpdateShapeInstancesGpu(std::shared_ptr<ResourceManager> re
 void InstanceSystem::UpdateModelInstances(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager)
 {
 	auto modelManager = resourceManager->GetModelManager();
-	for (auto& [name, model] : modelManager->GetModels())
+	for (auto& [name, versionedObject] : modelManager->GetModels())
 	{
+		if (versionedObject == nullptr)
+			continue;
+
+		auto model = versionedObject->object;
+
 		if (model && model->state == LoadState::Ready)
 		{
 			model->ResetInstanceCount();
@@ -105,8 +129,13 @@ void InstanceSystem::UpdateModelInstances(std::shared_ptr<Registry> registry, st
 		}
 	);
 
-	for (auto& [name, model] : modelManager->GetModels())
+	for (auto& [name, versionedObject] : modelManager->GetModels())
 	{
+		if (versionedObject == nullptr)
+			continue;
+
+		auto model = versionedObject->object;
+
 		if (model && model->state == LoadState::Ready)
 			model->ShrinkInstances();
 	}
@@ -116,9 +145,15 @@ void InstanceSystem::UpdateModelInstancesGpu(std::shared_ptr<ResourceManager> re
 {
 	auto modelManager = resourceManager->GetModelManager();
 	std::for_each(std::execution::par, modelManager->GetModels().begin(), modelManager->GetModels().end(),
-		[&](const std::pair<std::string, std::shared_ptr<Model>>& data) -> void {
-			if(data.second && data.second->state == LoadState::Ready)
-				data.second->UploadInstanceDataToGPU(data.second.use_count(), frameIndex);
+		[&](const auto& data) -> void 
+		{
+			if (data.second == nullptr)
+				return;
+
+			auto model = data.second->object;
+
+			if(model && model->state == LoadState::Ready)
+				model->UploadInstanceDataToGPU(model.use_count(), frameIndex);
 		}
 	);
 }
@@ -211,7 +246,6 @@ bool InstanceSystem::IsCameraInsidePointLightCubeVolume(const PointLightComponen
 
 bool InstanceSystem::IsCameraInsideSpotLightConeVolume(const SpotLightComponent& spotLightComponent, const CameraComponent& cameraComponent)
 {
-
 	glm::vec3 fromSpotToCamera = cameraComponent.position - spotLightComponent.position;
 	glm::vec3 fromSpotToCameraNorm = glm::normalize(fromSpotToCamera);
 	glm::vec3 spotDirNorm = glm::normalize(spotLightComponent.direction);

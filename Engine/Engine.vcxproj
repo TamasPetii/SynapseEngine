@@ -163,6 +163,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Managers\BaseManagers\DrawIndirectManager.h" />
+    <ClInclude Include="Managers\BaseManagers\DynamicSizeBuffer.h" />
     <ClInclude Include="Utils\BitsetFlagged.h" />
     <ClInclude Include="Utils\BitsetFlag.h" />
     <ClInclude Include="Utils\BufferArrayIndexed.h" />
@@ -198,6 +200,7 @@
     <ClInclude Include="Utils\Hashable.h" />
     <ClInclude Include="Utils\ImageTexture.h" />
     <ClInclude Include="Components\BaseComponents\VersionIndexed.h" />
+    <ClInclude Include="Utils\VersionedObject.h" />
     <ClInclude Include="Vulkan\ComputePipeline.h" />
     <ClInclude Include="Registry\Pools\ComponentPool.h" />
     <ClInclude Include="Registry\Pools\DataPool.h" />
@@ -301,6 +304,7 @@
     <ClInclude Include="Vulkan\VulkanMutex.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Managers\BaseManagers\DrawIndirectManager.cpp" />
     <ClCompile Include="Utils\BitsetFlagged.cpp" />
     <ClCompile Include="Utils\BufferArrayIndexed.cpp" />
     <ClCompile Include="Managers\MaterialManager.cpp" />
@@ -334,6 +338,7 @@
     <ClCompile Include="Animation\Bone.cpp" />
     <ClCompile Include="Utils\ImageTexture.cpp" />
     <ClCompile Include="Components\BaseComponents\VersionIndexed.cpp" />
+    <ClCompile Include="Utils\VersionedObject.cpp" />
     <ClCompile Include="Vulkan\ComputePipeline.cpp" />
     <ClCompile Include="Registry\Pools\ComponentPool.cpp" />
     <ClCompile Include="Registry\Pools\DataPool.cpp" />
@@ -440,6 +445,7 @@
     <None Include="Shaders\Common\Pbr.glsl" />
     <None Include="Shaders\Common\Position.glsl" />
     <None Include="Shaders\Common\Render\DefaultCollider.glsl" />
+    <None Include="Shaders\Common\Render\DrawIndirectCommand.glsl" />
     <None Include="Shaders\Common\Render\Occlusion.glsl" />
     <None Include="Shaders\Common\Shape\ShapeBufferAddresses.glsl" />
     <None Include="Shaders\Culling.comp" />
