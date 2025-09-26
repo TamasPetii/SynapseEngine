@@ -98,10 +98,12 @@ struct CullingPushConstants
 	VkDeviceAddress modelRenderIndicesBuffer;
 	VkDeviceAddress modelBufferAddresses;
 	VkDeviceAddress modelDrawIndirectCommandBuffer;
+	VkDeviceAddress modelInstanceIndexAddressBuffer;
 
 	VkDeviceAddress shapeRenderIndicesBuffer;
 	VkDeviceAddress shapeBufferAddresses;
 	VkDeviceAddress shapeDrawIndirectCommandBuffer;
+	VkDeviceAddress shapeInstanceIndexAddressBuffer;
 
 	uint32_t cameraIndex;
 	uint32_t defaultColliderCount;

@@ -8,7 +8,7 @@
 #include "Common/Render/DrawIndirectCommand.glsl"
 #include "Common/Render/InstanceIndex.glsl"
 
-layout( push_constant) uniform constants
+layout(push_constant) uniform constants
 {	
 	uvec2 cameraFrustumBuffer;
 	uvec2 defaultColliderBuffer;
@@ -16,10 +16,12 @@ layout( push_constant) uniform constants
 	uvec2 modelRenderIndicesBuffer;
 	uvec2 modelBufferAddresses;
 	uvec2 modelDrawIndirectCommandBuffer;
+	uvec2 modelInstanceIndexAddressBuffer;
 
 	uvec2 shapeRenderIndicesBuffer;
 	uvec2 shapeBufferAddresses;
 	uvec2 shapeDrawIndirectCommandBuffer;
+	uvec2 shapeInstanceIndexAddressBuffer;
 
 	uint cameraIndex;
 	uint defaultColliderCount;	
@@ -88,14 +90,17 @@ void main()
 
 		if(isModel)
 		{
-			uint modelIndex = ModelRenderIndicesBuffer(PushConstants.modelRenderIndicesBuffer).indices[objectIndex].modelIndex;
-			
-			//Indirect buffer instance count increase
-			uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(PushConstants.modelDrawIndirectCommandBuffer).commands[modelIndex].instanceCount, 1);
-			
-			//ModelDeviceAddressesBuffer(PushConstants.modelBufferAddresses).deviceAddresses[modelIndex].
+			uint modelIndex = ModelRenderIndicesBuffer(PushConstants.modelRenderIndicesBuffer).indices[objectIndex].modelIndex;			
+			uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(PushConstants.modelDrawIndirectCommandBuffer).commands[modelIndex].instanceCount, 1);		
+			uvec2 instanceIndexBuffer = InstanceIndexAddressBuffer(PushConstants.modelInstanceIndexAddressBuffer).deviceAddresses[modelIndex];
+			InstanceIndexBuffer(instanceIndexBuffer).indices[instanceIndex] = objectIndex;
 		}
-
-		//Todo: Get instance buffer, append objectIndex to it
+		else
+		{
+			uint shapeIndex = ShapeRenderIndicesBuffer(PushConstants.shapeRenderIndicesBuffer).indices[objectIndex].shapeIndex;			
+			uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(PushConstants.shapeDrawIndirectCommandBuffer).commands[shapeIndex].instanceCount, 1);		
+			uvec2 instanceIndexBuffer = InstanceIndexAddressBuffer(PushConstants.shapeInstanceIndexAddressBuffer).deviceAddresses[shapeIndex];
+			InstanceIndexBuffer(instanceIndexBuffer).indices[instanceIndex] = objectIndex;
+		}
 	}
 }
