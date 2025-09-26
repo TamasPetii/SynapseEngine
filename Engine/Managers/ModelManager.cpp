@@ -19,7 +19,7 @@ std::shared_ptr<Model> ModelManager::LoadModel(const std::string& path)
     std::lock_guard<std::mutex> lock(asyncMutex);
 
     if (models.find(path) != models.end())
-        return GetModel(path);
+        return models.at(path)->object;
 
     log << std::format("[Model Thread Started] : {}", path) << "\n";
 

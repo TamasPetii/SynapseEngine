@@ -137,9 +137,9 @@ void Scene::InitializeRegistry()
 		std::string materialName = std::to_string(counter++);
 		auto [material, wasLoaded] = resourceManager->GetMaterialManager()->RegisterMaterial(materialName);
 
-		for (uint32_t x = 0; x < 100; ++x)
+		for (uint32_t x = 0; x < 10; ++x)
 		{
-			for (uint32_t y = 0; y < 100; ++y)
+			for (uint32_t y = 0; y < 10; ++y)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, MaterialComponent, ShapeComponent, DefaultColliderComponent>(entity);
@@ -160,6 +160,17 @@ void Scene::InitializeRegistry()
 	{
 		auto modelParent = registry->CreateEntity();
 		registry->AddComponents<TransformComponent>(modelParent);
+
+		for(uint32_t i = 0; i < 10000; i++)
+		{
+			auto entity = registry->CreateEntity();
+			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
+			auto [transformComponent, modelComponent] = registry->GetComponents<TransformComponent, ModelComponent>(entity);
+			modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/Models/Pikachu/model.obj");
+			transformComponent.translation = glm::vec3(dist(rng), dist(rng), dist(rng)) * 50.f;
+			transformComponent.rotation = glm::vec3(dist(rng), dist(rng), dist(rng)) * 180.f;
+			registry->SetParent(entity, modelParent);
+		}
 
 		/*
 
