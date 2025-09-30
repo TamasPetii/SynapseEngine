@@ -28,7 +28,7 @@ layout( push_constant ) uniform constants
 {	
 	uvec2 cameraBuffer;
 	uvec2 transformBuffer;
-	uvec2 instanceIndexBuffer;
+	uvec2 instanceIndexAddressBuffer;
 	uvec2 modelRenderIndicesBuffer;
 	uvec2 modelBufferAddresses;
 	uvec2 animationTransformBufferAddresses;
@@ -39,11 +39,12 @@ layout( push_constant ) uniform constants
 	uvec2 materialBuffer;
 	uint renderMode;
 	uint cameraIndex;
+	uint objectIndex;
 } PushConstants;
 
 void main() 
 {
-    uint index = InstanceIndexBuffer(PushConstants.instanceIndexBuffer).indices[gl_InstanceIndex];
+	uint index = InstanceIndexBuffer(InstanceIndexAddressBuffer(PushConstants.instanceIndexAddressBuffer).deviceAddresses[PushConstants.objectIndex]).indices[gl_InstanceIndex];
 
 	uint entityIndex = INVALID_RENDER_INDEX;
 	uint transformIndex = INVALID_RENDER_INDEX;

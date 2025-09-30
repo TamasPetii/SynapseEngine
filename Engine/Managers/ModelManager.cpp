@@ -28,8 +28,13 @@ std::shared_ptr<Model> ModelManager::LoadModel(const std::string& path)
 
     models[path] = std::make_shared<VersionedObject<Model>>(model);
 
-    futures.emplace(path, std::async(std::launch::async, &Model::Load, models.at(path)->object, path));
+    //futures.emplace(path, std::async(std::launch::async, &Model::Load, models.at(path)->object, path));
     
+    model->Load(path);
+
+    if (model && model->state == LoadState::GpuUploaded)
+        model->state = LoadState::Ready;
+
     return models.at(path)->object;
 }
 
@@ -92,7 +97,7 @@ void ModelManager::Update(uint32_t frameIndex)
                 .nodeTransformBufferAddress = model->GetNodeTransformBuffer()->GetAddress()
             };
 
-            std::cout << std::format("Model addresses {} updated in frame {} with version {}", path, frameIndex, versionedObject->versions[frameIndex]) << std::endl;
+            std::cout << std::format("Model addresses {} updated in frame {} with version {}", path, frameIndex, deviceAddressBuffers[frameIndex]->version) << std::endl;
         }
 
         //Todo: Handle model LOD???
@@ -108,10 +113,14 @@ void ModelManager::Update(uint32_t frameIndex)
                 .firstInstance = 0
             };
 
-            std::cout << std::format("Model drawIndirectCommand {} updated in frame {} with version {}", path, frameIndex, versionedObject->versions[frameIndex]) << std::endl;
+            std::cout << std::format("Model drawIndirectCommand {} updated in frame {} with version {}", path, frameIndex, indirectCommandBuffers[frameIndex]->version) << std::endl;
         }
+
         //Important: The buffers will be resized and regenerated at the same time! So model->version can be used to handle both!!!
-        if(versionChanged)
+        if (versionChanged)
+        {
             versionedObject->versions[frameIndex] = indirectCommandBuffers[frameIndex]->version;
+            std::cout << std::format("Model {} frame {} version updated {} ", path, frameIndex, versionedObject->versions[frameIndex]) << std::endl;
+        }
     }
 }

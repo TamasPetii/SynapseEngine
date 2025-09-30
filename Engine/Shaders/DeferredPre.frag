@@ -23,7 +23,7 @@ layout( push_constant ) uniform constants
 {	
 	uvec2 cameraBuffer;
 	uvec2 transformBuffer;
-	uvec2 instanceIndexBuffer;
+	uvec2 instanceIndexAddressBuffer;
 	uvec2 modelRenderIndicesBuffer;
 	uvec2 modelBufferAddresses;
 	uvec2 animationTransformBufferAddresses;
@@ -34,6 +34,7 @@ layout( push_constant ) uniform constants
 	uvec2 materialBuffer;
 	uint renderMode;
 	uint cameraIndex;
+	uint objectIndex;
 } PushConstants;
 
 void main() 

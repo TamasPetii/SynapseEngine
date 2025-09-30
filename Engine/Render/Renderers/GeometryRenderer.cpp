@@ -83,6 +83,10 @@ void GeometryRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Reg
 	//RenderModelsInstanced(commandBuffer, pipeline->GetLayout(), resourceManager, frameIndex);
 	RenderShapesInstancedIndirect(commandBuffer, pipeline->GetLayout(), resourceManager, frameIndex);
 	RenderModelsInstancedIndirect(commandBuffer, pipeline->GetLayout(), resourceManager, frameIndex);
+
+	//RenderShapesInstancedNew(commandBuffer, pipeline->GetLayout(), resourceManager, frameIndex);
+	//RenderModelsInstancedNew(commandBuffer, pipeline->GetLayout(), resourceManager, frameIndex);
+
 	vkCmdEndRendering(commandBuffer);
 }
 
@@ -151,6 +155,72 @@ void GeometryRenderer::RenderModelsInstanced(VkCommandBuffer commandBuffer, VkPi
 	);
 }
 
+void GeometryRenderer::RenderShapesInstancedNew(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
+{
+	auto geometryManager = resourceManager->GetGeometryManager();
+	std::for_each(std::execution::seq, geometryManager->GetShapes().begin(), geometryManager->GetShapes().end(),
+		[&](const auto& data) -> void
+		{
+			if (data.second == nullptr)
+				return;
+
+			auto shape = data.second->object;
+
+			if (shape->GetInstanceCount() > 0)
+			{
+				GeometryRendererPushConstants pushConstants;
+				pushConstants.renderMode = SHAPE_INSTANCED;
+				pushConstants.cameraIndex = 0;
+				pushConstants.cameraBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraData", frameIndex)->buffer->GetAddress();
+				pushConstants.transformBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("TransformData", frameIndex)->buffer->GetAddress();
+				pushConstants.instanceIndexBuffer = geometryManager->GetInstanceIndexAddressBuffer(frameIndex)->buffer->GetAddress();
+				pushConstants.shapeRenderIndicesBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("ShapeRenderIndicesData", frameIndex)->buffer->GetAddress();
+				pushConstants.shapeBufferAddresses = resourceManager->GetGeometryManager()->GetDeviceAddressesBuffer(frameIndex)->buffer->GetAddress();
+				pushConstants.shapeMaterialIndicesBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("MaterialData", frameIndex)->buffer->GetAddress();
+				pushConstants.materialBuffer = resourceManager->GetMaterialManager()->GetDeviceAddressesBuffer(frameIndex)->buffer->GetAddress();
+				pushConstants.objectIndex = shape->GetBufferArrayIndex();
+
+				vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(GeometryRendererPushConstants), &pushConstants);
+				vkCmdDraw(commandBuffer, shape->GetIndexCount(), shape->GetInstanceCount(), 0, 0);
+			}
+		}
+	);
+}
+
+void GeometryRenderer::RenderModelsInstancedNew(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
+{
+	auto modelManager = resourceManager->GetModelManager();
+	std::for_each(std::execution::seq, modelManager->GetModels().begin(), modelManager->GetModels().end(),
+		[&](const auto& data) -> void
+		{
+			if (data.second == nullptr)
+				return;
+
+			auto model = data.second->object;
+
+			if (model && model->state == LoadState::Ready && model->GetInstanceCount() > 0)
+			{
+				//Global buffers could be uploaded once / model pass
+				GeometryRendererPushConstants pushConstants;
+				pushConstants.renderMode = MODEL_INSTANCED;
+				pushConstants.cameraIndex = 0;
+				pushConstants.cameraBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraData", frameIndex)->buffer->GetAddress();
+				pushConstants.transformBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("TransformData", frameIndex)->buffer->GetAddress();
+				pushConstants.instanceIndexBuffer = modelManager->GetInstanceIndexAddressBuffer(frameIndex)->buffer->GetAddress();
+				pushConstants.modelRenderIndicesBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("ModelRenderIndicesData", frameIndex)->buffer->GetAddress();
+				pushConstants.modelBufferAddresses = resourceManager->GetModelManager()->GetDeviceAddressesBuffer(frameIndex)->buffer->GetAddress();
+				pushConstants.animationTransformBufferAddresses = resourceManager->GetComponentBufferManager()->GetComponentBuffer("AnimationNodeTransformDeviceAddressesBuffers", frameIndex)->buffer->GetAddress();
+				pushConstants.animationVertexBoneBufferAddresses = resourceManager->GetAnimationManager()->GetDeviceAddressesBuffer(frameIndex)->buffer->GetAddress();
+				pushConstants.materialBuffer = resourceManager->GetMaterialManager()->GetDeviceAddressesBuffer(frameIndex)->buffer->GetAddress();
+				pushConstants.objectIndex = model->GetBufferArrayIndex();
+
+				vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(GeometryRendererPushConstants), &pushConstants);
+				vkCmdDraw(commandBuffer, model->GetIndexCount(), model->GetInstanceCount(), 0, 0);
+			}
+		}
+	);
+}
+
 void GeometryRenderer::RenderShapesInstancedIndirect(VkCommandBuffer commandBuffer, VkPipelineLayout pipelineLayout, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
 {
 	auto geometryManager = resourceManager->GetGeometryManager();
@@ -199,27 +269,38 @@ void GeometryRenderer::RenderModelsInstancedIndirect(VkCommandBuffer commandBuff
 	memcpy(modelIndirectCountBufferHandler, &modelCount, (size_t)bufferSize);
 
 	{ //Debug
-		/*
-		std::cout << "[GeometryRenderer::RenderModelsInstancedIndirect]" << std::endl;
+		std::cout << std::format("[GeometryRenderer::RenderModelsInstancedIndirect] : FrameIndex {}", frameIndex) << std::endl;
 
+		uint32_t loadedModelCount = modelManager->GetCurrentCount();
+		auto instanceIndexAddressBuffer = static_cast<VkDeviceAddress*>(modelManager->GetInstanceIndexAddressBuffer(frameIndex)->buffer->GetHandler());
 		auto indirectCommandBufferHandler = static_cast<VkDrawIndirectCommand*>(modelManager->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler());
-		
-		for (int i = 0; i < modelManager->GetCurrentCount(); ++i)
+
+		//Print Instance Device Buffer Addresses
+		for (uint32_t i = 0; i < loadedModelCount; ++i)
 		{
-			std::cout << std::format("Model {}: {} {} {} {}", i, indirectCommandBufferHandler[i].vertexCount, indirectCommandBufferHandler[i].instanceCount, indirectCommandBufferHandler[i].firstInstance, indirectCommandBufferHandler[i].firstVertex) << std::endl;
-		
-			auto instanceBufferHanlder = static_cast<uint32_t*>(modelManager->GetInstanceIndexBuffer(frameIndex, i)->buffer->GetHandler());
+			std::cout << std::format("[IndirectCommandBuffer][{}] - {} {} {} {}\n", i, indirectCommandBufferHandler[i].vertexCount, indirectCommandBufferHandler[i].instanceCount, indirectCommandBufferHandler[i].firstInstance, indirectCommandBufferHandler[i].firstVertex);
+			std::cout << std::format("[InstanceIndexAddressBuffer][{}] - {}\n", i, instanceIndexAddressBuffer[i]);
 			
+			if (indirectCommandBufferHandler[i].instanceCount > 0)
+				int x;
+
+			auto instanceIndexBuffer = modelManager->GetInstanceIndexBuffer(frameIndex, i)->buffer;
+			std::cout << std::format("[InstanceIndexBuffer][{}] - {}\n", i, instanceIndexBuffer->GetAddress());
+
+			std::cout << std::format("[InstanceIndexBuffer][{}] - ", i);
+
+			auto instanceIndexBufferHanlder = static_cast<uint32_t*>(instanceIndexBuffer->GetHandler());
+
 			for (int j = 0; j < modelManager->GetInstanceIndexBuffer(frameIndex, i)->size; ++j)
 			{
-				std::cout << instanceBufferHanlder[j] << " ";
+				std::cout << instanceIndexBufferHanlder[j] << " ";
 			}
 
 			std::cout << std::endl;
 		}
-		*/
 	}
 
 	vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(GeometryRendererIndirectPushConstants), &pushConstants);
 	vkCmdDrawIndirectCount(commandBuffer, modelManager->GetIndirectDrawBuffer(frameIndex)->buffer->Value(), 0, modelIndirectCountBuffer->Value(), 0, modelManager->GetIndirectDrawBuffer(frameIndex)->size, sizeof(VkDrawIndirectCommand));
+	//vkCmdDrawIndirect(commandBuffer, modelManager->GetIndirectDrawBuffer(frameIndex)->buffer->Value(), 0, modelManager->GetCurrentCount(), sizeof(VkDrawIndirectCommand));
 }

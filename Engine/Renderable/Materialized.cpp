@@ -21,7 +21,7 @@ void Materialized::UploadMaterialDataToGpu(std::shared_ptr<MaterialManager> mate
         Vk::BufferConfig config;
         config.size = bufferSize;
         config.usage = VK_BUFFER_USAGE_2_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_2_SHADER_DEVICE_ADDRESS_BIT;
-        config.memoryProperties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
+        config.memoryProperties = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
         materialBuffer = std::make_shared<Vk::Buffer>(config);
         materialBuffer->MapMemory();
 
@@ -34,7 +34,5 @@ void Materialized::UploadMaterialDataToGpu(std::shared_ptr<MaterialManager> mate
             else
                 materialBufferHandler[i] = materials[i]->GetBufferArrayIndex();
         }
-
-        materialBuffer->UnmapMemory();
     }
 }

@@ -18,8 +18,9 @@ DrawIndirectManager::DrawIndirectManager()
 
 void DrawIndirectManager::Update(uint32_t frameIndex, uint32_t count, uint32_t bufferBaseSize)
 {
+    uint32_t requiredSize = static_cast<uint32_t>(std::ceil((count + 1) / (float)bufferBaseSize)) * bufferBaseSize;
+
     { //Instance Address Buffer and Instance Index Buffers
-        uint32_t requiredSize = static_cast<uint32_t>(std::ceil((count + 1) / (float)bufferBaseSize)) * bufferBaseSize;
 
         if (instanceIndexAddressBuffers[frameIndex]->buffer == nullptr || instanceIndexAddressBuffers[frameIndex]->size != requiredSize)
         {
@@ -33,11 +34,11 @@ void DrawIndirectManager::Update(uint32_t frameIndex, uint32_t count, uint32_t b
             instanceIndexAddressBuffers[frameIndex]->buffer->MapMemory();
             instanceIndexAddressBuffers[frameIndex]->version++;
 
-            std::cout << std::format("[DrawIndirectManager] - instanceIndexAddressBuffers resized {} in frame {}", requiredSize, frameIndex) << std::endl;
+            std::cout << std::format("[DrawIndirectManager::Update] - instanceIndexAddressBuffers resized {} in frame {}", requiredSize, frameIndex) << std::endl;
         }
 
         { //Instance Index Buffers
-            if (instanceIndexBuffers.size() != requiredSize)
+            if (instanceIndexBuffers[frameIndex].size() != requiredSize)
                 instanceIndexBuffers[frameIndex].resize(requiredSize);
 
             for (uint32_t i = 0; i < requiredSize; ++i)
@@ -46,15 +47,13 @@ void DrawIndirectManager::Update(uint32_t frameIndex, uint32_t count, uint32_t b
                 {
                     instanceIndexBuffers[frameIndex][i] = std::make_shared<VersionedObject<DynamicSizeBuffer>>(std::make_shared<DynamicSizeBuffer>());
 
-                    std::cout << std::format("[DrawIndirectManager] - VersionedObject<IndexBuffer> created {} in frame {} for model {}", requiredSize, frameIndex, i) << std::endl;
+                    //std::cout << std::format("[DrawIndirectManager] - VersionedObject<IndexBuffer> created {} in frame {} for model {}", requiredSize, frameIndex, i) << std::endl;
                 }
             }
         }
     }
 
     { //Draw Indirect Command Buffer
-        uint32_t requiredSize = static_cast<uint32_t>(std::ceil((count + 1) / (float)bufferBaseSize)) * bufferBaseSize;
-
         if (indirectCommandBuffers[frameIndex]->buffer == nullptr || indirectCommandBuffers[frameIndex]->size != requiredSize)
         {
             Vk::BufferConfig config;
@@ -67,7 +66,17 @@ void DrawIndirectManager::Update(uint32_t frameIndex, uint32_t count, uint32_t b
             indirectCommandBuffers[frameIndex]->buffer->MapMemory();
             indirectCommandBuffers[frameIndex]->version++;
 
-            std::cout << std::format("[DrawIndirectManager] - indirectCommandBuffers resized {} in frame {}", requiredSize, frameIndex) << std::endl;
+            for (uint32_t i = 0; i < requiredSize; ++i)
+            {
+                static_cast<VkDrawIndirectCommand*>(indirectCommandBuffers[frameIndex]->buffer->GetHandler())[i] = VkDrawIndirectCommand{
+                    .vertexCount = 0,
+                    .instanceCount = 0,
+                    .firstVertex = 0,
+                    .firstInstance = 0
+                };
+            }
+
+            std::cout << std::format("[DrawIndirectManager::Update] - indirectCommandBuffers resized {} in frame {}", requiredSize, frameIndex) << std::endl;
         }
     }
 }
@@ -77,9 +86,6 @@ void DrawIndirectManager::UpdateInstanceBuffer(uint32_t frameIndex, uint32_t buf
     { //Instance Index Buffers
         uint32_t baseBufferSize = GlobalConfig::BufferConfig::instanceBufferBaseSize;
         uint32_t requiredSize = static_cast<uint32_t>(std::ceil((count + 1) / (float)baseBufferSize)) * baseBufferSize;
-
-        if (instanceIndexBuffers[frameIndex][bufferIndex]->object == nullptr)
-            return;
 
         auto dynamicSizedBuffer = instanceIndexBuffers[frameIndex][bufferIndex]->object;
 
@@ -99,18 +105,19 @@ void DrawIndirectManager::UpdateInstanceBuffer(uint32_t frameIndex, uint32_t buf
 
             bufferRegenerated = true;
 
-            std::cout << std::format("[DrawIndirectManager] - instanceIndexBuffer resized {} in frame {} for model {}", requiredSize, frameIndex, bufferIndex) << std::endl;
+            std::cout << std::format("[DrawIndirectManager::UpdateInstanceBuffer] - instanceIndexBuffer resized {} in frame {} for model {}", requiredSize, frameIndex, bufferIndex) << std::endl;
         }
 
         //InstanceIndexAddressBuffer resized and regenerated -> Need to reupload all exsisting buffer addresses!
         if (bufferRegenerated || instanceIndexBuffers[frameIndex][bufferIndex]->versions[frameIndex] != instanceIndexAddressBuffers[frameIndex]->version)
         {
+            //Its not a problem if instanceIndexBuffers changes, version is not increased! 
             instanceIndexBuffers[frameIndex][bufferIndex]->versions[frameIndex] = instanceIndexAddressBuffers[frameIndex]->version;
 
             auto bufferHandler = static_cast<VkDeviceAddress*>(instanceIndexAddressBuffers[frameIndex]->buffer->GetHandler());
             bufferHandler[bufferIndex] = dynamicSizedBuffer->buffer->GetAddress();
 
-            std::cout << std::format("[DrawIndirectManager] - instanceIndexBuffer address uploaded in frame {} for model {}", frameIndex, bufferIndex) << std::endl;
+            std::cout << std::format("[DrawIndirectManager::UpdateInstanceBuffer] - instanceIndexBuffer address uploaded in frame {} for model {}", frameIndex, bufferIndex) << std::endl;
         }
     }
 }

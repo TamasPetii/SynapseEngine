@@ -66,40 +66,43 @@ void Scene::InitializeRegistry()
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, DirectionLightComponent>(entity);
-			registry->GetComponent<DirectionLightComponent>(entity).strength = 0.f;
+			registry->GetComponent<DirectionLightComponent>(entity).strength = 10.f;
 			registry->SetParent(entity, directionLightParent);		
 		}
 
 		//Point Lights
 		{
-			for (int i = 0; i < 2500; ++i)
+			for (int i = 0; i < 10; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, PointLightComponent>(entity);
 				auto [transformComponent, pointLightComponent] = registry->GetComponents<TransformComponent, PointLightComponent>(entity);
 
-				transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 50.f;
+				transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 25.f;
 				transformComponent.rotation = glm::vec3(dist(rng), dist(rng), dist(rng)) * 180.f;
 				transformComponent.scale = glm::vec3(dist(rng)) * 8.f;
 
 				pointLightComponent.color = glm::vec3(dist(rng), dist(rng), dist(rng));
+				pointLightComponent.strength = 5.f;
+
 				registry->SetParent(entity, pointLightParent);
 			}
 		}
 
 		//Spot Lights
 		{
-			for (int i = 0; i < 2500; ++i)
+			for (int i = 0; i < 10; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, SpotLightComponent>(entity);
 				auto [transformComponent, spotLightComponent] = registry->GetComponents<TransformComponent, SpotLightComponent>(entity);
 				
-				transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 50.f;
+				transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 25.f;
 				transformComponent.rotation = glm::vec3(dist(rng), dist(rng), dist(rng)) * 180.f;
 				transformComponent.scale = glm::vec3(1.f, 5.f, 10.f) + glm::vec3(dist(rng), dist(rng), dist(rng)) * glm::vec3(25.f, 10.f, 25.f);
 				
 				spotLightComponent.color = glm::vec3(dist(rng), dist(rng), dist(rng));
+				spotLightComponent.strength = 5.f;
 
 				registry->SetParent(entity, spotLightParent);
 			}
@@ -120,7 +123,7 @@ void Scene::InitializeRegistry()
 			"Torus"
 		};
 
-		for (uint32_t i = 0; i < 10000; ++i)
+		for (uint32_t i = 0; i < 2500; ++i)
 		{
 			std::string materialName = "Shape" + std::to_string(i++);
 			auto [material, wasLoaded] = resourceManager->GetMaterialManager()->RegisterMaterial(materialName);
@@ -142,6 +145,36 @@ void Scene::InitializeRegistry()
 
 			registry->SetParent(entity, shapeParent);
 		}
+
+		for (uint32_t x = 0; x < 0; ++x)
+		{
+			for (uint32_t y = 0; y < 0; ++y)
+			{
+				std::string materialName = "Shape" + std::to_string(x) + std::to_string(y);
+				auto [material, wasLoaded] = resourceManager->GetMaterialManager()->RegisterMaterial(materialName);
+
+				material->albedoTexture = resourceManager->GetImageManager()->LoadImage("C:/Users/User/Desktop/Metal053C_4K-PNG/Metal053C_4K-PNG_Color.png", ImageLoadMode::Sync);
+				//material->normalTexture = resourceManager->GetImageManager()->LoadImage("C:/Users/User/Desktop/Metal053C_4K-PNG/Metal053C_4K-PNG_NormalGL.png", ImageLoadMode::Sync);
+				material->metalnessTexture = resourceManager->GetImageManager()->LoadImage("C:/Users/User/Desktop/Metal053C_4K-PNG/Metal053C_4K-PNG_Metalness.png", ImageLoadMode::Sync);
+				material->roughnessTexture = resourceManager->GetImageManager()->LoadImage("C:/Users/User/Desktop/Metal053C_4K-PNG/Metal053C_4K-PNG_Roughness.png", ImageLoadMode::Sync);
+				
+				material->roughness = x / 10.f;
+				material->metalness = y / 10.f;
+				material->SetBit<UPDATE_BIT>();
+
+				auto entity = registry->CreateEntity();
+				registry->AddComponents<TransformComponent, MaterialComponent, ShapeComponent, DefaultColliderComponent>(entity);
+
+				auto [transformComponent, materialComponent, shapeComponent] = registry->GetComponents<TransformComponent, MaterialComponent, ShapeComponent>(entity);
+				transformComponent.translation = glm::vec3(y, x, 0) * 2.f;
+
+				materialComponent.material = material;
+
+				shapeComponent.shape = resourceManager->GetGeometryManager()->GetShape("Sphere");
+
+				registry->SetParent(entity, shapeParent);
+			}
+		}
 	}
 
 	//Models
@@ -149,7 +182,7 @@ void Scene::InitializeRegistry()
 		auto modelParent = registry->CreateEntity();
 		registry->AddComponents<TransformComponent>(modelParent);
 
-		for(uint32_t i = 0; i < 0; i++)
+		for(uint32_t i = 0; i < 1; i++)
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
@@ -160,7 +193,7 @@ void Scene::InitializeRegistry()
 			registry->SetParent(entity, modelParent);
 		}
 
-		for (uint32_t i = 0; i < 0; i++)
+		for (uint32_t i = 0; i < 1; i++)
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
@@ -173,7 +206,6 @@ void Scene::InitializeRegistry()
 		}
 
 		/*
-
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
@@ -193,7 +225,6 @@ void Scene::InitializeRegistry()
 
 			registry->SetParent(entity, modelParent);
 		}
-
 		*/
 
 		/*
@@ -469,7 +500,5 @@ void Scene::UpdateComponentBuffers(uint32_t frameIndex)
 	RecalculateGpuBufferSize<SpotLightComponent, glm::mat4>("SpotLightTransform", frameIndex);
 	RecalculateGpuBufferSize<SpotLightComponent, uint32_t>("SpotLightInstanceIndices", frameIndex);
 	RecalculateGpuBufferSize<SpotLightComponent, uint32_t>("SpotLightOcclusionIndices", frameIndex);
-	RecalculateGpuBufferSize<SpotLightComponent, glm::vec4>("SpotLightBillboard", frameIndex);
-
-	
+	RecalculateGpuBufferSize<SpotLightComponent, glm::vec4>("SpotLightBillboard", frameIndex);	
 }

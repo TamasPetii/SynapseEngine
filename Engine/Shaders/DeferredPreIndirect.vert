@@ -45,7 +45,7 @@ layout( push_constant ) uniform constants
 
 void main() 
 {
-	uvec2 instanceIndexBuffer = InstanceIndexAddressBuffer(PushConstants.instanceIndexAddressBuffer).deviceAddresses[gl_DrawID];
+	uvec2 instanceIndexBuffer = InstanceIndexAddressBuffer(PushConstants.instanceIndexAddressBuffer).deviceAddresses[gl_DrawIDARB];
 
     uint index = InstanceIndexBuffer(instanceIndexBuffer).indices[gl_InstanceIndex];
 
@@ -139,7 +139,7 @@ void main()
 		//No animation render static model
 		else
 		{
-			ModelNodeTransformBuffer modelNodeTransformBuffer = ModelNodeTransformBuffer(ModelDeviceAddressesBuffer(PushConstants.modelBufferAddresses).deviceAddresses[renderIndices.modelIndex].nodeTransformBuffer);
+			ModelNodeTransformBuffer modelNodeTransformBuffer = ModelNodeTransformBuffer(ModelDeviceAddressesBuffer(PushConstants.modelBufferAddresses).deviceAddresses[meshIndex].nodeTransformBuffer);
 			position = modelNodeTransformBuffer.nodeTransforms[v.nodeIndex].transform * position;
 			normal = modelNodeTransformBuffer.nodeTransforms[v.nodeIndex].transformIT * normal;
 			tangent = modelNodeTransformBuffer.nodeTransforms[v.nodeIndex].transformIT * tangent;

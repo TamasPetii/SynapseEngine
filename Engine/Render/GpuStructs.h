@@ -21,6 +21,7 @@ struct GeometryRendererPushConstants
 	VkDeviceAddress materialBuffer;
 	uint32_t renderMode;
 	uint32_t cameraIndex;
+	uint32_t objectIndex;
 };
 
 struct OcclusionCullingPushConstants

@@ -2,7 +2,7 @@
 
 uint32_t ArrayIndexedManager::GetAvailableIndex()
 {
-	std::unique_lock<std::mutex> lock(availableIndexMutex);
+	std::lock_guard<std::mutex> lock(availableIndexMutex);
 
 	if (availableIndices.empty())
 		return counter++;
@@ -14,5 +14,7 @@ uint32_t ArrayIndexedManager::GetAvailableIndex()
 
 uint32_t ArrayIndexedManager::GetCurrentCount()
 {
+	std::lock_guard<std::mutex> lock(availableIndexMutex);
+
 	return counter;
 }

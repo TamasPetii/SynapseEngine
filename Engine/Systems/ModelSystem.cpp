@@ -52,7 +52,7 @@ void ModelSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_
 	auto renderIndicesBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("ModelRenderIndicesData", frameIndex);
 	auto renderIndicesBufferHandler = static_cast<ModelRenderIndicesGPU*>(renderIndicesBuffer->buffer->GetHandler());
 
-	std::for_each(std::execution::par, modelPool->GetDenseIndices().begin(), modelPool->GetDenseIndices().end(),
+	std::for_each(std::execution::seq, modelPool->GetDenseIndices().begin(), modelPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			auto& modelComponent = modelPool->GetData(entity);
 			auto modelIndex = modelPool->GetDenseIndex(entity);
@@ -76,6 +76,8 @@ void ModelSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_
 				};
 
 				renderIndicesBufferHandler[modelIndex] = renderIndices;
+
+				std::cout << std::format("Render Indices ModelComponent {} | {} {} {} {} {}\n", modelIndex, renderIndices.entityIndex, renderIndices.transformIndex, renderIndices.modelIndex, renderIndices.animationIndex, renderIndices.animationTransformIndex);
 			}
 
 			//MAYBE EACH SYSTEM UPDATES ITS INDEX????

@@ -99,6 +99,34 @@ void InstanceSystem::UpdateShapeInstancesGpu(std::shared_ptr<ResourceManager> re
 	);
 }
 
+void InstanceSystem::UpdateShapeInstancesGpuNew(std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
+{
+	auto geometryManager = resourceManager->GetGeometryManager();
+	auto shapeIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(geometryManager->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler());
+
+	std::for_each(std::execution::par, geometryManager->GetShapes().begin(), geometryManager->GetShapes().end(),
+		[&](const auto& data) -> void
+		{
+			if (data.second == nullptr)
+				return;
+
+			auto shape = data.second->object;
+
+			if (shape)
+			{
+				uint32_t instanceCount = shape->GetInstanceIndices().size();
+
+				//Update insatnce index buffer with visible model indices
+				VkDeviceSize bufferSize = sizeof(uint32_t) * instanceCount;
+				auto shapeInstanceIndexBufferHandler = geometryManager->GetInstanceIndexBuffer(frameIndex, shape->GetBufferArrayIndex())->buffer->GetHandler();
+				memcpy(shapeInstanceIndexBufferHandler, shape->GetInstanceIndices().data(), (size_t)bufferSize);
+
+				shape->ClearInstanceIndices();
+			}
+		}
+	);
+}
+
 void InstanceSystem::UpdateShapeInstancesGpuIndirectDraw(std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
 {
 	auto geometryManager = resourceManager->GetGeometryManager();	
@@ -190,6 +218,32 @@ void InstanceSystem::UpdateModelInstancesGpu(std::shared_ptr<ResourceManager> re
 	);
 }
 
+void InstanceSystem::UpdateModelInstancesGpuNew(std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
+{
+	auto modelManager = resourceManager->GetModelManager();
+	std::for_each(std::execution::seq, modelManager->GetModels().begin(), modelManager->GetModels().end(),
+		[&](const auto& data) -> void
+		{
+			if (data.second == nullptr)
+				return;
+
+			auto model = data.second->object;
+
+			if (model && model->state == LoadState::Ready)
+			{
+				uint32_t instanceCount = model->GetInstanceIndices().size();
+
+				//Update insatnce index buffer with visible model indices
+				VkDeviceSize bufferSize = sizeof(uint32_t) * instanceCount;
+				auto modelInstanceIndexBufferHandler = modelManager->GetInstanceIndexBuffer(frameIndex, model->GetBufferArrayIndex())->buffer->GetHandler();
+				memcpy(modelInstanceIndexBufferHandler, model->GetInstanceIndices().data(), (size_t)bufferSize);
+
+				model->ClearInstanceIndices();
+			}
+		}
+	);
+}
+
 void InstanceSystem::UpdateModelInstancesGpuIndirectDraw(std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
 {
 	auto modelManager = resourceManager->GetModelManager();
@@ -198,9 +252,6 @@ void InstanceSystem::UpdateModelInstancesGpuIndirectDraw(std::shared_ptr<Resourc
 	std::for_each(std::execution::seq, modelManager->GetModels().begin(), modelManager->GetModels().end(),
 		[&](const auto& data) -> void
 		{
-			if (data.second == nullptr)
-				return;
-
 			auto model = data.second->object;
 
 			//Todo: On model deletion instanceCount has to be 0!!

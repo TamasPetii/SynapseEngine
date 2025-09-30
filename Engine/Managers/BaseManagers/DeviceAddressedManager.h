@@ -41,9 +41,6 @@ DeviceAddressedManager<T>::~DeviceAddressedManager()
 template<typename T>
 void DeviceAddressedManager<T>::Update(uint32_t frameIndex, uint32_t count, uint32_t baseBufferSize)
 {
-    if (deviceAddressBuffers[frameIndex] == nullptr)
-        return; //Should be never!!
-
     uint32_t requiredSize = static_cast<uint32_t>(std::ceil((count + 1) / (float)baseBufferSize)) * baseBufferSize;
 
     if (deviceAddressBuffers[frameIndex]->buffer == nullptr || deviceAddressBuffers[frameIndex]->size != requiredSize)
