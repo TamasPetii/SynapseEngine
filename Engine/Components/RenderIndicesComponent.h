@@ -11,6 +11,8 @@ struct ENGINE_API ModelRenderIndicesGPU
 	uint32_t animationIndex; //Defines: BoneBuffer
 	uint32_t animationTransformIndex; //Defines: Unique NodeTransformBuffer
 	uint32_t bitflag;
+	uint32_t padding0;
+	uint32_t padding1;
 };
 
 struct ENGINE_API ShapeRenderIndicesGPU
@@ -20,4 +22,7 @@ struct ENGINE_API ShapeRenderIndicesGPU
 	uint32_t shapeIndex;
 	uint32_t materialIndex;
 	uint32_t bitflag;
+	uint32_t padding0;
+	uint32_t padding1;
+	uint32_t padding2;
 };

@@ -6,8 +6,6 @@ struct ModelDeviceAddresses {
 	uvec2 indexBuffer;
 	uvec2 materialIndexBuffer;
 	uvec2 nodeTransformBuffer;
-	uvec2 instanceIndexBuffer;
-	uvec2 padding;
 }; 
 
 layout(buffer_reference, std430) readonly buffer ModelDeviceAddressesBuffer { 

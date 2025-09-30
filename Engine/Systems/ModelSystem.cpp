@@ -77,7 +77,7 @@ void ModelSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_
 
 				renderIndicesBufferHandler[modelIndex] = renderIndices;
 
-				std::cout << std::format("Render Indices ModelComponent {} | {} {} {} {} {}\n", modelIndex, renderIndices.entityIndex, renderIndices.transformIndex, renderIndices.modelIndex, renderIndices.animationIndex, renderIndices.animationTransformIndex);
+				//std::cout << std::format("Render Indices ModelComponent {} | {} {} {} {} {}\n", modelIndex, renderIndices.entityIndex, renderIndices.transformIndex, renderIndices.modelIndex, renderIndices.animationIndex, renderIndices.animationTransformIndex);
 			}
 
 			//MAYBE EACH SYSTEM UPDATES ITS INDEX????

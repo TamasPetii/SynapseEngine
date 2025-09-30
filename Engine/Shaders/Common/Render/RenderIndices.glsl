@@ -10,6 +10,8 @@ struct ModelRenderIndices
 	uint animationIndex;
 	uint animationTransformIndex;
 	uint bitflag;
+	uint padding0;
+	uint padding1;
 };
 
 layout(buffer_reference, std430) readonly buffer ModelRenderIndicesBuffer {
@@ -23,6 +25,9 @@ struct ShapeRenderIndices
 	uint shapeIndex; //This is the loaded shape array index! This is not the shape component dense index!!
 	uint materialIndex;
 	uint bitflag;
+	uint padding0;
+	uint padding1;
+	uint padding2;
 };
 
 layout(buffer_reference, std430) readonly buffer ShapeRenderIndicesBuffer {

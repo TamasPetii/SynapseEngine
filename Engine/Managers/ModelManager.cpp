@@ -119,7 +119,7 @@ void ModelManager::Update(uint32_t frameIndex)
         //Important: The buffers will be resized and regenerated at the same time! So model->version can be used to handle both!!!
         if (versionChanged)
         {
-            versionedObject->versions[frameIndex] = indirectCommandBuffers[frameIndex]->version;
+            versionedObject->versions[frameIndex] = deviceAddressBuffers[frameIndex]->version;
             std::cout << std::format("Model {} frame {} version updated {} ", path, frameIndex, versionedObject->versions[frameIndex]) << std::endl;
         }
     }
