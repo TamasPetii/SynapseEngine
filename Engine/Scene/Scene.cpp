@@ -205,7 +205,6 @@ void Scene::InitializeRegistry()
 			registry->SetParent(entity, modelParent);
 		}
 
-		/*
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
@@ -225,7 +224,6 @@ void Scene::InitializeRegistry()
 
 			registry->SetParent(entity, modelParent);
 		}
-		*/
 
 		/*
 		{

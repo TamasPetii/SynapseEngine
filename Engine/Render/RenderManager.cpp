@@ -5,6 +5,7 @@
 #include "Renderers/WireframeRenderer.h"
 #include "Renderers/BillboardRenderer.h"
 #include "Engine/Vulkan/VulkanMutex.h"
+#include "Renderers/ObjectCuller.h"
 
 RenderManager::RenderManager(std::shared_ptr<ResourceManager> resourceManager) : 
 	resourceManager(resourceManager)
@@ -50,6 +51,7 @@ void RenderManager::Render(std::shared_ptr<Registry> registry, uint32_t frameInd
 
 	VK_CHECK_MESSAGE(vkBeginCommandBuffer(commandBuffer, &beginInfo), "Failed to begin recording command buffer!");
 
+	renderers["ObjectCuller"]->Render(commandBuffer, registry, resourceManager, frameIndex);
 	renderers["GeometryRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
 	renderers["DeferredRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
 	renderers["WireframeRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
@@ -143,6 +145,9 @@ void RenderManager::InitRenderers()
 
 	renderers["BillboardRenderer"] = std::make_shared<BillboardRenderer>();
 	renderers["BillboardRenderer"]->Initialize(resourceManager);
+
+	renderers["ObjectCuller"] = std::make_shared<ObjectCuller>();
+	renderers["ObjectCuller"]->Initialize(resourceManager);
 }
 
 void RenderManager::InitCommandPool()

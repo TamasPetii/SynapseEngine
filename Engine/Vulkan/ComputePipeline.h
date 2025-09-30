@@ -16,8 +16,8 @@ namespace Vk
 	public:
 		ComputePipeline(const ComputePipelineConfig& config);
 		~ComputePipeline();
-		VkPipeline Pipeline() { return pipeline; }
-		VkPipelineLayout Layout() { return layout; }
+		VkPipeline GetPipeline() { return pipeline; }
+		VkPipelineLayout GetLayout() { return layout; }
 	private:
 		VkPipeline pipeline;
 		VkPipelineLayout layout;

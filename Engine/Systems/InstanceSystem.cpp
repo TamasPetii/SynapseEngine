@@ -16,13 +16,13 @@
 
 void InstanceSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex, float deltaTime)
 {
-	auto futureShape = std::async(std::launch::async, &InstanceSystem::UpdateShapeInstances, this, registry, resourceManager);
-	auto futureModel = std::async(std::launch::async, &InstanceSystem::UpdateModelInstances, this, registry, resourceManager);
+	//auto futureShape = std::async(std::launch::async, &InstanceSystem::UpdateShapeInstances, this, registry, resourceManager);
+	//auto futureModel = std::async(std::launch::async, &InstanceSystem::UpdateModelInstances, this, registry, resourceManager);
 	auto futurePointLight = std::async(std::launch::async, &InstanceSystem::UpdatePointLightInstances, this, registry);
 	auto futureSpotLight = std::async(std::launch::async, &InstanceSystem::UpdateSpotLightInstances, this, registry);
 
-	futureShape.get();
-	futureModel.get();
+	//futureShape.get();
+	//futureModel.get();
 	futurePointLight.get();
 	futureSpotLight.get();
 }
@@ -33,13 +33,13 @@ void InstanceSystem::OnFinish(std::shared_ptr<Registry> registry)
 
 void InstanceSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
 {
-	auto futureShapeGpu = std::async(std::launch::async, &InstanceSystem::UpdateShapeInstancesGpuIndirectDraw, this, resourceManager, frameIndex);
-	auto futureModelGpu = std::async(std::launch::async, &InstanceSystem::UpdateModelInstancesGpuIndirectDraw, this, resourceManager, frameIndex);
+	//auto futureShapeGpu = std::async(std::launch::async, &InstanceSystem::UpdateShapeInstancesGpuIndirectDraw, this, resourceManager, frameIndex);
+	//auto futureModelGpu = std::async(std::launch::async, &InstanceSystem::UpdateModelInstancesGpuIndirectDraw, this, resourceManager, frameIndex);
 	auto futurePointLightGpu = std::async(std::launch::async, &InstanceSystem::UpdatePointLightInstancesGpu, this, registry, resourceManager, frameIndex);
 	auto futureSpotLightGpu = std::async(std::launch::async, &InstanceSystem::UpdateSpotLightInstancesGpu, this, registry, resourceManager, frameIndex);
 
-	futureShapeGpu.get();
-	futureModelGpu.get();
+	//futureShapeGpu.get();
+	//futureModelGpu.get();
 	futurePointLightGpu.get();
 	futureSpotLightGpu.get();
 }

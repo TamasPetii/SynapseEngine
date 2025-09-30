@@ -114,7 +114,8 @@ void DefaultColliderSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, st
 					componentBufferSphere->versions[defaultColliderIndex] = defaultColliderComponent.version;
 					bufferHandlerSphere[defaultColliderIndex] = glm::translate(defaultColliderComponent.origin) * glm::scale(glm::vec3(defaultColliderComponent.radius));
 				}
-						
+				
+				//Todo: Default Collider Component should always be on Model/Shape and should get destroyed when no component!
 				if (defaultColliderBuffer->versions[defaultColliderIndex] != defaultColliderComponent.version)
 				{
 					defaultColliderBuffer->versions[defaultColliderIndex] = defaultColliderComponent.version;

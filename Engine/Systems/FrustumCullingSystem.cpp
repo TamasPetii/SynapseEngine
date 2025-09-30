@@ -47,7 +47,7 @@ void FrustumCullingSystem::OnUpdate(std::shared_ptr<Registry> registry, std::sha
 	//FarFace
 	frustumCollider.faces[5] = FrustumFace(-cameraComponent.direction, cameraComponent.position + cameraComponent.direction * cameraComponent.farPlane);
 
-	DefaultColliderCulling(registry, &frustumCollider);
+	//DefaultColliderCulling(registry, &frustumCollider);
 	PointLightCulling(registry, &frustumCollider);
 	SpotLightCulling(registry, &frustumCollider);
 }

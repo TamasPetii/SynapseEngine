@@ -167,6 +167,7 @@
   <ItemGroup>
     <ClInclude Include="Managers\BaseManagers\DrawIndirectManager.h" />
     <ClInclude Include="Managers\BaseManagers\DynamicSizeBuffer.h" />
+    <ClInclude Include="Render\Renderers\ObjectCuller.h" />
     <ClInclude Include="Utils\BitsetFlagged.h" />
     <ClInclude Include="Utils\BitsetFlag.h" />
     <ClInclude Include="Utils\BufferArrayIndexed.h" />
@@ -307,6 +308,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Managers\BaseManagers\DrawIndirectManager.cpp" />
+    <ClCompile Include="Render\Renderers\ObjectCuller.cpp" />
     <ClCompile Include="Utils\BitsetFlagged.cpp" />
     <ClCompile Include="Utils\BufferArrayIndexed.cpp" />
     <ClCompile Include="Managers\MaterialManager.cpp" />

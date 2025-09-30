@@ -28,12 +28,7 @@ std::shared_ptr<Model> ModelManager::LoadModel(const std::string& path)
 
     models[path] = std::make_shared<VersionedObject<Model>>(model);
 
-    //futures.emplace(path, std::async(std::launch::async, &Model::Load, models.at(path)->object, path));
-    
-    model->Load(path);
-
-    if (model && model->state == LoadState::GpuUploaded)
-        model->state = LoadState::Ready;
+    futures.emplace(path, std::async(std::launch::async, &Model::Load, models.at(path)->object, path));
 
     return models.at(path)->object;
 }
