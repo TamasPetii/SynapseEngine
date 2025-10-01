@@ -165,6 +165,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Managers\LightBufferManager.h" />
     <ClInclude Include="Managers\BaseManagers\DrawIndirectManager.h" />
     <ClInclude Include="Managers\BaseManagers\DynamicSizeBuffer.h" />
     <ClInclude Include="Render\Renderers\ObjectCuller.h" />
@@ -307,6 +308,7 @@
     <ClInclude Include="Vulkan\VulkanMutex.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Managers\LightBufferManager.cpp" />
     <ClCompile Include="Managers\BaseManagers\DrawIndirectManager.cpp" />
     <ClCompile Include="Render\Renderers\ObjectCuller.cpp" />
     <ClCompile Include="Utils\BitsetFlagged.cpp" />
@@ -445,6 +447,7 @@
     <None Include="Shaders\Billboard.geom" />
     <None Include="Shaders\BillboardInstanced.vert" />
     <None Include="Shaders\Billboard.vert" />
+    <None Include="Shaders\Common\Culling\Culling.glsl" />
     <None Include="Shaders\Common\Light\SpotLight.glsl" />
     <None Include="Shaders\Common\Pbr.glsl" />
     <None Include="Shaders\Common\Position.glsl" />
@@ -452,7 +455,7 @@
     <None Include="Shaders\Common\Render\DrawIndirectCommand.glsl" />
     <None Include="Shaders\Common\Render\Occlusion.glsl" />
     <None Include="Shaders\Common\Shape\ShapeBufferAddresses.glsl" />
-    <None Include="Shaders\Culling.comp" />
+    <None Include="Shaders\CullingCameraFrustum.comp" />
     <None Include="Shaders\DeferredAmbient.frag" />
     <None Include="Shaders\DeferredAmbient.vert" />
     <None Include="Shaders\DeferredPreIndirect.frag" />
@@ -461,6 +464,7 @@
     <None Include="Shaders\DeferredSpotLight.vert" />
     <None Include="Shaders\OcclusionCulling.frag" />
     <None Include="Shaders\OcclusionCulling.vert" />
+    <None Include="Shaders\CullingPointLight.comp" />
     <None Include="Shaders\Wireframe.frag" />
     <None Include="Shaders\Wireframe.vert" />
     <None Include="Shaders\Common\Animation\AnimationBufferAddresses.glsl" />

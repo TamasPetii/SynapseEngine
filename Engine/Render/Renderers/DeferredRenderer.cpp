@@ -48,7 +48,7 @@ void DeferredRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Reg
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_WRITE_BIT,
 		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT);
 
-	OcclusionCuller::CullLights(registry, resourceManager, frameIndex);
+	//OcclusionCuller::CullLights(registry, resourceManager, frameIndex);
 	RenderDirectionLights(commandBuffer, registry, resourceManager, frameIndex);
 	RenderPointLights(commandBuffer, registry, resourceManager, frameIndex);
 	RenderSpotLights(commandBuffer, registry, resourceManager, frameIndex);

@@ -7,6 +7,7 @@
 #include "BenchmarkManager.h"
 #include "AnimationManager.h"
 #include "MaterialManager.h"
+#include "LightBufferManager.h"
 
 class ENGINE_API ResourceManager
 {
@@ -24,6 +25,7 @@ public:
 	auto GetBenchmarkManager() { return benchmarkManager; }
 	auto GetAnimationManager() { return animationManager; }
 	auto GetMaterialManager() { return materialManager; }
+	auto GetLightBufferManager() { return lightBufferManager; }
 private:
 	std::shared_ptr<ModelManager> modelManager;
 	std::shared_ptr<ImageManager> imageManager;
@@ -33,5 +35,6 @@ private:
 	std::shared_ptr<BenchmarkManager> benchmarkManager;
 	std::shared_ptr<AnimationManager> animationManager;
 	std::shared_ptr<MaterialManager> materialManager;
+	std::shared_ptr<LightBufferManager> lightBufferManager;
 };
 

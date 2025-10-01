@@ -482,7 +482,7 @@ void VulkanManager::InitShaderModuls()
 	RegisterShaderModule("BillboardFrag", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/Billboard.frag", VK_SHADER_STAGE_FRAGMENT_BIT));
 
 	//Frustum Culling
-	RegisterShaderModule("CullingComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/Culling.comp", VK_SHADER_STAGE_COMPUTE_BIT));
+	RegisterShaderModule("CullingCameraFrustumComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/CullingCameraFrustum.comp", VK_SHADER_STAGE_COMPUTE_BIT));
 }
 
 void VulkanManager::InitGraphicsPipelines()
@@ -761,10 +761,10 @@ void VulkanManager::InitComputePipelines()
 
 		Vk::ComputePipelineBuilder pipelineBuilder;
 		pipelineBuilder
-			.AddShaderStage(shaderModuls["CullingComp"])
+			.AddShaderStage(shaderModuls["CullingCameraFrustumComp"])
 			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT);
 
-		RegisterComputePipeline("Culling", pipelineBuilder.BuildDynamic());
+		RegisterComputePipeline("CullingCameraFrustum", pipelineBuilder.BuildDynamic());
 	}
 }
 

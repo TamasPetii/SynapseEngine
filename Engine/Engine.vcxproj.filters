@@ -435,6 +435,9 @@
     <ClInclude Include="Render\Renderers\ObjectCuller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Managers\LightBufferManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -824,6 +827,9 @@
     <ClCompile Include="Render\Renderers\ObjectCuller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Managers\LightBufferManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Registry\Registry.inl">
@@ -872,10 +878,12 @@
     <None Include="Shaders\Billboard.geom" />
     <None Include="Shaders\Common\Position.glsl" />
     <None Include="Shaders\Billboard.vert" />
-    <None Include="Shaders\Culling.comp" />
+    <None Include="Shaders\CullingCameraFrustum.comp" />
     <None Include="Shaders\Common\Render\DefaultCollider.glsl" />
     <None Include="Shaders\Common\Render\DrawIndirectCommand.glsl" />
     <None Include="Shaders\DeferredPreIndirect.vert" />
     <None Include="Shaders\DeferredPreIndirect.frag" />
+    <None Include="Shaders\CullingPointLight.comp" />
+    <None Include="Shaders\Common\Culling\Culling.glsl" />
   </ItemGroup>
 </Project>

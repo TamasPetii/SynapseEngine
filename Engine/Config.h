@@ -25,7 +25,7 @@ struct ENGINE_API GlobalConfig
 	struct ENGINE_API FrameConfig
 	{
 		static inline constexpr uint32_t maxFramesInFlights = 3;
-		static inline uint32_t framesInFlight = 1;
+		static inline uint32_t framesInFlight = 2;
 	};
 
 	struct ENGINE_API World
@@ -41,5 +41,7 @@ struct ENGINE_API GlobalConfig
 		static constexpr uint32_t shapeAddressBufferBaseSize = 16;
 		static constexpr uint32_t animationBufferBaseSize = 16;
 		static constexpr uint32_t componentBufferBaseSize = 32;
+		static constexpr uint32_t pointLightInstanceSize = 32;
+		static constexpr uint32_t spotLightInstanceSize = 32;
 	};
 };

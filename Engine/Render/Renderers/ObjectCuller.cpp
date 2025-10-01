@@ -10,7 +10,7 @@ void ObjectCuller::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registr
 	auto vulkanContext = Vk::VulkanContext::GetContext();
 	auto device = vulkanContext->GetDevice();
 	auto graphicsQueue = device->GetQueue(Vk::QueueType::GRAPHICS);
-	auto pipeline = resourceManager->GetVulkanManager()->GetComputePipeline("Culling");
+	auto pipeline = resourceManager->GetVulkanManager()->GetComputePipeline("CullingCameraFrustum");
 
 	auto modelIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(resourceManager->GetModelManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler());
 	auto shapeIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(resourceManager->GetGeometryManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler());

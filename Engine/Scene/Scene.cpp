@@ -66,13 +66,14 @@ void Scene::InitializeRegistry()
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, DirectionLightComponent>(entity);
-			registry->GetComponent<DirectionLightComponent>(entity).strength = 10.f;
+			registry->GetComponent<DirectionLightComponent>(entity).strength = 3.f;
+			registry->GetComponent<TransformComponent>(entity).rotation = glm::vec3(45, 0, 45);
 			registry->SetParent(entity, directionLightParent);		
 		}
 
 		//Point Lights
 		{
-			for (int i = 0; i < 10; ++i)
+			for (int i = 0; i < 250; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, PointLightComponent>(entity);
@@ -91,7 +92,7 @@ void Scene::InitializeRegistry()
 
 		//Spot Lights
 		{
-			for (int i = 0; i < 10; ++i)
+			for (int i = 0; i < 250; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, SpotLightComponent>(entity);
@@ -123,7 +124,7 @@ void Scene::InitializeRegistry()
 			"Torus"
 		};
 
-		for (uint32_t i = 0; i < 2500; ++i)
+		for (uint32_t i = 0; i < 1000; ++i)
 		{
 			std::string materialName = "Shape" + std::to_string(i++);
 			auto [material, wasLoaded] = resourceManager->GetMaterialManager()->RegisterMaterial(materialName);
@@ -205,6 +206,7 @@ void Scene::InitializeRegistry()
 			registry->SetParent(entity, modelParent);
 		}
 
+		/*
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
@@ -224,6 +226,7 @@ void Scene::InitializeRegistry()
 
 			registry->SetParent(entity, modelParent);
 		}
+		*/
 
 		/*
 		{

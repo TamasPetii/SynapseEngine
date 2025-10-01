@@ -20,6 +20,7 @@ void ResourceManager::Initialize()
 	modelManager = std::make_shared<ModelManager>(imageManager, materialManager);
 	benchmarkManager = std::make_shared<BenchmarkManager>();
 	animationManager = std::make_shared<AnimationManager>();
+	lightBufferManager = std::make_shared<LightBufferManager>();
 }
 
 void ResourceManager::Cleanup()
@@ -32,4 +33,5 @@ void ResourceManager::Cleanup()
 	benchmarkManager.reset();
 	animationManager.reset();
 	materialManager.reset();
+	lightBufferManager.reset();
 }
