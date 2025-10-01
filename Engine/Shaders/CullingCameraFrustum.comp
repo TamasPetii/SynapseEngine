@@ -5,7 +5,7 @@
 #include "Common/Model/ModelBufferAddresses.glsl"
 #include "Common/Shape/ShapeBufferAddresses.glsl"
 #include "Common/Render/DefaultCollider.glsl"
-#include "Common/Render/DrawIndirectCommand.glsl"
+#include "Common/Render/DrawIndirect.glsl"
 #include "Common/Render/InstanceIndex.glsl"
 #include "Common/Culling/Culling.glsl"
 

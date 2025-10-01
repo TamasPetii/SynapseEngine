@@ -2,9 +2,12 @@
 
 #include "Common/Camera.glsl"
 #include "Common/Render/RenderIndices.glsl"
-#include "Common/Render/DrawIndirectCommand.glsl"
+#include "Common/Render/DrawIndirect.glsl"
 #include "Common/Render/InstanceIndex.glsl"
 #include "Common/Light/PointLight.glsl"
+#include "Common/Light/LightCount.glsl"
+#include "Common/Culling/Culling.glsl"
+#include "Common/Render/DispatchIndirect.glsl"
 
 layout(push_constant) uniform constants
 {	
@@ -14,11 +17,15 @@ layout(push_constant) uniform constants
 	uvec2 pointLightDrawIndirectCommandBuffer;
 	uvec2 pointLightShadowInstanceIndexBuffer;
 	uvec2 pointLightShadowCountBuffer;
+	uvec2 pointLightShadowDispatchIndirectBuffer;
 	uint cameraIndex;
 	uint pointLightCount;
 } PushConstants;
 
 layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+
+const uint pointShadowLocalSizeX = 64;
+const uint pointLightDrawCommandIndex = 0;
 
 void main()
 {
@@ -35,18 +42,22 @@ void main()
 	//Todo: Occlusion culling
 	if(IsSphereVisibleInFrustum(cameraBuffer, PushConstants.cameraIndex, pointLightBuffer.lights[pointLightIndex].position, pointLightBuffer.lights[pointLightIndex].radius))
 	{	
-		const uint instanceIndexDrawCommandIndex = 0;
-		uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(PushConstants.pointLightDrawIndirectCommandBuffer).commands[instanceIndexDrawCommandIndex].instanceCount, 1);
+		uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(PushConstants.pointLightDrawIndirectCommandBuffer).commands[pointLightDrawCommandIndex].instanceCount, 1);
 		InstanceIndexBuffer(PushConstants.pointLightInstanceIndexBuffer).indices[instanceIndex] = pointLightIndex;
 
 		bool shadow = ((pointLightBuffer.lights[pointLightIndex].bitflag >> SHADOW_BIT) & 1u) != 0;
+
 		if(shadow)
-		{
-			//Do we need indirect command buffer for point lights? Or use the vk dispatch buffer size x???
-			//Populate Shadow Object culling dispatch buffer
-			const uint shadowInstanceIndexDrawCommandIndex = 1;
-			uint shadowInstanceIndex = atomicAdd(DrawIndirectCommandBuffer(PushConstants.pointLightDrawIndirectCommandBuffer).commands[shadowInstanceIndexDrawCommandIndex].instanceCount, 1);
+		{		
+			uint shadowInstanceIndex = atomicAdd(LightCountBuffer(PushConstants.pointLightShadowCountBuffer).lightCount, 1);
 			InstanceIndexBuffer(PushConstants.pointLightShadowInstanceIndexBuffer).indices[shadowInstanceIndex] = pointLightIndex;
 		}	
 	}
+
+    memoryBarrierBuffer();
+
+    if (globalIndex == 0) {
+        uint num_groups_x = (LightCountBuffer(PushConstants.pointLightShadowCountBuffer).lightCount + (pointShadowLocalSizeX - 1)) / pointShadowLocalSizeX;
+        DispatchIndirectCommandBuffer(PushConstants.pointLightShadowDispatchIndirectBuffer).command.num_groups_x = num_groups_x;
+    }
 }

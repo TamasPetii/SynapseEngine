@@ -126,3 +126,16 @@ struct CullingCameraFrustumPushConstants
 	uint32_t cameraIndex;
 	uint32_t defaultColliderCount;
 };
+
+struct CullingPointLightPushConstants
+{
+	VkDeviceAddress cameraFrustumBuffer;
+	VkDeviceAddress pointLightBuffer;
+	VkDeviceAddress pointLightInstanceIndexBuffer;
+	VkDeviceAddress pointLightDrawIndirectCommandBuffer;
+	VkDeviceAddress pointLightShadowInstanceIndexBuffer;
+	VkDeviceAddress pointLightShadowCountBuffer;
+	VkDeviceAddress pointLightShadowDispatchIndirectBuffer;
+	uint32_t cameraIndex;
+	uint32_t pointLightCount;
+};

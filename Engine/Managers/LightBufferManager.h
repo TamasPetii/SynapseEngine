@@ -14,16 +14,35 @@ class LightBufferManager
 public:
 	LightBufferManager();
 	void Update(std::shared_ptr<Registry> registry, uint32_t frameIndex);
+
+	const auto& GetIndirectDrawBuffer(uint32_t frameIndex) const {
+		return indirectDrawBuffers[frameIndex];
+	}
+	const auto& GetInstanceIndexBuffer(uint32_t frameIndex) const {
+		return instanceIndexBuffers[frameIndex];
+	}
+	const auto& GetShadowCountBuffer(uint32_t frameIndex) const {
+		return shadowCountBuffers[frameIndex];
+	}
+	const auto& GetShadowInstanceIndexBuffer(uint32_t frameIndex) const {
+		return shadowInstanceIndexBuffers[frameIndex];
+	}
+	const auto& GetShadowDispatchIndirectBuffers(uint32_t frameIndex) const {
+		return shadowDispatchIndirectBuffers[frameIndex];
+	}
+
 private:
 	void InitLightResources();
-private:
+
 	template<typename T>
 	void UpdateBuffer(std::shared_ptr<DynamicSizeBuffer> dynamicBuffer, uint32_t requiredSize);
+
 private:
-	std::array<std::shared_ptr<DynamicSizeBuffer>, GlobalConfig::FrameConfig::maxFramesInFlights> lightIndirectDrawBuffers;
-	std::array<std::shared_ptr<DynamicSizeBuffer>, GlobalConfig::FrameConfig::maxFramesInFlights> lightInstanceIndexBuffers;
-	std::array<std::shared_ptr<DynamicSizeBuffer>, GlobalConfig::FrameConfig::maxFramesInFlights> lightShadowCountBuffers;
-	std::array<std::shared_ptr<DynamicSizeBuffer>, GlobalConfig::FrameConfig::maxFramesInFlights> lightShadowInstanceIndexBuffers;
+	std::array<std::shared_ptr<DynamicSizeBuffer>, GlobalConfig::FrameConfig::maxFramesInFlights> indirectDrawBuffers;
+	std::array<std::shared_ptr<DynamicSizeBuffer>, GlobalConfig::FrameConfig::maxFramesInFlights> instanceIndexBuffers;
+	std::array<std::shared_ptr<DynamicSizeBuffer>, GlobalConfig::FrameConfig::maxFramesInFlights> shadowCountBuffers;
+	std::array<std::shared_ptr<DynamicSizeBuffer>, GlobalConfig::FrameConfig::maxFramesInFlights> shadowInstanceIndexBuffers;
+	std::array<std::shared_ptr<DynamicSizeBuffer>, GlobalConfig::FrameConfig::maxFramesInFlights> shadowDispatchIndirectBuffers;
 };
 
 template<typename L>
@@ -37,16 +56,20 @@ void LightBufferManager<L>::InitLightResources()
 {
 	for (uint32_t i = 0; i < GlobalConfig::FrameConfig::maxFramesInFlights; ++i)
 	{
-		lightIndirectDrawBuffers[i] = std::make_shared<DynamicSizeBuffer>();
-		lightShadowCountBuffers[i] = std::make_shared<DynamicSizeBuffer>();
-		lightInstanceIndexBuffers[i] = std::make_shared<DynamicSizeBuffer>();
-		lightShadowInstanceIndexBuffers[i] = std::make_shared<DynamicSizeBuffer>();
+		indirectDrawBuffers[i] = std::make_shared<DynamicSizeBuffer>();
+		shadowCountBuffers[i] = std::make_shared<DynamicSizeBuffer>();
+		instanceIndexBuffers[i] = std::make_shared<DynamicSizeBuffer>();
+		shadowInstanceIndexBuffers[i] = std::make_shared<DynamicSizeBuffer>();
+		shadowDispatchIndirectBuffers[i] = std::make_shared<DynamicSizeBuffer>();
 
-		lightShadowCountBuffers[i]->size = 1;
-		UpdateBuffer<uint32_t>(lightShadowCountBuffers[i], 1);
+		shadowCountBuffers[i]->size = 1;
+		UpdateBuffer<uint32_t>(shadowCountBuffers[i], 1);
 
-		lightIndirectDrawBuffers[i]->size = 1;
-		UpdateBuffer<VkDrawIndirectCommand>(lightIndirectDrawBuffers[i], 1);
+		indirectDrawBuffers[i]->size = 1;
+		UpdateBuffer<VkDrawIndirectCommand>(indirectDrawBuffers[i], 1);
+
+		shadowDispatchIndirectBuffers[i]->size = 1;
+		UpdateBuffer<VkDispatchIndirectCommand>(shadowDispatchIndirectBuffers[i], 1);
 	}
 }
 
@@ -76,6 +99,6 @@ void LightBufferManager<L>::Update(std::shared_ptr<Registry> registry, uint32_t 
 	uint32_t baseBufferSize = GlobalConfig::BufferConfig::lightInstanceSize;
 	uint32_t requiredSize = static_cast<uint32_t>(std::ceil((count + 1) / (float)baseBufferSize)) * baseBufferSize;
 
-	UpdateBuffer<uint32_t>(lightInstanceIndexBuffers[frameIndex], requiredSize);
-	UpdateBuffer<uint32_t>(lightShadowInstanceIndexBuffers[frameIndex], requiredSize);
+	UpdateBuffer<uint32_t>(instanceIndexBuffers[frameIndex], requiredSize);
+	UpdateBuffer<uint32_t>(shadowInstanceIndexBuffers[frameIndex], requiredSize);
 }

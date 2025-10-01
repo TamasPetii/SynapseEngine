@@ -448,11 +448,13 @@
     <None Include="Shaders\BillboardInstanced.vert" />
     <None Include="Shaders\Billboard.vert" />
     <None Include="Shaders\Common\Culling\Culling.glsl" />
+    <None Include="Shaders\Common\Light\LightCount.glsl" />
     <None Include="Shaders\Common\Light\SpotLight.glsl" />
     <None Include="Shaders\Common\Pbr.glsl" />
     <None Include="Shaders\Common\Position.glsl" />
     <None Include="Shaders\Common\Render\DefaultCollider.glsl" />
-    <None Include="Shaders\Common\Render\DrawIndirectCommand.glsl" />
+    <None Include="Shaders\Common\Render\DispatchIndirect.glsl" />
+    <None Include="Shaders\Common\Render\DrawIndirect.glsl" />
     <None Include="Shaders\Common\Render\Occlusion.glsl" />
     <None Include="Shaders\Common\Shape\ShapeBufferAddresses.glsl" />
     <None Include="Shaders\CullingCameraFrustum.comp" />
