@@ -95,7 +95,8 @@ void Engine::Update()
 	resourceManager->GetImageManager()->Update();
 	resourceManager->GetMaterialManager()->Update(frameIndex);
 	resourceManager->GetAnimationManager()->Update(frameIndex);
-	resourceManager->GetLightBufferManager()->Update(scene->GetRegistry(), frameIndex);
+	resourceManager->GetPointLightBufferManager()->Update(scene->GetRegistry(), frameIndex);
+	resourceManager->GetSpotLightBufferManager()->Update(scene->GetRegistry(), frameIndex);
 
 	/*
 	if (resourceUpdateTime >= resourceUpdateTargetTime)

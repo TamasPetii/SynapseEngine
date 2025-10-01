@@ -9,6 +9,9 @@
 #include "MaterialManager.h"
 #include "LightBufferManager.h"
 
+class PointLightComponent;
+class SpotLightComponent;
+
 class ENGINE_API ResourceManager
 {
 public:
@@ -25,7 +28,8 @@ public:
 	auto GetBenchmarkManager() { return benchmarkManager; }
 	auto GetAnimationManager() { return animationManager; }
 	auto GetMaterialManager() { return materialManager; }
-	auto GetLightBufferManager() { return lightBufferManager; }
+	auto GetPointLightBufferManager() { return pointLightBufferManager; }
+	auto GetSpotLightBufferManager() { return spotLightBufferManager; }
 private:
 	std::shared_ptr<ModelManager> modelManager;
 	std::shared_ptr<ImageManager> imageManager;
@@ -35,6 +39,7 @@ private:
 	std::shared_ptr<BenchmarkManager> benchmarkManager;
 	std::shared_ptr<AnimationManager> animationManager;
 	std::shared_ptr<MaterialManager> materialManager;
-	std::shared_ptr<LightBufferManager> lightBufferManager;
+	std::shared_ptr<LightBufferManager<PointLightComponent>> pointLightBufferManager;
+	std::shared_ptr<LightBufferManager<SpotLightComponent>> spotLightBufferManager;
 };
 

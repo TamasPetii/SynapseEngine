@@ -1,4 +1,6 @@
 #include "ResourceManager.h"
+#include "Engine/Components/PointLightComponent.h"
+#include "Engine/Components/SpotLightComponent.h"
 
 ResourceManager::ResourceManager()
 {
@@ -20,7 +22,8 @@ void ResourceManager::Initialize()
 	modelManager = std::make_shared<ModelManager>(imageManager, materialManager);
 	benchmarkManager = std::make_shared<BenchmarkManager>();
 	animationManager = std::make_shared<AnimationManager>();
-	lightBufferManager = std::make_shared<LightBufferManager>();
+	pointLightBufferManager = std::make_shared<LightBufferManager<PointLightComponent>>();
+	spotLightBufferManager = std::make_shared<LightBufferManager<SpotLightComponent>>();
 }
 
 void ResourceManager::Cleanup()
@@ -33,5 +36,6 @@ void ResourceManager::Cleanup()
 	benchmarkManager.reset();
 	animationManager.reset();
 	materialManager.reset();
-	lightBufferManager.reset();
+	pointLightBufferManager.reset();
+	spotLightBufferManager.reset();
 }

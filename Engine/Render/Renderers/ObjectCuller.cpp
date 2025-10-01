@@ -7,6 +7,11 @@ void ObjectCuller::Initialize(std::shared_ptr<ResourceManager> resourceManager)
 
 void ObjectCuller::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex, std::function<void()> renderFunction)
 {
+	CullObjectInCameraFrustum(commandBuffer, registry, resourceManager, frameIndex);
+}
+
+void ObjectCuller::CullObjectInCameraFrustum(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
+{
 	auto vulkanContext = Vk::VulkanContext::GetContext();
 	auto device = vulkanContext->GetDevice();
 	auto graphicsQueue = device->GetQueue(Vk::QueueType::GRAPHICS);
@@ -30,10 +35,10 @@ void ObjectCuller::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registr
 	if (workgroupCount == 0)
 		return;
 
-	CullingPushConstants pushConstants;
+	CullingCameraFrustumPushConstants pushConstants;
 	pushConstants.cameraIndex = 0;
 	pushConstants.cameraFrustumBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraFrustumData", frameIndex)->buffer->GetAddress();
-	
+
 	pushConstants.defaultColliderCount = defaultColliderCount;
 	pushConstants.defaultColliderBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("DefaultColliderData", frameIndex)->buffer->GetAddress();
 
@@ -48,7 +53,7 @@ void ObjectCuller::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registr
 	pushConstants.shapeInstanceIndexAddressBuffer = resourceManager->GetGeometryManager()->GetInstanceIndexAddressBuffer(frameIndex)->buffer->GetAddress();
 
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetPipeline());
-	vkCmdPushConstants(commandBuffer, pipeline->GetLayout(), VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(CullingPushConstants), &pushConstants);
+	vkCmdPushConstants(commandBuffer, pipeline->GetLayout(), VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(CullingCameraFrustumPushConstants), &pushConstants);
 
 	vkCmdDispatch(commandBuffer, workgroupCount, 1, 1);
 
@@ -63,5 +68,6 @@ void ObjectCuller::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registr
 	drawDepInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
 	drawDepInfo.memoryBarrierCount = 1;
 	drawDepInfo.pMemoryBarriers = &drawBarrier;
+
 	vkCmdPipelineBarrier2(commandBuffer, &drawDepInfo);
 }

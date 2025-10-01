@@ -41,7 +41,6 @@ struct ENGINE_API GlobalConfig
 		static constexpr uint32_t shapeAddressBufferBaseSize = 16;
 		static constexpr uint32_t animationBufferBaseSize = 16;
 		static constexpr uint32_t componentBufferBaseSize = 32;
-		static constexpr uint32_t pointLightInstanceSize = 32;
-		static constexpr uint32_t spotLightInstanceSize = 32;
+		static constexpr uint32_t lightInstanceSize = 32;
 	};
 };

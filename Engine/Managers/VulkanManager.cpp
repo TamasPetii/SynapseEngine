@@ -757,7 +757,7 @@ void VulkanManager::InitGraphicsPipelines()
 void VulkanManager::InitComputePipelines()
 {
 	{
-		uint32_t pushConsantSize = sizeof(CullingPushConstants);
+		uint32_t pushConsantSize = sizeof(CullingCameraFrustumPushConstants);
 
 		Vk::ComputePipelineBuilder pipelineBuilder;
 		pipelineBuilder

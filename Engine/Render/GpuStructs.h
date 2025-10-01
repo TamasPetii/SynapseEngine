@@ -108,7 +108,7 @@ struct GeometryRendererIndirectPushConstants
 	uint32_t cameraIndex;
 };
 
-struct CullingPushConstants
+struct CullingCameraFrustumPushConstants
 {
 	VkDeviceAddress cameraFrustumBuffer;
 	VkDeviceAddress defaultColliderBuffer;

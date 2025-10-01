@@ -11,8 +11,9 @@ layout(push_constant) uniform constants
 	uvec2 cameraFrustumBuffer;
 	uvec2 pointLightBuffer;
 	uvec2 pointLightInstanceIndexBuffer;
-	uvec2 pointLightShadowInstanceIndexBuffer;
 	uvec2 pointLightDrawIndirectCommandBuffer;
+	uvec2 pointLightShadowInstanceIndexBuffer;
+	uvec2 pointLightShadowCountBuffer;
 	uint cameraIndex;
 	uint pointLightCount;
 } PushConstants;
