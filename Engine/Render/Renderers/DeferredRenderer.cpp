@@ -3,7 +3,6 @@
 #include "Engine/Components/PointLightComponent.h"
 #include "Engine/Components/SpotLightComponent.h"
 #include "Engine/Render/GpuStructs.h"
-#include "OcclusionCuller.h"
 
 void DeferredRenderer::Initialize(std::shared_ptr<ResourceManager> resourceManager)
 {
@@ -48,7 +47,6 @@ void DeferredRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Reg
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_WRITE_BIT,
 		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT);
 
-	//OcclusionCuller::CullLights(registry, resourceManager, frameIndex);
 	RenderDirectionLights(commandBuffer, registry, resourceManager, frameIndex);
 	RenderPointLights(commandBuffer, registry, resourceManager, frameIndex);
 	RenderSpotLights(commandBuffer, registry, resourceManager, frameIndex);
@@ -111,7 +109,10 @@ void DeferredRenderer::RenderPointLights(VkCommandBuffer commandBuffer, std::sha
 {
 	auto pointLightPool = registry->GetPool<PointLightComponent>();
 
-	if (!pointLightPool || pointLightPool->GetDenseSize() == 0 || PointLightComponent::instanceCount == 0)
+	auto pointLightIndirectDrawBuffer = static_cast<VkDrawIndirectCommand*>(resourceManager->GetPointLightBufferManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler());
+	uint32_t pointLightInstanceCount = pointLightIndirectDrawBuffer[0].instanceCount;
+
+	if (!pointLightPool || pointLightPool->GetDenseSize() == 0 || pointLightInstanceCount == 0)
 		return;
 
 	auto vulkanContext = Vk::VulkanContext::GetContext();
@@ -152,7 +153,7 @@ void DeferredRenderer::RenderPointLights(VkCommandBuffer commandBuffer, std::sha
 	pushConstants.cameraBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraData", frameIndex)->buffer->GetAddress();
 	pushConstants.pointLightBufferAddress = resourceManager->GetComponentBufferManager()->GetComponentBuffer("PointLightData", frameIndex)->buffer->GetAddress();
 	pushConstants.transformBufferAddress = resourceManager->GetComponentBufferManager()->GetComponentBuffer("PointLightTransform", frameIndex)->buffer->GetAddress();
-	pushConstants.instanceBufferAddress = resourceManager->GetComponentBufferManager()->GetComponentBuffer("PointLightInstanceIndices", frameIndex)->buffer->GetAddress();
+	pushConstants.instanceBufferAddress = resourceManager->GetPointLightBufferManager()->GetInstanceIndexBuffer(frameIndex)->buffer->GetAddress();
 	pushConstants.vertexBufferAddress = shape->GetVertexBuffer()->GetAddress();
 	pushConstants.indexBufferAddress = shape->GetIndexBuffer()->GetAddress();
 	pushConstants.viewPortSize = glm::vec2(viewport.width, viewport.height);
@@ -164,7 +165,7 @@ void DeferredRenderer::RenderPointLights(VkCommandBuffer commandBuffer, std::sha
 
 	//TODO: BIND POINT LIGHT DYNAMIC DESCRIPTOR ARRAY INDICES
 
-	vkCmdDraw(commandBuffer, shape->GetIndexCount(), PointLightComponent::instanceCount, 0, 0);
+	vkCmdDraw(commandBuffer, shape->GetIndexCount(), pointLightInstanceCount, 0, 0);
 
 	vkCmdEndRendering(commandBuffer);
 }
@@ -173,7 +174,10 @@ void DeferredRenderer::RenderSpotLights(VkCommandBuffer commandBuffer, std::shar
 {
 	auto spotLightPool = registry->GetPool<SpotLightComponent>();
 
-	if (!spotLightPool || spotLightPool->GetDenseSize() == 0)
+	auto spotLightIndirectDrawBuffer = static_cast<VkDrawIndirectCommand*>(resourceManager->GetSpotLightBufferManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler());
+	uint32_t spotLightInstanceCount = spotLightIndirectDrawBuffer[0].instanceCount;
+
+	if (!spotLightPool || spotLightPool->GetDenseSize() == 0 || spotLightInstanceCount == 0)
 		return;
 
 	auto vulkanContext = Vk::VulkanContext::GetContext();
@@ -213,7 +217,7 @@ void DeferredRenderer::RenderSpotLights(VkCommandBuffer commandBuffer, std::shar
 	pushConstants.cameraBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraData", frameIndex)->buffer->GetAddress();
 	pushConstants.spotLightBufferAddress = resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightData", frameIndex)->buffer->GetAddress();
 	pushConstants.transformBufferAddress = resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightTransform", frameIndex)->buffer->GetAddress();
-	pushConstants.instanceBufferAddress = resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightInstanceIndices", frameIndex)->buffer->GetAddress();
+	pushConstants.instanceBufferAddress = resourceManager->GetSpotLightBufferManager()->GetInstanceIndexBuffer(frameIndex)->buffer->GetAddress();
 	pushConstants.vertexBufferAddress = shape->GetVertexBuffer()->GetAddress();
 	pushConstants.indexBufferAddress = shape->GetIndexBuffer()->GetAddress();
 	pushConstants.viewPortSize = glm::vec2(viewport.width, viewport.height);
@@ -225,7 +229,7 @@ void DeferredRenderer::RenderSpotLights(VkCommandBuffer commandBuffer, std::shar
 
 	//TODO: BIND Spot LIGHT DYNAMIC DESCRIPTOR ARRAY INDICES
 
-	vkCmdDraw(commandBuffer, shape->GetIndexCount(), SpotLightComponent::instanceCount, 0, 0);
+	vkCmdDraw(commandBuffer, shape->GetIndexCount(), spotLightInstanceCount, 0, 0);
 
 	vkCmdEndRendering(commandBuffer);
 }

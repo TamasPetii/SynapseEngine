@@ -81,16 +81,20 @@ void BillboardRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Re
 	{
 		uint32_t count = pointLightPool->GetDenseSize();
 
+		/*
 		if (GlobalConfig::BillboardConfig::showPointLights)
 			RenderBillboard("PointLightBillboard", "PointLightInstanceIndices", count, pointLightIcon->GetBufferArrayIndex());
+		*/
 	}
 
 	if (auto spotLightPool = registry->GetPool<SpotLightComponent>())
 	{
 		uint32_t count = spotLightPool->GetDenseSize();
 
+		/*
 		if (GlobalConfig::BillboardConfig::showSpotLights)
 			RenderBillboard("SpotLightBillboard", "SpotLightInstanceIndices", count, spotLightIcon->GetBufferArrayIndex());
+		*/
 	}
 
 

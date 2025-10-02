@@ -399,9 +399,6 @@
     <ClInclude Include="Components\TagComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Renderers\OcclusionCuller.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Render\Renderers\BillboardRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -795,9 +792,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Components\TagComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\Renderers\OcclusionCuller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Renderers\BillboardRenderer.cpp">

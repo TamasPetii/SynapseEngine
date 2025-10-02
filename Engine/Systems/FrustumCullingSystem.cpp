@@ -91,7 +91,7 @@ void FrustumCullingSystem::PointLightCulling(std::shared_ptr<Registry> registry,
 	if (!pointLightPool || !transformPool)
 		return;
 
-	std::for_each(std::execution::par, pointLightPool->GetDenseIndices().begin(), pointLightPool->GetDenseIndices().end(),
+	std::for_each(std::execution::seq, pointLightPool->GetDenseIndices().begin(), pointLightPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			if (transformPool->HasComponent(entity))
 			{

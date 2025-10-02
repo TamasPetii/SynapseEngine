@@ -138,5 +138,12 @@ void Engine::SimulateFrame()
 	UpdateGPU();
 	Render();
 
+	Finish();
+
 	frameIndex = (frameIndex + 1) % GlobalConfig::FrameConfig::framesInFlight;
+}
+
+void Engine::Finish()
+{
+	scene->Finish();
 }

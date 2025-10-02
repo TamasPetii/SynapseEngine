@@ -51,13 +51,11 @@ void main()
 		{		
 			uint shadowInstanceIndex = atomicAdd(LightCountBuffer(PushConstants.pointLightShadowCountBuffer).lightCount, 1);
 			InstanceIndexBuffer(PushConstants.pointLightShadowInstanceIndexBuffer).indices[shadowInstanceIndex] = pointLightIndex;
+
+			uint count = shadowInstanceIndex + 1;
+			uint numGroupsX = (count + (pointShadowLocalSizeX - 1)) / pointShadowLocalSizeX;
+            
+			atomicMax(DispatchIndirectCommandBuffer(PushConstants.pointLightShadowDispatchIndirectBuffer).command.num_groups_x, numGroupsX);
 		}	
 	}
-
-    memoryBarrierBuffer();
-
-    if (globalIndex == 0) {
-        uint num_groups_x = (LightCountBuffer(PushConstants.pointLightShadowCountBuffer).lightCount + (pointShadowLocalSizeX - 1)) / pointShadowLocalSizeX;
-        DispatchIndirectCommandBuffer(PushConstants.pointLightShadowDispatchIndirectBuffer).command.num_groups_x = num_groups_x;
-    }
 }

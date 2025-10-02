@@ -30,7 +30,6 @@ public:
 	const auto& GetShadowDispatchIndirectBuffers(uint32_t frameIndex) const {
 		return shadowDispatchIndirectBuffers[frameIndex];
 	}
-
 private:
 	void InitLightResources();
 

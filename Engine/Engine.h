@@ -30,6 +30,7 @@ private:
 	void Render();
 	void Update();
 	void UpdateGPU();
+	void Finish();
 private:
 	uint32_t frameIndex = 0;
 	std::shared_ptr<Scene> scene;

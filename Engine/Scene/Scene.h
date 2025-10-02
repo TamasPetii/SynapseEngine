@@ -12,6 +12,7 @@ public:
 	~Scene();
 	void Update(std::shared_ptr<Timer> frameTimer, uint32_t frameIndex);
 	void UpdateGPU(uint32_t frameIndex);
+	void Finish();
 	std::shared_ptr<Registry> GetRegistry() { return registry; }
 private:
 	void Initialize();

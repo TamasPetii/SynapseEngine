@@ -18,13 +18,13 @@ void InstanceSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_pt
 {
 	//auto futureShape = std::async(std::launch::async, &InstanceSystem::UpdateShapeInstances, this, registry, resourceManager);
 	//auto futureModel = std::async(std::launch::async, &InstanceSystem::UpdateModelInstances, this, registry, resourceManager);
-	auto futurePointLight = std::async(std::launch::async, &InstanceSystem::UpdatePointLightInstances, this, registry);
-	auto futureSpotLight = std::async(std::launch::async, &InstanceSystem::UpdateSpotLightInstances, this, registry);
+	//auto futurePointLight = std::async(std::launch::async, &InstanceSystem::UpdatePointLightInstances, this, registry);
+	//auto futureSpotLight = std::async(std::launch::async, &InstanceSystem::UpdateSpotLightInstances, this, registry);
 
 	//futureShape.get();
 	//futureModel.get();
-	futurePointLight.get();
-	futureSpotLight.get();
+	//futurePointLight.get();
+	//futureSpotLight.get();
 }
 
 void InstanceSystem::OnFinish(std::shared_ptr<Registry> registry)
@@ -273,79 +273,52 @@ void InstanceSystem::UpdateModelInstancesGpuIndirectDraw(std::shared_ptr<Resourc
 	);
 }
 
-void InstanceSystem::UpdatePointLightInstances(std::shared_ptr<Registry> registry)
+void InstanceSystem::UpdatePointLightInstancesGpu(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
 {
 	auto pointLightPool = registry->GetPool<PointLightComponent>();
 	if (!pointLightPool)
 		return;
 
-	PointLightComponent::instanceCount = 0;
-	PointLightComponent::instanceIndices.clear();
-	PointLightComponent::instanceIndices.reserve(pointLightPool->GetDenseSize());
+	auto pointLightManager = resourceManager->GetPointLightBufferManager();
+	auto pointLightIndirectDrawBuffer = static_cast<VkDrawIndirectCommand*>(pointLightManager->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler());
+	auto pointLightInstanceIndexBufferHandler = static_cast<uint32_t*>(pointLightManager->GetInstanceIndexBuffer(frameIndex)->buffer->GetHandler());
+
+	std::atomic<uint32_t> instanceCount = 0;
 
 	std::for_each(std::execution::seq, pointLightPool->GetDenseIndices().begin(), pointLightPool->GetDenseIndices().end(),
 		[&](Entity entity) -> void {
 			auto& pointLightComponent = pointLightPool->GetData(entity);
 
 			if (pointLightComponent.toRender)
-			{
-				PointLightComponent::instanceIndices.push_back(pointLightPool->GetDenseIndex(entity));
-				PointLightComponent::instanceCount++;
-			}
+				pointLightInstanceIndexBufferHandler[instanceCount++] = pointLightPool->GetDenseIndex(entity);
 		}
 	);
 
-	PointLightComponent::instanceIndices.resize(PointLightComponent::instanceCount);
+	pointLightIndirectDrawBuffer[0].instanceCount = instanceCount;
 }
 
-void InstanceSystem::UpdatePointLightInstancesGpu(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
+void InstanceSystem::UpdateSpotLightInstancesGpu(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
 {
-	auto pointLightPool = registry->GetPool<PointLightComponent>();
-	if (!pointLightPool || PointLightComponent::instanceCount == 0)
+	auto spotLightPool = registry->GetPool<SpotLightComponent>();
+	if (!spotLightPool)
 		return;
 
-	{
-		VkDeviceSize bufferSize = sizeof(uint32_t) * PointLightComponent::instanceCount;
-		auto pointLightInstanceIndicesBufferHandler = resourceManager->GetComponentBufferManager()->GetComponentBuffer("PointLightInstanceIndices", frameIndex)->buffer->GetHandler();
-		memcpy(pointLightInstanceIndicesBufferHandler, PointLightComponent::instanceIndices.data(), (size_t)bufferSize);
-	}
+	auto spotLightManager = resourceManager->GetSpotLightBufferManager();
+	auto spotLightIndirectDrawBuffer = static_cast<VkDrawIndirectCommand*>(spotLightManager->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler());
+	auto spotLightInstanceIndexBufferHandler = static_cast<uint32_t*>(spotLightManager->GetInstanceIndexBuffer(frameIndex)->buffer->GetHandler());
 
-	{
-		VkDeviceSize bufferSize = sizeof(uint32_t) * PointLightComponent::instanceCount;
-		auto pointLightOcclusionIndicesBufferHandler = resourceManager->GetComponentBufferManager()->GetComponentBuffer("PointLightOcclusionIndices", frameIndex)->buffer->GetHandler();
-		memset(pointLightOcclusionIndicesBufferHandler, 0, (size_t)bufferSize);
-	}
-}
+	std::atomic<uint32_t> instanceCount = 0;
 
-void InstanceSystem::UpdatePointLightInstancesWithOcclusion(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
-{
-	auto [pointLightPool, cameraPool] = registry->GetPools<PointLightComponent, CameraComponent>();
+	std::for_each(std::execution::seq, spotLightPool->GetDenseIndices().begin(), spotLightPool->GetDenseIndices().end(),
+		[&](Entity entity) -> void {
+			auto& spotLightComponent = spotLightPool->GetData(entity);
 
-	if (!pointLightPool || !cameraPool || PointLightComponent::instanceCount == 0)
-		return;
+			if (spotLightComponent.toRender)
+				spotLightInstanceIndexBufferHandler[instanceCount++] = spotLightPool->GetDenseIndex(entity);
+		}
+	);
 
-	auto mainCameraEntity = CameraSystem::GetMainCameraEntity(registry);
-	auto& cameraComponent = cameraPool->GetData(mainCameraEntity);
-
-	auto pointLightOcclusionIndicesBufferHandler = static_cast<uint32_t*>(resourceManager->GetComponentBufferManager()->GetComponentBuffer("PointLightOcclusionIndices", frameIndex)->buffer->GetHandler());
-
-	uint32_t currentIndex = 0;
-	for (uint32_t i = 0; i < PointLightComponent::instanceCount; ++i)
-	{
-		auto& pointLightComponent = pointLightPool->GetDenseData()[PointLightComponent::instanceIndices[i]];
-
-		//Camera in inside the light volume it won't be rendered which means no fragments created because of Back Face Culling.
-		//In this case we still need to add the instance index to the final instance indices list.
-		if (pointLightOcclusionIndicesBufferHandler[i] == 1 || IsCameraInsidePointLightCubeVolume(pointLightComponent, cameraComponent))
-			PointLightComponent::instanceIndices[currentIndex++] = PointLightComponent::instanceIndices[i];
-	}
-
-	PointLightComponent::instanceCount = currentIndex;
-	PointLightComponent::instanceIndices.resize(PointLightComponent::instanceCount);
-
-	VkDeviceSize bufferSize = sizeof(uint32_t) * PointLightComponent::instanceCount;
-	auto pointLightInstanceIndicesBufferHandler = resourceManager->GetComponentBufferManager()->GetComponentBuffer("PointLightInstanceIndices", frameIndex)->buffer->GetHandler();
-	memcpy(pointLightInstanceIndicesBufferHandler, PointLightComponent::instanceIndices.data(), (size_t)bufferSize);
+	spotLightIndirectDrawBuffer[0].instanceCount = instanceCount;
 }
 
 bool InstanceSystem::IsCameraInsidePointLightSphereVolume(const PointLightComponent& pointLightComponent, const CameraComponent& cameraComponent)
@@ -368,79 +341,4 @@ bool InstanceSystem::IsCameraInsideSpotLightConeVolume(const SpotLightComponent&
 	float delta = glm::dot(spotDirNorm, fromSpotToCamera); //The projected length to check if its inside the far plane
 
 	return !(alpha < spotLightComponent.angles.w || delta > spotLightComponent.length);
-}
-
-void InstanceSystem::UpdateSpotLightInstances(std::shared_ptr<Registry> registry)
-{
-	auto spotLightPool = registry->GetPool<SpotLightComponent>();
-	if (!spotLightPool)
-		return;
-
-	SpotLightComponent::instanceCount = 0;
-	SpotLightComponent::instanceIndices.clear();
-	SpotLightComponent::instanceIndices.reserve(spotLightPool->GetDenseSize());
-
-	std::for_each(std::execution::seq, spotLightPool->GetDenseIndices().begin(), spotLightPool->GetDenseIndices().end(),
-		[&](Entity entity) -> void {
-			auto& spotLightComponent = spotLightPool->GetData(entity);
-
-			if (spotLightComponent.toRender)
-			{
-				SpotLightComponent::instanceIndices.push_back(spotLightPool->GetDenseIndex(entity));
-				SpotLightComponent::instanceCount++;
-			}
-		}
-	);
-
-	SpotLightComponent::instanceIndices.resize(SpotLightComponent::instanceCount);
-}
-
-void InstanceSystem::UpdateSpotLightInstancesGpu(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
-{
-	auto spotLightPool = registry->GetPool<SpotLightComponent>();
-	if (!spotLightPool || SpotLightComponent::instanceCount == 0)
-		return;
-
-	{
-		VkDeviceSize bufferSize = sizeof(uint32_t) * SpotLightComponent::instanceCount;
-		auto spotLightInstanceIndicesBufferHandler = resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightInstanceIndices", frameIndex)->buffer->GetHandler();
-		memcpy(spotLightInstanceIndicesBufferHandler, SpotLightComponent::instanceIndices.data(), (size_t)bufferSize);
-	}
-
-	{
-		VkDeviceSize bufferSize = sizeof(uint32_t) * SpotLightComponent::instanceCount;
-		auto spotLightOcclusionIndicesBufferHandler = resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightOcclusionIndices", frameIndex)->buffer->GetHandler();
-		memset(spotLightOcclusionIndicesBufferHandler, 0, (size_t)bufferSize);
-	}
-}
-
-void InstanceSystem::UpdateSpotLightInstancesWithOcclusion(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
-{
-	auto [spotLightPool, cameraPool] = registry->GetPools<SpotLightComponent, CameraComponent>();
-
-	if (!spotLightPool || !cameraPool || SpotLightComponent::instanceCount == 0)
-		return;
-
-	auto mainCameraEntity = CameraSystem::GetMainCameraEntity(registry);
-	auto& cameraComponent = cameraPool->GetData(mainCameraEntity);
-
-	auto spotLightOcclusionIndicesBufferHandler = static_cast<uint32_t*>(resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightOcclusionIndices", frameIndex)->buffer->GetHandler());
-
-	uint32_t currentIndex = 0;
-	for (uint32_t i = 0; i < SpotLightComponent::instanceCount; ++i)
-	{
-		auto& spotLightComponent = spotLightPool->GetDenseData()[SpotLightComponent::instanceIndices[i]];
-
-		//Camera in inside the light volume it won't be rendered which means no fragments created because of Back Face Culling.
-		//In this case we still need to add the instance index to the final instance indices list.
-		if (spotLightOcclusionIndicesBufferHandler[i] == 1 || IsCameraInsideSpotLightConeVolume(spotLightComponent, cameraComponent))
-			SpotLightComponent::instanceIndices[currentIndex++] = SpotLightComponent::instanceIndices[i];
-	}
-
-	SpotLightComponent::instanceCount = currentIndex;
-	SpotLightComponent::instanceIndices.resize(SpotLightComponent::instanceCount);
-
-	VkDeviceSize bufferSize = sizeof(uint32_t) * SpotLightComponent::instanceCount;
-	auto spotLightInstanceIndicesBufferHandler = resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightInstanceIndices", frameIndex)->buffer->GetHandler();
-	memcpy(spotLightInstanceIndicesBufferHandler, SpotLightComponent::instanceIndices.data(), (size_t)bufferSize);
 }

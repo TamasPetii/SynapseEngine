@@ -23,8 +23,6 @@ struct ENGINE_API SpotLightShadow : public LightShadow
 struct ENGINE_API SpotLightComponent : public Light, public Component, public FrustumCullable
 {
 	SpotLightComponent();
-	static inline uint32_t instanceCount = 0; //Probably problematic with more scenes on the fly
-	static inline std::vector<uint32_t> instanceIndices;
 
 	glm::vec3 position; //Mapped to transform component translation!
 	glm::vec3 direction; //Mapped to transform component rotation!
