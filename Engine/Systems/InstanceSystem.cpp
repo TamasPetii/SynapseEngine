@@ -35,13 +35,13 @@ void InstanceSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shar
 {
 	//auto futureShapeGpu = std::async(std::launch::async, &InstanceSystem::UpdateShapeInstancesGpuIndirectDraw, this, resourceManager, frameIndex);
 	//auto futureModelGpu = std::async(std::launch::async, &InstanceSystem::UpdateModelInstancesGpuIndirectDraw, this, resourceManager, frameIndex);
-	auto futurePointLightGpu = std::async(std::launch::async, &InstanceSystem::UpdatePointLightInstancesGpu, this, registry, resourceManager, frameIndex);
-	auto futureSpotLightGpu = std::async(std::launch::async, &InstanceSystem::UpdateSpotLightInstancesGpu, this, registry, resourceManager, frameIndex);
+	//auto futurePointLightGpu = std::async(std::launch::async, &InstanceSystem::UpdatePointLightInstancesGpu, this, registry, resourceManager, frameIndex);
+	//auto futureSpotLightGpu = std::async(std::launch::async, &InstanceSystem::UpdateSpotLightInstancesGpu, this, registry, resourceManager, frameIndex);
 
 	//futureShapeGpu.get();
 	//futureModelGpu.get();
-	futurePointLightGpu.get();
-	futureSpotLightGpu.get();
+	//futurePointLightGpu.get();
+	//futureSpotLightGpu.get();
 }
 
 void InstanceSystem::UpdateShapeInstances(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager)

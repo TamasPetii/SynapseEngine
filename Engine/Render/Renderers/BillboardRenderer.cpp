@@ -53,13 +53,14 @@ void BillboardRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Re
 
 	auto RenderBillboard = [&](const std::string& billboardBufferName, const std::string& instanceBufferName, uint32_t instanceCount, uint32_t iconIndex) -> void
 		{
+			//Todo: Use new light instance buffer, if instanced billboards are rendered!
 			if (instanceCount > 0)
 			{
 				BillboardPushConstants pushConstants;
 				pushConstants.cameraIndex = 0;
 				pushConstants.cameraBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraData", frameIndex)->buffer->GetAddress();
 				pushConstants.positionBufferAddress = resourceManager->GetComponentBufferManager()->GetComponentBuffer(billboardBufferName, frameIndex)->buffer->GetAddress();
-				pushConstants.instanceBufferAddress = resourceManager->GetComponentBufferManager()->GetComponentBuffer(instanceBufferName, frameIndex)->buffer->GetAddress();
+				//pushConstants.instanceBufferAddress = resourceManager->GetComponentBufferManager()->GetComponentBuffer(instanceBufferName, frameIndex)->buffer->GetAddress();
 				pushConstants.iconIndex = iconIndex;
 
 				vkCmdPushConstants(commandBuffer, pipeline->GetLayout(), VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(BillboardPushConstants), &pushConstants);
@@ -81,20 +82,16 @@ void BillboardRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Re
 	{
 		uint32_t count = pointLightPool->GetDenseSize();
 
-		/*
 		if (GlobalConfig::BillboardConfig::showPointLights)
 			RenderBillboard("PointLightBillboard", "PointLightInstanceIndices", count, pointLightIcon->GetBufferArrayIndex());
-		*/
 	}
 
 	if (auto spotLightPool = registry->GetPool<SpotLightComponent>())
 	{
 		uint32_t count = spotLightPool->GetDenseSize();
 
-		/*
 		if (GlobalConfig::BillboardConfig::showSpotLights)
 			RenderBillboard("SpotLightBillboard", "SpotLightInstanceIndices", count, spotLightIcon->GetBufferArrayIndex());
-		*/
 	}
 
 

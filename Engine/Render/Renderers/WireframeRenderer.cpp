@@ -60,6 +60,8 @@ void WireframeRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Re
 			}
 		};
 
+	//Todo: Optimise wireframe rendering to use instance buffer
+
 	if (auto defaultColliderPool = registry->GetPool<DefaultColliderComponent>())
 	{
 		uint32_t count = defaultColliderPool->GetDenseSize();

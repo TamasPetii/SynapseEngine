@@ -10,7 +10,7 @@ void ObjectCuller::Initialize(std::shared_ptr<ResourceManager> resourceManager)
 void ObjectCuller::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex, std::function<void()> renderFunction)
 {
 	CullObjectInCameraFrustum(commandBuffer, registry, resourceManager, frameIndex);
-	//CullPointLightInCameraFrustum(commandBuffer, registry, resourceManager, frameIndex);
+	CullPointLightInCameraFrustum(commandBuffer, registry, resourceManager, frameIndex);
 }
 
 void ObjectCuller::CullObjectInCameraFrustum(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
@@ -60,7 +60,6 @@ void ObjectCuller::CullObjectInCameraFrustum(VkCommandBuffer commandBuffer, std:
 
 	vkCmdDispatch(commandBuffer, workgroupCount, 1, 1);
 
-	/*
 	//Todo!
 	VkMemoryBarrier2 drawBarrier = {};
 	drawBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2;
@@ -68,14 +67,15 @@ void ObjectCuller::CullObjectInCameraFrustum(VkCommandBuffer commandBuffer, std:
 	drawBarrier.srcAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT;
 	drawBarrier.dstStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
 	drawBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT | VK_ACCESS_2_SHADER_WRITE_BIT;
-	*/
 
+	/*
 	VkMemoryBarrier2 drawBarrier = {};
 	drawBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2;
 	drawBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
 	drawBarrier.srcAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT;
 	drawBarrier.dstStageMask = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT;
 	drawBarrier.dstAccessMask = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT | VK_ACCESS_2_SHADER_READ_BIT;
+	*/
 
 	VkDependencyInfo drawDepInfo = {};
 	drawDepInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;

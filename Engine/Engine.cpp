@@ -135,6 +135,9 @@ void Engine::SimulateFrame()
 	vkWaitForFences(device->Value(), 1, &inFlightFence->Value(), VK_TRUE, UINT64_MAX);
 	vkResetFences(device->Value(), 1, &inFlightFence->Value());
 
+	//auto pointLightIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(resourceManager->GetPointLightBufferManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler());
+	//std::cout << std::format("Point Light Instance Count: {}\n", pointLightIndirectDrawBufferHandler[0].instanceCount);
+
 	UpdateGPU();
 	Render();
 
