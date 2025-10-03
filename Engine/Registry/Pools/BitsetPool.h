@@ -1,8 +1,9 @@
 #pragma once
 #include "SparseSet.h"
 #include "Engine/Utils/BitsetFlag.h"
+#include "Engine/Utils/BitsetFlagged.h"
 
-class ENGINE_API BitsetPool : public virtual SparseSet
+class ENGINE_API BitsetPool : public virtual SparseSet, public BitsetFlagged
 {
 public:
 	virtual ~BitsetPool() = default;
@@ -17,7 +18,7 @@ public:
 	virtual BitsetFlag& GetBitset(uint32_t index);
 	const auto& GetDenseBitsets() { return denseBitsets; }
 protected:
-	void AddBitset();
+	void AddBitset(uint32_t index);
 	void RemoveBitset(const RemoveContext& context);
 protected:
 	std::vector<BitsetFlag> denseBitsets;
@@ -35,6 +36,7 @@ inline void BitsetPool::SetBit(uint32_t index)
 {
 	auto& bitset = GetBitset(index);
 	(bitset.set(bitIndex, true), ...);
+	(this->bitset.set(bitIndex, true), ...);
 }
 
 template<uint32_t ...bitIndex>

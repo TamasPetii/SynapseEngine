@@ -13,7 +13,8 @@ public:
 	void SetBit();
 	template<uint32_t... bitIndex>
 	void ResetBit();
-private:
+	BitsetFlag& GetBitset() { return bitset; }
+protected:
 	BitsetFlag bitset;
 	std::mutex asyncMutex;
 };

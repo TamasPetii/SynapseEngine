@@ -73,7 +73,7 @@ void Scene::InitializeRegistry()
 
 		//Point Lights
 		{
-			for (int i = 0; i < 250; ++i)
+			for (int i = 0; i < 1; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, PointLightComponent>(entity);
@@ -92,7 +92,7 @@ void Scene::InitializeRegistry()
 
 		//Spot Lights
 		{
-			for (int i = 0; i < 250; ++i)
+			for (int i = 0; i < 1; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, SpotLightComponent>(entity);
@@ -124,7 +124,7 @@ void Scene::InitializeRegistry()
 			"Torus"
 		};
 
-		for (uint32_t i = 0; i < 1000; ++i)
+		for (uint32_t i = 0; i < 2500; ++i)
 		{
 			std::string materialName = "Shape" + std::to_string(i++);
 			auto [material, wasLoaded] = resourceManager->GetMaterialManager()->RegisterMaterial(materialName);
@@ -183,7 +183,7 @@ void Scene::InitializeRegistry()
 		auto modelParent = registry->CreateEntity();
 		registry->AddComponents<TransformComponent>(modelParent);
 
-		for(uint32_t i = 0; i < 1000; i++)
+		for(uint32_t i = 0; i < 2500; i++)
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
@@ -194,7 +194,7 @@ void Scene::InitializeRegistry()
 			registry->SetParent(entity, modelParent);
 		}
 
-		for (uint32_t i = 0; i < 1000; i++)
+		for (uint32_t i = 0; i < 2500; i++)
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);

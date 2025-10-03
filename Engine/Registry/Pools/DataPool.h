@@ -45,8 +45,8 @@ inline void DataPool<T>::Add(uint32_t index, const T& data)
 
 	if (context.has_value())
 	{
-		DataPool<T>::AddData(data);
 		SparseSet::AddIndex(context.value());
+		DataPool<T>::AddData(data);
 	}
 }
 

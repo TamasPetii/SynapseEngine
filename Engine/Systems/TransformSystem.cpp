@@ -8,8 +8,14 @@
 void TransformSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex, float deltaTime)
 {
 	auto [transformPool, relationShipPool] = registry->GetPools<TransformComponent, Relationship>();
+	
 	if (!transformPool)
 		return;
+
+	if (!transformPool->BitsetFlagged::IsBitSet<UPDATE_BIT>())
+		return;
+
+	//Todo: FrameIndex BitsetFlagged -> GPU cannot skip!!!
 
 	// Iterating over all the entities, checking level depth of parent-child relation
 	// Optimisation: Get max depth in registry, probably less than MAX_RELATIONSHIP_DEPTH
@@ -85,6 +91,9 @@ void TransformSystem::OnFinish(std::shared_ptr<Registry> registry)
 	if (!transformPool)
 		return;
 
+	if (!transformPool->BitsetFlagged::IsBitSet<CHANGED_BIT>())
+		return;
+
 	std::for_each(std::execution::par, transformPool->GetDenseIndices().begin(), transformPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			[[unlikely]]
@@ -92,6 +101,8 @@ void TransformSystem::OnFinish(std::shared_ptr<Registry> registry)
 				transformPool->GetBitset(entity).reset();
 		}
 	);
+
+	transformPool->BitsetFlagged::GetBitset().reset();
 }
 
 void TransformSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)

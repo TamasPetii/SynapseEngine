@@ -50,9 +50,9 @@ inline void ComponentPool<T>::Add(uint32_t index, const T& data)
 
 	if (context.has_value())
 	{
-		BitsetPool::AddBitset();
-		DataPool<T>::AddData(data);
 		SparseSet::AddIndex(context.value());
+		BitsetPool::AddBitset(index);
+		DataPool<T>::AddData(data);
 	}
 }
 

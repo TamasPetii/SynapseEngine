@@ -18,8 +18,8 @@ void BitsetPool::Add(uint32_t index)
 
 	if (context.has_value())
 	{
-		BitsetPool::AddBitset();
 		SparseSet::AddIndex(context.value());
+		BitsetPool::AddBitset(index);
 	}
 }
 
@@ -32,17 +32,15 @@ BitsetFlag& BitsetPool::GetBitset(uint32_t index)
 	return denseBitsets[sparseIndices[GetPageIndex(index)][GetPageOffset(index)]];
 }
 
-void BitsetPool::AddBitset()
+void BitsetPool::AddBitset(uint32_t index)
 {
 	denseBitsets.push_back(BitsetFlag{});
-	denseBitsets.back().set(REGENERATE_BIT, true);
-	denseBitsets.back().set(UPDATE_BIT, true);
-	denseBitsets.back().set(INDEX_CHANGED_BIT, true);
+	SetBit<REGENERATE_BIT, UPDATE_BIT, INDEX_CHANGED_BIT>(index);
 }
 
 void BitsetPool::RemoveBitset(const RemoveContext& context)
 {
-	SetBit<REGENERATE_BIT, UPDATE_BIT, INDEX_CHANGED_BIT>(context.swapDenseIndex);
+	SetBit<REGENERATE_BIT, UPDATE_BIT, INDEX_CHANGED_BIT>(denseIndices[context.swapDenseIndex]);
 	std::swap(denseBitsets[context.deleteDenseIndex], denseBitsets[context.swapDenseIndex]);
 	denseBitsets.pop_back();
 }
