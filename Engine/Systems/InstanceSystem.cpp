@@ -340,5 +340,5 @@ bool InstanceSystem::IsCameraInsideSpotLightConeVolume(const SpotLightComponent&
 	float alpha = glm::dot(spotDirNorm, fromSpotToCameraNorm); // Angle: tells if we are inside of the cone
 	float delta = glm::dot(spotDirNorm, fromSpotToCamera); //The projected length to check if its inside the far plane
 
-	return !(alpha < spotLightComponent.angles.w || delta > spotLightComponent.length);
+	return !(alpha < spotLightComponent.angles.w || delta > spotLightComponent.range);
 }

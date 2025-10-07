@@ -66,7 +66,7 @@ void Scene::InitializeRegistry()
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, DirectionLightComponent>(entity);
-			registry->GetComponent<DirectionLightComponent>(entity).strength = 3.f;
+			registry->GetComponent<DirectionLightComponent>(entity).strength = 0.f;
 			registry->GetComponent<TransformComponent>(entity).rotation = glm::vec3(45, 0, 45);
 			registry->SetParent(entity, directionLightParent);		
 		}
@@ -92,7 +92,7 @@ void Scene::InitializeRegistry()
 
 		//Spot Lights
 		{
-			for (int i = 0; i < 1; ++i)
+			for (int i = 0; i < 3; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, SpotLightComponent>(entity);
@@ -124,17 +124,26 @@ void Scene::InitializeRegistry()
 			"Torus"
 		};
 
-		for (uint32_t i = 0; i < 2500; ++i)
+		std::string materialName = "Shape";
+		auto [material, wasLoaded] = resourceManager->GetMaterialManager()->RegisterMaterial(materialName);
+		material->color = glm::vec4(dist(rng), dist(rng), dist(rng), 1.f);
+		material->roughness = dist(rng);
+		material->metalness = dist(rng);
+		material->SetBit<UPDATE_BIT>();
+
+		for (uint32_t i = 0; i < 1000; ++i)
 		{
+			/*
 			std::string materialName = "Shape" + std::to_string(i++);
 			auto [material, wasLoaded] = resourceManager->GetMaterialManager()->RegisterMaterial(materialName);
 			material->color = glm::vec4(dist(rng), dist(rng), dist(rng), 1.f);
 			material->roughness = dist(rng);
 			material->metalness = dist(rng);
 			material->SetBit<UPDATE_BIT>();
+			*/
 
 			auto entity = registry->CreateEntity();
-			registry->AddComponents<TransformComponent, MaterialComponent, ShapeComponent, DefaultColliderComponent>(entity);
+			registry->AddComponents<TransformComponent, MaterialComponent, ShapeComponent, DefaultColliderComponent, RenderIndicesComponent>(entity);
 
 			auto [transformComponent, materialComponent, shapeComponent] = registry->GetComponents<TransformComponent, MaterialComponent, ShapeComponent>(entity);
 			transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 50.f;
@@ -142,7 +151,9 @@ void Scene::InitializeRegistry()
 
 			materialComponent.material = material;
 
-			shapeComponent.shape = resourceManager->GetGeometryManager()->GetShape(shapeNames[distShape(rng)]);
+			auto shapeName = shapeNames[distShape(rng)];
+			shapeName = "Cube";
+			shapeComponent.shape = resourceManager->GetGeometryManager()->GetShape(shapeName);
 
 			registry->SetParent(entity, shapeParent);
 		}
@@ -164,7 +175,7 @@ void Scene::InitializeRegistry()
 				material->SetBit<UPDATE_BIT>();
 
 				auto entity = registry->CreateEntity();
-				registry->AddComponents<TransformComponent, MaterialComponent, ShapeComponent, DefaultColliderComponent>(entity);
+				registry->AddComponents<TransformComponent, MaterialComponent, ShapeComponent, DefaultColliderComponent, RenderIndicesComponent>(entity);
 
 				auto [transformComponent, materialComponent, shapeComponent] = registry->GetComponents<TransformComponent, MaterialComponent, ShapeComponent>(entity);
 				transformComponent.translation = glm::vec3(y, x, 0) * 2.f;
@@ -183,10 +194,10 @@ void Scene::InitializeRegistry()
 		auto modelParent = registry->CreateEntity();
 		registry->AddComponents<TransformComponent>(modelParent);
 
-		for(uint32_t i = 0; i < 2500; i++)
+		for(uint32_t i = 0; i < 1; i++)
 		{
 			auto entity = registry->CreateEntity();
-			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
+			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent, RenderIndicesComponent>(entity);
 			auto [transformComponent, modelComponent] = registry->GetComponents<TransformComponent, ModelComponent>(entity);
 			modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/Models/Pikachu/model.obj");
 			transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 50.f;
@@ -194,10 +205,10 @@ void Scene::InitializeRegistry()
 			registry->SetParent(entity, modelParent);
 		}
 
-		for (uint32_t i = 0; i < 2500; i++)
+		for (uint32_t i = 0; i < 1; i++)
 		{
 			auto entity = registry->CreateEntity();
-			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
+			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent, RenderIndicesComponent>(entity);
 			auto [transformComponent, modelComponent] = registry->GetComponents<TransformComponent, ModelComponent>(entity);
 			modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/Models/Otter/RiverOtter.obj");
 			transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 50.f;
@@ -209,7 +220,7 @@ void Scene::InitializeRegistry()
 		/*
 		{
 			auto entity = registry->CreateEntity();
-			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
+			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent, RenderIndicesComponent>(entity);
 			auto [transformComponent, modelComponent] = registry->GetComponents<TransformComponent, ModelComponent>(entity);
 			modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/Bistro_v5_2/BistroInterior.fbx");
 			modelComponent.hasDirectxNormals = true;
@@ -219,7 +230,7 @@ void Scene::InitializeRegistry()
 
 		{
 			auto entity = registry->CreateEntity();
-			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
+			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent, RenderIndicesComponent>(entity);
 			auto [transformComponent, modelComponent] = registry->GetComponents<TransformComponent, ModelComponent>(entity);
 			modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/Bistro_v5_2/BistroExterior.fbx");
 			modelComponent.hasDirectxNormals = true;
@@ -231,7 +242,7 @@ void Scene::InitializeRegistry()
 		/*
 		{
 			auto entity = registry->CreateEntity();
-			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
+			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent, RenderIndicesComponent>(entity);
 			auto [transformComponent, modelComponent] = registry->GetComponents<TransformComponent, ModelComponent>(entity);
 			transformComponent.scale = glm::vec3(0.01);
 			modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/main1_sponza/NewSponza_Main_Yup_003.fbx");
@@ -241,7 +252,7 @@ void Scene::InitializeRegistry()
 		/*
 		{
 			auto entity = registry->CreateEntity();
-			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
+			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent, RenderIndicesComponent>(entity);
 			auto [transformComponent, modelComponent] = registry->GetComponents<TransformComponent, ModelComponent>(entity);
 			transformComponent.scale = glm::vec3(0.01);
 			modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/VulkanEngine/Assets/Sponza/sponza.obj");
@@ -251,7 +262,7 @@ void Scene::InitializeRegistry()
 		/*
 		{
 			auto entity = registry->CreateEntity();
-			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
+			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent, RenderIndicesComponent>(entity);
 			auto [transformComponent, modelComponent] = registry->GetComponents<TransformComponent, ModelComponent>(entity);
 			modelComponent.hasDirectxNormals = true;
 			modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/EmeraldSquare_v4_1/EmeraldSquare_Day.fbx");
@@ -261,7 +272,7 @@ void Scene::InitializeRegistry()
 		/*
 		{
 			auto entity = registry->CreateEntity();
-			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent>(entity);
+			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent, RenderIndicesComponent>(entity);
 			auto [transformComponent, modelComponent] = registry->GetComponents<TransformComponent, ModelComponent>(entity);
 			transformComponent.scale = glm::vec3(0.01);
 			modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/main1_sponza/NewSponza_Main_Yup_003.fbx");
@@ -284,7 +295,7 @@ void Scene::InitializeRegistry()
 		for (uint32_t i = 0; i < 0; ++i)
 		{
 			auto entity = registry->CreateEntity();
-			registry->AddComponents<TransformComponent, ModelComponent, AnimationComponent, DefaultColliderComponent>(entity);
+			registry->AddComponents<TransformComponent, ModelComponent, AnimationComponent, DefaultColliderComponent, RenderIndicesComponent>(entity);
 			auto [transformComponent, modelComponent, animationComponent] = registry->GetComponents<TransformComponent, ModelComponent, AnimationComponent>(entity);
 			modelComponent.model = resourceManager->GetModelManager()->LoadModel("C:/Users/User/Desktop/Animations/Worker_Standing.dae");
 			animationComponent.animation = resourceManager->GetAnimationManager()->LoadAnimation(animationPaths[distAnimation(rng)]);
@@ -357,6 +368,7 @@ void Scene::InitializeSystems()
 	InitSystem<DirectionLightSystem>();
 	InitSystem<PointLightSystem>();
 	InitSystem<SpotLightSystem>();
+	InitSystem<RenderIndicesSystem>();
 }
 
 void Scene::UpdateSystems(uint32_t frameIndex, float deltaTime)
@@ -377,8 +389,10 @@ void Scene::UpdateSystems(uint32_t frameIndex, float deltaTime)
 	LaunchSystemUpdateAsync.template operator() < TransformSystem > ();
 	LaunchSystemUpdateAsync.template operator() < CameraSystem > ();
 	LaunchSystemUpdateAsync.template operator() < MaterialSystem > ();
-	LaunchSystemUpdateAsync.template operator() < ShapeSystem > ();
 	LaunchSystemUpdateAsync.template operator() < AnimationSystem > ();
+
+	futures[Unique::typeID<MaterialSystem>()].get();
+	LaunchSystemUpdateAsync.template operator() < ShapeSystem > ();
 
 	//Maybe problematic in long term -> Need a mechanism to handle model indices
 	futures[Unique::typeID<AnimationSystem>()].get();
@@ -393,6 +407,7 @@ void Scene::UpdateSystems(uint32_t frameIndex, float deltaTime)
 	futures[Unique::typeID<ShapeSystem>()].get();
 	futures[Unique::typeID<ModelSystem>()].get();
 	LaunchSystemUpdateAsync.template operator() < DefaultColliderSystem > ();
+	LaunchSystemUpdateAsync.template operator() < RenderIndicesSystem > ();
 
 	//FrustumCullingSystem uses these systems output as input
 	futures[Unique::typeID<CameraSystem>()].get();
@@ -435,6 +450,7 @@ void Scene::FinishSystems()
 	LaunchSystemFinishAsync.template operator() < DirectionLightSystem > ();
 	LaunchSystemFinishAsync.template operator() < PointLightSystem > ();
 	LaunchSystemFinishAsync.template operator() < SpotLightSystem > ();
+	LaunchSystemFinishAsync.template operator() < RenderIndicesSystem > ();
 
 	for (auto& [_, future] : futures) {
 		if (future.valid())
@@ -468,6 +484,7 @@ void Scene::UpdateSystemsGPU(uint32_t frameIndex)
 	LaunchSystemUpdateGpuAsync.template operator() < DirectionLightSystem > ();
 	LaunchSystemUpdateGpuAsync.template operator() < PointLightSystem > ();
 	LaunchSystemUpdateGpuAsync.template operator() < SpotLightSystem > ();
+	LaunchSystemUpdateGpuAsync.template operator() < RenderIndicesSystem > ();
 
 	for (auto& [_, future] : futures) {
 		if (future.valid())
@@ -480,18 +497,21 @@ void Scene::UpdateSystemsGPU(uint32_t frameIndex)
 void Scene::UpdateComponentBuffers(uint32_t frameIndex)
 {
 	RecalculateGpuBufferSize<TransformComponent, TransformComponentGPU>("TransformData", frameIndex);
+	RecalculateGpuBufferSize<MaterialComponent, uint32_t>("MaterialData", frameIndex);
+
 	RecalculateGpuBufferSize<CameraComponent, CameraComponentGPU>("CameraData", frameIndex);
 	RecalculateGpuBufferSize<CameraComponent, CameraFrustumGPU>("CameraFrustumData", frameIndex);
 
-	RecalculateGpuBufferSize<MaterialComponent, uint32_t>("MaterialData", frameIndex);
 	RecalculateGpuBufferSize<ShapeComponent, ShapeRenderIndicesGPU>("ShapeRenderIndicesData", frameIndex);
 	RecalculateGpuBufferSize<ModelComponent, ModelRenderIndicesGPU>("ModelRenderIndicesData", frameIndex);
+
+	RecalculateGpuBufferSize<AnimationComponent, VkDeviceAddress>("AnimationNodeTransformDeviceAddressesBuffers", frameIndex);
+	
 	RecalculateGpuBufferSize<DefaultColliderComponent, glm::mat4>("DefaultColliderAabbData", frameIndex);
 	RecalculateGpuBufferSize<DefaultColliderComponent, glm::mat4>("DefaultColliderObbData", frameIndex);
 	RecalculateGpuBufferSize<DefaultColliderComponent, glm::mat4>("DefaultColliderSphereData", frameIndex);
 	RecalculateGpuBufferSize<DefaultColliderComponent, DefaultColliderGPU>("DefaultColliderData", frameIndex);
-	RecalculateGpuBufferSize<AnimationComponent, VkDeviceAddress>("AnimationNodeTransformDeviceAddressesBuffers", frameIndex);
-	
+
 	RecalculateGpuBufferSize<DirectionLightComponent, DirectionLightGPU>("DirectionLightData", frameIndex);
 	RecalculateGpuBufferSize<DirectionLightComponent, glm::vec4>("DirectionLightBillboard", frameIndex);
 
@@ -502,4 +522,8 @@ void Scene::UpdateComponentBuffers(uint32_t frameIndex)
 	RecalculateGpuBufferSize<SpotLightComponent, SpotLightGPU>("SpotLightData", frameIndex);
 	RecalculateGpuBufferSize<SpotLightComponent, glm::mat4>("SpotLightTransform", frameIndex);
 	RecalculateGpuBufferSize<SpotLightComponent, glm::vec4>("SpotLightBillboard", frameIndex);	
+	RecalculateGpuBufferSize<SpotLightComponent, glm::mat4>("SpotLightBoundingSphereTransform", frameIndex);
+	RecalculateGpuBufferSize<SpotLightComponent, glm::mat4>("SpotLightBoundingBoxTransform", frameIndex);
+
+	RecalculateGpuBufferSize<RenderIndicesComponent, RenderIndicesGPU>("RenderIndicesData", frameIndex);
 }

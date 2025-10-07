@@ -42,7 +42,7 @@ void DefaultColliderSystem::OnUpdate(std::shared_ptr<Registry> registry, std::sh
 				defaultColliderComponent.aabbExtents = 0.5f * (maxPosition - minPosition);
 
 				defaultColliderComponent.origin = defaultColliderComponent.aabbOrigin;
-				defaultColliderComponent.radius = glm::max(glm::max(defaultColliderComponent.aabbExtents.x, defaultColliderComponent.aabbExtents.y), defaultColliderComponent.aabbExtents.z);
+				defaultColliderComponent.radius = glm::sqrt(glm::dot(defaultColliderComponent.aabbExtents, defaultColliderComponent.aabbExtents));
 
 				defaultColliderPool->SetBit<CHANGED_BIT>(entity);
 				defaultColliderComponent.version++;

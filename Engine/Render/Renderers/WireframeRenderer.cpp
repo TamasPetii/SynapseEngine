@@ -89,7 +89,12 @@ void WireframeRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Re
 		uint32_t count = spotLightPool->GetDenseSize();
 
 		if (GlobalConfig::WireframeConfig::showSpotLights)
+		{	
 			RenderWireframeVolume("Cone", "SpotLightTransform", glm::vec4(0, 1, 1, 1), count);
+			//RenderWireframeVolume("Cube", "SpotLightTransform", glm::vec4(0, 0, 1, 1), count);
+			//RenderWireframeVolume("Sphere", "SpotLightBoundingSphereTransform", glm::vec4(1, 0, 1, 1), count);
+			RenderWireframeVolume("Cube", "SpotLightBoundingBoxTransform", glm::vec4(1, 0, 1, 1), count);
+		}
 	}
 
 	vkCmdEndRendering(commandBuffer);

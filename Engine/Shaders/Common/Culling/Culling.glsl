@@ -1,27 +1,36 @@
-bool IsAABBVisibleInFrustum(CameraFrustumBuffer cameraBuffer, uint cameraIndex, vec3 aabbOrigin, vec3 aabbExtents)
-{	
-	bool visible = true;
-
-	visible = visible && (-dot(aabbExtents, abs(cameraBuffer.frustums[cameraIndex].near.xyz))   <= dot(cameraBuffer.frustums[cameraIndex].near.xyz, aabbOrigin)    - cameraBuffer.frustums[cameraIndex].near.w);
-	visible = visible && (-dot(aabbExtents, abs(cameraBuffer.frustums[cameraIndex].right.xyz))  <= dot(cameraBuffer.frustums[cameraIndex].right.xyz, aabbOrigin)   - cameraBuffer.frustums[cameraIndex].right.w);
-	visible = visible && (-dot(aabbExtents, abs(cameraBuffer.frustums[cameraIndex].left.xyz))   <= dot(cameraBuffer.frustums[cameraIndex].left.xyz, aabbOrigin)    - cameraBuffer.frustums[cameraIndex].left.w);
-	visible = visible && (-dot(aabbExtents, abs(cameraBuffer.frustums[cameraIndex].top.xyz))    <= dot(cameraBuffer.frustums[cameraIndex].top.xyz, aabbOrigin)     - cameraBuffer.frustums[cameraIndex].top.w);
-	visible = visible && (-dot(aabbExtents, abs(cameraBuffer.frustums[cameraIndex].bottom.xyz)) <= dot(cameraBuffer.frustums[cameraIndex].bottom.xyz, aabbOrigin)  - cameraBuffer.frustums[cameraIndex].bottom.w);
-	visible = visible && (-dot(aabbExtents, abs(cameraBuffer.frustums[cameraIndex].far.xyz))    <= dot(cameraBuffer.frustums[cameraIndex].far.xyz, aabbOrigin)     - cameraBuffer.frustums[cameraIndex].far.w);
-
-	return visible;
+bool TestPlaneVsAABB(vec4 plane, vec3 aabbOrigin, vec3 aabbExtents)
+{
+	return (-dot(aabbExtents, abs(plane.xyz)) <= dot(plane.xyz, aabbOrigin) - plane.w);
 }
 
-bool IsSphereVisibleInFrustum(CameraFrustumBuffer cameraBuffer, uint cameraIndex, vec3 origin, float radius)
+bool TestPlaneVsSphere(vec4 plane, vec3 sphereOrigin, float sphereRadius)
 {
-	bool visible = true;
+	return (dot(plane.xyz, sphereOrigin) - plane.w > -sphereRadius);
+}
 
-	visible = visible && (dot(cameraBuffer.frustums[cameraIndex].near.xyz, origin)   - cameraBuffer.frustums[cameraIndex].near.w > -radius);
-	visible = visible && (dot(cameraBuffer.frustums[cameraIndex].right.xyz, origin)  - cameraBuffer.frustums[cameraIndex].right.w > -radius);
-	visible = visible && (dot(cameraBuffer.frustums[cameraIndex].left.xyz, origin)   - cameraBuffer.frustums[cameraIndex].left.w > -radius);
-	visible = visible && (dot(cameraBuffer.frustums[cameraIndex].top.xyz, origin)    - cameraBuffer.frustums[cameraIndex].top.w > -radius);
-	visible = visible && (dot(cameraBuffer.frustums[cameraIndex].bottom.xyz, origin) - cameraBuffer.frustums[cameraIndex].bottom.w > -radius);
-	visible = visible && (dot(cameraBuffer.frustums[cameraIndex].far.xyz, origin)    - cameraBuffer.frustums[cameraIndex].far.w > -radius);
+bool TestFrustumVsAABB(CameraFrustumBuffer cameraBuffer, uint cameraIndex, vec3 aabbOrigin, vec3 aabbExtents)
+{
+	return 
+	TestPlaneVsAABB(cameraBuffer.frustums[cameraIndex].near, aabbOrigin, aabbExtents) && 
+	TestPlaneVsAABB(cameraBuffer.frustums[cameraIndex].right, aabbOrigin, aabbExtents) && 
+	TestPlaneVsAABB(cameraBuffer.frustums[cameraIndex].left, aabbOrigin, aabbExtents) && 
+	TestPlaneVsAABB(cameraBuffer.frustums[cameraIndex].top, aabbOrigin, aabbExtents) && 
+	TestPlaneVsAABB(cameraBuffer.frustums[cameraIndex].bottom, aabbOrigin, aabbExtents) && 
+	TestPlaneVsAABB(cameraBuffer.frustums[cameraIndex].far, aabbOrigin, aabbExtents);
+}
 
-	return visible;
+bool TestFrustumVsSphere(CameraFrustumBuffer cameraBuffer, uint cameraIndex, vec3 sphereOrigin, float sphereRadius)
+{
+	return
+	TestPlaneVsSphere(cameraBuffer.frustums[cameraIndex].near, sphereOrigin, sphereRadius) &&
+	TestPlaneVsSphere(cameraBuffer.frustums[cameraIndex].right, sphereOrigin, sphereRadius) &&
+	TestPlaneVsSphere(cameraBuffer.frustums[cameraIndex].left, sphereOrigin, sphereRadius) &&
+	TestPlaneVsSphere(cameraBuffer.frustums[cameraIndex].top, sphereOrigin, sphereRadius) &&
+	TestPlaneVsSphere(cameraBuffer.frustums[cameraIndex].bottom, sphereOrigin, sphereRadius) &&
+	TestPlaneVsSphere(cameraBuffer.frustums[cameraIndex].far, sphereOrigin, sphereRadius);
+}
+
+bool TestConeVsSphere(uint coneIndex, vec3 sphereOrigin, float sphereRadius)
+{
+	return false;
 }

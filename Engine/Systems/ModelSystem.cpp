@@ -12,6 +12,9 @@ void ModelSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_ptr<R
 	if (!modelPool)
 		return;
 
+	//Todo: If loaded model changed -> Update bit set -> Changed bit set -> Update model buffer array index in render indices!
+	//Only reset update bit if model is in loaded state!
+
 	std::for_each(std::execution::par, modelPool->GetDenseIndices().begin(), modelPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			[[unlikely]]

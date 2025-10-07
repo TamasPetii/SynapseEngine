@@ -1,3 +1,4 @@
+#extension GL_EXT_scalar_block_layout : require
 #extension GL_EXT_buffer_reference : require
 #extension GL_EXT_buffer_reference_uvec2 : require
 #define INVALID_RENDER_INDEX 0xFFFFFFFFu
@@ -10,11 +11,9 @@ struct ModelRenderIndices
 	uint animationIndex;
 	uint animationTransformIndex;
 	uint bitflag;
-	uint padding0;
-	uint padding1;
 };
 
-layout(buffer_reference, std430) readonly buffer ModelRenderIndicesBuffer {
+layout(buffer_reference, scalar) readonly buffer ModelRenderIndicesBuffer {
 	ModelRenderIndices indices[];
 };
 
@@ -25,11 +24,8 @@ struct ShapeRenderIndices
 	uint shapeIndex; //This is the loaded shape array index! This is not the shape component dense index!!
 	uint materialIndex;
 	uint bitflag;
-	uint padding0;
-	uint padding1;
-	uint padding2;
 };
 
-layout(buffer_reference, std430) readonly buffer ShapeRenderIndicesBuffer {
+layout(buffer_reference, scalar) readonly buffer ShapeRenderIndicesBuffer {
 	ShapeRenderIndices indices[];
 };

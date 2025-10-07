@@ -46,7 +46,7 @@ void main()
 	DefaultColliderBuffer defaultColliderBuffer = DefaultColliderBuffer(PushConstants.defaultColliderBuffer);
 	CameraFrustumBuffer cameraBuffer = CameraFrustumBuffer(PushConstants.cameraFrustumBuffer);
 
-	if(IsAABBVisibleInFrustum(cameraBuffer, PushConstants.cameraIndex, defaultColliderBuffer.colliders[globalIndex].aabbOrigin, defaultColliderBuffer.colliders[globalIndex].aabbExtents))
+	if(TestFrustumVsAABB(cameraBuffer, PushConstants.cameraIndex, defaultColliderBuffer.colliders[globalIndex].aabbOrigin, defaultColliderBuffer.colliders[globalIndex].aabbExtents))
 	{
 		bool isModel = (defaultColliderBuffer.colliders[globalIndex].bitflag & COLLIDER_MODEL_BIT) != 0u;
 

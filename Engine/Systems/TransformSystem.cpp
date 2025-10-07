@@ -18,7 +18,7 @@ void TransformSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_p
 	//Todo: FrameIndex BitsetFlagged -> GPU cannot skip!!!
 
 	// Iterating over all the entities, checking level depth of parent-child relation
-	// Optimisation: Get max depth in registry, probably less than MAX_RELATIONSHIP_DEPTH
+	// Optimization: Get max depth in registry, probably less than MAX_RELATIONSHIP_DEPTH
 	for (uint32_t depth = 0; depth < MAX_RELATIONSHIP_DEPTH; ++depth)
 	{
 		std::for_each(std::execution::par, transformPool->GetDenseIndices().begin(), transformPool->GetDenseIndices().end(),

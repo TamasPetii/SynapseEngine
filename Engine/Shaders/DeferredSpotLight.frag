@@ -55,7 +55,7 @@ void main()
 	float delta = dot(spotDirNorm, fromSpotToFrag); //The projected length to check if its inside the far plane
 
 	//Alpha <, we calculate with cosine!!!
-	if(alpha < slBuffer.lights[fs_in_id].angles.w || delta > slBuffer.lights[fs_in_id].len)
+	if(alpha < slBuffer.lights[fs_in_id].angles.w || delta > slBuffer.lights[fs_in_id].range)
 		discard;
 
 	vec4 albedoMetal = texture(u_colorTexture, fs_in_tex);

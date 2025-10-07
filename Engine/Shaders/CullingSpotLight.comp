@@ -1,0 +1,61 @@
+#version 460
+
+#include "Common/Camera.glsl"
+#include "Common/Render/RenderIndices.glsl"
+#include "Common/Render/DrawIndirect.glsl"
+#include "Common/Render/InstanceIndex.glsl"
+#include "Common/Light/SpotLight.glsl"
+#include "Common/Light/LightCount.glsl"
+#include "Common/Culling/Culling.glsl"
+#include "Common/Render/DispatchIndirect.glsl"
+
+layout(push_constant) uniform constants
+{	
+	uvec2 cameraFrustumBuffer;
+	uvec2 spotLightBuffer;
+	uvec2 spotLightInstanceIndexBuffer;
+	uvec2 spotLightDrawIndirectCommandBuffer;
+	uvec2 spotLightShadowInstanceIndexBuffer;
+	uvec2 spotLightShadowCountBuffer;
+	uvec2 spotLightShadowDispatchIndirectBuffer;
+	uint cameraIndex;
+	uint spotLightCount;
+} PushConstants;
+
+layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+
+const uint spotShadowLocalSizeX = 64;
+const uint spotLightDrawCommandIndex = 0;
+
+void main()
+{
+	uint globalIndex = gl_GlobalInvocationID.x;
+
+	if(globalIndex >= PushConstants.spotLightCount)
+		return;
+
+	CameraFrustumBuffer cameraBuffer = CameraFrustumBuffer(PushConstants.cameraFrustumBuffer);
+	SpotLightBuffer spotLightBuffer = SpotLightBuffer(PushConstants.spotLightBuffer);
+
+	uint spotLightIndex = globalIndex;
+
+	//Todo: Occlusion culling
+	if(TestFrustumVsAABB(cameraBuffer, PushConstants.cameraIndex, spotLightBuffer.lights[spotLightIndex].aabbOrigin, spotLightBuffer.lights[spotLightIndex].aabbExtents))
+	{	
+		uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(PushConstants.spotLightDrawIndirectCommandBuffer).commands[spotLightDrawCommandIndex].instanceCount, 1);
+		InstanceIndexBuffer(PushConstants.spotLightInstanceIndexBuffer).indices[instanceIndex] = spotLightIndex;
+
+		bool shadow = ((spotLightBuffer.lights[spotLightIndex].bitflag >> SHADOW_BIT) & 1u) != 0;
+
+		if(shadow)
+		{		
+			uint shadowInstanceIndex = atomicAdd(LightCountBuffer(PushConstants.spotLightShadowCountBuffer).lightCount, 1);
+			InstanceIndexBuffer(PushConstants.spotLightShadowInstanceIndexBuffer).indices[shadowInstanceIndex] = spotLightIndex;
+
+			uint count = shadowInstanceIndex + 1;
+			uint numGroupsX = (count + (spotShadowLocalSizeX - 1)) / spotShadowLocalSizeX;
+            
+			atomicMax(DispatchIndirectCommandBuffer(PushConstants.spotLightShadowDispatchIndirectBuffer).command.num_groups_x, numGroupsX);
+		}	
+	}
+}

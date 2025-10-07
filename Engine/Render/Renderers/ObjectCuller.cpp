@@ -2,6 +2,7 @@
 #include "Engine/Render/GpuStructs.h"
 #include "Engine/Components/DefaultColliderComponent.h"
 #include "Engine/Components/PointLightComponent.h"
+#include "Engine/Components/SpotLightComponent.h"
 
 void ObjectCuller::Initialize(std::shared_ptr<ResourceManager> resourceManager)
 {
@@ -9,8 +10,9 @@ void ObjectCuller::Initialize(std::shared_ptr<ResourceManager> resourceManager)
 
 void ObjectCuller::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex, std::function<void()> renderFunction)
 {
-	CullObjectInCameraFrustum(commandBuffer, registry, resourceManager, frameIndex);
 	CullPointLightInCameraFrustum(commandBuffer, registry, resourceManager, frameIndex);
+	CullSpotLightInCameraFrustum(commandBuffer, registry, resourceManager, frameIndex);
+	CullObjectInCameraFrustum(commandBuffer, registry, resourceManager, frameIndex);
 }
 
 void ObjectCuller::CullObjectInCameraFrustum(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
@@ -61,21 +63,21 @@ void ObjectCuller::CullObjectInCameraFrustum(VkCommandBuffer commandBuffer, std:
 	vkCmdDispatch(commandBuffer, workgroupCount, 1, 1);
 
 	//Todo!
+	/*
 	VkMemoryBarrier2 drawBarrier = {};
 	drawBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2;
 	drawBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
 	drawBarrier.srcAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT;
 	drawBarrier.dstStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
 	drawBarrier.dstAccessMask = VK_ACCESS_2_SHADER_READ_BIT | VK_ACCESS_2_SHADER_WRITE_BIT;
+	*/
 
-	/*
 	VkMemoryBarrier2 drawBarrier = {};
 	drawBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2;
 	drawBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
 	drawBarrier.srcAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT;
 	drawBarrier.dstStageMask = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT;
 	drawBarrier.dstAccessMask = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT | VK_ACCESS_2_SHADER_READ_BIT;
-	*/
 
 	VkDependencyInfo drawDepInfo = {};
 	drawDepInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
@@ -83,6 +85,23 @@ void ObjectCuller::CullObjectInCameraFrustum(VkCommandBuffer commandBuffer, std:
 	drawDepInfo.pMemoryBarriers = &drawBarrier;
 
 	vkCmdPipelineBarrier2(commandBuffer, &drawDepInfo);
+
+	/*
+	
+	VkMemoryBarrier2 drawBarrier = {};
+	drawBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2;
+	drawBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+	drawBarrier.srcAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT;
+	drawBarrier.dstStageMask = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT;
+	drawBarrier.dstAccessMask = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT | VK_ACCESS_2_SHADER_READ_BIT;
+
+	VkDependencyInfo drawDepInfo = {};
+	drawDepInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
+	drawDepInfo.memoryBarrierCount = 1;
+	drawDepInfo.pMemoryBarriers = &drawBarrier;
+
+	vkCmdPipelineBarrier2(commandBuffer, &drawDepInfo);
+	*/
 }
 
 void ObjectCuller::CullPointLightInCameraFrustum(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
@@ -118,8 +137,6 @@ void ObjectCuller::CullPointLightInCameraFrustum(VkCommandBuffer commandBuffer, 
 	if (workgroupCount == 0)
 		return;
 
-	VkDeviceAddress pointLightShadowDispatchIndirectBuffer;
-
 	CullingPointLightPushConstants pushConstants;
 	pushConstants.cameraIndex = 0;
 	pushConstants.cameraFrustumBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraFrustumData", frameIndex)->buffer->GetAddress();
@@ -135,18 +152,54 @@ void ObjectCuller::CullPointLightInCameraFrustum(VkCommandBuffer commandBuffer, 
 	vkCmdPushConstants(commandBuffer, pipeline->GetLayout(), VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(CullingPointLightPushConstants), &pushConstants);
 
 	vkCmdDispatch(commandBuffer, workgroupCount, 1, 1);
+}
 
-	VkMemoryBarrier2 drawBarrier = {};
-	drawBarrier.sType = VK_STRUCTURE_TYPE_MEMORY_BARRIER_2;
-	drawBarrier.srcStageMask = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-	drawBarrier.srcAccessMask = VK_ACCESS_2_SHADER_WRITE_BIT;
-	drawBarrier.dstStageMask = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT;
-	drawBarrier.dstAccessMask = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT | VK_ACCESS_2_SHADER_READ_BIT;
+void ObjectCuller::CullSpotLightInCameraFrustum(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
+{
+	auto vulkanContext = Vk::VulkanContext::GetContext();
+	auto device = vulkanContext->GetDevice();
+	auto graphicsQueue = device->GetQueue(Vk::QueueType::GRAPHICS);
+	auto pipeline = resourceManager->GetVulkanManager()->GetComputePipeline("CullingSpotLight");
 
-	VkDependencyInfo drawDepInfo = {};
-	drawDepInfo.sType = VK_STRUCTURE_TYPE_DEPENDENCY_INFO;
-	drawDepInfo.memoryBarrierCount = 1;
-	drawDepInfo.pMemoryBarriers = &drawBarrier;
+	auto spotLightShadowCountBufferHandler = static_cast<uint32_t*>(resourceManager->GetSpotLightBufferManager()->GetShadowCountBuffer(frameIndex)->buffer->GetHandler());
+	spotLightShadowCountBufferHandler[0] = 0;
 
-	vkCmdPipelineBarrier2(commandBuffer, &drawDepInfo);
+	auto spotLightShadowDispatchIndirectBuffers = static_cast<VkDispatchIndirectCommand*>(resourceManager->GetSpotLightBufferManager()->GetShadowDispatchIndirectBuffers(frameIndex)->buffer->GetHandler());
+	spotLightShadowDispatchIndirectBuffers[0] = VkDispatchIndirectCommand{
+		.x = 1,
+		.y = 1,
+		.z = 1
+	};
+
+	auto spotLightIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(resourceManager->GetSpotLightBufferManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler());
+	spotLightIndirectDrawBufferHandler[0] = VkDrawIndirectCommand{
+		.vertexCount = resourceManager->GetGeometryManager()->GetShape("Cone")->GetIndexCount(),
+		.instanceCount = 0,
+		.firstVertex = 0,
+		.firstInstance = 0
+	};
+
+	uint32_t spotLightCount = registry->GetPool<SpotLightComponent>()->GetDenseSize();
+
+	uint32_t workgroupSize = 64; // Matches shader local_size_x
+	uint32_t workgroupCount = static_cast<uint32_t>(std::ceil(spotLightCount / (float)workgroupSize));
+
+	if (workgroupCount == 0)
+		return;
+
+	CullingSpotLightPushConstants pushConstants;
+	pushConstants.cameraIndex = 0;
+	pushConstants.cameraFrustumBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraFrustumData", frameIndex)->buffer->GetAddress();
+	pushConstants.spotLightCount = spotLightCount;
+	pushConstants.spotLightBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightData", frameIndex)->buffer->GetAddress();
+	pushConstants.spotLightInstanceIndexBuffer = resourceManager->GetSpotLightBufferManager()->GetInstanceIndexBuffer(frameIndex)->buffer->GetAddress();
+	pushConstants.spotLightDrawIndirectCommandBuffer = resourceManager->GetSpotLightBufferManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetAddress();
+	pushConstants.spotLightShadowInstanceIndexBuffer = resourceManager->GetSpotLightBufferManager()->GetShadowInstanceIndexBuffer(frameIndex)->buffer->GetAddress();
+	pushConstants.spotLightShadowCountBuffer = resourceManager->GetSpotLightBufferManager()->GetShadowCountBuffer(frameIndex)->buffer->GetAddress();
+	pushConstants.spotLightShadowDispatchIndirectBuffer = resourceManager->GetSpotLightBufferManager()->GetShadowDispatchIndirectBuffers(frameIndex)->buffer->GetAddress();
+
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetPipeline());
+	vkCmdPushConstants(commandBuffer, pipeline->GetLayout(), VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(CullingSpotLightPushConstants), &pushConstants);
+
+	vkCmdDispatch(commandBuffer, workgroupCount, 1, 1);
 }

@@ -18,8 +18,12 @@ SpotLightGPU::SpotLightGPU(const SpotLightComponent& spotLightComponent) :
 	position(spotLightComponent.position),
 	shininess(spotLightComponent.shininess),
 	direction(glm::normalize(spotLightComponent.direction)),
-	length(spotLightComponent.length),
+	range(spotLightComponent.range),
 	angles(spotLightComponent.angles),
+	boundingSphereOrigin(spotLightComponent.boundingSphereOrigin),
+	boundingSphereRadius(spotLightComponent.boundingSphereRadius),
+	aabbExtents(spotLightComponent.aabbExtents),
+	aabbOrigin(spotLightComponent.aabbOrigin),
 	bitflag(0)
 {
 	bitflag |= (spotLightComponent.shadow.use ? 1u : 0u) << 0; // Bit 0 = Simulate Shadow?
