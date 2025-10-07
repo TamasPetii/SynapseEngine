@@ -25,7 +25,7 @@ struct ENGINE_API GlobalConfig
 	struct ENGINE_API FrameConfig
 	{
 		static inline constexpr uint32_t maxFramesInFlights = 3;
-		static inline uint32_t framesInFlight = 2;
+		static inline uint32_t framesInFlight = 3;
 	};
 
 	struct ENGINE_API World

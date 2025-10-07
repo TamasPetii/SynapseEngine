@@ -66,20 +66,20 @@ void Scene::InitializeRegistry()
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, DirectionLightComponent>(entity);
-			registry->GetComponent<DirectionLightComponent>(entity).strength = 0.f;
+			registry->GetComponent<DirectionLightComponent>(entity).strength = 2.f;
 			registry->GetComponent<TransformComponent>(entity).rotation = glm::vec3(45, 0, 45);
 			registry->SetParent(entity, directionLightParent);		
 		}
 
 		//Point Lights
 		{
-			for (int i = 0; i < 1; ++i)
+			for (int i = 0; i < 2500; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, PointLightComponent>(entity);
 				auto [transformComponent, pointLightComponent] = registry->GetComponents<TransformComponent, PointLightComponent>(entity);
 
-				transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 25.f;
+				transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 50.f;
 				transformComponent.rotation = glm::vec3(dist(rng), dist(rng), dist(rng)) * 180.f;
 				transformComponent.scale = glm::vec3(dist(rng)) * 8.f;
 
@@ -92,13 +92,13 @@ void Scene::InitializeRegistry()
 
 		//Spot Lights
 		{
-			for (int i = 0; i < 3; ++i)
+			for (int i = 0; i < 2500; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, SpotLightComponent>(entity);
 				auto [transformComponent, spotLightComponent] = registry->GetComponents<TransformComponent, SpotLightComponent>(entity);
 				
-				transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 25.f;
+				transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 50.f;
 				transformComponent.rotation = glm::vec3(dist(rng), dist(rng), dist(rng)) * 180.f;
 				transformComponent.scale = glm::vec3(1.f, 5.f, 10.f) + glm::vec3(dist(rng), dist(rng), dist(rng)) * glm::vec3(25.f, 10.f, 25.f);
 				
@@ -131,7 +131,7 @@ void Scene::InitializeRegistry()
 		material->metalness = dist(rng);
 		material->SetBit<UPDATE_BIT>();
 
-		for (uint32_t i = 0; i < 1000; ++i)
+		for (uint32_t i = 0; i < 25000; ++i)
 		{
 			/*
 			std::string materialName = "Shape" + std::to_string(i++);
@@ -191,10 +191,11 @@ void Scene::InitializeRegistry()
 
 	//Models
 	{
+		/*
 		auto modelParent = registry->CreateEntity();
 		registry->AddComponents<TransformComponent>(modelParent);
 
-		for(uint32_t i = 0; i < 1; i++)
+		for(uint32_t i = 0; i < 2500; i++)
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent, RenderIndicesComponent>(entity);
@@ -205,7 +206,7 @@ void Scene::InitializeRegistry()
 			registry->SetParent(entity, modelParent);
 		}
 
-		for (uint32_t i = 0; i < 1; i++)
+		for (uint32_t i = 0; i < 2500; i++)
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent, RenderIndicesComponent>(entity);
@@ -217,7 +218,6 @@ void Scene::InitializeRegistry()
 			registry->SetParent(entity, modelParent);
 		}
 
-		/*
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, ModelComponent, DefaultColliderComponent, RenderIndicesComponent>(entity);
@@ -412,11 +412,11 @@ void Scene::UpdateSystems(uint32_t frameIndex, float deltaTime)
 	//FrustumCullingSystem uses these systems output as input
 	futures[Unique::typeID<CameraSystem>()].get();
 	futures[Unique::typeID<DefaultColliderSystem>()].get();
-	LaunchSystemUpdateAsync.template operator() < FrustumCullingSystem > ();
+	//LaunchSystemUpdateAsync.template operator() < FrustumCullingSystem > ();
 
 	//InstanceSystem uses these systems output as input
-	futures[Unique::typeID<FrustumCullingSystem>()].get();
-	LaunchSystemUpdateAsync.template operator() < InstanceSystem > ();
+	//futures[Unique::typeID<FrustumCullingSystem>()].get();
+	//LaunchSystemUpdateAsync.template operator() < InstanceSystem > ();
 
 	for (auto& [_, future] : futures) {
 		if(future.valid())
@@ -444,7 +444,7 @@ void Scene::FinishSystems()
 	LaunchSystemFinishAsync.template operator() < MaterialSystem > ();
 	LaunchSystemFinishAsync.template operator() < ShapeSystem > ();
 	LaunchSystemFinishAsync.template operator() < ModelSystem > ();
-	LaunchSystemFinishAsync.template operator() < InstanceSystem > ();
+	//LaunchSystemFinishAsync.template operator() < InstanceSystem > ();
 	LaunchSystemFinishAsync.template operator() < DefaultColliderSystem > ();
 	LaunchSystemFinishAsync.template operator() < AnimationSystem > ();
 	LaunchSystemFinishAsync.template operator() < DirectionLightSystem > ();
@@ -478,7 +478,7 @@ void Scene::UpdateSystemsGPU(uint32_t frameIndex)
 	LaunchSystemUpdateGpuAsync.template operator() < MaterialSystem > ();
 	LaunchSystemUpdateGpuAsync.template operator() < ShapeSystem > ();
 	LaunchSystemUpdateGpuAsync.template operator() < ModelSystem > ();
-	LaunchSystemUpdateGpuAsync.template operator() < InstanceSystem > ();
+	//LaunchSystemUpdateGpuAsync.template operator() < InstanceSystem > ();
 	LaunchSystemUpdateGpuAsync.template operator() < DefaultColliderSystem > ();
 	LaunchSystemUpdateGpuAsync.template operator() < AnimationSystem > ();
 	LaunchSystemUpdateGpuAsync.template operator() < DirectionLightSystem > ();

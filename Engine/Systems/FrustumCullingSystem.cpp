@@ -47,9 +47,9 @@ void FrustumCullingSystem::OnUpdate(std::shared_ptr<Registry> registry, std::sha
 	//FarFace
 	frustumCollider.faces[5] = FrustumFace(-cameraComponent.direction, cameraComponent.position + cameraComponent.direction * cameraComponent.farPlane);
 
-	//DefaultColliderCulling(registry, &frustumCollider);
-	//PointLightCulling(registry, &frustumCollider);
-	//SpotLightCulling(registry, &frustumCollider);
+	DefaultColliderCulling(registry, &frustumCollider);
+	PointLightCulling(registry, &frustumCollider);
+	SpotLightCulling(registry, &frustumCollider);
 }
 
 void FrustumCullingSystem::OnFinish(std::shared_ptr<Registry> registry)
@@ -122,10 +122,11 @@ void FrustumCullingSystem::SpotLightCulling(std::shared_ptr<Registry> registry, 
 			{
 				auto& spotLightComponent = spotLightPool->GetData(entity);
 
-				//Todo: Cone collider ->
+				ColliderAABB collider;
+				collider.aabbOrigin = spotLightComponent.aabbOrigin;
+				collider.aabbExtents = spotLightComponent.aabbExtents;
 
-				//if (TesterFrustum::Test(cameraCollider, &collider))
-				if (true)
+				if (TesterFrustum::Test(cameraCollider, &collider))
 				{
 					spotLightComponent.toRender = true;
 				}

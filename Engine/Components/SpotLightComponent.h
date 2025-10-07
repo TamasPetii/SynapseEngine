@@ -38,6 +38,7 @@ private:
 	glm::mat4 transform; //Cannot use transform component becouse of the scale can be different on xyz!
 	friend class SpotLightSystem;
 	friend struct SpotLightGPU;
+	friend class FrustumCullingSystem;
 };
 
 struct ENGINE_API SpotLightGPU

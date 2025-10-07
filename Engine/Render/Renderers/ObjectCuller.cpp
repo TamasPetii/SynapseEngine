@@ -32,6 +32,9 @@ void ObjectCuller::CullObjectInCameraFrustum(VkCommandBuffer commandBuffer, std:
 	for (uint32_t i = 0; i < resourceManager->GetGeometryManager()->GetCurrentCount(); ++i)
 		shapeIndirectDrawBufferHandler[i].instanceCount = 0;
 
+	if (!registry->GetPool<DefaultColliderComponent>())
+		return;
+
 	uint32_t defaultColliderCount = registry->GetPool<DefaultColliderComponent>()->GetDenseSize();
 
 	uint32_t workgroupSize = 64; // Matches shader local_size_x
@@ -129,6 +132,9 @@ void ObjectCuller::CullPointLightInCameraFrustum(VkCommandBuffer commandBuffer, 
 		.firstInstance = 0
 	};
 
+	if (!registry->GetPool<PointLightComponent>())
+		return;
+
 	uint32_t pointLightCount = registry->GetPool<PointLightComponent>()->GetDenseSize();
 
 	uint32_t workgroupSize = 64; // Matches shader local_size_x
@@ -178,6 +184,9 @@ void ObjectCuller::CullSpotLightInCameraFrustum(VkCommandBuffer commandBuffer, s
 		.firstVertex = 0,
 		.firstInstance = 0
 	};
+
+	if (!registry->GetPool<SpotLightComponent>())
+		return;
 
 	uint32_t spotLightCount = registry->GetPool<SpotLightComponent>()->GetDenseSize();
 

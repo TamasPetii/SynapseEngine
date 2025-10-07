@@ -135,6 +135,7 @@ void Engine::SimulateFrame()
 	vkWaitForFences(device->Value(), 1, &inFlightFence->Value(), VK_TRUE, UINT64_MAX);
 	vkResetFences(device->Value(), 1, &inFlightFence->Value());
 
+	/*
 	{
 		auto pointLightIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(resourceManager->GetPointLightBufferManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler());
 		std::cout << std::format("Point Light Instance Count: {}\n", pointLightIndirectDrawBufferHandler[0].instanceCount);
@@ -145,7 +146,11 @@ void Engine::SimulateFrame()
 		auto spotLightIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(resourceManager->GetSpotLightBufferManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler());
 		std::cout << std::format("Spot Light Instance Count: {}\n", spotLightIndirectDrawBufferHandler[0].instanceCount);
 
+		auto spotLightDispatchIndirectBufferHandler = static_cast<VkDispatchIndirectCommand*>(resourceManager->GetSpotLightBufferManager()->GetShadowDispatchIndirectBuffers(frameIndex)->buffer->GetHandler());
+		std::cout << std::format("Spot Light Dispatch Count: {}\n", spotLightDispatchIndirectBufferHandler[0].x);
 	}
+	*/
+
 
 	UpdateGPU();
 	Render();
