@@ -486,10 +486,10 @@ void VulkanManager::InitShaderModuls()
 
 	//Point Light Culling
 	RegisterShaderModule("CullingPointLightComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/CullingPointLight.comp", VK_SHADER_STAGE_COMPUTE_BIT));
+	RegisterShaderModule("CullingPointLightShadowAabbComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/CullingPointLightShadowAabb.comp", VK_SHADER_STAGE_COMPUTE_BIT));
 
 	//Spot Light Culling
 	RegisterShaderModule("CullingSpotLightComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/CullingSpotLight.comp", VK_SHADER_STAGE_COMPUTE_BIT));
-
 }
 
 void VulkanManager::InitGraphicsPipelines()
@@ -794,6 +794,17 @@ void VulkanManager::InitComputePipelines()
 			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT);
 
 		RegisterComputePipeline("CullingSpotLight", pipelineBuilder.BuildDynamic());
+	}
+
+	{
+		uint32_t pushConsantSize = sizeof(CullingPointLightShadowAabbPushConstants);
+
+		Vk::ComputePipelineBuilder pipelineBuilder;
+		pipelineBuilder
+			.AddShaderStage(shaderModuls["CullingPointLightShadowAabbComp"])
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT);
+
+		RegisterComputePipeline("CullingPointLightShadowAabb", pipelineBuilder.BuildDynamic());
 	}
 }
 

@@ -45,3 +45,14 @@ bool TestConeVsSphere(uint coneIndex, vec3 sphereOrigin, float sphereRadius)
 {
 	return false;
 }
+
+bool TestAabbVsAabb(vec3 aabbMin_A, vec3 aabbMax_A, vec3 aabbMin_B, vec3 aabbMax_B)
+{
+	return
+	aabbMin_A.x <= aabbMax_B.x &&
+	aabbMax_A.x >= aabbMin_B.x &&
+	aabbMin_A.y <= aabbMax_B.y &&
+	aabbMax_A.y >= aabbMin_B.y &&
+	aabbMin_A.z <= aabbMax_B.z &&
+	aabbMax_A.z >= aabbMin_B.z;
+}
