@@ -879,7 +879,7 @@
     <None Include="Shaders\DeferredPreIndirect.frag" />
     <None Include="Shaders\CullingPointLight.comp" />
     <None Include="Shaders\Common\Culling\Culling.glsl" />
-    <None Include="Shaders\Common\Light\LightCount.glsl" />
+    <None Include="Shaders\Common\Light\LightCommon.glsl" />
     <None Include="Shaders\Common\Render\DispatchIndirect.glsl" />
     <None Include="Shaders\CullingSpotLight.comp" />
   </ItemGroup>

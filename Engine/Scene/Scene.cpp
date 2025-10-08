@@ -86,6 +86,8 @@ void Scene::InitializeRegistry()
 				pointLightComponent.color = glm::vec3(dist(rng), dist(rng), dist(rng));
 				pointLightComponent.strength = 5.f;
 
+				pointLightComponent.shadow.use = dist(rng) > 0.5f;
+
 				registry->SetParent(entity, pointLightParent);
 			}
 		}
@@ -104,6 +106,8 @@ void Scene::InitializeRegistry()
 				
 				spotLightComponent.color = glm::vec3(dist(rng), dist(rng), dist(rng));
 				spotLightComponent.strength = 5.f;
+
+				spotLightComponent.shadow.use = dist(rng) > 0.5f;
 
 				registry->SetParent(entity, spotLightParent);
 			}

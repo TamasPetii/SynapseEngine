@@ -5,7 +5,7 @@
 #include "Common/Render/DrawIndirect.glsl"
 #include "Common/Render/InstanceIndex.glsl"
 #include "Common/Light/SpotLight.glsl"
-#include "Common/Light/LightCount.glsl"
+#include "Common/Light/LightCommon.glsl"
 #include "Common/Culling/Culling.glsl"
 #include "Common/Render/DispatchIndirect.glsl"
 
@@ -16,7 +16,7 @@ layout(push_constant) uniform constants
 	uvec2 spotLightInstanceIndexBuffer;
 	uvec2 spotLightDrawIndirectCommandBuffer;
 	uvec2 spotLightShadowInstanceIndexBuffer;
-	uvec2 spotLightShadowCountBuffer;
+	uvec2 spotLightCommonDataBuffer;
 	uvec2 spotLightShadowDispatchIndirectBuffer;
 	uint cameraIndex;
 	uint spotLightCount;
@@ -42,20 +42,37 @@ void main()
 	//Todo: Occlusion culling
 	if(TestFrustumVsAABB(cameraBuffer, PushConstants.cameraIndex, spotLightBuffer.lights[spotLightIndex].aabbOrigin, spotLightBuffer.lights[spotLightIndex].aabbExtents))
 	{	
-		uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(PushConstants.spotLightDrawIndirectCommandBuffer).commands[spotLightDrawCommandIndex].instanceCount, 1);
+		//This would be faster, easier...
+		//uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(PushConstants.spotLightDrawIndirectCommandBuffer).commands[spotLightDrawCommandIndex].instanceCount, 1);
+		
+		LightCommonDataBuffer lightCommonDataBuffer = LightCommonDataBuffer(PushConstants.spotLightCommonDataBuffer);
+
+		uint instanceIndex = atomicAdd(lightCommonDataBuffer.commonData.count, 1);
 		InstanceIndexBuffer(PushConstants.spotLightInstanceIndexBuffer).indices[instanceIndex] = spotLightIndex;
-
-		bool shadow = ((spotLightBuffer.lights[spotLightIndex].bitflag >> SHADOW_BIT) & 1u) != 0;
-
-		if(shadow)
-		{		
-			uint shadowInstanceIndex = atomicAdd(LightCountBuffer(PushConstants.spotLightShadowCountBuffer).lightCount, 1);
+		atomicMax(DrawIndirectCommandBuffer(PushConstants.spotLightDrawIndirectCommandBuffer).commands[spotLightDrawCommandIndex].instanceCount, instanceIndex);
+		
+		//Active shadow simulation
+		if(((spotLightBuffer.lights[spotLightIndex].bitflag >> SHADOW_BIT) & 1u) != 0)
+		{					
+			//Get shadow instance index
+			uint shadowInstanceIndex = atomicAdd(lightCommonDataBuffer.commonData.shadowCount, 1);
 			InstanceIndexBuffer(PushConstants.spotLightShadowInstanceIndexBuffer).indices[shadowInstanceIndex] = spotLightIndex;
 
-			uint count = shadowInstanceIndex + 1;
-			uint numGroupsX = (count + (spotShadowLocalSizeX - 1)) / spotShadowLocalSizeX;
-            
+			//Update dispatch indirect args
+			uint numGroupsX = ((shadowInstanceIndex + 1) + (spotShadowLocalSizeX - 1)) / spotShadowLocalSizeX;  
 			atomicMax(DispatchIndirectCommandBuffer(PushConstants.spotLightShadowDispatchIndirectBuffer).command.num_groups_x, numGroupsX);
+		
+			//Update common shadow AABB volume
+			vec3 aabbMin = spotLightBuffer.lights[spotLightIndex].aabbOrigin - spotLightBuffer.lights[spotLightIndex].aabbExtents;
+			vec3 aabbMax = spotLightBuffer.lights[spotLightIndex].aabbOrigin + spotLightBuffer.lights[spotLightIndex].aabbExtents;
+
+			atomicMin(lightCommonDataBuffer.commonData.aabbMin.x, floatToSortableUint(aabbMin.x));
+			atomicMin(lightCommonDataBuffer.commonData.aabbMin.y, floatToSortableUint(aabbMin.y));
+			atomicMin(lightCommonDataBuffer.commonData.aabbMin.z, floatToSortableUint(aabbMin.z));
+
+			atomicMax(lightCommonDataBuffer.commonData.aabbMax.x, floatToSortableUint(aabbMax.x));
+			atomicMax(lightCommonDataBuffer.commonData.aabbMax.y, floatToSortableUint(aabbMax.y));
+			atomicMax(lightCommonDataBuffer.commonData.aabbMax.z, floatToSortableUint(aabbMax.z));
 		}	
 	}
 }

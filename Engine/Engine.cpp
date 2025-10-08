@@ -27,6 +27,10 @@ void Engine::Initialize()
 	vulkanContext->SetRequiredDeviceExtension(VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME);
 	vulkanContext->SetRequiredDeviceExtension(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
 	vulkanContext->SetRequiredDeviceExtension(VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME);
+	//vulkanContext->SetRequiredDeviceExtension(VK_EXT_SHADER_ATOMIC_FLOAT_EXTENSION_NAME);
+	//vulkanContext->SetRequiredDeviceExtension(VK_EXT_SHADER_ATOMIC_FLOAT_2_EXTENSION_NAME);
+	//vulkanContext->SetRequiredDeviceExtension(VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME);
+	//vulkanContext->SetRequiredDeviceExtension(VK_EXT_EXTENDED_DYNAMIC_STATE_EXTENSION_NAME);
 	vulkanContext->Init();
 
 	frameTimer = std::make_shared<Timer>();
@@ -137,19 +141,51 @@ void Engine::SimulateFrame()
 
 	/*
 	{
-		auto pointLightIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(resourceManager->GetPointLightBufferManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler());
-		std::cout << std::format("Point Light Instance Count: {}\n", pointLightIndirectDrawBufferHandler[0].instanceCount);
+		auto pointLightIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(
+			resourceManager->GetPointLightBufferManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler()
+			);
 
+		auto pointLightDispatchIndirectBufferHandler = static_cast<VkDispatchIndirectCommand*>(
+			resourceManager->GetPointLightBufferManager()->GetShadowDispatchIndirectBuffers(frameIndex)->buffer->GetHandler()
+			);
+
+		auto pointLightCommonDataBufferHandler = static_cast<LightBufferCommonData*>(
+			resourceManager->GetPointLightBufferManager()->GetCommonDataBuffer(frameIndex)->buffer->GetHandler()
+			);
+
+		std::cout << std::format(
+			"Point Light: Count: {} | InstanceCount: {} | ShadowCount: {} | ShadowDispatchCount: {}\n",
+			pointLightCommonDataBufferHandler[0].count,
+			pointLightIndirectDrawBufferHandler[0].instanceCount,
+			pointLightCommonDataBufferHandler[0].shadowCount,
+			pointLightDispatchIndirectBufferHandler[0].x
+		);
 	}
+
 	
 	{
-		auto spotLightIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(resourceManager->GetSpotLightBufferManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler());
-		std::cout << std::format("Spot Light Instance Count: {}\n", spotLightIndirectDrawBufferHandler[0].instanceCount);
+		auto spotLightIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(
+			resourceManager->GetSpotLightBufferManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler()
+			);
 
-		auto spotLightDispatchIndirectBufferHandler = static_cast<VkDispatchIndirectCommand*>(resourceManager->GetSpotLightBufferManager()->GetShadowDispatchIndirectBuffers(frameIndex)->buffer->GetHandler());
-		std::cout << std::format("Spot Light Dispatch Count: {}\n", spotLightDispatchIndirectBufferHandler[0].x);
+		auto spotLightDispatchIndirectBufferHandler = static_cast<VkDispatchIndirectCommand*>(
+			resourceManager->GetSpotLightBufferManager()->GetShadowDispatchIndirectBuffers(frameIndex)->buffer->GetHandler()
+			);
+
+		auto spotLightCommonDataBufferHandler = static_cast<LightBufferCommonData*>(
+			resourceManager->GetSpotLightBufferManager()->GetCommonDataBuffer(frameIndex)->buffer->GetHandler()
+			);
+
+		std::cout << std::format(
+			"Spot Light: Count: {} | InstanceCount: {} | ShadowCount: {} | ShadowDispatchCount: {}\n",
+			spotLightCommonDataBufferHandler[0].count,
+			spotLightIndirectDrawBufferHandler[0].instanceCount,
+			spotLightCommonDataBufferHandler[0].shadowCount,
+			spotLightDispatchIndirectBufferHandler[0].x
+		);
 	}
 	*/
+
 
 
 	UpdateGPU();

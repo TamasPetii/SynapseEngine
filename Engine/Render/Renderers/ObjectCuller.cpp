@@ -114,8 +114,8 @@ void ObjectCuller::CullPointLightInCameraFrustum(VkCommandBuffer commandBuffer, 
 	auto graphicsQueue = device->GetQueue(Vk::QueueType::GRAPHICS);
 	auto pipeline = resourceManager->GetVulkanManager()->GetComputePipeline("CullingPointLight");
 
-	auto pointLightShadowCountBufferHandler = static_cast<uint32_t*>(resourceManager->GetPointLightBufferManager()->GetShadowCountBuffer(frameIndex)->buffer->GetHandler());
-	pointLightShadowCountBufferHandler[0] = 0;
+	auto pointLightShadowCountBufferHandler = static_cast<LightBufferCommonData*>(resourceManager->GetPointLightBufferManager()->GetCommonDataBuffer(frameIndex)->buffer->GetHandler());
+	pointLightShadowCountBufferHandler[0] = LightBufferCommonData{};
 	
 	auto pointLightShadowDispatchIndirectBuffers = static_cast<VkDispatchIndirectCommand*>(resourceManager->GetPointLightBufferManager()->GetShadowDispatchIndirectBuffers(frameIndex)->buffer->GetHandler());
 	pointLightShadowDispatchIndirectBuffers[0] = VkDispatchIndirectCommand{
@@ -151,7 +151,7 @@ void ObjectCuller::CullPointLightInCameraFrustum(VkCommandBuffer commandBuffer, 
 	pushConstants.pointLightInstanceIndexBuffer = resourceManager->GetPointLightBufferManager()->GetInstanceIndexBuffer(frameIndex)->buffer->GetAddress();
 	pushConstants.pointLightDrawIndirectCommandBuffer = resourceManager->GetPointLightBufferManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetAddress();
 	pushConstants.pointLightShadowInstanceIndexBuffer = resourceManager->GetPointLightBufferManager()->GetShadowInstanceIndexBuffer(frameIndex)->buffer->GetAddress();
-	pushConstants.pointLightShadowCountBuffer = resourceManager->GetPointLightBufferManager()->GetShadowCountBuffer(frameIndex)->buffer->GetAddress();
+	pushConstants.pointLightCommonDataBuffer = resourceManager->GetPointLightBufferManager()->GetCommonDataBuffer(frameIndex)->buffer->GetAddress();
 	pushConstants.pointLightShadowDispatchIndirectBuffer = resourceManager->GetPointLightBufferManager()->GetShadowDispatchIndirectBuffers(frameIndex)->buffer->GetAddress();
 
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetPipeline());
@@ -167,8 +167,8 @@ void ObjectCuller::CullSpotLightInCameraFrustum(VkCommandBuffer commandBuffer, s
 	auto graphicsQueue = device->GetQueue(Vk::QueueType::GRAPHICS);
 	auto pipeline = resourceManager->GetVulkanManager()->GetComputePipeline("CullingSpotLight");
 
-	auto spotLightShadowCountBufferHandler = static_cast<uint32_t*>(resourceManager->GetSpotLightBufferManager()->GetShadowCountBuffer(frameIndex)->buffer->GetHandler());
-	spotLightShadowCountBufferHandler[0] = 0;
+	auto spotLightShadowCountBufferHandler = static_cast<LightBufferCommonData*>(resourceManager->GetSpotLightBufferManager()->GetCommonDataBuffer(frameIndex)->buffer->GetHandler());
+	spotLightShadowCountBufferHandler[0] = LightBufferCommonData{};;
 
 	auto spotLightShadowDispatchIndirectBuffers = static_cast<VkDispatchIndirectCommand*>(resourceManager->GetSpotLightBufferManager()->GetShadowDispatchIndirectBuffers(frameIndex)->buffer->GetHandler());
 	spotLightShadowDispatchIndirectBuffers[0] = VkDispatchIndirectCommand{
@@ -204,7 +204,7 @@ void ObjectCuller::CullSpotLightInCameraFrustum(VkCommandBuffer commandBuffer, s
 	pushConstants.spotLightInstanceIndexBuffer = resourceManager->GetSpotLightBufferManager()->GetInstanceIndexBuffer(frameIndex)->buffer->GetAddress();
 	pushConstants.spotLightDrawIndirectCommandBuffer = resourceManager->GetSpotLightBufferManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetAddress();
 	pushConstants.spotLightShadowInstanceIndexBuffer = resourceManager->GetSpotLightBufferManager()->GetShadowInstanceIndexBuffer(frameIndex)->buffer->GetAddress();
-	pushConstants.spotLightShadowCountBuffer = resourceManager->GetSpotLightBufferManager()->GetShadowCountBuffer(frameIndex)->buffer->GetAddress();
+	pushConstants.spotLightCommonDataBuffer = resourceManager->GetSpotLightBufferManager()->GetCommonDataBuffer(frameIndex)->buffer->GetAddress();
 	pushConstants.spotLightShadowDispatchIndirectBuffer = resourceManager->GetSpotLightBufferManager()->GetShadowDispatchIndirectBuffers(frameIndex)->buffer->GetAddress();
 
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetPipeline());

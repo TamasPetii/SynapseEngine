@@ -134,7 +134,7 @@ struct CullingPointLightPushConstants
 	VkDeviceAddress pointLightInstanceIndexBuffer;
 	VkDeviceAddress pointLightDrawIndirectCommandBuffer;
 	VkDeviceAddress pointLightShadowInstanceIndexBuffer;
-	VkDeviceAddress pointLightShadowCountBuffer;
+	VkDeviceAddress pointLightCommonDataBuffer;
 	VkDeviceAddress pointLightShadowDispatchIndirectBuffer;
 	uint32_t cameraIndex;
 	uint32_t pointLightCount;
@@ -147,7 +147,7 @@ struct CullingSpotLightPushConstants
 	VkDeviceAddress spotLightInstanceIndexBuffer;
 	VkDeviceAddress spotLightDrawIndirectCommandBuffer;
 	VkDeviceAddress spotLightShadowInstanceIndexBuffer;
-	VkDeviceAddress spotLightShadowCountBuffer;
+	VkDeviceAddress spotLightCommonDataBuffer;
 	VkDeviceAddress spotLightShadowDispatchIndirectBuffer;
 	uint32_t cameraIndex;
 	uint32_t spotLightCount;

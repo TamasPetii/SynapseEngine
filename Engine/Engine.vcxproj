@@ -446,7 +446,7 @@
     <None Include="Shaders\BillboardInstanced.vert" />
     <None Include="Shaders\Billboard.vert" />
     <None Include="Shaders\Common\Culling\Culling.glsl" />
-    <None Include="Shaders\Common\Light\LightCount.glsl" />
+    <None Include="Shaders\Common\Light\LightCommon.glsl" />
     <None Include="Shaders\Common\Light\SpotLight.glsl" />
     <None Include="Shaders\Common\Pbr.glsl" />
     <None Include="Shaders\Common\Position.glsl" />
