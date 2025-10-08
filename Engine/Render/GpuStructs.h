@@ -153,7 +153,7 @@ struct CullingSpotLightPushConstants
 	uint32_t spotLightCount;
 };
 
-struct CullingPointLightShadowAabbPushConstants
+struct CullingLightShadowAabbPushConstants
 {
 	VkDeviceAddress defaultColliderBuffer;
 	VkDeviceAddress defaultColliderCountBuffer;

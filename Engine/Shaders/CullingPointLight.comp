@@ -9,6 +9,8 @@
 #include "Common/Culling/Culling.glsl"
 #include "Common/Render/DispatchIndirect.glsl"
 
+//Todo: Default Collider shadow dispatch -> x is colliderCount, y is 1 or 0 (has shadow point light!)
+
 layout(push_constant) uniform constants
 {	
 	uvec2 cameraFrustumBuffer;

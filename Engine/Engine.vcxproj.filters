@@ -882,7 +882,7 @@
     <None Include="Shaders\Common\Light\LightCommon.glsl" />
     <None Include="Shaders\Common\Render\DispatchIndirect.glsl" />
     <None Include="Shaders\CullingSpotLight.comp" />
-    <None Include="Shaders\CullingPointLightShadowAabb.comp" />
+    <None Include="Shaders\CullingLightShadowAabb.comp" />
     <None Include="Shaders\Common\Count.glsl" />
   </ItemGroup>
 </Project>

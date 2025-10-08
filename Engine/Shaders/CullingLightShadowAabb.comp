@@ -13,8 +13,8 @@ layout(push_constant) uniform constants
 	uvec2 defaultColliderBuffer;
 	uvec2 defaultColliderCountBuffer;
 	uvec2 defaultColliderInstanceIndexBuffer;
-	uvec2 pointLightCommonDataBuffer;
-	uvec2 pointLightShadowDispatchIndirectBuffer;
+	uvec2 lightCommonDataBuffer;
+	uvec2 lightShadowDispatchIndirectBuffer;
 	uint defaultColliderCount;
 } PushConstants;
 
@@ -30,7 +30,7 @@ void main()
 		return;
 
 	DefaultColliderBuffer defaultColliderBuffer = DefaultColliderBuffer(PushConstants.defaultColliderBuffer);
-	LightCommonDataBuffer lightCommonDataBuffer = LightCommonDataBuffer(PushConstants.pointLightCommonDataBuffer);
+	LightCommonDataBuffer lightCommonDataBuffer = LightCommonDataBuffer(PushConstants.lightCommonDataBuffer);
 
 	vec3 defaultColliderAabbMin = defaultColliderBuffer.colliders[globalIndex].aabbOrigin - defaultColliderBuffer.colliders[globalIndex].aabbExtents;
 	vec3 defaultColliderAabbMax = defaultColliderBuffer.colliders[globalIndex].aabbOrigin + defaultColliderBuffer.colliders[globalIndex].aabbExtents;
@@ -46,6 +46,6 @@ void main()
 
 		//Update dispatch indirect args (Y dimension)
 		uint numGroupsY = ((colliderInstanceIndex + 1) + (colliderLocalSizeX - 1)) / colliderLocalSizeX;  
-		atomicMax(DispatchIndirectCommandBuffer(PushConstants.pointLightShadowDispatchIndirectBuffer).command.num_groups_y, numGroupsY);
+		atomicMax(DispatchIndirectCommandBuffer(PushConstants.lightShadowDispatchIndirectBuffer).command.num_groups_y, numGroupsY);
 	}
 }
