@@ -16,6 +16,7 @@ namespace Vk
 		VkBorderColor borderColor;
 		uint32_t minLod = 0.f;
 		uint32_t maxLod = 0.f;
+		std::optional<VkSamplerReductionMode> reductionMode = std::nullopt;
 	};
 
 	class ENGINE_API ImageSampler

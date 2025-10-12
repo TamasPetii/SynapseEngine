@@ -160,6 +160,11 @@ bool Vk::Image::ImageFormatSupportsLinearMipMap(VkFormat format)
 	return formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT;
 }
 
+uint32_t Vk::Image::GetMipLevels(uint32_t width, uint32_t height)
+{
+	return static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
+}
+
 bool Vk::Image::IsDepthFormat(VkFormat format)
 {
 	switch (format)
@@ -245,7 +250,7 @@ VkImageCreateInfo Vk::Image::BuildImageInfo()
 	imageInfo.extent.width = specification.width;
 	imageInfo.extent.height = specification.height;
 	imageInfo.extent.depth = 1;
-	imageInfo.mipLevels = specification.mipmapLevel;
+	imageInfo.mipLevels = specification.calcualteMipLevelAutomaticly ? GetMipLevels(specification.width, specification.height) : specification.mipmapLevel;
 	imageInfo.arrayLayers = 1;
 	imageInfo.format = specification.format;
 	imageInfo.tiling = specification.tiling;

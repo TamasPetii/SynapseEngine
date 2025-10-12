@@ -435,6 +435,9 @@
     <ClInclude Include="Managers\LightBufferManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Renderers\DepthHierarchyBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -824,6 +827,9 @@
     <ClCompile Include="Managers\LightBufferManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Renderers\DepthHierarchyBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Registry\Registry.inl">
@@ -884,5 +890,9 @@
     <None Include="Shaders\CullingSpotLight.comp" />
     <None Include="Shaders\CullingLightShadowAabb.comp" />
     <None Include="Shaders\Common\Count.glsl" />
+    <None Include="Shaders\Hiz.comp" />
+    <None Include="Shaders\Common\Utility\Sampler.glsl" />
+    <None Include="Shaders\Common\Utility\TextureLoaded.glsl" />
+    <None Include="Shaders\Common\Utility\Texture.glsl" />
   </ItemGroup>
 </Project>

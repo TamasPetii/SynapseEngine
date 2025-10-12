@@ -44,7 +44,15 @@ void Vk::ImageSampler::Init()
 	samplerInfo.mipmapMode = config.mipMapFilter;
 	samplerInfo.mipLodBias = 0.0f;
 	samplerInfo.minLod = config.minLod;
-	samplerInfo.maxLod =config.maxLod;
+	samplerInfo.maxLod = config.maxLod;
+
+	VkSamplerReductionModeCreateInfoEXT createInfoReduction = {};
+	if (config.reductionMode.has_value())
+	{
+		createInfoReduction.sType = VK_STRUCTURE_TYPE_SAMPLER_REDUCTION_MODE_CREATE_INFO_EXT;
+		createInfoReduction.reductionMode = config.reductionMode.value();
+		samplerInfo.pNext = &createInfoReduction;
+	}
 
 	VK_CHECK_MESSAGE(vkCreateSampler(device->Value(), &samplerInfo, nullptr, &sampler), "Failed to create texture sampler!");
 }

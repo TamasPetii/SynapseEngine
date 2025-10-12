@@ -285,6 +285,20 @@ void VulkanManager::InitSamplers()
 	}
 
 	{
+		Vk::ImageSamplerConfig config{};
+		config.magFilter = VK_FILTER_LINEAR;
+		config.minFilter = VK_FILTER_LINEAR;
+		config.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		config.mipMapFilter = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+		config.minLod = 0;
+		config.maxLod = 16.f;
+		config.reductionMode = VK_SAMPLER_REDUCTION_MODE_MAX;
+		config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK; //Irrelevant
+		
+		RegisterSampler("MaxReduction", config);
+	}
+
+	{
 		/*
 		VkSamplerCreateInfo samplerInfo = {};
 		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -362,12 +376,22 @@ void VulkanManager::InitFrameBuffers()
 	entityImageSpec.aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
 	entityImageSpec.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
+	Vk::ImageSpecification depthPyramidImageSpec;
+	depthPyramidImageSpec.type = VK_IMAGE_TYPE_2D;
+	depthPyramidImageSpec.viewType = VK_IMAGE_VIEW_TYPE_2D;
+	depthPyramidImageSpec.format = VK_FORMAT_R32_SFLOAT;
+	depthPyramidImageSpec.tiling = VK_IMAGE_TILING_OPTIMAL;
+	depthPyramidImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+	depthPyramidImageSpec.aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
+	depthPyramidImageSpec.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	depthPyramidImageSpec.calcualteMipLevelAutomaticly = true;
+
 	Vk::ImageSpecification depthImageSpec;
 	depthImageSpec.type = VK_IMAGE_TYPE_2D;
 	depthImageSpec.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	depthImageSpec.format = VK_FORMAT_D32_SFLOAT;
 	depthImageSpec.tiling = VK_IMAGE_TILING_OPTIMAL;
-	depthImageSpec.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+	depthImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 	depthImageSpec.aspectFlag = VK_IMAGE_ASPECT_DEPTH_BIT;
 	depthImageSpec.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 
@@ -378,7 +402,8 @@ void VulkanManager::InitFrameBuffers()
 		.AddImageSpecification("Color", 2, colorImageSpec)
 		.AddImageSpecification("Normal", 3, normalImageSpec)
 		.AddImageSpecification("Entity", 4, entityImageSpec)
-		.AddDepthSpecification(5, depthImageSpec);
+		.AddImageSpecification("DepthPyramid", 5, depthPyramidImageSpec)
+		.AddDepthSpecification(6, depthImageSpec);
 
 	for (uint32_t i = 0; i < GlobalConfig::FrameConfig::maxFramesInFlights; ++i)
 		RegisterFrameDependentFrameBuffer("Main", frameBufferBuilder.BuildDynamic(), i);
@@ -423,6 +448,7 @@ void VulkanManager::InitDescriptors()
 		GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Samplers", VK_NULL_HANDLE, GetSampler("Linear")->Value(), 1);
 		GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Samplers", VK_NULL_HANDLE, GetSampler("NearestAniso")->Value(), 2);
 		GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Samplers", VK_NULL_HANDLE, GetSampler("LinearAniso")->Value(), 3);
+		GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Samplers", VK_NULL_HANDLE, GetSampler("MaxReduction")->Value(), 4);
 	}
 }
 
@@ -492,6 +518,9 @@ void VulkanManager::InitShaderModuls()
 	
 	//Object culling against light shadow aabb
 	RegisterShaderModule("CullingLightShadowAabbComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/CullingLightShadowAabb.comp", VK_SHADER_STAGE_COMPUTE_BIT));
+
+	//Object culling against light shadow aabb
+	RegisterShaderModule("HizComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/Hiz.comp", VK_SHADER_STAGE_COMPUTE_BIT));
 }
 
 void VulkanManager::InitGraphicsPipelines()
@@ -807,6 +836,17 @@ void VulkanManager::InitComputePipelines()
 			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT);
 
 		RegisterComputePipeline("CullingLightShadowAabb", pipelineBuilder.BuildDynamic());
+	}
+
+	{
+		uint32_t pushConsantSize = sizeof(HizPushConstants);
+
+		Vk::ComputePipelineBuilder pipelineBuilder;
+		pipelineBuilder
+			.AddShaderStage(shaderModuls["HizComp"])
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT);
+
+		RegisterComputePipeline("Hiz", pipelineBuilder.BuildDynamic());
 	}
 }
 

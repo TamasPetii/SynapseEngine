@@ -165,6 +165,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Render\Renderers\DepthHierarchyBuilder.h" />
     <ClInclude Include="Managers\LightBufferManager.h" />
     <ClInclude Include="Managers\BaseManagers\DrawIndirectManager.h" />
     <ClInclude Include="Managers\BaseManagers\DynamicSizeBuffer.h" />
@@ -307,6 +308,7 @@
     <ClInclude Include="Vulkan\VulkanMutex.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Render\Renderers\DepthHierarchyBuilder.cpp" />
     <ClCompile Include="Managers\LightBufferManager.cpp" />
     <ClCompile Include="Managers\BaseManagers\DrawIndirectManager.cpp" />
     <ClCompile Include="Render\Renderers\ObjectCuller.cpp" />
@@ -456,6 +458,9 @@
     <None Include="Shaders\Common\Render\DrawIndirect.glsl" />
     <None Include="Shaders\Common\Render\Occlusion.glsl" />
     <None Include="Shaders\Common\Shape\ShapeBufferAddresses.glsl" />
+    <None Include="Shaders\Common\Utility\TextureLoaded.glsl" />
+    <None Include="Shaders\Common\Utility\Sampler.glsl" />
+    <None Include="Shaders\Common\Utility\Texture.glsl" />
     <None Include="Shaders\CullingCameraFrustum.comp" />
     <None Include="Shaders\CullingLightShadowAabb.comp" />
     <None Include="Shaders\CullingSpotLight.comp" />
@@ -465,6 +470,7 @@
     <None Include="Shaders\DeferredPreIndirect.vert" />
     <None Include="Shaders\DeferredSpotLight.frag" />
     <None Include="Shaders\DeferredSpotLight.vert" />
+    <None Include="Shaders\Hiz.comp" />
     <None Include="Shaders\OcclusionCulling.frag" />
     <None Include="Shaders\OcclusionCulling.vert" />
     <None Include="Shaders\CullingPointLight.comp" />

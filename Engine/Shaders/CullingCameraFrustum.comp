@@ -1,4 +1,5 @@
 #version 460
+layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
 #include "Common/Camera.glsl"
 #include "Common/Render/RenderIndices.glsl"
@@ -28,7 +29,6 @@ layout(push_constant) uniform constants
 	uint defaultColliderCount;
 } PushConstants;
 
-layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
 void main()
 {

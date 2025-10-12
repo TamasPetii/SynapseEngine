@@ -162,3 +162,8 @@ struct CullingLightShadowAabbPushConstants
 	VkDeviceAddress pointLightShadowDispatchIndirectBuffer;
 	uint32_t defaultColliderCount;
 };
+
+struct HizPushConstants
+{
+	uint32_t inImageSize;
+};

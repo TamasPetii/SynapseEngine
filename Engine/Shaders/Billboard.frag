@@ -1,7 +1,8 @@
 #version 460
 #extension GL_EXT_buffer_reference_uvec2 : require
 
-#include "Common/Images.glsl"
+#include "Common/Utility/Sampler.glsl"
+#include "Common/Utility/TextureLoaded.glsl"
 
 layout(location = 0) in vec2 fs_in_tex;
 layout(location = 1) in flat uint fs_in_id;
@@ -19,7 +20,7 @@ layout( push_constant ) uniform constants
 
 void main()
 {
-	vec4 color = sampleTexture2D(PushConstants.iconIndex, LINEAR_ANISOTROPY_SAMPLER_ID, vec2(fs_in_tex.x, 1.0 - fs_in_tex.y));
+	vec4 color = sampleLoadedTexture2D(PushConstants.iconIndex, LINEAR_ANISOTROPY_SAMPLER_ID, vec2(fs_in_tex.x, 1.0 - fs_in_tex.y));
 
 	if(color.w < 0.05)
 		discard;
