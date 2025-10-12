@@ -76,7 +76,7 @@ void DepthHierarchyBuilder::BuildDepthHierarchy(VkCommandBuffer commandBuffer, s
 		uint32_t workgroupCountX = static_cast<uint32_t>(std::ceil(depthPyramidWidth / (float)workgroupSize));
 		uint32_t workgroupCountY = static_cast<uint32_t>(std::ceil(depthPyramidHeight / (float)workgroupSize));
 
-		vkCmdPushDescriptorSet(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetLayout(), 1, descriptorWrites.size(), descriptorWrites.data());
+		vkCmdPushDescriptorSet(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetLayout(), 0, descriptorWrites.size(), descriptorWrites.data());
 		vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetPipeline());
 		vkCmdPushConstants(commandBuffer, pipeline->GetLayout(), VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(HizPushConstants), &pushConstants);
 		vkCmdDispatch(commandBuffer, workgroupCountX, workgroupCountY, 1);
