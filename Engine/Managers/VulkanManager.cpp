@@ -198,6 +198,19 @@ std::shared_ptr<Vk::DescriptorSet> VulkanManager::GetDescriptorSet(const std::st
 	return descriptorSets.at(name);
 }
 
+void VulkanManager::RegisterPushDescriptorSet(const std::string& name, std::shared_ptr<Vk::PushDescriptorSet> set)
+{
+	pushDescriptorSets[name] = set;
+}
+
+std::shared_ptr<Vk::PushDescriptorSet> VulkanManager::GetPushDescriptorSet(const std::string& name) const
+{
+	if (pushDescriptorSets.find(name) == pushDescriptorSets.end())
+		return nullptr;
+
+	return pushDescriptorSets.at(name);
+}
+
 void VulkanManager::RegisterFrameDependentFence(const std::string& name, std::shared_ptr<Vk::Fence> fence, uint32_t frameIndex)
 {
 	if (frameIndex >= GlobalConfig::FrameConfig::maxFramesInFlights)
@@ -449,6 +462,16 @@ void VulkanManager::InitDescriptors()
 		GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Samplers", VK_NULL_HANDLE, GetSampler("NearestAniso")->Value(), 2);
 		GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Samplers", VK_NULL_HANDLE, GetSampler("LinearAniso")->Value(), 3);
 		GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Samplers", VK_NULL_HANDLE, GetSampler("MaxReduction")->Value(), 4);
+	}
+
+	//Push Descriptor
+	{
+		Vk::DescriptorSetBuilder setBuilder;
+		setBuilder
+			.AddDescriptorLayoutImage("SrcImage", 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_IMAGE_LAYOUT_GENERAL)
+			.AddDescriptorLayoutImage("DstImage", 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_IMAGE_LAYOUT_GENERAL);
+	
+		RegisterPushDescriptorSet("HizPushSet", setBuilder.BuildPushDescriptorSet());
 	}
 }
 
@@ -844,7 +867,8 @@ void VulkanManager::InitComputePipelines()
 		Vk::ComputePipelineBuilder pipelineBuilder;
 		pipelineBuilder
 			.AddShaderStage(shaderModuls["HizComp"])
-			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT);
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT)
+			.AddDescriptorSetLayout(GetPushDescriptorSet("HizPushSet")->Layout());
 
 		RegisterComputePipeline("Hiz", pipelineBuilder.BuildDynamic());
 	}

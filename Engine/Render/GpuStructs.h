@@ -165,5 +165,5 @@ struct CullingLightShadowAabbPushConstants
 
 struct HizPushConstants
 {
-	uint32_t inImageSize;
+	glm::vec2 outImageSize;
 };

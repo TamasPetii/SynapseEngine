@@ -63,6 +63,9 @@ public:
 	void RegisterDescriptorSet(const std::string& name, std::shared_ptr<Vk::DescriptorSet> set);
 	std::shared_ptr<Vk::DescriptorSet> GetDescriptorSet(const std::string& name) const;
 
+	void RegisterPushDescriptorSet(const std::string& name, std::shared_ptr<Vk::PushDescriptorSet> set);
+	std::shared_ptr<Vk::PushDescriptorSet> GetPushDescriptorSet(const std::string& name) const;
+
 	//Fences
 	void RegisterFrameDependentFence(const std::string& name, std::shared_ptr<Vk::Fence> fence, uint32_t frameIndex);
 	std::shared_ptr<Vk::Fence> GetFrameDependentFence(const std::string& name, uint32_t frameIndex);
@@ -87,6 +90,7 @@ private:
 	std::unordered_map<std::string, std::shared_ptr<Vk::RenderPass>> renderPasses;
 	std::unordered_map<std::string, std::shared_ptr<Vk::ShaderModule>> shaderModuls;
 	std::unordered_map<std::string, std::shared_ptr<Vk::DescriptorPool>> descriptorPools;
+	std::unordered_map<std::string, std::shared_ptr<Vk::PushDescriptorSet>> pushDescriptorSets;
 	std::unordered_map<std::string, std::shared_ptr<Vk::GraphicsPipeline>> graphicsPipelines;
 	std::unordered_map<std::string, std::shared_ptr<Vk::ComputePipeline>> computePipelines;
 	std::unordered_map<std::string, std::shared_ptr<Vk::DescriptorSet>> descriptorSets;

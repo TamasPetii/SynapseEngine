@@ -1,7 +1,6 @@
 #include "DescriptorSet.h"
 
-
-VkDescriptorSetLayoutBinding Vk::DescriptorSet::BuildLayoutBindingInfo(uint32_t binding, VkDescriptorType type, VkShaderStageFlags flags, uint32_t descriptorCount)
+VkDescriptorSetLayoutBinding Vk::DesciptorSetUtils::BuildLayoutBindingInfo(uint32_t binding, VkDescriptorType type, VkShaderStageFlags flags, uint32_t descriptorCount)
 {
 	VkDescriptorSetLayoutBinding layoutBinding{};
 	layoutBinding.binding = binding;
@@ -11,6 +10,19 @@ VkDescriptorSetLayoutBinding Vk::DescriptorSet::BuildLayoutBindingInfo(uint32_t 
 	layoutBinding.pImmutableSamplers = nullptr;
 
 	return layoutBinding;
+}
+
+VkWriteDescriptorSet Vk::DesciptorSetUtils::BuildWritePushDescriptorSetInfo(const DescriptorLayoutImage& imageLayout, const VkDescriptorImageInfo& imageInfo)
+{
+	VkWriteDescriptorSet writeInfo{};
+	writeInfo.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	writeInfo.dstBinding = imageLayout.config.binding;
+	writeInfo.descriptorType = imageLayout.config.type;
+	writeInfo.dstArrayElement = 0;
+	writeInfo.descriptorCount = 1;
+	writeInfo.pImageInfo = &imageInfo;
+
+	return writeInfo;
 }
 
 Vk::DescriptorSet::DescriptorSet(VkDescriptorPool pool, const std::unordered_map<std::string, DescriptorLayoutBuffer>& bufferLayouts, const std::unordered_map<std::string, DescriptorLayoutImage>& imageLayouts) :
@@ -48,6 +60,11 @@ const VkDescriptorSetLayout& Vk::DescriptorSet::Layout() const
 	return descriptorlayout;
 }
 
+const VkDescriptorSetLayout& Vk::PushDescriptorSet::Layout() const
+{
+	return descriptorlayout;
+}
+
 void Vk::DescriptorSet::UpdateImageArrayElement(const std::string& name, VkImageView imageView, VkSampler sampler, uint32_t index)
 {
 	if (imageLayouts.find(name) == imageLayouts.end())
@@ -80,7 +97,7 @@ void Vk::DescriptorSet::Initialize()
 
 	for (auto& [name, bufferLayout] : bufferLayouts)
 	{
-		VkDescriptorSetLayoutBinding layoutBinding = BuildLayoutBindingInfo(bufferLayout.config.binding, bufferLayout.config.type, bufferLayout.config.flags, bufferLayout.config.descriptorCount);
+		VkDescriptorSetLayoutBinding layoutBinding = DesciptorSetUtils::BuildLayoutBindingInfo(bufferLayout.config.binding, bufferLayout.config.type, bufferLayout.config.flags, bufferLayout.config.descriptorCount);
 		layoutBindings.push_back(layoutBinding);
 	}
 
@@ -89,7 +106,7 @@ void Vk::DescriptorSet::Initialize()
 
 	for (auto& [name, imageLayout] : imageLayouts)
 	{
-		VkDescriptorSetLayoutBinding layoutBinding = BuildLayoutBindingInfo(imageLayout.config.binding, imageLayout.config.type, imageLayout.config.flags, imageLayout.config.descriptorCount);
+		VkDescriptorSetLayoutBinding layoutBinding = DesciptorSetUtils::BuildLayoutBindingInfo(imageLayout.config.binding, imageLayout.config.type, imageLayout.config.flags, imageLayout.config.descriptorCount);
 		layoutBindings.push_back(layoutBinding);
 
 		if (imageLayout.config.descriptorCount > 1)
@@ -231,4 +248,47 @@ Vk::DescriptorSetBuilder& Vk::DescriptorSetBuilder::AddDescriptorLayoutImage(con
 std::shared_ptr<Vk::DescriptorSet> Vk::DescriptorSetBuilder::BuildDescriptorSet(VkDescriptorPool pool)
 {
 	return std::make_shared<Vk::DescriptorSet>(pool, bufferLayouts, imageLayouts);
+}
+
+std::shared_ptr<Vk::PushDescriptorSet> Vk::DescriptorSetBuilder::BuildPushDescriptorSet()
+{
+	return std::make_shared<Vk::PushDescriptorSet>(bufferLayouts, imageLayouts);
+}
+
+Vk::PushDescriptorSet::PushDescriptorSet(const std::unordered_map<std::string, DescriptorLayoutBuffer>& bufferLayouts, const std::unordered_map<std::string, DescriptorLayoutImage>& imageLayouts)
+{
+	auto device = VulkanContext::GetContext()->GetDevice();
+
+	std::vector<VkDescriptorSetLayoutBinding> layoutBindings;
+
+	for (auto& [name, bufferLayout] : bufferLayouts)
+	{
+		VkDescriptorSetLayoutBinding layoutBinding = DesciptorSetUtils::BuildLayoutBindingInfo(bufferLayout.config.binding, bufferLayout.config.type, bufferLayout.config.flags, bufferLayout.config.descriptorCount);
+		layoutBindings.push_back(layoutBinding);
+	}
+
+	for (auto& [name, imageLayout] : imageLayouts)
+	{
+		VkDescriptorSetLayoutBinding layoutBinding = DesciptorSetUtils::BuildLayoutBindingInfo(imageLayout.config.binding, imageLayout.config.type, imageLayout.config.flags, imageLayout.config.descriptorCount);
+		layoutBindings.push_back(layoutBinding);
+	}
+
+	VkDescriptorSetLayoutCreateInfo layoutInfo{};
+	layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+	layoutInfo.bindingCount = static_cast<uint32_t>(layoutBindings.size());
+	layoutInfo.pBindings = layoutBindings.data();
+	layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR;
+
+	VK_CHECK_MESSAGE(vkCreateDescriptorSetLayout(device->Value(), &layoutInfo, nullptr, &descriptorlayout), "Failed to create push descriptor set layout!");
+}
+
+Vk::PushDescriptorSet::~PushDescriptorSet()
+{
+	auto device = VulkanContext::GetContext()->GetDevice();
+
+	if (descriptorlayout != VK_NULL_HANDLE)
+	{
+		vkDestroyDescriptorSetLayout(device->Value(), descriptorlayout, nullptr);
+		descriptorlayout = VK_NULL_HANDLE;
+	}
 }

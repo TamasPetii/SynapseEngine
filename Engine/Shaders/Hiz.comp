@@ -6,14 +6,14 @@ layout(set = 1, binding = 1, r32f) uniform writeonly image2D outImage;
 
 layout( push_constant ) uniform constants
 {
-	vec2 inImageSize;
+	vec2 outImageSize;
 } PushConstants;
 
 void main()
 {
-	uvec2 pos = gl_GlobalInvocationID.xy;
+	uvec2 pos = gl_GlobalInvocationID.xy; //OutImageDimension
 
-	float depth = texture(inImage, (vec2(pos) + vec2(0.5)) / PushConstants.inImageSize).x;
+	float depth = texture(inImage, (vec2(pos) + vec2(0.5)) / PushConstants.outImageSize).x;
 
 	imageStore(outImage, ivec2(pos), vec4(depth));
 }

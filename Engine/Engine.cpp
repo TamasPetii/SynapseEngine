@@ -28,7 +28,7 @@ void Engine::Initialize()
 	vulkanContext->SetRequiredDeviceExtension(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
 	vulkanContext->SetRequiredDeviceExtension(VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME);
 	vulkanContext->SetRequiredDeviceExtension(VK_EXT_SAMPLER_FILTER_MINMAX_EXTENSION_NAME);
-	
+	vulkanContext->SetRequiredDeviceExtension(VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME);
 	//vulkanContext->SetRequiredDeviceExtension(VK_EXT_SHADER_ATOMIC_FLOAT_EXTENSION_NAME);
 	//vulkanContext->SetRequiredDeviceExtension(VK_EXT_SHADER_ATOMIC_FLOAT_2_EXTENSION_NAME);
 	//vulkanContext->SetRequiredDeviceExtension(VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME);
