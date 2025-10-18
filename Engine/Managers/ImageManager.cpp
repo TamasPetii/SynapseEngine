@@ -57,7 +57,7 @@ std::shared_ptr<ImageTexture> ImageManager::LoadImage(const std::string& path, c
         static_cast<BatchUploaded*>(imageTexture.get())->DestoryCommandPoolAndBuffer();
         
         imageTexture->state = LoadState::Ready;
-        vulkanManager->GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Images", imageTexture->GetImage()->GetImageView(), VK_NULL_HANDLE, imageTexture->GetBufferArrayIndex());
+        vulkanManager->GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Images", imageTexture->GetImage()->GetImageView("Default"), VK_NULL_HANDLE, imageTexture->GetBufferArrayIndex());
     
         if (onFinished)
             onFinished();
@@ -94,7 +94,7 @@ void ImageManager::Update()
     {
         if (image && image->state == LoadState::GpuUploaded)
         {
-            vulkanManager->GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Images", image->GetImage()->GetImageView(), VK_NULL_HANDLE, image->GetBufferArrayIndex());
+            vulkanManager->GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Images", image->GetImage()->GetImageView("Default"), VK_NULL_HANDLE, image->GetBufferArrayIndex());
             image->state = LoadState::Ready;
 
             std::cout << std::format("Image loaded and ready, on index = {}", image->GetBufferArrayIndex()) << std::endl;

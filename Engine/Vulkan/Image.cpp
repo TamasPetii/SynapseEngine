@@ -1,6 +1,16 @@
 #include "Image.h"
 #include "Memory.h"
 
+void Vk::ImageSpecification::AddImageViewConfig(const std::string& name, const ImageViewConfig& imageViewConfig)
+{
+	imageViewConfigs.insert(std::make_pair(name, imageViewConfig));
+}
+
+void Vk::ImageSpecification::AddImageViewConfig(const std::string& name, VkImageViewType viewType, uint32_t baseMipLevel, uint32_t mipLevelCount, std::optional<VkComponentMapping> swizzle)
+{
+	imageViewConfigs[name] = ImageViewConfig{ viewType, baseMipLevel, mipLevelCount, swizzle };
+}
+
 Vk::Image::Image(const ImageSpecification& specification) :
 	specification(specification)
 {
@@ -17,9 +27,12 @@ const VkImage Vk::Image::Value() const
 	return image;
 }
 
-const VkImageView& Vk::Image::GetImageView() const
+const VkImageView Vk::Image::GetImageView(const std::string& imageViewName) const
 {
-	return imageView;
+	if(imageViews.find(imageViewName) == imageViews.end())
+		return VK_NULL_HANDLE;;
+
+	return imageViews.at(imageViewName);
 }
 
 void Vk::Image::TransitionImageLayout(VkCommandBuffer commandBuffer, VkImage image, VkImageLayout srcLayout, VkPipelineStageFlags srcStageFlags, VkAccessFlags srcAccessMask, VkImageLayout dstLayout, VkPipelineStageFlags dstStageFlags, VkAccessFlags dstAccessMask, uint32_t mipmapLevel)
@@ -213,14 +226,11 @@ void Vk::Image::Init()
 
 	vkBindImageMemory(device->Value(), image, imageMemory, 0);
 
-	auto imageViewInfo = BuildImageViewInfo();
-	VK_CHECK_MESSAGE(vkCreateImageView(device->Value(), &imageViewInfo, nullptr, &imageView), "Failed to create texture image view!");
-
-	for (auto& [name, swizzle] : specification.swizzles)
+	for (auto& [name, config] : specification.imageViewConfigs)
 	{
-		swizzledImageViews.insert(std::make_pair(name, VK_NULL_HANDLE));
-		auto imageViewSwizzleInfo = BuildImageViewSwizzledInfo(swizzle);
-		VK_CHECK_MESSAGE(vkCreateImageView(device->Value(), &imageViewSwizzleInfo, nullptr, &swizzledImageViews.at(name)), "Failed to create texture image view!");
+		imageViews.insert(std::make_pair(name, VK_NULL_HANDLE));
+		auto imageViewInfo = BuildImageViewInfoExtended(config);
+		VK_CHECK_MESSAGE(vkCreateImageView(device->Value(), &imageViewInfo, nullptr, &imageViews.at(name)), "Failed to create texture image view!");
 	}
 }
 
@@ -228,8 +238,11 @@ void Vk::Image::Destroy()
 {
 	auto device = VulkanContext::GetContext()->GetDevice();
 
-	if(imageView != VK_NULL_HANDLE)
-		vkDestroyImageView(device->Value(), imageView, nullptr);
+	for (auto& [name, view] : imageViews)
+	{
+		if(view != VK_NULL_HANDLE)
+			vkDestroyImageView(device->Value(), view, nullptr);
+	}
 	
 	if(image != VK_NULL_HANDLE)
 		vkDestroyImage(device->Value(), image, nullptr);
@@ -238,8 +251,8 @@ void Vk::Image::Destroy()
 		vkFreeMemory(device->Value(), imageMemory, nullptr);
 
 	image = VK_NULL_HANDLE;
-	imageView = VK_NULL_HANDLE;
 	imageMemory = VK_NULL_HANDLE;
+	imageViews.clear();
 }
 
 VkImageCreateInfo Vk::Image::BuildImageInfo()
@@ -262,35 +275,26 @@ VkImageCreateInfo Vk::Image::BuildImageInfo()
 	return imageInfo;
 }
 
-VkImageViewCreateInfo Vk::Image::BuildImageViewInfo()
+VkImageViewCreateInfo Vk::Image::BuildImageViewInfoExtended(const ImageViewConfig& imageViewConfig)
 {
+	if (image == VK_NULL_HANDLE)
+	{
+		throw std::runtime_error("Failed to build image view info extended: Image is null!");
+	}
+
 	VkImageViewCreateInfo viewInfo{};
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	viewInfo.image = image;
-	viewInfo.viewType = specification.viewType;
+	viewInfo.viewType = imageViewConfig.viewType;
 	viewInfo.format = specification.format;
 	viewInfo.subresourceRange.aspectMask = specification.aspectFlag;
-	viewInfo.subresourceRange.baseMipLevel = 0;
-	viewInfo.subresourceRange.levelCount = specification.mipmapLevel;
+	viewInfo.subresourceRange.baseMipLevel = imageViewConfig.baseMipLevel;
+	viewInfo.subresourceRange.levelCount = imageViewConfig.mipLevelCount;
 	viewInfo.subresourceRange.baseArrayLayer = 0;
 	viewInfo.subresourceRange.layerCount = 1;
-
-	return viewInfo;
-}
-
-VkImageViewCreateInfo Vk::Image::BuildImageViewSwizzledInfo(const VkComponentMapping& swizzle)
-{
-	VkImageViewCreateInfo viewInfo{};
-	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-	viewInfo.image = image;
-	viewInfo.viewType = specification.viewType;
-	viewInfo.format = specification.format;
-	viewInfo.subresourceRange.aspectMask = specification.aspectFlag;
-	viewInfo.subresourceRange.baseMipLevel = 0;
-	viewInfo.subresourceRange.levelCount = specification.mipmapLevel;
-	viewInfo.subresourceRange.baseArrayLayer = 0;
-	viewInfo.subresourceRange.layerCount = 1;
-	viewInfo.components = swizzle;
+	
+	if(imageViewConfig.swizzle.has_value())
+		viewInfo.components = imageViewConfig.swizzle.value();
 
 	return viewInfo;
 }

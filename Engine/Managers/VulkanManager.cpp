@@ -346,67 +346,73 @@ void VulkanManager::InitFrameBuffers()
 {
 	Vk::ImageSpecification mainImageSpec;
 	mainImageSpec.type = VK_IMAGE_TYPE_2D;
-	mainImageSpec.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	mainImageSpec.format = VK_FORMAT_R16G16B16A16_SFLOAT;
 	mainImageSpec.tiling = VK_IMAGE_TILING_OPTIMAL;
 	mainImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 	mainImageSpec.aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
 	mainImageSpec.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	mainImageSpec.AddImageViewConfig("Default", VK_IMAGE_VIEW_TYPE_2D);
 
 	Vk::ImageSpecification positionImageSpec;
 	positionImageSpec.type = VK_IMAGE_TYPE_2D;
-	positionImageSpec.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	positionImageSpec.format = VK_FORMAT_R32G32B32A32_SFLOAT;
 	positionImageSpec.tiling = VK_IMAGE_TILING_OPTIMAL;
 	positionImageSpec.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 	positionImageSpec.aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
 	positionImageSpec.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	positionImageSpec.AddImageViewConfig("Default", VK_IMAGE_VIEW_TYPE_2D);
 
 	Vk::ImageSpecification colorImageSpec;
 	colorImageSpec.type = VK_IMAGE_TYPE_2D;
-	colorImageSpec.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	colorImageSpec.format = VK_FORMAT_R16G16B16A16_SFLOAT;
 	colorImageSpec.tiling = VK_IMAGE_TILING_OPTIMAL;
 	colorImageSpec.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 	colorImageSpec.aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
 	colorImageSpec.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	colorImageSpec.AddImageViewConfig("Default", VK_IMAGE_VIEW_TYPE_2D);
+	colorImageSpec.AddImageViewConfig("Color", VK_IMAGE_VIEW_TYPE_2D, 0, 1, std::make_optional(VkComponentMapping{ .r = VK_COMPONENT_SWIZZLE_R, .g = VK_COMPONENT_SWIZZLE_G, .b = VK_COMPONENT_SWIZZLE_B, .a = VK_COMPONENT_SWIZZLE_ONE }));
+	colorImageSpec.AddImageViewConfig("Metallic", VK_IMAGE_VIEW_TYPE_2D, 0, 1, std::make_optional(VkComponentMapping{ .r = VK_COMPONENT_SWIZZLE_A, .g = VK_COMPONENT_SWIZZLE_A, .b = VK_COMPONENT_SWIZZLE_A, .a = VK_COMPONENT_SWIZZLE_ONE }));
 
 	Vk::ImageSpecification normalImageSpec;
 	normalImageSpec.type = VK_IMAGE_TYPE_2D;
-	normalImageSpec.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	normalImageSpec.format = VK_FORMAT_R16G16B16A16_SFLOAT;
 	normalImageSpec.tiling = VK_IMAGE_TILING_OPTIMAL;
 	normalImageSpec.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 	normalImageSpec.aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
 	normalImageSpec.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	normalImageSpec.AddImageViewConfig("Default", VK_IMAGE_VIEW_TYPE_2D);
+	normalImageSpec.AddImageViewConfig("Normal", VK_IMAGE_VIEW_TYPE_2D, 0, 1, std::make_optional(VkComponentMapping{ .r = VK_COMPONENT_SWIZZLE_R, .g = VK_COMPONENT_SWIZZLE_G, .b = VK_COMPONENT_SWIZZLE_B, .a = VK_COMPONENT_SWIZZLE_ONE }));
+	normalImageSpec.AddImageViewConfig("Roughness", VK_IMAGE_VIEW_TYPE_2D, 0, 1, std::make_optional(VkComponentMapping{ .r = VK_COMPONENT_SWIZZLE_A, .g = VK_COMPONENT_SWIZZLE_A, .b = VK_COMPONENT_SWIZZLE_A, .a = VK_COMPONENT_SWIZZLE_ONE }));
+
 
 	Vk::ImageSpecification entityImageSpec;
 	entityImageSpec.type = VK_IMAGE_TYPE_2D;
-	entityImageSpec.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	entityImageSpec.format = VK_FORMAT_R32_UINT;
 	entityImageSpec.tiling = VK_IMAGE_TILING_OPTIMAL;
 	entityImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 	entityImageSpec.aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
 	entityImageSpec.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	entityImageSpec.AddImageViewConfig("Default", VK_IMAGE_VIEW_TYPE_2D);
 
 	Vk::ImageSpecification depthPyramidImageSpec;
 	depthPyramidImageSpec.type = VK_IMAGE_TYPE_2D;
-	depthPyramidImageSpec.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	depthPyramidImageSpec.format = VK_FORMAT_R32_SFLOAT;
 	depthPyramidImageSpec.tiling = VK_IMAGE_TILING_OPTIMAL;
 	depthPyramidImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 	depthPyramidImageSpec.aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
 	depthPyramidImageSpec.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 	depthPyramidImageSpec.calcualteMipLevelAutomaticly = true;
+	depthPyramidImageSpec.AddImageViewConfig("Default", VK_IMAGE_VIEW_TYPE_2D);
+	//Todo:
 
 	Vk::ImageSpecification depthImageSpec;
 	depthImageSpec.type = VK_IMAGE_TYPE_2D;
-	depthImageSpec.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	depthImageSpec.format = VK_FORMAT_D32_SFLOAT;
 	depthImageSpec.tiling = VK_IMAGE_TILING_OPTIMAL;
 	depthImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 	depthImageSpec.aspectFlag = VK_IMAGE_ASPECT_DEPTH_BIT;
 	depthImageSpec.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	depthImageSpec.AddImageViewConfig("Default", VK_IMAGE_VIEW_TYPE_2D);
 
 	Vk::FrameBufferBuilder frameBufferBuilder;
 	frameBufferBuilder.SetSize(4, 4)
@@ -478,13 +484,15 @@ void VulkanManager::InitDescriptors()
 
 void VulkanManager::InitMainFramebufferDescriptorSet(uint32_t frameIndex)
 {
+	auto frameBuffer = GetFrameDependentFrameBuffer("Main", frameIndex);
+
 	Vk::DescriptorSetBuilder setBuilder;
 	setBuilder
-		.AddDescriptorLayoutImage("FboMain", 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, GetFrameDependentFrameBuffer("Main", frameIndex)->GetImage("Main")->GetImageView(), GetSampler("Nearest")->Value(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-		.AddDescriptorLayoutImage("FboPosition", 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, GetFrameDependentFrameBuffer("Main", frameIndex)->GetImage("Position")->GetImageView(), GetSampler("Nearest")->Value(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-		.AddDescriptorLayoutImage("FboColor", 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, GetFrameDependentFrameBuffer("Main", frameIndex)->GetImage("Color")->GetImageView(), GetSampler("Nearest")->Value(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-		.AddDescriptorLayoutImage("FboNormal", 3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, GetFrameDependentFrameBuffer("Main", frameIndex)->GetImage("Normal")->GetImageView(), GetSampler("Nearest")->Value(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-		.AddDescriptorLayoutImage("FboEntity", 4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, GetFrameDependentFrameBuffer("Main", frameIndex)->GetImage("Entity")->GetImageView(), GetSampler("Nearest")->Value(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		.AddDescriptorLayoutImage("FboMain", 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, frameBuffer->GetImage("Main")->GetImageView("Default"), GetSampler("Nearest")->Value(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+		.AddDescriptorLayoutImage("FboPosition", 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, frameBuffer->GetImage("Position")->GetImageView("Default"), GetSampler("Nearest")->Value(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+		.AddDescriptorLayoutImage("FboColor", 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, frameBuffer->GetImage("Color")->GetImageView("Default"), GetSampler("Nearest")->Value(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+		.AddDescriptorLayoutImage("FboNormal", 3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, frameBuffer->GetImage("Normal")->GetImageView("Default"), GetSampler("Nearest")->Value(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+		.AddDescriptorLayoutImage("FboEntity", 4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, frameBuffer->GetImage("Entity")->GetImageView("Default"), GetSampler("Nearest")->Value(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	RegisterFrameDependentDescriptorSet("MainFrameBuffer", setBuilder.BuildDescriptorSet(GetDescriptorPool("Main")->Value()), frameIndex);
 }

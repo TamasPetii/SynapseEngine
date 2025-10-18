@@ -93,13 +93,13 @@ void ImageTexture::CreateVulkanImageWithGli(const std::string& path)
 	imageSpec.width = texWidth;
 	imageSpec.height = texHeight;
 	imageSpec.type = VK_IMAGE_TYPE_2D;
-	imageSpec.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	imageSpec.format = format;
 	imageSpec.tiling = VK_IMAGE_TILING_OPTIMAL;
 	imageSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 	imageSpec.aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
 	imageSpec.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 	imageSpec.mipmapLevel = mipMapLevel;
+	imageSpec.AddImageViewConfig("Default", VK_IMAGE_VIEW_TYPE_2D, 0, mipMapLevel);
 	image = std::make_unique<Vk::Image>(imageSpec);
 
 	VkDeviceSize totalSize = 0;
@@ -188,13 +188,13 @@ void ImageTexture::CreateVulkanImageWithStb(const std::string& path, bool genera
 	imageSpec.width = texWidth;
 	imageSpec.height = texHeight;
 	imageSpec.type = VK_IMAGE_TYPE_2D;
-	imageSpec.viewType = VK_IMAGE_VIEW_TYPE_2D;
 	imageSpec.format = format;
 	imageSpec.tiling = VK_IMAGE_TILING_OPTIMAL;
 	imageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 	imageSpec.aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
 	imageSpec.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 	imageSpec.mipmapLevel = mipMapLevel;
+	imageSpec.AddImageViewConfig("Default", VK_IMAGE_VIEW_TYPE_2D, 0, mipMapLevel);
 	image = std::make_unique<Vk::Image>(imageSpec);
 
 	BatchUploaded::CreateCommandPoolAndBuffer();

@@ -36,7 +36,8 @@ void ViewportWindow::Render(std::shared_ptr<Registry> registry, std::shared_ptr<
 				resourceManager->GetVulkanManager()->MarkFrameBufferToResize("Main", nextFrameIndex, static_cast<uint32_t>(imageSize.x), static_cast<uint32_t>(imageSize.y));
 
 			auto sampler = resourceManager->GetVulkanManager()->GetSampler("Nearest")->Value();
-			auto imageView = frameBuffer->GetImage(GetViewportImageName())->GetImageView();
+			auto imageViewNames = GetViewportImageName();
+			auto imageView = frameBuffer->GetImage(imageViewNames.first)->GetImageView(imageViewNames.second);
 
 			VkDescriptorSet image = ImGui_ImplVulkan_AddTexture(sampler, imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 			textureSet.insert(image);
@@ -54,14 +55,16 @@ void ViewportWindow::Render(std::shared_ptr<Registry> registry, std::shared_ptr<
 	ImGui::PopStyleVar();
 }
 
-std::string ViewportWindow::GetViewportImageName()
+std::pair<std::string, std::string> ViewportWindow::GetViewportImageName()
 {
 	switch (viewportImage)
 	{
-	case 1: return "Position"; break;
-	case 2: return "Color"; break;
-	case 3: return "Normal"; break;
-	default: return "Main";
+	case 1: return { "Position", "Default" }; break;
+	case 2: return { "Color",  "Color" }; break;
+	case 3: return { "Normal", "Normal"}; break;
+	case 4: return { "Normal", "Roughness" }; break;
+	case 5: return { "Color", "Metallic" }; break;
+	default: return { "Main", "Default"};
 	}
 }
 
@@ -117,6 +120,8 @@ void ViewportWindow::ViewportImageMenu()
 			ImGui::RadioButton("Position", &viewportImage, 1);
 			ImGui::RadioButton("Color", &viewportImage, 2);
 			ImGui::RadioButton("Normal", &viewportImage, 3);
+			ImGui::RadioButton("Roughness", &viewportImage, 4);
+			ImGui::RadioButton("Metallic", &viewportImage, 5);
 
 			ImGui::EndChild();
 		}

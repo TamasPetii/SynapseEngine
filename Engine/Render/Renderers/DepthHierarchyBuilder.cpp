@@ -40,14 +40,14 @@ void DepthHierarchyBuilder::BuildDepthHierarchy(VkCommandBuffer commandBuffer, s
 		VK_IMAGE_LAYOUT_UNDEFINED, VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT, VK_ACCESS_2_NONE,
 		VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT | VK_ACCESS_2_SHADER_WRITE_BIT, depthPyramidLevels - 1, 1);
 
-	VkImageView sourceImageView = frameBuffer->GetImage("DepthPyramid")->GetImageView(); //Todo: MIP 0
+	VkImageView sourceImageView = frameBuffer->GetImage("DepthPyramid")->GetImageView("Default"); //Todo: MIP 0
 
 	uint32_t depthPyramidWidth = frameBuffer->GetSize().width;
 	uint32_t depthPyramidHeight = frameBuffer->GetSize().height;
 
 	for (uint32_t i = 1; i < depthPyramidLevels; ++i)
 	{
-		VkImageView destImageView = frameBuffer->GetImage("DepthPyramid")->GetImageView(); //TODO: MIP i
+		VkImageView destImageView = frameBuffer->GetImage("DepthPyramid")->GetImageView("Default"); //TODO: MIP i
 
 		VkDescriptorImageInfo dstTarget;
 		dstTarget.sampler = nullptr;

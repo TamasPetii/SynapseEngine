@@ -22,6 +22,8 @@ void DirectionLightSystem::OnUpdate(std::shared_ptr<Registry> registry, std::sha
 			[[unlikely]]
 			if (directionLightComponent.shadow.frameBuffers[frameIndex].version != directionLightComponent.shadow.version)
 			{
+				/*
+
 				directionLightComponent.shadow.frameBuffers[frameIndex].version = directionLightComponent.shadow.version;
 
 				Vk::ImageSpecification depthImageSpec;
@@ -39,6 +41,8 @@ void DirectionLightSystem::OnUpdate(std::shared_ptr<Registry> registry, std::sha
 					.AddDepthSpecification(0, depthImageSpec);
 
 				directionLightComponent.shadow.frameBuffers[frameIndex].frameBuffer = frameBufferBuilder.BuildDynamic();
+
+				*/
 
 				//TODO: DYNAMIC DESCRIPTOR ARRAY UPDATE
 			}

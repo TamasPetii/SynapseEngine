@@ -19,7 +19,7 @@ protected:
 	inline static int viewportImage = 0;
 	inline static GizmoConfig gizmoConfig;
 private:
-	std::string GetViewportImageName();
+	std::pair<std::string, std::string> GetViewportImageName();
 	void GizmoConfigMenu();
 	void ViewportImageMenu();
 	void RenderGizmo(std::shared_ptr<Registry> registry, ImVec2 viewPortStart, ImVec2 viewPortEnd);

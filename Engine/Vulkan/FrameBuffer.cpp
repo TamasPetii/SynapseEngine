@@ -39,7 +39,6 @@ bool Vk::FrameBuffer::Initialize()
 {
 	auto device = VulkanContext::GetContext()->GetDevice();
 
-	std::vector<VkImageView> imageViews(config.imageSpecifications.size());
 	images.resize(config.imageSpecifications.size());
 
 	for (auto& [imageName, imageData] : config.imageSpecifications)
@@ -47,21 +46,6 @@ bool Vk::FrameBuffer::Initialize()
 		imageData.second.width = config.width;
 		imageData.second.height = config.height;
 		images[imageData.first] = std::make_shared<Image>(imageData.second);
-		imageViews[imageData.first] = images[imageData.first]->GetImageView();
-	}
-
-	if (config.renderPass.has_value())
-	{
-		VkFramebufferCreateInfo framebufferInfo{};
-		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferInfo.renderPass = config.renderPass.value();
-		framebufferInfo.attachmentCount = static_cast<uint32_t>(imageViews.size());
-		framebufferInfo.pAttachments = imageViews.data();
-		framebufferInfo.width = config.width;
-		framebufferInfo.height = config.height;
-		framebufferInfo.layers = 1;
-
-		VK_CHECK_MESSAGE(vkCreateFramebuffer(device->Value(), &framebufferInfo, nullptr, &frameBuffer), "Failed to create framebuffer!");
 	}
 
 	return true;
