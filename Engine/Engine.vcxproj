@@ -458,6 +458,7 @@
     <None Include="Shaders\Common\Render\DrawIndirect.glsl" />
     <None Include="Shaders\Common\Render\Occlusion.glsl" />
     <None Include="Shaders\Common\Shape\ShapeBufferAddresses.glsl" />
+    <None Include="Shaders\Common\Utility\LinearDepth.glsl" />
     <None Include="Shaders\Common\Utility\TextureLoaded.glsl" />
     <None Include="Shaders\Common\Utility\Sampler.glsl" />
     <None Include="Shaders\Common\Utility\Texture.glsl" />
@@ -471,6 +472,7 @@
     <None Include="Shaders\DeferredSpotLight.frag" />
     <None Include="Shaders\DeferredSpotLight.vert" />
     <None Include="Shaders\Hiz.comp" />
+    <None Include="Shaders\HizLinearDepth.comp" />
     <None Include="Shaders\OcclusionCulling.frag" />
     <None Include="Shaders\OcclusionCulling.vert" />
     <None Include="Shaders\CullingPointLight.comp" />

@@ -398,12 +398,11 @@ void VulkanManager::InitFrameBuffers()
 	depthPyramidImageSpec.type = VK_IMAGE_TYPE_2D;
 	depthPyramidImageSpec.format = VK_FORMAT_R32_SFLOAT;
 	depthPyramidImageSpec.tiling = VK_IMAGE_TILING_OPTIMAL;
-	depthPyramidImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+	depthPyramidImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
 	depthPyramidImageSpec.aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
 	depthPyramidImageSpec.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 	depthPyramidImageSpec.calcualteMipLevelAutomaticly = true;
-	depthPyramidImageSpec.AddImageViewConfig("Default", VK_IMAGE_VIEW_TYPE_2D);
-	//Todo:
+	depthPyramidImageSpec.AddImageViewConfig("Default", VK_IMAGE_VIEW_TYPE_2D, 0, 0, std::nullopt, true);
 
 	Vk::ImageSpecification depthImageSpec;
 	depthImageSpec.type = VK_IMAGE_TYPE_2D;
@@ -479,6 +478,15 @@ void VulkanManager::InitDescriptors()
 	
 		RegisterPushDescriptorSet("HizPushSet", setBuilder.BuildPushDescriptorSet());
 	}
+
+	{
+		Vk::DescriptorSetBuilder setBuilder;
+		setBuilder
+			.AddDescriptorLayoutImage("SrcImage", 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL)
+			.AddDescriptorLayoutImage("DstImage", 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_IMAGE_LAYOUT_GENERAL);
+
+		RegisterPushDescriptorSet("HizPushSetLinearDepth", setBuilder.BuildPushDescriptorSet());
+	}
 }
 
 
@@ -552,6 +560,10 @@ void VulkanManager::InitShaderModuls()
 
 	//Object culling against light shadow aabb
 	RegisterShaderModule("HizComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/Hiz.comp", VK_SHADER_STAGE_COMPUTE_BIT));
+
+	//Object culling against light shadow aabb
+	RegisterShaderModule("HizLinearDepthComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/HizLinearDepth.comp", VK_SHADER_STAGE_COMPUTE_BIT));
+
 }
 
 void VulkanManager::InitGraphicsPipelines()
@@ -879,6 +891,18 @@ void VulkanManager::InitComputePipelines()
 			.AddDescriptorSetLayout(GetPushDescriptorSet("HizPushSet")->Layout());
 
 		RegisterComputePipeline("Hiz", pipelineBuilder.BuildDynamic());
+	}
+
+	{
+		uint32_t pushConsantSize = sizeof(HizLinearDepthPushConstants);
+
+		Vk::ComputePipelineBuilder pipelineBuilder;
+		pipelineBuilder
+			.AddShaderStage(shaderModuls["HizLinearDepthComp"])
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT)
+			.AddDescriptorSetLayout(GetPushDescriptorSet("HizPushSetLinearDepth")->Layout());
+
+		RegisterComputePipeline("HizLinearDepth", pipelineBuilder.BuildDynamic());
 	}
 }
 

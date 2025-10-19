@@ -894,5 +894,7 @@
     <None Include="Shaders\Common\Utility\Sampler.glsl" />
     <None Include="Shaders\Common\Utility\TextureLoaded.glsl" />
     <None Include="Shaders\Common\Utility\Texture.glsl" />
+    <None Include="Shaders\HizLinearDepth.comp" />
+    <None Include="Shaders\Common\Utility\LinearDepth.glsl" />
   </ItemGroup>
 </Project>

@@ -255,7 +255,9 @@ std::shared_ptr<Vk::PushDescriptorSet> Vk::DescriptorSetBuilder::BuildPushDescri
 	return std::make_shared<Vk::PushDescriptorSet>(bufferLayouts, imageLayouts);
 }
 
-Vk::PushDescriptorSet::PushDescriptorSet(const std::unordered_map<std::string, DescriptorLayoutBuffer>& bufferLayouts, const std::unordered_map<std::string, DescriptorLayoutImage>& imageLayouts)
+Vk::PushDescriptorSet::PushDescriptorSet(const std::unordered_map<std::string, DescriptorLayoutBuffer>& bufferLayouts, const std::unordered_map<std::string, DescriptorLayoutImage>& imageLayouts) : 
+	bufferLayouts(bufferLayouts),
+	imageLayouts(imageLayouts)
 {
 	auto device = VulkanContext::GetContext()->GetDevice();
 

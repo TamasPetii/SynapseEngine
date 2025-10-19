@@ -219,7 +219,6 @@ void Scene::InitializeRegistry()
 			transformComponent.scale = glm::vec3(0.5);
 			registry->SetParent(entity, modelParent);
 		}
-		*/
 
 		{
 			auto entity = registry->CreateEntity();
@@ -240,6 +239,7 @@ void Scene::InitializeRegistry()
 
 			registry->SetParent(entity, modelParent);
 		}
+		*/
 
 		/*
 		{

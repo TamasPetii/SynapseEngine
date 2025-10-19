@@ -109,6 +109,13 @@ void Vk::Device::Init(std::span<const char*> deviceExtensions)
 
 	VK_CHECK_MESSAGE(vkCreateDevice(physicalDevice->Value(), &createInfo, nullptr, &device), "Failed to create logical device!");
 
+	vkCmdPushDescriptorSetKHR = reinterpret_cast<PFN_vkCmdPushDescriptorSetKHR>(vkGetDeviceProcAddr(device, "vkCmdPushDescriptorSetKHR"));
+
+	if (!vkCmdPushDescriptorSetKHR)
+	{
+		throw std::runtime_error("Failed to load vkCmdPushDescriptorSetKHR — VK_KHR_push_descriptor not enabled or unsupported!");
+	}
+
 	vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
 	vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
 	vkGetDeviceQueue(device, indices.computeFamily.value(), 0, &computeQueue);

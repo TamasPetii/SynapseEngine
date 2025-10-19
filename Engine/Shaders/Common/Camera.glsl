@@ -9,7 +9,8 @@ struct Camera
 	mat4 projInv;
 	mat4 viewProj;
 	mat4 viewProjInv;
-	vec4 eye;
+	vec4 eye; //xyz: position, w = padding
+	vec4 params; // x: near, y: far, z: fov, w: aspect
 };
 
 layout(buffer_reference, std430) readonly buffer CameraBuffer { 

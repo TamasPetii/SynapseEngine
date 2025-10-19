@@ -167,3 +167,10 @@ struct HizPushConstants
 {
 	glm::vec2 outImageSize;
 };
+
+struct HizLinearDepthPushConstants
+{
+	glm::vec2 outImageSize;
+	VkDeviceAddress cameraBuffer;
+	uint32_t cameraIndex;
+};

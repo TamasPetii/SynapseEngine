@@ -30,6 +30,7 @@ namespace Vk
 		~Device();
 		VkDevice Value() const;
 		VkQueue GetQueue(QueueType type) const;
+		PFN_vkCmdPushDescriptorSetKHR vkCmdPushDescriptorSetKHR = nullptr;
 	private:
 		void Init(std::span<const char*> deviceExtensions);
 		void Destroy();

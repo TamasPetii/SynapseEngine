@@ -6,6 +6,7 @@
 #include "Renderers/BillboardRenderer.h"
 #include "Engine/Vulkan/VulkanMutex.h"
 #include "Renderers/ObjectCuller.h"
+#include "Renderers/DepthHierarchyBuilder.h"
 
 RenderManager::RenderManager(std::shared_ptr<ResourceManager> resourceManager) : 
 	resourceManager(resourceManager)
@@ -56,6 +57,8 @@ void RenderManager::Render(std::shared_ptr<Registry> registry, uint32_t frameInd
 	renderers["DeferredRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
 	renderers["WireframeRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
 	renderers["BillboardRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
+
+	DepthHierarchyBuilder::Build(commandBuffer, registry, resourceManager, frameIndex);
 
 	GuiRenderer::Render(commandBuffer, registry, resourceManager, frameIndex, imageIndex, guiRenderFunction);
 

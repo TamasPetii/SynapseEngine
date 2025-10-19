@@ -47,6 +47,7 @@ public:
 	glm::mat4 viewProj;
 	glm::mat4 viewProjInv;
 	glm::vec4 eye;
+	glm::vec4 params;
 };
 
 struct ENGINE_API CameraFrustumGPU

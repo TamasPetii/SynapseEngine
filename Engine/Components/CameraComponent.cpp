@@ -32,7 +32,8 @@ CameraComponentGPU::CameraComponentGPU(const CameraComponent& component) :
 	projInv(component.projInv),
 	viewProj(component.viewProj),
 	viewProjInv(component.viewProjInv),
-	eye(component.position, component.farPlane)
+	eye(component.position, 0.f),
+	params(component.nearPlane, component.farPlane, component.fov, component.width / component.height)
 {
 }
 

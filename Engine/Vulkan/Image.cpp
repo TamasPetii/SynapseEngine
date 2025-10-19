@@ -6,9 +6,9 @@ void Vk::ImageSpecification::AddImageViewConfig(const std::string& name, const I
 	imageViewConfigs.insert(std::make_pair(name, imageViewConfig));
 }
 
-void Vk::ImageSpecification::AddImageViewConfig(const std::string& name, VkImageViewType viewType, uint32_t baseMipLevel, uint32_t mipLevelCount, std::optional<VkComponentMapping> swizzle)
+void Vk::ImageSpecification::AddImageViewConfig(const std::string& name, VkImageViewType viewType, uint32_t baseMipLevel, uint32_t mipLevelCount, std::optional<VkComponentMapping> swizzle, bool calcualteMipLevelAutomaticly)
 {
-	imageViewConfigs[name] = ImageViewConfig{ viewType, baseMipLevel, mipLevelCount, swizzle };
+	imageViewConfigs[name] = ImageViewConfig{ calcualteMipLevelAutomaticly, viewType, baseMipLevel, mipLevelCount, swizzle };
 }
 
 Vk::Image::Image(const ImageSpecification& specification) :
@@ -108,7 +108,7 @@ void Vk::Image::TransitionImageLayoutDynamic(VkCommandBuffer commandBuffer, VkIm
 	imageBarrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	imageBarrier.image = image;
 
-	imageBarrier.subresourceRange.aspectMask = (dstLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT);
+	imageBarrier.subresourceRange.aspectMask = (dstLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL || dstLayout == VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL ? VK_IMAGE_ASPECT_DEPTH_BIT : VK_IMAGE_ASPECT_COLOR_BIT);
 	imageBarrier.subresourceRange.baseMipLevel = baseMipMap;
 	imageBarrier.subresourceRange.levelCount = mipmapLevel;
 	imageBarrier.subresourceRange.baseArrayLayer = 0;
@@ -228,9 +228,25 @@ void Vk::Image::Init()
 
 	for (auto& [name, config] : specification.imageViewConfigs)
 	{
-		imageViews.insert(std::make_pair(name, VK_NULL_HANDLE));
-		auto imageViewInfo = BuildImageViewInfoExtended(config);
-		VK_CHECK_MESSAGE(vkCreateImageView(device->Value(), &imageViewInfo, nullptr, &imageViews.at(name)), "Failed to create texture image view!");
+		if (config.generateMipImageViewAutomaticly)
+		{
+			for (uint32_t mipLevel = 0; mipLevel < specification.mipmapLevel; mipLevel++)
+			{
+				std::string mipName = name + "_mip_" + std::to_string(mipLevel);
+				imageViews.insert(std::make_pair(mipName, VK_NULL_HANDLE));
+				ImageViewConfig mipConfig = config;
+				mipConfig.baseMipLevel = mipLevel;
+				mipConfig.mipLevelCount = 1;
+				auto imageViewInfo = BuildImageViewInfoExtended(mipConfig);
+				VK_CHECK_MESSAGE(vkCreateImageView(device->Value(), &imageViewInfo, nullptr, &imageViews.at(mipName)), "Failed to create texture image view!");
+			}
+		}
+		else
+		{
+			imageViews.insert(std::make_pair(name, VK_NULL_HANDLE));
+			auto imageViewInfo = BuildImageViewInfoExtended(config);
+			VK_CHECK_MESSAGE(vkCreateImageView(device->Value(), &imageViewInfo, nullptr, &imageViews.at(name)), "Failed to create texture image view!");
+		}
 	}
 }
 
@@ -257,13 +273,18 @@ void Vk::Image::Destroy()
 
 VkImageCreateInfo Vk::Image::BuildImageInfo()
 {
+	uint32_t mipLevels = specification.calcualteMipLevelAutomaticly ? GetMipLevels(specification.width, specification.height) : specification.mipmapLevel;
+
+	//Need the automatic mip level to iterate over image views
+	specification.mipmapLevel = mipLevels;
+
 	VkImageCreateInfo imageInfo{};
 	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 	imageInfo.imageType = specification.type;
 	imageInfo.extent.width = specification.width;
 	imageInfo.extent.height = specification.height;
 	imageInfo.extent.depth = 1;
-	imageInfo.mipLevels = specification.calcualteMipLevelAutomaticly ? GetMipLevels(specification.width, specification.height) : specification.mipmapLevel;
+	imageInfo.mipLevels = specification.mipmapLevel;
 	imageInfo.arrayLayers = 1;
 	imageInfo.format = specification.format;
 	imageInfo.tiling = specification.tiling;

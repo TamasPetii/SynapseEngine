@@ -11,6 +11,7 @@ namespace Vk
 
 	struct ENGINE_API ImageViewConfig
 	{
+		bool generateMipImageViewAutomaticly = false;
 		VkImageViewType viewType;
 		uint32_t baseMipLevel = 0;
 		uint32_t mipLevelCount = 1;
@@ -31,7 +32,7 @@ namespace Vk
 		bool calcualteMipLevelAutomaticly = false;
 
 		void AddImageViewConfig(const std::string& name, const ImageViewConfig& imageViewConfig);
-		void AddImageViewConfig(const std::string& name, VkImageViewType viewType, uint32_t baseMipLevel = 0, uint32_t mipLevelCount = 1, std::optional<VkComponentMapping> swizzle = std::nullopt);
+		void AddImageViewConfig(const std::string& name, VkImageViewType viewType, uint32_t baseMipLevel = 0, uint32_t mipLevelCount = 1, std::optional<VkComponentMapping> swizzle = std::nullopt, bool calcualteMipLevelAutomaticly = false);
 		std::unordered_map<std::string, ImageViewConfig> imageViewConfigs;
 	};
 
