@@ -11,6 +11,9 @@ struct DefaultCollider
 	uint bitflag;
 	vec3 sphereOrigin;
 	float sphereRadius;
+	vec4 projectedMinMax;
+	vec3 padding;
+	float linearDepth;
 };
 
 

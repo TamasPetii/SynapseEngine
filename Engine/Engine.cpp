@@ -142,6 +142,36 @@ void Engine::SimulateFrame()
 	vkResetFences(device->Value(), 1, &inFlightFence->Value());
 
 	/*
+	std::cout << "----- Frame " << frameIndex << " -----\n";
+
+	{
+		auto shapeIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(
+			resourceManager->GetGeometryManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler()
+			);
+
+		for (auto& [name, shape] : resourceManager->GetGeometryManager()->GetShapes())
+		{	
+			std::cout << std::format("Shape: {} | InstanceCount: {}\n",
+				name,
+				shapeIndirectDrawBufferHandler[shape->object->GetBufferArrayIndex()].instanceCount
+			);
+		}
+	}
+
+	{
+		auto modelIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(
+			resourceManager->GetModelManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler()
+			);
+
+		for (auto& [name, model] : resourceManager->GetModelManager()->GetModels())
+		{
+			std::cout << std::format("Shape: {} | InstanceCount: {}\n",
+				name,
+				modelIndirectDrawBufferHandler[model->object->GetBufferArrayIndex()].instanceCount
+			);
+		}
+	}
+
 	{
 		auto pointLightIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(
 			resourceManager->GetPointLightBufferManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler()
@@ -187,7 +217,6 @@ void Engine::SimulateFrame()
 		);
 	}
 	*/
-
 
 
 	UpdateGPU();

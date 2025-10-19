@@ -230,6 +230,15 @@ void Vk::Image::Init()
 	{
 		if (config.generateMipImageViewAutomaticly)
 		{
+			//Default iamge view containing all the mip levels
+			imageViews.insert(std::make_pair(name, VK_NULL_HANDLE));
+			ImageViewConfig mipConfig = config;
+			mipConfig.baseMipLevel = 0;
+			mipConfig.mipLevelCount = specification.mipmapLevel;
+			auto imageViewInfo = BuildImageViewInfoExtended(mipConfig);
+			VK_CHECK_MESSAGE(vkCreateImageView(device->Value(), &imageViewInfo, nullptr, &imageViews.at(name)), "Failed to create texture image view!");
+
+			//Individual mip level image views
 			for (uint32_t mipLevel = 0; mipLevel < specification.mipmapLevel; mipLevel++)
 			{
 				std::string mipName = name + "_mip_" + std::to_string(mipLevel);

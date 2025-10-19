@@ -173,3 +173,9 @@ Entity CameraSystem::GetMainCameraEntity(std::shared_ptr<Registry> registry)
 
 	return NULL_ENTITY;
 }
+
+float CameraSystem::ConvertDepthToLinearNormalized(float depth, float nearPlane, float farPlane)
+{
+	float linear = (nearPlane * farPlane) / (farPlane - depth * (farPlane - nearPlane));
+	return (linear - nearPlane) / (farPlane - nearPlane);
+}

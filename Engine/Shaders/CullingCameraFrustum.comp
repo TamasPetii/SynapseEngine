@@ -10,6 +10,8 @@ layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 #include "Common/Render/InstanceIndex.glsl"
 #include "Common/Culling/Culling.glsl"
 
+layout(set = 0, binding = 0) uniform sampler2D depthPyramid;
+
 layout(push_constant) uniform constants
 {	
 	uvec2 cameraFrustumBuffer;
@@ -24,6 +26,8 @@ layout(push_constant) uniform constants
 	uvec2 shapeBufferAddresses;
 	uvec2 shapeDrawIndirectCommandBuffer;
 	uvec2 shapeInstanceIndexAddressBuffer;
+
+	uvec2 depthPyramidSize;
 
 	uint cameraIndex;
 	uint defaultColliderCount;
@@ -48,21 +52,30 @@ void main()
 
 	if(TestFrustumVsAABB(cameraBuffer, PushConstants.cameraIndex, defaultColliderBuffer.colliders[globalIndex].aabbOrigin, defaultColliderBuffer.colliders[globalIndex].aabbExtents))
 	{
-		bool isModel = (defaultColliderBuffer.colliders[globalIndex].bitflag & COLLIDER_MODEL_BIT) != 0u;
+		vec4 projectedMinMax = defaultColliderBuffer.colliders[globalIndex].projectedMinMax;
+		float width = (projectedMinMax.z - projectedMinMax.x) * PushConstants.depthPyramidSize.x;
+		float height = (projectedMinMax.w - projectedMinMax.y) * PushConstants.depthPyramidSize.y;
+		float level = floor(log2(max(width, height)));
+		float depth = textureLod(depthPyramid, (projectedMinMax.xy + projectedMinMax.zw) * 0.5, level).x;
 
-		if(isModel)
+		if(defaultColliderBuffer.colliders[globalIndex].linearDepth <= depth)
 		{
-			uint modelIndex = ModelRenderIndicesBuffer(PushConstants.modelRenderIndicesBuffer).indices[objectIndex].modelIndex;			
-			uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(PushConstants.modelDrawIndirectCommandBuffer).commands[modelIndex].instanceCount, 1);		
-			uvec2 instanceIndexBuffer = InstanceIndexAddressBuffer(PushConstants.modelInstanceIndexAddressBuffer).deviceAddresses[modelIndex];
-			InstanceIndexBuffer(instanceIndexBuffer).indices[instanceIndex] = objectIndex;
-		}
-		else
-		{
-			uint shapeIndex = ShapeRenderIndicesBuffer(PushConstants.shapeRenderIndicesBuffer).indices[objectIndex].shapeIndex;			
-			uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(PushConstants.shapeDrawIndirectCommandBuffer).commands[shapeIndex].instanceCount, 1);		
-			uvec2 instanceIndexBuffer = InstanceIndexAddressBuffer(PushConstants.shapeInstanceIndexAddressBuffer).deviceAddresses[shapeIndex];
-			InstanceIndexBuffer(instanceIndexBuffer).indices[instanceIndex] = objectIndex;
+			bool isModel = (defaultColliderBuffer.colliders[globalIndex].bitflag & COLLIDER_MODEL_BIT) != 0u;
+
+			if(isModel)
+			{
+				uint modelIndex = ModelRenderIndicesBuffer(PushConstants.modelRenderIndicesBuffer).indices[objectIndex].modelIndex;			
+				uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(PushConstants.modelDrawIndirectCommandBuffer).commands[modelIndex].instanceCount, 1);		
+				uvec2 instanceIndexBuffer = InstanceIndexAddressBuffer(PushConstants.modelInstanceIndexAddressBuffer).deviceAddresses[modelIndex];
+				InstanceIndexBuffer(instanceIndexBuffer).indices[instanceIndex] = objectIndex;
+			}
+			else
+			{
+				uint shapeIndex = ShapeRenderIndicesBuffer(PushConstants.shapeRenderIndicesBuffer).indices[objectIndex].shapeIndex;			
+				uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(PushConstants.shapeDrawIndirectCommandBuffer).commands[shapeIndex].instanceCount, 1);		
+				uvec2 instanceIndexBuffer = InstanceIndexAddressBuffer(PushConstants.shapeInstanceIndexAddressBuffer).deviceAddresses[shapeIndex];
+				InstanceIndexBuffer(instanceIndexBuffer).indices[instanceIndex] = objectIndex;
+			}
 		}
 	}
 }

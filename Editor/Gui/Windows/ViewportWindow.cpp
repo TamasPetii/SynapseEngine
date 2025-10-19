@@ -47,6 +47,17 @@ void ViewportWindow::Render(std::shared_ptr<Registry> registry, std::shared_ptr<
 
 			ImGui::Image((ImTextureID)image, imageSize);
 
+			uint32_t depthPyramidLevels = Vk::Image::GetMipLevels(frameBuffer->GetSize().width, frameBuffer->GetSize().height);
+
+			for (int i = 0; i < depthPyramidLevels; i++)
+			{
+				auto depthPyramidImageView = frameBuffer->GetImage("DepthPyramid")->GetImageView("Default_mip_" + std::to_string(i));
+				VkDescriptorSet depthPyramidImage = ImGui_ImplVulkan_AddTexture(sampler, depthPyramidImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+				textureSet.insert(depthPyramidImage);
+
+				ImGui::Image((ImTextureID)depthPyramidImage, imageSize);
+			}
+
 			RenderGizmo(registry, imageStart, imageEnd);
 			GetClickedActiveEntity(registry, frameBuffer);		
 		}

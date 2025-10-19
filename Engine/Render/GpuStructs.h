@@ -123,6 +123,8 @@ struct CullingCameraFrustumPushConstants
 	VkDeviceAddress shapeDrawIndirectCommandBuffer;
 	VkDeviceAddress shapeInstanceIndexAddressBuffer;
 
+	glm::vec2 depthPyramidSize;
+
 	uint32_t cameraIndex;
 	uint32_t defaultColliderCount;
 };

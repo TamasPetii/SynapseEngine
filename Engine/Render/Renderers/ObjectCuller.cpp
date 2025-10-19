@@ -21,6 +21,11 @@ void ObjectCuller::CullObjectInCameraFrustum(VkCommandBuffer commandBuffer, std:
 	auto device = vulkanContext->GetDevice();
 	auto graphicsQueue = device->GetQueue(Vk::QueueType::GRAPHICS);
 	auto pipeline = resourceManager->GetVulkanManager()->GetComputePipeline("CullingCameraFrustum");
+	auto pushDescriptor = resourceManager->GetVulkanManager()->GetPushDescriptorSet("DepthPyramid");
+
+	//Fix: Problematic with framebuffer resizing?
+	auto previousFrameIndex = (frameIndex + GlobalConfig::FrameConfig::framesInFlight - 1) % GlobalConfig::FrameConfig::framesInFlight;
+	auto previousFrameBuffer = resourceManager->GetVulkanManager()->GetFrameDependentFrameBuffer("Main", previousFrameIndex);
 
 	auto modelIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(resourceManager->GetModelManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler());
 	auto shapeIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(resourceManager->GetGeometryManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler());
@@ -60,9 +65,22 @@ void ObjectCuller::CullObjectInCameraFrustum(VkCommandBuffer commandBuffer, std:
 	pushConstants.shapeDrawIndirectCommandBuffer = resourceManager->GetGeometryManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetAddress();
 	pushConstants.shapeInstanceIndexAddressBuffer = resourceManager->GetGeometryManager()->GetInstanceIndexAddressBuffer(frameIndex)->buffer->GetAddress();
 
+	pushConstants.depthPyramidSize = glm::vec2(previousFrameBuffer->GetSize().width, previousFrameBuffer->GetSize().height);
+
+	VkDescriptorImageInfo srcTarget;
+	srcTarget.sampler = resourceManager->GetVulkanManager()->GetSampler("Nearest")->Value();
+	srcTarget.imageView = previousFrameBuffer->GetImage("DepthPyramid")->GetImageView("Default");
+	srcTarget.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+	//Potential problem with srcTarget in BuildWritePushDescriptorSetInfo image info???
+	std::vector<VkWriteDescriptorSet> descriptorWrites =
+	{
+		Vk::DesciptorSetUtils::BuildWritePushDescriptorSetInfo(pushDescriptor->GetImageLayout("SrcImage"), srcTarget)
+	};
+
+	device->vkCmdPushDescriptorSetKHR(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetLayout(), 0, descriptorWrites.size(), descriptorWrites.data());
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetPipeline());
 	vkCmdPushConstants(commandBuffer, pipeline->GetLayout(), VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(CullingCameraFrustumPushConstants), &pushConstants);
-
 	vkCmdDispatch(commandBuffer, workgroupCount, 1, 1);
 
 	//Todo!

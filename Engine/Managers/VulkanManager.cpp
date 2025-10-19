@@ -487,6 +487,14 @@ void VulkanManager::InitDescriptors()
 
 		RegisterPushDescriptorSet("HizPushSetLinearDepth", setBuilder.BuildPushDescriptorSet());
 	}
+
+	{
+		Vk::DescriptorSetBuilder setBuilder;
+		setBuilder
+			.AddDescriptorLayoutImage("SrcImage", 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+
+		RegisterPushDescriptorSet("DepthPyramid", setBuilder.BuildPushDescriptorSet());
+	}
 }
 
 
@@ -843,7 +851,8 @@ void VulkanManager::InitComputePipelines()
 		Vk::ComputePipelineBuilder pipelineBuilder;
 		pipelineBuilder
 			.AddShaderStage(shaderModuls["CullingCameraFrustumComp"])
-			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT);
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT)
+			.AddDescriptorSetLayout(GetPushDescriptorSet("DepthPyramid")->Layout());
 
 		RegisterComputePipeline("CullingCameraFrustum", pipelineBuilder.BuildDynamic());
 	}
