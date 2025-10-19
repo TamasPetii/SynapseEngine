@@ -21,7 +21,7 @@ void main()
 	float depth = texture(inImage, (vec2(pos) + vec2(0.5)) / PushConstants.outImageSize).x;
 	float nearPlane = CameraBuffer(PushConstants.cameraBufferAddress).cameras[PushConstants.cameraIndex].params.x;
 	float farPlane = CameraBuffer(PushConstants.cameraBufferAddress).cameras[PushConstants.cameraIndex].params.y;
-	float linearDepth = ConvertDepthToLinear(depth, nearPlane, farPlane);
+	float linearDepth = ConvertDepthToLinearNormalized(depth, nearPlane, farPlane);
 
 	imageStore(outImage, ivec2(pos), vec4(linearDepth));
 }

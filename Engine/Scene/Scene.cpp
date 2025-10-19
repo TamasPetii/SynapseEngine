@@ -135,7 +135,7 @@ void Scene::InitializeRegistry()
 		material->metalness = dist(rng);
 		material->SetBit<UPDATE_BIT>();
 
-		for (uint32_t i = 0; i < 5000; ++i)
+		for (uint32_t i = 0; i < 25000; ++i)
 		{
 			std::string materialName = "Shape" + std::to_string(i++);
 			auto [material, wasLoaded] = resourceManager->GetMaterialManager()->RegisterMaterial(materialName);
@@ -154,7 +154,7 @@ void Scene::InitializeRegistry()
 			materialComponent.material = material;
 
 			auto shapeName = shapeNames[distShape(rng)];
-			shapeName = "Cube";
+			//shapeName = "Cube";
 			shapeComponent.shape = resourceManager->GetGeometryManager()->GetShape(shapeName);
 
 			registry->SetParent(entity, shapeParent);
@@ -196,7 +196,6 @@ void Scene::InitializeRegistry()
 		auto modelParent = registry->CreateEntity();
 		registry->AddComponents<TransformComponent>(modelParent);
 
-		/*
 		for(uint32_t i = 0; i < 2500; i++)
 		{
 			auto entity = registry->CreateEntity();
@@ -208,6 +207,7 @@ void Scene::InitializeRegistry()
 			registry->SetParent(entity, modelParent);
 		}
 
+		/*
 		for (uint32_t i = 0; i < 2500; i++)
 		{
 			auto entity = registry->CreateEntity();

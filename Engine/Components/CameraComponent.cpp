@@ -7,7 +7,7 @@ CameraComponent::CameraComponent()
 	, height{ 1080 }
 	, fov{ 60.f }
 	, nearPlane{ 0.01f }
-	, farPlane{ 1000.f }
+	, farPlane{ 500.f }
 	, distance{ 5.f }
 	, position{ 0.f, 0.f, 0.f }
 	, target{ 0.f, 0.f, -1.f }
