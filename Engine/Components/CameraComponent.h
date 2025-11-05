@@ -46,6 +46,7 @@ public:
 	glm::mat4 projInv;
 	glm::mat4 viewProj;
 	glm::mat4 viewProjInv;
+	glm::mat4 viewProjVulkan;
 	glm::vec4 eye;
 	glm::vec4 params;
 };

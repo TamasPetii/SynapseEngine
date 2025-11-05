@@ -145,7 +145,7 @@ void main()
 	}
 
 	vec4 worldPosition = TransformBuffer(PushConstants.transformBuffer).transforms[transformIndex].transform * position;
-	gl_Position = CameraBuffer(PushConstants.cameraBuffer).cameras[PushConstants.cameraIndex].viewProj * worldPosition;
+	gl_Position = CameraBuffer(PushConstants.cameraBuffer).cameras[PushConstants.cameraIndex].viewProjVulkan * worldPosition;
 
 	vec3 finalNormal = normalize((TransformBuffer(PushConstants.transformBuffer).transforms[transformIndex].transformIT * normal).xyz);
 	vec3 finalTangent = normalize((TransformBuffer(PushConstants.transformBuffer).transforms[transformIndex].transformIT * tangent).xyz);

@@ -6,8 +6,6 @@
 
 struct ENGINE_API DefaultColliderComponent : public Component, public SphereColliderGJK, public ColliderAABB, public ColliderOBB
 {
-	float linearDepth;
-	glm::vec4 projectedMinMax;
 };
 
 struct ENGINE_API DefaultCameraCollider : public ColliderAABB, public ColliderOBB
@@ -24,7 +22,4 @@ struct ENGINE_API DefaultColliderGPU
 	uint32_t bitflag;
 	glm::vec3 sphereOrigin;
 	float sphereRadius;
-	glm::vec4 projectedMinMax;
-	glm::vec3 padding;
-	float linearDepth;
 };

@@ -50,6 +50,7 @@ void ObjectCuller::CullObjectInCameraFrustum(VkCommandBuffer commandBuffer, std:
 
 	CullingCameraFrustumPushConstants pushConstants;
 	pushConstants.cameraIndex = 0;
+	pushConstants.cameraBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraData", frameIndex)->buffer->GetAddress();
 	pushConstants.cameraFrustumBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraFrustumData", frameIndex)->buffer->GetAddress();
 
 	pushConstants.defaultColliderCount = defaultColliderCount;
@@ -68,7 +69,7 @@ void ObjectCuller::CullObjectInCameraFrustum(VkCommandBuffer commandBuffer, std:
 	pushConstants.depthPyramidSize = glm::vec2(previousFrameBuffer->GetSize().width, previousFrameBuffer->GetSize().height);
 
 	VkDescriptorImageInfo srcTarget;
-	srcTarget.sampler = resourceManager->GetVulkanManager()->GetSampler("Nearest")->Value();
+	srcTarget.sampler = resourceManager->GetVulkanManager()->GetSampler("MaxReduction")->Value();
 	srcTarget.imageView = previousFrameBuffer->GetImage("DepthPyramid")->GetImageView("Default");
 	srcTarget.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 

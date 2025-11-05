@@ -13,7 +13,7 @@ void DefaultColliderSystem::OnUpdate(std::shared_ptr<Registry> registry, std::sh
 
 	Entity mainCameraEntity = CameraSystem::GetMainCameraEntity(registry);
 	auto& cameraComponent = cameraPool->GetData(mainCameraEntity);
-	bool cameraChanged = cameraPool && cameraPool->IsBitSet<CHANGED_BIT>(mainCameraEntity);
+	bool cameraChanged = false && cameraPool && cameraPool->IsBitSet<CHANGED_BIT>(mainCameraEntity);
 
 	std::for_each(std::execution::par, defaultColliderPool->GetDenseIndices().begin(), defaultColliderPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void
@@ -32,29 +32,15 @@ void DefaultColliderSystem::OnUpdate(std::shared_ptr<Registry> registry, std::sh
 
 				glm::vec3 maxPosition{ std::numeric_limits<float>::lowest() };
 				glm::vec3 minPosition{ std::numeric_limits<float>::max() };
-				glm::vec2 maxProjectedPos{ std::numeric_limits<float>::lowest() };
-				glm::vec2 minProjectedPos{ std::numeric_limits<float>::max() };
-				float minLinearDepth = std::numeric_limits<float>::max();
 
 				for (unsigned int i = 0; i < 8; ++i)
 				{
 					defaultColliderComponent.obbPositions[i] = glm::vec3(transformComponent.transform * glm::vec4(boundingVolume->obbPositions[i], 1));
 
-					glm::vec4 projectedObbPos = cameraComponent.viewProj * glm::vec4(defaultColliderComponent.obbPositions[i], 1);
-					projectedObbPos /= projectedObbPos.w;		
-
-					glm::vec2 projectedObbPosXYNorm = glm::vec2(projectedObbPos) * 0.5f + 0.5f;
-					float linearDepth = CameraSystem::ConvertDepthToLinearNormalized(projectedObbPos.z, cameraComponent.nearPlane, cameraComponent.farPlane);;
-
-					minLinearDepth = glm::min(minLinearDepth, linearDepth);
-					maxProjectedPos = glm::max(maxProjectedPos, glm::vec2(projectedObbPosXYNorm));
-					minProjectedPos = glm::min(minProjectedPos, glm::vec2(projectedObbPosXYNorm));
 					maxPosition = glm::max(maxPosition, defaultColliderComponent.obbPositions[i]);
 					minPosition = glm::min(minPosition, defaultColliderComponent.obbPositions[i]);
 				}
 
-				defaultColliderComponent.linearDepth = minLinearDepth;
-				defaultColliderComponent.projectedMinMax = glm::vec4(minProjectedPos, maxProjectedPos);
 				defaultColliderComponent.aabbMin = minPosition;
 				defaultColliderComponent.aabbMax = maxPosition;
 				defaultColliderComponent.aabbOrigin = 0.5f * (minPosition + maxPosition);

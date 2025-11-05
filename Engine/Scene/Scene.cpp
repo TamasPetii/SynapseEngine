@@ -135,7 +135,7 @@ void Scene::InitializeRegistry()
 		material->metalness = dist(rng);
 		material->SetBit<UPDATE_BIT>();
 
-		for (uint32_t i = 0; i < 25; ++i)
+		for (uint32_t i = 0; i < 100000; ++i)
 		{
 			/*
 			std::string materialName = "Shape" + std::to_string(i++);
@@ -221,7 +221,6 @@ void Scene::InitializeRegistry()
 			transformComponent.scale = glm::vec3(0.5);
 			registry->SetParent(entity, modelParent);
 		}
-		*/
 
 		{
 			auto entity = registry->CreateEntity();
@@ -242,6 +241,7 @@ void Scene::InitializeRegistry()
 
 			registry->SetParent(entity, modelParent);
 		}
+		*/
 
 		/*
 		{
@@ -296,7 +296,7 @@ void Scene::InitializeRegistry()
 		auto animationParent = registry->CreateEntity();
 		registry->AddComponents<TransformComponent>(animationParent);
 
-		for (uint32_t i = 0; i < 1000; ++i)
+		for (uint32_t i = 0; i < 0; ++i)
 		{
 			auto entity = registry->CreateEntity();
 			registry->AddComponents<TransformComponent, ModelComponent, AnimationComponent, DefaultColliderComponent, RenderIndicesComponent>(entity);

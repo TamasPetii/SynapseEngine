@@ -141,7 +141,6 @@ void Engine::SimulateFrame()
 	vkWaitForFences(device->Value(), 1, &inFlightFence->Value(), VK_TRUE, UINT64_MAX);
 	vkResetFences(device->Value(), 1, &inFlightFence->Value());
 
-	/*
 	std::cout << "----- Frame " << frameIndex << " -----\n";
 
 	{
@@ -158,6 +157,7 @@ void Engine::SimulateFrame()
 		}
 	}
 
+	/*
 	{
 		auto modelIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(
 			resourceManager->GetModelManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler()

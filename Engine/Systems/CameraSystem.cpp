@@ -114,11 +114,14 @@ void CameraSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared
 				componentBuffer->versions[cameraIndex] = cameraComponent.version;
 
 				CameraComponent component = cameraComponent;
-				component.proj[1][1] *= -1;
-				component.projInv = glm::inverse(component.proj);
-				component.viewProj = component.proj * component.view;
-				component.viewProjInv = glm::inverse(component.viewProj);
-				bufferHandler[cameraIndex] = CameraComponentGPU(component);
+				
+				glm::mat4 vulkanProj = component.proj;
+				vulkanProj[1][1] *= -1;
+
+				CameraComponentGPU cameraGPU{ component };
+				cameraGPU.viewProjVulkan = vulkanProj * component.view;
+
+				bufferHandler[cameraIndex] = cameraGPU;
 			}
 
 			if (cameraFrustumBuffer->versions[cameraIndex] != cameraComponent.version)

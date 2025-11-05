@@ -28,7 +28,7 @@ void main()
 	Vertex v = VertexBuffer(PushConstants.vertexBufferAddress).vertices[vertexIndex];
 
 	vec4 worldPosition = SimpleTransformBuffer(PushConstants.transformBufferAddress).transforms[objectIndex] * vec4(v.position, 1.0);
-	gl_Position = CameraBuffer(PushConstants.cameraBuffer).cameras[PushConstants.cameraIndex].viewProj * worldPosition;
+	gl_Position = CameraBuffer(PushConstants.cameraBuffer).cameras[PushConstants.cameraIndex].viewProjVulkan * worldPosition;
 
 	vs_out_id = gl_InstanceIndex;
 }

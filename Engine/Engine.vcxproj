@@ -459,6 +459,7 @@
     <None Include="Shaders\Common\Render\Occlusion.glsl" />
     <None Include="Shaders\Common\Shape\ShapeBufferAddresses.glsl" />
     <None Include="Shaders\Common\Utility\LinearDepth.glsl" />
+    <None Include="Shaders\Common\Utility\ProjectToScreen.glsl" />
     <None Include="Shaders\Common\Utility\TextureLoaded.glsl" />
     <None Include="Shaders\Common\Utility\Sampler.glsl" />
     <None Include="Shaders\Common\Utility\Texture.glsl" />

@@ -6,9 +6,7 @@ DefaultColliderGPU::DefaultColliderGPU(const DefaultColliderComponent& component
 	aabbExtents(component.aabbExtents),
 	bitflag(0),
 	sphereOrigin(component.origin),
-	sphereRadius(component.radius),
-	projectedMinMax(component.projectedMinMax),
-	linearDepth(component.linearDepth)
+	sphereRadius(component.radius)
 {
 	bitflag |= (isModel ? 1u : 0u) << 0; // Bit 0 = Model or Shape?
 	//This might be problematic for animation in future???

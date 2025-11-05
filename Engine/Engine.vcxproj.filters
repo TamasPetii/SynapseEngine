@@ -896,5 +896,6 @@
     <None Include="Shaders\Common\Utility\Texture.glsl" />
     <None Include="Shaders\HizLinearDepth.comp" />
     <None Include="Shaders\Common\Utility\LinearDepth.glsl" />
+    <None Include="Shaders\Common\Utility\ProjectToScreen.glsl" />
   </ItemGroup>
 </Project>

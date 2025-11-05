@@ -30,25 +30,25 @@ void main()
 	to_right *= iconSize;
 
 	//Bottom Left
-	gl_Position = cameraBuffer.cameras[PushConstants.cameraIndex].viewProj * vec4(gl_in[0].gl_Position.xyz - to_up - to_right, 1);
+	gl_Position = cameraBuffer.cameras[PushConstants.cameraIndex].viewProjVulkan * vec4(gl_in[0].gl_Position.xyz - to_up - to_right, 1);
 	gs_out_tex = vec2(0, 0);
 	gs_out_id = uint(gl_in[0].gl_Position.w);
 	EmitVertex();
 
 	//Top Left
-	gl_Position = cameraBuffer.cameras[PushConstants.cameraIndex].viewProj * vec4(gl_in[0].gl_Position.xyz + to_up - to_right, 1);
+	gl_Position = cameraBuffer.cameras[PushConstants.cameraIndex].viewProjVulkan * vec4(gl_in[0].gl_Position.xyz + to_up - to_right, 1);
 	gs_out_tex = vec2(0, 1);
 	gs_out_id = uint(gl_in[0].gl_Position.w);
 	EmitVertex();
 
 	//Bottom Right
-	gl_Position = cameraBuffer.cameras[PushConstants.cameraIndex].viewProj * vec4(gl_in[0].gl_Position.xyz - to_up + to_right, 1);
+	gl_Position = cameraBuffer.cameras[PushConstants.cameraIndex].viewProjVulkan * vec4(gl_in[0].gl_Position.xyz - to_up + to_right, 1);
 	gs_out_tex = vec2(1, 0);
 	gs_out_id = uint(gl_in[0].gl_Position.w);
 	EmitVertex();
 
 	//Top Right
-	gl_Position = cameraBuffer.cameras[PushConstants.cameraIndex].viewProj * vec4(gl_in[0].gl_Position.xyz + to_up + to_right, 1);
+	gl_Position = cameraBuffer.cameras[PushConstants.cameraIndex].viewProjVulkan * vec4(gl_in[0].gl_Position.xyz + to_up + to_right, 1);
 	gs_out_tex = vec2(1, 1);
 	gs_out_id = uint(gl_in[0].gl_Position.w);
 	EmitVertex();
