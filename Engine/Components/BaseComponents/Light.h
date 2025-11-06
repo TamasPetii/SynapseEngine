@@ -25,6 +25,7 @@ struct ENGINE_API LightShadow : public VersionIndexed
 	LightShadow();
 
 	bool use;
+	float nearPlane = 0.1f;
 	uint32_t textureSize;
 	uint32_t updateFrequency;
 	std::array<LightShadowFrameBuffer, GlobalConfig::FrameConfig::maxFramesInFlights> frameBuffers;

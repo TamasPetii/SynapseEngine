@@ -16,7 +16,6 @@ class PointLightSystem;
 struct ENGINE_API PointLightShadow : public LightShadow
 {
 	PointLightShadow();
-	//farplane = radius
 	std::array<glm::mat4, 6> viewProj;
 };
 
@@ -28,7 +27,6 @@ struct ENGINE_API PointLightComponent : public Light, public Component, public F
 	float radius; //Mapped to transform component scale (max value)
 	float weakenDistance;
 	PointLightShadow shadow;
-	//Todo: Visible entities??? Instanced???? Maybe in models???? Or like a model map?
 private:
 	glm::mat4 transform; //Cannot use transform component becouse of the scale can be different on xyz!
 	friend class PointLightSystem;
@@ -46,4 +44,5 @@ struct ENGINE_API PointLightGPU
 	float weakenDistance;
 	uint32_t bitflag;
 	uint32_t padding;
+	glm::mat4 shadowViewProj[6];
 };

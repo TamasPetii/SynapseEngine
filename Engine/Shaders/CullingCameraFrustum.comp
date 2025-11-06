@@ -65,7 +65,7 @@ void main()
 
 		float width = (projectedAABB.z - projectedAABB.x) * PushConstants.depthPyramidSize.x;
 		float height = (projectedAABB.w - projectedAABB.y) * PushConstants.depthPyramidSize.y;
-		float level = ceil(log2(max(width, height) / 2.0));
+		float level = max(0.0, ceil(log2(max(width, height) / 2.0)));
 		float sampleLinearDepth = textureLod(depthPyramid, (projectedAABB.xy + projectedAABB.zw) * 0.5, level).x;
 
 		if(intersectNearPlane || projectedLinearDepth <= sampleLinearDepth)

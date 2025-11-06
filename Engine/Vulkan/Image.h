@@ -29,7 +29,9 @@ namespace Vk
 		VkImageAspectFlagBits aspectFlag;
 		VkMemoryPropertyFlags memoryProperties;
 		uint32_t mipmapLevel = 1;
+		uint32_t arrayLayers = 1;
 		bool calcualteMipLevelAutomaticly = false;
+		VkImageCreateFlags flags = VK_IMAGE_CREATE_FLAG_BITS_MAX_ENUM;
 
 		void AddImageViewConfig(const std::string& name, const ImageViewConfig& imageViewConfig);
 		void AddImageViewConfig(const std::string& name, VkImageViewType viewType, uint32_t baseMipLevel = 0, uint32_t mipLevelCount = 1, std::optional<VkComponentMapping> swizzle = std::nullopt, bool calcualteMipLevelAutomaticly = false);

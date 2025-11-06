@@ -25,6 +25,9 @@ PointLightGPU::PointLightGPU(const PointLightComponent& pointLightComponent) :
 	weakenDistance(pointLightComponent.weakenDistance),
 	bitflag(0)
 {
+	for (int i = 0; i < 6; ++i)
+		shadowViewProj[i] = pointLightComponent.shadow.viewProj[i];
+
 	bitflag |= (pointLightComponent.shadow.use ? 1u : 0u) << 0; // Bit 0 = Simulate Shadow?
 	bitflag |= (pointLightComponent.falloff == LightFalloff::QUADRATIC ? 1u : 0u) << 1; // Bit 1 = Quadratic/Linear
 }

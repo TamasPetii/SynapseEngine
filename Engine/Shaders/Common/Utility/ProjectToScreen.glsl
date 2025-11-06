@@ -60,11 +60,11 @@ bool ProjectBox(CameraBuffer cameraBuffer, uint cameraIndex, vec3 bmin, vec3 bma
     vec2 p7 = P7.xy / P7.w;
 
     // AABB számítás (clip space-ben)
-    vec2 minP = min(min(min(p0, p1), min(p2, p3)), min(min(p4, p5), min(p6, p7)));
-    vec2 maxP = max(max(max(p0, p1), max(p2, p3)), max(max(p4, p5), max(p6, p7)));
+    projectedAABB.xy = min(min(min(p0, p1), min(p2, p3)), min(min(p4, p5), min(p6, p7)));
+    projectedAABB.zw = max(max(max(p0, p1), max(p2, p3)), max(max(p4, p5), max(p6, p7)));
 
     // Clip space -> UV space [0..1]
-    projectedAABB = vec4(minP, maxP) * vec4(0.5, -0.5, 0.5, -0.5) + vec4(0.5);
+    projectedAABB = projectedAABB.xwzy * vec4(0.5, -0.5, 0.5, -0.5) + vec4(0.5);
     projectedLinearDepth = (minW - znear) / (zfar - znear);
 
     return true;

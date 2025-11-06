@@ -477,6 +477,9 @@
     <None Include="Shaders\OcclusionCulling.frag" />
     <None Include="Shaders\OcclusionCulling.vert" />
     <None Include="Shaders\CullingPointLight.comp" />
+    <None Include="Shaders\ShadowPointLight.frag" />
+    <None Include="Shaders\ShadowPointLight.geom" />
+    <None Include="Shaders\ShadowPointLight.vert" />
     <None Include="Shaders\Wireframe.frag" />
     <None Include="Shaders\Wireframe.vert" />
     <None Include="Shaders\Common\Animation\AnimationBufferAddresses.glsl" />

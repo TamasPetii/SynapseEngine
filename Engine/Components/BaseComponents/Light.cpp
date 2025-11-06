@@ -2,7 +2,7 @@
 
 LightShadow::LightShadow() :
 	use(false),
-	textureSize(2048),
+	textureSize(1024),
 	updateFrequency(1)
 {
 }

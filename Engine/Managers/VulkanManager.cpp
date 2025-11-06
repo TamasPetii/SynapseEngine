@@ -572,6 +572,9 @@ void VulkanManager::InitShaderModuls()
 	//Object culling against light shadow aabb
 	RegisterShaderModule("HizLinearDepthComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/HizLinearDepth.comp", VK_SHADER_STAGE_COMPUTE_BIT));
 
+	RegisterShaderModule("ShadowPointLightVert", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/ShadowPointLight.vert", VK_SHADER_STAGE_VERTEX_BIT));
+	RegisterShaderModule("ShadowPointLightGeom", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/ShadowPointLight.geom", VK_SHADER_STAGE_GEOMETRY_BIT));
+	RegisterShaderModule("ShadowPointLightFrag", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/ShadowPointLight.frag", VK_SHADER_STAGE_FRAGMENT_BIT));
 }
 
 void VulkanManager::InitGraphicsPipelines()

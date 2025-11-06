@@ -294,13 +294,16 @@ VkImageCreateInfo Vk::Image::BuildImageInfo()
 	imageInfo.extent.height = specification.height;
 	imageInfo.extent.depth = 1;
 	imageInfo.mipLevels = specification.mipmapLevel;
-	imageInfo.arrayLayers = 1;
+	imageInfo.arrayLayers = specification.arrayLayers;
 	imageInfo.format = specification.format;
 	imageInfo.tiling = specification.tiling;
 	imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 	imageInfo.usage = specification.usage;
 	imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 	imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	if(specification.flags != VK_IMAGE_CREATE_FLAG_BITS_MAX_ENUM)
+		imageInfo.flags = specification.flags;
 
 	return imageInfo;
 }
@@ -321,7 +324,7 @@ VkImageViewCreateInfo Vk::Image::BuildImageViewInfoExtended(const ImageViewConfi
 	viewInfo.subresourceRange.baseMipLevel = imageViewConfig.baseMipLevel;
 	viewInfo.subresourceRange.levelCount = imageViewConfig.mipLevelCount;
 	viewInfo.subresourceRange.baseArrayLayer = 0;
-	viewInfo.subresourceRange.layerCount = 1;
+	viewInfo.subresourceRange.layerCount = specification.arrayLayers;
 	
 	if(imageViewConfig.swizzle.has_value())
 		viewInfo.components = imageViewConfig.swizzle.value();

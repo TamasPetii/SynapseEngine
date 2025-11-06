@@ -135,7 +135,7 @@ void Scene::InitializeRegistry()
 		material->metalness = dist(rng);
 		material->SetBit<UPDATE_BIT>();
 
-		for (uint32_t i = 0; i < 100000; ++i)
+		for (uint32_t i = 0; i < 1000; ++i)
 		{
 			/*
 			std::string materialName = "Shape" + std::to_string(i++);

@@ -24,16 +24,16 @@ void PointLightSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_
 			{
 				pointLightComponent.shadow.frameBuffers[frameIndex].version = pointLightComponent.shadow.version;
 
-				/*
 				Vk::ImageSpecification depthImageSpec;
 				depthImageSpec.type = VK_IMAGE_TYPE_2D;
-				depthImageSpec.viewType = VK_IMAGE_VIEW_TYPE_CUBE;
 				depthImageSpec.format = VK_FORMAT_D32_SFLOAT;
 				depthImageSpec.tiling = VK_IMAGE_TILING_OPTIMAL;
 				depthImageSpec.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 				depthImageSpec.aspectFlag = VK_IMAGE_ASPECT_DEPTH_BIT;
 				depthImageSpec.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-				//VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT -> Need to refactor
+				depthImageSpec.arrayLayers = 6;
+				depthImageSpec.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+				depthImageSpec.AddImageViewConfig("Default", VK_IMAGE_VIEW_TYPE_CUBE);
 
 				Vk::FrameBufferBuilder frameBufferBuilder;
 				frameBufferBuilder
@@ -41,7 +41,6 @@ void PointLightSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_
 					.AddDepthSpecification(0, depthImageSpec);
 
 				pointLightComponent.shadow.frameBuffers[frameIndex].frameBuffer = frameBufferBuilder.BuildDynamic();
-				*/
 
 				//TODO: DYNAMIC DESCRIPTOR ARRAY UPDATE
 			}
@@ -68,7 +67,34 @@ void PointLightSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_
 				pointLightComponent.transform = glm::translate(pointLightComponent.transform, pointLightComponent.position);
 				pointLightComponent.transform = glm::scale(pointLightComponent.transform, glm::vec3(pointLightComponent.radius));
 
-				//Todo: ViewProj calculation
+				//Shadow calculation
+				{
+					auto& pos = pointLightComponent.position;
+
+					glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), 1.f, pointLightComponent.shadow.nearPlane, pointLightComponent.radius);
+					shadowProj[1][1] *= -1; //Invert Y for Vulkan
+					
+					const glm::vec3 directions[6] = {
+						{ 1.0,  0.0,  0.0 },
+						{-1.0,  0.0,  0.0 },
+						{ 0.0,  1.0,  0.0 },
+						{ 0.0, -1.0,  0.0 },
+						{ 0.0,  0.0,  1.0 },
+						{ 0.0,  0.0, -1.0 }
+					};
+
+					const glm::vec3 upVectors[6] = {
+						{ 0.0, -1.0,  0.0 },
+						{ 0.0, -1.0,  0.0 },
+						{ 0.0,  0.0,  1.0 },
+						{ 0.0,  0.0, -1.0 },
+						{ 0.0, -1.0,  0.0 },
+						{ 0.0, -1.0,  0.0 }
+					};
+
+					for (int i = 0; i < 6; ++i)
+						pointLightComponent.shadow.viewProj[i] = shadowProj * glm::lookAt(pos, pos + directions[i], upVectors[i]);
+				}
 
 				pointLightPool->SetBit<CHANGED_BIT>(entity);
 				pointLightComponent.version++;

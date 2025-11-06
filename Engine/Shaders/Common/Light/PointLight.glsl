@@ -14,6 +14,7 @@ struct PointLight {
 	float weakenDistance;
 	uint bitflag;
 	uint padding;
+	mat4 shadowViewProj[6]; //Todo: Optimize by storing only when shadow bit is set, in different dedicated buffer
 }; 
 
 layout(buffer_reference, std430) readonly buffer PointLightBuffer { 

@@ -897,5 +897,8 @@
     <None Include="Shaders\HizLinearDepth.comp" />
     <None Include="Shaders\Common\Utility\LinearDepth.glsl" />
     <None Include="Shaders\Common\Utility\ProjectToScreen.glsl" />
+    <None Include="Shaders\ShadowPointLight.vert" />
+    <None Include="Shaders\ShadowPointLight.geom" />
+    <None Include="Shaders\ShadowPointLight.frag" />
   </ItemGroup>
 </Project>
