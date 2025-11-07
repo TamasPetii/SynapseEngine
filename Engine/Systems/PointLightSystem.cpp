@@ -20,7 +20,7 @@ void PointLightSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_
 			}
 
 			[[unlikely]]
-			if (pointLightComponent.shadow.frameBuffers[frameIndex].version != pointLightComponent.shadow.version)
+			if (pointLightComponent.shadow.use && pointLightComponent.shadow.frameBuffers[frameIndex].version != pointLightComponent.shadow.version)
 			{
 				pointLightComponent.shadow.frameBuffers[frameIndex].version = pointLightComponent.shadow.version;
 
@@ -41,6 +41,8 @@ void PointLightSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_
 					.AddDepthSpecification(0, depthImageSpec);
 
 				pointLightComponent.shadow.frameBuffers[frameIndex].frameBuffer = frameBufferBuilder.BuildDynamic();
+
+				std::cout << "Regenerated point light shadow framebuffer for entity " << entity << std::endl;
 
 				//TODO: DYNAMIC DESCRIPTOR ARRAY UPDATE
 			}

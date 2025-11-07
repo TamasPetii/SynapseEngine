@@ -56,3 +56,14 @@ bool TestAabbVsAabb(vec3 aabbMin_A, vec3 aabbMax_A, vec3 aabbMin_B, vec3 aabbMax
 	aabbMin_A.z <= aabbMax_B.z &&
 	aabbMax_A.z >= aabbMin_B.z;
 }
+
+//Distance/Length uses sqrt internally, so we compare squared distances for better performance
+bool TestAabbVsSphere(vec3 aabbMin, vec3 aabbMax, vec3 sphereOrigin, float sphereRadius)
+{
+	const vec3 closestPoint = max(aabbMin, min(sphereOrigin, aabbMax));
+
+	const vec3 toBox = closestPoint - sphereOrigin;
+	float distSq = dot(toBox, toBox);
+
+	return distSq < sphereRadius * sphereRadius;
+}

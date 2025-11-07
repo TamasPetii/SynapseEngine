@@ -447,6 +447,7 @@
     <None Include="Shaders\Billboard.geom" />
     <None Include="Shaders\BillboardInstanced.vert" />
     <None Include="Shaders\Billboard.vert" />
+    <None Include="Shaders\CullingPointLightShadowObjects.comp" />
     <None Include="Shaders\Common\Culling\Culling.glsl" />
     <None Include="Shaders\Common\Light\LightCommon.glsl" />
     <None Include="Shaders\Common\Count.glsl" />

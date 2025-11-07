@@ -567,6 +567,9 @@ void VulkanManager::InitShaderModuls()
 	RegisterShaderModule("CullingLightShadowAabbComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/CullingLightShadowAabb.comp", VK_SHADER_STAGE_COMPUTE_BIT));
 
 	//Object culling against light shadow aabb
+	RegisterShaderModule("CullingLightShadowAabbComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/CullingPointLightShadowObjects.comp", VK_SHADER_STAGE_COMPUTE_BIT));
+
+	//Object culling against light shadow aabb
 	RegisterShaderModule("HizComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/Hiz.comp", VK_SHADER_STAGE_COMPUTE_BIT));
 
 	//Object culling against light shadow aabb

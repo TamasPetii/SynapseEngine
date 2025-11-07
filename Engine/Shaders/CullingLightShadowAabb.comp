@@ -7,6 +7,11 @@ layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 #include "Common/Light/LightCommon.glsl"
 #include "Common/Render/DispatchIndirect.glsl"
 #include "Common/Render/DefaultCollider.glsl"
+#include "Common/Render/RenderIndices.glsl"
+
+#include "Common/Model/ModelBufferAddresses.glsl"
+#include "Common/Shape/ShapeBufferAddresses.glsl"
+
 #include "Common/Culling/Culling.glsl"
 
 layout(push_constant) uniform constants
@@ -20,7 +25,7 @@ layout(push_constant) uniform constants
 } PushConstants;
 
 
-const uint colliderLocalSizeX = 64;
+const uint colliderLocalSizeY = 64;
 
 void main()
 {
@@ -31,6 +36,11 @@ void main()
 
 	DefaultColliderBuffer defaultColliderBuffer = DefaultColliderBuffer(PushConstants.defaultColliderBuffer);
 	LightCommonDataBuffer lightCommonDataBuffer = LightCommonDataBuffer(PushConstants.lightCommonDataBuffer);
+
+	uint objectIndex = defaultColliderBuffer.colliders[globalIndex].objectIndex;
+
+	if(objectIndex == INVALID_RENDER_INDEX)
+		return;
 
 	vec3 defaultColliderAabbMin = defaultColliderBuffer.colliders[globalIndex].aabbOrigin - defaultColliderBuffer.colliders[globalIndex].aabbExtents;
 	vec3 defaultColliderAabbMax = defaultColliderBuffer.colliders[globalIndex].aabbOrigin + defaultColliderBuffer.colliders[globalIndex].aabbExtents;
@@ -45,7 +55,7 @@ void main()
 		InstanceIndexBuffer(PushConstants.defaultColliderInstanceIndexBuffer).indices[colliderInstanceIndex] = globalIndex;	
 
 		//Update dispatch indirect args (Y dimension)
-		uint numGroupsY = ((colliderInstanceIndex + 1) + (colliderLocalSizeX - 1)) / colliderLocalSizeX;  
+		uint numGroupsY = ((colliderInstanceIndex + 1) + (colliderLocalSizeY - 1)) / colliderLocalSizeY;  
 		atomicMax(DispatchIndirectCommandBuffer(PushConstants.lightShadowDispatchIndirectBuffer).command.num_groups_y, numGroupsY);
 	}
 }
