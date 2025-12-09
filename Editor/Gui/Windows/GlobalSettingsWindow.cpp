@@ -60,6 +60,16 @@ void GlobalSettingsWindow::Render(std::shared_ptr<Registry> registry, std::share
 					ImGui::Text("Light Billboards");
 					ImGui::SameLine(offset);
 					ImGui::Checkbox("##Light Billboards", &GlobalConfig::WireframeConfig::showLightBillboards);
+
+					ImGui::Separator();
+
+					ImGui::Text("Point Collider Project Debug");
+					ImGui::SameLine(offset);
+					ImGui::Checkbox("##Point Collider Project Debug", &GlobalConfig::WireframeConfig::showPointLightsProjectedAABB);
+
+					ImGui::Text("Spot Collider Project Debug");
+					ImGui::SameLine(offset);
+					ImGui::Checkbox("##Spot Collider Project Debug", &GlobalConfig::WireframeConfig::showSpotLightsProjectedAABB);
 				}
 			);
 		}

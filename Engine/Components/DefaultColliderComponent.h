@@ -23,3 +23,12 @@ struct ENGINE_API DefaultColliderGPU
 	glm::vec3 sphereOrigin;
 	float sphereRadius;
 };
+
+struct ENGINE_API ColliderGpuDebug
+{
+	glm::vec4 projectedAABB;
+	float projectedLinearDepth;
+	uint32_t paddingA;
+	uint32_t paddingB;
+	uint32_t paddingC;
+};

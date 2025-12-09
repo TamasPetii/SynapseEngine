@@ -68,6 +68,9 @@ void ObjectCuller::CullObjectInCameraFrustum(VkCommandBuffer commandBuffer, std:
 
 	pushConstants.depthPyramidSize = glm::vec2(previousFrameBuffer->GetSize().width, previousFrameBuffer->GetSize().height);
 
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetPipeline());
+	vkCmdPushConstants(commandBuffer, pipeline->GetLayout(), VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(CullingCameraFrustumPushConstants), &pushConstants);
+	
 	VkDescriptorImageInfo srcTarget;
 	srcTarget.sampler = resourceManager->GetVulkanManager()->GetSampler("MaxReduction")->Value();
 	srcTarget.imageView = previousFrameBuffer->GetImage("DepthPyramid")->GetImageView("Default");
@@ -80,8 +83,7 @@ void ObjectCuller::CullObjectInCameraFrustum(VkCommandBuffer commandBuffer, std:
 	};
 
 	device->vkCmdPushDescriptorSetKHR(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetLayout(), 0, descriptorWrites.size(), descriptorWrites.data());
-	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetPipeline());
-	vkCmdPushConstants(commandBuffer, pipeline->GetLayout(), VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(CullingCameraFrustumPushConstants), &pushConstants);
+
 	vkCmdDispatch(commandBuffer, workgroupCount, 1, 1);
 
 	//Todo!
@@ -132,6 +134,9 @@ void ObjectCuller::CullPointLightInCameraFrustum(VkCommandBuffer commandBuffer, 
 	auto device = vulkanContext->GetDevice();
 	auto graphicsQueue = device->GetQueue(Vk::QueueType::GRAPHICS);
 	auto pipeline = resourceManager->GetVulkanManager()->GetComputePipeline("CullingPointLight");
+	auto pushDescriptor = resourceManager->GetVulkanManager()->GetPushDescriptorSet("DepthPyramid");
+	auto previousFrameIndex = (frameIndex + GlobalConfig::FrameConfig::framesInFlight - 1) % GlobalConfig::FrameConfig::framesInFlight;
+	auto previousFrameBuffer = resourceManager->GetVulkanManager()->GetFrameDependentFrameBuffer("Main", previousFrameIndex);
 
 	auto pointLightShadowCountBufferHandler = static_cast<LightBufferCommonData*>(resourceManager->GetPointLightBufferManager()->GetCommonDataBuffer(frameIndex)->buffer->GetHandler());
 	pointLightShadowCountBufferHandler[0] = LightBufferCommonData{};
@@ -164,6 +169,7 @@ void ObjectCuller::CullPointLightInCameraFrustum(VkCommandBuffer commandBuffer, 
 
 	CullingPointLightPushConstants pushConstants;
 	pushConstants.cameraIndex = 0;
+	pushConstants.cameraBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraData", frameIndex)->buffer->GetAddress();
 	pushConstants.cameraFrustumBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraFrustumData", frameIndex)->buffer->GetAddress();
 	pushConstants.pointLightCount = pointLightCount;
 	pushConstants.pointLightBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("PointLightData", frameIndex)->buffer->GetAddress();
@@ -172,9 +178,27 @@ void ObjectCuller::CullPointLightInCameraFrustum(VkCommandBuffer commandBuffer, 
 	pushConstants.pointLightShadowInstanceIndexBuffer = resourceManager->GetPointLightBufferManager()->GetShadowInstanceIndexBuffer(frameIndex)->buffer->GetAddress();
 	pushConstants.pointLightCommonDataBuffer = resourceManager->GetPointLightBufferManager()->GetCommonDataBuffer(frameIndex)->buffer->GetAddress();
 	pushConstants.pointLightShadowDispatchIndirectBuffer = resourceManager->GetPointLightBufferManager()->GetShadowDispatchIndirectBuffers(frameIndex)->buffer->GetAddress();
+	pushConstants.colliderDebugBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("PointLightColliderDebug", frameIndex)->buffer->GetAddress();
+	pushConstants.depthPyramidSize = glm::vec2(previousFrameBuffer->GetSize().width, previousFrameBuffer->GetSize().height);
 
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetPipeline());
 	vkCmdPushConstants(commandBuffer, pipeline->GetLayout(), VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(CullingPointLightPushConstants), &pushConstants);
+
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetPipeline());
+	vkCmdPushConstants(commandBuffer, pipeline->GetLayout(), VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(CullingSpotLightPushConstants), &pushConstants);
+
+	VkDescriptorImageInfo srcTarget;
+	srcTarget.sampler = resourceManager->GetVulkanManager()->GetSampler("MaxReduction")->Value();
+	srcTarget.imageView = previousFrameBuffer->GetImage("DepthPyramid")->GetImageView("Default");
+	srcTarget.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+	//Potential problem with srcTarget in BuildWritePushDescriptorSetInfo image info???
+	std::vector<VkWriteDescriptorSet> descriptorWrites =
+	{
+		Vk::DesciptorSetUtils::BuildWritePushDescriptorSetInfo(pushDescriptor->GetImageLayout("SrcImage"), srcTarget)
+	};
+
+	device->vkCmdPushDescriptorSetKHR(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetLayout(), 0, descriptorWrites.size(), descriptorWrites.data());
 
 	vkCmdDispatch(commandBuffer, workgroupCount, 1, 1);
 }
@@ -185,6 +209,9 @@ void ObjectCuller::CullSpotLightInCameraFrustum(VkCommandBuffer commandBuffer, s
 	auto device = vulkanContext->GetDevice();
 	auto graphicsQueue = device->GetQueue(Vk::QueueType::GRAPHICS);
 	auto pipeline = resourceManager->GetVulkanManager()->GetComputePipeline("CullingSpotLight");
+	auto pushDescriptor = resourceManager->GetVulkanManager()->GetPushDescriptorSet("DepthPyramid");
+	auto previousFrameIndex = (frameIndex + GlobalConfig::FrameConfig::framesInFlight - 1) % GlobalConfig::FrameConfig::framesInFlight;
+	auto previousFrameBuffer = resourceManager->GetVulkanManager()->GetFrameDependentFrameBuffer("Main", previousFrameIndex);
 
 	auto spotLightShadowCountBufferHandler = static_cast<LightBufferCommonData*>(resourceManager->GetSpotLightBufferManager()->GetCommonDataBuffer(frameIndex)->buffer->GetHandler());
 	spotLightShadowCountBufferHandler[0] = LightBufferCommonData{};;
@@ -217,6 +244,7 @@ void ObjectCuller::CullSpotLightInCameraFrustum(VkCommandBuffer commandBuffer, s
 
 	CullingSpotLightPushConstants pushConstants;
 	pushConstants.cameraIndex = 0;
+	pushConstants.cameraBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraData", frameIndex)->buffer->GetAddress();
 	pushConstants.cameraFrustumBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("CameraFrustumData", frameIndex)->buffer->GetAddress();
 	pushConstants.spotLightCount = spotLightCount;
 	pushConstants.spotLightBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightData", frameIndex)->buffer->GetAddress();
@@ -225,9 +253,24 @@ void ObjectCuller::CullSpotLightInCameraFrustum(VkCommandBuffer commandBuffer, s
 	pushConstants.spotLightShadowInstanceIndexBuffer = resourceManager->GetSpotLightBufferManager()->GetShadowInstanceIndexBuffer(frameIndex)->buffer->GetAddress();
 	pushConstants.spotLightCommonDataBuffer = resourceManager->GetSpotLightBufferManager()->GetCommonDataBuffer(frameIndex)->buffer->GetAddress();
 	pushConstants.spotLightShadowDispatchIndirectBuffer = resourceManager->GetSpotLightBufferManager()->GetShadowDispatchIndirectBuffers(frameIndex)->buffer->GetAddress();
+	pushConstants.colliderDebugBuffer = resourceManager->GetComponentBufferManager()->GetComponentBuffer("SpotLightColliderDebug", frameIndex)->buffer->GetAddress();
+	pushConstants.depthPyramidSize = glm::vec2(previousFrameBuffer->GetSize().width, previousFrameBuffer->GetSize().height);
 
 	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetPipeline());
 	vkCmdPushConstants(commandBuffer, pipeline->GetLayout(), VK_SHADER_STAGE_COMPUTE_BIT, 0, sizeof(CullingSpotLightPushConstants), &pushConstants);
+
+	VkDescriptorImageInfo srcTarget;
+	srcTarget.sampler = resourceManager->GetVulkanManager()->GetSampler("MaxReduction")->Value();
+	srcTarget.imageView = previousFrameBuffer->GetImage("DepthPyramid")->GetImageView("Default");
+	srcTarget.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+
+	//Potential problem with srcTarget in BuildWritePushDescriptorSetInfo image info???
+	std::vector<VkWriteDescriptorSet> descriptorWrites =
+	{
+		Vk::DesciptorSetUtils::BuildWritePushDescriptorSetInfo(pushDescriptor->GetImageLayout("SrcImage"), srcTarget)
+	};
+
+	device->vkCmdPushDescriptorSetKHR(commandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetLayout(), 0, descriptorWrites.size(), descriptorWrites.data());
 
 	vkCmdDispatch(commandBuffer, workgroupCount, 1, 1);
 }

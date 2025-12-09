@@ -878,7 +878,6 @@
     <None Include="Shaders\Billboard.geom" />
     <None Include="Shaders\Common\Position.glsl" />
     <None Include="Shaders\Billboard.vert" />
-    <None Include="Shaders\CullingCameraFrustum.comp" />
     <None Include="Shaders\Common\Render\DefaultCollider.glsl" />
     <None Include="Shaders\Common\Render\DrawIndirect.glsl" />
     <None Include="Shaders\DeferredPreIndirect.vert" />
@@ -901,5 +900,9 @@
     <None Include="Shaders\ShadowPointLight.geom" />
     <None Include="Shaders\ShadowPointLight.frag" />
     <None Include="Shaders\CullingPointLightShadowObjects.comp" />
+    <None Include="Shaders\CullingCameraFrustum.comp" />
+    <None Include="Shaders\Common\Render\ColliderDebug.glsl" />
+    <None Include="Shaders\ProjectedColliderDebug.vert" />
+    <None Include="Shaders\ProjectedColliderDebug.frag" />
   </ItemGroup>
 </Project>

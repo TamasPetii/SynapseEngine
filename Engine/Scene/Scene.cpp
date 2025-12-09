@@ -73,20 +73,20 @@ void Scene::InitializeRegistry()
 
 		//Point Lights
 		{
-			for (int i = 0; i < 50; ++i)
+			for (int i = 0; i < 5; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, PointLightComponent>(entity);
 				auto [transformComponent, pointLightComponent] = registry->GetComponents<TransformComponent, PointLightComponent>(entity);
 
-				transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 50.f;
+				transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 25.f;
 				transformComponent.rotation = glm::vec3(dist(rng), dist(rng), dist(rng)) * 180.f;
 				transformComponent.scale = glm::vec3(dist(rng)) * 8.f;
 
 				pointLightComponent.color = glm::vec3(dist(rng), dist(rng), dist(rng));
 				pointLightComponent.strength = 5.f;
 
-				pointLightComponent.shadow.use = dist(rng) > 0.5f;
+				pointLightComponent.shadow.use = false; //dist(rng) > 0.5f;
 
 				registry->SetParent(entity, pointLightParent);
 			}
@@ -94,7 +94,7 @@ void Scene::InitializeRegistry()
 
 		//Spot Lights
 		{
-			for (int i = 0; i < 50; ++i)
+			for (int i = 0; i < 15; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, SpotLightComponent>(entity);
@@ -135,7 +135,7 @@ void Scene::InitializeRegistry()
 		material->metalness = dist(rng);
 		material->SetBit<UPDATE_BIT>();
 
-		for (uint32_t i = 0; i < 1000; ++i)
+		for (uint32_t i = 0; i < 1; ++i)
 		{
 			/*
 			std::string materialName = "Shape" + std::to_string(i++);
@@ -198,6 +198,7 @@ void Scene::InitializeRegistry()
 		auto modelParent = registry->CreateEntity();
 		registry->AddComponents<TransformComponent>(modelParent);
 
+		/*
 		for(uint32_t i = 0; i < 25; i++)
 		{
 			auto entity = registry->CreateEntity();
@@ -209,7 +210,6 @@ void Scene::InitializeRegistry()
 			registry->SetParent(entity, modelParent);
 		}
 
-		/*
 		for (uint32_t i = 0; i < 2500; i++)
 		{
 			auto entity = registry->CreateEntity();
@@ -221,6 +221,7 @@ void Scene::InitializeRegistry()
 			transformComponent.scale = glm::vec3(0.5);
 			registry->SetParent(entity, modelParent);
 		}
+		*/
 
 		{
 			auto entity = registry->CreateEntity();
@@ -241,6 +242,7 @@ void Scene::InitializeRegistry()
 
 			registry->SetParent(entity, modelParent);
 		}
+		/*
 		*/
 
 		/*
@@ -515,6 +517,7 @@ void Scene::UpdateComponentBuffers(uint32_t frameIndex)
 	RecalculateGpuBufferSize<DefaultColliderComponent, glm::mat4>("DefaultColliderObbData", frameIndex);
 	RecalculateGpuBufferSize<DefaultColliderComponent, glm::mat4>("DefaultColliderSphereData", frameIndex);
 	RecalculateGpuBufferSize<DefaultColliderComponent, DefaultColliderGPU>("DefaultColliderData", frameIndex);
+	RecalculateGpuBufferSize<DefaultColliderComponent, ColliderGpuDebug>("DefaultColliderDebug", frameIndex);
 
 	RecalculateGpuBufferSize<DirectionLightComponent, DirectionLightGPU>("DirectionLightData", frameIndex);
 	RecalculateGpuBufferSize<DirectionLightComponent, glm::vec4>("DirectionLightBillboard", frameIndex);
@@ -522,12 +525,14 @@ void Scene::UpdateComponentBuffers(uint32_t frameIndex)
 	RecalculateGpuBufferSize<PointLightComponent, PointLightGPU>("PointLightData", frameIndex);
 	RecalculateGpuBufferSize<PointLightComponent, glm::mat4>("PointLightTransform", frameIndex);
 	RecalculateGpuBufferSize<PointLightComponent, glm::vec4>("PointLightBillboard", frameIndex);
+	RecalculateGpuBufferSize<PointLightComponent, ColliderGpuDebug>("PointLightColliderDebug", frameIndex);
 
 	RecalculateGpuBufferSize<SpotLightComponent, SpotLightGPU>("SpotLightData", frameIndex);
 	RecalculateGpuBufferSize<SpotLightComponent, glm::mat4>("SpotLightTransform", frameIndex);
 	RecalculateGpuBufferSize<SpotLightComponent, glm::vec4>("SpotLightBillboard", frameIndex);	
 	RecalculateGpuBufferSize<SpotLightComponent, glm::mat4>("SpotLightBoundingSphereTransform", frameIndex);
 	RecalculateGpuBufferSize<SpotLightComponent, glm::mat4>("SpotLightBoundingBoxTransform", frameIndex);
+	RecalculateGpuBufferSize<SpotLightComponent, ColliderGpuDebug>("SpotLightColliderDebug", frameIndex);
 
 	RecalculateGpuBufferSize<RenderIndicesComponent, RenderIndicesGPU>("RenderIndicesData", frameIndex);
 }

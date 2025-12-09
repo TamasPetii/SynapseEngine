@@ -13,6 +13,9 @@ struct ENGINE_API GlobalConfig
 		static inline bool showPointLights = false;
 		static inline bool showSpotLights = false;
 		static inline bool showLightBillboards = true;
+
+		static inline bool showPointLightsProjectedAABB = false;
+		static inline bool showSpotLightsProjectedAABB = false;
 	};
 
 	struct ENGINE_API BillboardConfig

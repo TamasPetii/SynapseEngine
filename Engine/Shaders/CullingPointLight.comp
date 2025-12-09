@@ -9,11 +9,16 @@ layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 #include "Common/Light/LightCommon.glsl"
 #include "Common/Culling/Culling.glsl"
 #include "Common/Render/DispatchIndirect.glsl"
+#include "Common/Utility/ProjectToScreen.glsl"
+#include "Common/Render/ColliderDebug.glsl"
 
 //Todo: Default Collider shadow dispatch -> x is colliderCount, y is 1 or 0 (has shadow point light!)
 
+layout(set = 0, binding = 0) uniform sampler2D depthPyramid;
+
 layout(push_constant) uniform constants
 {	
+    uvec2 cameraBuffer;
 	uvec2 cameraFrustumBuffer;
 	uvec2 pointLightBuffer;
 	uvec2 pointLightInstanceIndexBuffer;
@@ -21,6 +26,8 @@ layout(push_constant) uniform constants
 	uvec2 pointLightShadowInstanceIndexBuffer;
 	uvec2 pointLightCommonDataBuffer;
 	uvec2 pointLightShadowDispatchIndirectBuffer;
+	uvec2 colliderDebugBuffer;
+	uvec2 depthPyramidSize;
 	uint cameraIndex;
 	uint pointLightCount;
 } PushConstants;
@@ -36,45 +43,96 @@ void main()
 	if(globalIndex >= PushConstants.pointLightCount)
 		return;
 
-	CameraFrustumBuffer cameraBuffer = CameraFrustumBuffer(PushConstants.cameraFrustumBuffer);
+	CameraBuffer cameraBuffer = CameraBuffer(PushConstants.cameraBuffer);
+	CameraFrustumBuffer cameraFrustumBuffer = CameraFrustumBuffer(PushConstants.cameraFrustumBuffer);
 	PointLightBuffer pointLightBuffer = PointLightBuffer(PushConstants.pointLightBuffer);
 
 	uint pointLightIndex = globalIndex;
 
-	//Todo: Occlusion culling
-	if(TestFrustumVsSphere(cameraBuffer, PushConstants.cameraIndex, pointLightBuffer.lights[pointLightIndex].position, pointLightBuffer.lights[pointLightIndex].radius))
+	if(TestFrustumVsSphere(cameraFrustumBuffer, PushConstants.cameraIndex, pointLightBuffer.lights[pointLightIndex].position, pointLightBuffer.lights[pointLightIndex].radius))
 	{	
-		//This would be faster, easier...
-		//uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(PushConstants.pointLightDrawIndirectCommandBuffer).commands[pointLightDrawCommandIndex].instanceCount, 1);
-		
-		LightCommonDataBuffer lightCommonDataBuffer = LightCommonDataBuffer(PushConstants.pointLightCommonDataBuffer);
-		
-		uint instanceIndex = atomicAdd(lightCommonDataBuffer.commonData.count, 1);
-		InstanceIndexBuffer(PushConstants.pointLightInstanceIndexBuffer).indices[instanceIndex] = pointLightIndex;
-		atomicMax(DrawIndirectCommandBuffer(PushConstants.pointLightDrawIndirectCommandBuffer).commands[pointLightDrawCommandIndex].instanceCount, instanceIndex);
-		
-		//Active shadow simulation
-		if(((pointLightBuffer.lights[pointLightIndex].bitflag >> SHADOW_BIT) & 1u) != 0)
-		{		
-			//Get shadow instance index
-			uint shadowInstanceIndex = atomicAdd(lightCommonDataBuffer.commonData.shadowCount, 1);
-			InstanceIndexBuffer(PushConstants.pointLightShadowInstanceIndexBuffer).indices[shadowInstanceIndex] = pointLightIndex;
+		vec4 projectedAABB;
+		float projectedLinearDepth;
+    
+		bool validProjection = ProjectSphere(
+			cameraBuffer, 
+			PushConstants.cameraIndex, 
+			pointLightBuffer.lights[pointLightIndex].position, 
+			pointLightBuffer.lights[pointLightIndex].radius, 
+			projectedAABB, 
+			projectedLinearDepth
+		);
 
-			//Update dispatch indirect args
-			uint numGroupsX = ((shadowInstanceIndex + 1) + (pointShadowLocalSizeX - 1)) / pointShadowLocalSizeX;     
-			atomicMax(DispatchIndirectCommandBuffer(PushConstants.pointLightShadowDispatchIndirectBuffer).command.num_groups_x, numGroupsX);
+		bool isVisible = true;
+
+		if(validProjection)
+		{
+			float width = (projectedAABB.z - projectedAABB.x) * PushConstants.depthPyramidSize.x;
+			float height = (projectedAABB.w - projectedAABB.y) * PushConstants.depthPyramidSize.y;
+			float level = max(0.0, ceil(log2(max(width, height) / 2.0))); 
 			
-			//Update common shadow AABB volume
-			vec3 aabbMin = pointLightBuffer.lights[pointLightIndex].position - pointLightBuffer.lights[pointLightIndex].radius;
-			vec3 aabbMax = pointLightBuffer.lights[pointLightIndex].position + pointLightBuffer.lights[pointLightIndex].radius;
+			vec2 sampleUV = (projectedAABB.xy + projectedAABB.zw) * 0.5;
+			sampleUV.x = sampleUV.x;
+			sampleUV.y = sampleUV.y;
+			
+			float sampleLinearDepth = textureLod(depthPyramid, sampleUV, level).x;
+			isVisible = isVisible && (projectedLinearDepth <= sampleLinearDepth);
+		}
+		else
+		{
+			vec4 clipPos = cameraBuffer.cameras[PushConstants.cameraIndex].viewProj * vec4(pointLightBuffer.lights[pointLightIndex].position, 1.0);
 
-			atomicMin(lightCommonDataBuffer.commonData.aabbMin.x, floatToSortableUint(aabbMin.x));
-			atomicMin(lightCommonDataBuffer.commonData.aabbMin.y, floatToSortableUint(aabbMin.y));
-			atomicMin(lightCommonDataBuffer.commonData.aabbMin.z, floatToSortableUint(aabbMin.z));
+			if (clipPos.w > 0.001)
+			{
+				vec2 ndc = clipPos.xy / clipPos.w;
+				vec2 centerUV = ndc * 0.5 + 0.5;
 
-			atomicMax(lightCommonDataBuffer.commonData.aabbMax.x, floatToSortableUint(aabbMax.x));
-			atomicMax(lightCommonDataBuffer.commonData.aabbMax.y, floatToSortableUint(aabbMax.y));
-			atomicMax(lightCommonDataBuffer.commonData.aabbMax.z, floatToSortableUint(aabbMax.z));
-		}	
+				float size = 0.05; 
+				projectedAABB = vec4(centerUV.x - size, centerUV.y - size, 
+									 centerUV.x + size, centerUV.y + size);
+            
+				projectedLinearDepth = 1.0; 
+			}
+		}
+
+		if(isVisible)
+		{
+			//This would be faster, easier...
+			//uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(PushConstants.pointLightDrawIndirectCommandBuffer).commands[pointLightDrawCommandIndex].instanceCount, 1);
+		
+			LightCommonDataBuffer lightCommonDataBuffer = LightCommonDataBuffer(PushConstants.pointLightCommonDataBuffer);
+		
+			uint instanceIndex = atomicAdd(lightCommonDataBuffer.commonData.count, 1);
+			InstanceIndexBuffer(PushConstants.pointLightInstanceIndexBuffer).indices[instanceIndex] = pointLightIndex;
+			atomicMax(DrawIndirectCommandBuffer(PushConstants.pointLightDrawIndirectCommandBuffer).commands[pointLightDrawCommandIndex].instanceCount, instanceIndex);
+		
+			ColliderDebugBuffer debugBuf = ColliderDebugBuffer(PushConstants.colliderDebugBuffer);
+            debugBuf.data[instanceIndex].projectedAABB = projectedAABB;
+            debugBuf.data[instanceIndex].projectedLinearDepth = projectedLinearDepth;
+
+			//Active shadow simulation
+			if(((pointLightBuffer.lights[pointLightIndex].bitflag >> SHADOW_BIT) & 1u) != 0)
+			{		
+				//Get shadow instance index
+				uint shadowInstanceIndex = atomicAdd(lightCommonDataBuffer.commonData.shadowCount, 1);
+				InstanceIndexBuffer(PushConstants.pointLightShadowInstanceIndexBuffer).indices[shadowInstanceIndex] = pointLightIndex;
+
+				//Update dispatch indirect args
+				uint numGroupsX = ((shadowInstanceIndex + 1) + (pointShadowLocalSizeX - 1)) / pointShadowLocalSizeX;     
+				atomicMax(DispatchIndirectCommandBuffer(PushConstants.pointLightShadowDispatchIndirectBuffer).command.num_groups_x, numGroupsX);
+			
+				//Update common shadow AABB volume
+				vec3 aabbMin = pointLightBuffer.lights[pointLightIndex].position - pointLightBuffer.lights[pointLightIndex].radius;
+				vec3 aabbMax = pointLightBuffer.lights[pointLightIndex].position + pointLightBuffer.lights[pointLightIndex].radius;
+
+				atomicMin(lightCommonDataBuffer.commonData.aabbMin.x, floatToSortableUint(aabbMin.x));
+				atomicMin(lightCommonDataBuffer.commonData.aabbMin.y, floatToSortableUint(aabbMin.y));
+				atomicMin(lightCommonDataBuffer.commonData.aabbMin.z, floatToSortableUint(aabbMin.z));
+
+				atomicMax(lightCommonDataBuffer.commonData.aabbMax.x, floatToSortableUint(aabbMax.x));
+				atomicMax(lightCommonDataBuffer.commonData.aabbMax.y, floatToSortableUint(aabbMax.y));
+				atomicMax(lightCommonDataBuffer.commonData.aabbMax.z, floatToSortableUint(aabbMax.z));
+			}	
+		}
 	}
 }

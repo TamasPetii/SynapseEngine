@@ -554,6 +554,10 @@ void VulkanManager::InitShaderModuls()
 	RegisterShaderModule("BillboardGeom", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/Billboard.geom", VK_SHADER_STAGE_GEOMETRY_BIT));
 	RegisterShaderModule("BillboardFrag", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/Billboard.frag", VK_SHADER_STAGE_FRAGMENT_BIT));
 
+	//Projected Debug
+	RegisterShaderModule("ProjectedDebugVert", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/ProjectedColliderDebug.vert", VK_SHADER_STAGE_VERTEX_BIT));
+	RegisterShaderModule("ProjectedDebugFrag", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/ProjectedColliderDebug.frag", VK_SHADER_STAGE_FRAGMENT_BIT));
+
 	//Frustum Culling
 	RegisterShaderModule("CullingCameraFrustumComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/CullingCameraFrustum.comp", VK_SHADER_STAGE_COMPUTE_BIT));
 
@@ -846,7 +850,28 @@ void VulkanManager::InitGraphicsPipelines()
 		RegisterGraphicsPipeline("BillboardInstanced", pipelineBuilder.BuildDynamic());
 	}
 
-	
+	{
+		uint32_t pushConsantSize = sizeof(ProjectedDebugPushConstants);
+
+		Vk::GraphicsPipelineBuilder pipelineBuilder;
+		pipelineBuilder
+			.ResetToDefault()
+			.AddShaderStage(shaderModuls["ProjectedDebugVert"])
+			.AddShaderStage(shaderModuls["ProjectedDebugFrag"])
+			.AddDynamicState(VK_DYNAMIC_STATE_VIEWPORT)
+			.AddDynamicState(VK_DYNAMIC_STATE_SCISSOR)
+			.SetVertexInput({}, {})
+			.SetPrimitiveTopology(VK_PRIMITIVE_TOPOLOGY_LINE_STRIP)
+			.SetRasterization(VK_POLYGON_MODE_FILL, VK_CULL_MODE_NONE, VK_FRONT_FACE_COUNTER_CLOCKWISE)
+			.SetMultisampling(VK_SAMPLE_COUNT_1_BIT)
+			.SetDepthStencil(VK_FALSE, VK_FALSE, VK_COMPARE_OP_LESS)
+			.SetColorBlend(VK_FALSE)
+			.AddColorBlendAttachment(VK_FALSE)
+			.SetColorAttachmentFormats(VK_FORMAT_R16G16B16A16_SFLOAT, 0)
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+
+		RegisterGraphicsPipeline("ProjectedAABBDebug", pipelineBuilder.BuildDynamic());
+	}
 }
 
 void VulkanManager::InitComputePipelines()
@@ -869,7 +894,8 @@ void VulkanManager::InitComputePipelines()
 		Vk::ComputePipelineBuilder pipelineBuilder;
 		pipelineBuilder
 			.AddShaderStage(shaderModuls["CullingPointLightComp"])
-			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT);
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT)
+			.AddDescriptorSetLayout(GetPushDescriptorSet("DepthPyramid")->Layout());
 
 		RegisterComputePipeline("CullingPointLight", pipelineBuilder.BuildDynamic());
 	}
@@ -880,7 +906,8 @@ void VulkanManager::InitComputePipelines()
 		Vk::ComputePipelineBuilder pipelineBuilder;
 		pipelineBuilder
 			.AddShaderStage(shaderModuls["CullingSpotLightComp"])
-			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT);
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT)
+			.AddDescriptorSetLayout(GetPushDescriptorSet("DepthPyramid")->Layout());
 
 		RegisterComputePipeline("CullingSpotLight", pipelineBuilder.BuildDynamic());
 	}

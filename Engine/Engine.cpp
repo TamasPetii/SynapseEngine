@@ -1,5 +1,6 @@
 #include "Engine.h"
 #include <random>
+#include "Render/Renderers/DepthHierarchyBuilder.h"
 
 Engine::Engine()
 {

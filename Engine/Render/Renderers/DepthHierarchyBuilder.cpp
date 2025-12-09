@@ -2,6 +2,39 @@
 #include "Engine/Render/GpuStructs.h"
 #include "Engine/Vulkan/DescriptorSet.h"
 
+void DepthHierarchyBuilder::Clear(VkCommandBuffer commandBuffer, std::shared_ptr<ResourceManager> resourceManager)
+{
+	for (uint32_t i = 0; i < GlobalConfig::FrameConfig::framesInFlight; ++i)
+	{
+		auto frameBuffer = resourceManager->GetVulkanManager()->GetFrameDependentFrameBuffer("Main", i);
+		auto depthPyramidImage = frameBuffer->GetImage("DepthPyramid");
+
+		uint32_t mipLevels = Vk::Image::GetMipLevels(frameBuffer->GetSize().width, frameBuffer->GetSize().height);
+
+		Vk::Image::TransitionImageLayoutDynamic(commandBuffer, depthPyramidImage->Value(),
+			VK_IMAGE_LAYOUT_UNDEFINED, VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT, VK_ACCESS_2_NONE,
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_WRITE_BIT,
+			mipLevels, 0);
+
+		VkClearColorValue clearColor = {};
+		clearColor.float32[0] = 1.0f;
+
+		VkImageSubresourceRange range = {};
+		range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		range.baseMipLevel = 0;
+		range.levelCount = mipLevels;
+		range.baseArrayLayer = 0;
+		range.layerCount = 1;
+
+		vkCmdClearColorImage(commandBuffer, depthPyramidImage->Value(), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, &clearColor, 1, &range);
+
+		Vk::Image::TransitionImageLayoutDynamic(commandBuffer, depthPyramidImage->Value(),
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_WRITE_BIT,
+			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT,
+			mipLevels, 0);
+	}
+}
+
 void DepthHierarchyBuilder::Build(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
 {
 	CopyLinearDepthToDepthPyramid(commandBuffer, registry, resourceManager, frameIndex);
@@ -151,5 +184,5 @@ void DepthHierarchyBuilder::BuildDepthHierarchy(VkCommandBuffer commandBuffer, s
 	//Transfer to the source image to shader READ layout
 	Vk::Image::TransitionImageLayoutDynamic(commandBuffer, frameBuffer->GetImage("DepthPyramid")->Value(),
 		VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_WRITE_BIT,
-		VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT);
+		VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT, depthPyramidLevels);
 }

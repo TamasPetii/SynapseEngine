@@ -1,26 +1,44 @@
-/*
-// 2D Polyhedral Bounds of a Clipped, Perspective-Projected 3D Sphere. Michael Mara, Morgan McGuire. 2013
-bool projectSphere(vec3 C, float r, float znear, float P00, float P11, out vec4 aabb)
+
+bool ProjectSphere(CameraBuffer cameraBuffer, uint cameraIndex, vec3 center, float radius, out vec4 projectedAABB, out float projectedLinearDepth)
 {
-	if (C.z < r + znear)
-		return false;
+    float znear = cameraBuffer.cameras[cameraIndex].params.x;
+    float zfar = cameraBuffer.cameras[cameraIndex].params.y;
+    float P00 = cameraBuffer.cameras[cameraIndex].proj[0][0];
+    float P11 = cameraBuffer.cameras[cameraIndex].proj[1][1];
+    vec3 centerView = (cameraBuffer.cameras[cameraIndex].view * vec4(center, 1.0)).xyz;
 
-	vec2 cx = -C.xz;
-	vec2 vx = vec2(sqrt(dot(cx, cx) - r * r), r);
-	vec2 minx = mat2(vx.x, vx.y, -vx.y, vx.x) * cx;
-	vec2 maxx = mat2(vx.x, -vx.y, vx.y, vx.x) * cx;
+    if (-centerView.z < znear + radius)
+        return false;
 
-	vec2 cy = -C.yz;
-	vec2 vy = vec2(sqrt(dot(cy, cy) - r * r), r);
-	vec2 miny = mat2(vy.x, vy.y, -vy.y, vy.x) * cy;
-	vec2 maxy = mat2(vy.x, -vy.y, vy.y, vy.x) * cy;
+    vec3 cx = -centerView;   
+    vec2 vx = vec2(sqrt(dot(cx.xz, cx.xz) - radius * radius), radius);
+    vec2 minx = mat2(vx.x, vx.y, -vx.y, vx.x) * cx.xz;
+    vec2 maxx = mat2(vx.x, -vx.y, vx.y, vx.x) * cx.xz;
 
-	aabb = vec4(minx.x / minx.y * P00, miny.x / miny.y * P11, maxx.x / maxx.y * P00, maxy.x / maxy.y * P11);
-	aabb = aabb.xwzy * vec4(0.5f, -0.5f, 0.5f, -0.5f) + vec4(0.5f); // clip space -> uv space
+    vec3 cy = -centerView;
+    vec2 vy = vec2(sqrt(dot(cy.yz, cy.yz) - radius * radius), radius);
+    vec2 miny = mat2(vy.x, vy.y, -vy.y, vy.x) * cy.yz;
+    vec2 maxy = mat2(vy.x, -vy.y, vy.y, vy.x) * cy.yz;
 
-	return true;
+    vec4 tempAABB = vec4(
+        -(minx.x / minx.y * P00), 
+        -(miny.x / miny.y * P11),
+        -(maxx.x / maxx.y * P00), 
+        -(maxy.x / maxy.y * P11)
+    );
+
+    //vec4 tempAABB = vec4(minx.x / minx.y * P00, miny.x / miny.y * P11, maxx.x / maxx.y * P00, maxy.x / maxy.y * P11);
+    
+    vec2 finalMin = min(tempAABB.xy, tempAABB.zw);
+    vec2 finalMax = max(tempAABB.xy, tempAABB.zw);
+
+    projectedAABB = vec4(finalMin, finalMax) * 0.5 + 0.5;
+
+    float linearDist = -centerView.z - radius;
+    projectedLinearDepth = (linearDist - znear) / (zfar - znear);
+
+    return true;
 }
-*/
 
 bool ProjectBox(CameraBuffer cameraBuffer, uint cameraIndex, vec3 bmin, vec3 bmax, out vec4 projectedAABB, out float projectedLinearDepth)
 {
@@ -64,7 +82,7 @@ bool ProjectBox(CameraBuffer cameraBuffer, uint cameraIndex, vec3 bmin, vec3 bma
     projectedAABB.zw = max(max(max(p0, p1), max(p2, p3)), max(max(p4, p5), max(p6, p7)));
 
     // Clip space -> UV space [0..1]
-    projectedAABB = projectedAABB.xwzy * vec4(0.5, -0.5, 0.5, -0.5) + vec4(0.5);
+    projectedAABB = projectedAABB * 0.5 + 0.5;
     projectedLinearDepth = (minW - znear) / (zfar - znear);
 
     return true;

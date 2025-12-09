@@ -77,15 +77,18 @@ void Vk::Device::Init(std::span<const char*> deviceExtensions)
 	deviceFeatures13.synchronization2 = VK_TRUE;
 	deviceFeatures13.pNext = &deviceFeatures12;
 
+	/*
 	// Add VK_EXT_shader_atomic_float2 features
 	VkPhysicalDeviceShaderAtomicFloat2FeaturesEXT atomicFloat2Features{};
 	atomicFloat2Features.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_2_FEATURES_EXT;
 	atomicFloat2Features.shaderBufferFloat32AtomicMinMax = VK_TRUE; // Enable 32-bit float atomic min/max
 	atomicFloat2Features.pNext = &deviceFeatures13; // Chain to Vulkan 1.3 features
+	*/
 
 	VkPhysicalDeviceFeatures2 deviceFeatures2 = {};
 	deviceFeatures2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
-	deviceFeatures2.pNext = &atomicFloat2Features;
+	//deviceFeatures2.pNext = &atomicFloat2Features;
+	deviceFeatures2.pNext = &deviceFeatures13;
 	deviceFeatures2.features = deviceFeatures;
 
 	VkDeviceCreateInfo createInfo = {};

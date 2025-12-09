@@ -124,6 +124,8 @@ struct CullingCameraFrustumPushConstants
 	VkDeviceAddress shapeDrawIndirectCommandBuffer;
 	VkDeviceAddress shapeInstanceIndexAddressBuffer;
 
+	VkDeviceAddress colliderDebugBuffer;
+
 	glm::vec2 depthPyramidSize;
 
 	uint32_t cameraIndex;
@@ -132,6 +134,7 @@ struct CullingCameraFrustumPushConstants
 
 struct CullingPointLightPushConstants
 {
+	VkDeviceAddress cameraBuffer;
 	VkDeviceAddress cameraFrustumBuffer;
 	VkDeviceAddress pointLightBuffer;
 	VkDeviceAddress pointLightInstanceIndexBuffer;
@@ -139,12 +142,15 @@ struct CullingPointLightPushConstants
 	VkDeviceAddress pointLightShadowInstanceIndexBuffer;
 	VkDeviceAddress pointLightCommonDataBuffer;
 	VkDeviceAddress pointLightShadowDispatchIndirectBuffer;
+	VkDeviceAddress colliderDebugBuffer;
+	glm::uvec2 depthPyramidSize;
 	uint32_t cameraIndex;
 	uint32_t pointLightCount;
 };
 
 struct CullingSpotLightPushConstants
 {
+	VkDeviceAddress cameraBuffer;
 	VkDeviceAddress cameraFrustumBuffer;
 	VkDeviceAddress spotLightBuffer;
 	VkDeviceAddress spotLightInstanceIndexBuffer;
@@ -152,6 +158,8 @@ struct CullingSpotLightPushConstants
 	VkDeviceAddress spotLightShadowInstanceIndexBuffer;
 	VkDeviceAddress spotLightCommonDataBuffer;
 	VkDeviceAddress spotLightShadowDispatchIndirectBuffer;
+	VkDeviceAddress colliderDebugBuffer;
+	glm::uvec2 depthPyramidSize;
 	uint32_t cameraIndex;
 	uint32_t spotLightCount;
 };
@@ -176,4 +184,11 @@ struct HizLinearDepthPushConstants
 	glm::vec2 outImageSize;
 	VkDeviceAddress cameraBuffer;
 	uint32_t cameraIndex;
+};
+
+struct ProjectedDebugPushConstants
+{
+	glm::vec4 color;
+	VkDeviceAddress colliderDebugBuffer;
+	VkDeviceAddress instanceIndexBuffer;
 };
