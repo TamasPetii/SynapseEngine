@@ -373,6 +373,7 @@ void Scene::InitializeSystems()
 	InitSystem<PointLightSystem>();
 	InitSystem<PointLightShadowSystem>();
 	InitSystem<SpotLightSystem>();
+	InitSystem<SpotLightShadowSystem>();
 	InitSystem<RenderIndicesSystem>();
 }
 
@@ -412,6 +413,7 @@ void Scene::UpdateSystems(uint32_t frameIndex, float deltaTime)
 	futures[Unique::typeID<PointLightSystem>()].get();
 	futures[Unique::typeID<SpotLightSystem>()].get();
 	LaunchSystemUpdateAsync.template operator() < PointLightShadowSystem > ();
+	LaunchSystemUpdateAsync.template operator() < SpotLightShadowSystem > ();
 
 	futures[Unique::typeID<ShapeSystem>()].get();
 	futures[Unique::typeID<ModelSystem>()].get();
@@ -459,6 +461,7 @@ void Scene::FinishSystems()
 	LaunchSystemFinishAsync.template operator() < DirectionLightSystem > ();
 	LaunchSystemFinishAsync.template operator() < PointLightSystem > ();
 	LaunchSystemFinishAsync.template operator() < PointLightShadowSystem > ();
+	LaunchSystemFinishAsync.template operator() < SpotLightShadowSystem > ();
 	LaunchSystemFinishAsync.template operator() < SpotLightSystem > ();
 	LaunchSystemFinishAsync.template operator() < RenderIndicesSystem > ();
 
@@ -495,6 +498,7 @@ void Scene::UpdateSystemsGPU(uint32_t frameIndex)
 	LaunchSystemUpdateGpuAsync.template operator() < PointLightSystem > ();
 	LaunchSystemUpdateGpuAsync.template operator() < PointLightShadowSystem > ();
 	LaunchSystemUpdateGpuAsync.template operator() < SpotLightSystem > ();
+	LaunchSystemUpdateGpuAsync.template operator() < SpotLightShadowSystem > ();
 	LaunchSystemUpdateGpuAsync.template operator() < RenderIndicesSystem > ();
 
 	for (auto& [_, future] : futures) {
@@ -539,6 +543,7 @@ void Scene::UpdateComponentBuffers(uint32_t frameIndex)
 	RecalculateGpuBufferSize<SpotLightComponent, glm::mat4>("SpotLightBoundingSphereTransform", frameIndex);
 	RecalculateGpuBufferSize<SpotLightComponent, glm::mat4>("SpotLightBoundingBoxTransform", frameIndex);
 	RecalculateGpuBufferSize<SpotLightComponent, ColliderGpuDebug>("SpotLightColliderDebug", frameIndex);
+	RecalculateGpuBufferSize<SpotLightShadowComponent, SpotLightShadowGPU>("SpotLightShadowData", frameIndex);
 
 	RecalculateGpuBufferSize<RenderIndicesComponent, RenderIndicesGPU>("RenderIndicesData", frameIndex);
 }

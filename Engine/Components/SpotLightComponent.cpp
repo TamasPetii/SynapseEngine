@@ -1,10 +1,5 @@
 #include "SpotLightComponent.h"
 
-SpotLightShadow::SpotLightShadow() : 
-	viewProj(glm::mat4(1))
-{
-}
-
 SpotLightComponent::SpotLightComponent() :
 	position(glm::vec3(0.f)),
 	transform(glm::mat4(1))
@@ -12,7 +7,7 @@ SpotLightComponent::SpotLightComponent() :
 	strength = 10.f;
 }
 
-SpotLightGPU::SpotLightGPU(const SpotLightComponent& spotLightComponent) :
+SpotLightGPU::SpotLightGPU(const SpotLightComponent& spotLightComponent, uint32_t shadowIndex) :
 	color(spotLightComponent.color),
 	strength(spotLightComponent.strength),
 	position(spotLightComponent.position),
@@ -24,7 +19,16 @@ SpotLightGPU::SpotLightGPU(const SpotLightComponent& spotLightComponent) :
 	boundingSphereRadius(spotLightComponent.boundingSphereRadius),
 	aabbExtents(spotLightComponent.aabbExtents),
 	aabbOrigin(spotLightComponent.aabbOrigin),
-	bitflag(0)
+	bitflag(0),
+	shadowIndex(shadowIndex)
 {
 	bitflag |= (spotLightComponent.useShadow ? 1u : 0u) << 0; // Bit 0 = Simulate Shadow?
+}
+
+SpotLightShadowGPU::SpotLightShadowGPU(const SpotLightShadowComponent& shadowComponent) :
+	nearPlane(shadowComponent.nearPlane),
+	farPlane(shadowComponent.farPlane),
+	shadowMapSize(glm::vec2(static_cast<float>(shadowComponent.textureSize))),
+	viewProj(shadowComponent.viewProj)
+{
 }

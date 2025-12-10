@@ -1,5 +1,5 @@
-#ifndef SAMPLER_GLSL
-#define SAMPLER_GLSL
+#ifndef COMMON_UTILITY_SAMPLER_GLSL
+#define COMMON_UTILITY_SAMPLER_GLSL
 
 #extension GL_EXT_nonuniform_qualifier : require
 

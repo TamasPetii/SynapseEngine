@@ -167,6 +167,7 @@
   <ItemGroup>
     <ClInclude Include="Render\Renderers\BloomRenderer.h" />
     <ClInclude Include="Managers\LightShadowBufferManager.h" />
+    <ClInclude Include="Systems\SpotLightShadowSystem.h" />
     <ClInclude Include="Systems\PointLightShadowSystem.h" />
     <ClInclude Include="Render\Renderers\DepthHierarchyBuilder.h" />
     <ClInclude Include="Managers\LightBufferManager.h" />
@@ -313,6 +314,7 @@
   <ItemGroup>
     <ClCompile Include="Render\Renderers\BloomRenderer.cpp" />
     <ClCompile Include="Managers\LightShadowBufferManager.cpp" />
+    <ClCompile Include="Systems\SpotLightShadowSystem.cpp" />
     <ClCompile Include="Systems\PointLightShadowSystem.cpp" />
     <ClCompile Include="Render\Renderers\DepthHierarchyBuilder.cpp" />
     <ClCompile Include="Managers\LightBufferManager.cpp" />
@@ -478,6 +480,7 @@
     <None Include="Shaders\Common\Utility\Texture.glsl" />
     <None Include="Shaders\CullingLightShadowAabb.comp" />
     <None Include="Shaders\CullingSpotLight.comp" />
+    <None Include="Shaders\CullingSpotLightShadowObjects.comp" />
     <None Include="Shaders\DeferredAmbient.frag" />
     <None Include="Shaders\DeferredAmbient.vert" />
     <None Include="Shaders\DeferredPreIndirect.frag" />
@@ -494,6 +497,8 @@
     <None Include="Shaders\ShadowPointLight.frag" />
     <None Include="Shaders\ShadowPointLight.geom" />
     <None Include="Shaders\ShadowPointLight.vert" />
+    <None Include="Shaders\ShadowSpotLight.frag" />
+    <None Include="Shaders\ShadowSpotLight.vert" />
     <None Include="Shaders\Wireframe.frag" />
     <None Include="Shaders\Wireframe.vert" />
     <None Include="Shaders\Common\Animation\AnimationBufferAddresses.glsl" />

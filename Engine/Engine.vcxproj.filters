@@ -447,6 +447,9 @@
     <ClInclude Include="Render\Renderers\BloomRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Systems\SpotLightShadowSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -848,6 +851,9 @@
     <ClCompile Include="Render\Renderers\BloomRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Systems\SpotLightShadowSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Registry\Registry.inl">
@@ -926,5 +932,8 @@
     <None Include="Shaders\BloomUpsample.comp" />
     <None Include="Shaders\BloomPrefilter.comp" />
     <None Include="Shaders\BloomComposite.comp" />
+    <None Include="Shaders\CullingSpotLightShadowObjects.comp" />
+    <None Include="Shaders\ShadowSpotLight.vert" />
+    <None Include="Shaders\ShadowSpotLight.frag" />
   </ItemGroup>
 </Project>

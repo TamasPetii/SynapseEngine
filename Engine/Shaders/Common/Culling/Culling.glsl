@@ -1,3 +1,6 @@
+#ifndef COMMON_CULLING_GLSL
+#define COMMON_CULLING_GLSL
+
 uint floatToSortableUint(float f) {
     uint u = floatBitsToUint(f);
     uint mask = uint(-int(u >> 31)) | 0x80000000u;
@@ -67,3 +70,5 @@ bool TestAabbVsSphere(vec3 aabbMin, vec3 aabbMax, vec3 sphereOrigin, float spher
 
 	return distSq < sphereRadius * sphereRadius;
 }
+
+#endif

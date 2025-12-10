@@ -37,7 +37,6 @@ layout( push_constant ) uniform constants
 void main() 
 {
 	uvec2 instanceIndexBuffer = InstanceIndexAddressBuffer(PushConstants.instanceIndexAddressBuffer).deviceAddresses[gl_DrawIDARB];
-
     uint index = InstanceIndexBuffer(instanceIndexBuffer).indices[gl_InstanceIndex];
 
 	uint transformIndex = INVALID_RENDER_INDEX;

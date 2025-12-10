@@ -1,3 +1,5 @@
+#ifndef COMMON_UTILITY_PROJECT_TO_SCREEN_GLSL
+#define COMMON_UTILITY_PROJECT_TO_SCREEN_GLSL
 
 bool ProjectSphere(CameraBuffer cameraBuffer, uint cameraIndex, vec3 center, float radius, out vec4 projectedAABB, out float projectedLinearDepth)
 {
@@ -87,3 +89,5 @@ bool ProjectBox(CameraBuffer cameraBuffer, uint cameraIndex, vec3 bmin, vec3 bma
 
     return true;
 }
+
+#endif

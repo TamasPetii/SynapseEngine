@@ -46,7 +46,6 @@ void main()
 
 	uint spotLightIndex = globalIndex;
 
-	//Todo: Occlusion culling
 	if(TestFrustumVsAABB(cameraFrustumBuffer, PushConstants.cameraIndex, spotLightBuffer.lights[spotLightIndex].aabbOrigin, spotLightBuffer.lights[spotLightIndex].aabbExtents))
 	{	
 		vec4 projectedAABB;

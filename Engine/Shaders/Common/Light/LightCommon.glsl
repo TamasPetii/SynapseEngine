@@ -1,3 +1,6 @@
+#ifndef COMMON_LIGHT_COMMON_GLSL
+#define COMMON_LIGHT_COMMON_GLSL
+
 #extension GL_EXT_buffer_reference : require
 #extension GL_EXT_buffer_reference_uvec2 : require
 
@@ -11,3 +14,5 @@ struct LightCommonData {
 layout(buffer_reference, std430) buffer LightCommonDataBuffer { 
 	LightCommonData commonData;
 };
+
+#endif

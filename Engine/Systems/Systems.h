@@ -14,3 +14,4 @@
 #include "SpotLightSystem.h"
 #include "RenderIndicesSystem.h"
 #include "PointLightShadowSystem.h"
+#include "SpotLightShadowSystem.h"

@@ -1,5 +1,6 @@
-#ifndef TEXTURE_LOADED_GLSL
-#define TEXTURE_LOADED_GLSL
+#ifndef COMMON_UTILITY_TEXTURE_LOADED_GLSL
+#define COMMON_UTILITY_TEXTURE_LOADED_GLSL
+
 #extension GL_EXT_nonuniform_qualifier : require
 
 layout(set = 0, binding = 1) uniform texture2D u_textures[];

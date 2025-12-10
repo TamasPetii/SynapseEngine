@@ -591,30 +591,22 @@ void VulkanManager::InitShaderModuls()
 	RegisterShaderModule("ProjectedDebugVert", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/ProjectedColliderDebug.vert", VK_SHADER_STAGE_VERTEX_BIT));
 	RegisterShaderModule("ProjectedDebugFrag", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/ProjectedColliderDebug.frag", VK_SHADER_STAGE_FRAGMENT_BIT));
 
-	//Frustum Culling
 	RegisterShaderModule("CullingCameraFrustumComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/CullingCameraFrustum.comp", VK_SHADER_STAGE_COMPUTE_BIT));
-
-	//Point Light Culling
 	RegisterShaderModule("CullingPointLightComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/CullingPointLight.comp", VK_SHADER_STAGE_COMPUTE_BIT));
-
-	//Spot Light Culling
 	RegisterShaderModule("CullingSpotLightComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/CullingSpotLight.comp", VK_SHADER_STAGE_COMPUTE_BIT));
-	
-	//Object culling against light shadow aabb
 	RegisterShaderModule("CullingLightShadowAabbComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/CullingLightShadowAabb.comp", VK_SHADER_STAGE_COMPUTE_BIT));
+	RegisterShaderModule("CullingPointLightShadowObjectsComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/CullingPointLightShadowObjects.comp", VK_SHADER_STAGE_COMPUTE_BIT));
+	RegisterShaderModule("CullingSpotLightShadowObjectsComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/CullingSpotLightShadowObjects.comp", VK_SHADER_STAGE_COMPUTE_BIT));
 
-	//Object culling against light shadow aabb
-	RegisterShaderModule("CullingLightShadowAabbComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/CullingPointLightShadowObjects.comp", VK_SHADER_STAGE_COMPUTE_BIT));
-
-	//Object culling against light shadow aabb
 	RegisterShaderModule("HizComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/Hiz.comp", VK_SHADER_STAGE_COMPUTE_BIT));
-
-	//Object culling against light shadow aabb
 	RegisterShaderModule("HizLinearDepthComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/HizLinearDepth.comp", VK_SHADER_STAGE_COMPUTE_BIT));
 
 	RegisterShaderModule("ShadowPointLightVert", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/ShadowPointLight.vert", VK_SHADER_STAGE_VERTEX_BIT));
 	RegisterShaderModule("ShadowPointLightGeom", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/ShadowPointLight.geom", VK_SHADER_STAGE_GEOMETRY_BIT));
 	RegisterShaderModule("ShadowPointLightFrag", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/ShadowPointLight.frag", VK_SHADER_STAGE_FRAGMENT_BIT));
+
+	RegisterShaderModule("ShadowSpotLightVert", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/ShadowSpotLight.vert", VK_SHADER_STAGE_VERTEX_BIT));
+	RegisterShaderModule("ShadowSpotLightFrag", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/ShadowSpotLight.frag", VK_SHADER_STAGE_FRAGMENT_BIT));
 
 	RegisterShaderModule("BloomPrefilterComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/BloomPrefilter.comp", VK_SHADER_STAGE_COMPUTE_BIT));
 	RegisterShaderModule("BloomDownsampleComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/BloomDownsample.comp", VK_SHADER_STAGE_COMPUTE_BIT));
@@ -910,6 +902,53 @@ void VulkanManager::InitGraphicsPipelines()
 
 		RegisterGraphicsPipeline("ProjectedAABBDebug", pipelineBuilder.BuildDynamic());
 	}
+
+	{
+		uint32_t pushConsantSize = sizeof(PointLightShadowPushConstants);
+
+		Vk::GraphicsPipelineBuilder pipelineBuilder;
+		pipelineBuilder
+			.ResetToDefault()
+			.AddShaderStage(shaderModuls["ShadowPointLightVert"])
+			.AddShaderStage(shaderModuls["ShadowPointLightGeom"])
+			.AddShaderStage(shaderModuls["ShadowPointLightFrag"])
+			.AddDynamicState(VK_DYNAMIC_STATE_VIEWPORT)
+			.AddDynamicState(VK_DYNAMIC_STATE_SCISSOR)
+			.AddDynamicState(VK_DYNAMIC_STATE_DEPTH_BIAS)
+			.SetVertexInput({}, {})
+			.SetPrimitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
+			.SetRasterization(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_CLOCKWISE)
+			.SetMultisampling(VK_SAMPLE_COUNT_1_BIT)
+			.SetDepthStencil(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS)
+			.SetColorBlend(VK_FALSE)
+			.SetDepthAttachmentFormat(VK_FORMAT_D32_SFLOAT)
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+
+		RegisterGraphicsPipeline("ShadowPointLight", pipelineBuilder.BuildDynamic());
+	}
+
+	{
+		uint32_t pushConsantSize = sizeof(SpotLightShadowPushConstants);
+
+		Vk::GraphicsPipelineBuilder pipelineBuilder;
+		pipelineBuilder
+			.ResetToDefault()
+			.AddShaderStage(shaderModuls["ShadowSpotLightVert"])
+			.AddShaderStage(shaderModuls["ShadowSpotLightFrag"])
+			.AddDynamicState(VK_DYNAMIC_STATE_VIEWPORT)
+			.AddDynamicState(VK_DYNAMIC_STATE_SCISSOR)
+			.AddDynamicState(VK_DYNAMIC_STATE_DEPTH_BIAS)
+			.SetVertexInput({}, {})
+			.SetPrimitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST)
+			.SetRasterization(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_CLOCKWISE)
+			.SetMultisampling(VK_SAMPLE_COUNT_1_BIT)
+			.SetDepthStencil(VK_TRUE, VK_TRUE, VK_COMPARE_OP_LESS)
+			.SetColorBlend(VK_FALSE)
+			.SetDepthAttachmentFormat(VK_FORMAT_D32_SFLOAT)
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT);
+
+		RegisterGraphicsPipeline("ShadowSpotLight", pipelineBuilder.BuildDynamic());
+	}
 }
 
 void VulkanManager::InitComputePipelines()
@@ -959,6 +998,28 @@ void VulkanManager::InitComputePipelines()
 			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT);
 
 		RegisterComputePipeline("CullingLightShadowAabb", pipelineBuilder.BuildDynamic());
+	}
+
+	{
+		uint32_t pushConsantSize = sizeof(CullingPointLightsShadowObjectsPushConstants);
+
+		Vk::ComputePipelineBuilder pipelineBuilder;
+		pipelineBuilder
+			.AddShaderStage(shaderModuls["CullingPointLightShadowObjectsComp"])
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT);
+
+		RegisterComputePipeline("CullingPointLightShadowObjects", pipelineBuilder.BuildDynamic());
+	}
+
+	{
+		uint32_t pushConsantSize = sizeof(CullingSpotLightsShadowObjectsPushConstants);
+
+		Vk::ComputePipelineBuilder pipelineBuilder;
+		pipelineBuilder
+			.AddShaderStage(shaderModuls["CullingSpotLightShadowObjectsComp"])
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT);
+
+		RegisterComputePipeline("CullingSpotLightShadowObjects", pipelineBuilder.BuildDynamic());
 	}
 
 	{

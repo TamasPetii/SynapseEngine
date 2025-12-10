@@ -1,0 +1,88 @@
+#version 460
+layout (local_size_x = 64, local_size_y = 64, local_size_z = 1) in;
+
+#include "Common/Camera.glsl"
+#include "Common/Count.glsl"
+#include "Common/Render/InstanceIndex.glsl"
+#include "Common/Render/RenderIndices.glsl"
+#include "Common/Render/DrawIndirect.glsl"
+#include "Common/Render/DefaultCollider.glsl"
+#include "Common/Light/SpotLight.glsl"
+#include "Common/Light/LightCommon.glsl"
+#include "Common/Culling/Culling.glsl"
+
+layout(push_constant) uniform constants
+{    
+    uvec2 defaultColliderBuffer;
+    uvec2 defaultColliderCountBuffer;
+    uvec2 defaultColliderCulledIndexBuffer;
+
+    uvec2 spotLightBuffer;
+    uvec2 spotLightCommonDataBuffer;
+    uvec2 spotLightShadowInstanceIndexBuffer;
+
+    uvec2 modelRenderIndicesBuffer;
+    uvec2 spotLightShadowModelInstanceBufferAddresses; 
+    uvec2 spotLightShadowModelIndirectDrawBufferAddresses; 
+
+    uvec2 shapeRenderIndicesBuffer;
+    uvec2 spotLightShadowShapeInstanceBufferAddresses;
+    uvec2 spotLightShadowShapeIndirectDrawBufferAddresses;
+} PushConstants;
+
+void main()
+{
+    uint lightIndex = gl_GlobalInvocationID.x;
+    uint colliderInstanceIndex = gl_GlobalInvocationID.y;
+
+    CountBuffer defaultColliderCountBuffer = CountBuffer(PushConstants.defaultColliderCountBuffer);
+    LightCommonDataBuffer lightCommonDataBuffer = LightCommonDataBuffer(PushConstants.spotLightCommonDataBuffer);
+
+    if(lightIndex >= lightCommonDataBuffer.commonData.shadowCount || colliderInstanceIndex >= defaultColliderCountBuffer.count)
+        return;
+
+    InstanceIndexBuffer defaultColliderCulledIndexBuffer = InstanceIndexBuffer(PushConstants.defaultColliderCulledIndexBuffer);
+    uint colliderIndex = defaultColliderCulledIndexBuffer.indices[colliderInstanceIndex];
+    
+    DefaultColliderBuffer defaultColliderBuffer = DefaultColliderBuffer(PushConstants.defaultColliderBuffer);
+    uint objectIndex = defaultColliderBuffer.colliders[colliderIndex].objectIndex;
+
+    if(objectIndex == INVALID_RENDER_INDEX)
+        return;
+
+    SpotLightBuffer spotLightBuffer = SpotLightBuffer(PushConstants.spotLightBuffer);
+    uint spotLightIndex = InstanceIndexBuffer(PushConstants.spotLightShadowInstanceIndexBuffer).indices[lightIndex];
+
+    vec3 objectAabbMin = defaultColliderBuffer.colliders[colliderIndex].aabbOrigin - defaultColliderBuffer.colliders[colliderIndex].aabbExtents;
+    vec3 objectAabbMax = defaultColliderBuffer.colliders[colliderIndex].aabbOrigin + defaultColliderBuffer.colliders[colliderIndex].aabbExtents;    
+
+    vec3 lightAabbMin = spotLightBuffer.lights[spotLightIndex].aabbOrigin - spotLightBuffer.lights[spotLightIndex].aabbExtents;
+    vec3 lightAabbMax = spotLightBuffer.lights[spotLightIndex].aabbOrigin + spotLightBuffer.lights[spotLightIndex].aabbExtents;
+
+    if(TestAabbVsAabb(objectAabbMin, objectAabbMax, lightAabbMin, lightAabbMax))
+    {
+        uint spotLightShadowIndex = spotLightBuffer.lights[spotLightIndex].shadowIndex;
+        bool isModel = (defaultColliderBuffer.colliders[colliderIndex].bitflag & COLLIDER_MODEL_BIT) != 0u;
+
+        if(isModel)
+        {
+            uvec2 drawIndirectBufferAddress = InstanceIndexAddressBuffer(PushConstants.spotLightShadowModelIndirectDrawBufferAddresses).deviceAddresses[spotLightShadowIndex];
+            uvec2 middleLevelBufferAddress = InstanceIndexAddressBuffer(PushConstants.spotLightShadowModelInstanceBufferAddresses).deviceAddresses[spotLightShadowIndex];
+            uint modelIndex = ModelRenderIndicesBuffer(PushConstants.modelRenderIndicesBuffer).indices[objectIndex].modelIndex;            
+            uvec2 finalInstanceBufferAddress = InstanceIndexAddressBuffer(middleLevelBufferAddress).deviceAddresses[modelIndex];
+
+            uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(drawIndirectBufferAddress).commands[modelIndex].instanceCount, 1);        
+            InstanceIndexBuffer(finalInstanceBufferAddress).indices[instanceIndex] = objectIndex;
+        }
+        else
+        {
+            uvec2 drawIndirectBufferAddress = InstanceIndexAddressBuffer(PushConstants.spotLightShadowShapeIndirectDrawBufferAddresses).deviceAddresses[spotLightShadowIndex];
+            uvec2 middleLevelBufferAddress = InstanceIndexAddressBuffer(PushConstants.spotLightShadowShapeInstanceBufferAddresses).deviceAddresses[spotLightShadowIndex];
+            uint shapeIndex = ShapeRenderIndicesBuffer(PushConstants.shapeRenderIndicesBuffer).indices[objectIndex].shapeIndex;            
+            uvec2 finalInstanceBufferAddress = InstanceIndexAddressBuffer(middleLevelBufferAddress).deviceAddresses[shapeIndex];
+
+            uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(drawIndirectBufferAddress).commands[shapeIndex].instanceCount, 1);        
+            InstanceIndexBuffer(finalInstanceBufferAddress).indices[instanceIndex] = objectIndex;
+        }
+    }
+}

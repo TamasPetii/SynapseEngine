@@ -1,3 +1,6 @@
+#ifndef COMMON_RENDER_DEFAULT_COLLIDER_GLSL
+#define COMMON_RENDER_DEFAULT_COLLIDER_GLSL
+
 #extension GL_EXT_buffer_reference : require
 #extension GL_EXT_buffer_reference_uvec2 : require
 
@@ -17,3 +20,5 @@ struct DefaultCollider
 layout(buffer_reference, std430) readonly buffer DefaultColliderBuffer {
 	DefaultCollider colliders[];
 };
+
+#endif

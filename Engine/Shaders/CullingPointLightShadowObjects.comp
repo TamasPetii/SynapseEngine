@@ -20,7 +20,6 @@ layout(push_constant) uniform constants
 	uvec2 pointLightBuffer;
 	uvec2 pointLightCommonDataBuffer;
 	uvec2 pointLightShadowInstanceIndexBuffer;
-	uvec2 pointLightShadowIndexMapBuffer;
 
 	uvec2 modelRenderIndicesBuffer;
 	uvec2 pointLightShadowModelInstanceBufferAddresses; 

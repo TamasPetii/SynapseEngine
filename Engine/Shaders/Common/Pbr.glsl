@@ -1,3 +1,6 @@
+#ifndef COMMON_PBR_GLSL
+#define COMMON_PBR_GLSL
+
 //Todo: Better to use a const.glsl and define all of this there!
 const float PI = 3.14159265359;
 
@@ -83,3 +86,5 @@ vec3 ShadePhysicallyBased(vec3 albedo, vec3 normal, vec3 toEye, vec3 toLight, fl
     float NdotL = max(dot(N, L), 0.0);                
     return (kD * albedo / PI + specular) * radiance * NdotL; //Lo, but differed shading
 }
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef COMMON_RENDER_INDICES_GLSL
+#define COMMON_RENDER_INDICES_GLSL
+
 #extension GL_EXT_scalar_block_layout : require
 #extension GL_EXT_buffer_reference : require
 #extension GL_EXT_buffer_reference_uvec2 : require
@@ -29,3 +32,5 @@ struct ShapeRenderIndices
 layout(buffer_reference, scalar) readonly buffer ShapeRenderIndicesBuffer {
 	ShapeRenderIndices indices[];
 };
+
+#endif

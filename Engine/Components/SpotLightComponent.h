@@ -12,14 +12,6 @@ constexpr glm::vec3 defaultSpotLightDirection = glm::vec3(1.f, 0.f, 0.f);
 
 class SpotLightSystem;
 
-struct ENGINE_API SpotLightShadow : public LightShadow
-{
-	SpotLightShadow();
-
-	//farplane = length;
-	glm::mat4 viewProj;
-};
-
 struct ENGINE_API SpotLightComponent : public Light, public Component, public FrustumCullable
 {
 	SpotLightComponent();
@@ -28,8 +20,6 @@ struct ENGINE_API SpotLightComponent : public Light, public Component, public Fr
 	glm::vec3 direction; //Mapped to transform component rotation!
 	glm::vec4 angles; //x = inner bound to transform component scale x | y = outer angle bound to transform component scale y | zw = cos(angles)
 	float range; //Mapped to transform component scale z
-	SpotLightShadow shadow;
-	//Todo: Visible entities??? Instanced???? Maybe in models???? Or like a model map?
 private:
 	glm::vec3 boundingSphereOrigin;
 	float boundingSphereRadius;
@@ -43,7 +33,7 @@ private:
 
 struct ENGINE_API SpotLightGPU
 {
-	SpotLightGPU(const SpotLightComponent& spotLightComponent);
+	SpotLightGPU(const SpotLightComponent& spotLightComponent, uint32_t shadowIndex);
 
 	glm::vec3 color;
 	float strength;
@@ -57,5 +47,20 @@ struct ENGINE_API SpotLightGPU
 	glm::vec3 aabbOrigin;
 	uint32_t bitflag;
 	glm::vec3 aabbExtents;
-	float padding; //Padding for 16 byte alignment
+	uint32_t shadowIndex;
+};
+
+struct ENGINE_API SpotLightShadowComponent : public LightShadow, public Component
+{
+	glm::mat4 viewProj;
+};
+
+struct ENGINE_API SpotLightShadowGPU
+{
+	SpotLightShadowGPU(const SpotLightShadowComponent& shadowComponent);
+
+	float nearPlane;
+	float farPlane;
+	glm::vec2 shadowMapSize;
+	glm::mat4 viewProj;
 };

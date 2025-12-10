@@ -174,6 +174,45 @@ struct CullingLightShadowAabbPushConstants
 	uint32_t defaultColliderCount;
 };
 
+struct CullingPointLightsShadowObjectsPushConstants
+{
+	VkDeviceAddress defaultColliderBuffer;
+	VkDeviceAddress defaultColliderCountBuffer;
+	VkDeviceAddress defaultColliderCulledIndexBuffer;
+
+	VkDeviceAddress pointLightBuffer;
+	VkDeviceAddress pointLightCommonDataBuffer;
+	VkDeviceAddress pointLightShadowInstanceIndexBuffer;
+
+	VkDeviceAddress modelRenderIndicesBuffer;
+	VkDeviceAddress pointLightShadowModelInstanceBufferAddresses;
+	VkDeviceAddress pointLightShadowModelIndirectDrawBufferAddresses;
+
+	VkDeviceAddress shapeRenderIndicesBuffer;
+	VkDeviceAddress pointLightShadowShapeInstanceBufferAddresses;
+	VkDeviceAddress pointLightShadowShapeIndirectDrawBufferAddresses;
+};
+
+struct CullingSpotLightsShadowObjectsPushConstants
+{
+	VkDeviceAddress defaultColliderBuffer;
+	VkDeviceAddress defaultColliderCountBuffer;
+	VkDeviceAddress defaultColliderCulledIndexBuffer;
+
+	VkDeviceAddress spotLightBuffer;
+	VkDeviceAddress spotLightCommonDataBuffer;
+	VkDeviceAddress spotLightShadowInstanceIndexBuffer;
+
+	VkDeviceAddress modelRenderIndicesBuffer;
+	VkDeviceAddress spotLightShadowModelInstanceBufferAddresses;
+	VkDeviceAddress spotLightShadowModelIndirectDrawBufferAddresses;
+
+	VkDeviceAddress shapeRenderIndicesBuffer;
+	VkDeviceAddress spotLightShadowShapeInstanceBufferAddresses;
+	VkDeviceAddress spotLightShadowShapeIndirectDrawBufferAddresses;
+};
+
+
 struct HizPushConstants
 {
 	glm::vec2 outImageSize;
@@ -211,4 +250,34 @@ struct BloomUpsamplePushConstants {
 struct BloomCompositePushConstants {
 	float exposure;
 	float bloomStrength;
+};
+
+struct PointLightShadowPushConstants {
+	VkDeviceAddress transformBuffer;
+	VkDeviceAddress instanceIndexAddressBuffer;
+	VkDeviceAddress modelRenderIndicesBuffer;
+	VkDeviceAddress modelBufferAddresses;
+	VkDeviceAddress animationTransformBufferAddresses;
+	VkDeviceAddress animationVertexBoneBufferAddresses;
+	VkDeviceAddress shapeRenderIndicesBuffer;
+	VkDeviceAddress shapeBufferAddresses;
+	VkDeviceAddress pointLightBufferAddress;
+	VkDeviceAddress pointLightShadowBufferAddress;
+	uint32_t renderMode;
+	uint32_t pointLightIndex;
+};
+
+struct SpotLightShadowPushConstants {
+	VkDeviceAddress transformBuffer;
+	VkDeviceAddress instanceIndexAddressBuffer;
+	VkDeviceAddress modelRenderIndicesBuffer;
+	VkDeviceAddress modelBufferAddresses;
+	VkDeviceAddress animationTransformBufferAddresses;
+	VkDeviceAddress animationVertexBoneBufferAddresses;
+	VkDeviceAddress shapeRenderIndicesBuffer;
+	VkDeviceAddress shapeBufferAddresses;
+	VkDeviceAddress spotLightBufferAddress;
+	VkDeviceAddress spotLightShadowBufferAddress;
+	uint32_t renderMode;
+	uint32_t spotLightIndex;
 };

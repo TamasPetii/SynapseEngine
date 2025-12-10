@@ -1,3 +1,6 @@
+#ifndef COMMON_CAMERA_GLSL
+#define COMMON_CAMERA_GLSL
+
 #extension GL_EXT_buffer_reference : require
 #extension GL_EXT_buffer_reference_uvec2 : require
 
@@ -35,3 +38,5 @@ struct CameraFrustum
 layout(buffer_reference, std430) readonly buffer CameraFrustumBuffer { 
 	CameraFrustum frustums[];
 };
+
+#endif
