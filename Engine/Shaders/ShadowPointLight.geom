@@ -16,6 +16,7 @@ layout( push_constant ) uniform constants
 	uvec2 shapeRenderIndicesBuffer;
 	uvec2 shapeBufferAddresses;
     uvec2 pointLightBufferAddress;
+    uvec2 pointLightShadowBufferAddress;
 	uint renderMode;
 	uint pointLightIndex;
 } PushConstants;
@@ -28,7 +29,8 @@ void main()
         for(int i = 0; i < 3; ++i)
         {
             gs_out_pos = gl_in[i].gl_Position;
-            gl_Position = PointLightBuffer(PushConstants.pointLightBufferAddress).lights[PushConstants.pointLightIndex].shadowViewProj[face] * gs_out_pos;
+            uint shadowIndex = PointLightBuffer(PushConstants.pointLightBufferAddress).lights[PushConstants.pointLightIndex].shadowIndex;
+            gl_Position = PointLightShadowBuffer(PushConstants.pointLightShadowBufferAddress).lightShadows[shadowIndex].viewProj[face] * gs_out_pos;
             EmitVertex();
         }    
         EndPrimitive();

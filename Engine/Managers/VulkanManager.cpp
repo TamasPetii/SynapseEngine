@@ -250,7 +250,7 @@ void VulkanManager::InitSamplers()
 		config.magFilter = VK_FILTER_LINEAR;
 		config.minFilter = VK_FILTER_LINEAR;
 		config.addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		config.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+		config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
 		config.mipMapFilter = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 		config.anisotropyEnable = false;
 		config.maxLod = Vk::MAX_SAMPLER_MIMAP_LEVEL;
@@ -263,7 +263,7 @@ void VulkanManager::InitSamplers()
 		config.magFilter = VK_FILTER_NEAREST;
 		config.minFilter = VK_FILTER_NEAREST;
 		config.addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		config.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+		config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
 		config.mipMapFilter = VK_SAMPLER_MIPMAP_MODE_NEAREST;
 		config.anisotropyEnable = false;
 		config.maxLod = Vk::MAX_SAMPLER_MIMAP_LEVEL;
@@ -276,7 +276,7 @@ void VulkanManager::InitSamplers()
 		config.magFilter = VK_FILTER_LINEAR;
 		config.minFilter = VK_FILTER_LINEAR;
 		config.addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		config.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+		config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
 		config.mipMapFilter = VK_SAMPLER_MIPMAP_MODE_LINEAR;
 		config.anisotropyEnable = true;
 		config.maxLod = Vk::MAX_SAMPLER_MIMAP_LEVEL;
@@ -289,7 +289,7 @@ void VulkanManager::InitSamplers()
 		config.magFilter = VK_FILTER_NEAREST;
 		config.minFilter = VK_FILTER_NEAREST;
 		config.addressMode = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-		config.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
+		config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
 		config.mipMapFilter = VK_SAMPLER_MIPMAP_MODE_NEAREST;
 		config.anisotropyEnable = true;
 		config.maxLod = Vk::MAX_SAMPLER_MIMAP_LEVEL;
@@ -306,7 +306,7 @@ void VulkanManager::InitSamplers()
 		config.minLod = 0;
 		config.maxLod = 16.f;
 		config.reductionMode = VK_SAMPLER_REDUCTION_MODE_MAX;
-		config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK; //Irrelevant
+		config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
 		
 		RegisterSampler("MaxReduction", config);
 	}
@@ -324,6 +324,19 @@ void VulkanManager::InitSamplers()
 		samplerInfo.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 		samplerInfo.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
 		*/
+	}
+
+	{
+		Vk::ImageSamplerConfig config{};
+		config.magFilter = VK_FILTER_LINEAR;
+		config.minFilter = VK_FILTER_LINEAR;
+		config.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+		config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+		config.mipMapFilter = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+		config.anisotropyEnable = false;
+		config.maxLod = Vk::MAX_SAMPLER_MIMAP_LEVEL;
+
+		RegisterSampler("BloomSampler", config);
 	}
 }
 
@@ -348,7 +361,7 @@ void VulkanManager::InitFrameBuffers()
 	mainImageSpec.type = VK_IMAGE_TYPE_2D;
 	mainImageSpec.format = VK_FORMAT_R16G16B16A16_SFLOAT;
 	mainImageSpec.tiling = VK_IMAGE_TILING_OPTIMAL;
-	mainImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+	mainImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
 	mainImageSpec.aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
 	mainImageSpec.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
 	mainImageSpec.AddImageViewConfig("Default", VK_IMAGE_VIEW_TYPE_2D);
@@ -404,6 +417,16 @@ void VulkanManager::InitFrameBuffers()
 	depthPyramidImageSpec.calcualteMipLevelAutomaticly = true;
 	depthPyramidImageSpec.AddImageViewConfig("Default", VK_IMAGE_VIEW_TYPE_2D, 0, 0, std::nullopt, true);
 
+	Vk::ImageSpecification bloomImageSpec;
+	bloomImageSpec.type = VK_IMAGE_TYPE_2D;
+	bloomImageSpec.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+	bloomImageSpec.tiling = VK_IMAGE_TILING_OPTIMAL;
+	bloomImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+	bloomImageSpec.aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
+	bloomImageSpec.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	bloomImageSpec.calcualteMipLevelAutomaticly = true;
+	bloomImageSpec.AddImageViewConfig("Default", VK_IMAGE_VIEW_TYPE_2D, 0, 0, std::nullopt, true);
+
 	Vk::ImageSpecification depthImageSpec;
 	depthImageSpec.type = VK_IMAGE_TYPE_2D;
 	depthImageSpec.format = VK_FORMAT_D32_SFLOAT;
@@ -421,7 +444,8 @@ void VulkanManager::InitFrameBuffers()
 		.AddImageSpecification("Normal", 3, normalImageSpec)
 		.AddImageSpecification("Entity", 4, entityImageSpec)
 		.AddImageSpecification("DepthPyramid", 5, depthPyramidImageSpec)
-		.AddDepthSpecification(6, depthImageSpec);
+		.AddImageSpecification("Bloom", 6, bloomImageSpec)
+		.AddDepthSpecification(7, depthImageSpec);
 
 	for (uint32_t i = 0; i < GlobalConfig::FrameConfig::maxFramesInFlights; ++i)
 		RegisterFrameDependentFrameBuffer("Main", frameBufferBuilder.BuildDynamic(), i);
@@ -494,6 +518,15 @@ void VulkanManager::InitDescriptors()
 			.AddDescriptorLayoutImage("SrcImage", 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 		RegisterPushDescriptorSet("DepthPyramid", setBuilder.BuildPushDescriptorSet());
+	}
+
+	{
+		Vk::DescriptorSetBuilder setBuilder;
+		setBuilder
+			.AddDescriptorLayoutImage("SrcImage", 0, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_COMPUTE_BIT, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_IMAGE_LAYOUT_GENERAL)
+			.AddDescriptorLayoutImage("DstImage", 1, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_SHADER_STAGE_COMPUTE_BIT, VK_NULL_HANDLE, VK_NULL_HANDLE, VK_IMAGE_LAYOUT_GENERAL);
+
+		RegisterPushDescriptorSet("BloomPushSet", setBuilder.BuildPushDescriptorSet());
 	}
 }
 
@@ -582,6 +615,11 @@ void VulkanManager::InitShaderModuls()
 	RegisterShaderModule("ShadowPointLightVert", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/ShadowPointLight.vert", VK_SHADER_STAGE_VERTEX_BIT));
 	RegisterShaderModule("ShadowPointLightGeom", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/ShadowPointLight.geom", VK_SHADER_STAGE_GEOMETRY_BIT));
 	RegisterShaderModule("ShadowPointLightFrag", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/ShadowPointLight.frag", VK_SHADER_STAGE_FRAGMENT_BIT));
+
+	RegisterShaderModule("BloomPrefilterComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/BloomPrefilter.comp", VK_SHADER_STAGE_COMPUTE_BIT));
+	RegisterShaderModule("BloomDownsampleComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/BloomDownsample.comp", VK_SHADER_STAGE_COMPUTE_BIT));
+	RegisterShaderModule("BloomUpsampleComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/BloomUpsample.comp", VK_SHADER_STAGE_COMPUTE_BIT));
+	RegisterShaderModule("BloomCompositeComp", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/BloomComposite.comp", VK_SHADER_STAGE_COMPUTE_BIT));
 }
 
 void VulkanManager::InitGraphicsPipelines()
@@ -945,6 +983,54 @@ void VulkanManager::InitComputePipelines()
 			.AddDescriptorSetLayout(GetPushDescriptorSet("HizPushSetLinearDepth")->Layout());
 
 		RegisterComputePipeline("HizLinearDepth", pipelineBuilder.BuildDynamic());
+	}
+
+	{
+		uint32_t pushConsantSize = sizeof(BloomPrefilterPushConstants);
+
+		Vk::ComputePipelineBuilder pipelineBuilder;
+		pipelineBuilder
+			.AddShaderStage(shaderModuls["BloomPrefilterComp"])
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT)
+			.AddDescriptorSetLayout(GetPushDescriptorSet("BloomPushSet")->Layout());
+
+		RegisterComputePipeline("BloomPrefilter", pipelineBuilder.BuildDynamic());
+	}
+
+	{
+		uint32_t pushConsantSize = sizeof(BloomDownsamplePushConstants);
+
+		Vk::ComputePipelineBuilder pipelineBuilder;
+		pipelineBuilder
+			.AddShaderStage(shaderModuls["BloomDownsampleComp"])
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT)
+			.AddDescriptorSetLayout(GetPushDescriptorSet("BloomPushSet")->Layout());
+
+		RegisterComputePipeline("BloomDownsample", pipelineBuilder.BuildDynamic());
+	}
+
+	{
+		uint32_t pushConsantSize = sizeof(BloomUpsamplePushConstants);
+
+		Vk::ComputePipelineBuilder pipelineBuilder;
+		pipelineBuilder
+			.AddShaderStage(shaderModuls["BloomUpsampleComp"])
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT)
+			.AddDescriptorSetLayout(GetPushDescriptorSet("BloomPushSet")->Layout());
+
+		RegisterComputePipeline("BloomUpsample", pipelineBuilder.BuildDynamic());
+	}
+
+	{
+		uint32_t pushConsantSize = sizeof(BloomCompositePushConstants);
+
+		Vk::ComputePipelineBuilder pipelineBuilder;
+		pipelineBuilder
+			.AddShaderStage(shaderModuls["BloomCompositeComp"])
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_COMPUTE_BIT)
+			.AddDescriptorSetLayout(GetPushDescriptorSet("BloomPushSet")->Layout());
+
+		RegisterComputePipeline("BloomComposite", pipelineBuilder.BuildDynamic());
 	}
 }
 

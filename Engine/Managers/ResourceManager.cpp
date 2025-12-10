@@ -24,6 +24,7 @@ void ResourceManager::Initialize()
 	animationManager = std::make_shared<AnimationManager>();
 	pointLightBufferManager = std::make_shared<LightBufferManager<PointLightComponent>>();
 	spotLightBufferManager = std::make_shared<LightBufferManager<SpotLightComponent>>();
+	pointLightShadowBufferManager = std::make_shared<LightShadowBufferManager<PointLightShadowComponent>>(modelManager, geometryManager);
 }
 
 void ResourceManager::Cleanup()
@@ -38,4 +39,5 @@ void ResourceManager::Cleanup()
 	materialManager.reset();
 	pointLightBufferManager.reset();
 	spotLightBufferManager.reset();
+	pointLightShadowBufferManager.reset();
 }

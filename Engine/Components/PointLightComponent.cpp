@@ -1,9 +1,5 @@
 #include "PointLightComponent.h"
 
-PointLightShadow::PointLightShadow()
-{
-}
-
 PointLightComponent::PointLightComponent() :
 	position(glm::vec3(0.f)),
 	radius(1.f),
@@ -16,18 +12,24 @@ PointLightComponent::PointLightComponent() :
 	falloff = LightFalloff::QUADRATIC;
 }
 
-PointLightGPU::PointLightGPU(const PointLightComponent& pointLightComponent) :
+PointLightGPU::PointLightGPU(const PointLightComponent& pointLightComponent, uint32_t shadowDenseIndex) :
 	color(pointLightComponent.color),
 	strength(pointLightComponent.strength),
 	position(pointLightComponent.position),
 	shininess(pointLightComponent.shininess),
 	radius(pointLightComponent.radius),
 	weakenDistance(pointLightComponent.weakenDistance),
-	bitflag(0)
+	bitflag(0),
+	shadowDenseIndex(shadowDenseIndex)
 {
-	for (int i = 0; i < 6; ++i)
-		shadowViewProj[i] = pointLightComponent.shadow.viewProj[i];
-
-	bitflag |= (pointLightComponent.shadow.use ? 1u : 0u) << 0; // Bit 0 = Simulate Shadow?
+	bitflag |= (pointLightComponent.useShadow ? 1u : 0u) << 0; // Bit 0 = Simulate Shadow?
 	bitflag |= (pointLightComponent.falloff == LightFalloff::QUADRATIC ? 1u : 0u) << 1; // Bit 1 = Quadratic/Linear
+}
+
+PointLightShadowGPU::PointLightShadowGPU(const PointLightShadowComponent& shadowComponent) :
+	nearPlane(shadowComponent.nearPlane),
+	farPlane(shadowComponent.farPlane),
+	shadowMapSize(glm::vec2(static_cast<float>(shadowComponent.textureSize)))
+{
+	std::memcpy(viewProj, shadowComponent.viewProj, sizeof(viewProj));
 }

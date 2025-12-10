@@ -1,0 +1,29 @@
+#version 460
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout(set = 0, binding = 0) uniform sampler2D bloomImage;
+layout(set = 0, binding = 1, rgba16f) uniform image2D mainImage;
+
+layout(push_constant) uniform constants
+{
+	float exposure;
+	float bloomStrength;
+} PushConstants;
+
+void main()
+{
+	ivec2 imgSize = imageSize(mainImage);
+	ivec2 id = ivec2(gl_GlobalInvocationID.xy);
+	if (id.x >= imgSize.x || id.y >= imgSize.y) return;
+
+	vec2 uv = (vec2(id) + vec2(0.5)) / vec2(imgSize);
+
+	vec3 sceneColor = imageLoad(mainImage, id).rgb;
+	vec3 bloomColor = texture(bloomImage, uv).rgb;
+
+	vec3 finalColor = sceneColor + (bloomColor * PushConstants.bloomStrength);
+	finalColor = vec3(1.0) - exp(-finalColor * PushConstants.exposure);
+	finalColor = pow(finalColor, vec3(1.0 / 2.2));
+
+	imageStore(mainImage, id, vec4(finalColor, 1.0));
+}

@@ -14,12 +14,14 @@ layout( push_constant ) uniform constants
 	uvec2 shapeRenderIndicesBuffer;
 	uvec2 shapeBufferAddresses;
     uvec2 pointLightBufferAddress;
+	uvec2 pointLightShadowBufferAddress;
 	uint renderMode;
 	uint pointLightIndex;
 } PushConstants;
 
 void main()
 {
+	//Todo: Shadow near/far plane with shadow buffer!
     float lightDistance = length(fs_in_pos.xyz - PointLightBuffer(PushConstants.pointLightBufferAddress).lights[PushConstants.pointLightIndex].position); 
     float lightDistanceLinearNorm = lightDistance / PointLightBuffer(PushConstants.pointLightBufferAddress).lights[PushConstants.pointLightIndex].radius;
     gl_FragDepth = lightDistanceLinearNorm;

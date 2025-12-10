@@ -8,9 +8,12 @@
 #include "AnimationManager.h"
 #include "MaterialManager.h"
 #include "LightBufferManager.h"
+#include "LightShadowBufferManager.h"
 
 class PointLightComponent;
+class PointLightShadowComponent;
 class SpotLightComponent;
+class SpotLightShadowComponent;
 
 class ENGINE_API ResourceManager
 {
@@ -29,6 +32,7 @@ public:
 	auto GetAnimationManager() { return animationManager; }
 	auto GetMaterialManager() { return materialManager; }
 	auto GetPointLightBufferManager() { return pointLightBufferManager; }
+	auto GetPointLightShadowBufferManager() { return pointLightShadowBufferManager; }
 	auto GetSpotLightBufferManager() { return spotLightBufferManager; }
 private:
 	std::shared_ptr<ModelManager> modelManager;
@@ -40,6 +44,7 @@ private:
 	std::shared_ptr<AnimationManager> animationManager;
 	std::shared_ptr<MaterialManager> materialManager;
 	std::shared_ptr<LightBufferManager<PointLightComponent>> pointLightBufferManager;
+	std::shared_ptr<LightShadowBufferManager<PointLightShadowComponent>> pointLightShadowBufferManager;
 	std::shared_ptr<LightBufferManager<SpotLightComponent>> spotLightBufferManager;
 };
 

@@ -13,19 +13,19 @@ void SpotLightSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_p
 		[&](const Entity& entity) -> void {
 			auto& spotLightComponent = spotLightPool->GetData(entity);
 
+				/*
 			[[unlikely]]
 			if (spotLightPool->IsBitSet<REGENERATE_BIT>(entity))
 			{
-				spotLightComponent.shadow.version++;
+				spotLightComponent.version++;
 				spotLightPool->ResetBit<REGENERATE_BIT>(entity);
 			}
 
 			[[unlikely]]
-			if (spotLightComponent.shadow.frameBuffers[frameIndex].version != spotLightComponent.shadow.version)
+			if (spotLightComponent.shadow.frameBuffers[frameIndex].version != spotLightComponent.version)
 			{
-				spotLightComponent.shadow.frameBuffers[frameIndex].version = spotLightComponent.shadow.version;
+				spotLightComponent.shadow.frameBuffers[frameIndex].version = spotLightComponent.version;
 
-				/*
 				Vk::ImageSpecification depthImageSpec;
 				depthImageSpec.type = VK_IMAGE_TYPE_2D;
 				depthImageSpec.viewType = VK_IMAGE_VIEW_TYPE_CUBE;
@@ -42,10 +42,10 @@ void SpotLightSystem::OnUpdate(std::shared_ptr<Registry> registry, std::shared_p
 					.AddDepthSpecification(0, depthImageSpec);
 
 				pointLightComponent.shadow.frameBuffers[frameIndex].frameBuffer = frameBufferBuilder.BuildDynamic();
-				*/
 
 				//TODO: DYNAMIC DESCRIPTOR ARRAY UPDATE
 			}
+				*/
 		}
 	);
 

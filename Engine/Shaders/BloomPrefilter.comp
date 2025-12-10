@@ -1,0 +1,37 @@
+#version 460
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout(set = 0, binding = 0) uniform sampler2D srcImage; // Main Image
+layout(set = 0, binding = 1, rgba16f) uniform writeonly image2D dstImage; // Bloom Mip 0
+
+layout(push_constant) uniform constants
+{
+	vec2 texelSize;
+	float threshold;
+	float knee;
+} PushConstants;
+
+vec3 Prefilter(vec3 color) 
+{
+    float brightness = max(color.r, max(color.g, color.b));
+    float soft = brightness - PushConstants.threshold + PushConstants.knee;
+    soft = clamp(soft, 0.0, 2.0 * PushConstants.knee);
+    soft = soft * soft / (4.0 * PushConstants.knee + 0.00001);
+    float contribution = max(soft, brightness - PushConstants.threshold);
+    contribution /= max(brightness, 0.00001);
+    return color * contribution;
+}
+
+void main()
+{
+	ivec2 imgSize = imageSize(dstImage);
+	ivec2 id = ivec2(gl_GlobalInvocationID.xy);
+	if (id.x >= imgSize.x || id.y >= imgSize.y) return;
+
+	vec2 uv = (vec2(id) + vec2(0.5)) * PushConstants.texelSize;
+	vec3 color = texture(srcImage, uv).rgb;
+	
+	color = Prefilter(color);
+
+	imageStore(dstImage, id, vec4(color, 1.0));
+}

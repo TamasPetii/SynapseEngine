@@ -192,3 +192,23 @@ struct ProjectedDebugPushConstants
 	VkDeviceAddress colliderDebugBuffer;
 	VkDeviceAddress instanceIndexBuffer;
 };
+
+struct BloomPrefilterPushConstants {
+	glm::vec2 texelSize;
+	float threshold;
+	float knee;
+};
+
+struct BloomDownsamplePushConstants {
+	glm::vec2 texelSize;
+};
+
+struct BloomUpsamplePushConstants {
+	glm::vec2 texelSize;
+	float filterRadius;
+};
+
+struct BloomCompositePushConstants {
+	float exposure;
+	float bloomStrength;
+};

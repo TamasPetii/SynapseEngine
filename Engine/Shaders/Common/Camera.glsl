@@ -7,9 +7,12 @@ struct Camera
 	mat4 viewInv;
 	mat4 proj;
 	mat4 projInv;
+	mat4 projVulkan;
+	mat4 projVulkanInv;
 	mat4 viewProj;
 	mat4 viewProjInv;
 	mat4 viewProjVulkan;
+	mat4 viewProjVulkanInv;
 	vec4 eye; //xyz: position, w = padding
 	vec4 params; // x: near, y: far, z: fov, w: aspect
 };

@@ -12,17 +12,17 @@ void DirectionLightSystem::OnUpdate(std::shared_ptr<Registry> registry, std::sha
 		[&](const Entity& entity) -> void {
 			auto& directionLightComponent = directionLightPool->GetData(entity);
 
+				/*
 			[[unlikely]]
 			if (directionLightPool->IsBitSet<REGENERATE_BIT>(entity))
 			{
-				directionLightComponent.shadow.version++;
+				//directionLightComponent.shadow.version++;
 				directionLightPool->ResetBit<REGENERATE_BIT>(entity);
 			}
 
 			[[unlikely]]
 			if (directionLightComponent.shadow.frameBuffers[frameIndex].version != directionLightComponent.shadow.version)
 			{
-				/*
 
 				directionLightComponent.shadow.frameBuffers[frameIndex].version = directionLightComponent.shadow.version;
 
@@ -42,10 +42,10 @@ void DirectionLightSystem::OnUpdate(std::shared_ptr<Registry> registry, std::sha
 
 				directionLightComponent.shadow.frameBuffers[frameIndex].frameBuffer = frameBufferBuilder.BuildDynamic();
 
-				*/
 
 				//TODO: DYNAMIC DESCRIPTOR ARRAY UPDATE
 			}
+				*/
 		}
 	);
 

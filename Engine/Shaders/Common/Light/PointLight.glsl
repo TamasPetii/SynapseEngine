@@ -13,12 +13,22 @@ struct PointLight {
 	float radius;
 	float weakenDistance;
 	uint bitflag;
-	uint padding;
-	mat4 shadowViewProj[6]; //Todo: Optimize by storing only when shadow bit is set, in different dedicated buffer
+	uint shadowIndex;
+}; 
+
+struct PointLightShadow {
+	float nearPlane;
+	float farPlane;
+	vec2 texSize;
+	mat4 viewProj[6];
 }; 
 
 layout(buffer_reference, std430) readonly buffer PointLightBuffer { 
 	PointLight lights[];
+};
+
+layout(buffer_reference, std430) readonly buffer PointLightShadowBuffer { 
+	PointLightShadow lightShadows[];
 };
 
 //layout(set = 1, binding = 1) uniform texture2D u_pointLightShadowTextures[];

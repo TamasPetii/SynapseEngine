@@ -29,6 +29,7 @@ layout( push_constant ) uniform constants
 	uvec2 shapeRenderIndicesBuffer;
 	uvec2 shapeBufferAddresses;
 	uvec2 pointLightBufferAddress;
+	uvec2 pointLightShadowBufferAddress;
 	uint renderMode;
 	uint pointLightIndex;
 } PushConstants;

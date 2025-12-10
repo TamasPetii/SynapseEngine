@@ -1,18 +1,14 @@
 #version 460
-
-//Todo: 16 localx??
 layout (local_size_x = 64, local_size_y = 64, local_size_z = 1) in;
 
 #include "Common/Camera.glsl"
 #include "Common/Count.glsl"
 #include "Common/Render/InstanceIndex.glsl"
 #include "Common/Render/RenderIndices.glsl"
-
 #include "Common/Render/DrawIndirect.glsl"
 #include "Common/Render/DefaultCollider.glsl"
 #include "Common/Light/PointLight.glsl"
 #include "Common/Light/LightCommon.glsl"
-
 #include "Common/Culling/Culling.glsl"
 
 layout(push_constant) uniform constants
@@ -26,19 +22,13 @@ layout(push_constant) uniform constants
 	uvec2 pointLightShadowInstanceIndexBuffer;
 	uvec2 pointLightShadowIndexMapBuffer;
 
-	//These are an NxM buffer matrix of instance indices! N shadow point light + M loaded (model/shape)
-	//These are an NxM buffer matrix of indirect draw commands! N shadow point light + M loaded (model/shape)
-
 	uvec2 modelRenderIndicesBuffer;
-	uvec2 pointLightShadowModelInstanceBufferAddresses;
-	uvec2 pointLightShadowModelIndirectDrawBufferAddresses;
+	uvec2 pointLightShadowModelInstanceBufferAddresses; 
+	uvec2 pointLightShadowModelIndirectDrawBufferAddresses; 
 
 	uvec2 shapeRenderIndicesBuffer;
 	uvec2 pointLightShadowShapeInstanceBufferAddresses;
 	uvec2 pointLightShadowShapeIndirectDrawBufferAddresses;
-
-	//Todo: Kell egy point light index -> Shadow index leképezés! 
-	//Ehhez is külön index buffer?
 } PushConstants;
 
 void main()
@@ -72,28 +62,28 @@ void main()
 
 	if(TestAabbVsSphere(objectAabbMin, objectAabbMax, sphereOrigin, sphereRadius))
 	{
-		uint pointLightShadowIndex = lightIndex; //Todo: Map point light index to shadow index!
+		uint pointLightShadowIndex = pointLightBuffer.lights[pointLightIndex].shadowIndex;
 		bool isModel = (defaultColliderBuffer.colliders[colliderIndex].bitflag & COLLIDER_MODEL_BIT) != 0u;
 
 		if(isModel)
 		{
-			uvec2 instanceIndexBufferAddress = InstanceIndexAddressBuffer(PushConstants.pointLightShadowModelInstanceBufferAddresses).deviceAddresses[pointLightShadowIndex];
 			uvec2 drawIndirectBufferAddress = InstanceIndexAddressBuffer(PushConstants.pointLightShadowModelIndirectDrawBufferAddresses).deviceAddresses[pointLightShadowIndex];
-
+            uvec2 middleLevelBufferAddress = InstanceIndexAddressBuffer(PushConstants.pointLightShadowModelInstanceBufferAddresses).deviceAddresses[pointLightShadowIndex];
 			uint modelIndex = ModelRenderIndicesBuffer(PushConstants.modelRenderIndicesBuffer).indices[objectIndex].modelIndex;			
-			
+            uvec2 finalInstanceBufferAddress = InstanceIndexAddressBuffer(middleLevelBufferAddress).deviceAddresses[modelIndex];
+
 			uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(drawIndirectBufferAddress).commands[modelIndex].instanceCount, 1);		
-			InstanceIndexBuffer(instanceIndexBufferAddress).indices[instanceIndex] = objectIndex;
+			InstanceIndexBuffer(finalInstanceBufferAddress).indices[instanceIndex] = objectIndex;
 		}
 		else
 		{
-			uvec2 instanceIndexBufferAddress = InstanceIndexAddressBuffer(PushConstants.pointLightShadowShapeInstanceBufferAddresses).deviceAddresses[pointLightShadowIndex];
 			uvec2 drawIndirectBufferAddress = InstanceIndexAddressBuffer(PushConstants.pointLightShadowShapeIndirectDrawBufferAddresses).deviceAddresses[pointLightShadowIndex];
-
+            uvec2 middleLevelBufferAddress = InstanceIndexAddressBuffer(PushConstants.pointLightShadowShapeInstanceBufferAddresses).deviceAddresses[pointLightShadowIndex];
 			uint shapeIndex = ShapeRenderIndicesBuffer(PushConstants.shapeRenderIndicesBuffer).indices[objectIndex].shapeIndex;			
+            uvec2 finalInstanceBufferAddress = InstanceIndexAddressBuffer(middleLevelBufferAddress).deviceAddresses[shapeIndex];
 
 			uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(drawIndirectBufferAddress).commands[shapeIndex].instanceCount, 1);		
-			InstanceIndexBuffer(instanceIndexBufferAddress).indices[instanceIndex] = objectIndex;
+			InstanceIndexBuffer(finalInstanceBufferAddress).indices[instanceIndex] = objectIndex;
 		}
 	}
 }

@@ -164,6 +164,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
+    <ClInclude Include="Gui\Windows\GraphicsDebugWindow.h" />
     <ClInclude Include="Gui\ImGui\GraphEditor.h" />
     <ClInclude Include="Gui\ImGui\ImCurveEdit.h" />
     <ClInclude Include="Gui\ImGui\ImGradient.h" />
@@ -189,6 +190,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="Gui\Windows\GraphicsDebugWindow.cpp" />
     <ClCompile Include="Gui\ImGui\GraphEditor.cpp" />
     <ClCompile Include="Gui\ImGui\ImCurveEdit.cpp" />
     <ClCompile Include="Gui\ImGui\ImGradient.cpp" />

@@ -384,9 +384,6 @@
     <ClInclude Include="Components\BaseComponents\FrustumCullable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Systems\PointLightSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Components\SpotLightComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -436,6 +433,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Renderers\DepthHierarchyBuilder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Managers\LightShadowBufferManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\PointLightSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Systems\PointLightShadowSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Renderers\BloomRenderer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -782,9 +791,6 @@
     <ClCompile Include="Components\BaseComponents\FrustumCullable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Systems\PointLightSystem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Components\SpotLightComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -828,6 +834,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Renderers\DepthHierarchyBuilder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Managers\LightShadowBufferManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\PointLightSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Systems\PointLightShadowSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Renderers\BloomRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -904,5 +922,9 @@
     <None Include="Shaders\Common\Render\ColliderDebug.glsl" />
     <None Include="Shaders\ProjectedColliderDebug.vert" />
     <None Include="Shaders\ProjectedColliderDebug.frag" />
+    <None Include="Shaders\BloomDownsample.comp" />
+    <None Include="Shaders\BloomUpsample.comp" />
+    <None Include="Shaders\BloomPrefilter.comp" />
+    <None Include="Shaders\BloomComposite.comp" />
   </ItemGroup>
 </Project>

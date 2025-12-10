@@ -26,5 +26,5 @@ SpotLightGPU::SpotLightGPU(const SpotLightComponent& spotLightComponent) :
 	aabbOrigin(spotLightComponent.aabbOrigin),
 	bitflag(0)
 {
-	bitflag |= (spotLightComponent.shadow.use ? 1u : 0u) << 0; // Bit 0 = Simulate Shadow?
+	bitflag |= (spotLightComponent.useShadow ? 1u : 0u) << 0; // Bit 0 = Simulate Shadow?
 }

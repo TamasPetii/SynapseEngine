@@ -165,11 +165,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Render\Renderers\BloomRenderer.h" />
+    <ClInclude Include="Managers\LightShadowBufferManager.h" />
+    <ClInclude Include="Systems\PointLightShadowSystem.h" />
     <ClInclude Include="Render\Renderers\DepthHierarchyBuilder.h" />
     <ClInclude Include="Managers\LightBufferManager.h" />
     <ClInclude Include="Managers\BaseManagers\DrawIndirectManager.h" />
     <ClInclude Include="Managers\BaseManagers\DynamicSizeBuffer.h" />
     <ClInclude Include="Render\Renderers\ObjectCuller.h" />
+    <ClInclude Include="Systems\PointLightSystem.h" />
     <ClInclude Include="Utils\BitsetFlagged.h" />
     <ClInclude Include="Utils\BitsetFlag.h" />
     <ClInclude Include="Utils\BufferArrayIndexed.h" />
@@ -185,7 +189,6 @@
     <ClInclude Include="Components\SpotLightComponent.h" />
     <ClInclude Include="Components\BaseComponents\Light.h" />
     <ClInclude Include="Systems\SpotLightSystem.h" />
-    <ClInclude Include="Systems\PointLightSystem.h" />
     <ClInclude Include="Systems\DirectionLightSystem.h" />
     <ClInclude Include="Systems\RenderIndicesSystem.h" />
     <ClInclude Include="Managers\BaseManagers\BatchedGpuUploadedManager.h" />
@@ -308,10 +311,14 @@
     <ClInclude Include="Vulkan\VulkanMutex.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Render\Renderers\BloomRenderer.cpp" />
+    <ClCompile Include="Managers\LightShadowBufferManager.cpp" />
+    <ClCompile Include="Systems\PointLightShadowSystem.cpp" />
     <ClCompile Include="Render\Renderers\DepthHierarchyBuilder.cpp" />
     <ClCompile Include="Managers\LightBufferManager.cpp" />
     <ClCompile Include="Managers\BaseManagers\DrawIndirectManager.cpp" />
     <ClCompile Include="Render\Renderers\ObjectCuller.cpp" />
+    <ClCompile Include="Systems\PointLightSystem.cpp" />
     <ClCompile Include="Utils\BitsetFlagged.cpp" />
     <ClCompile Include="Utils\BufferArrayIndexed.cpp" />
     <ClCompile Include="Managers\MaterialManager.cpp" />
@@ -326,7 +333,6 @@
     <ClCompile Include="Components\SpotLightComponent.cpp" />
     <ClCompile Include="Components\BaseComponents\Light.cpp" />
     <ClCompile Include="Systems\SpotLightSystem.cpp" />
-    <ClCompile Include="Systems\PointLightSystem.cpp" />
     <ClCompile Include="Systems\DirectionLightSystem.cpp" />
     <ClCompile Include="Systems\RenderIndicesSystem.cpp" />
     <ClCompile Include="Managers\BaseManagers\BatchedGpuUploadedManager.cpp" />
@@ -447,6 +453,10 @@
     <None Include="Shaders\Billboard.geom" />
     <None Include="Shaders\BillboardInstanced.vert" />
     <None Include="Shaders\Billboard.vert" />
+    <None Include="Shaders\BloomComposite.comp" />
+    <None Include="Shaders\BloomDownsample.comp" />
+    <None Include="Shaders\BloomPrefilter.comp" />
+    <None Include="Shaders\BloomUpsample.comp" />
     <None Include="Shaders\Common\Render\ColliderDebug.glsl" />
     <None Include="Shaders\CullingCameraFrustum.comp" />
     <None Include="Shaders\CullingPointLightShadowObjects.comp" />

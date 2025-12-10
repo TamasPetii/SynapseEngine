@@ -7,6 +7,7 @@
 #include "Engine/Vulkan/VulkanMutex.h"
 #include "Renderers/ObjectCuller.h"
 #include "Renderers/DepthHierarchyBuilder.h"
+#include "Renderers/BloomRenderer.h"
 
 RenderManager::RenderManager(std::shared_ptr<ResourceManager> resourceManager) : 
 	resourceManager(resourceManager)
@@ -55,10 +56,12 @@ void RenderManager::Render(std::shared_ptr<Registry> registry, uint32_t frameInd
 	renderers["ObjectCuller"]->Render(commandBuffer, registry, resourceManager, frameIndex);
 	renderers["GeometryRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
 	renderers["DeferredRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
-	renderers["WireframeRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
-	renderers["BillboardRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
+	renderers["BloomRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
 
 	DepthHierarchyBuilder::Build(commandBuffer, registry, resourceManager, frameIndex);
+
+	renderers["WireframeRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
+	renderers["BillboardRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
 
 	GuiRenderer::Render(commandBuffer, registry, resourceManager, frameIndex, imageIndex, guiRenderFunction);
 
@@ -151,6 +154,9 @@ void RenderManager::InitRenderers()
 
 	renderers["ObjectCuller"] = std::make_shared<ObjectCuller>();
 	renderers["ObjectCuller"]->Initialize(resourceManager);
+
+	renderers["BloomRenderer"] = std::make_shared<BloomRenderer>();
+	renderers["BloomRenderer"]->Initialize(resourceManager);
 }
 
 void RenderManager::InitCommandPool()

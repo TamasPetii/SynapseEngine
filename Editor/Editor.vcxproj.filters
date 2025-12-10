@@ -84,6 +84,9 @@
     <ClInclude Include="Gui\Windows\Window.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Gui\Windows\GraphicsDebugWindow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp">
@@ -150,6 +153,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Gui\Windows\Window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Gui\Windows\GraphicsDebugWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

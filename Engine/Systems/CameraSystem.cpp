@@ -119,7 +119,10 @@ void CameraSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared
 				vulkanProj[1][1] *= -1;
 
 				CameraComponentGPU cameraGPU{ component };
+				cameraGPU.projVulkan = vulkanProj;
+				cameraGPU.projVulkanInv = glm::inverse(cameraGPU.projVulkan);
 				cameraGPU.viewProjVulkan = vulkanProj * component.view;
+				cameraGPU.viewProjVulkanInv = glm::inverse(cameraGPU.viewProjVulkan);
 
 				bufferHandler[cameraIndex] = cameraGPU;
 			}

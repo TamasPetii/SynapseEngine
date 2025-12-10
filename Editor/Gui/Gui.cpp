@@ -5,6 +5,7 @@
 #include "Editor/Gui/Windows/GlobalSettingsWindow.h"
 #include "Editor/Gui/Windows/BenchmarkWindow.h"
 #include "Editor/Gui/Windows/ViewportWindow.h"
+#include "Editor/Gui/Windows/GraphicsDebugWindow.h"
 
 Gui::Gui(GLFWwindow* window)
 {
@@ -83,6 +84,7 @@ void Gui::Initialize(GLFWwindow* window)
 	windows["Component"] = std::make_shared<ComponentWindow>();
 	windows["GlobalSettings"] = std::make_shared<GlobalSettingsWindow>();
 	windows["BenchmarkWindow"] = std::make_shared<BenchmarkWindow>();
+	windows["GraphicsDebugWIndow"] = std::make_shared<GraphicsDebugWindow>();
 }
 
 void Gui::Cleanup()
@@ -113,6 +115,7 @@ void Gui::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> regist
 	windows["Component"]->Render(registry, resourceManager, textureSet, frameIndex);
 	windows["GlobalSettings"]->Render(registry, resourceManager, textureSet, frameIndex);
 	windows["BenchmarkWindow"]->Render(registry, resourceManager, textureSet, frameIndex);
+	windows["GraphicsDebugWIndow"]->Render(registry, resourceManager, textureSet, frameIndex);
 
 	ImGui::Render();
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);

@@ -22,9 +22,9 @@ bool ProjectSphere(CameraBuffer cameraBuffer, uint cameraIndex, vec3 center, flo
 
     vec4 tempAABB = vec4(
         -(minx.x / minx.y * P00), 
-        -(miny.x / miny.y * P11),
+        (miny.x / miny.y * P11),
         -(maxx.x / maxx.y * P00), 
-        -(maxy.x / maxy.y * P11)
+        (maxy.x / maxy.y * P11)
     );
 
     //vec4 tempAABB = vec4(minx.x / minx.y * P00, miny.x / miny.y * P11, maxx.x / maxx.y * P00, maxy.x / maxy.y * P11);
