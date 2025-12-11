@@ -281,3 +281,7 @@ struct SpotLightShadowPushConstants {
 	uint32_t renderMode;
 	uint32_t spotLightIndex;
 };
+
+struct DeferredEmissiveAoPushConstants {
+	float emissiveStrength;
+};

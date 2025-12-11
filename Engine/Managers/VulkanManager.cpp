@@ -397,6 +397,16 @@ void VulkanManager::InitFrameBuffers()
 	normalImageSpec.AddImageViewConfig("Normal", VK_IMAGE_VIEW_TYPE_2D, 0, 1, std::make_optional(VkComponentMapping{ .r = VK_COMPONENT_SWIZZLE_R, .g = VK_COMPONENT_SWIZZLE_G, .b = VK_COMPONENT_SWIZZLE_B, .a = VK_COMPONENT_SWIZZLE_ONE }));
 	normalImageSpec.AddImageViewConfig("Roughness", VK_IMAGE_VIEW_TYPE_2D, 0, 1, std::make_optional(VkComponentMapping{ .r = VK_COMPONENT_SWIZZLE_A, .g = VK_COMPONENT_SWIZZLE_A, .b = VK_COMPONENT_SWIZZLE_A, .a = VK_COMPONENT_SWIZZLE_ONE }));
 
+	Vk::ImageSpecification emissiveAoImageSpec;
+	emissiveAoImageSpec.type = VK_IMAGE_TYPE_2D;
+	emissiveAoImageSpec.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+	emissiveAoImageSpec.tiling = VK_IMAGE_TILING_OPTIMAL;
+	emissiveAoImageSpec.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+	emissiveAoImageSpec.aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
+	emissiveAoImageSpec.memoryProperties = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
+	emissiveAoImageSpec.AddImageViewConfig("Default", VK_IMAGE_VIEW_TYPE_2D);
+	emissiveAoImageSpec.AddImageViewConfig("Emissive", VK_IMAGE_VIEW_TYPE_2D, 0, 1, std::make_optional(VkComponentMapping{ .r = VK_COMPONENT_SWIZZLE_R, .g = VK_COMPONENT_SWIZZLE_G, .b = VK_COMPONENT_SWIZZLE_B, .a = VK_COMPONENT_SWIZZLE_ONE }));
+	emissiveAoImageSpec.AddImageViewConfig("AmbientOcclusion", VK_IMAGE_VIEW_TYPE_2D, 0, 1, std::make_optional(VkComponentMapping{ .r = VK_COMPONENT_SWIZZLE_A, .g = VK_COMPONENT_SWIZZLE_A, .b = VK_COMPONENT_SWIZZLE_A, .a = VK_COMPONENT_SWIZZLE_ONE }));
 
 	Vk::ImageSpecification entityImageSpec;
 	entityImageSpec.type = VK_IMAGE_TYPE_2D;
@@ -442,10 +452,11 @@ void VulkanManager::InitFrameBuffers()
 		.AddImageSpecification("Position", 1, positionImageSpec)
 		.AddImageSpecification("Color", 2, colorImageSpec)
 		.AddImageSpecification("Normal", 3, normalImageSpec)
-		.AddImageSpecification("Entity", 4, entityImageSpec)
-		.AddImageSpecification("DepthPyramid", 5, depthPyramidImageSpec)
-		.AddImageSpecification("Bloom", 6, bloomImageSpec)
-		.AddDepthSpecification(7, depthImageSpec);
+		.AddImageSpecification("Emissive", 4, emissiveAoImageSpec)
+		.AddImageSpecification("Entity", 5, entityImageSpec)
+		.AddImageSpecification("DepthPyramid", 6, depthPyramidImageSpec)
+		.AddImageSpecification("Bloom", 7, bloomImageSpec)
+		.AddDepthSpecification(8, depthImageSpec);
 
 	for (uint32_t i = 0; i < GlobalConfig::FrameConfig::maxFramesInFlights; ++i)
 		RegisterFrameDependentFrameBuffer("Main", frameBufferBuilder.BuildDynamic(), i);
@@ -541,7 +552,9 @@ void VulkanManager::InitMainFramebufferDescriptorSet(uint32_t frameIndex)
 		.AddDescriptorLayoutImage("FboPosition", 1, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, frameBuffer->GetImage("Position")->GetImageView("Default"), GetSampler("Nearest")->Value(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
 		.AddDescriptorLayoutImage("FboColor", 2, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, frameBuffer->GetImage("Color")->GetImageView("Default"), GetSampler("Nearest")->Value(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
 		.AddDescriptorLayoutImage("FboNormal", 3, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, frameBuffer->GetImage("Normal")->GetImageView("Default"), GetSampler("Nearest")->Value(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
-		.AddDescriptorLayoutImage("FboEntity", 4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, frameBuffer->GetImage("Entity")->GetImageView("Default"), GetSampler("Nearest")->Value(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		.AddDescriptorLayoutImage("FboEntity", 4, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, frameBuffer->GetImage("Entity")->GetImageView("Default"), GetSampler("Nearest")->Value(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL)
+		.AddDescriptorLayoutImage("FboEmissive", 5, VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, frameBuffer->GetImage("Emissive")->GetImageView("Default"), GetSampler("Nearest")->Value(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+		;
 
 	RegisterFrameDependentDescriptorSet("MainFrameBuffer", setBuilder.BuildDescriptorSet(GetDescriptorPool("Main")->Value()), frameIndex);
 }
@@ -572,6 +585,10 @@ void VulkanManager::InitShaderModuls()
 	//Deferred Spot Light Shaders
 	RegisterShaderModule("DeferredSpotLightVert", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/DeferredSpotLight.vert", VK_SHADER_STAGE_VERTEX_BIT));
 	RegisterShaderModule("DeferredSpotLightFrag", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/DeferredSpotLight.frag", VK_SHADER_STAGE_FRAGMENT_BIT));
+
+	//Deferred Emissive Amebient Occlusuion
+	RegisterShaderModule("DeferredEmissiveAoVert", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/DeferredEmissiveAo.vert", VK_SHADER_STAGE_VERTEX_BIT));
+	RegisterShaderModule("DeferredEmissiveAoFrag", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/DeferredEmissiveAo.frag", VK_SHADER_STAGE_FRAGMENT_BIT));
 
 	//Bounding Volume Wireframe Shaders
 	RegisterShaderModule("WireframeVert", std::make_shared<Vk::ShaderModule>("../Engine/Shaders/Wireframe.vert", VK_SHADER_STAGE_VERTEX_BIT));
@@ -660,10 +677,12 @@ void VulkanManager::InitGraphicsPipelines()
 			.AddColorBlendAttachment(VK_FALSE)
 			.AddColorBlendAttachment(VK_FALSE)
 			.AddColorBlendAttachment(VK_FALSE)
+			.AddColorBlendAttachment(VK_FALSE)
 			.SetColorAttachmentFormats(VK_FORMAT_R32G32B32A32_SFLOAT, 0)
 			.SetColorAttachmentFormats(VK_FORMAT_R16G16B16A16_SFLOAT, 1)
 			.SetColorAttachmentFormats(VK_FORMAT_R16G16B16A16_SFLOAT, 2)
 			.SetColorAttachmentFormats(VK_FORMAT_R32_UINT, 3)
+			.SetColorAttachmentFormats(VK_FORMAT_R16G16B16A16_SFLOAT, 4)
 			.SetDepthAttachmentFormat(VK_FORMAT_D32_SFLOAT)
 			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
 			.AddDescriptorSetLayout(GetDescriptorSet("LoadedImages")->Layout());
@@ -691,15 +710,41 @@ void VulkanManager::InitGraphicsPipelines()
 			.AddColorBlendAttachment(VK_FALSE)
 			.AddColorBlendAttachment(VK_FALSE)
 			.AddColorBlendAttachment(VK_FALSE)
+			.AddColorBlendAttachment(VK_FALSE)
 			.SetColorAttachmentFormats(VK_FORMAT_R32G32B32A32_SFLOAT, 0)
 			.SetColorAttachmentFormats(VK_FORMAT_R16G16B16A16_SFLOAT, 1)
 			.SetColorAttachmentFormats(VK_FORMAT_R16G16B16A16_SFLOAT, 2)
 			.SetColorAttachmentFormats(VK_FORMAT_R32_UINT, 3)
+			.SetColorAttachmentFormats(VK_FORMAT_R16G16B16A16_SFLOAT, 4)
 			.SetDepthAttachmentFormat(VK_FORMAT_D32_SFLOAT)
 			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT)
 			.AddDescriptorSetLayout(GetDescriptorSet("LoadedImages")->Layout());
 
 		RegisterGraphicsPipeline("DeferredPreIndirect", pipelineBuilder.BuildDynamic());
+	}
+
+	{
+		uint32_t pushConsantSize = sizeof(DeferredEmissiveAoPushConstants);
+
+		Vk::GraphicsPipelineBuilder pipelineBuilder;
+		pipelineBuilder
+			.ResetToDefault()
+			.AddShaderStage(shaderModuls["DeferredEmissiveAoVert"])
+			.AddShaderStage(shaderModuls["DeferredEmissiveAoFrag"])
+			.AddDynamicState(VK_DYNAMIC_STATE_VIEWPORT)
+			.AddDynamicState(VK_DYNAMIC_STATE_SCISSOR)
+			.SetVertexInput({}, {})
+			.SetPrimitiveTopology(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_STRIP)
+			.SetRasterization(VK_POLYGON_MODE_FILL, VK_CULL_MODE_BACK_BIT, VK_FRONT_FACE_CLOCKWISE)
+			.SetMultisampling(VK_SAMPLE_COUNT_1_BIT)
+			.SetDepthStencil(VK_FALSE, VK_FALSE, VK_COMPARE_OP_LESS)
+			.SetColorBlend(VK_FALSE)
+			.AddColorBlendAttachment(VK_TRUE, VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ONE, VK_BLEND_OP_ADD, VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ONE, VK_BLEND_OP_ADD)
+			.SetColorAttachmentFormats(VK_FORMAT_R16G16B16A16_SFLOAT, 0)
+			.AddPushConstant(0, pushConsantSize, VK_SHADER_STAGE_FRAGMENT_BIT)
+			.AddDescriptorSetLayout(GetFrameDependentDescriptorSet("MainFrameBuffer", 0)->Layout());
+
+		RegisterGraphicsPipeline("DeferredEmissiveAo", pipelineBuilder.BuildDynamic());
 	}
 
 	{

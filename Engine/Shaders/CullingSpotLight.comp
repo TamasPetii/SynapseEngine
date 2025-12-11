@@ -87,7 +87,7 @@ void main()
 			}
 		}
 
-		if(isVisible)
+		if(true || isVisible)
 		{
 			//This would be faster, easier...
 			//uint instanceIndex = atomicAdd(DrawIndirectCommandBuffer(PushConstants.spotLightDrawIndirectCommandBuffer).commands[spotLightDrawCommandIndex].instanceCount, 1);

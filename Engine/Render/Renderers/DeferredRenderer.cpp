@@ -3,6 +3,7 @@
 #include "Engine/Components/PointLightComponent.h"
 #include "Engine/Components/SpotLightComponent.h"
 #include "Engine/Render/GpuStructs.h"
+#include "Engine/Render/Renderers/BloomRenderer.h"
 
 void DeferredRenderer::Initialize(std::shared_ptr<ResourceManager> resourceManager)
 {
@@ -21,6 +22,10 @@ void DeferredRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Reg
 		VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT);
 
 	Vk::Image::TransitionImageLayoutDynamic(commandBuffer, frameBuffer->GetImage("Normal")->Value(),
+		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+		VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT);
+
+	Vk::Image::TransitionImageLayoutDynamic(commandBuffer, frameBuffer->GetImage("Emissive")->Value(),
 		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
 		VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT);
 
@@ -47,12 +52,70 @@ void DeferredRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Reg
 		VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_WRITE_BIT,
 		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT);
 
+	RenderEmissiveAo(commandBuffer, registry, resourceManager, frameIndex);
+
 	RenderDirectionLights(commandBuffer, registry, resourceManager, frameIndex);
+
 	//RenderPointLights(commandBuffer, registry, resourceManager, frameIndex);
 	//RenderSpotLights(commandBuffer, registry, resourceManager, frameIndex);
 
 	RenderPointLightsIndirect(commandBuffer, registry, resourceManager, frameIndex);
 	RenderSpotLightsIndirect(commandBuffer, registry, resourceManager, frameIndex);
+}
+
+void DeferredRenderer::RenderEmissiveAo(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
+{
+	auto vulkanContext = Vk::VulkanContext::GetContext();
+	auto device = vulkanContext->GetDevice();
+	auto graphicsQueue = device->GetQueue(Vk::QueueType::GRAPHICS);
+
+	auto frameBuffer = resourceManager->GetVulkanManager()->GetFrameDependentFrameBuffer("Main", frameIndex);
+	auto pipeline = resourceManager->GetVulkanManager()->GetGraphicsPipeline("DeferredEmissiveAo");
+
+	VkRenderingAttachmentInfo colorAttachment = Vk::DynamicRendering::BuildRenderingAttachmentInfo(
+		frameBuffer->GetImage("Main")->GetImageView("Default"),
+		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		nullptr
+	);
+
+	std::vector<VkRenderingAttachmentInfo> renderTargetAttachments = { colorAttachment };
+	VkRenderingInfo renderingInfo = Vk::DynamicRendering::BuildRenderingInfo(frameBuffer->GetSize(), renderTargetAttachments, nullptr);
+
+	vkCmdBeginRendering(commandBuffer, &renderingInfo);
+	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetPipeline());
+
+	VkViewport viewport{};
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = (float)frameBuffer->GetSize().width;
+	viewport.height = (float)frameBuffer->GetSize().height;
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
+
+	VkRect2D scissor{};
+	scissor.offset = { 0, 0 };
+	scissor.extent = frameBuffer->GetSize();
+	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
+
+	auto frameBufferDescriptorSet = resourceManager->GetVulkanManager()->GetFrameDependentDescriptorSet("MainFrameBuffer", frameIndex);
+	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline->GetLayout(), 0, 1, &frameBufferDescriptorSet->Value(), 0, nullptr);
+
+	DeferredEmissiveAoPushConstants pushConstants;
+	pushConstants.emissiveStrength = BloomRenderer::settings.enabled ? 1.0f : 0.0f;
+
+	vkCmdPushConstants(
+		commandBuffer,
+		pipeline->GetLayout(),
+		VK_SHADER_STAGE_FRAGMENT_BIT,
+		0,
+		sizeof(DeferredEmissiveAoPushConstants),
+		&pushConstants
+	);
+
+	vkCmdDraw(commandBuffer, 4, 1, 0, 0);
+
+	vkCmdEndRendering(commandBuffer);
 }
 
 void DeferredRenderer::RenderDirectionLights(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)

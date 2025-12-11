@@ -1,7 +1,7 @@
 #pragma once
 #include "Renderer.h"
 
-class GeometryRenderer : public Renderer
+class ENGINE_API GeometryRenderer : public Renderer
 {
 public:
 	void Initialize(std::shared_ptr<ResourceManager> resourceManager) override;

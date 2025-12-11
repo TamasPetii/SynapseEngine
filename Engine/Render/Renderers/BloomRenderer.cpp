@@ -2,6 +2,8 @@
 #include "Engine/Render/GpuStructs.h"
 #include "Engine/Vulkan/DescriptorSet.h"
 
+BloomSettings BloomRenderer::settings;
+
 void BloomRenderer::Initialize(std::shared_ptr<ResourceManager> resourceManager)
 {
 
@@ -9,6 +11,17 @@ void BloomRenderer::Initialize(std::shared_ptr<ResourceManager> resourceManager)
 
 void BloomRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex, std::function<void()> renderFunction)
 {
+	if (!settings.enabled)
+	{
+		auto frameBuffer = resourceManager->GetVulkanManager()->GetFrameDependentFrameBuffer("Main", frameIndex);
+
+		Vk::Image::TransitionImageLayoutDynamic(commandBuffer, frameBuffer->GetImage("Main")->Value(),
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+			VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT | VK_ACCESS_2_SHADER_WRITE_BIT);
+
+		return;
+	}
+
 	Prefilter(commandBuffer, resourceManager, frameIndex);
 	Downsample(commandBuffer, resourceManager, frameIndex);
 	Upsample(commandBuffer, resourceManager, frameIndex);
@@ -46,8 +59,8 @@ void BloomRenderer::Prefilter(VkCommandBuffer cmd, std::shared_ptr<ResourceManag
 
 	BloomPrefilterPushConstants pc;
 	pc.texelSize = 1.0f / glm::vec2(width, height);
-	pc.threshold = 1.0f;
-	pc.knee = 0.1f;
+	pc.threshold = settings.threshold;
+	pc.knee = settings.knee;
 
 	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetPipeline());
 	device->vkCmdPushDescriptorSetKHR(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetLayout(), 0, writes.size(), writes.data());
@@ -152,7 +165,7 @@ void BloomRenderer::Upsample(VkCommandBuffer cmd, std::shared_ptr<ResourceManage
 
 		BloomUpsamplePushConstants pc;
 		pc.texelSize = 1.0f / glm::vec2(srcW, srcH);
-		pc.filterRadius = 0.005f;
+		pc.filterRadius = settings.upsampleRadius;
 
 		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetPipeline());
 		device->vkCmdPushDescriptorSetKHR(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetLayout(), 0, writes.size(), writes.data());
@@ -197,8 +210,8 @@ void BloomRenderer::Composite(VkCommandBuffer cmd, std::shared_ptr<ResourceManag
 	};
 
 	BloomCompositePushConstants pc;
-	pc.exposure = 1.0f;
-	pc.bloomStrength = 1.0f;
+	pc.exposure = settings.exposure;
+	pc.bloomStrength = settings.bloomStrength;
 
 	vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetPipeline());
 	device->vkCmdPushDescriptorSetKHR(cmd, VK_PIPELINE_BIND_POINT_COMPUTE, pipeline->GetLayout(), 0, writes.size(), writes.data());

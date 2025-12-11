@@ -481,8 +481,8 @@
     <None Include="Shaders\CullingLightShadowAabb.comp" />
     <None Include="Shaders\CullingSpotLight.comp" />
     <None Include="Shaders\CullingSpotLightShadowObjects.comp" />
-    <None Include="Shaders\DeferredAmbient.frag" />
-    <None Include="Shaders\DeferredAmbient.vert" />
+    <None Include="Shaders\DeferredEmissiveAo.frag" />
+    <None Include="Shaders\DeferredEmissiveAo.vert" />
     <None Include="Shaders\DeferredPreIndirect.frag" />
     <None Include="Shaders\DeferredPreIndirect.vert" />
     <None Include="Shaders\DeferredSpotLight.frag" />

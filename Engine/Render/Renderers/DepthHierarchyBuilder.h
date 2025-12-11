@@ -6,7 +6,7 @@
 #include <optional>
 #include <functional>
 
-class DepthHierarchyBuilder
+class ENGINE_API DepthHierarchyBuilder
 {
 public:
 	static void Clear(VkCommandBuffer commandBuffer, std::shared_ptr<ResourceManager> resourceManager);

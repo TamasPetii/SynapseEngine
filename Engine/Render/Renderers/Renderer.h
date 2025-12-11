@@ -1,4 +1,5 @@
 #pragma once
+#include "Engine/EngineApi.h"
 #include "Engine/Vulkan/VulkanContext.h"
 #include "Engine/Vulkan/DynamicRendering.h"
 #include "Engine/Managers/ResourceManager.h"
@@ -6,7 +7,7 @@
 #include <optional>
 #include <functional>
 
-class Renderer
+class ENGINE_API Renderer
 {
 public:
 	virtual void Initialize(std::shared_ptr<ResourceManager> resourceManager) = 0;

@@ -894,8 +894,8 @@
     <None Include="Shaders\OcclusionCulling.frag" />
     <None Include="Shaders\Common\Render\Occlusion.glsl" />
     <None Include="Shaders\Common\Pbr.glsl" />
-    <None Include="Shaders\DeferredAmbient.vert" />
-    <None Include="Shaders\DeferredAmbient.frag" />
+    <None Include="Shaders\DeferredEmissiveAo.vert" />
+    <None Include="Shaders\DeferredEmissiveAo.frag" />
     <None Include="Shaders\Common\Shape\ShapeBufferAddresses.glsl" />
     <None Include="Shaders\BillboardInstanced.vert" />
     <None Include="Shaders\Billboard.frag" />

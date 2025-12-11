@@ -1,7 +1,7 @@
 #pragma once
 #include "Renderer.h"
 
-class WireframeRenderer : public Renderer
+class ENGINE_API WireframeRenderer : public Renderer
 {
 public:
 	void Initialize(std::shared_ptr<ResourceManager> resourceManager) override;

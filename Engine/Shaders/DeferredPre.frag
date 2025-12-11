@@ -16,9 +16,10 @@ layout (location = 4) in mat3 fs_in_tbn;
 
 //Outputs
 layout (location = 0) out vec4 fs_out_pos;
-layout (location = 1) out vec4 fs_out_color;
-layout (location = 2) out vec4 fs_out_normal;
+layout (location = 1) out vec4 fs_out_color_metallic;
+layout (location = 2) out vec4 fs_out_normal_roughness;
 layout (location = 3) out uint fs_out_entity;
+layout (location = 4) out vec4 fs_out_emissive_ao;
 
 layout( push_constant ) uniform constants
 {	
@@ -70,8 +71,18 @@ void main()
 	if(materialBuffer.materials[materialIndex].roughnessIndex != uint(INVALID_IMAGE_INDEX))
 		roughness *= sampleLoadedTexture2D(materialBuffer.materials[materialIndex].roughnessIndex, LINEAR_ANISOTROPY_SAMPLER_ID, fs_in_tex).x;
 	
+    vec3 emission = materialBuffer.materials[materialIndex].emissiveColor.rgb * materialBuffer.materials[materialIndex].emissiveColor.a;
+    if(materialBuffer.materials[materialIndex].emissiveIndex != uint(INVALID_IMAGE_INDEX))
+        emission *= sampleLoadedTexture2D(materialBuffer.materials[materialIndex].emissiveIndex, LINEAR_ANISOTROPY_SAMPLER_ID, fs_in_tex).rgb;
+
+	float ao = materialBuffer.materials[materialIndex].aoStrength; 
+    if(materialBuffer.materials[materialIndex].ambientOcclusionIndex != uint(INVALID_IMAGE_INDEX))
+        ao *= sampleLoadedTexture2D(materialBuffer.materials[materialIndex].ambientOcclusionIndex, LINEAR_ANISOTROPY_SAMPLER_ID, fs_in_tex).x;
+
+
 	fs_out_pos = vec4(fs_in_pos, 1);
-	fs_out_color = vec4(albedo.xyz, metallic);
-	fs_out_normal = vec4(normal, roughness);
+	fs_out_color_metallic = vec4(albedo.xyz, metallic);
+	fs_out_normal_roughness = vec4(normal, roughness);
 	fs_out_entity = fs_in_index.x;
+	fs_out_emissive_ao = vec4(emission, ao);
 }

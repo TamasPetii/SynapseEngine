@@ -135,11 +135,14 @@ void Scene::InitializeRegistry()
 		material->metalness = dist(rng);
 		material->SetBit<UPDATE_BIT>();
 
-		for (uint32_t i = 0; i < 1000; ++i)
+		for (uint32_t i = 0; i < 500; ++i)
 		{
 			std::string materialName = "Shape" + std::to_string(i++);
 			auto [material, wasLoaded] = resourceManager->GetMaterialManager()->RegisterMaterial(materialName);
-			material->color = glm::vec4(dist(rng) * 15, dist(rng) * 15, dist(rng) * 15, 1.f);
+			material->color = glm::vec4(dist(rng), dist(rng), dist(rng), 1.f);
+			material->emissiveColor = material->color;
+			material->emissiveIntensity = dist(rng) * 50.f;
+			material->useBloom = dist(rng) > 0.8f;
 			material->roughness = dist(rng);
 			material->metalness = dist(rng);
 			material->SetBit<UPDATE_BIT>();

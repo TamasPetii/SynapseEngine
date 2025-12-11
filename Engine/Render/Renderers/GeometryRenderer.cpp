@@ -46,6 +46,10 @@ void GeometryRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Reg
 		VK_IMAGE_LAYOUT_UNDEFINED, VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT, VK_ACCESS_2_NONE,
 		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT);
 
+	Vk::Image::TransitionImageLayoutDynamic(commandBuffer, frameBuffer->GetImage("Emissive")->Value(),
+		VK_IMAGE_LAYOUT_UNDEFINED, VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT, VK_ACCESS_2_NONE,
+		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT, VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT);
+
 	Vk::Image::TransitionImageLayoutDynamic(commandBuffer, frameBuffer->GetImage("Depth")->Value(),
 		VK_IMAGE_LAYOUT_UNDEFINED, VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT, VK_ACCESS_2_NONE,
 		VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT, VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT);
@@ -54,9 +58,10 @@ void GeometryRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Reg
 	VkRenderingAttachmentInfo colorAttachment = Vk::DynamicRendering::BuildRenderingAttachmentInfo(frameBuffer->GetImage("Color")->GetImageView("Default"), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, &colorClearValue);
 	VkRenderingAttachmentInfo normalAttachment = Vk::DynamicRendering::BuildRenderingAttachmentInfo(frameBuffer->GetImage("Normal")->GetImageView("Default"), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, &colorClearValue);
 	VkRenderingAttachmentInfo entityAttachment = Vk::DynamicRendering::BuildRenderingAttachmentInfo(frameBuffer->GetImage("Entity")->GetImageView("Default"), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, &entityClearValue);
+	VkRenderingAttachmentInfo emissiveAttachment = Vk::DynamicRendering::BuildRenderingAttachmentInfo(frameBuffer->GetImage("Emissive")->GetImageView("Default"), VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, &colorClearValue);
 	VkRenderingAttachmentInfo depthAttachment = Vk::DynamicRendering::BuildRenderingAttachmentInfo(frameBuffer->GetImage("Depth")->GetImageView("Default"), VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, &depthClearValue);
 
-	std::vector<VkRenderingAttachmentInfo> renderTargetAttachments = { positionAttachment, colorAttachment , normalAttachment, entityAttachment };
+	std::vector<VkRenderingAttachmentInfo> renderTargetAttachments = { positionAttachment, colorAttachment , normalAttachment, entityAttachment, emissiveAttachment };
 	VkRenderingInfo renderingInfo = Vk::DynamicRendering::BuildRenderingInfo(frameBuffer->GetSize(), renderTargetAttachments, &depthAttachment);
 
 	vkCmdBeginRendering(commandBuffer, &renderingInfo);
@@ -81,11 +86,11 @@ void GeometryRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Reg
 
 	//RenderShapesInstanced(commandBuffer, pipeline->GetLayout(), resourceManager, frameIndex);
 	//RenderModelsInstanced(commandBuffer, pipeline->GetLayout(), resourceManager, frameIndex);
-	RenderShapesInstancedIndirect(commandBuffer, pipeline->GetLayout(), resourceManager, frameIndex);
-	RenderModelsInstancedIndirect(commandBuffer, pipeline->GetLayout(), resourceManager, frameIndex);
-
 	//RenderShapesInstancedNew(commandBuffer, pipeline->GetLayout(), resourceManager, frameIndex);
 	//RenderModelsInstancedNew(commandBuffer, pipeline->GetLayout(), resourceManager, frameIndex);
+
+	RenderShapesInstancedIndirect(commandBuffer, pipeline->GetLayout(), resourceManager, frameIndex);
+	RenderModelsInstancedIndirect(commandBuffer, pipeline->GetLayout(), resourceManager, frameIndex);
 
 	vkCmdEndRendering(commandBuffer);
 }

@@ -80,7 +80,7 @@ void main()
 			isVisible = isVisible && (projectedLinearDepth <= sampleLinearDepth);
 		}	
 
-		if(isVisible)
+		if(true || isVisible)
 		{
 			bool isModel = (defaultColliderBuffer.colliders[globalIndex].bitflag & COLLIDER_MODEL_BIT) != 0u;
 

@@ -8,7 +8,7 @@
 void GraphicsDebugWindow::Render(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, std::set<VkDescriptorSet>& textureSet, uint32_t frameIndex)
 {
 	static Window::Config windowConfig{
-		.name = "Graphics-Debug-Window",
+		.name = "Viewport-Debug",
 		.flags = ImGuiWindowFlags_NoTitleBar
 	};
 

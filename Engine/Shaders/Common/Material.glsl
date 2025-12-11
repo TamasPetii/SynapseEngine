@@ -8,15 +8,18 @@
 
 struct Material {
 	vec4 color;
+	vec4 emissiveColor;
 	vec2 uvScale;
-	vec2 bloom;
 	uint albedoIndex;
 	uint normalIndex;
 	uint metallicIndex;
 	uint roughnessIndex;
+	uint emissiveIndex;
+	uint ambientOcclusionIndex;
 	float metalness;
 	float roughness;
-	vec2 padding;
+	float aoStrength;
+	uint padding;
 }; 
 
 layout(buffer_reference, std430) readonly buffer MaterialBuffer { 

@@ -1,7 +1,7 @@
 #pragma once
 #include "Renderer.h"
 
-class BillboardRenderer : public Renderer
+class ENGINE_API BillboardRenderer : public Renderer
 {
 public:
 	void Initialize(std::shared_ptr<ResourceManager> resourceManager) override;

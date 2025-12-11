@@ -1,77 +1,105 @@
 #include "GlobalSettingsWindow.h"
 #include "Editor/Gui/Utils/Panel.h"
+#include "Engine/Render/Renderers/BloomRenderer.h"
 
 void GlobalSettingsWindow::Render(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, std::set<VkDescriptorSet>& textureSet, uint32_t frameIndex)
 {
-	static Window::Config windowConfig{
-		.name = "GlobalSettings-Window"
-	};
+    static Window::Config windowConfig{
+        .name = "GlobalSettings"
+    };
 
-	Window::RenderWindow(windowConfig, [&]() -> void
-		{
-			static Panel::Config skyboxConfig{
-				.name = "Skybox"
-			};
+    Window::RenderWindow(windowConfig, [&]() -> void
+        {
+            static Panel::Config skyboxConfig{ .name = "Skybox" };
+            Panel::Render(skyboxConfig, [&]() {});
 
-			Panel::Render(skyboxConfig, [&]() -> void
-				{
+            static Panel::Config physicsConfig{ .name = "Physics" };
+            Panel::Render(physicsConfig, [&]() {});
 
-				}
-			);
+            RenderWireframeSettings();
+            RenderBloomSettings();
+        });
+}
 
-			static Panel::Config physicsConfig{
-				.name = "Physics"
-			};
+void GlobalSettingsWindow::RenderWireframeSettings()
+{
+    static Panel::Config wireframeConfig{
+        .name = "Wireframe"
+    };
 
-			Panel::Render(physicsConfig, [&]() -> void
-				{
+    Panel::Render(wireframeConfig, [&]() -> void
+        {
+            float offset = ImGui::GetContentRegionAvail().x / 2.f;
 
-				}
-			);
+            auto DrawCheckbox = [&](const char* label, const char* id, bool* value) {
+                ImGui::Text("%s", label);
+                ImGui::SameLine(offset);
+                ImGui::Checkbox(id, value);
+                };
 
-			static Panel::Config wireframeConfig{
-				.name = "Wireframe"
-			};
+            DrawCheckbox("AABB Colliders", "##AABB Colliders", &GlobalConfig::WireframeConfig::showColliderAABB);
+            DrawCheckbox("Obb Colliders", "##Obb Colliders", &GlobalConfig::WireframeConfig::showColliderOBB);
+            DrawCheckbox("Sphere Colliders", "##Sphere Colliders", &GlobalConfig::WireframeConfig::showColliderSphere);
+            DrawCheckbox("Point Light Volume", "##Point Light Volume", &GlobalConfig::WireframeConfig::showPointLights);
+            DrawCheckbox("Spot Light Volume", "##Spot Light Volume", &GlobalConfig::WireframeConfig::showSpotLights);
+            DrawCheckbox("Light Billboards", "##Light Billboards", &GlobalConfig::WireframeConfig::showLightBillboards);
 
-			Panel::Render(wireframeConfig, [&]() -> void
-				{
-					int offset = ImGui::GetContentRegionAvail().x / 2.f;
+            ImGui::Separator();
 
-					ImGui::Text("AABB Colliders");
-					ImGui::SameLine(offset);
-					ImGui::Checkbox("##AABB Colliders", &GlobalConfig::WireframeConfig::showColliderAABB);
+            DrawCheckbox("Point Project Debug", "##Point Collider Project Debug", &GlobalConfig::WireframeConfig::showPointLightsProjectedAABB);
+            DrawCheckbox("Spot Project Debug", "##Spot Collider Project Debug", &GlobalConfig::WireframeConfig::showSpotLightsProjectedAABB);
+        });
+}
 
-					ImGui::Text("Obb Colliders");
-					ImGui::SameLine(offset);
-					ImGui::Checkbox("##Obb Colliders", &GlobalConfig::WireframeConfig::showColliderOBB);
+void GlobalSettingsWindow::RenderBloomSettings()
+{
+    static Panel::Config bloomConfig{
+        .name = "Bloom Settings"
+    };
 
-					ImGui::Text("Sphere Colliders");
-					ImGui::SameLine(offset);
-					ImGui::Checkbox("##Sphere Colliders", &GlobalConfig::WireframeConfig::showColliderSphere);
+    Panel::Render(bloomConfig, [&]() -> void
+        {
+            float offset = ImGui::GetContentRegionAvail().x / 2.f;
 
-					ImGui::Text("Point Light Volume");
-					ImGui::SameLine(offset);
-					ImGui::Checkbox("##Point Light Volume", &GlobalConfig::WireframeConfig::showPointLights);
+            ImGui::Text("Enable Bloom");
+            ImGui::SameLine(offset);
+            ImGui::Checkbox("##EnableBloom", &BloomRenderer::settings.enabled);
 
-					ImGui::Text("Spot Light Volume");
-					ImGui::SameLine(offset);
-					ImGui::Checkbox("##Spot Light Volume", &GlobalConfig::WireframeConfig::showSpotLights);
+            ImGui::Separator();
 
-					ImGui::Text("Light Billboards");
-					ImGui::SameLine(offset);
-					ImGui::Checkbox("##Light Billboards", &GlobalConfig::WireframeConfig::showLightBillboards);
+            if (!BloomRenderer::settings.enabled)
+            {
+                ImGui::BeginDisabled(); // Innentõl minden inaktív
+            }
 
-					ImGui::Separator();
+            ImGui::Text("Threshold");
+            ImGui::SameLine(offset);
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+            ImGui::DragFloat("##Threshold", &BloomRenderer::settings.threshold, 0.01f, 0.0f, 10.0f);
 
-					ImGui::Text("Point Project Debug");
-					ImGui::SameLine(offset);
-					ImGui::Checkbox("##Point Collider Project Debug", &GlobalConfig::WireframeConfig::showPointLightsProjectedAABB);
+            ImGui::Text("Knee");
+            ImGui::SameLine(offset);
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+            ImGui::DragFloat("##Knee", &BloomRenderer::settings.knee, 0.005f, 0.0f, 1.0f);
 
-					ImGui::Text("Spot Project Debug");
-					ImGui::SameLine(offset);
-					ImGui::Checkbox("##Spot Collider Project Debug", &GlobalConfig::WireframeConfig::showSpotLightsProjectedAABB);
-				}
-			);
-		}
-	);
+            ImGui::Text("Upsample Radius");
+            ImGui::SameLine(offset);
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+            ImGui::DragFloat("##UpsampleRadius", &BloomRenderer::settings.upsampleRadius, 0.0001f, 0.0f, 0.1f, "%.4f");
+
+            ImGui::Text("Intensity");
+            ImGui::SameLine(offset);
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+            ImGui::DragFloat("##BloomStrength", &BloomRenderer::settings.bloomStrength, 0.005f, 0.0f, 5.0f);
+
+            ImGui::Text("Exposure");
+            ImGui::SameLine(offset);
+            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
+            ImGui::DragFloat("##Exposure", &BloomRenderer::settings.exposure, 0.01f, 0.0f, 10.0f);
+
+            if (!BloomRenderer::settings.enabled)
+            {
+                ImGui::EndDisabled();
+            }
+        });
 }

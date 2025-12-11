@@ -8,7 +8,7 @@
 void ViewportWindow::Render(std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, std::set<VkDescriptorSet>& textureSet, uint32_t frameIndex)
 {
 	static Window::Config windowConfig{
-		.name = "Viewport-Window",
+		.name = "Viewport",
 		.flags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_MenuBar
 	};
 
@@ -64,6 +64,8 @@ std::pair<std::string, std::string> ViewportWindow::GetViewportImageName()
 	case 3: return { "Normal", "Normal"}; break;
 	case 4: return { "Normal", "Roughness" }; break;
 	case 5: return { "Color", "Metallic" }; break;
+	case 6: return { "Emissive", "Emissive" }; break;
+	case 7: return { "Emissive", "AmbientOcclusion" }; break;
 	default: return { "Main", "Default"};
 	}
 }
@@ -122,6 +124,8 @@ void ViewportWindow::ViewportImageMenu()
 			ImGui::RadioButton("Normal", &viewportImage, 3);
 			ImGui::RadioButton("Roughness", &viewportImage, 4);
 			ImGui::RadioButton("Metallic", &viewportImage, 5);
+			ImGui::RadioButton("Emissive", &viewportImage, 6);
+			ImGui::RadioButton("Ambient Occlusion", &viewportImage, 7);
 
 			ImGui::EndChild();
 		}
