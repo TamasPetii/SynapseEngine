@@ -34,6 +34,7 @@ public:
 	auto GetPointLightBufferManager() { return pointLightBufferManager; }
 	auto GetPointLightShadowBufferManager() { return pointLightShadowBufferManager; }
 	auto GetSpotLightBufferManager() { return spotLightBufferManager; }
+	auto GetSpotLightShadowBufferManager() { return spotLightShadowBufferManager; }
 private:
 	std::shared_ptr<ModelManager> modelManager;
 	std::shared_ptr<ImageManager> imageManager;
@@ -46,5 +47,6 @@ private:
 	std::shared_ptr<LightBufferManager<PointLightComponent>> pointLightBufferManager;
 	std::shared_ptr<LightShadowBufferManager<PointLightShadowComponent>> pointLightShadowBufferManager;
 	std::shared_ptr<LightBufferManager<SpotLightComponent>> spotLightBufferManager;
+	std::shared_ptr<LightShadowBufferManager<SpotLightShadowComponent>> spotLightShadowBufferManager;
 };
 

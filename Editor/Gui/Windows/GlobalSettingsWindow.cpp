@@ -63,11 +63,11 @@ void GlobalSettingsWindow::Render(std::shared_ptr<Registry> registry, std::share
 
 					ImGui::Separator();
 
-					ImGui::Text("Point Collider Project Debug");
+					ImGui::Text("Point Project Debug");
 					ImGui::SameLine(offset);
 					ImGui::Checkbox("##Point Collider Project Debug", &GlobalConfig::WireframeConfig::showPointLightsProjectedAABB);
 
-					ImGui::Text("Spot Collider Project Debug");
+					ImGui::Text("Spot Project Debug");
 					ImGui::SameLine(offset);
 					ImGui::Checkbox("##Spot Collider Project Debug", &GlobalConfig::WireframeConfig::showSpotLightsProjectedAABB);
 				}

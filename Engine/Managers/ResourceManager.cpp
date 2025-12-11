@@ -25,6 +25,7 @@ void ResourceManager::Initialize()
 	pointLightBufferManager = std::make_shared<LightBufferManager<PointLightComponent>>();
 	spotLightBufferManager = std::make_shared<LightBufferManager<SpotLightComponent>>();
 	pointLightShadowBufferManager = std::make_shared<LightShadowBufferManager<PointLightShadowComponent>>(modelManager, geometryManager);
+	spotLightShadowBufferManager = std::make_shared<LightShadowBufferManager<SpotLightShadowComponent>>(modelManager, geometryManager);
 }
 
 void ResourceManager::Cleanup()
@@ -40,4 +41,5 @@ void ResourceManager::Cleanup()
 	pointLightBufferManager.reset();
 	spotLightBufferManager.reset();
 	pointLightShadowBufferManager.reset();
+	spotLightShadowBufferManager.reset();
 }

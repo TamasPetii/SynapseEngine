@@ -41,7 +41,7 @@ void GraphicsDebugWindow::Render(std::shared_ptr<Registry> registry, std::shared
                 float mipW = (float)std::max(1u, baseWidth >> i) * fitScale;
                 float mipH = (float)std::max(1u, baseHeight >> i) * fitScale;
 
-                ImGui::Image((ImTextureID)image, ImVec2(mipW, mipH));
+                ImGui::Image((ImTextureID)image, contentRegion /*ImVec2(mipW, mipH)*/);
             }
 
             ImGui::Separator();
@@ -56,7 +56,7 @@ void GraphicsDebugWindow::Render(std::shared_ptr<Registry> registry, std::shared
                 float mipW = (float)std::max(1u, baseWidth >> i) * fitScale;
                 float mipH = (float)std::max(1u, baseHeight >> i) * fitScale;
 
-                ImGui::Image((ImTextureID)image, ImVec2(mipW, mipH));
+                ImGui::Image((ImTextureID)image, contentRegion /*ImVec2(mipW, mipH)*/);
             }
         });
 

@@ -6,6 +6,7 @@
 #include "Editor/Gui/Windows/BenchmarkWindow.h"
 #include "Editor/Gui/Windows/ViewportWindow.h"
 #include "Editor/Gui/Windows/GraphicsDebugWindow.h"
+#include "Editor/Gui/Windows/FileSystemWindow.h"
 
 Gui::Gui(GLFWwindow* window)
 {
@@ -31,6 +32,14 @@ void Gui::Initialize(GLFWwindow* window)
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+	io.Fonts->AddFontDefault();
+	ImFontConfig config;
+	config.MergeMode = true;
+	config.GlyphOffset.y = 2.f;
+	config.GlyphMinAdvanceX = 16.0f;
+	static const ImWchar icon_ranges[] = { ICON_MIN_FA, ICON_MAX_FA, 0 };
+	io.Fonts->AddFontFromFileTTF("../Assets/Fonts/fa-solid-900.ttf", 13.0f, &config, icon_ranges);
 
 	ImGui_ImplGlfw_InitForVulkan(window, true);
 
@@ -85,6 +94,11 @@ void Gui::Initialize(GLFWwindow* window)
 	windows["GlobalSettings"] = std::make_shared<GlobalSettingsWindow>();
 	windows["BenchmarkWindow"] = std::make_shared<BenchmarkWindow>();
 	windows["GraphicsDebugWIndow"] = std::make_shared<GraphicsDebugWindow>();
+
+    windows["FileSystemWindow"] = std::make_shared<FileSystemWindow>(
+        std::make_shared<NativeFileSystem>(),
+        std::filesystem::absolute("../Assets").string()
+    );
 }
 
 void Gui::Cleanup()
@@ -116,6 +130,7 @@ void Gui::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> regist
 	windows["GlobalSettings"]->Render(registry, resourceManager, textureSet, frameIndex);
 	windows["BenchmarkWindow"]->Render(registry, resourceManager, textureSet, frameIndex);
 	windows["GraphicsDebugWIndow"]->Render(registry, resourceManager, textureSet, frameIndex);
+    windows["FileSystemWindow"]->Render(registry, resourceManager, textureSet, frameIndex);
 
 	ImGui::Render();
 	ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer);
@@ -128,119 +143,114 @@ void Gui::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> regist
 
 void Gui::SetStyle()
 {
-	ImGuiStyle& style = ImGui::GetStyle();
-	ImVec4* colors = ImGui::GetStyle().Colors;
-	colors[ImGuiCol_Text] = ImVec4(1.00f, 1.00f, 1.00f, 1.00f);
-	colors[ImGuiCol_TextDisabled] = ImVec4(0.51f, 0.51f, 0.51f, 1.00f);
-	colors[ImGuiCol_WindowBg] = ImVec4(0.16f, 0.16f, 0.16f, 1.00f);
-	colors[ImGuiCol_ChildBg] = ImVec4(0.18f, 0.18f, 0.18f, 1.00f);
-	colors[ImGuiCol_PopupBg] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
-	colors[ImGuiCol_Border] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
-	colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-	colors[ImGuiCol_FrameBg] = ImVec4(0.27f, 0.27f, 0.27f, 1.00f);
-	colors[ImGuiCol_FrameBgHovered] = ImVec4(0.29f, 0.29f, 0.29f, 1.00f);
-	colors[ImGuiCol_FrameBgActive] = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
-	colors[ImGuiCol_TitleBg] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
-	colors[ImGuiCol_TitleBgActive] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
-	colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
-	colors[ImGuiCol_MenuBarBg] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
-	colors[ImGuiCol_ScrollbarBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-	colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.35f, 0.35f, 0.35f, 1.00f);
-	colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.45f, 0.45f, 0.45f, 1.00f);
-	colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.55f, 0.55f, 0.55f, 1.00f);
-	colors[ImGuiCol_CheckMark] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-	colors[ImGuiCol_SliderGrab] = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
-	colors[ImGuiCol_SliderGrabActive] = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
-	colors[ImGuiCol_Button] = ImVec4(0.24f, 0.24f, 0.24f, 1.00f);
-	colors[ImGuiCol_ButtonHovered] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
-	colors[ImGuiCol_ButtonActive] = ImVec4(0.27f, 0.27f, 0.27f, 1.00f);
-	colors[ImGuiCol_Header] = ImVec4(0.22f, 0.22f, 0.22f, 1.00f);
-	colors[ImGuiCol_HeaderHovered] = ImVec4(0.24f, 0.24f, 0.24f, 0.95f);
-	colors[ImGuiCol_HeaderActive] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
-	colors[ImGuiCol_Separator] = ImVec4(0.25f, 0.25f, 0.25f, 1.00f);
-	colors[ImGuiCol_SeparatorHovered] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-	colors[ImGuiCol_SeparatorActive] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-	colors[ImGuiCol_ResizeGrip] = ImVec4(0.39f, 0.39f, 0.39f, 1.00f);
-	colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.47f, 0.47f, 0.47f, 1.00f);
-	colors[ImGuiCol_ResizeGripActive] = ImVec4(0.55f, 0.55f, 0.55f, 1.00f);
-	colors[ImGuiCol_TabHovered] = ImVec4(0.27f, 0.27f, 0.27f, 1.00f);
-	colors[ImGuiCol_Tab] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
-	colors[ImGuiCol_TabSelected] = ImVec4(0.35f, 0.35f, 0.35f, 1.00f);
-	colors[ImGuiCol_TabSelectedOverline] = ImVec4(0.00f, 0.00f, 0.00f, 1.00f);
-	colors[ImGuiCol_TabDimmed] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
-	colors[ImGuiCol_TabDimmedSelected] = ImVec4(0.24f, 0.24f, 0.24f, 1.00f);
-	colors[ImGuiCol_TabDimmedSelectedOverline] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-	colors[ImGuiCol_DockingPreview] = ImVec4(0.00f, 0.59f, 1.00f, 1.00f);
-	colors[ImGuiCol_DockingEmptyBg] = ImVec4(1.00f, 0.00f, 0.00f, 1.00f);
-	colors[ImGuiCol_PlotLines] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-	colors[ImGuiCol_PlotLinesHovered] = ImVec4(0.00f, 0.57f, 1.00f, 1.00f);
-	colors[ImGuiCol_PlotHistogram] = ImVec4(0.00f, 1.00f, 1.00f, 1.00f);
-	colors[ImGuiCol_PlotHistogramHovered] = ImVec4(0.00f, 0.57f, 1.00f, 1.00f);
-	colors[ImGuiCol_TableHeaderBg] = ImVec4(0.19f, 0.19f, 0.20f, 1.00f);
-	colors[ImGuiCol_TableBorderStrong] = ImVec4(0.31f, 0.31f, 0.35f, 1.00f);
-	colors[ImGuiCol_TableBorderLight] = ImVec4(0.23f, 0.23f, 0.25f, 1.00f);
-	colors[ImGuiCol_TableRowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
-	colors[ImGuiCol_TableRowBgAlt] = ImVec4(0.00f, 0.00f, 0.00f, 0.12f);
-	colors[ImGuiCol_TextLink] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
-	colors[ImGuiCol_TextSelectedBg] = ImVec4(0.00f, 0.47f, 0.83f, 0.35f);
-	colors[ImGuiCol_DragDropTarget] = ImVec4(0.00f, 0.47f, 0.83f, 0.90f);
-	colors[ImGuiCol_NavCursor] = ImVec4(0.00f, 0.47f, 0.83f, 1.00f);
-	colors[ImGuiCol_NavWindowingHighlight] = ImVec4(1.00f, 1.00f, 1.00f, 0.70f);
-	colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
-	colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
+    ImGuiStyle& style = ImGui::GetStyle();
+    ImVec4* colors = style.Colors;
 
-	// Sizes
-	style.WindowPadding = ImVec2(8.0f, 8.0f);
-	style.FramePadding = ImVec2(6.0f, 4.0f);
-	style.ItemSpacing = ImVec2(8.0f, 6.0f);
-	style.ItemInnerSpacing = ImVec2(8.0f, 6.0f);
-	style.TouchExtraPadding = ImVec2(0.0f, 0.0f);
-	style.IndentSpacing = 12.0f;
-	style.ScrollbarSize = 12.0f;
-	style.GrabMinSize = 12.0f;
+    // --- Geometria és Méretek (Unreal-os, szögletesebb stílus) ---
+    style.WindowPadding = ImVec2(8.0f, 8.0f);
+    style.FramePadding = ImVec2(5.0f, 5.0f);
+    style.CellPadding = ImVec2(4.0f, 2.0f); // Tömörebb táblázatok
+    style.ItemSpacing = ImVec2(8.0f, 4.0f);
+    style.ItemInnerSpacing = ImVec2(4.0f, 4.0f);
+    style.TouchExtraPadding = ImVec2(0.0f, 0.0f);
+    style.IndentSpacing = 21.0f;
+    style.ScrollbarSize = 14.0f; // Kicsit vastagabb, könnyebben fogható
+    style.GrabMinSize = 10.0f;
 
-	// Borders
-	style.WindowBorderSize = 1.0f;
-	style.ChildBorderSize = 1.0f;
-	style.PopupBorderSize = 1.0f;
-	style.FrameBorderSize = 1.0f;
+    // --- Lekerekítések (Sharp / Flat Design) ---
+    style.WindowBorderSize = 1.0f;
+    style.ChildBorderSize = 1.0f;
+    style.PopupBorderSize = 1.0f;
+    style.FrameBorderSize = 0.0f; // A gomboknak nem kell keret, modern hatás
+    style.TabBorderSize = 0.0f;
 
-	// Rounding
-	style.WindowRounding = 4.0f;
-	style.ChildRounding = 4.0f;
-	style.FrameRounding = 4.0f;
-	style.PopupRounding = 4.0f;
-	style.ScrollbarRounding = 4.0f;
-	style.GrabRounding = 2.0f;
+    style.WindowRounding = 2.0f; // Minimális kerekítés az ablakokon
+    style.ChildRounding = 2.0f;
+    style.FrameRounding = 3.0f; // A gombok/inputok épp csak lágyítva
+    style.PopupRounding = 2.0f;
+    style.ScrollbarRounding = 9.0f; // A scrollbar maradhat kerek
+    style.GrabRounding = 2.0f;
+    style.LogSliderDeadzone = 4.0f;
+    style.TabRounding = 2.0f;
 
-	// Tabs
-	style.TabBorderSize = 1.0f;
-	style.TabBarBorderSize = 2.0f;
-	style.TabCloseButtonMinWidthSelected = -1.0f; // Always
-	style.TabCloseButtonMinWidthUnselected = -1.0f; // Always
-	style.TabRounding = 4.0f;
+    // --- Színek (Deep Dark Grey / Slate Theme) ---
 
-	// Tables
-	style.CellPadding = ImVec2(4.0f, 4.0f);
-	style.TableAngledHeadersAngle = 25.0f * (3.1415926535f / 180.0f); // Convert degrees to radians
-	style.TableAngledHeadersTextAlign = ImVec2(0.5f, 0.0f);
+    // Alap szövegek
+    colors[ImGuiCol_Text] = ImVec4(0.95f, 0.96f, 0.98f, 1.00f); // Törtfehér, szemkímélõbb
+    colors[ImGuiCol_TextDisabled] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
 
-	// Windows
-	style.WindowTitleAlign = ImVec2(0.0f, 0.5f);
-	style.WindowMenuButtonPosition = ImGuiDir_Right;
+    // Ablak hátterek (Nagyon sötét szürke)
+    colors[ImGuiCol_WindowBg] = ImVec4(0.11f, 0.11f, 0.11f, 1.00f);
+    colors[ImGuiCol_ChildBg] = ImVec4(0.13f, 0.13f, 0.13f, 1.00f);
+    colors[ImGuiCol_PopupBg] = ImVec4(0.08f, 0.08f, 0.08f, 0.94f);
 
-	// Widgets
-	style.ButtonTextAlign = ImVec2(0.5f, 0.5f);
-	style.SelectableTextAlign = ImVec2(0.0f, 0.0f);
-	style.SeparatorTextBorderSize = 2.0f;
-	style.SeparatorTextAlign = ImVec2(0.00f, 0.5f);
-	style.SeparatorTextPadding = ImVec2(20.f, 2.0f);
-	style.LogSliderDeadzone = 4.0f;
+    // Keretek és elválasztók
+    colors[ImGuiCol_Border] = ImVec4(0.06f, 0.06f, 0.06f, 0.80f); // Szinte fekete keret
+    colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
 
-	// Docking
-	style.DockingSeparatorSize = 2.0f;
+    // Input mezõk és Gombok alapja (Sötétebb, mint az ablak)
+    colors[ImGuiCol_FrameBg] = ImVec4(0.05f, 0.05f, 0.05f, 0.54f);
+    colors[ImGuiCol_FrameBgHovered] = ImVec4(0.19f, 0.19f, 0.19f, 0.54f);
+    colors[ImGuiCol_FrameBgActive] = ImVec4(0.25f, 0.25f, 0.25f, 0.67f);
 
-	// Tooltips
-	style.DisplayWindowPadding = ImVec2(15.0f, 15.0f);
-	style.DisplaySafeAreaPadding = ImVec2(3.0f, 3.0f);
+    // Címsorok (Title Bar)
+    colors[ImGuiCol_TitleBg] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
+    colors[ImGuiCol_TitleBgActive] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
+    colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.00f, 0.00f, 0.00f, 0.51f);
+    colors[ImGuiCol_MenuBarBg] = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
+
+    // Görgetõsáv
+    colors[ImGuiCol_ScrollbarBg] = ImVec4(0.02f, 0.02f, 0.02f, 0.53f);
+    colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.31f, 0.31f, 0.31f, 1.00f);
+    colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.41f, 0.41f, 0.41f, 1.00f);
+    colors[ImGuiCol_ScrollbarGrabActive] = ImVec4(0.51f, 0.51f, 0.51f, 1.00f);
+
+    // "Pipa" és Sliderek (Accent Color - Itt egy "Unreal Orange"-os beütés helyett egy "Tech Blue"-t használunk)
+    colors[ImGuiCol_CheckMark] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+    colors[ImGuiCol_SliderGrab] = ImVec4(0.24f, 0.52f, 0.88f, 1.00f);
+    colors[ImGuiCol_SliderGrabActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+
+    // Gombok
+    colors[ImGuiCol_Button] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f); // Semleges szürke
+    colors[ImGuiCol_ButtonHovered] = ImVec4(0.28f, 0.28f, 0.28f, 1.00f);
+    colors[ImGuiCol_ButtonActive] = ImVec4(0.06f, 0.53f, 0.98f, 1.00f); // Aktív gomb kékül
+
+    // Fejlécek (Pl. TreeView elemek)
+    colors[ImGuiCol_Header] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
+    colors[ImGuiCol_HeaderHovered] = ImVec4(0.26f, 0.26f, 0.26f, 0.80f);
+    colors[ImGuiCol_HeaderActive] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+
+    // Elválasztók
+    colors[ImGuiCol_Separator] = ImVec4(0.08f, 0.08f, 0.08f, 1.00f);
+    colors[ImGuiCol_SeparatorHovered] = ImVec4(0.10f, 0.10f, 0.10f, 0.78f);
+    colors[ImGuiCol_SeparatorActive] = ImVec4(0.10f, 0.10f, 0.10f, 1.00f);
+
+    // Átméretezõ sarok
+    colors[ImGuiCol_ResizeGrip] = ImVec4(0.26f, 0.59f, 0.98f, 0.25f);
+    colors[ImGuiCol_ResizeGripHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.67f);
+    colors[ImGuiCol_ResizeGripActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.95f);
+
+    // Fülek (Tabs) - Ez kritikus az UE lookhoz
+    colors[ImGuiCol_Tab] = ImVec4(0.11f, 0.11f, 0.11f, 0.86f);       // Inaktív fül beleolvad
+    colors[ImGuiCol_TabHovered] = ImVec4(0.20f, 0.20f, 0.20f, 0.80f);
+    colors[ImGuiCol_TabSelected] = ImVec4(0.18f, 0.18f, 0.18f, 1.00f);       // Aktív fül kicsit világosabb
+    colors[ImGuiCol_TabSelectedOverline] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);       // Kék csík a tetején (Modern ImGui feature)
+    colors[ImGuiCol_TabDimmed] = ImVec4(0.08f, 0.08f, 0.08f, 0.97f);
+    colors[ImGuiCol_TabDimmedSelected] = ImVec4(0.12f, 0.12f, 0.12f, 1.00f);
+    colors[ImGuiCol_TabDimmedSelectedOverline] = ImVec4(0.50f, 0.50f, 0.50f, 1.00f);
+
+    // Docking
+    colors[ImGuiCol_DockingPreview] = ImVec4(0.26f, 0.59f, 0.98f, 0.70f);
+    colors[ImGuiCol_DockingEmptyBg] = ImVec4(0.20f, 0.20f, 0.20f, 1.00f);
+
+    // Plotok és grafikonok
+    colors[ImGuiCol_PlotLines] = ImVec4(0.61f, 0.61f, 0.61f, 1.00f);
+    colors[ImGuiCol_PlotLinesHovered] = ImVec4(1.00f, 0.43f, 0.35f, 1.00f);
+    colors[ImGuiCol_PlotHistogram] = ImVec4(0.90f, 0.70f, 0.00f, 1.00f);
+    colors[ImGuiCol_PlotHistogramHovered] = ImVec4(1.00f, 0.60f, 0.00f, 1.00f);
+
+    // Navigáció
+    colors[ImGuiCol_NavHighlight] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
+    colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
+    colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 }

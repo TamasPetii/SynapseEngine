@@ -73,7 +73,7 @@ void Scene::InitializeRegistry()
 
 		//Point Lights
 		{
-			for (int i = 0; i < 10; ++i)
+			for (int i = 0; i < 25; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, PointLightComponent>(entity);
@@ -94,7 +94,7 @@ void Scene::InitializeRegistry()
 
 		//Spot Lights
 		{
-			for (int i = 0; i < 1; ++i)
+			for (int i = 0; i < 25; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, SpotLightComponent>(entity);

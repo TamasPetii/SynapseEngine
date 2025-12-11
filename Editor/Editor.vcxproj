@@ -164,6 +164,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="App.h" />
+    <ClInclude Include="Gui\Utils\FileSystem.h" />
+    <ClInclude Include="Gui\Windows\FileSystemWindow.h" />
+    <ClInclude Include="Gui\Windows\ComponentWindow.h" />
     <ClInclude Include="Gui\Windows\GraphicsDebugWindow.h" />
     <ClInclude Include="Gui\ImGui\GraphEditor.h" />
     <ClInclude Include="Gui\ImGui\ImCurveEdit.h" />
@@ -174,7 +177,6 @@
     <ClInclude Include="Gui\Windows\BenchmarkWindow.h" />
     <ClInclude Include="Gui\Windows\GlobalSettingsWindow.h" />
     <ClInclude Include="Gui\Windows\EntityWindow.h" />
-    <ClInclude Include="Gui\Windows\ComponentWindow.h" />
     <ClInclude Include="Gui\Gui.h" />
     <ClInclude Include="Gui\ImGui\imconfig.h" />
     <ClInclude Include="Gui\ImGui\imgui.h" />
@@ -185,11 +187,14 @@
     <ClInclude Include="Gui\ImGui\imstb_textedit.h" />
     <ClInclude Include="Gui\ImGui\imstb_truetype.h" />
     <ClInclude Include="Gui\Utils\Panel.h" />
+    <ClInclude Include="Gui\Windows\IconsFontAwesome5.h" />
     <ClInclude Include="Gui\Windows\ViewportWindow.h" />
     <ClInclude Include="Gui\Windows\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="App.cpp" />
+    <ClCompile Include="Gui\Windows\FileSystemWindow.cpp" />
+    <ClCompile Include="Gui\Windows\ComponentWindow.cpp" />
     <ClCompile Include="Gui\Windows\GraphicsDebugWindow.cpp" />
     <ClCompile Include="Gui\ImGui\GraphEditor.cpp" />
     <ClCompile Include="Gui\ImGui\ImCurveEdit.cpp" />
@@ -199,7 +204,6 @@
     <ClCompile Include="Gui\Windows\BenchmarkWindow.cpp" />
     <ClCompile Include="Gui\Windows\GlobalSettingsWindow.cpp" />
     <ClCompile Include="Gui\Windows\EntityWindow.cpp" />
-    <ClCompile Include="Gui\Windows\ComponentWindow.cpp" />
     <ClCompile Include="Gui\Gui.cpp" />
     <ClCompile Include="Gui\ImGui\imgui.cpp" />
     <ClCompile Include="Gui\ImGui\imgui_demo.cpp" />

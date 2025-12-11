@@ -107,6 +107,7 @@ void Engine::Update()
 
 	//This has to update after model, and geometry maybe???
 	resourceManager->GetPointLightShadowBufferManager()->Update(scene->GetRegistry(), frameIndex);
+	resourceManager->GetSpotLightShadowBufferManager()->Update(scene->GetRegistry(), frameIndex);
 
 	/*
 	if (resourceUpdateTime >= resourceUpdateTargetTime)
