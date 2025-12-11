@@ -338,18 +338,65 @@ void ComponentWindow::RenderModelComponent(std::shared_ptr<Registry> registry, E
 void ComponentWindow::RenderMaterialComponent(std::shared_ptr<Registry> registry, Entity entity)
 {
     auto& component = registry->GetComponent<MaterialComponent>(entity);
-    auto pool = registry->GetPool<MaterialComponent>();
     static bool visible = true;
 
     if (ImGui::CollapsingHeader(TITLE_CP("Material Component"), &visible, ImGuiTreeNodeFlags_DefaultOpen))
     {
-        DrawLabel("Material");
+        DrawLabel("Material Asset");
         std::string matName = (component.material) ? "Assigned" : "None";
         ImGui::TextDisabled("%s", matName.c_str());
 
         if (ImGui::Button("Change Material (N/A)", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
         {
-            // TODO: Asset browser
+            // TODO: Asset browser integration
+        }
+
+        if (component.material)
+        {
+            ImGui::Separator();
+            ImGui::Text("Properties");
+            ImGui::Spacing();
+
+            auto& material = component.material;
+            bool changed = false;
+
+            DrawLabel("Color");
+            if (ImGui::ColorEdit4("##MatColor", glm::value_ptr(material->color)))
+                changed = true;
+
+            DrawLabel("UV Scale");
+            if (ImGui::DragFloat2("##MatUV", glm::value_ptr(material->uvScale), 0.05f))
+                changed = true;
+
+            DrawLabel("Metalness");
+            if (ImGui::SliderFloat("##MatMetal", &material->metalness, 0.0f, 1.0f))
+                changed = true;
+
+            DrawLabel("Roughness");
+            if (ImGui::SliderFloat("##MatRough", &material->roughness, 0.0f, 1.0f))
+                changed = true;
+
+            DrawLabel("AO Strength");
+            if (ImGui::DragFloat("##MatAO", &material->aoStrength, 0.01f, 0.0f, 1.0f))
+                changed = true;
+
+            // Emissive Settings
+            DrawLabel("Emissive Color");
+            if (ImGui::ColorEdit3("##MatEmissiveCol", glm::value_ptr(material->emissiveColor)))
+                changed = true;
+
+            DrawLabel("Emissive Int.");
+            if (ImGui::DragFloat("##MatEmissiveInt", &material->emissiveIntensity, 0.1f, 0.0f, 100.0f))
+                changed = true;
+
+            DrawLabel("Use Bloom");
+            if (ImGui::Checkbox("##MatBloom", &material->useBloom))
+                changed = true;
+
+            if (changed)
+            {
+                material->SetBit<UPDATE_BIT>();
+            }
         }
     }
 
