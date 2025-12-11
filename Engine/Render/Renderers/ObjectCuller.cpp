@@ -303,6 +303,9 @@ void ObjectCuller::CullPointLightShadowObjects(VkCommandBuffer commandBuffer, st
     if (!registry->GetPool<DefaultColliderComponent>())
         return;
 
+    //if (!registry->GetPool<PointLightComponent>() || registry->GetPool<PointLightComponent>()->GetDenseSize() == 0)
+        //return;
+
     auto pipeline = resourceManager->GetVulkanManager()->GetComputePipeline("CullingPointLightShadowObjects");
     auto pointLightBufferManager = resourceManager->GetPointLightBufferManager();
     auto pointLightShadowBufferManager = resourceManager->GetPointLightShadowBufferManager();

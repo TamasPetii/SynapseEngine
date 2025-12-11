@@ -73,7 +73,7 @@ void Scene::InitializeRegistry()
 
 		//Point Lights
 		{
-			for (int i = 0; i < 25; ++i)
+			for (int i = 0; i < 2; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, PointLightComponent>(entity);
@@ -86,7 +86,7 @@ void Scene::InitializeRegistry()
 				pointLightComponent.color = glm::vec3(dist(rng), dist(rng), dist(rng));
 				pointLightComponent.strength = 5.f;
 
-				pointLightComponent.useShadow = dist(rng) > 0.5f;
+				pointLightComponent.useShadow = true;
 
 				registry->SetParent(entity, pointLightParent);
 			}
@@ -94,7 +94,7 @@ void Scene::InitializeRegistry()
 
 		//Spot Lights
 		{
-			for (int i = 0; i < 25; ++i)
+			for (int i = 0; i < 1; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, SpotLightComponent>(entity);
@@ -107,7 +107,7 @@ void Scene::InitializeRegistry()
 				spotLightComponent.color = glm::vec3(dist(rng), dist(rng), dist(rng));
 				spotLightComponent.strength = 5.f;
 
-				spotLightComponent.useShadow = dist(rng) > 0.5f;
+				spotLightComponent.useShadow = true; //dist(rng) > 0.5f;
 
 				registry->SetParent(entity, spotLightParent);
 			}

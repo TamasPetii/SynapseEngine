@@ -1,6 +1,11 @@
 #include "Engine.h"
 #include <random>
 #include "Render/Renderers/DepthHierarchyBuilder.h"
+#include <iostream>
+#include <format>
+#include <numeric>
+
+CullingFrameStats Engine::stats;
 
 Engine::Engine()
 {
@@ -105,10 +110,6 @@ void Engine::Update()
 	resourceManager->GetPointLightBufferManager()->Update(scene->GetRegistry(), frameIndex);
 	resourceManager->GetSpotLightBufferManager()->Update(scene->GetRegistry(), frameIndex);
 
-	//This has to update after model, and geometry maybe???
-	resourceManager->GetPointLightShadowBufferManager()->Update(scene->GetRegistry(), frameIndex);
-	resourceManager->GetSpotLightShadowBufferManager()->Update(scene->GetRegistry(), frameIndex);
-
 	/*
 	if (resourceUpdateTime >= resourceUpdateTargetTime)
 	{
@@ -123,6 +124,11 @@ void Engine::Update()
 	*/
 
 	scene->Update(frameTimer, frameIndex);
+
+	//After scene update: PointLight useshadow changed component pool!
+	resourceManager->GetPointLightShadowBufferManager()->Update(scene->GetRegistry(), frameIndex);
+	resourceManager->GetSpotLightShadowBufferManager()->Update(scene->GetRegistry(), frameIndex);
+
 	InputManager::Instance()->UpdatePrevious();
 }
 
@@ -138,7 +144,7 @@ void Engine::Render()
 
 void Engine::SimulateFrame()
 {
-	Update();
+    //Todo: Update itt kint!
 
 	auto device = Vk::VulkanContext::GetContext()->GetDevice();
 	auto inFlightFence = resourceManager->GetVulkanManager()->GetFrameDependentFence("InFlight", frameIndex);
@@ -146,84 +152,9 @@ void Engine::SimulateFrame()
 	vkWaitForFences(device->Value(), 1, &inFlightFence->Value(), VK_TRUE, UINT64_MAX);
 	vkResetFences(device->Value(), 1, &inFlightFence->Value());
 
-	/*
-	std::cout << "----- Frame " << frameIndex << " -----\n";
+    CollectCullingStats(frameIndex);
 
-	{
-		auto shapeIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(
-			resourceManager->GetGeometryManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler()
-			);
-
-		for (auto& [name, shape] : resourceManager->GetGeometryManager()->GetShapes())
-		{	
-			std::cout << std::format("Shape: {} | InstanceCount: {}\n",
-				name,
-				shapeIndirectDrawBufferHandler[shape->object->GetBufferArrayIndex()].instanceCount
-			);
-		}
-	}
-
-	{
-		auto modelIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(
-			resourceManager->GetModelManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler()
-			);
-
-		for (auto& [name, model] : resourceManager->GetModelManager()->GetModels())
-		{
-			std::cout << std::format("Shape: {} | InstanceCount: {}\n",
-				name,
-				modelIndirectDrawBufferHandler[model->object->GetBufferArrayIndex()].instanceCount
-			);
-		}
-	}
-
-	{
-		auto pointLightIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(
-			resourceManager->GetPointLightBufferManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler()
-			);
-
-		auto pointLightDispatchIndirectBufferHandler = static_cast<VkDispatchIndirectCommand*>(
-			resourceManager->GetPointLightBufferManager()->GetShadowDispatchIndirectBuffers(frameIndex)->buffer->GetHandler()
-			);
-
-		auto pointLightCommonDataBufferHandler = static_cast<LightBufferCommonData*>(
-			resourceManager->GetPointLightBufferManager()->GetCommonDataBuffer(frameIndex)->buffer->GetHandler()
-			);
-
-		std::cout << std::format(
-			"Point Light: Count: {} | InstanceCount: {} | ShadowCount: {} | ShadowDispatchCount: {}\n",
-			pointLightCommonDataBufferHandler[0].count,
-			pointLightIndirectDrawBufferHandler[0].instanceCount,
-			pointLightCommonDataBufferHandler[0].shadowCount,
-			pointLightDispatchIndirectBufferHandler[0].x
-		);
-	}
-
-	
-	{
-		auto spotLightIndirectDrawBufferHandler = static_cast<VkDrawIndirectCommand*>(
-			resourceManager->GetSpotLightBufferManager()->GetIndirectDrawBuffer(frameIndex)->buffer->GetHandler()
-			);
-
-		auto spotLightDispatchIndirectBufferHandler = static_cast<VkDispatchIndirectCommand*>(
-			resourceManager->GetSpotLightBufferManager()->GetShadowDispatchIndirectBuffers(frameIndex)->buffer->GetHandler()
-			);
-
-		auto spotLightCommonDataBufferHandler = static_cast<LightBufferCommonData*>(
-			resourceManager->GetSpotLightBufferManager()->GetCommonDataBuffer(frameIndex)->buffer->GetHandler()
-			);
-
-		std::cout << std::format(
-			"Spot Light: Count: {} | InstanceCount: {} | ShadowCount: {} | ShadowDispatchCount: {}\n",
-			spotLightCommonDataBufferHandler[0].count,
-			spotLightIndirectDrawBufferHandler[0].instanceCount,
-			spotLightCommonDataBufferHandler[0].shadowCount,
-			spotLightDispatchIndirectBufferHandler[0].x
-		);
-	}
-	*/
-
-
+	Update();
 	UpdateGPU();
 	Render();
 
@@ -235,4 +166,209 @@ void Engine::SimulateFrame()
 void Engine::Finish()
 {
 	scene->Finish();
+}
+
+void Engine::CollectCullingStats(uint32_t frameIndex)
+{
+    stats = CullingFrameStats{};
+
+    auto modelMgr = resourceManager->GetModelManager();
+    auto geoMgr = resourceManager->GetGeometryManager();
+
+    // --- Main Camera ---
+    if (auto modelIndBuf = modelMgr->GetIndirectDrawBuffer(frameIndex))
+    {
+        if (modelIndBuf->buffer)
+        {
+            auto* cmd = static_cast<VkDrawIndirectCommand*>(modelIndBuf->buffer->GetHandler());
+            for (const auto& [name, model] : modelMgr->GetModels())
+            {
+                stats.mainModelCount += cmd[model->object->GetBufferArrayIndex()].instanceCount;
+            }
+        }
+    }
+
+    if (auto shapeIndBuf = geoMgr->GetIndirectDrawBuffer(frameIndex))
+    {
+        if (shapeIndBuf->buffer)
+        {
+            auto* cmd = static_cast<VkDrawIndirectCommand*>(shapeIndBuf->buffer->GetHandler());
+            for (const auto& [name, shape] : geoMgr->GetShapes())
+            {
+                stats.mainShapeCount += cmd[shape->object->GetBufferArrayIndex()].instanceCount;
+            }
+        }
+    }
+
+    // --- Point Lights ---
+    auto plBufMgr = resourceManager->GetPointLightBufferManager();
+    auto plShadowMgr = resourceManager->GetPointLightShadowBufferManager();
+
+    if (auto commonBuf = plBufMgr->GetCommonDataBuffer(frameIndex))
+    {
+        if (commonBuf->buffer)
+        {
+            auto* data = static_cast<LightBufferCommonData*>(commonBuf->buffer->GetHandler());
+            stats.pointLightCount = data->count;
+            stats.pointShadowCount = data->shadowCount;
+			stats.pointObjectCount = data->objectCount;
+        }
+    }
+
+    if (auto dispatchBuf = plBufMgr->GetShadowDispatchIndirectBuffers(frameIndex))
+    {
+        if (dispatchBuf->buffer)
+        {
+            auto* cmd = static_cast<VkDispatchIndirectCommand*>(dispatchBuf->buffer->GetHandler());
+            stats.pointDispatchX = cmd->x;
+            stats.pointDispatchY = cmd->y;
+        }
+    }
+
+    for (uint32_t i = 0; i < stats.pointShadowCount; ++i)
+    {
+        LightShadowStats lightStats;
+        lightStats.shadowIndex = i;
+
+        const auto& res = plShadowMgr->GetShadowResources(frameIndex, i);
+
+        if (res.modelIndirectDrawBuffer && res.modelIndirectDrawBuffer->buffer)
+        {
+            auto* cmds = static_cast<VkDrawIndirectCommand*>(res.modelIndirectDrawBuffer->buffer->GetHandler());
+
+            for (const auto& [name, model] : modelMgr->GetModels())
+            {
+                uint32_t idx = model->object->GetBufferArrayIndex();
+                uint32_t count = cmds[idx].instanceCount;
+
+                if (count > 0 && count != 9999)
+                {
+                    VisibleInstanceData instanceData;
+                    instanceData.name = name;
+                    instanceData.count = count;
+
+                    auto instBuffer = plShadowMgr->GetShadowResources(frameIndex, i).modelInstanceIndexBuffers[idx];
+                    if (instBuffer && instBuffer->buffer)
+                    {
+                        uint32_t* indices = static_cast<uint32_t*>(instBuffer->buffer->GetHandler());
+                        instanceData.instanceIndices.assign(indices, indices + count);
+                    }
+                    lightStats.visibleModels.push_back(instanceData);
+                }
+            }
+        }
+
+        if (res.shapeIndirectDrawBuffer && res.shapeIndirectDrawBuffer->buffer)
+        {
+            auto* cmds = static_cast<VkDrawIndirectCommand*>(res.shapeIndirectDrawBuffer->buffer->GetHandler());
+
+            for (const auto& [name, shape] : geoMgr->GetShapes())
+            {
+                uint32_t idx = shape->object->GetBufferArrayIndex();
+                uint32_t count = cmds[idx].instanceCount;
+
+                if (count > 0 && count != 9999)
+                {
+                    VisibleInstanceData instanceData;
+                    instanceData.name = name;
+                    instanceData.count = count;
+
+                    auto instBuffer = plShadowMgr->GetShadowResources(frameIndex, i).shapeInstanceIndexBuffers[idx];
+                    if (instBuffer && instBuffer->buffer)
+                    {
+                        uint32_t* indices = static_cast<uint32_t*>(instBuffer->buffer->GetHandler());
+                        instanceData.instanceIndices.assign(indices, indices + count);
+                    }
+                    lightStats.visibleShapes.push_back(instanceData);
+                }
+            }
+        }
+        stats.pointShadowDetails.push_back(lightStats);
+    }
+
+    // --- Spot Lights ---
+    auto slBufMgr = resourceManager->GetSpotLightBufferManager();
+    auto slShadowMgr = resourceManager->GetSpotLightShadowBufferManager();
+
+    if (auto commonBuf = slBufMgr->GetCommonDataBuffer(frameIndex))
+    {
+        if (commonBuf->buffer)
+        {
+            auto* data = static_cast<LightBufferCommonData*>(commonBuf->buffer->GetHandler());
+            stats.spotLightCount = data->count;
+            stats.spotShadowCount = data->shadowCount;
+			stats.spotObjectCount = data->objectCount;
+        }
+    }
+
+    if (auto dispatchBuf = slBufMgr->GetShadowDispatchIndirectBuffers(frameIndex))
+    {
+        if (dispatchBuf->buffer)
+        {
+            auto* cmd = static_cast<VkDispatchIndirectCommand*>(dispatchBuf->buffer->GetHandler());
+            stats.spotDispatchX = cmd->x;
+            stats.spotDispatchY = cmd->y;
+        }
+    }
+
+    for (uint32_t i = 0; i < stats.spotShadowCount; ++i)
+    {
+        LightShadowStats lightStats;
+        lightStats.shadowIndex = i;
+
+        const auto& res = slShadowMgr->GetShadowResources(frameIndex, i);
+
+        if (res.modelIndirectDrawBuffer && res.modelIndirectDrawBuffer->buffer)
+        {
+            auto* cmds = static_cast<VkDrawIndirectCommand*>(res.modelIndirectDrawBuffer->buffer->GetHandler());
+
+            for (const auto& [name, model] : modelMgr->GetModels())
+            {
+                uint32_t idx = model->object->GetBufferArrayIndex();
+                uint32_t count = cmds[idx].instanceCount;
+
+                if (count > 0 && count != 9999)
+                {
+                    VisibleInstanceData instanceData;
+                    instanceData.name = name;
+                    instanceData.count = count;
+
+                    auto instBuffer = slShadowMgr->GetShadowResources(frameIndex, i).modelInstanceIndexBuffers[idx];
+                    if (instBuffer && instBuffer->buffer)
+                    {
+                        uint32_t* indices = static_cast<uint32_t*>(instBuffer->buffer->GetHandler());
+                        instanceData.instanceIndices.assign(indices, indices + count);
+                    }
+                    lightStats.visibleModels.push_back(instanceData);
+                }
+            }
+        }
+
+        if (res.shapeIndirectDrawBuffer && res.shapeIndirectDrawBuffer->buffer)
+        {
+            auto* cmds = static_cast<VkDrawIndirectCommand*>(res.shapeIndirectDrawBuffer->buffer->GetHandler());
+
+            for (const auto& [name, shape] : geoMgr->GetShapes())
+            {
+                uint32_t idx = shape->object->GetBufferArrayIndex();
+                uint32_t count = cmds[idx].instanceCount;
+
+                if (count > 0 && count != 9999)
+                {
+                    VisibleInstanceData instanceData;
+                    instanceData.name = name;
+                    instanceData.count = count;
+
+                    auto instBuffer = slShadowMgr->GetShadowResources(frameIndex, i).shapeInstanceIndexBuffers[idx];
+                    if (instBuffer && instBuffer->buffer)
+                    {
+                        uint32_t* indices = static_cast<uint32_t*>(instBuffer->buffer->GetHandler());
+                        instanceData.instanceIndices.assign(indices, indices + count);
+                    }
+                    lightStats.visibleShapes.push_back(instanceData);
+                }
+            }
+        }
+        stats.spotShadowDetails.push_back(lightStats);
+    }
 }
