@@ -11,6 +11,7 @@ void SpotLightShadowSystem::OnUpdate(std::shared_ptr<Registry> registry, std::sh
 	std::for_each(std::execution::seq, spotLightShadowPool->GetDenseIndices().begin(), spotLightShadowPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			auto& spotLightShadowComponent = spotLightShadowPool->GetData(entity);
+			auto spotLightShadowDenseIndex = spotLightShadowPool->GetDenseIndex(entity);
 
 			[[unlikely]]
 			if (spotLightShadowPool->IsBitSet<REGENERATE_BIT>(entity))
@@ -18,6 +19,8 @@ void SpotLightShadowSystem::OnUpdate(std::shared_ptr<Registry> registry, std::sh
 				spotLightShadowComponent.version++;
 				spotLightShadowPool->ResetBit<REGENERATE_BIT>(entity);
 			}
+
+			//TODO: spotLightShadowComponent SHADOW VERSION -> Other version index for better control?
 
 			[[unlikely]]
 			if (spotLightShadowComponent.frameBuffers[frameIndex].version != spotLightShadowComponent.version)
@@ -37,12 +40,21 @@ void SpotLightShadowSystem::OnUpdate(std::shared_ptr<Registry> registry, std::sh
 				frameBufferBuilder
 					.SetSize(spotLightShadowComponent.textureSize, spotLightShadowComponent.textureSize)
 					.AddDepthSpecification(0, depthImageSpec);
+				
+				auto fbo = frameBufferBuilder.BuildDynamic();
+				spotLightShadowComponent.frameBuffers[frameIndex].frameBuffer = fbo;
 
-				spotLightShadowComponent.frameBuffers[frameIndex].frameBuffer = frameBufferBuilder.BuildDynamic();
+				resourceManager
+					->GetVulkanManager()
+					->GetDescriptorSet("ShadowDescriptorSet")
+					->UpdateImageArrayElement(
+						"PointShadowMaps",
+						fbo->GetImage("Depth")->GetImageView("Default"),
+						VK_NULL_HANDLE,
+						spotLightShadowDenseIndex
+					);
 
 				std::cout << "Regenerated spot light shadow framebuffer for entity " << entity << std::endl;
-
-				//TODO: DYNAMIC DESCRIPTOR ARRAY UPDATE
 			}
 		}
 	);

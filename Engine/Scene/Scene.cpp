@@ -531,6 +531,9 @@ void Scene::UpdateComponentBuffers(uint32_t frameIndex)
 	RecalculateGpuBufferSize<DefaultColliderComponent, DefaultColliderGPU>("DefaultColliderData", frameIndex);
 	RecalculateGpuBufferSize<DefaultColliderComponent, ColliderGpuDebug>("DefaultColliderDebug", frameIndex);
 
+	RecalculateGpuBufferSize<DefaultColliderComponent, uint32_t>("DefaultColliderIndexPointLight", frameIndex);
+	RecalculateGpuBufferSize<DefaultColliderComponent, uint32_t>("DefaultColliderIndexSpotLight", frameIndex);
+
 	RecalculateGpuBufferSize<DirectionLightComponent, DirectionLightGPU>("DirectionLightData", frameIndex);
 	RecalculateGpuBufferSize<DirectionLightComponent, glm::vec4>("DirectionLightBillboard", frameIndex);
 

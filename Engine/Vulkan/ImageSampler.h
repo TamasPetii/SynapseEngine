@@ -8,6 +8,8 @@ namespace Vk
 
 	struct ENGINE_API ImageSamplerConfig
 	{
+		bool compareEnable = false;
+		VkCompareOp compareOp = VK_COMPARE_OP_ALWAYS;
 		VkFilter magFilter;
 		VkFilter minFilter;
 		VkSamplerMipmapMode mipMapFilter;

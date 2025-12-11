@@ -9,6 +9,8 @@ struct LightCommonData {
 	uint count;
 	uvec3 aabbMax;
 	uint shadowCount;
+	vec3 padding;
+	uint objectCount;
 };
 
 layout(buffer_reference, std430) buffer LightCommonDataBuffer { 

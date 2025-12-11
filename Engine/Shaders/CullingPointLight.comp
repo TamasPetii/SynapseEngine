@@ -1,5 +1,5 @@
 #version 460
-layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+layout (local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
 
 #include "Common/Camera.glsl"
 #include "Common/Render/RenderIndices.glsl"
@@ -33,7 +33,7 @@ layout(push_constant) uniform constants
 } PushConstants;
 
 
-const uint pointShadowLocalSizeX = 64;
+const uint pointShadowLocalSizeX = 16;
 const uint pointLightDrawCommandIndex = 0;
 
 void main()
@@ -106,7 +106,7 @@ void main()
 		
 			uint instanceIndex = atomicAdd(lightCommonDataBuffer.commonData.count, 1);
 			InstanceIndexBuffer(PushConstants.pointLightInstanceIndexBuffer).indices[instanceIndex] = pointLightIndex;
-			atomicMax(DrawIndirectCommandBuffer(PushConstants.pointLightDrawIndirectCommandBuffer).commands[pointLightDrawCommandIndex].instanceCount, instanceIndex);
+			atomicMax(DrawIndirectCommandBuffer(PushConstants.pointLightDrawIndirectCommandBuffer).commands[pointLightDrawCommandIndex].instanceCount, instanceIndex+1);
 		
 			ColliderDebugBuffer debugBuf = ColliderDebugBuffer(PushConstants.colliderDebugBuffer);
             debugBuf.data[instanceIndex].projectedAABB = projectedAABB;

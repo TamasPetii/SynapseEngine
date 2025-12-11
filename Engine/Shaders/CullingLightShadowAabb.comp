@@ -17,7 +17,6 @@ layout (local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 layout(push_constant) uniform constants
 {	
 	uvec2 defaultColliderBuffer;
-	uvec2 defaultColliderCountBuffer;
 	uvec2 defaultColliderInstanceIndexBuffer;
 	uvec2 lightCommonDataBuffer;
 	uvec2 lightShadowDispatchIndirectBuffer;
@@ -25,7 +24,7 @@ layout(push_constant) uniform constants
 } PushConstants;
 
 
-const uint colliderLocalSizeY = 64;
+const uint colliderLocalSizeY = 32;
 
 void main()
 {
@@ -45,13 +44,13 @@ void main()
 	vec3 defaultColliderAabbMin = defaultColliderBuffer.colliders[globalIndex].aabbOrigin - defaultColliderBuffer.colliders[globalIndex].aabbExtents;
 	vec3 defaultColliderAabbMax = defaultColliderBuffer.colliders[globalIndex].aabbOrigin + defaultColliderBuffer.colliders[globalIndex].aabbExtents;
 
-	vec3 lightCommonAabbMin = vec3(uintBitsToFloat(lightCommonDataBuffer.commonData.aabbMin.x), uintBitsToFloat(lightCommonDataBuffer.commonData.aabbMin.y), uintBitsToFloat(lightCommonDataBuffer.commonData.aabbMin.z));
-	vec3 lightCommonAabbMax = vec3(uintBitsToFloat(lightCommonDataBuffer.commonData.aabbMax.x), uintBitsToFloat(lightCommonDataBuffer.commonData.aabbMax.y), uintBitsToFloat(lightCommonDataBuffer.commonData.aabbMax.z));
+	vec3 lightCommonAabbMin = vec3(sortableUintToFloat(lightCommonDataBuffer.commonData.aabbMin.x), sortableUintToFloat(lightCommonDataBuffer.commonData.aabbMin.y), sortableUintToFloat(lightCommonDataBuffer.commonData.aabbMin.z));
+	vec3 lightCommonAabbMax = vec3(sortableUintToFloat(lightCommonDataBuffer.commonData.aabbMax.x), sortableUintToFloat(lightCommonDataBuffer.commonData.aabbMax.y), sortableUintToFloat(lightCommonDataBuffer.commonData.aabbMax.z));
 
 	if(TestAabbVsAabb(lightCommonAabbMin, lightCommonAabbMax,defaultColliderAabbMin, defaultColliderAabbMax))
 	{	
 		//Save visible collider "instance" index to a buffer
-		uint colliderInstanceIndex = atomicAdd(CountBuffer(PushConstants.defaultColliderCountBuffer).count, 1);
+		uint colliderInstanceIndex = atomicAdd(lightCommonDataBuffer.commonData.objectCount, 1);
 		InstanceIndexBuffer(PushConstants.defaultColliderInstanceIndexBuffer).indices[colliderInstanceIndex] = globalIndex;	
 
 		//Update dispatch indirect args (Y dimension)

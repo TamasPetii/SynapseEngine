@@ -338,6 +338,20 @@ void VulkanManager::InitSamplers()
 
 		RegisterSampler("BloomSampler", config);
 	}
+
+	{
+		Vk::ImageSamplerConfig config{};
+		config.magFilter = VK_FILTER_LINEAR;
+		config.minFilter = VK_FILTER_LINEAR;
+		config.addressMode = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER;
+		config.borderColor = VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE;
+		config.mipMapFilter = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+		config.anisotropyEnable = false;
+		config.compareEnable = true;
+		config.compareOp = VK_COMPARE_OP_LESS;
+
+		RegisterSampler("ShadowSampler", config);
+	}
 }
 
 void VulkanManager::InitRenderPasses()
@@ -485,8 +499,8 @@ void VulkanManager::InitDescriptors()
 		Vk::DescriptorPoolBuilder poolBuilder;
 		poolBuilder
 			.SetMaxSets(1)
-			.SetPoolSize(VK_DESCRIPTOR_TYPE_SAMPLER, 16)
-			.SetPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 2048);
+			.SetPoolSize(VK_DESCRIPTOR_TYPE_SAMPLER, MAX_SAMPLERS)
+			.SetPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, MAX_IMAGES);
 	
 		RegisterDescriptorPool("ImagePool", poolBuilder.BuildDescriptorPool());
 
@@ -502,6 +516,58 @@ void VulkanManager::InitDescriptors()
 		GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Samplers", VK_NULL_HANDLE, GetSampler("NearestAniso")->Value(), 2);
 		GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Samplers", VK_NULL_HANDLE, GetSampler("LinearAniso")->Value(), 3);
 		GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Samplers", VK_NULL_HANDLE, GetSampler("MaxReduction")->Value(), 4);
+		GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Samplers", VK_NULL_HANDLE, GetSampler("BloomSampler")->Value(), 5);
+		GetDescriptorSet("LoadedImages")->UpdateImageArrayElement("Samplers", VK_NULL_HANDLE, GetSampler("ShadowSampler")->Value(), 6);
+	}
+
+	{
+		constexpr uint32_t MAX_DIR_SHADOWS = 1024;
+		constexpr uint32_t MAX_POINT_SHADOWS = 1024;
+		constexpr uint32_t MAX_SPOT_SHADOWS = 1024;
+
+		uint32_t totalImages = MAX_DIR_SHADOWS + MAX_POINT_SHADOWS + MAX_SPOT_SHADOWS;
+
+		Vk::DescriptorPoolBuilder poolBuilder;
+		poolBuilder
+			.SetMaxSets(1)
+			.SetPoolSize(VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, totalImages);
+
+		RegisterDescriptorPool("ShadowMapPool", poolBuilder.BuildDescriptorPool());
+
+		Vk::DescriptorSetBuilder setBuilder;
+		setBuilder
+			.AddDescriptorLayoutImage(
+				"DirShadowMaps",
+				0,
+				VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+				VK_SHADER_STAGE_FRAGMENT_BIT,
+				VK_NULL_HANDLE,
+				VK_NULL_HANDLE,
+				VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+				MAX_DIR_SHADOWS
+			)
+			.AddDescriptorLayoutImage(
+				"PointShadowMaps",
+				1,
+				VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+				VK_SHADER_STAGE_FRAGMENT_BIT,
+				VK_NULL_HANDLE,
+				VK_NULL_HANDLE,
+				VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+				MAX_POINT_SHADOWS
+			)
+			.AddDescriptorLayoutImage(
+				"SpotShadowMaps",
+				2,
+				VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE,
+				VK_SHADER_STAGE_FRAGMENT_BIT,
+				VK_NULL_HANDLE,
+				VK_NULL_HANDLE,
+				VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
+				MAX_SPOT_SHADOWS
+			);
+
+		RegisterDescriptorSet("ShadowDescriptorSet", setBuilder.BuildDescriptorSet(GetDescriptorPool("ShadowMapPool")->Value()));
 	}
 
 	//Push Descriptor

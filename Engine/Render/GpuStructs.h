@@ -44,7 +44,6 @@ struct DeferredDirectionLightPushConstants
 	uint32_t cameraIndex;
 };
 
-
 struct DeferredPointLightPushConstants
 {
 	VkDeviceAddress cameraBuffer;
@@ -167,17 +166,15 @@ struct CullingSpotLightPushConstants
 struct CullingLightShadowAabbPushConstants
 {
 	VkDeviceAddress defaultColliderBuffer;
-	VkDeviceAddress defaultColliderCountBuffer;
 	VkDeviceAddress defaultColliderInstanceIndexBuffer;
-	VkDeviceAddress pointLightCommonDataBuffer;
-	VkDeviceAddress pointLightShadowDispatchIndirectBuffer;
+	VkDeviceAddress lightCommonDataBuffer;
+	VkDeviceAddress lightShadowDispatchIndirectBuffer;
 	uint32_t defaultColliderCount;
 };
 
 struct CullingPointLightsShadowObjectsPushConstants
 {
 	VkDeviceAddress defaultColliderBuffer;
-	VkDeviceAddress defaultColliderCountBuffer;
 	VkDeviceAddress defaultColliderCulledIndexBuffer;
 
 	VkDeviceAddress pointLightBuffer;
@@ -196,7 +193,6 @@ struct CullingPointLightsShadowObjectsPushConstants
 struct CullingSpotLightsShadowObjectsPushConstants
 {
 	VkDeviceAddress defaultColliderBuffer;
-	VkDeviceAddress defaultColliderCountBuffer;
 	VkDeviceAddress defaultColliderCulledIndexBuffer;
 
 	VkDeviceAddress spotLightBuffer;

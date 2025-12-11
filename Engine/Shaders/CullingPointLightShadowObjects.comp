@@ -1,5 +1,5 @@
 #version 460
-layout (local_size_x = 64, local_size_y = 64, local_size_z = 1) in;
+layout (local_size_x = 16, local_size_y = 32, local_size_z = 1) in;
 
 #include "Common/Camera.glsl"
 #include "Common/Count.glsl"
@@ -14,7 +14,6 @@ layout (local_size_x = 64, local_size_y = 64, local_size_z = 1) in;
 layout(push_constant) uniform constants
 {	
 	uvec2 defaultColliderBuffer;
-	uvec2 defaultColliderCountBuffer;
 	uvec2 defaultColliderCulledIndexBuffer;
 
 	uvec2 pointLightBuffer;
@@ -35,10 +34,9 @@ void main()
 	uint lightIndex = gl_GlobalInvocationID.x;
 	uint colliderInstanceIndex = gl_GlobalInvocationID.y;
 
-	CountBuffer defaultColliderCountBuffer = CountBuffer(PushConstants.defaultColliderCountBuffer);
 	LightCommonDataBuffer lightCommonDataBuffer = LightCommonDataBuffer(PushConstants.pointLightCommonDataBuffer);
 
-	if(lightIndex >= lightCommonDataBuffer.commonData.shadowCount || colliderInstanceIndex >= defaultColliderCountBuffer.count)
+	if(lightIndex >= lightCommonDataBuffer.commonData.shadowCount || colliderInstanceIndex >= lightCommonDataBuffer.commonData.objectCount)
 		return;
 
 	InstanceIndexBuffer defaultColliderCulledIndexBuffer = InstanceIndexBuffer(PushConstants.defaultColliderCulledIndexBuffer);

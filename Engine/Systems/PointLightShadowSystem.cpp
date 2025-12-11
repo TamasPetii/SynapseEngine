@@ -29,6 +29,7 @@ void PointLightShadowSystem::OnUpdate(std::shared_ptr<Registry> registry, std::s
 	std::for_each(std::execution::seq, pointLightShadowPool->GetDenseIndices().begin(), pointLightShadowPool->GetDenseIndices().end(),
 		[&](const Entity& entity) -> void {
 			auto& pointLightShadowComponent = pointLightShadowPool->GetData(entity);
+			auto pointLightShadowDenseIndex = pointLightShadowPool->GetDenseIndex(entity);
 
 			[[unlikely]]
 			if (pointLightShadowPool->IsBitSet<REGENERATE_BIT>(entity))
@@ -36,6 +37,8 @@ void PointLightShadowSystem::OnUpdate(std::shared_ptr<Registry> registry, std::s
 				pointLightShadowComponent.version++;
 				pointLightShadowPool->ResetBit<REGENERATE_BIT>(entity);
 			}
+
+			//TODO: spotLightShadowComponent SHADOW VERSION -> Other version index for better control?
 
 			[[unlikely]]
 			if (pointLightShadowComponent.frameBuffers[frameIndex].version != pointLightShadowComponent.version)
@@ -58,11 +61,20 @@ void PointLightShadowSystem::OnUpdate(std::shared_ptr<Registry> registry, std::s
 					.SetSize(pointLightShadowComponent.textureSize, pointLightShadowComponent.textureSize)
 					.AddDepthSpecification(0, depthImageSpec);
 
-				pointLightShadowComponent.frameBuffers[frameIndex].frameBuffer = frameBufferBuilder.BuildDynamic();
+				auto fbo = frameBufferBuilder.BuildDynamic();
+				pointLightShadowComponent.frameBuffers[frameIndex].frameBuffer = fbo;
+
+				resourceManager
+					->GetVulkanManager()
+					->GetDescriptorSet("ShadowDescriptorSet")
+					->UpdateImageArrayElement(
+						"PointShadowMaps",
+						fbo->GetImage("Depth")->GetImageView("Default"),
+						VK_NULL_HANDLE,
+						pointLightShadowDenseIndex
+					);
 
 				std::cout << "Regenerated point light shadow framebuffer for entity " << entity << std::endl;
-
-				//TODO: DYNAMIC DESCRIPTOR ARRAY UPDATE
 			}
 		}
 	);

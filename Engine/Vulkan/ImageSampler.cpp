@@ -39,8 +39,8 @@ void Vk::ImageSampler::Init()
 
 	samplerInfo.borderColor = config.borderColor;
 	samplerInfo.unnormalizedCoordinates = VK_FALSE;
-	samplerInfo.compareEnable = VK_FALSE;
-	samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
+	samplerInfo.compareEnable = config.compareEnable;
+	samplerInfo.compareOp = config.compareOp;
 	samplerInfo.mipmapMode = config.mipMapFilter;
 	samplerInfo.mipLodBias = 0.0f;
 	samplerInfo.minLod = config.minLod;

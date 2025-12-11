@@ -15,6 +15,8 @@ struct LightBufferCommonData
 	uint32_t count = 0;
 	glm::uvec3 aabbMax = glm::uvec3(std::numeric_limits<uint32_t>::lowest());
 	uint32_t shadowCount = 0;
+	glm::uvec3 padding;
+	uint32_t objectCount = 0;
 };
 
 template <typename L>
