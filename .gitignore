@@ -5,7 +5,7 @@
 
 *.dae
 *.jpg
-*.png
+//*.png
 *.obj
 *.fbx
 *.mtl
