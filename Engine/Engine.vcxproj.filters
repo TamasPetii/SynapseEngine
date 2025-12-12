@@ -450,6 +450,9 @@
     <ClInclude Include="Systems\SpotLightShadowSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Renderers\ShadowRenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Engine.cpp">
@@ -852,6 +855,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Systems\SpotLightShadowSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Renderers\ShadowRenderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

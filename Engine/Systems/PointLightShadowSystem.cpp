@@ -56,6 +56,13 @@ void PointLightShadowSystem::OnUpdate(std::shared_ptr<Registry> registry, std::s
 				depthImageSpec.flags = VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
 				depthImageSpec.AddImageViewConfig("Default", VK_IMAGE_VIEW_TYPE_CUBE);
 
+				for (uint32_t i = 0; i < 6; ++i)
+				{
+					std::string viewName = "Face_" + std::to_string(i);
+					depthImageSpec.AddImageViewConfig(viewName, VK_IMAGE_VIEW_TYPE_2D, 0, 1, std::nullopt, false, i, 1);
+				}
+
+
 				Vk::FrameBufferBuilder frameBufferBuilder;
 				frameBufferBuilder
 					.SetSize(pointLightShadowComponent.textureSize, pointLightShadowComponent.textureSize)

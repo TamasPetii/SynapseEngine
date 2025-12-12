@@ -79,6 +79,15 @@ bool ProjectBox(CameraBuffer cameraBuffer, uint cameraIndex, vec3 bmin, vec3 bma
     vec2 p6 = P6.xy / P6.w;
     vec2 p7 = P7.xy / P7.w;
 
+    p0.y = -p0.y;
+    p1.y = -p1.y;
+    p2.y = -p2.y;
+    p3.y = -p3.y;
+    p4.y = -p4.y;
+    p5.y = -p5.y;
+    p6.y = -p6.y;
+    p7.y = -p7.y;
+
     // AABB számítás (clip space-ben)
     projectedAABB.xy = min(min(min(p0, p1), min(p2, p3)), min(min(p4, p5), min(p6, p7)));
     projectedAABB.zw = max(max(max(p0, p1), max(p2, p3)), max(max(p4, p5), max(p6, p7)));

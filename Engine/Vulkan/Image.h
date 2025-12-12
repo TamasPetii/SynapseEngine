@@ -15,6 +15,8 @@ namespace Vk
 		VkImageViewType viewType;
 		uint32_t baseMipLevel = 0;
 		uint32_t mipLevelCount = 1;
+		uint32_t baseArrayLayer = 0;
+		uint32_t layerCount = 1;
 		std::optional<VkComponentMapping> swizzle;
 	};
 
@@ -34,7 +36,7 @@ namespace Vk
 		VkImageCreateFlags flags = VK_IMAGE_CREATE_FLAG_BITS_MAX_ENUM;
 
 		void AddImageViewConfig(const std::string& name, const ImageViewConfig& imageViewConfig);
-		void AddImageViewConfig(const std::string& name, VkImageViewType viewType, uint32_t baseMipLevel = 0, uint32_t mipLevelCount = 1, std::optional<VkComponentMapping> swizzle = std::nullopt, bool calcualteMipLevelAutomaticly = false);
+		void AddImageViewConfig(const std::string& name, VkImageViewType viewType, uint32_t baseMipLevel = 0, uint32_t mipLevelCount = 1, std::optional<VkComponentMapping> swizzle = std::nullopt, bool calcualteMipLevelAutomaticly = false, uint32_t baseArrayLayer  = 0, uint32_t layerCount = 1);
 		std::unordered_map<std::string, ImageViewConfig> imageViewConfigs;
 	};
 

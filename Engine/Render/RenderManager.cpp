@@ -8,6 +8,7 @@
 #include "Renderers/ObjectCuller.h"
 #include "Renderers/DepthHierarchyBuilder.h"
 #include "Renderers/BloomRenderer.h"
+#include "Renderers/ShadowRenderer.h"
 
 RenderManager::RenderManager(std::shared_ptr<ResourceManager> resourceManager) : 
 	resourceManager(resourceManager)
@@ -54,6 +55,9 @@ void RenderManager::Render(std::shared_ptr<Registry> registry, uint32_t frameInd
 	VK_CHECK_MESSAGE(vkBeginCommandBuffer(commandBuffer, &beginInfo), "Failed to begin recording command buffer!");
 
 	renderers["ObjectCuller"]->Render(commandBuffer, registry, resourceManager, frameIndex);
+
+	renderers["ShadowRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
+
 	renderers["GeometryRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
 	renderers["DeferredRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
 	renderers["BloomRenderer"]->Render(commandBuffer, registry, resourceManager, frameIndex);
@@ -157,6 +161,9 @@ void RenderManager::InitRenderers()
 
 	renderers["BloomRenderer"] = std::make_shared<BloomRenderer>();
 	renderers["BloomRenderer"]->Initialize(resourceManager);
+
+	renderers["ShadowRenderer"] = std::make_shared<ShadowRenderer>();
+	renderers["ShadowRenderer"]->Initialize(resourceManager);
 }
 
 void RenderManager::InitCommandPool()

@@ -6,9 +6,9 @@ void Vk::ImageSpecification::AddImageViewConfig(const std::string& name, const I
 	imageViewConfigs.insert(std::make_pair(name, imageViewConfig));
 }
 
-void Vk::ImageSpecification::AddImageViewConfig(const std::string& name, VkImageViewType viewType, uint32_t baseMipLevel, uint32_t mipLevelCount, std::optional<VkComponentMapping> swizzle, bool calcualteMipLevelAutomaticly)
+void Vk::ImageSpecification::AddImageViewConfig(const std::string& name, VkImageViewType viewType, uint32_t baseMipLevel, uint32_t mipLevelCount, std::optional<VkComponentMapping> swizzle, bool calcualteMipLevelAutomaticly, uint32_t baseArrayLayer, uint32_t layerCount)
 {
-	imageViewConfigs[name] = ImageViewConfig{ calcualteMipLevelAutomaticly, viewType, baseMipLevel, mipLevelCount, swizzle };
+	imageViewConfigs[name] = ImageViewConfig{ calcualteMipLevelAutomaticly, viewType, baseMipLevel, mipLevelCount, baseArrayLayer, layerCount, swizzle };
 }
 
 Vk::Image::Image(const ImageSpecification& specification) :
