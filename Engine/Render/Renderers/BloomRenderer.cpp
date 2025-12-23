@@ -23,8 +23,14 @@ void BloomRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Regist
 	}
 
 	Prefilter(commandBuffer, resourceManager, frameIndex);
-	Downsample(commandBuffer, resourceManager, frameIndex);
-	Upsample(commandBuffer, resourceManager, frameIndex);
+
+
+	if (GlobalConfig::BloomConfig::simulateDownSample)
+		Downsample(commandBuffer, resourceManager, frameIndex);
+
+	if (GlobalConfig::BloomConfig::simulateUpSample)
+		Upsample(commandBuffer, resourceManager, frameIndex);
+
 	Composite(commandBuffer, resourceManager, frameIndex);
 }
 

@@ -48,6 +48,18 @@ void GlobalSettingsWindow::RenderWireframeSettings()
 
             DrawCheckbox("Point Project Debug", "##Point Collider Project Debug", &GlobalConfig::WireframeConfig::showPointLightsProjectedAABB);
             DrawCheckbox("Spot Project Debug", "##Spot Collider Project Debug", &GlobalConfig::WireframeConfig::showSpotLightsProjectedAABB);
+        
+			ImGui::Separator();
+
+            DrawCheckbox("Simulate Dir Light", "##Simulate Dir Light", &GlobalConfig::DeferredConfig::simulateDirLight);
+            DrawCheckbox("Simulate Point Light", "##Simulate Point Light", &GlobalConfig::DeferredConfig::simulatePointLight);
+            DrawCheckbox("Simulate Spot Light", "##Simulate Spot Light", &GlobalConfig::DeferredConfig::simulateSpotLight);
+
+            ImGui::Separator();
+
+            DrawCheckbox("Simulate Up Sample", "##Simulate Up Sample", &GlobalConfig::BloomConfig::simulateUpSample);
+            DrawCheckbox("Simulate Down Sample", "##Simulate Down Sample", &GlobalConfig::BloomConfig::simulateDownSample);
+
         });
 }
 

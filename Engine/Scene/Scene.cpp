@@ -73,7 +73,7 @@ void Scene::InitializeRegistry()
 
 		//Point Lights
 		{
-			for (int i = 0; i < 2; ++i)
+			for (int i = 0; i < 10; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, PointLightComponent>(entity);
@@ -81,12 +81,12 @@ void Scene::InitializeRegistry()
 
 				transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 25.f;
 				transformComponent.rotation = glm::vec3(dist(rng), dist(rng), dist(rng)) * 180.f;
-				transformComponent.scale = glm::vec3(dist(rng)) * 8.f;
+				transformComponent.scale = glm::vec3(dist(rng)) * 15.f;
 
 				pointLightComponent.color = glm::vec3(dist(rng), dist(rng), dist(rng));
-				pointLightComponent.strength = 5.f;
+				pointLightComponent.strength = 10.f;
 
-				pointLightComponent.useShadow = true;
+				pointLightComponent.useShadow = i == 0;
 
 				registry->SetParent(entity, pointLightParent);
 			}
@@ -94,20 +94,20 @@ void Scene::InitializeRegistry()
 
 		//Spot Lights
 		{
-			for (int i = 0; i < 1; ++i)
+			for (int i = 0; i < 10; ++i)
 			{
 				auto entity = registry->CreateEntity();
 				registry->AddComponents<TransformComponent, SpotLightComponent>(entity);
 				auto [transformComponent, spotLightComponent] = registry->GetComponents<TransformComponent, SpotLightComponent>(entity);
 				
-				transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 50.f;
+				transformComponent.translation = (glm::vec3(dist(rng), dist(rng), dist(rng)) * 2.f - 1.f) * 25.f;
 				transformComponent.rotation = glm::vec3(dist(rng), dist(rng), dist(rng)) * 180.f;
 				transformComponent.scale = glm::vec3(1.f, 5.f, 10.f) + glm::vec3(dist(rng), dist(rng), dist(rng)) * glm::vec3(25.f, 10.f, 25.f);
 				
 				spotLightComponent.color = glm::vec3(dist(rng), dist(rng), dist(rng));
 				spotLightComponent.strength = 5.f;
 
-				spotLightComponent.useShadow = true; //dist(rng) > 0.5f;
+				spotLightComponent.useShadow = i == 0; //dist(rng) > 0.5f;
 
 				registry->SetParent(entity, spotLightParent);
 			}
@@ -135,7 +135,7 @@ void Scene::InitializeRegistry()
 		material->metalness = dist(rng);
 		material->SetBit<UPDATE_BIT>();
 
-		for (uint32_t i = 0; i < 1000; ++i)
+		for (uint32_t i = 0; i < 500; ++i)
 		{
 			std::string materialName = "Shape" + std::to_string(i++);
 			auto [material, wasLoaded] = resourceManager->GetMaterialManager()->RegisterMaterial(materialName);

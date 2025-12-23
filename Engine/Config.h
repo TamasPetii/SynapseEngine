@@ -5,8 +5,22 @@
 
 struct ENGINE_API GlobalConfig
 {
+	struct ENGINE_API BloomConfig
+	{
+		static inline bool simulateUpSample = true;
+		static inline bool simulateDownSample = true;
+	};
+
+	struct ENGINE_API DeferredConfig
+	{
+		static inline bool simulateDirLight = true;
+		static inline bool simulatePointLight = true;
+		static inline bool simulateSpotLight = true;
+	};
+
 	struct ENGINE_API WireframeConfig
 	{
+
 		static inline bool showColliderAABB = false;
 		static inline bool showColliderOBB = false;
 		static inline bool showColliderSphere = false;

@@ -54,11 +54,11 @@ void DeferredRenderer::Render(VkCommandBuffer commandBuffer, std::shared_ptr<Reg
 
 	RenderEmissiveAo(commandBuffer, registry, resourceManager, frameIndex);
 
-	RenderDirectionLights(commandBuffer, registry, resourceManager, frameIndex);
 
 	//RenderPointLights(commandBuffer, registry, resourceManager, frameIndex);
 	//RenderSpotLights(commandBuffer, registry, resourceManager, frameIndex);
 
+	RenderDirectionLights(commandBuffer, registry, resourceManager, frameIndex);
 	RenderPointLightsIndirect(commandBuffer, registry, resourceManager, frameIndex);
 	RenderSpotLightsIndirect(commandBuffer, registry, resourceManager, frameIndex);
 }
@@ -120,6 +120,9 @@ void DeferredRenderer::RenderEmissiveAo(VkCommandBuffer commandBuffer, std::shar
 
 void DeferredRenderer::RenderDirectionLights(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
 {
+	if (!GlobalConfig::DeferredConfig::simulateDirLight)
+		return;
+
 	auto directionLightPool = registry->GetPool<DirectionLightComponent>();
 
 	if (!directionLightPool || directionLightPool->GetDenseSize() == 0)
@@ -302,6 +305,9 @@ void DeferredRenderer::RenderSpotLights(VkCommandBuffer commandBuffer, std::shar
 
 void DeferredRenderer::RenderPointLightsIndirect(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
 {
+	if (!GlobalConfig::DeferredConfig::simulatePointLight)
+		return;
+
 	auto pointLightPool = registry->GetPool<PointLightComponent>();
 
 	if (!pointLightPool || pointLightPool->GetDenseSize() == 0)
@@ -364,6 +370,9 @@ void DeferredRenderer::RenderPointLightsIndirect(VkCommandBuffer commandBuffer, 
 
 void DeferredRenderer::RenderSpotLightsIndirect(VkCommandBuffer commandBuffer, std::shared_ptr<Registry> registry, std::shared_ptr<ResourceManager> resourceManager, uint32_t frameIndex)
 {
+	if (!GlobalConfig::DeferredConfig::simulateSpotLight)
+		return;
+
 	auto spotLightPool = registry->GetPool<SpotLightComponent>();
 
 	if (!spotLightPool || spotLightPool->GetDenseSize() == 0)
