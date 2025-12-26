@@ -1,9 +1,12 @@
 <Solution>
   <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Dist" />
+    <BuildType Name="Release" />
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="Editor/Editor.vcxproj" />
-  <Project Path="EditorCore/EditorCore.vcxproj" />
-  <Project Path="Engine/Engine.vcxproj" />
+  <Project Path="Editor/Editor.vcxproj" Id="bd7d5d51-fe5f-4b82-be64-56c8b100b496" />
+  <Project Path="EditorCore/EditorCore.vcxproj" Id="3542814c-06e0-4d16-913b-47ba04a428ab" />
+  <Project Path="Engine/Engine.vcxproj" Id="de125602-7639-48fb-af02-5213bccc28ad" />
 </Solution>

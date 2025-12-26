@@ -1,1 +1,2 @@
-# Vulkan Engine
+# Synapse Engine - Development Journey
+
