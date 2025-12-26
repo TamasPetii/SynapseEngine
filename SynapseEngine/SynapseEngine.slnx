@@ -1,0 +1,9 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="Editor/Editor.vcxproj" />
+  <Project Path="EditorCore/EditorCore.vcxproj" />
+  <Project Path="Engine/Engine.vcxproj" />
+</Solution>
