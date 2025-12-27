@@ -1,0 +1,49 @@
+name: Synapse Engine Build
+
+on:
+  push:
+    branches: [ "remake" ]
+  pull_request:
+    branches: [ "remake" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Restore vcpkg artifacts
+      uses: actions/cache@v4
+      id: vcpkg-cache
+      with:
+        path: |
+          ${{ github.workspace }}/SynapseEngine/vcpkg_installed
+          ${{ github.workspace }}/External/vcpkg/installed
+          !${{ github.workspace }}/External/vcpkg/installed/**/debug
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('SynapseEngine/vcpkg.json') }}
+        restore-keys: |
+          ${{ runner.os }}-vcpkg-
+
+    - name: Bootstrap vcpkg
+      run: |
+        cd External/vcpkg
+        .\bootstrap-vcpkg.bat
+      shell: cmd
+
+    - name: Build Solution (Dist)
+      run: msbuild SynapseEngine/SynapseEngine.slnx /p:Configuration=Dist /p:Platform=x64 /m
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SynapseEngine-Build
+        path: SynapseEngine/Binaries/x64/Dist/
+        if-no-files-found: error
