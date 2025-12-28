@@ -6,6 +6,7 @@
 #include <vector>
 #include <functional>
 #include <type_traits>
+#include <span>
 
 namespace Syn
 {
@@ -25,8 +26,8 @@ namespace Syn
         void SwapBackend(DenseIndex a, DenseIndex b, const SwapCallback& onSwap);
         void ClearBackend();
         size_t Size() const;
-        const std::vector<EntityID>& GetEntities() const;
-    public:
+        std::span<const EntityID> GetDenseEntities() const;
+    protected:
         std::vector<EntityID> _entities;
     };
 }
@@ -85,7 +86,7 @@ namespace Syn
         _entities.clear();
         this->ClearData();
         this->ClearFlags();
-        this->ResetState();
+        this->ResetAllStateBits();
     }
 
     template<typename T, bool HasFlags>
@@ -95,7 +96,7 @@ namespace Syn
     }
 
     template<typename T, bool HasFlags>
-    SYN_INLINE const std::vector<EntityID>& StorageBackend<T, HasFlags>::GetEntities() const
+    SYN_INLINE std::span<const EntityID> StorageBackend<T, HasFlags>::GetDenseEntities() const
     {
         return _entities;
     }

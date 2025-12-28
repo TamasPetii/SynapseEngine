@@ -13,5 +13,5 @@ namespace Syn
     using DataPool = Pool<T, FlatStorage<T>, SparseVectorMapping>;
 
     template<typename T>
-    using ComponentPool = Pool<T, SegmentedStorageFlagged<T>, SparseVectorMapping>;
+    using ComponentPool = Pool<T, SegmentedStorage<T>, SparseVectorMapping>;
 }

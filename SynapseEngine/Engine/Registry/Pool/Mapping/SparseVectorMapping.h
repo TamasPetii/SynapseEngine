@@ -4,6 +4,7 @@
 #include "Engine/Registry/Entity.h"
 #include "MappingCRTP.h"
 #include <vector>
+#include <span>
 
 namespace Syn
 {
@@ -16,6 +17,7 @@ namespace Syn
         void Remove(EntityID entity);
         bool Contains(EntityID entity) const;
         void Clear();
+        std::span<const DenseIndex> GetSparseIndices() const;
     private:
         std::vector<DenseIndex> _indices;
     };
@@ -56,5 +58,10 @@ namespace Syn
     SYN_INLINE void SparseVectorMapping::Clear()
     {
         _indices.clear();
+    }
+
+    SYN_INLINE std::span<const DenseIndex> SparseVectorMapping::GetSparseIndices() const
+    {
+        return _indices;
     }
 }

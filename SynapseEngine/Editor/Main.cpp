@@ -8,7 +8,6 @@
 #include <algorithm>
 #include <random>
 #include "Engine/Engine.h"
-#include "Engine/TestComponent.h"
 #include "Engine/Registry/Type/TypeInfo.h"
 #include "Engine/Registry/Pool/Pool.h"
 #include "Engine/Registry/Pool/Mapping/SynMapping.h"
@@ -19,7 +18,6 @@ int main()
 {
     Syn::Engine engine;
 	engine.Initialize();
-    Syn::Info("Editor: Registered TestComponent with TypeID {}", Syn::TypeInfo<Syn::TestComponent>::ID);
 
     if (!glfwInit()) return -1;
     GLFWwindow* window = glfwCreateWindow(100, 100, "Test", NULL, NULL);

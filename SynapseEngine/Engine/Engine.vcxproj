@@ -210,7 +210,6 @@
     <ClInclude Include="Registry\Pool\IPool.h" />
     <ClInclude Include="Registry\Pool\PoolTypes.h" />
     <ClInclude Include="Registry\Registry.h" />
-    <ClInclude Include="TestComponent.h" />
     <ClInclude Include="Registry\Type\TypeInfo.h" />
     <ClInclude Include="Registry\Pool\Mapping\HashMapping.h" />
     <ClInclude Include="Registry\Pool\Mapping\MappingConcept.h" />

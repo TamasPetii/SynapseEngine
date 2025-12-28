@@ -4,6 +4,7 @@
 #include "Engine/Registry/Entity.h"
 #include <vector>
 #include <utility>
+#include <span>
 
 namespace Syn
 {
@@ -19,6 +20,9 @@ namespace Syn
 
         T& GetData(DenseIndex index);
         const T& GetData(DenseIndex index) const;
+
+        std::span<T> GetRawData();
+        std::span<const T> GetRawData() const;
     protected:
         std::vector<T> _data;
     };
@@ -28,11 +32,9 @@ namespace Syn
     {
         template<typename U>
         SYN_INLINE void PushData(U&&) {}
-
         SYN_INLINE void PopData() {}
         SYN_INLINE void SwapData(DenseIndex, DenseIndex) {}
         SYN_INLINE void ClearData() {}
-        SYN_INLINE const void* GetDataPtr() const { return nullptr; }
     };
 }
 
@@ -82,5 +84,17 @@ namespace Syn
     {
         SYN_ASSERT(index < _data.size(), "Data index out of bounds");
         return _data[index];
+    }
+
+    template<typename T>
+    SYN_INLINE std::span<T> DataMixin<T>::GetRawData()
+    {
+        return _data;
+    }
+
+    template<typename T>
+    SYN_INLINE std::span<const T> DataMixin<T>::GetRawData() const
+    {
+        return _data;
     }
 }

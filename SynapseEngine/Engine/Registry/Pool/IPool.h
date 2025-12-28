@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine/Registry/Entity.h"
-#include <vector>
+#include <span>
 
 namespace Syn
 {
@@ -9,7 +9,7 @@ namespace Syn
         virtual ~IPool() = default;
         virtual void RemoveIfHas(EntityID entity) = 0;
         virtual void Clear() = 0;
-        virtual size_t Size() = 0;
-        virtual const std::vector<EntityID>& GetRawEntities() const = 0;
+        virtual size_t Size() const = 0;
+        virtual std::span<const EntityID> GetDenseEntities() const = 0;
     };
 }

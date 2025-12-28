@@ -4,6 +4,7 @@
 #include "Engine/Registry/Entity.h"
 #include "Engine/Registry/BitFlag.h"
 #include <vector>
+#include <atomic>
 
 namespace Syn
 {
@@ -13,6 +14,20 @@ namespace Syn
     template<>
     struct FlagMixin<true>
     {
+    private:
+        struct AtomicByte
+        {
+            std::atomic<uint8_t> value;
+
+            AtomicByte() : value(0) {}
+            AtomicByte(uint8_t v) : value(v) {}
+            AtomicByte(const AtomicByte& other) : value(other.value.load(std::memory_order_relaxed)) {}
+            AtomicByte& operator=(const AtomicByte& other) {
+                value.store(other.value.load(std::memory_order_relaxed), std::memory_order_relaxed);
+                return *this;
+            }
+        };
+
     public:
         void PushFlag();
         void PopFlag();
@@ -20,23 +35,28 @@ namespace Syn
         void FlagIndexChanged(DenseIndex index);
         void ClearFlags();
 
-        BitsetFlag      GetState() const;
-        void            ResetState();
-
-        BitsetFlag& GetFlags(DenseIndex index);
-        const BitsetFlag& GetFlags(DenseIndex index) const;
+        template<uint32_t... Bits>
+        bool IsStateBitSet() const;
 
         template<uint32_t... Bits>
-        void SetBit(DenseIndex index);
+        void ResetStateBit();
+
+        void ResetAllStateBits();
+
+        template<uint32_t... Bits>
+        bool SetBit(DenseIndex index);
 
         template<uint32_t... Bits>
         void ResetBit(DenseIndex index);
 
         template<uint32_t... Bits>
         bool IsBitSet(DenseIndex index) const;
+
+        void ResetAllBits(DenseIndex index);
+
     protected:
-        std::vector<BitsetFlag> _flags;
-        BitsetFlag              _state;
+        std::vector<AtomicByte> _flags;
+        std::atomic<uint8_t>    _state{ 0 };
     };
 
     template<>
@@ -47,8 +67,25 @@ namespace Syn
         SYN_INLINE void SwapFlag(DenseIndex, DenseIndex) {}
         SYN_INLINE void FlagIndexChanged(DenseIndex) {}
         SYN_INLINE void ClearFlags() {}
-        SYN_INLINE BitsetFlag GetState() const { return {}; }
-        SYN_INLINE void       ResetState() {}
+
+        template<uint32_t... Bits>
+        SYN_INLINE bool IsStateBitSet() const { return false; }
+
+        template<uint32_t... Bits>
+        SYN_INLINE void ResetStateBit() {}
+
+        SYN_INLINE void ResetAllStateBits() {}
+
+        template<uint32_t... Bits>
+        SYN_INLINE bool SetBit(DenseIndex) { return false; }
+
+        template<uint32_t... Bits>
+        SYN_INLINE void ResetBit(DenseIndex) {}
+
+        template<uint32_t... Bits>
+        SYN_INLINE bool IsBitSet(DenseIndex) const { return false; }
+
+        SYN_INLINE void ResetAllBits(DenseIndex) {}
     };
 }
 
@@ -56,17 +93,10 @@ namespace Syn
 {
     SYN_INLINE void FlagMixin<true>::PushFlag()
     {
-        BitsetFlag newFlag;
+        constexpr uint8_t mask = (1 << REGENERATE_BIT) | (1 << UPDATE_BIT) | (1 << INDEX_CHANGED_BIT);
 
-        newFlag.set(REGENERATE_BIT);
-        newFlag.set(UPDATE_BIT);
-        newFlag.set(INDEX_CHANGED_BIT);
-
-        _flags.push_back(newFlag);
-
-        _state.set(REGENERATE_BIT);
-        _state.set(UPDATE_BIT);
-        _state.set(INDEX_CHANGED_BIT);
+        _flags.emplace_back(mask);
+        _state.fetch_or(mask, std::memory_order_relaxed);
     }
 
     SYN_INLINE void FlagMixin<true>::PopFlag()
@@ -78,63 +108,81 @@ namespace Syn
     SYN_INLINE void FlagMixin<true>::SwapFlag(DenseIndex a, DenseIndex b)
     {
         SYN_ASSERT(a < _flags.size() && b < _flags.size(), "Flag index out of bounds");
-        std::swap(_flags[a], _flags[b]);
+
+        uint8_t valA = _flags[a].value.load(std::memory_order_relaxed);
+        uint8_t valB = _flags[b].value.load(std::memory_order_relaxed);
+
+        _flags[a].value.store(valB, std::memory_order_relaxed);
+        _flags[b].value.store(valA, std::memory_order_relaxed);
     }
 
     SYN_INLINE void FlagMixin<true>::FlagIndexChanged(DenseIndex index)
     {
         SYN_ASSERT(index < _flags.size(), "Flag index out of bounds");
-        _flags[index].set(INDEX_CHANGED_BIT);
-        _state.set(INDEX_CHANGED_BIT);
+        constexpr uint8_t mask = (1 << INDEX_CHANGED_BIT);
+
+        _flags[index].value.fetch_or(mask, std::memory_order_relaxed);
+        _state.fetch_or(mask, std::memory_order_relaxed);
     }
 
     SYN_INLINE void FlagMixin<true>::ClearFlags()
     {
         _flags.clear();
-        _state.reset();
-    }
-
-    SYN_INLINE BitsetFlag& FlagMixin<true>::GetFlags(DenseIndex index)
-    {
-        SYN_ASSERT(index < _flags.size(), "Flag index out of bounds");
-        return _flags[index];
-    }
-
-    SYN_INLINE const BitsetFlag& FlagMixin<true>::GetFlags(DenseIndex index) const
-    {
-        SYN_ASSERT(index < _flags.size(), "Flag index out of bounds");
-        return _flags[index];
+        _state.store(0, std::memory_order_relaxed);
     }
 
     template<uint32_t... Bits>
-    SYN_INLINE void FlagMixin<true>::SetBit(DenseIndex index)
+    SYN_INLINE bool FlagMixin<true>::IsStateBitSet() const
+    {
+        constexpr uint8_t mask = ((1 << Bits) | ...);
+        return (_state.load(std::memory_order_relaxed) & mask) == mask;
+    }
+
+    template<uint32_t... Bits>
+    SYN_INLINE void FlagMixin<true>::ResetStateBit()
+    {
+        constexpr uint8_t mask = ((1 << Bits) | ...);
+        _state.fetch_and(~mask, std::memory_order_relaxed);
+    }
+
+    SYN_INLINE void FlagMixin<true>::ResetAllStateBits()
+    {
+        _state.store(0, std::memory_order_relaxed);
+    }
+
+    template<uint32_t... Bits>
+    SYN_INLINE bool FlagMixin<true>::SetBit(DenseIndex index)
     {
         SYN_ASSERT(index < _flags.size(), "Flag index out of bounds");
-        (_flags[index].set(Bits), ...);
-        (_state.set(Bits), ...);
+        constexpr uint8_t mask = ((1 << Bits) | ...);
+
+        uint8_t prev = _flags[index].value.fetch_or(mask, std::memory_order_relaxed);
+        _state.fetch_or(mask, std::memory_order_relaxed);
+
+        return (prev & mask) != 0;
     }
 
     template<uint32_t... Bits>
     SYN_INLINE void FlagMixin<true>::ResetBit(DenseIndex index)
     {
         SYN_ASSERT(index < _flags.size(), "Flag index out of bounds");
-        (_flags[index].reset(Bits), ...);
+        constexpr uint8_t mask = ((1 << Bits) | ...);
+
+        _flags[index].value.fetch_and(~mask, std::memory_order_relaxed);
     }
 
     template<uint32_t... Bits>
     SYN_INLINE bool FlagMixin<true>::IsBitSet(DenseIndex index) const
     {
         SYN_ASSERT(index < _flags.size(), "Flag index out of bounds");
-        return (_flags[index].test(Bits) && ...);
+        constexpr uint8_t mask = ((1 << Bits) | ...);
+
+        return (_flags[index].value.load(std::memory_order_relaxed) & mask) == mask;
     }
 
-    SYN_INLINE BitsetFlag FlagMixin<true>::GetState() const
+    SYN_INLINE void FlagMixin<true>::ResetAllBits(DenseIndex index)
     {
-        return _state;
-    }
-
-    SYN_INLINE void FlagMixin<true>::ResetState()
-    {
-        _state.reset();
+        SYN_ASSERT(index < _flags.size(), "Flag index out of bounds");
+        _flags[index].value.store(0, std::memory_order_relaxed);
     }
 }

@@ -7,11 +7,12 @@
 #include "Mapping/MappingConcept.h"
 #include <type_traits>
 #include <utility>
+#include <span>
 
 namespace Syn
 {
     template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
     class Pool
     {
     public:
@@ -26,7 +27,7 @@ namespace Syn
         void Add(EntityID entity, U&& value);
 
         template<typename U = T>
-            requires (!std::is_void_v<U> && std::is_default_constructible_v<U>)
+            requires (!std::is_void_v<U>&& std::is_default_constructible_v<U>)
         void Add(EntityID entity);
 
         template<typename U = T>
@@ -34,6 +35,7 @@ namespace Syn
         void Add(EntityID entity);
 
         void Remove(EntityID entity);
+
         void Clear();
 
         bool Has(EntityID entity) const;
@@ -52,8 +54,20 @@ namespace Syn
 
         size_t Size() const;
 
-        void            SetCategory(EntityID entity, StorageCategory newCat);
-        StorageCategory GetCategory(EntityID entity) const;
+        void SetCategory(EntityID entity, StorageCategory newCat)
+            requires requires(StoragePolicy s, DenseIndex i, StorageCategory c) { s.SetCategory(i, c, {}); };
+
+        StorageCategory GetCategory(EntityID entity) const
+            requires requires(const StoragePolicy s, DenseIndex i) { s.GetCategory(i); };
+
+        void MarkStaticDirty(EntityID entity)
+            requires requires(StoragePolicy s, DenseIndex i) { s.MarkStaticDirty(i); };
+
+        std::span<EntityID> GetDirtyStatics()
+            requires requires(StoragePolicy s) { s.GetDirtyStatics(); };
+
+        void ResetStaticDirtyCounter()
+            requires requires(StoragePolicy s) { s.ResetStaticDirtyCounter(); };
 
         template<uint32_t... Bits>
         void SetBit(EntityID entity);
@@ -63,7 +77,12 @@ namespace Syn
 
         template<uint32_t... Bits>
         void ResetBit(EntityID entity);
-    public:
+
+        std::span<const EntityID> GetDenseEntities() const;
+
+		std::span<const DenseIndex> GetSparseIndices() const
+            requires requires(MappingPolicy m) { m.GetSparseIndices(); };
+    private:
         StoragePolicy _storage;
         MappingPolicy _mapping;
     };
@@ -87,7 +106,7 @@ namespace Syn
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
+        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
     template<typename U>
         requires (!std::is_void_v<U>&& std::is_default_constructible_v<U>)
     SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::Add(EntityID entity)
@@ -172,9 +191,9 @@ namespace Syn
     template<typename T, typename StoragePolicy, typename MappingPolicy>
         requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
     SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::SetCategory(EntityID entity, StorageCategory newCat)
+        requires requires(StoragePolicy s, DenseIndex i, StorageCategory c) { s.SetCategory(i, c, {}); }
     {
         SYN_ASSERT(_mapping.Contains(entity), "Entity not in pool");
-
         const DenseIndex index = _mapping.Get(entity);
 
         _storage.SetCategory(index, newCat, [this](EntityID movedEntity, DenseIndex newIndex) {
@@ -185,9 +204,42 @@ namespace Syn
     template<typename T, typename StoragePolicy, typename MappingPolicy>
         requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
     SYN_INLINE StorageCategory Pool<T, StoragePolicy, MappingPolicy>::GetCategory(EntityID entity) const
+        requires requires(const StoragePolicy s, DenseIndex i) { s.GetCategory(i); }
     {
         const DenseIndex index = _mapping.Get(entity);
         return _storage.GetCategory(index);
+    }
+
+    template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
+    SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::MarkStaticDirty(EntityID entity)
+        requires requires(StoragePolicy s, DenseIndex i) { s.MarkStaticDirty(i); }
+    {
+        const DenseIndex index = _mapping.Get(entity);
+        _storage.MarkStaticDirty(index);
+    }
+
+    template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
+    SYN_INLINE std::span<EntityID> Pool<T, StoragePolicy, MappingPolicy>::GetDirtyStatics()
+        requires requires(StoragePolicy s) { s.GetDirtyStatics(); }
+    {
+        return _storage.GetDirtyStatics();
+    }
+
+    template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
+    SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::ResetStaticDirtyCounter()
+        requires requires(StoragePolicy s) { s.ResetStaticDirtyCounter(); }
+    {
+        _storage.ResetStaticDirtyCounter();
+    }
+
+    template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
+    inline std::span<const EntityID> Pool<T, StoragePolicy, MappingPolicy>::GetDenseEntities() const
+    {
+        return _storage.GetDenseEntities();
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>

@@ -267,7 +267,7 @@ namespace Syn
 				return a->Size() < b->Size();
 			});
 
-		const auto& entities = smallestIPool->GetRawEntities();
+		const auto& entities = smallestIPool->GetDenseEntities();
 
 		std::for_each(policy, entities.begin(), entities.end(), [&](EntityID entity) {
 			if (HasComponents<T...>(entity))
