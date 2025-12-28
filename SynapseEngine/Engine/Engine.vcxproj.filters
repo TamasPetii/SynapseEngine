@@ -18,16 +18,16 @@
     <ClCompile Include="Logger\Logger.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Logger\ISink.cpp">
+    <ClCompile Include="Logger\Sink\ISink.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Logger\ConsoleSink.cpp">
+    <ClCompile Include="Logger\Sink\ConsoleSink.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Logger\FileSink.cpp">
+    <ClCompile Include="Logger\Sink\FileSink.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Logger\MemorySink.cpp">
+    <ClCompile Include="Logger\Sink\MemorySink.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Logger\LogMessage.cpp">
@@ -63,6 +63,15 @@
     <ClCompile Include="Registry\Pool\Pool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Registry\Type\TypeManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Logger\LogFormat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -74,16 +83,16 @@
     <ClInclude Include="Logger\Logger.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Logger\ISink.h">
+    <ClInclude Include="Logger\Sink\ISink.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Logger\ConsoleSink.h">
+    <ClInclude Include="Logger\Sink\ConsoleSink.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Logger\FileSink.h">
+    <ClInclude Include="Logger\Sink\FileSink.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Logger\MemorySink.h">
+    <ClInclude Include="Logger\Sink\MemorySink.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Logger\LogMessage.h">
@@ -150,6 +159,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Registry\Pool\Mapping\MappingConcept.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Type\TypeManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Type\TypeInfo.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TestComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Logger\LogFormat.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

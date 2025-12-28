@@ -424,6 +424,10 @@ void Test_Pool_Clear()
     TEST_END
 }
 
+#include "Engine/Engine.h"
+#include "Engine/TestComponent.h"
+#include "Engine/Registry/Type/TypeInfo.h"
+
 int main()
 {
     std::cout << "========================================\n";
@@ -448,9 +452,14 @@ int main()
     std::cout << "   ALL TESTS PASSED\n";
     std::cout << "========================================\n";
 
-    Syn::Logger::Get().AddSink(std::make_shared<Syn::ConsoleSink>());
-    Syn::Logger::Get().AddSink(std::make_shared<Syn::MemorySink>());
-    Syn::Logger::Get().AddSink(std::make_shared<Syn::FileSink>());
+    Engine engine;
+	engine.Initialize();
+
+    Syn::Info("Editor: Registered TestComponent with TypeID {0}", TypeInfo<TestComponent>::ID);
+    Syn::Info("Editor: Registered TestComponent with TypeID {0}", TypeInfo<TestComponent>::ID);
+    Syn::Info("Editor: Registered TestComponent with TypeID {0}", TypeInfo<TestComponent>::ID);
+    Syn::Info("Editor: Registered TestComponent with TypeID {0}", TypeInfo<TestComponent>::ID);
+
 
     if (!glfwInit()) return -1;
     GLFWwindow* window = glfwCreateWindow(100, 100, "Test", NULL, NULL);

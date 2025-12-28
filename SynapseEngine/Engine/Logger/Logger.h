@@ -2,18 +2,16 @@
 #include "Engine/SynApi.h"
 #include "Engine/SynMacro.h"
 #include "Engine/Logger/LogMessage.h"
-#include "Engine/Logger/ISink.h"
-
+#include "Engine/Logger/LogFormat.h" // <--- Az új header include-olása
+#include "Sink/ISink.h"
 
 #include <string>
 #include <string_view>
-#include <format>
-#include <source_location>
-#include <chrono>
 #include <vector>
 #include <memory>
+#include <type_traits>
 
-namespace Syn 
+namespace Syn
 {
     class SYN_API Logger {
     public:
@@ -27,32 +25,29 @@ namespace Syn
     };
 
     template<typename... Args>
-    void Info(std::format_string<Args...> fmt, Args&&... args,
-        std::source_location loc = std::source_location::current())
+    void Info(Syn::LogFormat<std::type_identity_t<Args>...> format, Args&&... args)
     {
         if constexpr (Syn::EnableLogging) {
-            std::string msg = std::format(fmt, std::forward<Args>(args)...);
-            Logger::Get().Dispatch(LogLevel::Info, msg, loc.file_name(), static_cast<int>(loc.line()));
+            std::string msg = std::format(format.fmt, std::forward<Args>(args)...);
+            Logger::Get().Dispatch(LogLevel::Info, msg, format.loc.file_name(), static_cast<int>(format.loc.line()));
         }
     }
 
     template<typename... Args>
-    void Warning(std::format_string<Args...> fmt, Args&&... args,
-        std::source_location loc = std::source_location::current())
+    void Warning(Syn::LogFormat<std::type_identity_t<Args>...> format, Args&&... args)
     {
         if constexpr (Syn::EnableLogging) {
-            std::string msg = std::format(fmt, std::forward<Args>(args)...);
-            Logger::Get().Dispatch(LogLevel::Warning, msg, loc.file_name(), static_cast<int>(loc.line()));
+            std::string msg = std::format(format.fmt, std::forward<Args>(args)...);
+            Logger::Get().Dispatch(LogLevel::Warning, msg, format.loc.file_name(), static_cast<int>(format.loc.line()));
         }
     }
 
     template<typename... Args>
-    void Error(std::format_string<Args...> fmt, Args&&... args,
-        std::source_location loc = std::source_location::current())
+    void Error(Syn::LogFormat<std::type_identity_t<Args>...> format, Args&&... args)
     {
         if constexpr (Syn::EnableLogging) {
-            std::string msg = std::format(fmt, std::forward<Args>(args)...);
-            Logger::Get().Dispatch(LogLevel::Error, msg, loc.file_name(), static_cast<int>(loc.line()));
+            std::string msg = std::format(format.fmt, std::forward<Args>(args)...);
+            Logger::Get().Dispatch(LogLevel::Error, msg, format.loc.file_name(), static_cast<int>(format.loc.line()));
         }
     }
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine/SynApi.h"
-#include "Engine/Logger/ISink.h"
+#include "ISink.h"
 #include <fstream>
 
 namespace Syn

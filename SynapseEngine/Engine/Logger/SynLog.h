@@ -1,7 +1,7 @@
 #pragma once
 #include "LogMessage.h"
 #include "Logger.h"
-#include "ISink.h"
-#include "ConsoleSink.h"
-#include "FileSink.h"
-#include "MemorySink.h"
+#include "Sink/ISink.h"
+#include "Sink/ConsoleSink.h"
+#include "Sink/FileSink.h"
+#include "Sink/MemorySink.h"
