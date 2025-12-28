@@ -5,6 +5,7 @@
 #include "FlagMixin.h"
 #include <vector>
 #include <functional>
+#include <type_traits>
 
 namespace Syn
 {
@@ -12,20 +13,18 @@ namespace Syn
     class StorageBackend : public DataMixin<T>, public FlagMixin<HasFlags>
     {
     public:
-        template<typename U = T, typename = std::enable_if_t<!std::is_void_v<U>>>
+        template<typename U = T>
+            requires (!std::is_void_v<U>)
         void PushBackend(EntityID entity, U&& value);
 
-        template<typename U = T, typename = std::enable_if_t<std::is_void_v<U>>>
+        template<typename U = T>
+            requires std::is_void_v<U>
         void PushBackend(EntityID entity);
 
         void PopBackend();
-
         void SwapBackend(DenseIndex a, DenseIndex b, const SwapCallback& onSwap);
-
         void ClearBackend();
-
         size_t Size() const;
-
         const std::vector<EntityID>& GetEntities() const;
     public:
         std::vector<EntityID> _entities;
@@ -35,7 +34,8 @@ namespace Syn
 namespace Syn
 {
     template<typename T, bool HasFlags>
-    template<typename U, typename>
+    template<typename U>
+        requires (!std::is_void_v<U>)
     SYN_INLINE void StorageBackend<T, HasFlags>::PushBackend(EntityID entity, U&& value)
     {
         _entities.push_back(entity);
@@ -44,7 +44,8 @@ namespace Syn
     }
 
     template<typename T, bool HasFlags>
-    template<typename U, typename>
+    template<typename U>
+        requires std::is_void_v<U>
     SYN_INLINE void StorageBackend<T, HasFlags>::PushBackend(EntityID entity)
     {
         _entities.push_back(entity);

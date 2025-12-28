@@ -37,7 +37,4 @@ namespace Syn
             static_cast<Derived*>(this)->Clear();
         }
     };
-
-    template<typename T>
-    concept MappingConstraint = std::is_base_of_v<MappingCRTP<T>, T>;
 }

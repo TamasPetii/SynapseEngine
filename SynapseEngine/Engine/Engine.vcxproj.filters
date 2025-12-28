@@ -107,16 +107,7 @@
     <ClInclude Include="Registry\Pool\Storage\FlagMixin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Registry\Pool\Storage\StorageBackend.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Registry\Pool\Storage\SegmentedStorageImpl.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Registry\Pool\Storage\StorageCategory.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Registry\Pool\Storage\FlatStorageImpl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Registry\Pool\Pool.h">
@@ -141,6 +132,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Registry\Pool\Mapping\MappingCRTP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Storage\StorageCRTP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Storage\FlatStorageImpl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Storage\SegmentedStorageImpl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Storage\StorageBackend.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Storage\StorageConcept.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Mapping\MappingConcept.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

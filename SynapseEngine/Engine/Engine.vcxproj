@@ -198,13 +198,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Registry\Pool\Mapping\HashMapping.h" />
+    <ClInclude Include="Registry\Pool\Mapping\MappingConcept.h" />
     <ClInclude Include="Registry\Pool\Mapping\MappingCRTP.h" />
     <ClInclude Include="Registry\Pool\Mapping\MappingUtils.h" />
     <ClInclude Include="Registry\Pool\Mapping\SparsePagedMapping.h" />
     <ClInclude Include="Registry\Pool\Mapping\SparseVectorMapping.h" />
     <ClInclude Include="Registry\Pool\Mapping\SynMapping.h" />
     <ClInclude Include="Registry\Pool\Pool.h" />
-    <ClInclude Include="Registry\Pool\Storage\FlatStorageImpl.h" />
     <ClInclude Include="Registry\Pool\Storage\FlagMixin.h" />
     <ClInclude Include="Registry\Pool\Storage\DataMixin.h" />
     <ClInclude Include="Registry\BitFlag.h" />
@@ -217,9 +217,12 @@
     <ClInclude Include="Logger\LogMessage.h" />
     <ClInclude Include="Logger\SynLog.h" />
     <ClInclude Include="Logger\LogUtils.h" />
-    <ClInclude Include="Registry\Pool\Storage\StorageBackend.h" />
+    <ClInclude Include="Registry\Pool\Storage\FlatStorageImpl.h" />
     <ClInclude Include="Registry\Pool\Storage\SegmentedStorageImpl.h" />
+    <ClInclude Include="Registry\Pool\Storage\StorageBackend.h" />
     <ClInclude Include="Registry\Pool\Storage\StorageCategory.h" />
+    <ClInclude Include="Registry\Pool\Storage\StorageConcept.h" />
+    <ClInclude Include="Registry\Pool\Storage\StorageCRTP.h" />
     <ClInclude Include="Registry\Pool\Storage\SynStorage.h" />
     <ClInclude Include="SynApi.h" />
     <ClInclude Include="SynMacro.h" />
