@@ -119,15 +119,6 @@
     <ClInclude Include="Registry\Pool\Storage\FlatStorageImpl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Registry\Pool\Mapping\HashMapping.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Registry\Pool\Mapping\SparseVectorMapping.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Registry\Pool\Mapping\SparsePagedMapping.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Registry\Pool\Pool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -138,6 +129,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Registry\Pool\Storage\SynStorage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Mapping\HashMapping.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Mapping\SparsePagedMapping.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Mapping\SparseVectorMapping.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Mapping\MappingCRTP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

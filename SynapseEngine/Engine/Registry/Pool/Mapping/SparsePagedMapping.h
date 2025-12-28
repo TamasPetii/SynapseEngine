@@ -3,13 +3,14 @@
 #include "Engine/SynMacro.h"
 #include "Engine/Registry/Entity.h"
 #include "MappingUtils.h"
+#include "MappingCRTP.h"
 #include <vector>
 #include <memory>
 #include <algorithm> 
 
 namespace Syn
 {
-    class SYN_API SparsePagedMapping
+	class SYN_API SparsePagedMapping : public MappingCRTP<SparsePagedMapping>
     {
     public:
         static constexpr uint32_t PAGE_SIZE = 1024;

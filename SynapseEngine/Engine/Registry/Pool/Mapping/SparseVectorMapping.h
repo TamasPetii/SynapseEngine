@@ -2,11 +2,12 @@
 #include "Engine/SynApi.h"
 #include "Engine/SynMacro.h"
 #include "Engine/Registry/Entity.h"
+#include "MappingCRTP.h"
 #include <vector>
 
 namespace Syn
 {
-    class SYN_API SparseVectorMapping
+    class SYN_API SparseVectorMapping : public MappingCRTP<SparseVectorMapping>
     {
     public:
         // Common mapping interface is not used to avoid virtual calls in performance-critical code

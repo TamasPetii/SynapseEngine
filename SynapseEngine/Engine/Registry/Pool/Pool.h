@@ -3,13 +3,14 @@
 #include "Engine/SynMacro.h"
 #include "Engine/Registry/Entity.h"
 #include "Storage/StorageCategory.h"
-
+#include "Mapping/MappingCRTP.h"
 #include <type_traits>
 #include <utility>
 
 namespace Syn
 {
     template<typename T, typename StoragePolicy, typename MappingPolicy>
+       requires MappingConstraint<MappingPolicy>
     class Pool
     {
     public:
@@ -61,6 +62,7 @@ namespace Syn
 namespace Syn
 {
     template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires MappingConstraint<MappingPolicy>
     template<typename U, typename>
     SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::Add(EntityID entity, U&& value)
     {
@@ -74,6 +76,7 @@ namespace Syn
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires MappingConstraint<MappingPolicy>
     template<typename U, typename>
     SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::Add(EntityID entity)
     {
@@ -87,6 +90,7 @@ namespace Syn
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires MappingConstraint<MappingPolicy>
     SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::Remove(EntityID entity)
     {
         SYN_ASSERT(_mapping.Contains(entity), "Entity does not have this component");
@@ -101,12 +105,14 @@ namespace Syn
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires MappingConstraint<MappingPolicy>
     SYN_INLINE bool Pool<T, StoragePolicy, MappingPolicy>::Has(EntityID entity) const
     {
         return _mapping.Contains(entity);
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires MappingConstraint<MappingPolicy>
     template<typename U, typename>
     SYN_INLINE U& Pool<T, StoragePolicy, MappingPolicy>::Get(EntityID entity)
     {
@@ -115,6 +121,7 @@ namespace Syn
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires MappingConstraint<MappingPolicy>
     template<typename U, typename>
     SYN_INLINE const U& Pool<T, StoragePolicy, MappingPolicy>::Get(EntityID entity) const
     {
@@ -123,6 +130,7 @@ namespace Syn
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires MappingConstraint<MappingPolicy>
     template<typename U, typename>
     SYN_INLINE U* Pool<T, StoragePolicy, MappingPolicy>::TryGet(EntityID entity)
     {
@@ -133,6 +141,7 @@ namespace Syn
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires MappingConstraint<MappingPolicy>
     SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::SetCategory(EntityID entity, StorageCategory newCat)
     {
         SYN_ASSERT(_mapping.Contains(entity), "Entity not in pool");
@@ -145,6 +154,7 @@ namespace Syn
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires MappingConstraint<MappingPolicy>
     SYN_INLINE StorageCategory Pool<T, StoragePolicy, MappingPolicy>::GetCategory(EntityID entity) const
     {
         const DenseIndex index = _mapping.Get(entity);
@@ -152,6 +162,7 @@ namespace Syn
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires MappingConstraint<MappingPolicy>
     template<uint32_t... Bits>
     SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::SetBit(EntityID entity)
     {
@@ -160,6 +171,7 @@ namespace Syn
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires MappingConstraint<MappingPolicy>
     template<uint32_t... Bits>
     SYN_INLINE bool Pool<T, StoragePolicy, MappingPolicy>::IsBitSet(EntityID entity) const
     {
@@ -168,6 +180,7 @@ namespace Syn
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires MappingConstraint<MappingPolicy>
     template<uint32_t... Bits>
     SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::ResetBit(EntityID entity)
     {
@@ -176,6 +189,7 @@ namespace Syn
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires MappingConstraint<MappingPolicy>
     SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::Clear()
     {
         _storage.Clear();
@@ -183,6 +197,7 @@ namespace Syn
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires MappingConstraint<MappingPolicy>
     SYN_INLINE size_t Pool<T, StoragePolicy, MappingPolicy>::Size() const
     {
         return _storage.Size();

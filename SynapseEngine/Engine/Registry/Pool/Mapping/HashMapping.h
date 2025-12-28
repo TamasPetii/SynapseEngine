@@ -2,11 +2,12 @@
 #include "Engine/SynApi.h"
 #include "Engine/SynMacro.h"
 #include "Engine/Registry/Entity.h"
+#include "MappingCRTP.h"
 #include <unordered_map>
 
 namespace Syn
 {
-    class SYN_API HashMapping
+    class SYN_API HashMapping : public MappingCRTP<HashMapping>
     {
     public:
         // Common mapping interface is not used to avoid virtual calls in performance-critical code

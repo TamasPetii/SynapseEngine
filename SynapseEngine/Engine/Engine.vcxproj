@@ -197,12 +197,13 @@
     <ClCompile Include="Registry\Pool\Storage\SegmentedStorageImpl.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Registry\Pool\Mapping\HashMapping.h" />
+    <ClInclude Include="Registry\Pool\Mapping\MappingCRTP.h" />
     <ClInclude Include="Registry\Pool\Mapping\MappingUtils.h" />
+    <ClInclude Include="Registry\Pool\Mapping\SparsePagedMapping.h" />
+    <ClInclude Include="Registry\Pool\Mapping\SparseVectorMapping.h" />
     <ClInclude Include="Registry\Pool\Mapping\SynMapping.h" />
     <ClInclude Include="Registry\Pool\Pool.h" />
-    <ClInclude Include="Registry\Pool\Mapping\HashMapping.h" />
-    <ClInclude Include="Registry\Pool\Mapping\SparseVectorMapping.h" />
-    <ClInclude Include="Registry\Pool\Mapping\SparsePagedMapping.h" />
     <ClInclude Include="Registry\Pool\Storage\FlatStorageImpl.h" />
     <ClInclude Include="Registry\Pool\Storage\FlagMixin.h" />
     <ClInclude Include="Registry\Pool\Storage\DataMixin.h" />
