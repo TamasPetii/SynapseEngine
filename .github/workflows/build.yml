@@ -39,12 +39,22 @@ jobs:
       shell: cmd
 
     - name: Build Solution (Dist)
-      run: msbuild SynapseEngine/SynapseEngine.slnx /p:Configuration=Dist /p:Platform=x64 /p:PlatformToolset=v143 /p:LanguageStandard=stdcpp23 /m
+      run: |
+        msbuild SynapseEngine/SynapseEngine.slnx `
+        /p:Configuration=Dist `
+        /p:Platform=x64 `
+        /p:PlatformToolset=v143 `
+        /p:VcpkgEnableManifest=true `
+        /p:VcpkgConfiguration=Release `
+        /m
+      shell: pwsh
 
     - name: Run Unit Tests
       run: |
-        vstest.console.exe "SynapseEngine/Binaries/x64/Dist/UnitTests.exe" /Settings:"SynapseEngine/UnitTests.runsettings" /Logger:console;verbosity=detailed
-      shell: cmd
+        vstest.console.exe "SynapseEngine/Binaries/x64/Dist/UnitTests.exe" `
+        /Settings:"SynapseEngine/UnitTests.runsettings" `
+        /Logger:console;verbosity=detailed
+      shell: pwsh
       
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
