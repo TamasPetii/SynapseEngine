@@ -7,6 +7,8 @@
 #include "Type/TypeInfo.h"
 #include <vector>
 #include <tuple>
+#include <algorithm>
+#include <execution>
 
 namespace Syn
 {
@@ -68,7 +70,26 @@ namespace Syn
 
 		template<typename T>
 		DefaultPoolType<T>* GetPool();
+
+		template<typename... T>
+		std::tuple<DefaultPoolType<T>*...> GetPools();
+
+		template<typename... T, typename Func>
+			requires (std::invocable<Func, T&...>)
+		void ViewSeq(Func&& func);
+
+		template<typename... T, typename Func>
+			requires (std::invocable<Func, T&...>)
+		void ViewPar(Func&& func);
+
 	private:
+		template<typename T>
+		IPool* GetIPool();
+
+		template<typename ExecutionPolicy, typename... T, typename Func>
+			requires (std::invocable<Func, T&...>)
+		void View(ExecutionPolicy policy, Func&& func);
+
 		template<typename T>
 		WrapperType<T>* EnsurePool();
 	private:
@@ -106,6 +127,23 @@ namespace Syn
 			return nullptr;
 
 		return &static_cast<WrapperType<T>*>(_pools.Get(id))->_pool;
+	}
+
+	template<typename... T>
+	SYN_INLINE std::tuple<Registry::DefaultPoolType<T>*...> Registry::GetPools()
+	{
+		return std::make_tuple(GetPool<T>()...);
+	}
+
+	template<typename T>
+	SYN_INLINE IPool* Registry::GetIPool()
+	{
+		const TypeID id = TypeInfo<T>::ID;
+
+		if (!_pools.Has(id))
+			return nullptr;
+
+		return _pools.Get(id);
 	}
 
 	template<typename T>
@@ -199,5 +237,43 @@ namespace Syn
 	SYN_INLINE bool Registry::HasComponents(EntityID entity) const
 	{
 		return (HasComponent<T>(entity) && ...);
+	}
+
+	template<typename... T, typename Func>
+		requires (std::invocable<Func, T&...>)
+	SYN_INLINE void Registry::ViewSeq(Func&& func)
+	{
+		View<std::execution::sequenced_policy, T...>(std::execution::seq, std::forward<Func>(func));
+	}
+
+	template<typename... T, typename Func>
+		requires (std::invocable<Func, T&...>)
+	SYN_INLINE void Registry::ViewPar(Func&& func)
+	{
+		View<std::execution::parallel_policy, T...>(std::execution::par, std::forward<Func>(func));
+	}
+
+	template<typename ExecutionPolicy, typename... T, typename Func>
+		requires (std::invocable<Func, T&...>)
+	SYN_INLINE void Registry::View(ExecutionPolicy policy, Func&& func)
+	{
+		if (!(GetIPool<T>() && ...))
+			return;
+
+		auto pools = std::make_tuple(GetPool<T>()...);
+
+		IPool* smallestIPool = std::min({ GetIPool<T>()... },
+			[](IPool* a, IPool* b) {
+				return a->Size() < b->Size();
+			});
+
+		const auto& entities = smallestIPool->GetRawEntities();
+
+		std::for_each(policy, entities.begin(), entities.end(), [&](EntityID entity) {
+			if (HasComponents<T...>(entity))
+			{
+				func(std::get<DefaultPoolType<T>*>(pools)->Get(entity)...);
+			}
+			});
 	}
 }

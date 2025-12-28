@@ -22,5 +22,15 @@ namespace Syn
         {
             _pool.Clear();
         }
+
+        size_t Size() override
+        {
+            return _pool.Size();
+        }
+
+        const std::vector<EntityID>& GetRawEntities() const override 
+        { 
+            return _pool._storage._entities;
+        }
     };
 }
