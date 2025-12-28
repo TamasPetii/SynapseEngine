@@ -10,8 +10,8 @@ namespace Syn
         auto filenameStr = std::filesystem::path(file).filename().string();
 
         return std::format("[{}] [{}] [{}:{}] {}",
-            Syn::LogUtils::FormatTime(time),
-            Syn::LogUtils::LevelToString(level),
+            LogUtils::FormatTime(time),
+            LogUtils::LevelToString(level),
             filenameStr,
             line,
             message
