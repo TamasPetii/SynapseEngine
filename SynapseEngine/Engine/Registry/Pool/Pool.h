@@ -26,6 +26,10 @@ namespace Syn
         void Add(EntityID entity, U&& value);
 
         template<typename U = T>
+            requires (!std::is_void_v<U> && std::is_default_constructible_v<U>)
+        void Add(EntityID entity);
+
+        template<typename U = T>
             requires std::is_void_v<U>
         void Add(EntityID entity);
 
@@ -79,6 +83,20 @@ namespace Syn
 
         const DenseIndex index = static_cast<DenseIndex>(_storage.Size() - 1);
 
+        _mapping.Set(entity, index);
+    }
+
+    template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
+    template<typename U>
+        requires (!std::is_void_v<U>&& std::is_default_constructible_v<U>)
+    SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::Add(EntityID entity)
+    {
+        SYN_ASSERT(!_mapping.Contains(entity), "Entity already has this component");
+
+        _storage.Push(entity, U());
+
+        const DenseIndex index = static_cast<DenseIndex>(_storage.Size() - 1);
         _mapping.Set(entity, index);
     }
 

@@ -9,4 +9,7 @@
   <Project Path="Editor/Editor.vcxproj" Id="bd7d5d51-fe5f-4b82-be64-56c8b100b496" />
   <Project Path="EditorCore/EditorCore.vcxproj" Id="3542814c-06e0-4d16-913b-47ba04a428ab" />
   <Project Path="Engine/Engine.vcxproj" Id="de125602-7639-48fb-af02-5213bccc28ad" />
+  <Project Path="UnitTests/UnitTests.vcxproj" Id="14fefb24-9ce8-463a-af77-93310e776cb5">
+    <BuildType Solution="Dist|*" Project="Release" />
+  </Project>
 </Solution>

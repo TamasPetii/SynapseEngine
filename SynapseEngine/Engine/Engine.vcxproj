@@ -181,6 +181,9 @@
   <ItemGroup>
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Logger\LogFormat.cpp" />
+    <ClCompile Include="Registry\Pool\PoolWrapper.cpp" />
+    <ClCompile Include="Registry\Pool\IPool.cpp" />
+    <ClCompile Include="Registry\Registry.cpp" />
     <ClCompile Include="Registry\Pool\Pool.cpp" />
     <ClCompile Include="Registry\Pool\Mapping\HashMapping.cpp" />
     <ClCompile Include="Registry\Pool\Mapping\SparseVectorMapping.cpp" />
@@ -202,6 +205,11 @@
   <ItemGroup>
     <ClInclude Include="Engine.h" />
     <ClInclude Include="Logger\LogFormat.h" />
+    <ClInclude Include="Registry\Pool\PoolConcept.h" />
+    <ClInclude Include="Registry\Pool\PoolWrapper.h" />
+    <ClInclude Include="Registry\Pool\IPool.h" />
+    <ClInclude Include="Registry\Pool\PoolTypes.h" />
+    <ClInclude Include="Registry\Registry.h" />
     <ClInclude Include="TestComponent.h" />
     <ClInclude Include="Registry\Type\TypeInfo.h" />
     <ClInclude Include="Registry\Pool\Mapping\HashMapping.h" />

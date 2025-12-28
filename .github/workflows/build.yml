@@ -41,6 +41,11 @@ jobs:
     - name: Build Solution (Dist)
       run: msbuild SynapseEngine/SynapseEngine.slnx /p:Configuration=Dist /p:Platform=x64 /m
 
+    - name: Run Unit Tests
+      run: |
+        vstest.console.exe "SynapseEngine/Binaries/x64/Dist/UnitTests.exe" /Settings:"SynapseEngine/UnitTests.runsettings" /Logger:console;verbosity=detailed
+      shell: cmd
+
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
