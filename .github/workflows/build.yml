@@ -38,6 +38,12 @@ jobs:
         .\bootstrap-vcpkg.bat
       shell: cmd
 
+    - name: Install vcpkg dependencies
+      run: |
+        cd External/vcpkg
+        .\vcpkg.exe install --triplet x64-windows --x-manifest-root=${{ github.workspace }}/SynapseEngine
+      shell: cmd
+
     - name: Build Solution (Dist)
       run: |
         msbuild SynapseEngine/SynapseEngine.slnx `
