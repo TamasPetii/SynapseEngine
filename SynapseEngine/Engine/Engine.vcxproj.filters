@@ -36,10 +36,7 @@
     <ClCompile Include="Logger\LogUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Registry\Pool\Storage\Mixin\DataMixin.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Registry\Pool\Storage\Mixin\FlagMixin.cpp">
+    <ClCompile Include="Registry\Pool\Storage\Mixin\Data\DataMixin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Registry\Pool\Storage\Core\StorageBackend.cpp">
@@ -87,6 +84,18 @@
     <ClCompile Include="Registry\Pool\Storage\Extension\SegmentedStorageImplExtension.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\AtomicFlagMixin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\BitsetFlagMixin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\NoFlagMixin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -125,10 +134,7 @@
     <ClInclude Include="Registry\BitFlag.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Registry\Pool\Storage\Mixin\DataMixin.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Registry\Pool\Storage\Mixin\FlagMixin.h">
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Data\DataMixin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Registry\Pool\Storage\Utils\StorageCategory.h">
@@ -213,6 +219,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Registry\Pool\Storage\Extension\SegmentedStorageImplExtension.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Utils\FlagMixinCRTP.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Core\AtomicFlagMixin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Core\BitsetFlagMixin.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Utils\FlagMixinConcept.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Core\NoFlagMixin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

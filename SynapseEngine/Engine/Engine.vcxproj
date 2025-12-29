@@ -179,6 +179,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\NoFlagMixin.cpp" />
+    <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\BitsetFlagMixin.cpp" />
+    <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\AtomicFlagMixin.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="Logger\LogFormat.cpp" />
     <ClCompile Include="Registry\Pool\Mapping\Extension\SparseVectorMappingExtension.cpp" />
@@ -190,8 +193,7 @@
     <ClCompile Include="Registry\Pool\Mapping\Core\SparseVectorMapping.cpp" />
     <ClCompile Include="Registry\Pool\Mapping\Core\SparsePagedMapping.cpp" />
     <ClCompile Include="Registry\Pool\Storage\Core\FlatStorageImpl.cpp" />
-    <ClCompile Include="Registry\Pool\Storage\Mixin\FlagMixin.cpp" />
-    <ClCompile Include="Registry\Pool\Storage\Mixin\DataMixin.cpp" />
+    <ClCompile Include="Registry\Pool\Storage\Mixin\Data\DataMixin.cpp" />
     <ClCompile Include="Logger\Sink\FileSink.cpp" />
     <ClCompile Include="Logger\Sink\ConsoleSink.cpp" />
     <ClCompile Include="Logger\Sink\ISink.cpp" />
@@ -203,9 +205,15 @@
     <ClCompile Include="Registry\Pool\Storage\Core\SegmentedStorageImpl.cpp" />
     <ClCompile Include="Registry\Type\TypeManager.cpp" />
     <ClCompile Include="Registry\Pool\Storage\Extension\SegmentedStorageImplExtension.cpp" />
+    <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Core\NoFlagMixin.h" />
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Core\BitsetFlagMixin.h" />
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Core\AtomicFlagMixin.h" />
     <ClInclude Include="Engine.h" />
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Utils\FlagMixinConcept.h" />
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Utils\FlagMixinCRTP.h" />
     <ClInclude Include="Logger\LogFormat.h" />
     <ClInclude Include="Registry\Pool\Mapping\Extension\MappingExtension.h" />
     <ClInclude Include="Registry\Pool\Mapping\Extension\SparseVectorMappingExtension.h" />
@@ -224,8 +232,7 @@
     <ClInclude Include="Registry\Pool\Mapping\Core\SparseVectorMapping.h" />
     <ClInclude Include="Registry\Pool\Mapping\SynMapping.h" />
     <ClInclude Include="Registry\Pool\Pool.h" />
-    <ClInclude Include="Registry\Pool\Storage\Mixin\FlagMixin.h" />
-    <ClInclude Include="Registry\Pool\Storage\Mixin\DataMixin.h" />
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Data\DataMixin.h" />
     <ClInclude Include="Registry\BitFlag.h" />
     <ClInclude Include="Registry\Entity.h" />
     <ClInclude Include="Logger\Sink\FileSink.h" />
@@ -244,6 +251,7 @@
     <ClInclude Include="Registry\Pool\Storage\Utils\StorageCRTP.h" />
     <ClInclude Include="Registry\Pool\Storage\SynStorage.h" />
     <ClInclude Include="Registry\Pool\Storage\Extension\SegmentedStorageImplExtension.h" />
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.h" />
     <ClInclude Include="SynApi.h" />
     <ClInclude Include="SynMacro.h" />
     <ClInclude Include="Registry\Type\TypeManager.h" />

@@ -1,17 +1,21 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include "Engine/SynMacro.h"
-#include "../Mixin/DataMixin.h"
-#include "../Mixin/FlagMixin.h"
+
 #include <vector>
 #include <functional>
 #include <type_traits>
 #include <span>
 
+#include "../Mixin/Data/DataMixin.h"
+#include "../Mixin/Flag/Utils/FlagMixinConcept.h"
+#include "../Mixin/Flag/Core/NoFlagMixin.h"
+
 namespace Syn
 {
-    template<typename T, bool HasFlags>
-    class StorageBackend : public DataMixin<T>, public FlagMixin<HasFlags>
+    template<typename T, typename FlagMixinPolicy = NoFlagMixin>
+        requires FlagMixinConstraint<FlagMixinPolicy>
+    class StorageBackend : public DataMixin<T>, public FlagMixinPolicy
     {
     public:
         template<typename U = T>
@@ -34,27 +38,30 @@ namespace Syn
 
 namespace Syn
 {
-    template<typename T, bool HasFlags>
+    template<typename T, typename FlagMixinPolicy>
+        requires FlagMixinConstraint<FlagMixinPolicy>
     template<typename U>
         requires (!std::is_void_v<U>)
-    SYN_INLINE void StorageBackend<T, HasFlags>::PushBackend(EntityID entity, U&& value)
+    SYN_INLINE void StorageBackend<T, FlagMixinPolicy>::PushBackend(EntityID entity, U&& value)
     {
         _entities.push_back(entity);
         this->PushData(std::forward<U>(value));
         this->PushFlag();
     }
 
-    template<typename T, bool HasFlags>
+    template<typename T, typename FlagMixinPolicy>
+        requires FlagMixinConstraint<FlagMixinPolicy>
     template<typename U>
         requires std::is_void_v<U>
-    SYN_INLINE void StorageBackend<T, HasFlags>::PushBackend(EntityID entity)
+    SYN_INLINE void StorageBackend<T, FlagMixinPolicy>::PushBackend(EntityID entity)
     {
         _entities.push_back(entity);
         this->PushFlag();
     }
 
-    template<typename T, bool HasFlags>
-    SYN_INLINE void StorageBackend<T, HasFlags>::PopBackend()
+    template<typename T, typename FlagMixinPolicy>
+        requires FlagMixinConstraint<FlagMixinPolicy>
+    SYN_INLINE void StorageBackend<T, FlagMixinPolicy>::PopBackend()
     {
         SYN_ASSERT(!_entities.empty(), "Attempting to pop from empty storage");
 
@@ -63,8 +70,9 @@ namespace Syn
         this->PopFlag();
     }
 
-    template<typename T, bool HasFlags>
-    SYN_INLINE void StorageBackend<T, HasFlags>::SwapBackend(DenseIndex a, DenseIndex b, const SwapCallback& onSwap)
+    template<typename T, typename FlagMixinPolicy>
+        requires FlagMixinConstraint<FlagMixinPolicy>
+    SYN_INLINE void StorageBackend<T, FlagMixinPolicy>::SwapBackend(DenseIndex a, DenseIndex b, const SwapCallback& onSwap)
     {
         SYN_ASSERT(a < _entities.size() && b < _entities.size(), "Swap indices out of bounds");
 
@@ -80,8 +88,9 @@ namespace Syn
         }
     }
 
-    template<typename T, bool HasFlags>
-    SYN_INLINE void StorageBackend<T, HasFlags>::ClearBackend()
+    template<typename T, typename FlagMixinPolicy>
+        requires FlagMixinConstraint<FlagMixinPolicy>
+    SYN_INLINE void StorageBackend<T, FlagMixinPolicy>::ClearBackend()
     {
         _entities.clear();
         this->ClearData();
@@ -89,14 +98,16 @@ namespace Syn
         this->ResetAllStateBits();
     }
 
-    template<typename T, bool HasFlags>
-    SYN_INLINE size_t StorageBackend<T, HasFlags>::Size() const
+    template<typename T, typename FlagMixinPolicy>
+        requires FlagMixinConstraint<FlagMixinPolicy>
+    SYN_INLINE size_t StorageBackend<T, FlagMixinPolicy>::Size() const
     {
         return _entities.size();
     }
 
-    template<typename T, bool HasFlags>
-    SYN_INLINE std::span<const EntityID> StorageBackend<T, HasFlags>::GetDenseEntities() const
+    template<typename T, typename FlagMixinPolicy>
+        requires FlagMixinConstraint<FlagMixinPolicy>
+    SYN_INLINE std::span<const EntityID> StorageBackend<T, FlagMixinPolicy>::GetDenseEntities() const
     {
         return _entities;
     }
