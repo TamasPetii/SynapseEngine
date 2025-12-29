@@ -173,7 +173,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Core\Application.cpp" />
+    <ClCompile Include="Core\Windows\GlfwWindow.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Core\Windows\Window.cpp" />
+    <ClCompile Include="Synapse.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EditorCore\EditorCore.vcxproj">
@@ -181,7 +185,10 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="entt.hpp" />
+    <ClInclude Include="Core\Application.h" />
+    <ClInclude Include="Core\Windows\Window.h" />
+    <ClInclude Include="Core\Windows\GlfwWindow.h" />
+    <ClInclude Include="Synapse.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
