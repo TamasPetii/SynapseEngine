@@ -1,7 +1,7 @@
 #pragma once
-#include "DataMixin.h"
-#include "FlagMixin.h"
-#include "FlatStorageImpl.h"
-#include "SegmentedStorageImpl.h"
-#include "StorageBackend.h"
-#include "StorageCategory.h"
+#include "Mixin/DataMixin.h"
+#include "Mixin/FlagMixin.h"
+#include "Core/FlatStorageImpl.h"
+#include "Core/SegmentedStorageImpl.h"
+#include "Core/StorageBackend.h"
+#include "Utils/StorageCategory.h"

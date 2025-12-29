@@ -1,8 +1,10 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include "Engine/SynMacro.h"
-#include "Engine/Registry/Entity.h"
-#include "MappingCRTP.h"
+
+#include "../../../Entity.h"
+#include "../Utils/MappingCRTP.h"
+
 #include <vector>
 #include <span>
 
@@ -11,12 +13,12 @@ namespace Syn
     class SYN_API SparseVectorMapping : public MappingCRTP<SparseVectorMapping>
     {
     public:
-        // Common mapping interface is not used to avoid virtual calls in performance-critical code
-        void Set(EntityID entity, DenseIndex index);
-        DenseIndex Get(EntityID entity) const;
-        void Remove(EntityID entity);
-        bool Contains(EntityID entity) const;
-        void Clear();
+        SYN_INLINE void Set(EntityID entity, DenseIndex index);
+        SYN_INLINE DenseIndex Get(EntityID entity) const;
+        SYN_INLINE void Remove(EntityID entity);
+        SYN_INLINE bool Contains(EntityID entity) const;
+        SYN_INLINE void Clear();
+    public:
         std::span<const DenseIndex> GetSparseIndices() const;
     private:
         std::vector<DenseIndex> _indices;

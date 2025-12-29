@@ -36,28 +36,28 @@
     <ClCompile Include="Logger\LogUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Registry\Pool\Storage\DataMixin.cpp">
+    <ClCompile Include="Registry\Pool\Storage\Mixin\DataMixin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Registry\Pool\Storage\FlagMixin.cpp">
+    <ClCompile Include="Registry\Pool\Storage\Mixin\FlagMixin.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Registry\Pool\Storage\StorageBackend.cpp">
+    <ClCompile Include="Registry\Pool\Storage\Core\StorageBackend.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Registry\Pool\Storage\SegmentedStorageImpl.cpp">
+    <ClCompile Include="Registry\Pool\Storage\Core\SegmentedStorageImpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Registry\Pool\Storage\FlatStorageImpl.cpp">
+    <ClCompile Include="Registry\Pool\Storage\Core\FlatStorageImpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Registry\Pool\Mapping\HashMapping.cpp">
+    <ClCompile Include="Registry\Pool\Mapping\Core\HashMapping.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Registry\Pool\Mapping\SparseVectorMapping.cpp">
+    <ClCompile Include="Registry\Pool\Mapping\Core\SparseVectorMapping.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Registry\Pool\Mapping\SparsePagedMapping.cpp">
+    <ClCompile Include="Registry\Pool\Mapping\Core\SparsePagedMapping.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Registry\Pool\Pool.cpp">
@@ -79,6 +79,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Registry\Pool\IPool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Registry\Pool\Mapping\Extension\SparseVectorMappingExtension.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Registry\Pool\Storage\Extension\SegmentedStorageImplExtension.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -119,19 +125,19 @@
     <ClInclude Include="Registry\BitFlag.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Registry\Pool\Storage\DataMixin.h">
+    <ClInclude Include="Registry\Pool\Storage\Mixin\DataMixin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Registry\Pool\Storage\FlagMixin.h">
+    <ClInclude Include="Registry\Pool\Storage\Mixin\FlagMixin.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Registry\Pool\Storage\StorageCategory.h">
+    <ClInclude Include="Registry\Pool\Storage\Utils\StorageCategory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Registry\Pool\Pool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Registry\Pool\Mapping\MappingUtils.h">
+    <ClInclude Include="Registry\Pool\Mapping\Utils\MappingUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Registry\Pool\Mapping\SynMapping.h">
@@ -140,34 +146,34 @@
     <ClInclude Include="Registry\Pool\Storage\SynStorage.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Registry\Pool\Mapping\HashMapping.h">
+    <ClInclude Include="Registry\Pool\Mapping\Core\HashMapping.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Registry\Pool\Mapping\SparsePagedMapping.h">
+    <ClInclude Include="Registry\Pool\Mapping\Core\SparsePagedMapping.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Registry\Pool\Mapping\SparseVectorMapping.h">
+    <ClInclude Include="Registry\Pool\Mapping\Core\SparseVectorMapping.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Registry\Pool\Mapping\MappingCRTP.h">
+    <ClInclude Include="Registry\Pool\Mapping\Utils\MappingCRTP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Registry\Pool\Storage\StorageCRTP.h">
+    <ClInclude Include="Registry\Pool\Storage\Utils\StorageCRTP.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Registry\Pool\Storage\FlatStorageImpl.h">
+    <ClInclude Include="Registry\Pool\Storage\Core\FlatStorageImpl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Registry\Pool\Storage\SegmentedStorageImpl.h">
+    <ClInclude Include="Registry\Pool\Storage\Core\SegmentedStorageImpl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Registry\Pool\Storage\StorageBackend.h">
+    <ClInclude Include="Registry\Pool\Storage\Core\StorageBackend.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Registry\Pool\Storage\StorageConcept.h">
+    <ClInclude Include="Registry\Pool\Storage\Utils\StorageConcept.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Registry\Pool\Mapping\MappingConcept.h">
+    <ClInclude Include="Registry\Pool\Mapping\Utils\MappingConcept.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Registry\Type\TypeManager.h">
@@ -195,6 +201,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Registry\Pool\PoolConcept.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Mapping\Extension\MappingExtension.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Mapping\Extension\SparseVectorMappingExtension.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Storage\Extension\StorageExtension.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Pool\Storage\Extension\SegmentedStorageImplExtension.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

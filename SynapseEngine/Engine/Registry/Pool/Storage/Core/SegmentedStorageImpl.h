@@ -1,7 +1,9 @@
 #pragma once
 #include "StorageBackend.h"
-#include "StorageCategory.h"
-#include "StorageCRTP.h"
+
+#include "../Utils/StorageCRTP.h"
+#include "../Utils/StorageCategory.h"
+
 #include <vector>
 #include <atomic>
 #include <span>
@@ -20,34 +22,36 @@ namespace Syn
 
         template<typename U = T>
             requires (!std::is_void_v<U>)
-        U& Get(DenseIndex index);
+        SYN_INLINE U& Get(DenseIndex index);
 
         template<typename U = T>
             requires (!std::is_void_v<U>)
-        const U& Get(DenseIndex index) const;
+        SYN_INLINE const U& Get(DenseIndex index) const;
 
         template<typename U = T>
             requires (!std::is_void_v<U>)
-        void Push(EntityID entity, U&& value);
+        SYN_INLINE void Push(EntityID entity, U&& value);
 
-        void Push(EntityID entity);
+        SYN_INLINE void Push(EntityID entity);
 
-        void Remove(DenseIndex index, const SwapCallback& onSwap);
-        void Clear();
+        SYN_INLINE void Remove(DenseIndex index, const SwapCallback& onSwap);
 
-        StorageCategory GetCategory(DenseIndex index) const;
-        void SetCategory(DenseIndex index, StorageCategory newCat, const SwapCallback& onSwap);
+        SYN_INLINE void Clear();
 
-        void MarkStaticDirty(DenseIndex index);
-        std::span<EntityID> GetDirtyStatics();
-        void ResetStaticDirtyCounter();
+        SYN_INLINE StorageCategory GetCategory(DenseIndex index) const;
 
+        SYN_INLINE void SetCategory(DenseIndex index, StorageCategory newCat, const SwapCallback& onSwap);
+        
+        SYN_INLINE void MarkStaticDirty(DenseIndex index);
+
+        SYN_INLINE std::span<EntityID> GetDirtyStatics();
+
+        SYN_INLINE void ResetStaticDirtyCounter();
+    private:
+        SYN_INLINE void EnsureDirtyCapacity();
     protected:
-        void EnsureDirtyCapacity();
-
         size_t _staticEnd = 0;
         size_t _dynamicEnd = 0;
-    
         std::vector<EntityID> _dirtyStaticList;
         std::atomic<size_t>   _dirtyStaticCount{ 0 };
     };

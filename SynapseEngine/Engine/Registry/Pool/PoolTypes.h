@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Pool.h"
-#include "Storage/FlatStorageImpl.h"
-#include "Storage/SegmentedStorageImpl.h"
-#include "Mapping/SparseVectorMapping.h"
+#include "Storage/Core/FlatStorageImpl.h"
+#include "Storage/Core/SegmentedStorageImpl.h"
+#include "Mapping/Core/SparseVectorMapping.h"
 
 namespace Syn
 {

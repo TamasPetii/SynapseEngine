@@ -1,8 +1,8 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include "Engine/SynMacro.h"
-#include "DataMixin.h"
-#include "FlagMixin.h"
+#include "../Mixin/DataMixin.h"
+#include "../Mixin/FlagMixin.h"
 #include <vector>
 #include <functional>
 #include <type_traits>
@@ -16,17 +16,17 @@ namespace Syn
     public:
         template<typename U = T>
             requires (!std::is_void_v<U>)
-        void PushBackend(EntityID entity, U&& value);
+        SYN_INLINE void PushBackend(EntityID entity, U&& value);
 
         template<typename U = T>
             requires std::is_void_v<U>
-        void PushBackend(EntityID entity);
+        SYN_INLINE void PushBackend(EntityID entity);
 
-        void PopBackend();
-        void SwapBackend(DenseIndex a, DenseIndex b, const SwapCallback& onSwap);
-        void ClearBackend();
-        size_t Size() const;
-        std::span<const EntityID> GetDenseEntities() const;
+        SYN_INLINE void PopBackend();
+        SYN_INLINE void SwapBackend(DenseIndex a, DenseIndex b, const SwapCallback& onSwap);
+        SYN_INLINE void ClearBackend();
+        SYN_INLINE size_t Size() const;
+        SYN_INLINE std::span<const EntityID> GetDenseEntities() const;
     protected:
         std::vector<EntityID> _entities;
     };

@@ -1,6 +1,6 @@
 #pragma once
 #include "StorageBackend.h"
-#include "StorageCRTP.h"
+#include "../Utils/StorageCRTP.h"
 
 namespace Syn
 {
@@ -16,20 +16,21 @@ namespace Syn
 
         template<typename U = T>
             requires (!std::is_void_v<U>)
-        U& Get(DenseIndex index);
+        SYN_INLINE U& Get(DenseIndex index);
 
         template<typename U = T>
             requires (!std::is_void_v<U>)
-        const U& Get(DenseIndex index) const;
+        SYN_INLINE const U& Get(DenseIndex index) const;
 
         template<typename U = T>
             requires (!std::is_void_v<U>)
-        void Push(EntityID entity, U&& value);
+        SYN_INLINE void Push(EntityID entity, U&& value);
 
-        void Push(EntityID entity);
+        SYN_INLINE void Push(EntityID entity);
 
-        void Remove(DenseIndex index, const SwapCallback& onSwap);
-        void Clear();
+        SYN_INLINE void Remove(DenseIndex index, const SwapCallback& onSwap);
+
+        SYN_INLINE void Clear();
     };
 
     template<typename T> using FlatStorage = FlatStorageImpl<T, false>;

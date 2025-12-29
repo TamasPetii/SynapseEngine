@@ -1,8 +1,10 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include "Engine/SynMacro.h"
-#include "Engine/Registry/Entity.h"
-#include "MappingCRTP.h"
+
+#include "../../../Entity.h"
+#include "../Utils/MappingCRTP.h"
+
 #include <unordered_map>
 
 namespace Syn
@@ -10,12 +12,11 @@ namespace Syn
     class SYN_API HashMapping : public MappingCRTP<HashMapping>
     {
     public:
-        // Common mapping interface is not used to avoid virtual calls in performance-critical code
-        void Set(EntityID entity, DenseIndex index);
-        DenseIndex Get(EntityID entity) const;
-        void Remove(EntityID entity);
-        bool Contains(EntityID entity) const;
-        void Clear();
+        SYN_INLINE void Set(EntityID entity, DenseIndex index);
+        SYN_INLINE DenseIndex Get(EntityID entity) const;
+        SYN_INLINE void Remove(EntityID entity);
+        SYN_INLINE bool Contains(EntityID entity) const;
+        SYN_INLINE void Clear();
     private:
         std::unordered_map<EntityID, DenseIndex> _map;
     };
@@ -25,7 +26,6 @@ namespace Syn
 {
     SYN_INLINE void HashMapping::Set(EntityID entity, DenseIndex index)
     {
-        //SYN_ASSERT(!_map.contains(entity), "Entity already present in HashMapping");
         _map[entity] = index;
     }
 

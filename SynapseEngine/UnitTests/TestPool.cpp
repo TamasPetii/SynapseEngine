@@ -2,6 +2,8 @@
 #include "TestComponents.h"
 
 #include "Engine/Registry/Pool/Pool.h"
+#include "Engine/Registry/Pool/Mapping/Extension/SparseVectorMappingExtension.h"
+#include "Engine/Registry/Pool/Storage/Extension/SegmentedStorageImplExtension.h"
 #include "Engine/Registry/Pool/Mapping/SynMapping.h"
 #include "Engine/Registry/Pool/Storage/SynStorage.h"
 

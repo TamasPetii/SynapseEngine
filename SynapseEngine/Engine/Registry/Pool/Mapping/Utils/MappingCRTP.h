@@ -5,10 +5,6 @@
 
 namespace Syn
 {
-    /**
-     * CRTP Base class to enforce Mapping interface consistency at compile time
-     * without virtual function overhead.
-     */
     template<typename Derived>
     struct MappingCRTP
     {

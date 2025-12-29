@@ -1,4 +1,5 @@
 #pragma once
+#include "Engine/SynMacro.h"
 #include <ostream>
 
 enum class StorageCategory {
@@ -7,7 +8,7 @@ enum class StorageCategory {
     Stream
 };
 
-inline std::ostream& operator<<(std::ostream& os, StorageCategory cat) {
+SYN_INLINE std::ostream& operator<<(std::ostream& os, StorageCategory cat) {
     switch (cat) {
     case StorageCategory::Static:  return os << "Static";
     case StorageCategory::Dynamic: return os << "Dynamic";

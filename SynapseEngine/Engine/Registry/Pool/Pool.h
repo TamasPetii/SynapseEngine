@@ -2,9 +2,11 @@
 #include "Engine/SynApi.h"
 #include "Engine/SynMacro.h"
 #include "Engine/Registry/Entity.h"
-#include "Storage/StorageCategory.h"
-#include "Storage/StorageConcept.h"
-#include "Mapping/MappingConcept.h"
+#include "Storage/Utils/StorageConcept.h"
+#include "Storage/Extension/StorageExtension.h"
+#include "Mapping/Utils/MappingConcept.h"
+#include "Mapping/Extension/MappingExtension.h"
+
 #include <type_traits>
 #include <utility>
 #include <span>
@@ -13,7 +15,9 @@ namespace Syn
 {
     template<typename T, typename StoragePolicy, typename MappingPolicy>
         requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
-    class Pool
+    class Pool :
+        public StorageTraits<StoragePolicy>::template Extension<Pool<T, StoragePolicy, MappingPolicy>>,
+        public MappingTraits<MappingPolicy>::template Extension<Pool<T, StoragePolicy, MappingPolicy>>
     {
     public:
         Pool() = default;
@@ -22,66 +26,46 @@ namespace Syn
         Pool(const Pool&) = delete;
         Pool& operator=(const Pool&) = delete;
 
-        template<typename U = T>
-            requires (!std::is_void_v<U>)
-        void Add(EntityID entity, U&& value);
+        template<typename U = T> requires (!std::is_void_v<U>)
+        SYN_INLINE void Add(EntityID entity, U&& value);
 
-        template<typename U = T>
-            requires (!std::is_void_v<U>&& std::is_default_constructible_v<U>)
-        void Add(EntityID entity);
+        template<typename U = T> requires (!std::is_void_v<U>&& std::is_default_constructible_v<U>)
+        SYN_INLINE void Add(EntityID entity);
 
-        template<typename U = T>
-            requires std::is_void_v<U>
-        void Add(EntityID entity);
+        template<typename U = T> requires std::is_void_v<U>
+        SYN_INLINE void Add(EntityID entity);
 
-        void Remove(EntityID entity);
+        SYN_INLINE void Remove(EntityID entity);
+        SYN_INLINE void Clear();
+        SYN_INLINE bool Has(EntityID entity) const;
 
-        void Clear();
+        template<typename U = T> requires (!std::is_void_v<U>)
+        SYN_INLINE U& Get(EntityID entity);
 
-        bool Has(EntityID entity) const;
+        template<typename U = T> requires (!std::is_void_v<U>)
+        SYN_INLINE const U& Get(EntityID entity) const;
 
-        template<typename U = T>
-            requires (!std::is_void_v<U>)
-        U& Get(EntityID entity);
+        template<typename U = T> requires (!std::is_void_v<U>)
+        SYN_INLINE U* TryGet(EntityID entity);
 
-        template<typename U = T>
-            requires (!std::is_void_v<U>)
-        const U& Get(EntityID entity) const;
+        SYN_INLINE size_t Size() const;
 
-        template<typename U = T>
-            requires (!std::is_void_v<U>)
-        U* TryGet(EntityID entity);
+        SYN_INLINE std::span<const EntityID> GetDenseEntities() const;
 
-        size_t Size() const;
+        template<uint32_t... Bits> 
+        SYN_INLINE void SetBit(EntityID entity);
 
-        void SetCategory(EntityID entity, StorageCategory newCat)
-            requires requires(StoragePolicy s, DenseIndex i, StorageCategory c) { s.SetCategory(i, c, {}); };
+        template<uint32_t... Bits> 
+        SYN_INLINE bool IsBitSet(EntityID entity) const;
 
-        StorageCategory GetCategory(EntityID entity) const
-            requires requires(const StoragePolicy s, DenseIndex i) { s.GetCategory(i); };
+        template<uint32_t... Bits> 
+        SYN_INLINE void ResetBit(EntityID entity);
 
-        void MarkStaticDirty(EntityID entity)
-            requires requires(StoragePolicy s, DenseIndex i) { s.MarkStaticDirty(i); };
+        SYN_INLINE StoragePolicy& GetStorage() { return _storage; }
+        SYN_INLINE const StoragePolicy& GetStorage() const { return _storage; }
 
-        std::span<EntityID> GetDirtyStatics()
-            requires requires(StoragePolicy s) { s.GetDirtyStatics(); };
-
-        void ResetStaticDirtyCounter()
-            requires requires(StoragePolicy s) { s.ResetStaticDirtyCounter(); };
-
-        template<uint32_t... Bits>
-        void SetBit(EntityID entity);
-
-        template<uint32_t... Bits>
-        bool IsBitSet(EntityID entity) const;
-
-        template<uint32_t... Bits>
-        void ResetBit(EntityID entity);
-
-        std::span<const EntityID> GetDenseEntities() const;
-
-		std::span<const DenseIndex> GetSparseIndices() const
-            requires requires(MappingPolicy m) { m.GetSparseIndices(); };
+        SYN_INLINE MappingPolicy& GetMapping() { return _mapping; }
+        SYN_INLINE const MappingPolicy& GetMapping() const { return _mapping; }
     private:
         StoragePolicy _storage;
         MappingPolicy _mapping;
@@ -91,55 +75,40 @@ namespace Syn
 namespace Syn
 {
     template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
-    template<typename U>
-        requires (!std::is_void_v<U>)
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
+    template<typename U> requires (!std::is_void_v<U>)
     SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::Add(EntityID entity, U&& value)
     {
         SYN_ASSERT(!_mapping.Contains(entity), "Entity already has this component");
-
         _storage.Push(entity, std::forward<U>(value));
-
-        const DenseIndex index = static_cast<DenseIndex>(_storage.Size() - 1);
-
-        _mapping.Set(entity, index);
+        _mapping.Set(entity, static_cast<DenseIndex>(_storage.Size() - 1));
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
-    template<typename U>
-        requires (!std::is_void_v<U>&& std::is_default_constructible_v<U>)
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
+    template<typename U> requires (!std::is_void_v<U>&& std::is_default_constructible_v<U>)
     SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::Add(EntityID entity)
     {
         SYN_ASSERT(!_mapping.Contains(entity), "Entity already has this component");
-
         _storage.Push(entity, U());
-
-        const DenseIndex index = static_cast<DenseIndex>(_storage.Size() - 1);
-        _mapping.Set(entity, index);
+        _mapping.Set(entity, static_cast<DenseIndex>(_storage.Size() - 1));
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
-    template<typename U>
-        requires std::is_void_v<U>
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
+    template<typename U> requires std::is_void_v<U>
     SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::Add(EntityID entity)
     {
         SYN_ASSERT(!_mapping.Contains(entity), "Entity already has this tag");
-
         _storage.Push(entity);
-
-        const DenseIndex index = static_cast<DenseIndex>(_storage.Size() - 1);
-
-        _mapping.Set(entity, index);
+        _mapping.Set(entity, static_cast<DenseIndex>(_storage.Size() - 1));
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
     SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::Remove(EntityID entity)
     {
         SYN_ASSERT(_mapping.Contains(entity), "Entity does not have this component");
-
         const DenseIndex index = _mapping.Get(entity);
 
         _storage.Remove(index, [this](EntityID movedEntity, DenseIndex newIndex) {
@@ -150,127 +119,70 @@ namespace Syn
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
     SYN_INLINE bool Pool<T, StoragePolicy, MappingPolicy>::Has(EntityID entity) const
     {
         return _mapping.Contains(entity);
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
-    template<typename U>
-        requires (!std::is_void_v<U>)
-    SYN_INLINE U& Pool<T, StoragePolicy, MappingPolicy>::Get(EntityID entity)
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
+    template<typename U> requires (!std::is_void_v<U>)
+        SYN_INLINE U& Pool<T, StoragePolicy, MappingPolicy>::Get(EntityID entity)
     {
-        const DenseIndex index = _mapping.Get(entity);
-        return _storage.Get(index);
+        return _storage.Get(_mapping.Get(entity));
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
-    template<typename U>
-        requires (!std::is_void_v<U>)
-    SYN_INLINE const U& Pool<T, StoragePolicy, MappingPolicy>::Get(EntityID entity) const
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
+    template<typename U> requires (!std::is_void_v<U>)
+        SYN_INLINE const U& Pool<T, StoragePolicy, MappingPolicy>::Get(EntityID entity) const
     {
-        const DenseIndex index = _mapping.Get(entity);
-        return _storage.Get(index);
+        return _storage.Get(_mapping.Get(entity));
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
-    template<typename U>
-        requires (!std::is_void_v<U>)
-    SYN_INLINE U* Pool<T, StoragePolicy, MappingPolicy>::TryGet(EntityID entity)
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
+    template<typename U> requires (!std::is_void_v<U>)
+        SYN_INLINE U* Pool<T, StoragePolicy, MappingPolicy>::TryGet(EntityID entity)
     {
-        if (!_mapping.Contains(entity))
-            return nullptr;
-
+        if (!_mapping.Contains(entity)) return nullptr;
         return &_storage.Get(_mapping.Get(entity));
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
-    SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::SetCategory(EntityID entity, StorageCategory newCat)
-        requires requires(StoragePolicy s, DenseIndex i, StorageCategory c) { s.SetCategory(i, c, {}); }
-    {
-        SYN_ASSERT(_mapping.Contains(entity), "Entity not in pool");
-        const DenseIndex index = _mapping.Get(entity);
-
-        _storage.SetCategory(index, newCat, [this](EntityID movedEntity, DenseIndex newIndex) {
-            _mapping.Set(movedEntity, newIndex);
-            });
-    }
-
-    template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
-    SYN_INLINE StorageCategory Pool<T, StoragePolicy, MappingPolicy>::GetCategory(EntityID entity) const
-        requires requires(const StoragePolicy s, DenseIndex i) { s.GetCategory(i); }
-    {
-        const DenseIndex index = _mapping.Get(entity);
-        return _storage.GetCategory(index);
-    }
-
-    template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
-    SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::MarkStaticDirty(EntityID entity)
-        requires requires(StoragePolicy s, DenseIndex i) { s.MarkStaticDirty(i); }
-    {
-        const DenseIndex index = _mapping.Get(entity);
-        _storage.MarkStaticDirty(index);
-    }
-
-    template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
-    SYN_INLINE std::span<EntityID> Pool<T, StoragePolicy, MappingPolicy>::GetDirtyStatics()
-        requires requires(StoragePolicy s) { s.GetDirtyStatics(); }
-    {
-        return _storage.GetDirtyStatics();
-    }
-
-    template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
-    SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::ResetStaticDirtyCounter()
-        requires requires(StoragePolicy s) { s.ResetStaticDirtyCounter(); }
-    {
-        _storage.ResetStaticDirtyCounter();
-    }
-
-    template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
     inline std::span<const EntityID> Pool<T, StoragePolicy, MappingPolicy>::GetDenseEntities() const
     {
         return _storage.GetDenseEntities();
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
     template<uint32_t... Bits>
     SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::SetBit(EntityID entity)
     {
-        const DenseIndex index = _mapping.Get(entity);
-        _storage.template SetBit<Bits...>(index);
+        _storage.template SetBit<Bits...>(_mapping.Get(entity));
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
     template<uint32_t... Bits>
     SYN_INLINE bool Pool<T, StoragePolicy, MappingPolicy>::IsBitSet(EntityID entity) const
     {
-        const DenseIndex index = _mapping.Get(entity);
-        return _storage.template IsBitSet<Bits...>(index);
+        return _storage.template IsBitSet<Bits...>(_mapping.Get(entity));
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
     template<uint32_t... Bits>
     SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::ResetBit(EntityID entity)
     {
-        const DenseIndex index = _mapping.Get(entity);
-        _storage.template ResetBit<Bits...>(index);
+        _storage.template ResetBit<Bits...>(_mapping.Get(entity));
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
     SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::Clear()
     {
         _storage.Clear();
@@ -278,7 +190,7 @@ namespace Syn
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>
-        requires StorageConstraint<StoragePolicy> && MappingConstraint<MappingPolicy>
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
     SYN_INLINE size_t Pool<T, StoragePolicy, MappingPolicy>::Size() const
     {
         return _storage.Size();

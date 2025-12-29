@@ -29,30 +29,30 @@ namespace Syn
         };
 
     public:
-        void PushFlag();
-        void PopFlag();
-        void SwapFlag(DenseIndex a, DenseIndex b);
-        void FlagIndexChanged(DenseIndex index);
-        void ClearFlags();
+        SYN_INLINE void PushFlag();
+        SYN_INLINE void PopFlag();
+        SYN_INLINE void SwapFlag(DenseIndex a, DenseIndex b);
+        SYN_INLINE void FlagIndexChanged(DenseIndex index);
+        SYN_INLINE void ClearFlags();
 
         template<uint32_t... Bits>
-        bool IsStateBitSet() const;
+        SYN_INLINE bool IsStateBitSet() const;
 
         template<uint32_t... Bits>
-        void ResetStateBit();
+        SYN_INLINE void ResetStateBit();
 
-        void ResetAllStateBits();
-
-        template<uint32_t... Bits>
-        bool SetBit(DenseIndex index);
+        SYN_INLINE void ResetAllStateBits();
 
         template<uint32_t... Bits>
-        void ResetBit(DenseIndex index);
+        SYN_INLINE bool SetBit(DenseIndex index);
 
         template<uint32_t... Bits>
-        bool IsBitSet(DenseIndex index) const;
+        SYN_INLINE void ResetBit(DenseIndex index);
 
-        void ResetAllBits(DenseIndex index);
+        template<uint32_t... Bits>
+        SYN_INLINE bool IsBitSet(DenseIndex index) const;
+
+        SYN_INLINE void ResetAllBits(DenseIndex index);
 
     protected:
         std::vector<AtomicByte> _flags;

@@ -12,17 +12,17 @@ namespace Syn
     struct DataMixin
     {
     public:
-        void PushData(T&& value);
-        void PushData(const T& value);
-        void PopData();
-        void SwapData(DenseIndex a, DenseIndex b);
-        void ClearData();
+        SYN_INLINE void PushData(T&& value);
+        SYN_INLINE void PushData(const T& value);
+        SYN_INLINE void PopData();
+        SYN_INLINE void SwapData(DenseIndex a, DenseIndex b);
+        SYN_INLINE void ClearData();
 
-        T& GetData(DenseIndex index);
-        const T& GetData(DenseIndex index) const;
+        SYN_INLINE T& GetData(DenseIndex index);
+        SYN_INLINE const T& GetData(DenseIndex index) const;
 
-        std::span<T> GetRawData();
-        std::span<const T> GetRawData() const;
+        SYN_INLINE std::span<T> GetRawData();
+        SYN_INLINE std::span<const T> GetRawData() const;
     protected:
         std::vector<T> _data;
     };

@@ -1,9 +1,11 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include "Engine/SynMacro.h"
-#include "Engine/Registry/Entity.h"
-#include "MappingUtils.h"
-#include "MappingCRTP.h"
+
+#include "../../../Entity.h"
+#include "../Utils/MappingUtils.h"
+#include "../Utils/MappingCRTP.h"
+
 #include <vector>
 #include <memory>
 #include <algorithm> 
@@ -23,12 +25,11 @@ namespace Syn
         SparsePagedMapping(const SparsePagedMapping&) = delete;
         SparsePagedMapping& operator=(const SparsePagedMapping&) = delete;
     public:
-		// Common mapping interface is not used to avoid virtual calls in performance-critical code
-        void Set(EntityID entity, DenseIndex index);
-        DenseIndex Get(EntityID entity) const;
-        void Remove(EntityID entity);
-        bool Contains(EntityID entity) const;
-        void Clear();
+        SYN_INLINE void Set(EntityID entity, DenseIndex index);
+        SYN_INLINE DenseIndex Get(EntityID entity) const;
+        SYN_INLINE void Remove(EntityID entity);
+        SYN_INLINE bool Contains(EntityID entity) const;
+        SYN_INLINE void Clear();
     private:
         SYN_INLINE uint32_t CalculatePageIndex(EntityID entity) const;
         SYN_INLINE uint32_t CalculatePageOffset(EntityID entity) const;
