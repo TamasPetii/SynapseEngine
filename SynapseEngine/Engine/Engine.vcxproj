@@ -180,6 +180,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="ServiceLocator.cpp" />
+    <ClCompile Include="Vk\Shader\ShaderReflector.cpp" />
+    <ClCompile Include="Vk\Shader\Shader.cpp" />
+    <ClCompile Include="Vk\Shader\ShaderIncluder.cpp" />
+    <ClCompile Include="Vk\Shader\ShaderCompiler.cpp" />
     <ClCompile Include="SynMacro.cpp" />
     <ClCompile Include="Vk\Core\ThreadSafeQueue.cpp" />
     <ClCompile Include="Vk\Presentation\SwapChain.cpp" />
@@ -219,6 +223,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ServiceLocator.h" />
+    <ClInclude Include="Vk\Shader\ShaderReflector.h" />
+    <ClInclude Include="Vk\Shader\Shader.h" />
+    <ClInclude Include="Vk\Shader\ShaderIncluder.h" />
+    <ClInclude Include="Vk\Shader\ShaderCompiler.h" />
     <ClInclude Include="Vk\Core\ThreadSafeQueue.h" />
     <ClInclude Include="Vk\Presentation\SwapChain.h" />
     <ClInclude Include="Vk\Presentation\Surface.h" />
@@ -275,6 +283,9 @@
     <ClInclude Include="SynApi.h" />
     <ClInclude Include="SynMacro.h" />
     <ClInclude Include="Registry\Type\TypeManager.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\Test.comp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

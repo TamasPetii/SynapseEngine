@@ -21,6 +21,8 @@
     "stb",
     "nlohmann-json",
     "gli",
-    "gtest"
+    "gtest",
+    "spirv-reflect",
+    "spirv-headers"
   ]
 }

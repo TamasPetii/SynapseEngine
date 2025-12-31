@@ -148,6 +148,11 @@ namespace Syn::Vk {
     }
 
     void PhysicalDevice::LogProperties() const {
+        
+        if constexpr (!Syn::EnableLogging) {
+            return;
+        }
+
         auto apiVer = _properties.apiVersion;
         std::string apiVersionStr = std::format("{}.{}.{}",
             VK_API_VERSION_MAJOR(apiVer),
@@ -162,38 +167,32 @@ namespace Syn::Vk {
         case VK_PHYSICAL_DEVICE_TYPE_CPU: deviceTypeStr = "CPU"; break;
         }
 
-        Logger::Get().Dispatch(LogLevel::Info, "-----------------------------------------", "Vulkan", 0);
-        Logger::Get().Dispatch(LogLevel::Info, std::format("GPU Device: {}", _properties.deviceName), "Vulkan", 0);
-        Logger::Get().Dispatch(LogLevel::Info, std::format("GPU Type:   {}", deviceTypeStr), "Vulkan", 0);
-        Logger::Get().Dispatch(LogLevel::Info, std::format("API Ver:    {}", apiVersionStr), "Vulkan", 0);
-        Logger::Get().Dispatch(LogLevel::Info, std::format("Driver Ver: {}", _properties.driverVersion), "Vulkan", 0);
-        Logger::Get().Dispatch(LogLevel::Info, std::format("Vendor ID:  {}", _properties.vendorID), "Vulkan", 0);
+        std::stringstream ss;
+        ss << "\n-----------------------------------------\n";
 
-        Logger::Get().Dispatch(LogLevel::Info, std::format("Max Image Dim 2D:    {}", _properties.limits.maxImageDimension2D), "Vulkan", 0);
-        Logger::Get().Dispatch(LogLevel::Info, std::format("Max Push Constants:  {} bytes", _properties.limits.maxPushConstantsSize), "Vulkan", 0);
-        Logger::Get().Dispatch(LogLevel::Info, std::format("Max Sampler Aniso:   {}", _properties.limits.maxSamplerAnisotropy), "Vulkan", 0);
-        Logger::Get().Dispatch(LogLevel::Info, std::format("Timestamp Period:    {} ns", _properties.limits.timestampPeriod), "Vulkan", 0);
+        ss << std::format("GPU Device:      {}\n", _properties.deviceName);
+        ss << std::format("GPU Type:        {}\n", deviceTypeStr);
+        ss << std::format("API Ver:         {}\n", apiVersionStr);
+        ss << std::format("Driver Ver:      {}\n", _properties.driverVersion);
+        ss << std::format("Vendor ID:       {}\n", _properties.vendorID);
 
-        Logger::Get().Dispatch(LogLevel::Info, "--- Descriptor Buffer Properties ---", "Vulkan", 0);
+        ss << "\n"; // Kis elválasztás
+        ss << std::format("Max Image Dim 2D:    {}\n", _properties.limits.maxImageDimension2D);
+        ss << std::format("Max Push Constants:  {} bytes\n", _properties.limits.maxPushConstantsSize);
+        ss << std::format("Max Sampler Aniso:   {}\n", _properties.limits.maxSamplerAnisotropy);
+        ss << std::format("Timestamp Period:    {} ns\n", _properties.limits.timestampPeriod);
 
-        Logger::Get().Dispatch(LogLevel::Info, std::format("Combined Image Sampler Size: {} bytes",
-            _descriptorBufferProperties.combinedImageSamplerDescriptorSize), "Vulkan", 0);
+        ss << "\n--- Descriptor Buffer Properties ---\n";
+        ss << std::format("Combined Image Sampler Size: {} bytes\n", _descriptorBufferProperties.combinedImageSamplerDescriptorSize);
+        ss << std::format("Sampled Image Size:          {} bytes\n", _descriptorBufferProperties.sampledImageDescriptorSize);
+        ss << std::format("Storage Image Size:          {} bytes\n", _descriptorBufferProperties.storageImageDescriptorSize);
+        ss << std::format("Uniform Buffer Size:         {} bytes\n", _descriptorBufferProperties.uniformBufferDescriptorSize);
+        ss << std::format("Storage Buffer Size:         {} bytes\n", _descriptorBufferProperties.storageBufferDescriptorSize);
+        ss << std::format("Desc. Buffer Offset Align:   {} bytes\n", _descriptorBufferProperties.descriptorBufferOffsetAlignment);
 
-        Logger::Get().Dispatch(LogLevel::Info, std::format("Sampled Image Size:          {} bytes",
-            _descriptorBufferProperties.sampledImageDescriptorSize), "Vulkan", 0);
+        ss << "-----------------------------------------";
 
-        Logger::Get().Dispatch(LogLevel::Info, std::format("Storage Image Size:          {} bytes",
-            _descriptorBufferProperties.storageImageDescriptorSize), "Vulkan", 0);
-
-        Logger::Get().Dispatch(LogLevel::Info, std::format("Uniform Buffer Size:         {} bytes",
-            _descriptorBufferProperties.uniformBufferDescriptorSize), "Vulkan", 0);
-
-        Logger::Get().Dispatch(LogLevel::Info, std::format("Storage Buffer Size:         {} bytes",
-            _descriptorBufferProperties.storageBufferDescriptorSize), "Vulkan", 0);
-
-        Logger::Get().Dispatch(LogLevel::Info, std::format("Descriptor Buffer Offset Align: {} bytes",
-            _descriptorBufferProperties.descriptorBufferOffsetAlignment), "Vulkan", 0);
-
-        Logger::Get().Dispatch(LogLevel::Info, "-----------------------------------------", "Vulkan", 0);
+        // 3. Egyetlen log hívás a végén
+        Logger::Get().Dispatch(LogLevel::Info, ss.str(), "Vulkan", 0);
     }
 }

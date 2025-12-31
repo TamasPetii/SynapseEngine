@@ -22,16 +22,16 @@ namespace Syn::Vk {
         Context(const ContextInitParams& params);
         ~Context();
 
-        Instance& GetInstance() const { return *_instance; }
-        PhysicalDevice& GetPhysicalDevice() const { return *_physicalDevice; }
-        Device& GetDevice() const { return *_device; }
-        Surface& GetSurface() const { return *_surface; }
-        SwapChain& GetSwapChain() const { return *_swapChain; }
+        auto GetInstance() const { return _instance; }
+        auto GetPhysicalDevice() const { return _physicalDevice; }
+        auto GetDevice() const { return _device; }
+        auto GetSurface() const { return _surface; }
+        auto GetSwapChain() const { return _swapChain; }
     private:
-        std::unique_ptr<Instance> _instance;
-        std::unique_ptr<Surface> _surface;
-        std::unique_ptr<PhysicalDevice> _physicalDevice;
-        std::unique_ptr<Device> _device;
-        std::unique_ptr<SwapChain> _swapChain;
+        std::shared_ptr<Instance> _instance;
+        std::shared_ptr<Surface> _surface;
+        std::shared_ptr<PhysicalDevice> _physicalDevice;
+        std::shared_ptr<Device> _device;
+        std::shared_ptr<SwapChain> _swapChain;
     };
 }
