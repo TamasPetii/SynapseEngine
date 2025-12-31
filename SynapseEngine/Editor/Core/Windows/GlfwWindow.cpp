@@ -97,6 +97,14 @@ namespace Syn {
             }
             });
 
+        glfwSetFramebufferSizeCallback(_window, [](GLFWwindow* window, int width, int height) {
+            WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+
+            if (data.callbacks.OnResize) {
+                data.callbacks.OnResize(width, height);
+            }
+            });
+
         HWND hwnd = glfwGetWin32Window(_window);
         COLORREF color = RGB(0, 0, 0);
         const DWORD DWMWA_CAPTION_COLOR = 35;

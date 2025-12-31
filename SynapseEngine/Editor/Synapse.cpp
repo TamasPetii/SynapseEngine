@@ -39,7 +39,7 @@ void Synapse::OnInit() {
 
 void Synapse::OnUpdate(float dt) {
     if (_engine) {
-        _engine->SimulateFrame();
+        _engine->Update();
     }
 }
 
@@ -81,7 +81,7 @@ void Synapse::OnMouseMove(float x, float y) {
 
 void Synapse::OnResize(uint32_t width, uint32_t height) {
     if (_engine) {
-        _engine->WindowResizeEvent();
+        _engine->WindowResizeEvent(width, height);
     }
 }
 

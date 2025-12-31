@@ -22,12 +22,14 @@ namespace Syn
         Engine(const EngineInitParams& params);
         ~Engine();
 
-        void SimulateFrame() {}
-        void WindowResizeEvent() {}
+        void Update();
+        void Render();
+        void WindowResizeEvent(uint32_t width, uint32_t height);
     private:
         void Init(const EngineInitParams& params);
         void Shutdown();
     private:
+		bool _isMinimized = false;
 		std::unique_ptr<Vk::Context> _vkContext;
 	};
 }

@@ -26,6 +26,8 @@ namespace Syn::Vk {
         for (const auto& ext : availableExtensions) {
             _supportedExtensions.insert(ext.extensionName);
         }
+
+        LogProperties();
     }
 
     bool PhysicalDevice::IsExtensionSupported(const char* extensionName) const {

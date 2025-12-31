@@ -15,6 +15,16 @@ namespace Syn
 		Shutdown();
 	}
 
+	void Engine::Update()
+	{
+	}
+
+	void Engine::Render()
+	{
+		if (_isMinimized) 
+			return;
+	}
+
 	void Engine::Init(const EngineInitParams& params)
 	{
 		Logger::Get().AddSink(std::make_shared<Syn::ConsoleSink>());
@@ -25,7 +35,7 @@ namespace Syn
 			.enableValidation = EnableValidation,
 			.getSurfaceExtensionsCallback = params.getSurfaceExtensionsCallback,
 			.createSurfaceCallback = params.createSurfaceCallback,
-			.getWindowExtentCallback = [&]() -> VkExtent2D {
+			.getWindowExtentCallback = [=]() -> VkExtent2D {
 				auto [width, height] = params.getWindowExtentCallback();
 				return VkExtent2D{ width, height };
 			}
@@ -38,5 +48,14 @@ namespace Syn
 	void Engine::Shutdown() {
 		ServiceLocator::Shutdown();
 		_vkContext.reset();
+	}
+
+	void Engine::WindowResizeEvent(uint32_t width, uint32_t height) {
+		if (width == 0 || height == 0) {
+			_isMinimized = true;
+		}
+
+		_isMinimized = false;
+		_vkContext->GetSwapChain().Recreate();
 	}
 }
