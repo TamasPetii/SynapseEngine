@@ -3,12 +3,14 @@
 #include <functional>
 #include <utility>
 #include <memory>
-#include <vulkan/vulkan.h>
+
+typedef struct VkInstance_T* VkInstance;
+typedef struct VkSurfaceKHR_T* VkSurfaceKHR;
 
 namespace Syn 
 {
     struct WindowConfig {
-        std::string title = "SynapseEngine";
+        std::string title = "SynapseWindow";
         uint32_t width = 1280;
         uint32_t height = 720;
         bool resizable = true;
@@ -42,7 +44,7 @@ namespace Syn
 
         virtual std::vector<const char*> GetRequiredExtensions() const = 0;
 
-        virtual VkSurfaceKHR CreateSurface(VkInstance instance) = 0;
+        virtual void CreateSurface(VkInstance instance, VkSurfaceKHR* surface) = 0;
         virtual void SetCallbacks(const WindowCallbacks& callbacks) = 0;
 
         static std::unique_ptr<Window> Create(const WindowConfig& config);

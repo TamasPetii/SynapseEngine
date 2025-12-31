@@ -11,42 +11,36 @@ Synapse::~Synapse() {
 }
 
 void Synapse::OnInit() {
-    /*
-    _engine = std::make_shared<Engine>();
+    Syn::EngineInitParams params;
 
-    _engine->SetRequiredWindowExtensions(GetWindow().GetRequiredExtensions());
+    params.createSurfaceCallback = [&](VkInstance instance, VkSurfaceKHR* surface) {
+        GetWindow().CreateSurface(instance, surface);
+    };
 
-    _engine->SetSurfaceCreationFunction(
-        [this](const Vk::Instance* const instance, VkSurfaceKHR* surface) -> void {
-            *surface = GetWindow().CreateSurface(instance->Value());
+    params.getSurfaceExtensionsCallback = [&]() {
+        return GetWindow().GetRequiredExtensions();
+    };
+
+    params.getWindowExtentCallback = [&]() {
+        return GetWindow().GetSize();
+        };
+
+    params.onRenderGuiCallback = [&]() {
+        /*
+        if (_gui) {
+            // _gui->Render(cmd, registry, resMgr, frame);
         }
-    );
+        */
+    };
 
-    _engine->SetWindowExtentFunction(
-        [this]() -> std::pair<int, int> {
-            auto [width, height] = GetWindow().GetSize();
-            return std::make_pair((int)width, (int)height);
-        }
-    );
-
-    _engine->Initialize();
-
-    _engine->SetGuiRenderFunction(
-        [this](VkCommandBuffer cmd, auto registry, auto resMgr, uint32_t frame) {
-            _gui->Render(cmd, registry, resMgr, frame);
-        }
-    );
-    */
-
+    _engine = std::make_shared<Syn::Engine>(params);
     std::println("Sandbox Initialized successfully!");
 }
 
 void Synapse::OnUpdate(float dt) {
-    /*
     if (_engine) {
         _engine->SimulateFrame();
     }
-    */
 }
 
 void Synapse::OnKey(int key, int scancode, int action, int mods) {
@@ -86,11 +80,9 @@ void Synapse::OnMouseMove(float x, float y) {
 }
 
 void Synapse::OnResize(uint32_t width, uint32_t height) {
-    /*
     if (_engine) {
         _engine->WindowResizeEvent();
     }
-    */
 }
 
 Syn::Application* Syn::CreateApplication() {

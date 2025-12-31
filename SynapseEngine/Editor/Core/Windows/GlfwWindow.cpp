@@ -3,10 +3,12 @@
 
 #define GLFW_INCLUDE_VULKAN
 #define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3.h>
+#include <glfw/glfw3.h>
 #include <glfw/glfw3native.h>
 #include <dwmapi.h>
 #pragma comment(lib, "Dwmapi.lib")
+
+#include <volk.h>
 
 namespace Syn {
 
@@ -128,13 +130,11 @@ namespace Syn {
         return extensions;
     }
 
-    VkSurfaceKHR GlfwWindow::CreateSurface(VkInstance instance) {
-        VkSurfaceKHR surface;
+    void GlfwWindow::CreateSurface(VkInstance instance, VkSurfaceKHR* surface) {
         SYN_VK_ASSERT_MSG(
-            glfwCreateWindowSurface(instance, _window, nullptr, &surface),
+            glfwCreateWindowSurface(instance, _window, nullptr, surface),
             "Failed to create Vulkan Window Surface!"
         );
-        return surface;
     }
 
     void GlfwWindow::SetCallbacks(const WindowCallbacks& callbacks) {

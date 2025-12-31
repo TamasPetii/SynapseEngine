@@ -27,24 +27,27 @@
       <BuildStlModules>false</BuildStlModules>
 
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Debug'">
-        SYN_DEBUG;
-        _DEBUG;
-        NOMINMAX;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;
-        %(PreprocessorDefinitions)
-      </PreprocessorDefinitions>
+		  VK_NO_PROTOTYPES;
+		  SYN_DEBUG;
+		  _DEBUG;
+		  NOMINMAX;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;
+		  %(PreprocessorDefinitions)
+	  </PreprocessorDefinitions>
 
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Release'">
-        SYN_RELEASE;
-        NDEBUG; NOMINMAX;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;
-        %(PreprocessorDefinitions)
-      </PreprocessorDefinitions>
+		  VK_NO_PROTOTYPES;
+		  SYN_RELEASE;
+		  NDEBUG; NOMINMAX;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;
+		  %(PreprocessorDefinitions)
+	  </PreprocessorDefinitions>
 
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Dist'">
-        SYN_DIST;
-        NDEBUG;
-        NOMINMAX;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;
-        %(PreprocessorDefinitions)
-      </PreprocessorDefinitions>
+		  VK_NO_PROTOTYPES;
+		  SYN_DIST;
+		  NDEBUG;
+		  NOMINMAX;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;
+		  %(PreprocessorDefinitions)
+	  </PreprocessorDefinitions>
 
       <WholeProgramOptimization Condition="'$(Configuration)'=='Dist'">true</WholeProgramOptimization>
       <DebugInformationFormat Condition="'$(Configuration)'=='Dist'">None</DebugInformationFormat> <RuntimeLibrary Condition="'$(Configuration)'=='Dist'">MultiThreadedDLL</RuntimeLibrary> </ClCompile>

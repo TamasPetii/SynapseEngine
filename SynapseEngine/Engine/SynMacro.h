@@ -1,5 +1,5 @@
 #pragma once
-#include <print>
+#include "Engine/SynApi.h"
 #include <cstdlib>
 
 #ifndef SYN_DIST
@@ -17,24 +17,9 @@ namespace Syn {
     constexpr bool EnableLogging = !IsDist;
     constexpr bool EnableValidation = !IsDist;
 
-    inline void HandleAssert(const char* msg, const char* file, int line) {
-        std::println(stderr, "CRITICAL ERROR: {}\n\tAt: {}:{}", msg, file, line);
-        std::abort();
-    }
-
-    inline void HandleVkAssert(int result, const char* expr, const char* file, int line) {
-        if (result != 0) {
-            std::println(stderr, "VULKAN ERROR: {} (Code: {})\n\tAt: {}:{}", expr, result, file, line);
-            std::abort();
-        }
-    }
-
-    inline void HandleVkAssertMsg(int result, const char* expr, const char* msg, const char* file, int line) {
-        if (result != 0) {
-            std::println(stderr, "VULKAN ERROR: {}\n\tExpression: {} (Code: {})\n\tAt: {}:{}", msg, expr, result, file, line);
-            std::abort();
-        }
-    }
+    SYN_API void HandleAssert(const char* msg, const char* file, int line);
+    SYN_API void HandleVkAssert(int result, const char* expr, const char* file, int line);
+    SYN_API void HandleVkAssertMsg(int result, const char* expr, const char* msg, const char* file, int line);
 }
 
 #ifdef ENABLE_CHECKS

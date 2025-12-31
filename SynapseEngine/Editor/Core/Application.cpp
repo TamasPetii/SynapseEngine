@@ -47,8 +47,6 @@ namespace Syn {
             };
 
         _window->SetCallbacks(callbacks);
-
-        OnInit();
     }
 
     Application::~Application() {
@@ -57,6 +55,8 @@ namespace Syn {
     }
 
     void Application::Run() {
+        OnInit();
+
         while (_isRunning) {
             auto currentTime = std::chrono::high_resolution_clock::now();
             static auto startTime = currentTime;

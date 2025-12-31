@@ -179,6 +179,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ServiceLocator.cpp" />
+    <ClCompile Include="SynMacro.cpp" />
+    <ClCompile Include="Vk\Core\ThreadSafeQueue.cpp" />
+    <ClCompile Include="Vk\Presentation\SwapChain.cpp" />
+    <ClCompile Include="Vk\Presentation\Surface.cpp" />
+    <ClCompile Include="Vk\Core\Device.cpp" />
+    <ClCompile Include="Vk\Core\PhysicalDevice.cpp" />
+    <ClCompile Include="Vk\Core\Instance.cpp" />
+    <ClCompile Include="Vk\Core\QueueFamily.cpp" />
+    <ClCompile Include="Vk\Context.cpp" />
     <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\NoFlagMixin.cpp" />
     <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\BitsetFlagMixin.cpp" />
     <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\AtomicFlagMixin.cpp" />
@@ -208,6 +218,16 @@
     <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ServiceLocator.h" />
+    <ClInclude Include="Vk\Core\ThreadSafeQueue.h" />
+    <ClInclude Include="Vk\Presentation\SwapChain.h" />
+    <ClInclude Include="Vk\Presentation\Surface.h" />
+    <ClInclude Include="Vk\VkCommon.h" />
+    <ClInclude Include="Vk\Core\Device.h" />
+    <ClInclude Include="Vk\Core\PhysicalDevice.h" />
+    <ClInclude Include="Vk\Core\Instance.h" />
+    <ClInclude Include="Vk\Core\QueueFamily.h" />
+    <ClInclude Include="Vk\Context.h" />
     <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Core\NoFlagMixin.h" />
     <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Core\BitsetFlagMixin.h" />
     <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Core\AtomicFlagMixin.h" />

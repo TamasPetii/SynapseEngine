@@ -1,4 +1,4 @@
-#include "Core/Application.h"
+#include "Synapse.h"
 
 int main() {
     auto app = Syn::CreateApplication();

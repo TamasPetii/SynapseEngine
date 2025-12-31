@@ -20,7 +20,7 @@ namespace Syn {
 
         std::vector<const char*> GetRequiredExtensions() const override;
 
-        VkSurfaceKHR CreateSurface(VkInstance instance) override;
+        void CreateSurface(VkInstance instance, VkSurfaceKHR* surface) override;
         void SetCallbacks(const WindowCallbacks& callbacks) override;
     private:
         void Init(const WindowConfig& config);
