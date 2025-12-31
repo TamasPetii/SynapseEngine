@@ -179,6 +179,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Vk\Image\ImageUtils.cpp" />
+    <ClCompile Include="Vk\Image\ImageFactory.cpp" />
+    <ClCompile Include="Vk\Image\Image.cpp" />
+    <ClCompile Include="Vk\Buffer\BufferUtils.cpp" />
+    <ClCompile Include="Vk\Buffer\BufferFactory.cpp" />
+    <ClCompile Include="Vk\Buffer\Buffer.cpp" />
     <ClCompile Include="ServiceLocator.cpp" />
     <ClCompile Include="Vk\Shader\ShaderReflector.cpp" />
     <ClCompile Include="Vk\Shader\Shader.cpp" />
@@ -222,6 +228,12 @@
     <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Vk\Image\ImageUtils.h" />
+    <ClInclude Include="Vk\Image\ImageFactory.h" />
+    <ClInclude Include="Vk\Image\Image.h" />
+    <ClInclude Include="Vk\Buffer\BufferUtils.h" />
+    <ClInclude Include="Vk\Buffer\BufferFactory.h" />
+    <ClInclude Include="Vk\Buffer\Buffer.h" />
     <ClInclude Include="ServiceLocator.h" />
     <ClInclude Include="Vk\Shader\ShaderReflector.h" />
     <ClInclude Include="Vk\Shader\Shader.h" />

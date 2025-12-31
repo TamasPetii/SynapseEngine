@@ -25,18 +25,18 @@ namespace Syn::Vk {
         if (params.getSurfaceExtensionsCallback) {
             instanceExts = params.getSurfaceExtensionsCallback();
         }
-        _instance = std::make_shared<Instance>(params.enableValidation, instanceExts);
+        _instance = std::make_unique<Instance>(params.enableValidation, instanceExts);
 
         SYN_ASSERT(params.createSurfaceCallback, "Surface creation callback is missing!");
 
-        _surface = std::make_shared<Surface>(*_instance, params.createSurfaceCallback);
+        _surface = std::make_unique<Surface>(*_instance, params.createSurfaceCallback);
 
         auto extensions = GetRequiredExtensions();
-        _physicalDevice = std::make_shared<PhysicalDevice>(_instance->Handle(), _surface->Handle(), extensions);
-        _device = std::make_shared<Device>(_instance->Handle(), *_physicalDevice, extensions);
+        _physicalDevice = std::make_unique<PhysicalDevice>(_instance->Handle(), _surface->Handle(), extensions);
+        _device = std::make_unique<Device>(_instance->Handle(), *_physicalDevice, extensions);
 
         SYN_ASSERT(params.getWindowExtentCallback, "Window extent callback is missing!");
-        _swapChain = std::make_shared<SwapChain>(*_physicalDevice, *_device, *_surface, params.getWindowExtentCallback);
+        _swapChain = std::make_unique<SwapChain>(*_physicalDevice, *_device, *_surface, params.getWindowExtentCallback);
     }
 
     Context::~Context() {

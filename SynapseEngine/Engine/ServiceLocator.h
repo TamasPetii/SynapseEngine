@@ -14,9 +14,8 @@ namespace Syn {
 
         static void Provide(Vk::Context* context);
         static void Shutdown();
-        static Vk::Context& GetContext();
+        static Vk::Context* GetContext();
     private:
         static Vk::Context* _context;
     };
-
 }

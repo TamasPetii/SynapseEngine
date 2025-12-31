@@ -12,9 +12,9 @@ namespace Syn {
         _context = nullptr;
     }
 
-    Vk::Context& ServiceLocator::GetContext() {
+    Vk::Context* ServiceLocator::GetContext() {
         SYN_ASSERT(_context != nullptr, "Vulkan Context is not initialized! Ensure Engine::Init() is called before accessing Context.");
-        return *_context;
+        return _context;
     }
 
 }
