@@ -10,6 +10,8 @@ on:
 jobs:
   build:
     runs-on: windows-latest
+    env:
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_cache
 
     steps:
     - name: Checkout Code
@@ -20,28 +22,22 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    - name: Restore vcpkg artifacts
+    - name: Create Cache Directory
+      run: mkdir -p ${{ github.workspace }}/vcpkg_cache
+      shell: bash
+
+    - name: Restore vcpkg binary cache
       uses: actions/cache@v4
-      id: vcpkg-cache
       with:
-        path: |
-          ${{ github.workspace }}/SynapseEngine/vcpkg_installed
-          ${{ github.workspace }}/External/vcpkg/installed
-          !${{ github.workspace }}/External/vcpkg/installed/**/debug
-        key: ${{ runner.os }}-vcpkg-${{ hashFiles('SynapseEngine/vcpkg.json') }}
+        path: ${{ github.workspace }}/vcpkg_cache
+        key: ${{ runner.os }}-vcpkg-static-md-${{ hashFiles('SynapseEngine/vcpkg.json') }}
         restore-keys: |
-          ${{ runner.os }}-vcpkg-
+          ${{ runner.os }}-vcpkg-static-md-
 
     - name: Bootstrap vcpkg
       run: |
         cd External/vcpkg
         .\bootstrap-vcpkg.bat
-      shell: cmd
-
-    - name: Install vcpkg dependencies
-      run: |
-        cd External/vcpkg
-        .\vcpkg.exe install --triplet x64-windows --x-manifest-root=${{ github.workspace }}/SynapseEngine
       shell: cmd
 
     - name: Build Solution (Dist)

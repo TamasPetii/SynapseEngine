@@ -9,10 +9,7 @@ namespace Syn::Vk {
 
         spv_reflect::ShaderModule module(spirvCode);
 
-        if (module.GetResult() != SPV_REFLECT_RESULT_SUCCESS) {
-            SYN_ASSERT(false, "Failed to reflect shader SPIR-V!");
-            return resources;
-        }
+        SYN_ASSERT(module.GetResult() == SPV_REFLECT_RESULT_SUCCESS, "Failed to reflect shader SPIR-V!");
 
         // Descriptor Bindings
         uint32_t count = 0;

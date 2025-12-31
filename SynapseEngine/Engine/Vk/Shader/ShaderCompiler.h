@@ -6,7 +6,6 @@
 #include <shaderc/shaderc.hpp>
 
 namespace Syn::Vk {
-
     class SYN_API ShaderCompiler {
     public:
         static std::vector<uint32_t> Compile(const std::string& filepath, VkShaderStageFlagBits stage);

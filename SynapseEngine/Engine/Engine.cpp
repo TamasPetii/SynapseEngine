@@ -45,7 +45,7 @@ namespace Syn
 		_vkContext = std::make_unique<Syn::Vk::Context>(vkContextParams);
 		ServiceLocator::Provide(_vkContext.get());
 
-		auto shader = std::make_shared<Vk::Shader>("Engine/Shaders/Test.comp", VK_SHADER_STAGE_COMPUTE_BIT);
+		auto shader = std::make_shared<Vk::Shader>("../Engine/Shaders/Test.comp", VK_SHADER_STAGE_COMPUTE_BIT);
 	}
 
 	void Engine::Shutdown() {

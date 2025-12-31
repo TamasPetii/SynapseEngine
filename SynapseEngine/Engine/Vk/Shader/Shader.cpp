@@ -59,7 +59,7 @@ namespace Syn::Vk {
             createInfo.pSetLayouts = _descriptorSetLayouts.data();
             createInfo.setLayoutCount = static_cast<uint32_t>(_descriptorSetLayouts.size());
         }
-
+        
         SYN_VK_ASSERT_MSG(vkCreateShadersEXT(device->Handle(), 1, &createInfo, nullptr, &_handle), ("Failed to create Shader Object EXT: " + filepath).c_str());
     }
 
