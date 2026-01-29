@@ -179,6 +179,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Vk\Command\CommandBuffer.cpp" />
+    <ClCompile Include="Vk\Command\CommandPool.cpp" />
     <ClCompile Include="Vk\Synchronization\Fence.cpp" />
     <ClCompile Include="Vk\Synchronization\BinarySemaphore.cpp" />
     <ClCompile Include="Vk\Synchronization\TimelineSemaphore.cpp" />
@@ -232,6 +234,8 @@
     <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Vk\Command\CommandBuffer.h" />
+    <ClInclude Include="Vk\Command\CommandPool.h" />
     <ClInclude Include="Vk\Synchronization\Fence.h" />
     <ClInclude Include="Vk\Synchronization\BinarySemaphore.h" />
     <ClInclude Include="Vk\Synchronization\TimelineSemaphore.h" />

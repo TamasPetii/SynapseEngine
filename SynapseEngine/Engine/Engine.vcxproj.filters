@@ -168,6 +168,12 @@
     <ClCompile Include="Vk\Synchronization\Fence.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Vk\Command\CommandPool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Vk\Command\CommandBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -387,6 +393,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vk\Synchronization\Fence.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vk\Command\CommandPool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vk\Command\CommandBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
