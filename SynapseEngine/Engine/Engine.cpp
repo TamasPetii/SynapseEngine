@@ -3,6 +3,7 @@
 #include "ServiceLocator.h"
 #include "Vk/Context.h"
 #include "Vk/Shader/Shader.h"
+#include "Vk/Buffer/SynVkBuffer.h"
 
 namespace Syn
 {
@@ -43,10 +44,10 @@ namespace Syn
 		};
 
 		_vkContext = std::make_unique<Syn::Vk::Context>(vkContextParams);
-		ServiceLocator::Provide(_vkContext.get());
+		ServiceLocator::ProvideVkContext(_vkContext.get());
 
 		auto shader = std::make_shared<Vk::Shader>("../Engine/Shaders/Test.comp", VK_SHADER_STAGE_COMPUTE_BIT);
-	}
+    }
 
 	void Engine::Shutdown() {
 		ServiceLocator::Shutdown();

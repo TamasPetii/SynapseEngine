@@ -12,10 +12,11 @@ namespace Syn {
         ServiceLocator(const ServiceLocator&) = delete;
         ServiceLocator& operator=(const ServiceLocator&) = delete;
 
-        static void Provide(Vk::Context* context);
+        static void ProvideVkContext(Vk::Context* context);
         static void Shutdown();
-        static Vk::Context* GetContext();
+
+        static Vk::Context* GetVkContext();
     private:
-        static Vk::Context* _context;
+        static Vk::Context* _vkContext;
     };
 }

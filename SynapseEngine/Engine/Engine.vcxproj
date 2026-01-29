@@ -179,6 +179,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Vk\Synchronization\Fence.cpp" />
+    <ClCompile Include="Vk\Synchronization\BinarySemaphore.cpp" />
+    <ClCompile Include="Vk\Synchronization\TimelineSemaphore.cpp" />
+    <ClCompile Include="Vk\Synchronization\Semaphore.cpp" />
     <ClCompile Include="Vk\Image\ImageUtils.cpp" />
     <ClCompile Include="Vk\Image\ImageFactory.cpp" />
     <ClCompile Include="Vk\Image\Image.cpp" />
@@ -228,6 +232,11 @@
     <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Vk\Synchronization\Fence.h" />
+    <ClInclude Include="Vk\Synchronization\BinarySemaphore.h" />
+    <ClInclude Include="Vk\Synchronization\TimelineSemaphore.h" />
+    <ClInclude Include="Vk\Synchronization\Semaphore.h" />
+    <ClInclude Include="Vk\Buffer\SynVkBuffer.h" />
     <ClInclude Include="Vk\Image\ImageUtils.h" />
     <ClInclude Include="Vk\Image\ImageFactory.h" />
     <ClInclude Include="Vk\Image\Image.h" />
@@ -235,6 +244,7 @@
     <ClInclude Include="Vk\Buffer\BufferFactory.h" />
     <ClInclude Include="Vk\Buffer\Buffer.h" />
     <ClInclude Include="ServiceLocator.h" />
+    <ClInclude Include="Vk\Image\SynVkImage.h" />
     <ClInclude Include="Vk\Shader\ShaderReflector.h" />
     <ClInclude Include="Vk\Shader\Shader.h" />
     <ClInclude Include="Vk\Shader\ShaderIncluder.h" />

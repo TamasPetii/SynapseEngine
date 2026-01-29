@@ -7,7 +7,7 @@
 namespace Syn::Vk {
 
     void BufferFactory::Allocate(Buffer* buffer) {
-        auto context = ServiceLocator::GetContext();
+        auto context = ServiceLocator::GetVkContext();
         auto device = context->GetDevice();
         VmaAllocator allocator = device->GetAllocator();
 

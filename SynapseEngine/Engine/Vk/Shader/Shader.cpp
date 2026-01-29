@@ -10,7 +10,7 @@ namespace Syn::Vk {
     Shader::Shader(const std::string& filepath, VkShaderStageFlagBits stage)
         : _stage(stage)
     {
-        auto device = ServiceLocator::GetContext()->GetDevice();
+        auto device = ServiceLocator::GetVkContext()->GetDevice();
 
         std::vector<uint32_t> spirv = ShaderCompiler::Compile(filepath, stage);
         _resources = ShaderReflector::Reflect(spirv, stage, filepath);
@@ -64,7 +64,7 @@ namespace Syn::Vk {
     }
 
     Shader::~Shader() {
-        auto device = ServiceLocator::GetContext()->GetDevice();
+        auto device = ServiceLocator::GetVkContext()->GetDevice();
 
         if (_handle != VK_NULL_HANDLE) {
             vkDestroyShaderEXT(device->Handle(), _handle, nullptr);
