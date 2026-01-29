@@ -1,11 +1,5 @@
 #pragma once
-#include "Engine/SynApi.h"
-#include <volk.h>
-#include <vector>
-#include <string>
-#include <span>
-#include <map>
-#include <unordered_map>
+#include "../VkCommon.h"
 #include <spirv_reflect.h>
 
 namespace Syn::Vk {

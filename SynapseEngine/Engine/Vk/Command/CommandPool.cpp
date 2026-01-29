@@ -3,7 +3,6 @@
 #include "Engine/Vk/Synchronization/Fence.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
-#include "Engine/SynMacro.h"
 
 namespace Syn::Vk {
 

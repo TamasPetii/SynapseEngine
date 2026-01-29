@@ -1,6 +1,5 @@
 #pragma once
 #include "Image.h"
-#include <memory>
 
 namespace Syn::Vk {
 

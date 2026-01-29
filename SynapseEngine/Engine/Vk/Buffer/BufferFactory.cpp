@@ -1,7 +1,6 @@
 #include "BufferFactory.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
-#include "Engine/SynMacro.h"
 #include "BufferUtils.h"
 
 namespace Syn::Vk {

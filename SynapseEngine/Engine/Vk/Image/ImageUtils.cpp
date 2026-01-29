@@ -1,8 +1,6 @@
 #include "ImageUtils.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
-#include <cmath>
-#include <algorithm>
 
 namespace Syn::Vk {
 

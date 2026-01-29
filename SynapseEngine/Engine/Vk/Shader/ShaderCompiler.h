@@ -1,8 +1,5 @@
 #pragma once
-#include "Engine/SynApi.h"
-#include <vector>
-#include <string>
-#include <volk.h>
+#include "../VkCommon.h"
 #include <shaderc/shaderc.hpp>
 
 namespace Syn::Vk {

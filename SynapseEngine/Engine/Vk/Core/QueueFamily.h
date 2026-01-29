@@ -2,7 +2,7 @@
 #include "../VkCommon.h"
 
 namespace Syn::Vk {
-    struct QueueFamilyIndices {
+    struct SYN_API QueueFamilyIndices {
         std::optional<uint32_t> graphics;
         std::optional<uint32_t> compute;
         std::optional<uint32_t> transfer;

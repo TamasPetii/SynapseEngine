@@ -1,8 +1,5 @@
 #pragma once
-#include "Engine/SynApi.h"
-#include <volk.h>
-#include <string>
-#include <vector>
+#include "../VkCommon.h"
 #include "ShaderReflector.h"
 
 namespace Syn::Vk {
@@ -17,6 +14,7 @@ namespace Syn::Vk {
         VkShaderEXT Handle() const { return _handle; }
         VkShaderStageFlagBits GetStage() const { return _stage; }
         const ShaderResources& GetResources() const { return _resources; }
+        const std::vector<VkDescriptorSetLayout>& GetDescriptorSetLayouts() const { return _descriptorSetLayouts; }
     private:
         VkShaderEXT _handle = VK_NULL_HANDLE;
         VkShaderStageFlagBits _stage;

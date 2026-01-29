@@ -1,6 +1,5 @@
 #pragma once
-#include "Engine/SynApi.h"
-#include <volk.h>
+#include "../VkCommon.h"
 
 namespace Syn::Vk {
 

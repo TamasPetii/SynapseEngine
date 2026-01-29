@@ -142,7 +142,7 @@ namespace Syn::Vk {
         presentInfo.pSwapchains = swapChains;
         presentInfo.pImageIndices = &imageIndex;
 
-        VkQueue presentQueue = _device.GetGraphicsQueue().Handle();
+        VkQueue presentQueue = _device.GetGraphicsQueue()->Handle();
         VkResult result = vkQueuePresentKHR(presentQueue, &presentInfo);
 
         if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR) {

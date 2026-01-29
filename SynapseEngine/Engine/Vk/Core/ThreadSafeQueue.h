@@ -1,8 +1,11 @@
+#pragma once
 #include "../VkCommon.h"
 #include <mutex>
 
-namespace Syn::Vk {
-    class ThreadSafeQueue {
+namespace Syn::Vk 
+{
+    class SYN_API ThreadSafeQueue 
+    {
     public:
         ThreadSafeQueue(VkQueue handle, uint32_t familyIndex);
 

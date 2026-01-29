@@ -1,10 +1,6 @@
 #pragma once
-#include "Engine/SynApi.h"
+#include "../VkCommon.h"
 #include "Engine/Vk/Core/ThreadSafeQueue.h"
-#include <volk.h>
-#include <vector>
-#include <memory>
-#include <functional>
 
 namespace Syn::Vk {
 

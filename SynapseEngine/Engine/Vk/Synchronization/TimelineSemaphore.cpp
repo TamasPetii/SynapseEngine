@@ -1,7 +1,6 @@
 #include "TimelineSemaphore.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
-#include "Engine/SynMacro.h"
 
 namespace Syn::Vk {
     TimelineSemaphore::TimelineSemaphore(uint64_t initialValue) {

@@ -1,7 +1,5 @@
 #pragma once
-#include "Engine/SynApi.h"
-#include <volk.h>
-#include <cstdint>
+#include "../VkCommon.h"
 
 namespace Syn::Vk {
     class SYN_API Semaphore {

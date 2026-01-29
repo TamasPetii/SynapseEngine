@@ -1,9 +1,7 @@
 #include "Shader.h"
 #include "ShaderCompiler.h"
-#include "Engine/SynMacro.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
-#include "ShaderReflector.h"
 
 namespace Syn::Vk {
 
@@ -20,6 +18,7 @@ namespace Syn::Vk {
             maxSetIndex = _resources.descriptorSets.rbegin()->first + 1;
         }
 
+		//Filling out empty sets if any
         _descriptorSetLayouts.resize(maxSetIndex, VK_NULL_HANDLE);
 
         for (const auto& [setIndex, bindings] : _resources.descriptorSets) {

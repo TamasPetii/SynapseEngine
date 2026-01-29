@@ -1,6 +1,5 @@
 #include "Buffer.h"
 #include "BufferFactory.h"
-#include "Engine/SynMacro.h"
 
 namespace Syn::Vk {
 

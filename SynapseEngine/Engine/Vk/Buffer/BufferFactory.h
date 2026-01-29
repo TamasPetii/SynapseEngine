@@ -1,6 +1,5 @@
 #pragma once
 #include "Buffer.h"
-#include <memory>
 
 namespace Syn::Vk {
 

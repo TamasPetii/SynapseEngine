@@ -1,5 +1,4 @@
 #include "ShaderReflector.h"
-#include "Engine/SynMacro.h"
 #include "Engine/Logger/Logger.h"
 #include <print>
 

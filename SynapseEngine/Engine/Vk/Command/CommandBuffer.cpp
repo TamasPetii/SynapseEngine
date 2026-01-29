@@ -1,5 +1,4 @@
 #include "CommandBuffer.h"
-#include "Engine/SynMacro.h"
 
 namespace Syn::Vk {
 

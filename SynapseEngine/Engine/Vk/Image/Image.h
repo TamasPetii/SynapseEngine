@@ -1,11 +1,5 @@
 #pragma once
-#include "Engine/SynApi.h"
-#include <volk.h>
-#include <vma/vk_mem_alloc.h>
-#include <string>
-#include <vector>
-#include <unordered_map>
-#include <optional>
+#include "../VkCommon.h"
 
 namespace Syn::Vk {
 
