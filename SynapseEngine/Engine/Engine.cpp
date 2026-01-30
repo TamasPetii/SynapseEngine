@@ -3,6 +3,7 @@
 #include "ServiceLocator.h"
 #include "Vk/Context.h"
 #include "Vk/Shader/Shader.h"
+#include "Vk/Shader/ShaderProgram.h"
 #include "Vk/Buffer/SynVkBuffer.h"
 
 namespace Syn
@@ -46,8 +47,13 @@ namespace Syn
 		_vkContext = std::make_unique<Syn::Vk::Context>(vkContextParams);
 		ServiceLocator::ProvideVkContext(_vkContext.get());
 
-		auto shader = std::make_shared<Vk::Shader>("../Engine/Shaders/Test.comp", VK_SHADER_STAGE_COMPUTE_BIT);
-    }
+		auto shader = std::make_unique<Vk::Shader>("../Engine/Shaders/Test.comp", VK_SHADER_STAGE_COMPUTE_BIT);
+		auto complexShaderVert = std::make_unique<Vk::Shader>("../Engine/Shaders/ComplexTest.vert", VK_SHADER_STAGE_VERTEX_BIT);
+		auto complexShaderFrag = std::make_unique<Vk::Shader>("../Engine/Shaders/ComplexTest.frag", VK_SHADER_STAGE_FRAGMENT_BIT);
+		auto complexShaderGeom = std::make_unique<Vk::Shader>("../Engine/Shaders/ComplexTest.geom", VK_SHADER_STAGE_GEOMETRY_BIT);
+		std::vector<Vk::Shader*> shaders = { complexShaderVert.get(), complexShaderFrag.get(), complexShaderGeom.get()};
+		auto complexShaderProgram = std::make_unique<Vk::ShaderProgram>(shaders);
+	}
 
 	void Engine::Shutdown() {
 		ServiceLocator::Shutdown();

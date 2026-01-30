@@ -2,6 +2,7 @@
 #include "Engine/Vk/Rendering/RenderUtils.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
+#include "Engine/Vk/Descriptor/DescriptorUtils.h"
 
 namespace Syn::Vk {
 
@@ -47,6 +48,12 @@ namespace Syn::Vk {
 
             for (const auto& [index, layout] : setLayoutsMap) {
                 finalSetLayouts[index] = layout;
+            }
+
+            for (auto& layout : finalSetLayouts) {
+                if (layout == VK_NULL_HANDLE) {
+                    layout = DescriptorUtils::GetEmptyDescriptorSetLayout();
+                }
             }
         }
 

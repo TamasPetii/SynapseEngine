@@ -90,6 +90,11 @@ namespace Syn::Vk {
             scissor.extent = config.renderArea.value();
             vkCmdSetScissorWithCount(cmd, 1, &scissor);
         }
+
+        vkCmdSetVertexInputEXT(cmd,
+            0, nullptr,
+            0, nullptr
+        );
     }
 
     void RenderUtils::BindShaders(VkCommandBuffer cmd, std::span<const Shader* const> shaders) {

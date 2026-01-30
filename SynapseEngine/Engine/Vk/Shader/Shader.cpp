@@ -2,9 +2,9 @@
 #include "ShaderCompiler.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
+#include "Engine/Vk/Descriptor/DescriptorUtils.h"
 
 namespace Syn::Vk {
-
     Shader::Shader(const std::string& filepath, VkShaderStageFlagBits stage)
         : _stage(stage)
     {
@@ -25,7 +25,10 @@ namespace Syn::Vk {
             VkDescriptorSetLayoutCreateInfo layoutInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
             layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
             layoutInfo.pBindings = bindings.data();
+            layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
 
+            /* NOT WORKING, CANNOT MIX BUFFER WITH PUSH DESCRIPTOR
+            * 
 			//Set 0 -> Global Descriptor Buffer Extension
             if (setIndex == 0) {
                 layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
@@ -34,11 +37,24 @@ namespace Syn::Vk {
             else {
                 layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR;
             }
+            */
 
             VkDescriptorSetLayout setLayout;
             SYN_VK_ASSERT_MSG(vkCreateDescriptorSetLayout(device->Handle(), &layoutInfo, nullptr, &setLayout), "Failed to create descriptor set layout from reflection!");
 
             _descriptorSetLayouts[setIndex] = setLayout;
+        }
+
+        //Vulkan gives validation error to empty VK_NULL_HANDLE layouts -> Need to fill them up
+        std::vector<VkDescriptorSetLayout> creationLayouts = _descriptorSetLayouts;
+        if (!creationLayouts.empty()) {
+            VkDescriptorSetLayout emptyLayout = DescriptorUtils::GetEmptyDescriptorSetLayout();
+
+            for (auto& layout : creationLayouts) {
+                if (layout == VK_NULL_HANDLE) {
+                    layout = emptyLayout;
+                }
+            }
         }
 
         // Shader Object
@@ -54,9 +70,9 @@ namespace Syn::Vk {
             createInfo.pushConstantRangeCount = static_cast<uint32_t>(_resources.pushConstants.size());
         }
 
-        if (!_descriptorSetLayouts.empty()) {
-            createInfo.pSetLayouts = _descriptorSetLayouts.data();
-            createInfo.setLayoutCount = static_cast<uint32_t>(_descriptorSetLayouts.size());
+        if (!creationLayouts.empty()) {
+            createInfo.pSetLayouts = creationLayouts.data();
+            createInfo.setLayoutCount = static_cast<uint32_t>(creationLayouts.size());
         }
         
         SYN_VK_ASSERT_MSG(vkCreateShadersEXT(device->Handle(), 1, &createInfo, nullptr, &_handle), ("Failed to create Shader Object EXT: " + filepath).c_str());

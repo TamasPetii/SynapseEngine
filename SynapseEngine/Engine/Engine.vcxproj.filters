@@ -183,6 +183,9 @@
     <ClCompile Include="Vk\Shader\ShaderProgram.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Vk\Descriptor\DescriptorUtils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -419,8 +422,14 @@
     <ClInclude Include="Vk\Shader\ShaderProgram.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Vk\Descriptor\DescriptorUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Test.comp" />
+    <None Include="Shaders\ComplexTest.vert" />
+    <None Include="Shaders\ComplexTest.geom" />
+    <None Include="Shaders\ComplexTest.frag" />
   </ItemGroup>
 </Project>

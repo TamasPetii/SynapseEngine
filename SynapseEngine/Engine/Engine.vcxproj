@@ -179,6 +179,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Vk\Descriptor\DescriptorUtils.cpp" />
     <ClCompile Include="Vk\Shader\ShaderProgram.cpp" />
     <ClCompile Include="Vk\Rendering\RenderUtils.cpp" />
     <ClCompile Include="Vk\Image\Sampler.cpp" />
@@ -237,6 +238,7 @@
     <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Vk\Descriptor\DescriptorUtils.h" />
     <ClInclude Include="Vk\Shader\ShaderProgram.h" />
     <ClInclude Include="Vk\Rendering\RenderUtils.h" />
     <ClInclude Include="Vk\Image\Sampler.h" />
@@ -317,6 +319,9 @@
     <ClInclude Include="Registry\Type\TypeManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\ComplexTest.frag" />
+    <None Include="Shaders\ComplexTest.geom" />
+    <None Include="Shaders\ComplexTest.vert" />
     <None Include="Shaders\Test.comp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
