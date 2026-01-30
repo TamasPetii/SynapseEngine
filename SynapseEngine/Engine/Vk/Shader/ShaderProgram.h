@@ -16,7 +16,6 @@ namespace Syn::Vk {
 
         VkPipelineLayout GetLayout() const { return _pipelineLayout; }
         const std::vector<const Shader*>& GetShaders() const { return _shaders; }
-
     private:
         void CreatePipelineLayout();
     private:

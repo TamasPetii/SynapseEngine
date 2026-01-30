@@ -20,7 +20,6 @@ namespace Syn::Vk {
     }
 
     Context::Context(const ContextInitParams& params) {
-
         std::vector<const char*> instanceExts;
         if (params.getSurfaceExtensionsCallback) {
             instanceExts = params.getSurfaceExtensionsCallback();

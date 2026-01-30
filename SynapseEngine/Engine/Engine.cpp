@@ -6,6 +6,9 @@
 #include "Vk/Shader/ShaderProgram.h"
 #include "Vk/Buffer/SynVkBuffer.h"
 
+#include "Engine/Manager/ResourceManager.h"
+#include "Engine/Manager/ShaderManager.h"
+
 namespace Syn
 {
 	Engine::Engine(const EngineInitParams& params)
@@ -47,17 +50,19 @@ namespace Syn
 		_vkContext = std::make_unique<Syn::Vk::Context>(vkContextParams);
 		ServiceLocator::ProvideVkContext(_vkContext.get());
 
-		auto shader = std::make_unique<Vk::Shader>("../Engine/Shaders/Test.comp", VK_SHADER_STAGE_COMPUTE_BIT);
-		auto complexShaderVert = std::make_unique<Vk::Shader>("../Engine/Shaders/ComplexTest.vert", VK_SHADER_STAGE_VERTEX_BIT);
-		auto complexShaderFrag = std::make_unique<Vk::Shader>("../Engine/Shaders/ComplexTest.frag", VK_SHADER_STAGE_FRAGMENT_BIT);
-		auto complexShaderGeom = std::make_unique<Vk::Shader>("../Engine/Shaders/ComplexTest.geom", VK_SHADER_STAGE_GEOMETRY_BIT);
-		std::vector<Vk::Shader*> shaders = { complexShaderVert.get(), complexShaderFrag.get(), complexShaderGeom.get()};
-		auto complexShaderProgram = std::make_unique<Vk::ShaderProgram>(shaders);
+		_resourceManager = std::make_unique<ResourceManager>();
+		ServiceLocator::ProvideResourceManager(_resourceManager.get());
+
+		//Rendererekbe kell majd inicializálni!
+		auto shaderManager = ServiceLocator::GetShaderManager();
+		shaderManager->CreateProgram("TestComputeProgram", { "../Engine/Shaders/Test.comp" });
+		shaderManager->CreateProgram("ComplexTestProgram", { "../Engine/Shaders/ComplexTest.vert", "../Engine/Shaders/ComplexTest.frag", "../Engine/Shaders/ComplexTest.geom" });
 	}
 
 	void Engine::Shutdown() {
+		_resourceManager.reset();
+		_vkContext.reset(); //This has to be the last one!
 		ServiceLocator::Shutdown();
-		_vkContext.reset();
 	}
 
 	void Engine::WindowResizeEvent(uint32_t width, uint32_t height) {

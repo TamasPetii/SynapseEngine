@@ -5,7 +5,13 @@
 #include <span>
 #include <memory>
 
-namespace Syn::Vk { class Context; }
+namespace Syn::Vk { 
+    class Context;
+}
+
+namespace Syn {
+    class ResourceManager;
+}
 
 namespace Syn
 {
@@ -31,6 +37,7 @@ namespace Syn
     private:
 		bool _isMinimized = false;
 		std::unique_ptr<Vk::Context> _vkContext;
+		std::unique_ptr<ResourceManager> _resourceManager;
 	};
 }
 

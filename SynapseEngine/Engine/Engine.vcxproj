@@ -179,6 +179,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Manager\ShaderManager.cpp" />
+    <ClCompile Include="Manager\ResourceManager.cpp" />
+    <ClCompile Include="Vk\Shader\ShaderUtils.cpp" />
     <ClCompile Include="Vk\Descriptor\DescriptorUtils.cpp" />
     <ClCompile Include="Vk\Shader\ShaderProgram.cpp" />
     <ClCompile Include="Vk\Rendering\RenderUtils.cpp" />
@@ -238,6 +241,9 @@
     <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Manager\ShaderManager.h" />
+    <ClInclude Include="Manager\ResourceManager.h" />
+    <ClInclude Include="Vk\Shader\ShaderUtils.h" />
     <ClInclude Include="Vk\Descriptor\DescriptorUtils.h" />
     <ClInclude Include="Vk\Shader\ShaderProgram.h" />
     <ClInclude Include="Vk\Rendering\RenderUtils.h" />
