@@ -181,6 +181,9 @@
   <ItemGroup>
     <ClCompile Include="Manager\ShaderManager.cpp" />
     <ClCompile Include="Manager\ResourceManager.cpp" />
+    <ClCompile Include="Vk\Query\OcclusionQueryPool.cpp" />
+    <ClCompile Include="Vk\Query\TimestampQueryPool.cpp" />
+    <ClCompile Include="Vk\Query\QueryPool.cpp" />
     <ClCompile Include="Vk\Shader\ShaderUtils.cpp" />
     <ClCompile Include="Vk\Descriptor\DescriptorUtils.cpp" />
     <ClCompile Include="Vk\Shader\ShaderProgram.cpp" />
@@ -243,6 +246,9 @@
   <ItemGroup>
     <ClInclude Include="Manager\ShaderManager.h" />
     <ClInclude Include="Manager\ResourceManager.h" />
+    <ClInclude Include="Vk\Query\OcclusionQueryPool.h" />
+    <ClInclude Include="Vk\Query\TimestampQueryPool.h" />
+    <ClInclude Include="Vk\Query\QueryPool.h" />
     <ClInclude Include="Vk\Shader\ShaderUtils.h" />
     <ClInclude Include="Vk\Descriptor\DescriptorUtils.h" />
     <ClInclude Include="Vk\Shader\ShaderProgram.h" />

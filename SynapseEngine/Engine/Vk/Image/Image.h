@@ -31,7 +31,7 @@ namespace Syn::Vk {
         uint32_t arrayLayers = 1;
         bool generateMipMaps = false;
 
-        VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_AUTO;
+        VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
         VmaAllocationCreateFlags allocationFlags = 0;
         VkImageCreateFlags flags = 0;
 
