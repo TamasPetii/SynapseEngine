@@ -9,6 +9,8 @@
 #include "Engine/Manager/ResourceManager.h"
 #include "Engine/Manager/ShaderManager.h"
 
+#include "Engine/Mesh/Loader/AssimpLoader.h"
+
 namespace Syn
 {
 	Engine::Engine(const EngineInitParams& params)
@@ -57,6 +59,9 @@ namespace Syn
 		auto shaderManager = ServiceLocator::GetShaderManager();
 		shaderManager->CreateProgram("TestComputeProgram", { "../Engine/Shaders/Test.comp" });
 		shaderManager->CreateProgram("ComplexTestProgram", { "../Engine/Shaders/ComplexTest.vert", "../Engine/Shaders/ComplexTest.frag", "../Engine/Shaders/ComplexTest.geom" });
+	
+		AssimpLoader assimpLoader;
+		assimpLoader.LoadFile("C:/Users/User/Desktop/Models/Bistro/BistroInterior.fbx");
 	}
 
 	void Engine::Shutdown() {

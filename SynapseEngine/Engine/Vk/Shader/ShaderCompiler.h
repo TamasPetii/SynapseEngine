@@ -10,5 +10,4 @@ namespace Syn::Vk {
         static std::string LoadFile(const std::string& filepath);
         static shaderc_shader_kind MapStageToKind(VkShaderStageFlagBits stage);
     };
-
 }

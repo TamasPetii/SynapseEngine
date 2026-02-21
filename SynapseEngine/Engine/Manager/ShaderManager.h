@@ -8,7 +8,6 @@
 #include <unordered_map>
 
 namespace Syn {
-
     class SYN_API ShaderManager {
     public:
         ShaderManager() = default;
