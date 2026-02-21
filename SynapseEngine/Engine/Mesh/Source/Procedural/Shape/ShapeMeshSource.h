@@ -8,8 +8,6 @@
 
 namespace Syn
 {
-	struct RawModel;
-
 	class SYN_API ShapeMeshSource : public ProceduralMeshSource
 	{
 	public:

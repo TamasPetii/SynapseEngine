@@ -5,7 +5,7 @@
 
 namespace Syn
 {
-	struct SYN_API RawVertex
+	struct SYN_API Vertex
 	{
 		glm::vec3 position;
 		glm::vec3 normal;

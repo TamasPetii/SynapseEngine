@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine/SynApi.h"
-#include "RawVertex.h"
+#include "../Common/Vertex.h"
 #include <string>
 
 namespace Syn 
@@ -13,7 +13,7 @@ namespace Syn
 		std::string name;
 		uint32_t materialIndex;
 		std::vector<uint32_t> indices;
-		std::vector<RawVertex> vertices; 
+		std::vector<Vertex> vertices; 
 	};
 }
 

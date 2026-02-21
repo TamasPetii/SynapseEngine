@@ -9,10 +9,11 @@ namespace Syn::Vk {
 namespace Syn {
     class ShaderManager;
     class ResourceManager;
+    class StaticMeshBuilder;
 }
 
-namespace Syn {
-
+namespace Syn 
+{
     class SYN_API ServiceLocator {
     public:
         ServiceLocator() = delete;
@@ -22,15 +23,20 @@ namespace Syn {
         static void Shutdown();
 
         static void ProvideVkContext(Vk::Context* context) { _vkContext = context; }
-        static void ProvideResourceManager(ResourceManager* manager) { _resourceManager = manager; }
-        static void ProvideShaderManager(ShaderManager* manager) { _shaderManager = manager; }
-
         static Vk::Context* GetVkContext() { return _vkContext; }
-        static ShaderManager* GetShaderManager() { return _shaderManager; }
+
+        static void ProvideResourceManager(ResourceManager* manager) { _resourceManager = manager; }
         static ResourceManager* GetResourceManager() { return _resourceManager; }
+
+        static void ProvideShaderManager(ShaderManager* manager) { _shaderManager = manager; }
+        static ShaderManager* GetShaderManager() { return _shaderManager; }
+
+        static void ProvideStaticMeshBuilder(StaticMeshBuilder* builder) { _staticMeshBuilder = builder; }
+        static StaticMeshBuilder* GetStaticMeshBuilder() { return _staticMeshBuilder; }
     private:
         static Vk::Context* _vkContext;
 		static ShaderManager* _shaderManager;
 		static ResourceManager* _resourceManager;
+		static StaticMeshBuilder* _staticMeshBuilder;
     };
 }

@@ -4,7 +4,7 @@
 
 namespace Syn
 {
-	struct SYN_API RawNode
+	struct SYN_API TransformNode
 	{
 		glm::mat4 localTransform;
 		glm::mat4 globalTransform;

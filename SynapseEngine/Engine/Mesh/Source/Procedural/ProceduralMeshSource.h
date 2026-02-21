@@ -6,8 +6,6 @@
 
 namespace Syn
 {
-	struct RawModel;
-
 	class SYN_API ProceduralMeshSource : public IMeshSource
 	{
 	public:

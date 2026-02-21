@@ -8,8 +8,12 @@
 
 #include "Engine/Manager/ResourceManager.h"
 #include "Engine/Manager/ShaderManager.h"
+#include "Engine/Mesh/Builder/StaticMeshBuilder.h"
 
-#include "Engine/Mesh/Loader/AssimpLoader.h"
+#include "Engine/Mesh/Loader/MeshLoaders.h"
+#include "Engine/Mesh/Processor/MeshProcessors.h"
+#include "Engine/Mesh/Source/MeshSources.h"
+#include "Engine/Mesh/Factory/MeshFactory.h"
 
 namespace Syn
 {
@@ -35,10 +39,38 @@ namespace Syn
 
 	void Engine::Init(const EngineInitParams& params)
 	{
+		InitLogger();
+		InitVulkan(params);
+		InitResourceManager();
+		InitStaticMeshBuilder();
+
+		//Rendererekbe kell majd inicializálni!
+		auto shaderManager = ServiceLocator::GetShaderManager();
+		shaderManager->CreateProgram("TestComputeProgram", { "../Engine/Shaders/Test.comp" });
+		shaderManager->CreateProgram("ComplexTestProgram", { "../Engine/Shaders/ComplexTest.vert", "../Engine/Shaders/ComplexTest.frag", "../Engine/Shaders/ComplexTest.geom" });
+	
+		auto sphere = Syn::MeshFactory::CreateSphere();
+		auto cube = Syn::MeshFactory::CreateCube();
+		auto quad = Syn::MeshFactory::CreateQuad();
+		auto screenQuad = Syn::MeshFactory::CreateScreenQuad();
+		auto cylinder = Syn::MeshFactory::CreateCylinder();
+		auto cone = Syn::MeshFactory::CreateCone();
+		auto capsule = Syn::MeshFactory::CreateCapsule();
+		auto hemisphere = Syn::MeshFactory::CreateHemisphere();
+		auto pyramid = Syn::MeshFactory::CreatePyramid();
+		auto grid = Syn::MeshFactory::CreateGrid();
+		auto torus = Syn::MeshFactory::CreateTorus();
+	}
+
+	void Engine::InitLogger()
+	{
 		Logger::Get().AddSink(std::make_shared<Syn::ConsoleSink>());
 		Logger::Get().AddSink(std::make_shared<Syn::MemorySink>());
 		Logger::Get().AddSink(std::make_shared<Syn::FileSink>());
+	}
 
+	void Engine::InitVulkan(const EngineInitParams& params)
+	{
 		Vk::ContextInitParams vkContextParams{
 			.enableValidation = EnableValidation,
 			.getSurfaceExtensionsCallback = params.getSurfaceExtensionsCallback,
@@ -51,17 +83,28 @@ namespace Syn
 
 		_vkContext = std::make_unique<Syn::Vk::Context>(vkContextParams);
 		ServiceLocator::ProvideVkContext(_vkContext.get());
+	}
 
+	void Engine::InitResourceManager()
+	{
 		_resourceManager = std::make_unique<ResourceManager>();
 		ServiceLocator::ProvideResourceManager(_resourceManager.get());
+	}
 
-		//Rendererekbe kell majd inicializálni!
-		auto shaderManager = ServiceLocator::GetShaderManager();
-		shaderManager->CreateProgram("TestComputeProgram", { "../Engine/Shaders/Test.comp" });
-		shaderManager->CreateProgram("ComplexTestProgram", { "../Engine/Shaders/ComplexTest.vert", "../Engine/Shaders/ComplexTest.frag", "../Engine/Shaders/ComplexTest.geom" });
-	
-		AssimpLoader assimpLoader;
-		assimpLoader.LoadFile("C:/Users/User/Desktop/Models/Bistro/BistroInterior.fbx");
+	void Engine::InitStaticMeshBuilder()
+	{
+		_staticMeshBuilder = std::make_unique<StaticMeshBuilder>(
+			std::make_unique<MeshLoaderRegistry>(),
+			std::make_unique<MeshProcessorPipeline>()
+		);
+
+		_staticMeshBuilder->RegisterLoader(std::make_shared<AssimpLoader>(), 100);
+		_staticMeshBuilder->RegisterProcessor(std::make_unique<NormalProcessor>());
+		_staticMeshBuilder->RegisterProcessor(std::make_unique<TangentProcessor>());
+		_staticMeshBuilder->RegisterProcessor(std::make_unique<ColliderProcessor>());
+		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerLodProcessor>());
+		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerMeshletProcessor>());
+		ServiceLocator::ProvideStaticMeshBuilder(_staticMeshBuilder.get());
 	}
 
 	void Engine::Shutdown() {

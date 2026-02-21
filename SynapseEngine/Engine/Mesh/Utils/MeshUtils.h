@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine/SynApi.h"
-#include "Engine/Mesh/Intermediate/RawModel.h"
+#include "Engine/Mesh/Data/Raw/RawModel.h"
 #include <filesystem>
 
 namespace Syn 

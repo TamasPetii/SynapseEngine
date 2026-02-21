@@ -1,0 +1,11 @@
+#pragma once
+#include "IMeshProcessor.h"
+#include "IMeshProcessorPipeline.h"
+#include "MeshProcessorPipeline.h"
+#include "Geometry/NormalProcessor.h"
+#include "Geometry/TangentProcessor.h"
+#include "Geometry/ColliderProcessor.h"
+#include "Lod/ILodProcessor.h"
+#include "Lod/MeshoptimizerLodProcessor.h"
+#include "Meshlet/IMeshletProcessor.h"
+#include "Meshlet/MeshoptimizerMeshletProcessor.h"

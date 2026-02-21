@@ -4,7 +4,7 @@
 
 namespace Syn
 {
-	struct SYN_API RawMeshNodeDescriptor
+	struct SYN_API MeshInstanceDescriptor
 	{
 		uint16_t meshIndex;
 		uint16_t nodeIndex;

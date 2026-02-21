@@ -65,7 +65,7 @@ namespace Syn
 
             uint16_t nodeIndex = static_cast<uint16_t>(outModel.nodeTransforms.size());
 
-            RawNode rawNode;
+            TransformNode rawNode;
             rawNode.localTransform = AssimpUtils::ConvertAssimpToGlm(currentNode->mTransformation);
 
             const glm::mat4& parentTransform = parentNodeIndex != UINT16_MAX ? outModel.nodeTransforms[parentNodeIndex].globalTransform : glm::mat4(1);
@@ -79,7 +79,7 @@ namespace Syn
                 uint32_t meshIndex = currentNode->mMeshes[i];
                 aiMesh* ai_mesh = scene->mMeshes[meshIndex];
 
-                RawMeshNodeDescriptor descriptor{};
+                MeshInstanceDescriptor descriptor{};
                 descriptor.meshIndex = static_cast<uint16_t>(meshIndex);
                 descriptor.nodeIndex = nodeIndex;
                 descriptor.parentNodeIndex = parentNodeIndex;
@@ -125,7 +125,7 @@ namespace Syn
 
                 for (uint32_t v = 0; v < ai_mesh->mNumVertices; ++v)
                 {
-                    RawVertex vertex{};
+                    Vertex vertex{};
 
                     if (ai_mesh->HasPositions())
                         vertex.position = AssimpUtils::ConvertAssimpToGlm(ai_mesh->mVertices[v]);

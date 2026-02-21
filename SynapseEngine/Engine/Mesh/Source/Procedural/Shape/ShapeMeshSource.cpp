@@ -1,5 +1,4 @@
 #include "ShapeMeshSource.h"
-#include "Engine/Mesh/Intermediate/RawModel.h"
 #include <map>
 #include <tuple>
 
@@ -28,11 +27,13 @@ namespace Syn
         mesh.name = _name;
         mesh.materialIndex = 0;
         mesh.indices = std::move(indices);
+        mesh.hasNormals = true;
+        mesh.hasTangents = false;
 
         mesh.vertices.reserve(positions.size());
         for (size_t i = 0; i < positions.size(); ++i)
         {
-            RawVertex v{
+            Vertex v{
 				v.position = positions[i],
 				v.normal = normals[i],
 				v.tangent = glm::vec3(0.0f),
@@ -45,13 +46,13 @@ namespace Syn
 
         model.meshes.push_back(std::move(mesh));
 
-        RawNode rootNode{};
+        TransformNode rootNode{};
         rootNode.localTransform = glm::mat4(1.0f);
         rootNode.globalTransform = glm::mat4(1.0f);
         rootNode.globalTransformIT = glm::mat4(1.0f);
         model.nodeTransforms.push_back(rootNode);
 
-        RawMeshNodeDescriptor desc{};
+        MeshInstanceDescriptor desc{};
         desc.meshIndex = 0;
         desc.nodeIndex = 0;
         desc.parentNodeIndex = UINT16_MAX;

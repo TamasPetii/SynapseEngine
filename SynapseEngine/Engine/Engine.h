@@ -11,6 +11,7 @@ namespace Syn::Vk {
 
 namespace Syn {
     class ResourceManager;
+    class StaticMeshBuilder;
 }
 
 namespace Syn
@@ -33,11 +34,16 @@ namespace Syn
         void WindowResizeEvent(uint32_t width, uint32_t height);
     private:
         void Init(const EngineInitParams& params);
+        void InitLogger();
+        void InitVulkan(const EngineInitParams& params);
+        void InitResourceManager();
+        void InitStaticMeshBuilder();
         void Shutdown();
     private:
 		bool _isMinimized = false;
 		std::unique_ptr<Vk::Context> _vkContext;
 		std::unique_ptr<ResourceManager> _resourceManager;
+        std::unique_ptr<StaticMeshBuilder> _staticMeshBuilder;
 	};
 }
 

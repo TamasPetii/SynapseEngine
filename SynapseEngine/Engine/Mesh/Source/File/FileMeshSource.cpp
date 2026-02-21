@@ -1,5 +1,4 @@
 #include "FileMeshSource.h"
-#include "Engine/Mesh/Intermediate/RawModel.h"
 #include "Engine/Mesh/Loader/IMeshLoader.h"
 
 namespace Syn

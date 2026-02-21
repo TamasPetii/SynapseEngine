@@ -2,10 +2,10 @@
 #include "Engine/SynApi.h"
 #include <optional>
 
+#include "Engine/Mesh/Data/Raw/RawModel.h"
+
 namespace Syn 
 {
-	struct RawModel;
-
 	class SYN_API IMeshSource
 	{
 	public:	
