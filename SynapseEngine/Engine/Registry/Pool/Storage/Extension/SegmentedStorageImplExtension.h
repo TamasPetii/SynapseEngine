@@ -14,6 +14,7 @@ namespace Syn
         SYN_INLINE DerivedPool& AsDerived() { return static_cast<DerivedPool&>(*this); }
         SYN_INLINE const DerivedPool& AsDerived() const { return static_cast<const DerivedPool&>(*this); }
     public:
+
         SYN_INLINE void SetCategory(EntityID entity, StorageCategory newCat)
         {
             auto& pool = AsDerived();

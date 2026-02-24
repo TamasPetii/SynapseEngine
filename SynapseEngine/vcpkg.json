@@ -23,6 +23,7 @@
     "gli",
     "gtest",
     "spirv-reflect",
-    "spirv-headers"
+    "spirv-headers",
+    "taskflow"
   ]
 }

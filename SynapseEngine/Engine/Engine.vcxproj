@@ -179,8 +179,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Render\Data\RenderScene.cpp" />
+    <ClCompile Include="Render\Data\RenderView.cpp" />
+    <ClCompile Include="Render\Data\RenderTask.cpp" />
+    <ClCompile Include="Render\RenderPipeline.cpp" />
+    <ClCompile Include="Render\ComputePass\BaseComputePass.cpp" />
+    <ClCompile Include="Render\GraphicsPass\BaseRenderPass.cpp" />
     <ClCompile Include="Collision\Colliders\AabbCollider.cpp" />
     <ClCompile Include="Collision\Colliders\ConeCollider.cpp" />
+    <ClCompile Include="Render\IRenderPass.cpp" />
     <ClCompile Include="Mesh\Factory\MeshFactory.cpp" />
     <ClCompile Include="Mesh\Loader\IMeshLoaderRegistry.cpp" />
     <ClCompile Include="Mesh\Processor\IMeshProcessorPipeline.cpp" />
@@ -299,8 +306,15 @@
     <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\Data\RenderScene.h" />
+    <ClInclude Include="Render\Data\RenderView.h" />
+    <ClInclude Include="Render\Data\RenderTask.h" />
+    <ClInclude Include="Render\RenderPipeline.h" />
+    <ClInclude Include="Render\ComputePass\BaseComputePass.h" />
+    <ClInclude Include="Render\GraphicsPass\BaseRenderPass.h" />
     <ClInclude Include="Collision\Colliders\AabbCollider.h" />
     <ClInclude Include="Collision\Colliders\ConeCollider.h" />
+    <ClInclude Include="Render\IRenderPass.h" />
     <ClInclude Include="Mesh\Factory\MeshFactory.h" />
     <ClInclude Include="Mesh\Loader\IMeshLoaderRegistry.h" />
     <ClInclude Include="Mesh\Processor\IMeshProcessorPipeline.h" />

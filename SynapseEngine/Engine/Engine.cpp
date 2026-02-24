@@ -49,6 +49,7 @@ namespace Syn
 		shaderManager->CreateProgram("TestComputeProgram", { "../Engine/Shaders/Test.comp" });
 		shaderManager->CreateProgram("ComplexTestProgram", { "../Engine/Shaders/ComplexTest.vert", "../Engine/Shaders/ComplexTest.frag", "../Engine/Shaders/ComplexTest.geom" });
 	
+		auto bistro = Syn::MeshFactory::LoadFromFile("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
 		auto sphere = Syn::MeshFactory::CreateSphere();
 		auto cube = Syn::MeshFactory::CreateCube();
 		auto quad = Syn::MeshFactory::CreateQuad();
