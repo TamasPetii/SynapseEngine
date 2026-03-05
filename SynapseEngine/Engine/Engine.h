@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine/SynApi.h"
+#include "FrameContext.h"
 #include <vulkan/vulkan.h>
 #include <functional>
 #include <span>
@@ -12,6 +13,7 @@ namespace Syn::Vk {
 namespace Syn {
     class ResourceManager;
     class StaticMeshBuilder;
+    class RenderManager;
 }
 
 namespace Syn
@@ -38,12 +40,18 @@ namespace Syn
         void InitVulkan(const EngineInitParams& params);
         void InitResourceManager();
         void InitStaticMeshBuilder();
+        void InitFrameContext(uint32_t framesInFlight);
+        void InitRenderPipelines();
         void Shutdown();
     private:
+        void AdvanceFrameIndex();
+    private:
 		bool _isMinimized = false;
+        FrameContext _frameContext;
 		std::unique_ptr<Vk::Context> _vkContext;
 		std::unique_ptr<ResourceManager> _resourceManager;
         std::unique_ptr<StaticMeshBuilder> _staticMeshBuilder;
+		std::unique_ptr<RenderManager> _renderManager;
 	};
 }
 

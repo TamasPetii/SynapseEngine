@@ -8,12 +8,10 @@
 #include <vector>
 #include <memory>
 
-#include "RenderScene.h"
+#include "RenderContext.h"
 
 namespace Syn 
 {
-    struct ResourceManager;
-
     struct SYN_API PassImageTransition
     {
         Vk::Image* image;
@@ -27,8 +25,8 @@ namespace Syn
     {
     public:
         virtual ~IRenderPass() = default;
-        virtual void Initialize(std::shared_ptr<ResourceManager> resourceManager) = 0;
-        virtual void Execute(VkCommandBuffer cmd, const RenderScene& scene) = 0;
+        virtual void Initialize() = 0;
+        virtual void Execute(const RenderContext& context) = 0;
         virtual std::string GetName() const = 0;
     };
 }

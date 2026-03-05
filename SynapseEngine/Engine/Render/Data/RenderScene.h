@@ -10,6 +10,7 @@ namespace Syn
 {
     struct SYN_API RenderScene
     {
+        /*
         uint32_t frameIndex = 0;
         uint32_t cameraIndex = 0;
         VkDeviceAddress cameraBufferAddress = 0;
@@ -27,5 +28,6 @@ namespace Syn
         // Ez tárolja a Vulkan Draw Parancsokat! (1 elem = 20 byte / VkDrawIndexedIndirectCommand)
         // Szükséges Flags: VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | HOST_VISIBLE
         std::shared_ptr<Vk::Buffer> globalIndirectCommandBuffer;
+        */
     };
 }

@@ -6,7 +6,7 @@
 #include <vector>
 #include <memory>
 
-#include "../RenderScene.h"
+#include "../Data/RenderScene.h"
 #include "../IRenderPass.h"
 
 namespace Syn
@@ -14,16 +14,20 @@ namespace Syn
     class SYN_API BaseRenderPass : public IRenderPass
     {
     public:
-        void Execute(VkCommandBuffer cmd, const RenderScene& scene); 
+        void Execute(const RenderContext& context);
     protected:
-        virtual void BindDescriptors(VkCommandBuffer cmd, const RenderScene& scene) {}
-        virtual void PushConstants(VkCommandBuffer cmd, const RenderScene& scene) {}
-        virtual void Draw(VkCommandBuffer cmd, const RenderScene& scene) = 0;
+        virtual void PrepareFrame(const RenderContext& context) {}
+        virtual void BindDescriptors(const RenderContext& context) {}
+        virtual void PushConstants(const RenderContext& context) {}
+        virtual void Draw(const RenderContext& context) {};
     protected:
         bool _useDynamicRendering = true;
+        Vk::ShaderProgram* _shaderProgram;
         Vk::GraphicsPipelineConfig _graphicsState;
         std::vector<PassImageTransition> _imageTransitions;
+        std::vector<VkRenderingAttachmentInfo> _colorAttachments;
+        std::optional<VkRenderingAttachmentInfo> _depthAttachment;
+        std::optional<VkRenderingAttachmentInfo> _stencilAttachment;
         std::optional<Vk::RenderingInfoConfig> _renderInfo;
-        std::shared_ptr<Vk::ShaderProgram> _shaderProgram;
     };
 }

@@ -179,6 +179,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="FrameContext.cpp" />
+    <ClCompile Include="Render\GraphicsPass\PresentationPass.cpp" />
+    <ClCompile Include="Vk\Image\ImageConfig.cpp" />
+    <ClCompile Include="Render\RenderContext.cpp" />
+    <ClCompile Include="Render\Renderer.cpp" />
+    <ClCompile Include="Render\RenderManager.cpp" />
     <ClCompile Include="Render\Data\RenderScene.cpp" />
     <ClCompile Include="Render\Data\RenderView.cpp" />
     <ClCompile Include="Render\Data\RenderTask.cpp" />
@@ -211,6 +217,7 @@
     <ClCompile Include="Collision\Colliders\SphereCollider.cpp" />
     <ClCompile Include="Mesh\Builder\StaticMeshBuilder.cpp" />
     <ClCompile Include="Mesh\Data\StaticMesh.cpp" />
+    <ClCompile Include="Render\GraphicsPass\TestPass.cpp" />
     <ClCompile Include="Utils\AssimpUtils.cpp" />
     <ClCompile Include="Mesh\Loader\MeshLoaderRegistry.cpp" />
     <ClCompile Include="Mesh\Data\Common\MeshInstanceDescriptor.cpp" />
@@ -306,6 +313,12 @@
     <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FrameContext.h" />
+    <ClInclude Include="Render\GraphicsPass\PresentationPass.h" />
+    <ClInclude Include="Vk\Image\ImageConfig.h" />
+    <ClInclude Include="Render\RenderContext.h" />
+    <ClInclude Include="Render\Renderer.h" />
+    <ClInclude Include="Render\RenderManager.h" />
     <ClInclude Include="Render\Data\RenderScene.h" />
     <ClInclude Include="Render\Data\RenderView.h" />
     <ClInclude Include="Render\Data\RenderTask.h" />
@@ -341,6 +354,7 @@
     <ClInclude Include="Collision\Colliders\SphereCollider.h" />
     <ClInclude Include="Mesh\Builder\StaticMeshBuilder.h" />
     <ClInclude Include="Mesh\Data\StaticMesh.h" />
+    <ClInclude Include="Render\GraphicsPass\TestPass.h" />
     <ClInclude Include="Utils\AssimpUtils.h" />
     <ClInclude Include="Mesh\Loader\MeshLoaderRegistry.h" />
     <ClInclude Include="Mesh\Data\Common\MeshInstanceDescriptor.h" />
@@ -461,6 +475,8 @@
     <None Include="Shaders\ComplexTest.frag" />
     <None Include="Shaders\ComplexTest.geom" />
     <None Include="Shaders\ComplexTest.vert" />
+    <None Include="Shaders\Fullscreen.frag" />
+    <None Include="Shaders\Fullscreen.vert" />
     <None Include="Shaders\Test.comp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

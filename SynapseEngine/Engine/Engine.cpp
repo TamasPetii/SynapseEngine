@@ -15,6 +15,13 @@
 #include "Engine/Mesh/Source/MeshSources.h"
 #include "Engine/Mesh/Factory/MeshFactory.h"
 
+#include "Engine/Render/RenderManager.h"
+#include "Engine/Render/Data/RenderScene.h"
+
+#include "Engine/Render/GraphicsPass/TestPass.h"
+#include "Engine/Render/GraphicsPass/PresentationPass.h"
+#include "Engine/Render/RenderPipeline.h"
+
 namespace Syn
 {
 	Engine::Engine(const EngineInitParams& params)
@@ -33,22 +40,36 @@ namespace Syn
 
 	void Engine::Render()
 	{
-		if (_isMinimized) 
+		if (_isMinimized)
 			return;
+
+		uint32_t currentFrame = ServiceLocator::GetFrameContext()->currentFrameIndex;
+
+		_renderManager->WaitForFrame(currentFrame);
+
+		//UpdateGPU();
+		//RenderScene scene = _sceneManager->GetScene();
+		RenderScene scene;
+		_renderManager->RenderFrame(currentFrame, scene);
+
+		AdvanceFrameIndex();
 	}
 
 	void Engine::Init(const EngineInitParams& params)
 	{
+		InitFrameContext(3);
 		InitLogger();
 		InitVulkan(params);
 		InitResourceManager();
 		InitStaticMeshBuilder();
+		InitRenderPipelines();
 
 		//Rendererekbe kell majd inicializálni!
 		auto shaderManager = ServiceLocator::GetShaderManager();
 		shaderManager->CreateProgram("TestComputeProgram", { "../Engine/Shaders/Test.comp" });
 		shaderManager->CreateProgram("ComplexTestProgram", { "../Engine/Shaders/ComplexTest.vert", "../Engine/Shaders/ComplexTest.frag", "../Engine/Shaders/ComplexTest.geom" });
 	
+		/*
 		auto bistro = Syn::MeshFactory::LoadFromFile("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
 		auto sphere = Syn::MeshFactory::CreateSphere();
 		auto cube = Syn::MeshFactory::CreateCube();
@@ -61,6 +82,7 @@ namespace Syn
 		auto pyramid = Syn::MeshFactory::CreatePyramid();
 		auto grid = Syn::MeshFactory::CreateGrid();
 		auto torus = Syn::MeshFactory::CreateTorus();
+		*/
 	}
 
 	void Engine::InitLogger()
@@ -82,8 +104,11 @@ namespace Syn
 			}
 		};
 
-		_vkContext = std::make_unique<Syn::Vk::Context>(vkContextParams);
+		_vkContext = std::make_unique<Vk::Context>(vkContextParams);
 		ServiceLocator::ProvideVkContext(_vkContext.get());
+		
+		//Swapchain images relie on service locator!
+		_vkContext->InitSwapChain(vkContextParams);
 	}
 
 	void Engine::InitResourceManager()
@@ -106,6 +131,30 @@ namespace Syn
 		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerLodProcessor>());
 		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerMeshletProcessor>());
 		ServiceLocator::ProvideStaticMeshBuilder(_staticMeshBuilder.get());
+	}
+
+	void Engine::InitFrameContext(uint32_t framesInFlight) {
+		_frameContext.framesInFlight = framesInFlight;
+		_frameContext.currentFrameIndex = 0;
+		ServiceLocator::ProvideFrameContext(&_frameContext);
+	}
+
+	void Engine::AdvanceFrameIndex() {
+		_frameContext.currentFrameIndex = (_frameContext.currentFrameIndex + 1) % _frameContext.framesInFlight;
+		//Todo?? _frameContext.deltaTime
+	}
+
+	void Engine::InitRenderPipelines()
+	{
+		uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
+		_renderManager = std::make_unique<RenderManager>(framesInFlight);
+
+		auto pipeline = std::make_unique<RenderPipeline>();
+		pipeline->AddPass(std::make_unique<TestPass>());
+		pipeline->AddPass(std::make_unique<PresentationPass>());
+		pipeline->InitializeAll();
+
+		_renderManager->RegisterPipeline("MainPipeline", std::move(pipeline));
 	}
 
 	void Engine::Shutdown() {

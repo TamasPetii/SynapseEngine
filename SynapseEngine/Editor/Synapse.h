@@ -10,6 +10,7 @@ public:
 
     void OnInit() override;
     void OnUpdate(float dt) override;
+    void OnRender() override;
 
     void OnKey(int key, int scancode, int action, int mods) override;
     void OnMouseButton(int button, int action, int mods) override;

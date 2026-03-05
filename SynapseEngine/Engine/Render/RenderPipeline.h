@@ -11,9 +11,14 @@ namespace Syn
     class SYN_API RenderPipeline
     {
     public:
+        RenderPipeline() = default;
+
+        RenderPipeline(const RenderPipeline&) = delete;
+        RenderPipeline& operator=(const RenderPipeline&) = delete;
+
         void AddPass(std::unique_ptr<IRenderPass> pass);
-        void InitializeAll(std::shared_ptr<ResourceManager> resourceManager);
-        void Execute(VkCommandBuffer cmd, const RenderScene& scene);
+        void InitializeAll();
+        void Execute(const RenderContext& context);
     private:
         std::vector<std::unique_ptr<IRenderPass>> _passes;
     };

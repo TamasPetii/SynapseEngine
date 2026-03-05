@@ -1,11 +1,13 @@
 #include "BaseRenderPass.h"
 
 namespace Syn {
-    void BaseRenderPass::Execute(VkCommandBuffer cmd, const RenderScene& scene)
+    void BaseRenderPass::Execute(const RenderContext& context)
     {
+        PrepareFrame(context);
+
         for (const auto& transition : _imageTransitions) {
             transition.image->TransitionLayout(
-                cmd,
+                context.cmd,
                 transition.newLayout,
                 transition.dstStage,
                 transition.dstAccess,
@@ -14,20 +16,20 @@ namespace Syn {
         }
 
         if (_useDynamicRendering && _renderInfo.has_value()) {
-            Vk::RenderUtils::BeginRendering(cmd, _renderInfo.value());
+            Vk::RenderUtils::BeginRendering(context.cmd, _renderInfo.value());
         }
 
         if (_shaderProgram) {
-            Vk::RenderUtils::SetGraphicsState(cmd, _graphicsState);
-            _shaderProgram->Bind(cmd);
+            Vk::RenderUtils::SetGraphicsState(context.cmd, _graphicsState);
+            _shaderProgram->Bind(context.cmd);
 
-            BindDescriptors(cmd, scene);
-            PushConstants(cmd, scene);
-            Draw(cmd, scene);
+            BindDescriptors(context);
+            PushConstants(context);
+            Draw(context);
         }
 
-        if (_useDynamicRendering) {
-            Vk::RenderUtils::EndRendering(cmd);
+        if (_useDynamicRendering && _renderInfo.has_value()) {
+            Vk::RenderUtils::EndRendering(context.cmd);
         }
     }
 }

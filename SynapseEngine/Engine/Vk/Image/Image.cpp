@@ -11,6 +11,16 @@ namespace Syn::Vk {
         ImageFactory::Allocate(this);
     }
 
+    Image::Image(VkImage existingHandle, const ImageConfig& config)
+        : _config(config), _handle(existingHandle)
+    {
+        _currentLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        _currentStage = VK_PIPELINE_STAGE_2_TOP_OF_PIPE_BIT;
+        _currentAccess = 0;
+
+        ImageFactory::CreateViews(this);
+    }
+
     Image::~Image() {
         auto device = ServiceLocator::GetVkContext()->GetDevice();
 

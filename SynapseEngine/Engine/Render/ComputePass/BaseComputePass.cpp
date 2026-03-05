@@ -1,11 +1,13 @@
 #include "BaseComputePass.h"
 
 namespace Syn {
-    void BaseComputePass::Execute(VkCommandBuffer cmd, const RenderScene& scene)
+    void BaseComputePass::Execute(const RenderContext& context)
     {
+        PrepareFrame(context);
+
         for (const auto& transition : _imageTransitions) {
             transition.image->TransitionLayout(
-                cmd,
+                context.cmd,
                 transition.newLayout,
                 transition.dstStage,
                 transition.dstAccess,
@@ -14,11 +16,11 @@ namespace Syn {
         }
 
         if (_shaderProgram) {
-            _shaderProgram->Bind(cmd);
+            _shaderProgram->Bind(context.cmd);
 
-            BindDescriptors(cmd, scene);
-            PushConstants(cmd, scene);
-            Dispatch(cmd, scene);
+            BindDescriptors(context);
+            PushConstants(context);
+            Dispatch(context);
         }
     }
 }

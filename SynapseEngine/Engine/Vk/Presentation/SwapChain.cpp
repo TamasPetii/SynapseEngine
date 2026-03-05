@@ -76,35 +76,35 @@ namespace Syn::Vk {
         SYN_VK_ASSERT_MSG(vkCreateSwapchainKHR(_device.Handle(), &createInfo, nullptr, &_handle), "Failed to create SwapChain");
 
         vkGetSwapchainImagesKHR(_device.Handle(), _handle, &imageCount, nullptr);
-        _images.resize(imageCount);
-        vkGetSwapchainImagesKHR(_device.Handle(), _handle, &imageCount, _images.data());
+        std::vector<VkImage> rawImages(imageCount);
+        vkGetSwapchainImagesKHR(_device.Handle(), _handle, &imageCount, rawImages.data());
 
         _imageFormat = surfaceFormat.format;
         _extent = extent;
 
-        _imageViews.resize(_images.size());
-        for (size_t i = 0; i < _images.size(); i++) {
-            VkImageViewCreateInfo viewInfo{ VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
-            viewInfo.image = _images[i];
-            viewInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            viewInfo.format = _imageFormat;
-            viewInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            viewInfo.subresourceRange.baseMipLevel = 0;
-            viewInfo.subresourceRange.levelCount = 1;
-            viewInfo.subresourceRange.baseArrayLayer = 0;
-            viewInfo.subresourceRange.layerCount = 1;
+        ImageConfig swapchainImageConfig;
+        swapchainImageConfig.width = _extent.width;
+        swapchainImageConfig.height = _extent.height;
+        swapchainImageConfig.depth = 1;
+        swapchainImageConfig.format = _imageFormat;
+        swapchainImageConfig.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        swapchainImageConfig.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        swapchainImageConfig.mipLevels = 1;
+        swapchainImageConfig.arrayLayers = 1;
 
-            SYN_VK_ASSERT_MSG(vkCreateImageView(_device.Handle(), &viewInfo, nullptr, &_imageViews[i]), "Failed to create SwapChain Image View");
+        ImageViewConfig viewConfig{};
+        viewConfig.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        swapchainImageConfig.AddView("_default", viewConfig);
+
+        _images.clear();
+        _images.reserve(imageCount);
+
+        for (VkImage rawImage : rawImages) {
+            _images.push_back(std::make_unique<Syn::Vk::Image>(rawImage, swapchainImageConfig));
         }
     }
 
     void SwapChain::Cleanup() {
-        for (auto imageView : _imageViews) {
-            if (imageView != VK_NULL_HANDLE)
-                vkDestroyImageView(_device.Handle(), imageView, nullptr);
-        }
-        _imageViews.clear();
-
         if (_handle != VK_NULL_HANDLE) {
             vkDestroySwapchainKHR(_device.Handle(), _handle, nullptr);
             _handle = VK_NULL_HANDLE;

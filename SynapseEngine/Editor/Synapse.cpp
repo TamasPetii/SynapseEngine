@@ -43,6 +43,13 @@ void Synapse::OnUpdate(float dt) {
     }
 }
 
+void Synapse::OnRender()
+{
+    if(_engine) {
+        _engine->Render();
+	}
+}
+
 void Synapse::OnKey(int key, int scancode, int action, int mods) {
     /*
     ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);

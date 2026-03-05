@@ -19,7 +19,8 @@ namespace Syn::Vk {
         };
     }
 
-    Context::Context(const ContextInitParams& params) {
+    Context::Context(const ContextInitParams& params)
+    {
         std::vector<const char*> instanceExts;
         if (params.getSurfaceExtensionsCallback) {
             instanceExts = params.getSurfaceExtensionsCallback();
@@ -34,6 +35,11 @@ namespace Syn::Vk {
         _physicalDevice = std::make_unique<PhysicalDevice>(_instance->Handle(), _surface->Handle(), extensions);
         _device = std::make_unique<Device>(_instance->Handle(), *_physicalDevice, extensions);
 
+
+    }
+
+    void Context::InitSwapChain(const ContextInitParams& params)
+    {
         SYN_ASSERT(params.getWindowExtentCallback, "Window extent callback is missing!");
         _swapChain = std::make_unique<SwapChain>(*_physicalDevice, *_device, *_surface, params.getWindowExtentCallback);
     }

@@ -7,17 +7,17 @@ namespace Syn
         _passes.push_back(std::move(pass));
     }
 
-    void RenderPipeline::InitializeAll(std::shared_ptr<ResourceManager> resourceManager)
+    void RenderPipeline::InitializeAll()
     {
         for (auto& pass : _passes) {
-            pass->Initialize(resourceManager);
+            pass->Initialize();
         }
     }
 
-    void RenderPipeline::Execute(VkCommandBuffer cmd, const RenderScene& scene)
+    void RenderPipeline::Execute(const RenderContext& context)
     {
         for (auto& pass : _passes) {
-            pass->Execute(cmd, scene);
+            pass->Execute(context);
         }
     }
 }

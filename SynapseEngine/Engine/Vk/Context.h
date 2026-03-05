@@ -22,6 +22,8 @@ namespace Syn::Vk {
         Context(const ContextInitParams& params);
         ~Context();
 
+        void InitSwapChain(const ContextInitParams& params);
+
         auto GetInstance() const { return _instance.get(); }
         auto GetPhysicalDevice() const { return _physicalDevice.get(); }
         auto GetDevice() const { return _device.get(); }

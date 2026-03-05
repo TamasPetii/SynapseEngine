@@ -37,11 +37,17 @@ namespace Syn::Vk {
 
         image->_allocator = allocator;
 
+        CreateViews(image);
+    }
+
+    void ImageFactory::CreateViews(Image* image) {
+        auto device = ServiceLocator::GetVkContext()->GetDevice();
+
         if (!image->_config.imageViewConfigs.contains("_default")) {
             ImageViewConfig defaultConfig;
             defaultConfig.viewType = (image->_config.arrayLayers > 1) ?
-                (image->_config.flags & VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT ? 
-                    VK_IMAGE_VIEW_TYPE_CUBE : 
+                (image->_config.flags & VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT ?
+                    VK_IMAGE_VIEW_TYPE_CUBE :
                     VK_IMAGE_VIEW_TYPE_2D_ARRAY) :
                 VK_IMAGE_VIEW_TYPE_2D;
             image->_config.imageViewConfigs["_default"] = defaultConfig;
@@ -62,7 +68,7 @@ namespace Syn::Vk {
             VkImageView viewHandle;
             SYN_VK_ASSERT_MSG(vkCreateImageView(device->Handle(), &viewInfo, nullptr, &viewHandle), ("Failed to create Image View: " + name).c_str());
             image->_imageViews[name] = viewHandle;
-        };
+            };
 
         for (const auto& [name, viewConfig] : image->_config.imageViewConfigs) {
             createView(name, viewConfig);

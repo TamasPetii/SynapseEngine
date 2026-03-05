@@ -7,6 +7,7 @@ namespace Syn
 {
     struct SYN_API RenderTask
     {
+        /*
         uint32_t meshIndex;
         uint32_t indexCount;
         uint32_t firstIndex;
@@ -39,5 +40,6 @@ namespace Syn
 
         RenderTask(const RenderTask&) = delete;
         RenderTask& operator=(const RenderTask&) = delete;
+        */
     };
 }

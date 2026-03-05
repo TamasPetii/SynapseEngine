@@ -5,6 +5,7 @@ namespace Syn {
 	ShaderManager* ServiceLocator::_shaderManager = nullptr;
 	ResourceManager* ServiceLocator::_resourceManager = nullptr;
 	StaticMeshBuilder* ServiceLocator::_staticMeshBuilder = nullptr;
+	FrameContext* ServiceLocator::_frameContext = nullptr;
 
 	void ServiceLocator::Shutdown()
 	{
@@ -12,5 +13,6 @@ namespace Syn {
 		_shaderManager = nullptr;
 		_resourceManager = nullptr;
 		_staticMeshBuilder = nullptr;
+		_frameContext = nullptr;
 	}
 }

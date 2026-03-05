@@ -7,6 +7,7 @@ namespace Syn
 {
     struct SYN_API RenderView
     {
+        /*
         glm::mat4 viewMatrix;
         glm::mat4 projectionMatrix;
         glm::mat4 viewProjectionMatrix;
@@ -15,6 +16,7 @@ namespace Syn
         uint32_t indirectCommandOffset = 0;
         uint32_t indirectCommandCount = 0;
         uint32_t instanceDataOffset = 0;
+        */
     };
 
     struct SYN_API CameraRenderView : public RenderView
