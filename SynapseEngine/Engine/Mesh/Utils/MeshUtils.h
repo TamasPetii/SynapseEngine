@@ -3,6 +3,10 @@
 #include "Engine/Mesh/Data/Raw/RawModel.h"
 #include <filesystem>
 
+#include "Engine/Mesh/Data/Cooked/CookedMesh.h"
+#include "Engine/Mesh/Data/Cooked/CookedModel.h"
+#include "Engine/Mesh/Data/Raw/RawModel.h"
+
 namespace Syn 
 {
 	class MeshUtils

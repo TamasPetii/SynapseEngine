@@ -62,6 +62,16 @@ namespace Syn::Vk {
         std::vector<VkBool32> blendEnables(config.colorAttachmentCount, blendEnable);
         vkCmdSetColorBlendEnableEXT(cmd, 0, config.colorAttachmentCount, blendEnables.data());
 
+        vkCmdSetRasterizationSamplesEXT(cmd, config.raster.samples);
+
+        VkSampleMask mask = 0xFFFFFFFF;
+        vkCmdSetSampleMaskEXT(cmd, config.raster.samples, &mask);
+
+        vkCmdSetAlphaToCoverageEnableEXT(cmd, config.raster.alphaToCoverageEnable);
+        vkCmdSetAlphaToOneEnableEXT(cmd, VK_FALSE);
+
+        vkCmdSetPrimitiveRestartEnable(cmd, config.raster.primitiveRestartEnable);
+
         if (config.blend.enable) {
             VkColorBlendEquationEXT equation{};
             equation.srcColorBlendFactor = config.blend.srcColorFactor;
@@ -98,26 +108,34 @@ namespace Syn::Vk {
     }
 
     void RenderUtils::BindShaders(VkCommandBuffer cmd, std::span<const Shader* const> shaders) {
-        std::vector<VkShaderStageFlagBits> stages;
-        std::vector<VkShaderEXT> shaderHandles;
+        static const std::vector<VkShaderStageFlagBits> stages = {
+                VK_SHADER_STAGE_VERTEX_BIT,
+                VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
+                VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+                VK_SHADER_STAGE_GEOMETRY_BIT,
+                VK_SHADER_STAGE_FRAGMENT_BIT,
+                VK_SHADER_STAGE_TASK_BIT_EXT,
+                VK_SHADER_STAGE_MESH_BIT_EXT
+        };
 
-        stages.reserve(shaders.size());
-        shaderHandles.reserve(shaders.size());
-
+        std::vector<VkShaderEXT> shaderHandles(stages.size(), VK_NULL_HANDLE);
         for (const auto* shader : shaders) {
             if (shader) {
-                stages.push_back(shader->GetStage());
-                shaderHandles.push_back(shader->Handle());
+                VkShaderStageFlagBits currentStage = shader->GetStage();
+                for (size_t i = 0; i < stages.size(); ++i) {
+                    if (stages[i] == currentStage) {
+                        shaderHandles[i] = shader->Handle();
+                        break;
+                    }
+                }
             }
         }
 
-        if (!stages.empty()) {
-            vkCmdBindShadersEXT(
-                cmd,
-                static_cast<uint32_t>(stages.size()),
-                stages.data(),
-                shaderHandles.data()
-            );
-        }
+        vkCmdBindShadersEXT(
+            cmd,
+            static_cast<uint32_t>(stages.size()),
+            stages.data(),
+            shaderHandles.data()
+        );
     }
 }

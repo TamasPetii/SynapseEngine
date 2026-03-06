@@ -57,8 +57,39 @@ namespace Syn::Vk {
             }
         }
 
+        VkShaderStageFlags nextStages = 0;
+        switch (stage) {
+        case VK_SHADER_STAGE_VERTEX_BIT:
+            nextStages = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT |
+                VK_SHADER_STAGE_GEOMETRY_BIT |
+                VK_SHADER_STAGE_FRAGMENT_BIT;
+            break;
+        case VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT:
+            nextStages = VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT;
+            break;
+        case VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT:
+            nextStages = VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+            break;
+        case VK_SHADER_STAGE_GEOMETRY_BIT:
+            nextStages = VK_SHADER_STAGE_FRAGMENT_BIT;
+            break;
+        case VK_SHADER_STAGE_FRAGMENT_BIT:
+            nextStages = 0;
+            break;
+        case VK_SHADER_STAGE_TASK_BIT_EXT:
+            nextStages = VK_SHADER_STAGE_MESH_BIT_EXT;
+            break;
+        case VK_SHADER_STAGE_MESH_BIT_EXT:
+            nextStages = VK_SHADER_STAGE_FRAGMENT_BIT;
+            break;
+        default:
+            nextStages = 0;
+            break;
+        }
+
         // Shader Object
         VkShaderCreateInfoEXT createInfo = { VK_STRUCTURE_TYPE_SHADER_CREATE_INFO_EXT };
+        createInfo.nextStage = nextStages;
         createInfo.stage = stage;
         createInfo.codeType = VK_SHADER_CODE_TYPE_SPIRV_EXT;
         createInfo.pCode = spirv.data();

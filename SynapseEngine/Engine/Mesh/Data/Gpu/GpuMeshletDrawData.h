@@ -1,7 +1,7 @@
 #pragma once
 #include "Engine/SynApi.h"
-#include "VertexData.h"
 #include <vector>
+#include <glm/glm.hpp>
 
 /// <summary>
 /// - MeshletData: Similar to MeshData, but for meshlets. MeshletDescriptor contains information about a single meshlet, and MeshletLodDescriptor contains information about a single lod level of meshlets. 
@@ -16,38 +16,29 @@
 
 namespace Syn
 {
-	struct SYN_API MeshletDescriptor
+	struct SYN_API GpuMeshletDescriptor
 	{
 		uint32_t vertexIndicesOffset;
 		uint8_t vertexCount;
 		uint32_t triangleIndicesOffset;
 		uint8_t triangleCount;
+	};
 
-		// Local meshlet bounding sphere
+	struct SYN_API GpuMeshletCollider
+	{
 		glm::vec3 center;
 		float radius;
-
-		//Local meshlet bounding cone
 		glm::vec3 coneAxis;
 		float coneCutoff;
-
-		//Todo: Local meshlet AABB?
 	};
 
-	struct SYN_API MeshletLodDescriptor
-	{
-		uint32_t vertexIndexOffset;
-		uint32_t vertexIndexCount;
-		uint32_t triangleIndexOffset;
-		uint32_t triangleIndexCount;
+	struct SYN_API GpuMeshletDrawDescriptor {
 		uint32_t meshletOffset;
 		uint32_t meshletCount;
-		float distanceThreshold;
-		//Todo: Global Lod meshlet AABB?
-		//Todo: Global Lod meshlet Sphere Collider?
+		uint32_t materialIndex;
 	};
 
-	struct SYN_API MeshletData
+	struct SYN_API GpuMeshletDrawData
 	{
 		//[Lod0 | Lod1 | Lod2 | Lod3]
 		std::vector<uint32_t> vertexIndices;
@@ -55,11 +46,13 @@ namespace Syn
 		//[Lod0 | Lod1 | Lod2 | Lod3]
 		std::vector<uint8_t>  triangleIndices;
 
-		//[(Lod0 - Meshlet0, ..., MeshletN) | ... | (Lod3 - Meshlet0, ..., MeshletN)]
-		std::vector<MeshletDescriptor> descriptors;
+		//Old: [(Lod0 - Meshlet0, ..., MeshletN) | ... | (Lod3 - Meshlet0, ..., MeshletN)]
+		//New: [(Mesh0_Lod0, Mesh0_Lod1, Mesh0_Lod2, Mesh0_Lod3), (Mesh1_Lod0, ...)] 
+		std::vector<GpuMeshletDescriptor> meshletDescriptors;
 
-		//[Lod0 | Lod1 | Lod2 | Lod3]
-		std::vector<MeshletLodDescriptor> lods;
+		std::vector<GpuMeshletDrawDescriptor> drawDescriptors;
+
+		std::vector<GpuMeshletCollider> meshletColliders;
 	};
 }
 

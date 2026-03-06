@@ -10,6 +10,10 @@ namespace Syn::Vk {
         VkFrontFace frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
         VkPolygonMode polygonMode = VK_POLYGON_MODE_FILL;
         float lineWidth = 1.0f;
+
+        VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT;
+        bool primitiveRestartEnable = false;
+        bool alphaToCoverageEnable = false;
     };
 
     struct DepthState {

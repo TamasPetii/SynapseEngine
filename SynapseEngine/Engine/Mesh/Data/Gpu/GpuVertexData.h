@@ -10,9 +10,9 @@
 /// - Bitangent is not stored, but calculated in shader using normal and tangent vectors. (Sponza and some models might have bad light calculations??)
 /// </summary>
 
-namespace Syn 
+namespace Syn
 {
-	struct SYN_API VertexPosition
+	struct SYN_API GpuVertexPosition
 	{
 		glm::vec3 position;
 		uint32_t packedIndex; // meshIndex, nodeIndex
@@ -20,10 +20,16 @@ namespace Syn
 		void SetMeshAndNodeIndex(uint16_t meshIndex, uint16_t nodeIndex);
 	};
 
-	struct SYN_API VertexAttributes {
+	struct SYN_API GpuVertexAttributes {
 		glm::vec3 normal;
 		float uv_x;
 		glm::vec3 tangent;
 		float uv_y;
+	};
+
+	struct SYN_API GpuVertexData
+	{
+		std::vector<GpuVertexPosition> vertexPositions;
+		std::vector<GpuVertexAttributes> vertexAttributes;
 	};
 }

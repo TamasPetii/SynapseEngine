@@ -9,6 +9,9 @@
 #include "Engine/Manager/ResourceManager.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Mesh/Builder/StaticMeshBuilder.h"
+#include "Engine/Mesh/Converter/DefaultGpuModelConverter.h"
+#include "Engine/Mesh/Converter/DefaultModelCooker.h"
+#include "Engine/Mesh/Uploader/DefaultGpuModelUploader.h"
 
 #include "Engine/Mesh/Loader/MeshLoaders.h"
 #include "Engine/Mesh/Processor/MeshProcessors.h"
@@ -69,9 +72,12 @@ namespace Syn
 		shaderManager->CreateProgram("TestComputeProgram", { "../Engine/Shaders/Test.comp" });
 		shaderManager->CreateProgram("ComplexTestProgram", { "../Engine/Shaders/ComplexTest.vert", "../Engine/Shaders/ComplexTest.frag", "../Engine/Shaders/ComplexTest.geom" });
 	
+		//auto sponza = Syn::MeshFactory::LoadFromFile("C:/Users/User/Desktop/Models/Sponza-master/sponza.obj");
+
+		auto sphere = Syn::MeshFactory::CreateSphere();
+
 		/*
 		auto bistro = Syn::MeshFactory::LoadFromFile("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
-		auto sphere = Syn::MeshFactory::CreateSphere();
 		auto cube = Syn::MeshFactory::CreateCube();
 		auto quad = Syn::MeshFactory::CreateQuad();
 		auto screenQuad = Syn::MeshFactory::CreateScreenQuad();
@@ -121,7 +127,9 @@ namespace Syn
 	{
 		_staticMeshBuilder = std::make_unique<StaticMeshBuilder>(
 			std::make_unique<MeshLoaderRegistry>(),
-			std::make_unique<MeshProcessorPipeline>()
+			std::make_unique<MeshProcessorPipeline>(),
+			std::make_unique<DefaultGpuModelConverter>(),
+			std::make_unique<DefaultModelCooker>()
 		);
 
 		_staticMeshBuilder->RegisterLoader(std::make_shared<AssimpLoader>(), 100);
@@ -130,6 +138,7 @@ namespace Syn
 		_staticMeshBuilder->RegisterProcessor(std::make_unique<ColliderProcessor>());
 		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerLodProcessor>());
 		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerMeshletProcessor>());
+
 		ServiceLocator::ProvideStaticMeshBuilder(_staticMeshBuilder.get());
 	}
 
@@ -158,6 +167,8 @@ namespace Syn
 	}
 
 	void Engine::Shutdown() {
+		_renderManager.reset();
+		_staticMeshBuilder.reset();
 		_resourceManager.reset();
 		_vkContext.reset(); //This has to be the last one!
 		ServiceLocator::Shutdown();

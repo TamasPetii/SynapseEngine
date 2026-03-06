@@ -1,7 +1,7 @@
 #pragma once
 #include "Engine/SynApi.h"
-#include "VertexData.h"
 #include <vector>
+#include <glm/glm.hpp>
 
 /// <summary>
 /// - MeshData: Index buffer is batched, all lod level's indices are stored in a single buffer
@@ -13,38 +13,46 @@
 
 namespace Syn
 {
-	struct SYN_API MeshDescriptor
+	struct SYN_API GpuMeshCollider
+	{
+		glm::vec3 center;
+		float radius;
+		glm::vec3 aabbMin;
+		float padding0;
+		glm::vec3 aabbMax;
+		float padding1;
+	};
+
+	struct SYN_API GpuMeshDescriptor
 	{
 		uint32_t vertexOffset;
 		uint32_t vertexCount;
 		uint32_t indexOffset;
 		uint32_t indexCount;
 		uint32_t materialIndex;
-		//Todo: Local mesh AABB?
-		//Todo: Local mesh Sphere Collider?
 	};
 
-	struct SYN_API MeshLodDescriptor
+	struct SYN_API GpuMeshLodDescriptor
 	{
 		uint32_t meshOffset;
 		uint32_t meshCount;
 		uint32_t indexOffset;
 		uint32_t indexCount;
 		float distanceThreshold;
-		//Todo: Global Lod model AABB?
-		//Todo: Global Lod model Sphere Collider?
 	};
 
-	struct SYN_API MeshData 
+	struct SYN_API GpuIndexedDrawData
 	{
 		//[Lod0 | Lod1 | Lod2 | Lod3]
-		std::vector<uint32_t> indices; 
+		std::vector<uint32_t> indices;
 
-		//[(Lod0 - Mesh0, ..., MeshN) | ... | (Lod3 - Mesh0, ..., MeshN)]
-		std::vector<MeshDescriptor> meshDescriptors;
+		//New: [(Mesh0_Lod0, Mesh0_Lod1, Mesh0_Lod2, Mesh0_Lod3), (Mesh1_Lod0, ...)]
+		std::vector<GpuMeshDescriptor> meshDescriptors;
 
 		//[Lod0 | Lod1 | Lod2 | Lod3]
-		std::vector<MeshLodDescriptor> lodDescriptors;
+		std::vector<GpuMeshLodDescriptor> lodDescriptors;
+
+		std::vector<GpuMeshCollider> meshColliders;
 	};
 }
 

@@ -1,14 +1,19 @@
 #include "StaticMeshBuilder.h"
 #include "Engine/Mesh/Source/File/FileMeshSource.h"
-#include "Engine/Mesh/Data/Cooked/CookedUtils.h"
+#include "Engine/Mesh/Utils/MeshUtils.h"
 
 namespace Syn
 {
-    StaticMeshBuilder::StaticMeshBuilder(std::unique_ptr<IMeshLoaderRegistry> registry, std::unique_ptr<IMeshProcessorPipeline> pipeline) :
-		_registry(std::move(registry)), 
-        _pipeline(std::move(pipeline))
-    {
-    }
+    StaticMeshBuilder::StaticMeshBuilder(
+        std::unique_ptr<IMeshLoaderRegistry> registry,
+        std::unique_ptr<IMeshProcessorPipeline> pipeline,
+        std::unique_ptr<IGpuModelConverter> converter,
+        std::unique_ptr<IModelCooker> cooker) :
+        _registry(std::move(registry)),
+        _cooker(std::move(cooker)),
+        _pipeline(std::move(pipeline)),
+        _converter(std::move(converter))
+    {}
 
     void StaticMeshBuilder::RegisterLoader(std::shared_ptr<IMeshLoader> loader, int priority)
     {
@@ -23,7 +28,7 @@ namespace Syn
     std::shared_ptr<StaticMesh> StaticMeshBuilder::BuildFromFile(const std::string& filePath)
     {
         std::string ext = std::filesystem::path(filePath).extension().string();
-        IMeshLoader* loader = _registry->GetLoaderForExtension(ext); // Sima tagváltozóból olvassuk!
+        IMeshLoader* loader = _registry->GetLoaderForExtension(ext);
 
         if (!loader) 
             return nullptr;
@@ -40,11 +45,11 @@ namespace Syn
             return nullptr;
 
         auto staticMesh = std::make_shared<StaticMesh>();
-        staticMesh->cpuData = CookedUtils::ConvertRawModel(std::move(rawModelOpt).value());
+        staticMesh->cpuData = _cooker->Cook(std::move(rawModelOpt).value());
 
         _pipeline->Run(staticMesh->cpuData);
 
-        // staticMesh->gpuData = UploadToGpu(staticMesh->cpuData);
+        staticMesh->gpuData = _converter->Convert(staticMesh->cpuData);
 
         return staticMesh;
     }

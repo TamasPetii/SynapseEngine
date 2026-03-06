@@ -179,7 +179,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Mesh\Converter\DefaultModelCooker.cpp" />
     <ClCompile Include="FrameContext.cpp" />
+    <ClCompile Include="Mesh\Converter\IModelCooker.cpp" />
+    <ClCompile Include="Mesh\Converter\IGpuModelConverter.cpp" />
+    <ClCompile Include="Mesh\Uploader\IGpuModelUploader.cpp" />
+    <ClCompile Include="Mesh\Uploader\DefaultGpuModelUploader.cpp" />
+    <ClCompile Include="Mesh\Data\Gpu\GpuModelBuffers.cpp" />
+    <ClCompile Include="Mesh\Data\Gpu\GpuNodeTransform.cpp" />
+    <ClCompile Include="Mesh\Converter\DefaultGpuModelConverter.cpp" />
+    <ClCompile Include="Mesh\Data\Gpu\GpuBatchedModel.cpp" />
+    <ClCompile Include="Mesh\Data\Gpu\GpuMeshletDrawData.cpp" />
+    <ClCompile Include="Mesh\Data\Gpu\GpuIndexedDrawData.cpp" />
+    <ClCompile Include="Mesh\Data\Gpu\GpuVertexData.cpp" />
+    <ClCompile Include="Manager\ModelManager.cpp" />
     <ClCompile Include="Render\GraphicsPass\PresentationPass.cpp" />
     <ClCompile Include="Vk\Image\ImageConfig.cpp" />
     <ClCompile Include="Render\RenderContext.cpp" />
@@ -198,7 +211,6 @@
     <ClCompile Include="Mesh\Loader\IMeshLoaderRegistry.cpp" />
     <ClCompile Include="Mesh\Processor\IMeshProcessorPipeline.cpp" />
     <ClCompile Include="Mesh\Processor\MeshProcessorPipeline.cpp" />
-    <ClCompile Include="Mesh\Data\Cooked\CookedUtils.cpp" />
     <ClCompile Include="Mesh\Data\Cooked\CookedMeshlet.cpp" />
     <ClCompile Include="Mesh\Data\Cooked\CookedColliders.cpp" />
     <ClCompile Include="Mesh\Data\Cooked\CookedMesh.cpp" />
@@ -235,12 +247,8 @@
     <ClCompile Include="Mesh\Source\Procedural\ParametricSurface\BezierSurfaceSource.cpp" />
     <ClCompile Include="Mesh\Source\File\FileMeshSource.cpp" />
     <ClCompile Include="Mesh\Source\IMeshSource.cpp" />
-    <ClCompile Include="Mesh\Data\Gpu\GeometryData.cpp" />
     <ClCompile Include="Manager\ShaderManager.cpp" />
     <ClCompile Include="Manager\ResourceManager.cpp" />
-    <ClCompile Include="Mesh\Data\Gpu\MeshletData.cpp" />
-    <ClCompile Include="Mesh\Data\Gpu\MeshData.cpp" />
-    <ClCompile Include="Mesh\Data\Gpu\VertexData.cpp" />
     <ClCompile Include="Mesh\Source\Procedural\ProceduralMeshSource.cpp" />
     <ClCompile Include="Mesh\Source\Procedural\Shape\ShapeMeshSource.cpp" />
     <ClCompile Include="Mesh\Source\Procedural\Shape\SphereMeshSource.cpp" />
@@ -313,7 +321,20 @@
     <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Mesh\Converter\DefaultModelCooker.h" />
     <ClInclude Include="FrameContext.h" />
+    <ClInclude Include="Mesh\Converter\IModelCooker.h" />
+    <ClInclude Include="Mesh\Converter\IGpuModelConverter.h" />
+    <ClInclude Include="Mesh\Uploader\IGpuModelUploader.h" />
+    <ClInclude Include="Mesh\Uploader\DefaultGpuModelUploader.h" />
+    <ClInclude Include="Mesh\Data\Gpu\GpuModelBuffers.h" />
+    <ClInclude Include="Mesh\Data\Gpu\GpuNodeTransform.h" />
+    <ClInclude Include="Mesh\Converter\DefaultGpuModelConverter.h" />
+    <ClInclude Include="Mesh\Data\Gpu\GpuBatchedModel.h" />
+    <ClInclude Include="Mesh\Data\Gpu\GpuMeshletDrawData.h" />
+    <ClInclude Include="Mesh\Data\Gpu\GpuIndexedDrawData.h" />
+    <ClInclude Include="Mesh\Data\Gpu\GpuVertexData.h" />
+    <ClInclude Include="Manager\ModelManager.h" />
     <ClInclude Include="Render\GraphicsPass\PresentationPass.h" />
     <ClInclude Include="Vk\Image\ImageConfig.h" />
     <ClInclude Include="Render\RenderContext.h" />
@@ -333,7 +354,6 @@
     <ClInclude Include="Mesh\Processor\IMeshProcessorPipeline.h" />
     <ClInclude Include="Mesh\Loader\MeshLoaders.h" />
     <ClInclude Include="Mesh\Processor\MeshProcessorPipeline.h" />
-    <ClInclude Include="Mesh\Data\Cooked\CookedUtils.h" />
     <ClInclude Include="Mesh\Data\Cooked\CookedMeshlet.h" />
     <ClInclude Include="Mesh\Data\Cooked\CookedColliders.h" />
     <ClInclude Include="Mesh\Data\Cooked\CookedMesh.h" />
@@ -372,12 +392,8 @@
     <ClInclude Include="Mesh\Source\Procedural\ParametricSurface\BezierSurfaceSource.h" />
     <ClInclude Include="Mesh\Source\File\FileMeshSource.h" />
     <ClInclude Include="Mesh\Source\IMeshSource.h" />
-    <ClInclude Include="Mesh\Data\Gpu\GeometryData.h" />
     <ClInclude Include="Manager\ShaderManager.h" />
     <ClInclude Include="Manager\ResourceManager.h" />
-    <ClInclude Include="Mesh\Data\Gpu\MeshletData.h" />
-    <ClInclude Include="Mesh\Data\Gpu\MeshData.h" />
-    <ClInclude Include="Mesh\Data\Gpu\VertexData.h" />
     <ClInclude Include="Mesh\Source\Procedural\ProceduralMeshSource.h" />
     <ClInclude Include="Mesh\Source\Procedural\Shape\ShapeMeshSource.h" />
     <ClInclude Include="Mesh\Source\Procedural\Shape\SphereMeshSource.h" />
