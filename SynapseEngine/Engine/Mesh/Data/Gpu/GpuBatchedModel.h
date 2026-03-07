@@ -4,6 +4,7 @@
 #include "GpuIndexedDrawData.h"
 #include "GpuMeshletDrawData.h"
 #include "GpuNodeTransform.h"
+#include "../Common/MaterialInfo.h"
 
 namespace Syn
 {
@@ -12,6 +13,7 @@ namespace Syn
         GpuVertexData vertexData;
         GpuIndexedDrawData indexedData;
         GpuMeshletDrawData meshletData;
+        std::vector<MaterialInfo> materials;
         std::vector<GpuNodeTransform> nodeTransforms;
     };
 }

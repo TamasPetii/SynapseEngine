@@ -27,7 +27,7 @@ namespace Syn
             cookedModel.meshes.push_back(CookMesh(std::move(rawMesh)));
         }
 
-        cookedModel.materialNames = std::move(rawModel.materialNames);
+        cookedModel.materials = std::move(rawModel.materials);
         cookedModel.nodeTransforms = std::move(rawModel.nodeTransforms);
         cookedModel.meshNodeDescriptors = std::move(rawModel.meshNodeDescriptors);
 

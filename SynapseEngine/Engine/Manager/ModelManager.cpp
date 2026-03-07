@@ -7,9 +7,14 @@
 
 namespace Syn
 {
-    ModelManager::ModelManager(std::shared_ptr<StaticMeshBuilder> builder, std::unique_ptr<IGpuModelUploader> uploader)
-        : _builder(builder),
-        _uploader(std::move(uploader))
+    ModelManager::ModelManager(
+        std::shared_ptr<StaticMeshBuilder> builder,
+        std::unique_ptr<IGpuModelUploader> uploader,
+        TextureLoadCallback textureLoadCallback)
+        : 
+        _builder(builder),
+        _uploader(std::move(uploader)),
+        _textureLoadCallback(std::move(textureLoadCallback))
     {
         auto device = ServiceLocator::GetVkContext()->GetDevice();
 
@@ -22,25 +27,45 @@ namespace Syn
         _transferPool = std::make_unique<Vk::CommandPool>(_transferQueue, VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
     }
 
-    uint32_t ModelManager::LoadModelAsync(const std::string& filePath)
+    uint32_t ModelManager::InternalLoadAsync(const std::string& key, ModelLoadTask task)
     {
-        if (_pathToId.contains(filePath)) {
-            return _pathToId[filePath];
+        if (_pathToId.contains(key)) {
+            return _pathToId[key];
         }
 
         uint32_t newId = static_cast<uint32_t>(_models.size());
-        _pathToId[filePath] = newId;
+        _pathToId[key] = newId;
 
         ModelEntry entry;
-        entry.path = filePath;
+        entry.path = key;
         entry.state = ModelState::LoadingCPU;
 
-        entry.cpuFuture = std::async(std::launch::async, [this, filePath]() {
-            return _builder->BuildFromFile(filePath);
-            });
+        auto executor = ServiceLocator::GetTaskExecutor();
+        entry.cpuFuture = executor->async(std::move(task));
 
         _models.push_back(std::move(entry));
         return newId;
+    }
+
+    uint32_t ModelManager::LoadModelAsync(const std::string& filePath) {
+        return InternalLoadAsync(filePath, [this, filePath]() {
+            return _builder->BuildFromFile(filePath);
+            });
+    }
+
+    uint32_t ModelManager::LoadModelFromSourceAsync(const std::string& name, MeshSourceFactory factory) {
+        return InternalLoadAsync(name, [this, factory]() {
+            if (auto source = factory()) {
+                return _builder->BuildFromSource(*source);
+            }
+            return std::shared_ptr<StaticMesh>(nullptr);
+            });
+    }
+
+    uint32_t ModelManager::LoadModelFromStaticMeshAsync(const std::string& name, StaticMeshFactory factory) {
+        return InternalLoadAsync(name, [factory]() {
+            return factory();
+            });
     }
 
     void ModelManager::Update()
@@ -54,6 +79,27 @@ namespace Syn
 					Info("Model loaded from file: {}", entry.path);
 
                     entry.mesh = entry.cpuFuture.get();
+
+                    if (_textureLoadCallback && entry.mesh)
+                    {
+                        std::filesystem::path modelDir = std::filesystem::path(entry.path).parent_path();
+
+                        for (const auto& mat : entry.mesh->cpuData.materials)
+                        {
+                            auto submitTexture = [&](const std::string& texPath) {
+                                if (!texPath.empty()) {
+                                    std::string fullPath = (modelDir / texPath).lexically_normal().string();
+                                    _textureLoadCallback(fullPath);
+                                }
+                                };
+
+                            submitTexture(mat.albedoPath);
+                            submitTexture(mat.normalPath);
+                            submitTexture(mat.metallicRoughnessPath);
+                            submitTexture(mat.emissivePath);
+                            submitTexture(mat.ambientOcclusionPath);
+                        }
+                    }
 
                     entry.transferCmd = _transferPool->AllocateBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
                     entry.uploadFence = std::make_unique<Vk::Fence>(false);
@@ -121,7 +167,7 @@ namespace Syn
                         for (auto& desc : entry.mesh->gpuData.meshletData.drawDescriptors)
                         {
                             VkDrawMeshTasksIndirectCommandEXT cmd{};
-                            cmd.groupCountX = index % 4 == 3 ? desc.meshletCount : 0;
+                            cmd.groupCountX = index % 4 == 0 ? desc.meshletCount : 0;
                             cmd.groupCountY = 1;
                             cmd.groupCountZ = 1;
 
@@ -144,6 +190,8 @@ namespace Syn
                     entry.transferCmd.reset();
                     entry.uploadFence.reset();
                     entry.state = ModelState::Ready;
+
+                    //Todo: Buffer Address Buffer
                 }
             }
         }

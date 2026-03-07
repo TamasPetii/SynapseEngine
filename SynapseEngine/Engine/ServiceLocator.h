@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include "Engine/SynMacro.h"
+#include <taskflow/taskflow.hpp>
 
 namespace Syn::Vk { 
     class Context;
@@ -11,6 +12,8 @@ namespace Syn {
     class ResourceManager;
     class StaticMeshBuilder;
     class ModelManager;
+    class ImageManager;
+    class ImageBuilder;
 	struct FrameContext;
 }
 
@@ -41,12 +44,24 @@ namespace Syn
 
 		static void ProvideModelManager(ModelManager* manager) { _modelManager = manager; }
 		static ModelManager* GetModelManager() { return _modelManager; }
+
+		static void ProvideTaskExecutor(tf::Executor* executor) { _taskExecutor = executor; }
+		static tf::Executor* GetTaskExecutor() { return _taskExecutor; }
+
+		static void ProvideImageManager(ImageManager* manager) { _imageManager = manager; }
+		static ImageManager* GetImageManager() { return _imageManager; }
+
+		static void ProvideImageBuilder(ImageBuilder* builder) { _imageBuilder = builder; }
+		static ImageBuilder* GetImageBuilder() { return _imageBuilder; }
     private:
         static Vk::Context* _vkContext;
 		static ShaderManager* _shaderManager;
 		static ResourceManager* _resourceManager;
-		static StaticMeshBuilder* _staticMeshBuilder;
 		static ModelManager* _modelManager;
         static FrameContext* _frameContext;
+		static tf::Executor* _taskExecutor;
+		static ImageManager* _imageManager;
+		static ImageBuilder* _imageBuilder;
+		static StaticMeshBuilder* _staticMeshBuilder;
     };
 }

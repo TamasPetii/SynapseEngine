@@ -6,6 +6,8 @@
 #include <span>
 #include <memory>
 
+#include <taskflow/taskflow.hpp>
+
 namespace Syn::Vk { 
     class Context;
 }
@@ -41,6 +43,7 @@ namespace Syn
         void InitResourceManager();
         void InitFrameContext(uint32_t framesInFlight);
         void InitRenderPipelines();
+        void InitTaskExecutor();
         void Shutdown();
     private:
         void AdvanceFrameIndex();
@@ -50,6 +53,7 @@ namespace Syn
 		std::unique_ptr<Vk::Context> _vkContext;
 		std::unique_ptr<ResourceManager> _resourceManager;
 		std::unique_ptr<RenderManager> _renderManager;
+		std::unique_ptr<tf::Executor> _taskExecutor;
 	};
 }
 

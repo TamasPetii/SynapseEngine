@@ -53,7 +53,7 @@ namespace Syn
             outModel.meshes[i].indices.resize(ai_mesh->mNumFaces * 3);
         }
 
-        outModel.materialNames.resize(scene->mNumMaterials);
+        outModel.materials.resize(scene->mNumMaterials);
 
         std::queue<std::pair<aiNode*, uint16_t>> queue;
         queue.push({ scene->mRootNode, UINT16_MAX });
@@ -107,8 +107,71 @@ namespace Syn
         std::for_each(std::execution::seq, material_range.begin(), material_range.end(),
             [&](uint32_t matIndex) {
                 aiMaterial* matAI = scene->mMaterials[matIndex];
-                outModel.materialNames[matIndex] = matAI->GetName().C_Str();
-				//Todo: Process material properties (textures, colors, etc.)??
+                MaterialInfo& matInfo = outModel.materials[matIndex];
+
+                matInfo.name = matAI->GetName().C_Str();
+
+                aiString path;
+
+                if (matAI->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
+                    matAI->GetTexture(aiTextureType_DIFFUSE, 0, &path);
+                    matInfo.albedoPath = path.C_Str();
+                }
+                else if (matAI->GetTextureCount(aiTextureType_BASE_COLOR) > 0) {
+                    matAI->GetTexture(aiTextureType_BASE_COLOR, 0, &path);
+                    matInfo.albedoPath = path.C_Str();
+                }
+
+                if (matAI->GetTextureCount(aiTextureType_NORMALS) > 0) {
+                    matAI->GetTexture(aiTextureType_NORMALS, 0, &path);
+                    matInfo.normalPath = path.C_Str();
+                }
+
+                if (matAI->GetTextureCount(aiTextureType_METALNESS) > 0) {
+                    matAI->GetTexture(aiTextureType_METALNESS, 0, &path);
+                    matInfo.metallicRoughnessPath = path.C_Str();
+                }
+                else if (matAI->GetTextureCount(aiTextureType_UNKNOWN) > 0) {
+                    matAI->GetTexture(aiTextureType_UNKNOWN, 0, &path);
+                    matInfo.metallicRoughnessPath = path.C_Str();
+                }
+
+                if (matAI->GetTextureCount(aiTextureType_EMISSIVE) > 0) {
+                    matAI->GetTexture(aiTextureType_EMISSIVE, 0, &path);
+                    matInfo.emissivePath = path.C_Str();
+                }
+
+                if (matAI->GetTextureCount(aiTextureType_LIGHTMAP) > 0) {
+                    matAI->GetTexture(aiTextureType_LIGHTMAP, 0, &path);
+                    matInfo.ambientOcclusionPath = path.C_Str();
+                }
+                else if (matAI->GetTextureCount(aiTextureType_AMBIENT) > 0) {
+                    matAI->GetTexture(aiTextureType_AMBIENT, 0, &path);
+                    matInfo.ambientOcclusionPath = path.C_Str();
+                }
+
+                aiColor4D color;
+
+                if (AI_SUCCESS == matAI->Get(AI_MATKEY_BASE_COLOR, color)) {
+                    matInfo.color = glm::vec4(color.r, color.g, color.b, color.a);
+                }
+                else if (AI_SUCCESS == matAI->Get(AI_MATKEY_COLOR_DIFFUSE, color)) {
+                    matInfo.color = glm::vec4(color.r, color.g, color.b, color.a);
+                }
+
+                aiColor3D emissive;
+                if (AI_SUCCESS == matAI->Get(AI_MATKEY_COLOR_EMISSIVE, emissive)) {
+                    matInfo.emissiveFactor = glm::vec3(emissive.r, emissive.g, emissive.b);
+                }
+
+                ai_real floatValue;
+                if (AI_SUCCESS == matAI->Get(AI_MATKEY_METALLIC_FACTOR, floatValue)) {
+                    matInfo.metallicFactor = static_cast<float>(floatValue);
+                }
+
+                if (AI_SUCCESS == matAI->Get(AI_MATKEY_ROUGHNESS_FACTOR, floatValue)) {
+                    matInfo.roughnessFactor = static_cast<float>(floatValue);
+                }
             }
         );
     }

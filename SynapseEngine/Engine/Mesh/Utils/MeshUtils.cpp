@@ -15,12 +15,12 @@ namespace Syn
 
         ss << std::format("[Summary] Meshes: {} | Nodes: {} | Materials: {} | Descriptors: {}\n",
             model.meshes.size(), model.nodeTransforms.size(),
-            model.materialNames.size(), model.meshNodeDescriptors.size());
+            model.materials.size(), model.meshNodeDescriptors.size());
 
         ss << "--- Materials ---\n";
-        for (size_t i = 0; i < model.materialNames.size(); ++i)
+        for (size_t i = 0; i < model.materials.size(); ++i)
         {
-            ss << std::format("  [{}] Name: '{}'\n", i, model.materialNames[i]);
+            ss << std::format("  [{}] Name: '{}'\n", i, model.materials[i].name);
         }
 
         ss << "--- Meshes (Flat Layout) ---\n";

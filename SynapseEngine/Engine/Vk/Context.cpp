@@ -34,8 +34,6 @@ namespace Syn::Vk {
         auto extensions = GetRequiredExtensions();
         _physicalDevice = std::make_unique<PhysicalDevice>(_instance->Handle(), _surface->Handle(), extensions);
         _device = std::make_unique<Device>(_instance->Handle(), *_physicalDevice, extensions);
-
-
     }
 
     void Context::InitSwapChain(const ContextInitParams& params)

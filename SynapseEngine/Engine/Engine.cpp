@@ -42,6 +42,9 @@ namespace Syn
 	{
 		auto modelManager = ServiceLocator::GetModelManager();
 		modelManager->Update();
+
+		auto imageManager = ServiceLocator::GetImageManager();
+		imageManager->Update();
 	}
 
 	void Engine::Render()
@@ -84,6 +87,7 @@ namespace Syn
 		InitFrameContext(3);
 		InitLogger();
 		InitVulkan(params);
+		InitTaskExecutor();
 		InitResourceManager();
 		InitRenderPipelines();
 
@@ -92,26 +96,53 @@ namespace Syn
 		shaderManager->CreateProgram("TestComputeProgram", { "../Engine/Shaders/Test.comp" });
 		shaderManager->CreateProgram("ComplexTestProgram", { "../Engine/Shaders/ComplexTest.vert", "../Engine/Shaders/ComplexTest.frag", "../Engine/Shaders/ComplexTest.geom" });
 	
-		//auto sponza = Syn::MeshFactory::LoadFromFile("C:/Users/User/Desktop/Models/Sponza-master/sponza.obj");
-
 		auto modelManager = ServiceLocator::GetModelManager();
-		//modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Sponza-master/sponza.obj");
+		modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Sponza-master/sponza.obj");
 		modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
 
-		/*
-		auto bistro = Syn::MeshFactory::LoadFromFile("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
-		auto sphere = Syn::MeshFactory::CreateSphere();
-		auto cube = Syn::MeshFactory::CreateCube();
-		auto quad = Syn::MeshFactory::CreateQuad();
-		auto screenQuad = Syn::MeshFactory::CreateScreenQuad();
-		auto cylinder = Syn::MeshFactory::CreateCylinder();
-		auto cone = Syn::MeshFactory::CreateCone();
-		auto capsule = Syn::MeshFactory::CreateCapsule();
-		auto hemisphere = Syn::MeshFactory::CreateHemisphere();
-		auto pyramid = Syn::MeshFactory::CreatePyramid();
-		auto grid = Syn::MeshFactory::CreateGrid();
-		auto torus = Syn::MeshFactory::CreateTorus();
-		*/
+		modelManager->LoadModelFromStaticMeshAsync("Sphere", []() {
+				return MeshFactory::CreateSphere();
+			});
+
+		modelManager->LoadModelFromStaticMeshAsync("Cube", []() {
+			return MeshFactory::CreateCube();
+			});
+
+		modelManager->LoadModelFromStaticMeshAsync("Quad", []() {
+			return MeshFactory::CreateQuad();
+			});
+
+		modelManager->LoadModelFromStaticMeshAsync("ScreenQuad", []() {
+			return MeshFactory::CreateScreenQuad();
+			});
+
+		modelManager->LoadModelFromStaticMeshAsync("Cylinder", []() {
+			return MeshFactory::CreateCylinder();
+			});
+
+		modelManager->LoadModelFromStaticMeshAsync("Cone", []() {
+			return MeshFactory::CreateCone();
+			});
+
+		modelManager->LoadModelFromStaticMeshAsync("Capsule", []() {
+			return MeshFactory::CreateCapsule();
+			});
+
+		modelManager->LoadModelFromStaticMeshAsync("Hemisphere", []() {
+			return MeshFactory::CreateHemisphere();
+			});
+
+		modelManager->LoadModelFromStaticMeshAsync("Pyramid", []() {
+			return MeshFactory::CreatePyramid();
+			});
+
+		modelManager->LoadModelFromStaticMeshAsync("Grid", []() {
+			return MeshFactory::CreateGrid();
+			});
+
+		modelManager->LoadModelFromStaticMeshAsync("Torus", []() {
+			return MeshFactory::CreateTorus();
+			});
 	}
 
 	void Engine::InitLogger()
@@ -184,5 +215,14 @@ namespace Syn
 
 		_isMinimized = false;
 		_vkContext->GetSwapChain()->Recreate();
+	}
+
+	void Engine::InitTaskExecutor()
+	{
+		size_t hardwareThreads = std::thread::hardware_concurrency();
+		size_t workerThreads = std::max<size_t>(1, hardwareThreads - 1);
+
+		_taskExecutor = std::make_unique<tf::Executor>(workerThreads);
+		ServiceLocator::ProvideTaskExecutor(_taskExecutor.get());
 	}
 }

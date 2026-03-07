@@ -10,6 +10,10 @@ namespace Syn
 
     std::optional<RawModel> FileMeshSource::Produce()
     {
+		if (_loader == nullptr) {
+            return std::nullopt;
+        }
+
 		return _loader->LoadFile(_path);
     }
 }

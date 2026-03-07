@@ -9,6 +9,7 @@ namespace Syn
     GpuBatchedModel DefaultGpuModelConverter::Convert(const CookedModel& cookedModel) const
     {
         GpuBatchedModel result;
+		result.materials = std::move(cookedModel.materials);
 
         // ------------------------------------------------------------------
         // 1. GLOBÁLIS OFFSETEK

@@ -36,7 +36,7 @@ namespace Syn
         _graphicsState = {
             .raster = {
                 .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-                .cullMode = VK_CULL_MODE_NONE,
+                .cullMode = VK_CULL_MODE_BACK_BIT,
                 .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
                 .polygonMode = VK_POLYGON_MODE_FILL,
                 .lineWidth = 1.0f
@@ -128,7 +128,7 @@ namespace Syn
 
     void TestMeshPass::PushConstants(const RenderContext & context) {
         auto modelManager = ServiceLocator::GetModelManager();
-        auto sponza = modelManager->GetModel(0);
+        auto sponza = modelManager->GetModel("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
 
         if (!sponza || sponza->hardwareBuffers.indirectMeshletBuffer == nullptr)
             return;
@@ -137,7 +137,7 @@ namespace Syn
         static float yaw = 0.0f;
         static float pitch = 0.0f;
 
-        float moveSpeed = 0.5f;
+        float moveSpeed = 0.05f;
         float rotSpeed = 0.002f;
 
         if (GetAsyncKeyState(VK_LEFT) & 0x8000)  yaw -= rotSpeed;
@@ -193,7 +193,7 @@ namespace Syn
     void TestMeshPass::Draw(const RenderContext& context)
     {
         auto modelManager = ServiceLocator::GetModelManager();
-        auto sponza = modelManager->GetModel(0);
+        auto sponza = modelManager->GetModel("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
 
         if (!sponza || sponza->hardwareBuffers.indirectMeshletBuffer == nullptr)
             return;

@@ -179,6 +179,26 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Manager\ImageManager.cpp" />
+    <ClCompile Include="Image\Uploader\DefaultGpuImageUploader.cpp" />
+    <ClCompile Include="Image\Uploader\IGpuImageUploader.cpp" />
+    <ClCompile Include="Image\Builder\ImageBuilder.cpp" />
+    <ClCompile Include="Image\Converter\DefaultGpuImageConverter.cpp" />
+    <ClCompile Include="Image\Converter\DefaultImageCooker.cpp" />
+    <ClCompile Include="Image\Converter\IGpuImageConverter.cpp" />
+    <ClCompile Include="Image\Converter\IImageCooker.cpp" />
+    <ClCompile Include="Image\Processor\ImageProcessorPipeline.cpp" />
+    <ClCompile Include="Image\Processor\IImageProcessorPipeline.cpp" />
+    <ClCompile Include="Image\Processor\IImageProcessor.cpp" />
+    <ClCompile Include="Image\Data\Cooked\CookedImage.cpp" />
+    <ClCompile Include="Image\Data\Gpu\GpuImage.cpp" />
+    <ClCompile Include="Image\Loader\ImageLoaderRegistry.cpp" />
+    <ClCompile Include="Image\Loader\IImageLoaderRegistry.cpp" />
+    <ClCompile Include="Image\Source\File\FileImageSource.cpp" />
+    <ClCompile Include="Image\Source\IImageSource.cpp" />
+    <ClCompile Include="Image\Loader\GliImageLoader.cpp" />
+    <ClCompile Include="Image\Loader\IImageLoader.cpp" />
+    <ClCompile Include="Mesh\Data\Common\MaterialInfo.cpp" />
     <ClCompile Include="Mesh\Converter\DefaultModelCooker.cpp" />
     <ClCompile Include="FrameContext.cpp" />
     <ClCompile Include="Mesh\Converter\IModelCooker.cpp" />
@@ -193,8 +213,12 @@
     <ClCompile Include="Mesh\Data\Gpu\GpuIndexedDrawData.cpp" />
     <ClCompile Include="Mesh\Data\Gpu\GpuVertexData.cpp" />
     <ClCompile Include="Manager\ModelManager.cpp" />
+    <ClCompile Include="Image\Data\Raw\RawImage.cpp" />
+    <ClCompile Include="Image\Source\Procedural\ProceduralImageSource.cpp" />
+    <ClCompile Include="Image\Data\Common\MipLevelInfo.cpp" />
     <ClCompile Include="Render\GraphicsPass\PresentationPass.cpp" />
     <ClCompile Include="Render\GraphicsPass\TestMeshPass.cpp" />
+    <ClCompile Include="Image\Loader\StbImageLoader.cpp" />
     <ClCompile Include="Vk\Image\ImageConfig.cpp" />
     <ClCompile Include="Render\RenderContext.cpp" />
     <ClCompile Include="Render\Renderer.cpp" />
@@ -322,6 +346,26 @@
     <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Manager\ImageManager.h" />
+    <ClInclude Include="Image\Uploader\DefaultGpuImageUploader.h" />
+    <ClInclude Include="Image\Uploader\IGpuImageUploader.h" />
+    <ClInclude Include="Image\Builder\ImageBuilder.h" />
+    <ClInclude Include="Image\Converter\DefaultGpuImageConverter.h" />
+    <ClInclude Include="Image\Converter\DefaultImageCooker.h" />
+    <ClInclude Include="Image\Converter\IGpuImageConverter.h" />
+    <ClInclude Include="Image\Converter\IImageCooker.h" />
+    <ClInclude Include="Image\Processor\ImageProcessorPipeline.h" />
+    <ClInclude Include="Image\Processor\IImageProcessorPipeline.h" />
+    <ClInclude Include="Image\Processor\IImageProcessor.h" />
+    <ClInclude Include="Image\Data\Cooked\CookedImage.h" />
+    <ClInclude Include="Image\Data\Gpu\GpuImage.h" />
+    <ClInclude Include="Image\Loader\ImageLoaderRegistry.h" />
+    <ClInclude Include="Image\Loader\IImageLoaderRegistry.h" />
+    <ClInclude Include="Image\Source\File\FileImageSource.h" />
+    <ClInclude Include="Image\Source\IImageSource.h" />
+    <ClInclude Include="Image\Loader\GliImageLoader.h" />
+    <ClInclude Include="Image\Loader\IImageLoader.h" />
+    <ClInclude Include="Mesh\Data\Common\MaterialInfo.h" />
     <ClInclude Include="Mesh\Converter\DefaultModelCooker.h" />
     <ClInclude Include="FrameContext.h" />
     <ClInclude Include="Mesh\Converter\IModelCooker.h" />
@@ -336,8 +380,12 @@
     <ClInclude Include="Mesh\Data\Gpu\GpuIndexedDrawData.h" />
     <ClInclude Include="Mesh\Data\Gpu\GpuVertexData.h" />
     <ClInclude Include="Manager\ModelManager.h" />
+    <ClInclude Include="Image\Data\Raw\RawImage.h" />
+    <ClInclude Include="Image\Source\Procedural\ProceduralImageSource.h" />
+    <ClInclude Include="Image\Data\Common\MipLevelInfo.h" />
     <ClInclude Include="Render\GraphicsPass\PresentationPass.h" />
     <ClInclude Include="Render\GraphicsPass\TestMeshPass.h" />
+    <ClInclude Include="Image\Loader\StbImageLoader.h" />
     <ClInclude Include="Vk\Image\ImageConfig.h" />
     <ClInclude Include="Render\RenderContext.h" />
     <ClInclude Include="Render\Renderer.h" />

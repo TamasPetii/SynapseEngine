@@ -32,7 +32,7 @@ namespace Syn {
         _graphicsState = {
             .raster = {
                 .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-                .cullMode = VK_CULL_MODE_NONE,
+                .cullMode = VK_CULL_MODE_BACK_BIT,
                 .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
                 .polygonMode = VK_POLYGON_MODE_FILL,
                 .lineWidth = 1.0f

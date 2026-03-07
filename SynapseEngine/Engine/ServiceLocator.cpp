@@ -7,6 +7,9 @@ namespace Syn {
 	StaticMeshBuilder* ServiceLocator::_staticMeshBuilder = nullptr;
 	FrameContext* ServiceLocator::_frameContext = nullptr;
 	ModelManager* ServiceLocator::_modelManager = nullptr;
+	tf::Executor* ServiceLocator::_taskExecutor = nullptr;
+	ImageManager* ServiceLocator::_imageManager = nullptr;
+	ImageBuilder* ServiceLocator::_imageBuilder = nullptr;
 
 	void ServiceLocator::Shutdown()
 	{
@@ -16,5 +19,8 @@ namespace Syn {
 		_staticMeshBuilder = nullptr;
 		_frameContext = nullptr;
 		_modelManager = nullptr;
+		_taskExecutor = nullptr;
+		_imageManager = nullptr;
+		_imageBuilder = nullptr;
 	}
 }
