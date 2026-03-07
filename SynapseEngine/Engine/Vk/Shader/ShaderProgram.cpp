@@ -57,6 +57,7 @@ namespace Syn::Vk {
             }
         }
 
+        /*
 		// Merge push constant ranges at same offset and size, combining their stage flags
         std::map<std::pair<uint32_t, uint32_t>, VkShaderStageFlags> rangeMerger;
         for (const auto* shader : _shaders) {
@@ -77,6 +78,15 @@ namespace Syn::Vk {
             range.stageFlags = stages;
             finalPushConstants.push_back(range);
         }
+        */
+
+        auto physicalDevice = ServiceLocator::GetVkContext()->GetPhysicalDevice();
+        uint32_t maxPushConstantSize = physicalDevice->GetProperties().limits.maxPushConstantsSize;
+
+        VkPushConstantRange universalPushConstant{};
+        universalPushConstant.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+        universalPushConstant.offset = 0;
+        universalPushConstant.size = maxPushConstantSize;
 
         VkPipelineLayoutCreateInfo pipelineLayoutInfo{ VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO };
 
@@ -85,10 +95,15 @@ namespace Syn::Vk {
             pipelineLayoutInfo.pSetLayouts = finalSetLayouts.data();
         }
 
+        /*
         if (!finalPushConstants.empty()) {
             pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(finalPushConstants.size());
             pipelineLayoutInfo.pPushConstantRanges = finalPushConstants.data();
         }
+        */
+
+        pipelineLayoutInfo.pushConstantRangeCount = 1;
+        pipelineLayoutInfo.pPushConstantRanges = &universalPushConstant;
 
         SYN_VK_ASSERT_MSG(vkCreatePipelineLayout(device->Handle(), &pipelineLayoutInfo, nullptr, &_pipelineLayout), "Failed to create merged Pipeline Layout");
     }

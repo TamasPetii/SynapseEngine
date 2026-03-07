@@ -37,7 +37,7 @@ namespace Syn
     class SYN_API ModelManager
     {
     public:
-        ModelManager(std::unique_ptr<StaticMeshBuilder> builder, std::unique_ptr<IGpuModelUploader> uploader);
+        ModelManager(std::shared_ptr<StaticMeshBuilder> builder, std::unique_ptr<IGpuModelUploader> uploader);
         ~ModelManager() = default;
 
         uint32_t LoadModelAsync(const std::string& filePath);
@@ -45,7 +45,7 @@ namespace Syn
         std::shared_ptr<StaticMesh> GetModel(uint32_t id) const;
 		std::shared_ptr<StaticMesh> GetModel(const std::string& filePath) const;
     private:
-        std::unique_ptr<StaticMeshBuilder> _builder;
+        std::shared_ptr<StaticMeshBuilder> _builder;
         std::unique_ptr<IGpuModelUploader> _uploader;
 
         Vk::ThreadSafeQueue* _transferQueue = nullptr;

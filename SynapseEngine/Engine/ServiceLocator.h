@@ -10,6 +10,7 @@ namespace Syn {
     class ShaderManager;
     class ResourceManager;
     class StaticMeshBuilder;
+    class ModelManager;
 	struct FrameContext;
 }
 
@@ -37,11 +38,15 @@ namespace Syn
 
         static void ProvideFrameContext(FrameContext* context) { _frameContext = context; }
         static const FrameContext* GetFrameContext() { return _frameContext; }
+
+		static void ProvideModelManager(ModelManager* manager) { _modelManager = manager; }
+		static ModelManager* GetModelManager() { return _modelManager; }
     private:
         static Vk::Context* _vkContext;
 		static ShaderManager* _shaderManager;
 		static ResourceManager* _resourceManager;
 		static StaticMeshBuilder* _staticMeshBuilder;
+		static ModelManager* _modelManager;
         static FrameContext* _frameContext;
     };
 }

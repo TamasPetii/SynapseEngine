@@ -6,6 +6,7 @@ namespace Syn {
 	ResourceManager* ServiceLocator::_resourceManager = nullptr;
 	StaticMeshBuilder* ServiceLocator::_staticMeshBuilder = nullptr;
 	FrameContext* ServiceLocator::_frameContext = nullptr;
+	ModelManager* ServiceLocator::_modelManager = nullptr;
 
 	void ServiceLocator::Shutdown()
 	{
@@ -14,5 +15,6 @@ namespace Syn {
 		_resourceManager = nullptr;
 		_staticMeshBuilder = nullptr;
 		_frameContext = nullptr;
+		_modelManager = nullptr;
 	}
 }

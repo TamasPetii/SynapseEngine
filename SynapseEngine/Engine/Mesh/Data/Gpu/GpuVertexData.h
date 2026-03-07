@@ -15,7 +15,7 @@ namespace Syn
 	struct SYN_API GpuVertexPosition
 	{
 		glm::vec3 position;
-		uint32_t packedIndex; // meshIndex, nodeIndex
+		uint32_t packedIndex; // nodeIndex, meshIndex
 
 		void SetMeshAndNodeIndex(uint16_t meshIndex, uint16_t nodeIndex);
 	};

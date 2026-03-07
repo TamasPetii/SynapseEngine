@@ -435,6 +435,9 @@
     <ClCompile Include="Manager\ModelManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\TestMeshPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -932,6 +935,9 @@
     <ClInclude Include="Manager\ModelManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\TestMeshPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Test.comp" />
@@ -940,5 +946,9 @@
     <None Include="Shaders\ComplexTest.frag" />
     <None Include="Shaders\Fullscreen.vert" />
     <None Include="Shaders\Fullscreen.frag" />
+    <None Include="Shaders\Test.vert" />
+    <None Include="Shaders\Test.frag" />
+    <None Include="Shaders\TestMesh.mesh" />
+    <None Include="Shaders\TestMesh.frag" />
   </ItemGroup>
 </Project>

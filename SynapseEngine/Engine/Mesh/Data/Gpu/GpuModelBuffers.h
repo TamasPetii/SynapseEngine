@@ -25,5 +25,9 @@ namespace Syn
 
         //Hierarchy Buffers
         std::unique_ptr<Vk::Buffer> nodeTransforms;
+
+        //Indirect buffers
+        std::unique_ptr<Vk::Buffer> indirectBuffer;
+        std::unique_ptr<Vk::Buffer> indirectMeshletBuffer;
     };
 }

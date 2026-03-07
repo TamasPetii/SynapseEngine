@@ -19,9 +19,9 @@ namespace Syn
 	struct SYN_API GpuMeshletDescriptor
 	{
 		uint32_t vertexIndicesOffset;
-		uint8_t vertexCount;
+		uint32_t vertexCount;
 		uint32_t triangleIndicesOffset;
-		uint8_t triangleCount;
+		uint32_t triangleCount;
 	};
 
 	struct SYN_API GpuMeshletCollider
@@ -36,6 +36,7 @@ namespace Syn
 		uint32_t meshletOffset;
 		uint32_t meshletCount;
 		uint32_t materialIndex;
+		uint32_t padding; 
 	};
 
 	struct SYN_API GpuMeshletDrawData
@@ -44,12 +45,12 @@ namespace Syn
 		std::vector<uint32_t> vertexIndices;
 
 		//[Lod0 | Lod1 | Lod2 | Lod3]
-		std::vector<uint8_t>  triangleIndices;
+		std::vector<uint32_t> triangleIndices;
 
-		//Old: [(Lod0 - Meshlet0, ..., MeshletN) | ... | (Lod3 - Meshlet0, ..., MeshletN)]
 		//New: [(Mesh0_Lod0, Mesh0_Lod1, Mesh0_Lod2, Mesh0_Lod3), (Mesh1_Lod0, ...)] 
 		std::vector<GpuMeshletDescriptor> meshletDescriptors;
 
+		//New: [(Mesh0_Lod0, Mesh0_Lod1, Mesh0_Lod2, Mesh0_Lod3), (Mesh1_Lod0, ...)] 
 		std::vector<GpuMeshletDrawDescriptor> drawDescriptors;
 
 		std::vector<GpuMeshletCollider> meshletColliders;

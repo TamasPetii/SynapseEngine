@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include "Engine/Manager/ShaderManager.h"
+#include "Engine/Manager/ModelManager.h"
 #include <memory>
 
 namespace Syn {
@@ -15,6 +16,8 @@ namespace Syn {
 
        ShaderManager* GetShaderManager() const { return _shaderManager.get(); }
     private:
+		std::shared_ptr<StaticMeshBuilder> _staticMeshBuilder;
         std::unique_ptr<ShaderManager> _shaderManager;
+		std::unique_ptr<ModelManager> _modelManager;
     };
 }

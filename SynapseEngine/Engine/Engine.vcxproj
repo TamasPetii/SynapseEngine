@@ -194,6 +194,7 @@
     <ClCompile Include="Mesh\Data\Gpu\GpuVertexData.cpp" />
     <ClCompile Include="Manager\ModelManager.cpp" />
     <ClCompile Include="Render\GraphicsPass\PresentationPass.cpp" />
+    <ClCompile Include="Render\GraphicsPass\TestMeshPass.cpp" />
     <ClCompile Include="Vk\Image\ImageConfig.cpp" />
     <ClCompile Include="Render\RenderContext.cpp" />
     <ClCompile Include="Render\Renderer.cpp" />
@@ -336,6 +337,7 @@
     <ClInclude Include="Mesh\Data\Gpu\GpuVertexData.h" />
     <ClInclude Include="Manager\ModelManager.h" />
     <ClInclude Include="Render\GraphicsPass\PresentationPass.h" />
+    <ClInclude Include="Render\GraphicsPass\TestMeshPass.h" />
     <ClInclude Include="Vk\Image\ImageConfig.h" />
     <ClInclude Include="Render\RenderContext.h" />
     <ClInclude Include="Render\Renderer.h" />
@@ -493,7 +495,11 @@
     <None Include="Shaders\ComplexTest.vert" />
     <None Include="Shaders\Fullscreen.frag" />
     <None Include="Shaders\Fullscreen.vert" />
+    <None Include="Shaders\TestMesh.frag" />
     <None Include="Shaders\Test.comp" />
+    <None Include="Shaders\Test.frag" />
+    <None Include="Shaders\TestMesh.mesh" />
+    <None Include="Shaders\Test.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

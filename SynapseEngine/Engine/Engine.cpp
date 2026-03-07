@@ -22,6 +22,7 @@
 #include "Engine/Render/Data/RenderScene.h"
 
 #include "Engine/Render/GraphicsPass/TestPass.h"
+#include "Engine/Render/GraphicsPass/TestMeshPass.h"
 #include "Engine/Render/GraphicsPass/PresentationPass.h"
 #include "Engine/Render/RenderPipeline.h"
 
@@ -39,6 +40,8 @@ namespace Syn
 
 	void Engine::Update()
 	{
+		auto modelManager = ServiceLocator::GetModelManager();
+		modelManager->Update();
 	}
 
 	void Engine::Render()
@@ -56,6 +59,24 @@ namespace Syn
 		_renderManager->RenderFrame(currentFrame, scene);
 
 		AdvanceFrameIndex();
+
+		static auto lastTime = std::chrono::high_resolution_clock::now();
+		static uint32_t frameCount = 0;
+
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		frameCount++;
+
+		// Eltelt idő kiszámítása másodpercben
+		float timeDiff = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
+
+		// Ha eltelt 1 másodperc, kiírjuk és nullázzuk a számlálókat
+		if (timeDiff >= 1.0f) {
+			// Használd a saját loggolódat, amit korábban is láttam nálad!
+			Info("FPS: {} ({} ms/frame)", frameCount, 1000.0f / frameCount);
+
+			frameCount = 0;
+			lastTime = currentTime;
+		}
 	}
 
 	void Engine::Init(const EngineInitParams& params)
@@ -64,7 +85,6 @@ namespace Syn
 		InitLogger();
 		InitVulkan(params);
 		InitResourceManager();
-		InitStaticMeshBuilder();
 		InitRenderPipelines();
 
 		//Rendererekbe kell majd inicializálni!
@@ -74,10 +94,13 @@ namespace Syn
 	
 		//auto sponza = Syn::MeshFactory::LoadFromFile("C:/Users/User/Desktop/Models/Sponza-master/sponza.obj");
 
-		auto sphere = Syn::MeshFactory::CreateSphere();
+		auto modelManager = ServiceLocator::GetModelManager();
+		//modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Sponza-master/sponza.obj");
+		modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
 
 		/*
 		auto bistro = Syn::MeshFactory::LoadFromFile("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
+		auto sphere = Syn::MeshFactory::CreateSphere();
 		auto cube = Syn::MeshFactory::CreateCube();
 		auto quad = Syn::MeshFactory::CreateQuad();
 		auto screenQuad = Syn::MeshFactory::CreateScreenQuad();
@@ -123,25 +146,6 @@ namespace Syn
 		ServiceLocator::ProvideResourceManager(_resourceManager.get());
 	}
 
-	void Engine::InitStaticMeshBuilder()
-	{
-		_staticMeshBuilder = std::make_unique<StaticMeshBuilder>(
-			std::make_unique<MeshLoaderRegistry>(),
-			std::make_unique<MeshProcessorPipeline>(),
-			std::make_unique<DefaultGpuModelConverter>(),
-			std::make_unique<DefaultModelCooker>()
-		);
-
-		_staticMeshBuilder->RegisterLoader(std::make_shared<AssimpLoader>(), 100);
-		_staticMeshBuilder->RegisterProcessor(std::make_unique<NormalProcessor>());
-		_staticMeshBuilder->RegisterProcessor(std::make_unique<TangentProcessor>());
-		_staticMeshBuilder->RegisterProcessor(std::make_unique<ColliderProcessor>());
-		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerLodProcessor>());
-		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerMeshletProcessor>());
-
-		ServiceLocator::ProvideStaticMeshBuilder(_staticMeshBuilder.get());
-	}
-
 	void Engine::InitFrameContext(uint32_t framesInFlight) {
 		_frameContext.framesInFlight = framesInFlight;
 		_frameContext.currentFrameIndex = 0;
@@ -159,7 +163,7 @@ namespace Syn
 		_renderManager = std::make_unique<RenderManager>(framesInFlight);
 
 		auto pipeline = std::make_unique<RenderPipeline>();
-		pipeline->AddPass(std::make_unique<TestPass>());
+		pipeline->AddPass(std::make_unique<TestMeshPass>());
 		pipeline->AddPass(std::make_unique<PresentationPass>());
 		pipeline->InitializeAll();
 
@@ -168,7 +172,6 @@ namespace Syn
 
 	void Engine::Shutdown() {
 		_renderManager.reset();
-		_staticMeshBuilder.reset();
 		_resourceManager.reset();
 		_vkContext.reset(); //This has to be the last one!
 		ServiceLocator::Shutdown();

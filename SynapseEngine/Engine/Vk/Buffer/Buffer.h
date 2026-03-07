@@ -37,21 +37,16 @@ namespace Syn::Vk {
 
         void Flush(VkDeviceSize offset = 0, VkDeviceSize size = VK_WHOLE_SIZE);
 
-        template<typename T>
-        void Write(const T* data, size_t size, size_t offset = 0) {
+        void Write(const void* data, size_t size, size_t offset = 0) {
             uint8_t* ptr = static_cast<uint8_t*>(Map());
             memcpy(ptr + offset, data, size);
+
             if (!_isCoherent) {
                 Flush(offset, size);
             }
+
             Unmap();
         }
-
-        template<typename T>
-        void Write(const T& data, size_t offset = 0) {
-            Write(&data, sizeof(T), offset);
-        }
-
     private:
         BufferConfig _config;
 

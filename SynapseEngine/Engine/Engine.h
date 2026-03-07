@@ -39,7 +39,6 @@ namespace Syn
         void InitLogger();
         void InitVulkan(const EngineInitParams& params);
         void InitResourceManager();
-        void InitStaticMeshBuilder();
         void InitFrameContext(uint32_t framesInFlight);
         void InitRenderPipelines();
         void Shutdown();
@@ -50,7 +49,6 @@ namespace Syn
         FrameContext _frameContext;
 		std::unique_ptr<Vk::Context> _vkContext;
 		std::unique_ptr<ResourceManager> _resourceManager;
-        std::unique_ptr<StaticMeshBuilder> _staticMeshBuilder;
 		std::unique_ptr<RenderManager> _renderManager;
 	};
 }

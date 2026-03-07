@@ -96,10 +96,30 @@ namespace Syn::Vk {
         createInfo.codeSize = spirv.size() * sizeof(uint32_t);
         createInfo.pName = "main";
 
+        if (stage == VK_SHADER_STAGE_MESH_BIT_EXT) {
+            createInfo.flags = VK_SHADER_CREATE_NO_TASK_SHADER_BIT_EXT;
+        }
+        else {
+            createInfo.flags = 0;
+        }
+
+        /*
         if (!_resources.pushConstants.empty()) {
             createInfo.pPushConstantRanges = _resources.pushConstants.data();
             createInfo.pushConstantRangeCount = static_cast<uint32_t>(_resources.pushConstants.size());
         }
+        */
+
+        auto physicalDevice = ServiceLocator::GetVkContext()->GetPhysicalDevice();
+        uint32_t maxPushConstantSize = physicalDevice->GetProperties().limits.maxPushConstantsSize;
+
+        VkPushConstantRange universalPushConstant{};
+        universalPushConstant.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+        universalPushConstant.offset = 0;
+        universalPushConstant.size = maxPushConstantSize;
+
+        createInfo.pushConstantRangeCount = 1;
+        createInfo.pPushConstantRanges = &universalPushConstant;
 
         if (!creationLayouts.empty()) {
             createInfo.pSetLayouts = creationLayouts.data();
