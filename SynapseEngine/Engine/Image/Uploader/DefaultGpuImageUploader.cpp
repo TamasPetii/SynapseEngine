@@ -110,9 +110,15 @@ namespace Syn
             result.texture->image->TransitionLayout(
                 cmd,
                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
-                VK_ACCESS_2_SHADER_READ_BIT,
+                VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT,
+                VK_ACCESS_2_TRANSFER_WRITE_BIT,
                 false
+            );
+
+            result.texture->image->OverrideInternalState(
+                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
+                VK_ACCESS_2_SHADER_READ_BIT
             );
 
             result.requiresGraphicsQueue = false;
