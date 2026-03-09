@@ -16,6 +16,7 @@ namespace Syn {
     class ImageManager;
     class ImageBuilder;
 	struct FrameContext;
+    class InputManager;
 }
 
 namespace Syn 
@@ -57,6 +58,9 @@ namespace Syn
 
         static void ProvideGpuUploader(Vk::GpuUploader* uploader) { _gpuUploader = uploader; }
         static Vk::GpuUploader* GetGpuUploader() { return _gpuUploader; }
+
+        static void ProvideInputManager(InputManager* manager) { _inputManager = manager; }
+        static InputManager* GetInputManager() { return _inputManager; }
     private:
         static Vk::Context* _vkContext;
         static Vk::GpuUploader* _gpuUploader;
@@ -68,5 +72,6 @@ namespace Syn
 		static ImageManager* _imageManager;
 		static ImageBuilder* _imageBuilder;
 		static StaticMeshBuilder* _staticMeshBuilder;
+        static InputManager* _inputManager;
     };
 }

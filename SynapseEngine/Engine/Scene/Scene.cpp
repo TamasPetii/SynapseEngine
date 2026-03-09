@@ -2,6 +2,8 @@
 #include "Engine/ServiceLocator.h"
 #include "Engine/System/TransformSystem.h"
 #include "Engine/Component/TransformComponent.h"
+#include "Engine/System/CameraSystem.h"
+#include "Engine/Component/CameraComponent.h"
 
 namespace Syn
 {
@@ -31,11 +33,15 @@ namespace Syn
     void Scene::InitializeSystems()
     {
         RegisterSystem<TransformSystem>();
+        RegisterSystem<CameraSystem>();
     }
 
     void Scene::InitializeComponentBuffers()
     {
-        RegisterComponentBuffer<TransformComponent, TransformComponentGPU>("TransformData");
+        //Todo: Register sparse list!
+        RegisterComponentBuffer<TransformComponent, TransformComponentGPU>("TransformData");   
+        RegisterComponentBuffer<CameraComponent, CameraComponentGPU>("CameraData");
+        RegisterComponentBuffer<CameraComponent, CameraFrustumGPU>("CameraFrustumData");
     }
 
     void Scene::BuildTaskflowGraph(tf::Taskflow& taskflow, SystemPhase phase)
@@ -102,7 +108,7 @@ namespace Syn
     void Scene::UpdateGPU(uint32_t frameIndex)
     {
         _currentFrameIndex = frameIndex;
-        _componentBufferManager->Update(frameIndex); //Todo problematic -> Need to reload previous data??
+        _componentBufferManager->Update(frameIndex);
 
         ServiceLocator::GetTaskExecutor()->run(_gpuTaskflow).wait();
     }

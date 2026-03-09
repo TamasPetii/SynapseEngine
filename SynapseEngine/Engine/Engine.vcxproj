@@ -179,6 +179,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="System\ComponentSystem.cpp" />
+    <ClCompile Include="Manager\InputManager.cpp" />
+    <ClCompile Include="System\CameraSystem.cpp" />
+    <ClCompile Include="Component\CameraComponent.cpp" />
     <ClCompile Include="Manager\ComponentBufferManager.cpp" />
     <ClCompile Include="Component\BaseComponent\Component.cpp" />
     <ClCompile Include="Scene\Scene.cpp" />
@@ -362,6 +366,10 @@
     <ClCompile Include="Utils\WindowedBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="System\ComponentSystem.h" />
+    <ClInclude Include="Manager\InputManager.h" />
+    <ClInclude Include="System\CameraSystem.h" />
+    <ClInclude Include="Component\CameraComponent.h" />
     <ClInclude Include="Manager\ComponentBufferManager.h" />
     <ClInclude Include="Component\BaseComponent\Component.h" />
     <ClInclude Include="Scene\Scene.h" />

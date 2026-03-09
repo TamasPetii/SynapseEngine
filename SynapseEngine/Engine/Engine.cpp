@@ -27,6 +27,8 @@
 #include "Engine/Render/GraphicsPass/PresentationPass.h"
 #include "Engine/Render/RenderPipeline.h"
 
+#include "Engine/Manager/InputManager.h"
+
 namespace Syn
 {
 	Engine::Engine(const EngineInitParams& params)
@@ -80,6 +82,9 @@ namespace Syn
 
 	void Engine::Init(const EngineInitParams& params)
 	{
+		_inputManager = std::make_unique<InputManager>();
+		ServiceLocator::ProvideInputManager(_inputManager.get());
+
 		InitFrameContext(3);
 		InitLogger();
 		InitVulkan(params);
@@ -220,5 +225,32 @@ namespace Syn
 
 		_taskExecutor = std::make_unique<tf::Executor>(workerThreads);
 		ServiceLocator::ProvideTaskExecutor(_taskExecutor.get());
+	}
+
+	void Engine::OnKey(int key, int scancode, int action, int mods)
+	{
+		if (action == InputAction::PRESS) {
+			_inputManager->SetKeyboardKey(key, true);
+		}
+		else if (action == InputAction::RELEASE) {
+			_inputManager->SetKeyboardKey(key, false);
+		}
+	}
+
+	void Engine::OnMouseButton(int button, int action, int mods)
+	{
+		if (action == InputAction::PRESS)
+		{
+			_inputManager->SetMouseButton(button, true);
+		}
+		else if (action == InputAction::RELEASE)
+		{
+			_inputManager->SetMouseButton(button, false);
+		}
+	}
+
+	void Engine::OnMouseMove(float x, float y)
+	{
+		_inputManager->SetMousePosition(x, y);
 	}
 }

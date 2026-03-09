@@ -20,12 +20,6 @@ namespace Syn
         Finish
     };
 
-    struct GpuBufferState
-    {
-        uint32_t capacity = 0;
-        std::shared_ptr<Vk::Buffer> buffer;
-    };
-
     class SYN_API Scene
     {
     public:

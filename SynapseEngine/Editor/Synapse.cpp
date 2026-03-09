@@ -51,39 +51,24 @@ void Synapse::OnRender()
 }
 
 void Synapse::OnKey(int key, int scancode, int action, int mods) {
-    /*
-    ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
+    //ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
 
-    if (action == GLFW_PRESS) {
-        InputManager::Instance()->SetKeyboardKey(key, true);
-    }
-    else if (action == GLFW_RELEASE) {
-        InputManager::Instance()->SetKeyboardKey(key, false);
-    }
-    */
+    if(_engine)
+        _engine->OnKey(key, scancode, action, mods);
 }
 
 void Synapse::OnMouseButton(int button, int action, int mods) {
-    /*
-    ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+    //ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
 
-    if (action == GLFW_PRESS)
-    {
-        InputManager::Instance()->SetMouseButton(button, true);
-    }
-    else if (action == GLFW_RELEASE)
-    {
-        InputManager::Instance()->SetMouseButton(button, false);
-    }
-    */
+    if (_engine)
+        _engine->OnMouseButton(button, action, mods);
 }
 
-void Synapse::OnMouseMove(float x, float y) {
-    /*
-    ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
+void Synapse::OnMouseMove(float x, float y) {  
+    //ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
 
-    InputManager::Instance()->SetMousePosition(xpos, ypos);
-    */
+    if (_engine)
+        _engine->OnMouseMove(x, y);
 }
 
 void Synapse::OnResize(uint32_t width, uint32_t height) {

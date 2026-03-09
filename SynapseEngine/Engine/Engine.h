@@ -17,6 +17,7 @@ namespace Syn {
     class ResourceManager;
     class StaticMeshBuilder;
     class RenderManager;
+    class InputManager;
 }
 
 namespace Syn
@@ -37,6 +38,10 @@ namespace Syn
         void Update();
         void Render();
         void WindowResizeEvent(uint32_t width, uint32_t height);
+
+        void OnKey(int key, int scancode, int action, int mods);
+        void OnMouseButton(int button, int action, int mods);
+        void OnMouseMove(float x, float y);
     private:
         void Init(const EngineInitParams& params);
         void InitLogger();
@@ -56,6 +61,7 @@ namespace Syn
 		std::unique_ptr<RenderManager> _renderManager;
 		std::unique_ptr<tf::Executor> _taskExecutor;
         std::unique_ptr<Vk::GpuUploader> _gpuUploader;
+        std::unique_ptr<InputManager> _inputManager;
 	};
 }
 

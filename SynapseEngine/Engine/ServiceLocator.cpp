@@ -11,6 +11,7 @@ namespace Syn {
 	ImageManager* ServiceLocator::_imageManager = nullptr;
 	ImageBuilder* ServiceLocator::_imageBuilder = nullptr;
 	Vk::GpuUploader* ServiceLocator::_gpuUploader = nullptr;
+	InputManager* ServiceLocator::_inputManager = nullptr;
 
 	void ServiceLocator::Shutdown()
 	{
@@ -24,5 +25,6 @@ namespace Syn {
 		_imageManager = nullptr;
 		_imageBuilder = nullptr;
 		_gpuUploader = nullptr;
+		_inputManager = nullptr;
 	}
 }
