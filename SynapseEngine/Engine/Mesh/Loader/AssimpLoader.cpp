@@ -30,7 +30,7 @@ namespace Syn
         PreProcessSceneHierarchy(scene, model);
         ProcessSceneHierarchy(scene, model);
 
-        MeshUtils::LogRawModel(path, model);
+        //MeshUtils::LogRawModel(path, model);
 
         return model;
     }

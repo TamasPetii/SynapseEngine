@@ -64,6 +64,7 @@ namespace Syn {
                 FinalizeResource(entry);
                 entry.stagingBuffer.reset();
                 entry.state = ResourceState::Ready;
+                Info("Model '{}' is ready", entry.path);
             },
             .needsGraphics = false
         });

@@ -45,7 +45,10 @@ namespace Syn
 
         SYN_INLINE void MarkStaticDirty(DenseIndex index);
 
-        SYN_INLINE std::span<EntityID> GetDirtyStatics();
+        SYN_INLINE std::span<const EntityID> GetDirtyStatics() const;
+        SYN_INLINE std::span<const EntityID> GetStaticEntities() const;
+        SYN_INLINE std::span<const EntityID> GetDynamicEntities() const;
+        SYN_INLINE std::span<const EntityID> GetStreamEntities() const;
 
         SYN_INLINE void ResetStaticDirtyCounter();
     private:
@@ -238,13 +241,31 @@ namespace Syn
     }
 
     template<typename T, typename FlagMixinPolicy>
-    SYN_INLINE std::span<EntityID> SegmentedStorageImpl<T, FlagMixinPolicy>::GetDirtyStatics()
+    SYN_INLINE std::span<const EntityID> SegmentedStorageImpl<T, FlagMixinPolicy>::GetDirtyStatics() const
     {
         size_t count = _dirtyStaticCount.load(std::memory_order_acquire);
 
         SYN_ASSERT(count <= _dirtyStaticList.size(), "Dirty count is larger than buffer size!");
 
         return { _dirtyStaticList.data(), count };
+    }
+
+    template<typename T, typename FlagMixinPolicy>
+    SYN_INLINE std::span<const EntityID> SegmentedStorageImpl<T, FlagMixinPolicy>::GetStaticEntities() const
+    {
+        return { Base::_entities.data(), _staticEnd };
+    }
+
+    template<typename T, typename FlagMixinPolicy>
+    SYN_INLINE std::span<const EntityID> SegmentedStorageImpl<T, FlagMixinPolicy>::GetDynamicEntities() const
+    {
+        return { Base::_entities.data() + _staticEnd, _dynamicEnd - _staticEnd };
+    }
+
+    template<typename T, typename FlagMixinPolicy>
+    SYN_INLINE std::span<const EntityID> SegmentedStorageImpl<T, FlagMixinPolicy>::GetStreamEntities() const
+    {
+        return { Base::_entities.data() + _dynamicEnd, Base::_entities.size() - _dynamicEnd };
     }
 
     template<typename T, typename FlagMixinPolicy>

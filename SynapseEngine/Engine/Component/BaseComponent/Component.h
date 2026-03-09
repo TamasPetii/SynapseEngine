@@ -4,9 +4,8 @@
 
 namespace Syn
 {
-	struct SYN_API SphereCollider
+	struct SYN_API Component
 	{
-		glm::vec3 center;
-		float radius;
+		uint32_t version = 0;
 	};
 }

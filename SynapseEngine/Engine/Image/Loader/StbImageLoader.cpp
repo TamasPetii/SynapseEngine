@@ -1,29 +1,24 @@
 #include "StbImageLoader.h"
+#define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <iostream>
 #include "Engine/Logger/SynLog.h"
 
 namespace Syn
 {
-    std::optional<RawImage> StbImageLoader::LoadFile(const std::filesystem::path& path)
-    {
+    std::optional<RawImage> StbImageLoader::LoadFile(const std::filesystem::path& path) {
         int width, height, originalChannels;
 
-        if (!stbi_info(path.string().c_str(), &width, &height, &originalChannels)) {
-			Error("Failed to read image info: {} - {}", path.string(), stbi_failure_reason());
+        stbi_uc* data = stbi_load(path.string().c_str(), &width, &height, &originalChannels, STBI_default);
+
+        if (!data) {
+            Error("Failed to load image: {} - {}", path.string(), stbi_failure_reason());
             return std::nullopt;
         }
 
         int desiredChannels = originalChannels;
         if (originalChannels == 3) {
-            desiredChannels = STBI_rgb_alpha;
-        }
-
-        stbi_uc* data = stbi_load(path.string().c_str(), &width, &height, nullptr, desiredChannels);
-
-        if (!data) {
-			Error("Failed to load image: {} - {}", path.string(), stbi_failure_reason());
-            return std::nullopt;
+            desiredChannels = 4;
         }
 
         RawImage rawImage{};
@@ -44,7 +39,19 @@ namespace Syn
         }
 
         size_t imageSize = static_cast<size_t>(width * height * desiredChannels);
-        rawImage.pixels.assign(data, data + imageSize);
+
+        if (originalChannels == 3) {
+            rawImage.pixels.resize(imageSize);
+            for (size_t i = 0; i < static_cast<size_t>(width * height); ++i) {
+                rawImage.pixels[i * 4 + 0] = data[i * 3 + 0];
+                rawImage.pixels[i * 4 + 1] = data[i * 3 + 1];
+                rawImage.pixels[i * 4 + 2] = data[i * 3 + 2];
+                rawImage.pixels[i * 4 + 3] = 255;
+            }
+        }
+        else {
+            rawImage.pixels.assign(data, data + imageSize);
+        }
 
         stbi_image_free(data);
 

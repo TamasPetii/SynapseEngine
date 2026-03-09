@@ -68,12 +68,9 @@ namespace Syn
 		auto currentTime = std::chrono::high_resolution_clock::now();
 		frameCount++;
 
-		// Eltelt idő kiszámítása másodpercben
 		float timeDiff = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
 
-		// Ha eltelt 1 másodperc, kiírjuk és nullázzuk a számlálókat
 		if (timeDiff >= 1.0f) {
-			// Használd a saját loggolódat, amit korábban is láttam nálad!
 			Info("FPS: {} ({} ms/frame)", frameCount, 1000.0f / frameCount);
 
 			frameCount = 0;
@@ -90,7 +87,6 @@ namespace Syn
 		InitResourceManager();
 		InitRenderPipelines();
 
-		//Rendererekbe kell majd inicializálni!
 		auto shaderManager = ServiceLocator::GetShaderManager();
 		shaderManager->CreateProgram("TestComputeProgram", { "../Engine/Shaders/Test.comp" });
 		shaderManager->CreateProgram("ComplexTestProgram", { "../Engine/Shaders/ComplexTest.vert", "../Engine/Shaders/ComplexTest.frag", "../Engine/Shaders/ComplexTest.geom" });
@@ -165,8 +161,6 @@ namespace Syn
 
 		_vkContext = std::make_unique<Vk::Context>(vkContextParams);
 		ServiceLocator::ProvideVkContext(_vkContext.get());
-		
-		//Swapchain images relie on service locator!
 		_vkContext->InitSwapChain(vkContextParams);
 
 		_gpuUploader = std::make_unique<Vk::GpuUploader>();

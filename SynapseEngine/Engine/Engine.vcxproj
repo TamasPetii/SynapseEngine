@@ -179,6 +179,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Manager\ComponentBufferManager.cpp" />
+    <ClCompile Include="Component\BaseComponent\Component.cpp" />
+    <ClCompile Include="Scene\Scene.cpp" />
+    <ClCompile Include="System\ISystem.cpp" />
+    <ClCompile Include="System\TransformSystem.cpp" />
+    <ClCompile Include="Component\TransformComponent.cpp" />
     <ClCompile Include="Vk\Rendering\GpuUploader.cpp" />
     <ClCompile Include="Manager\BaseResourceManager.cpp" />
     <ClCompile Include="Image\Data\Texture.cpp" />
@@ -353,8 +359,15 @@
     <ClCompile Include="Registry\Type\TypeManager.cpp" />
     <ClCompile Include="Registry\Pool\Storage\Extension\SegmentedStorageImplExtension.cpp" />
     <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.cpp" />
+    <ClCompile Include="Utils\WindowedBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Manager\ComponentBufferManager.h" />
+    <ClInclude Include="Component\BaseComponent\Component.h" />
+    <ClInclude Include="Scene\Scene.h" />
+    <ClInclude Include="System\ISystem.h" />
+    <ClInclude Include="System\TransformSystem.h" />
+    <ClInclude Include="Component\TransformComponent.h" />
     <ClInclude Include="Vk\Rendering\GpuUploader.h" />
     <ClInclude Include="Manager\BaseResourceManager.h" />
     <ClInclude Include="Image\Data\Texture.h" />
@@ -554,6 +567,7 @@
     <ClInclude Include="SynApi.h" />
     <ClInclude Include="SynMacro.h" />
     <ClInclude Include="Registry\Type\TypeManager.h" />
+    <ClInclude Include="Utils\WindowedBuffer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\ComplexTest.frag" />

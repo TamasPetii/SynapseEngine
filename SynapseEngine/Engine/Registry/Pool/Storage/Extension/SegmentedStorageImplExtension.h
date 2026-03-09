@@ -41,9 +41,24 @@ namespace Syn
             pool.GetStorage().MarkStaticDirty(index);
         }
 
-        SYN_INLINE std::span<EntityID> GetDirtyStatics()
+        SYN_INLINE std::span<const EntityID> GetDirtyStatics() const
         {
             return AsDerived().GetStorage().GetDirtyStatics();
+        }
+
+        SYN_INLINE std::span<const EntityID> GetStaticEntities() const
+        {
+            return AsDerived().GetStorage().GetStaticEntities();
+        }
+
+        SYN_INLINE std::span<const EntityID> GetDynamicEntities() const
+        {
+            return AsDerived().GetStorage().GetDynamicEntities();
+        }
+
+        SYN_INLINE std::span<const EntityID> GetStreamEntities() const
+        {
+            return AsDerived().GetStorage().GetStreamEntities();
         }
 
         SYN_INLINE void ResetStaticDirtyCounter()

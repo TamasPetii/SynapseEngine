@@ -81,7 +81,6 @@ namespace Syn
 		template<typename... T, typename Func>
 			requires (std::invocable<Func, T&...>)
 		void ViewPar(Func&& func);
-
 	private:
 		template<typename T>
 		IPool* GetIPool();

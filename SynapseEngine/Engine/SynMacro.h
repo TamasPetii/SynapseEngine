@@ -2,10 +2,6 @@
 #include "Engine/SynApi.h"
 #include <cstdlib>
 
-#ifndef SYN_DIST
-#define ENABLE_CHECKS
-#endif
-
 namespace Syn {
 
 #ifdef SYN_DIST
@@ -22,8 +18,6 @@ namespace Syn {
     SYN_API void HandleVkAssertMsg(int result, const char* expr, const char* msg, const char* file, int line);
 }
 
-#ifdef ENABLE_CHECKS
-
 #define SYN_ASSERT(cond, msg) \
             if (!(cond)) Syn::HandleAssert(msg, __FILE__, __LINE__)
 
@@ -38,16 +32,6 @@ namespace Syn {
 
 #define SYN_VK_ASSERT_MSG(expr, msg) \
             Syn::HandleVkAssertMsg((int)(expr), #expr, msg, __FILE__, __LINE__)
-
-#else
-
-#define SYN_ASSERT(cond, msg)
-#define SYN_CHECK(cond)
-#define SYN_CHECK_RETURN(cond, val)
-#define SYN_VK_ASSERT(expr) (expr)
-#define SYN_VK_ASSERT_MSG(expr, msg) (expr)
-
-#endif
 
 #if defined(_MSC_VER)
 #define SYN_INLINE __forceinline
