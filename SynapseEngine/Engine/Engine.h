@@ -10,6 +10,7 @@
 
 namespace Syn::Vk { 
     class Context;
+    class GpuUploader;
 }
 
 namespace Syn {
@@ -54,6 +55,7 @@ namespace Syn
 		std::unique_ptr<ResourceManager> _resourceManager;
 		std::unique_ptr<RenderManager> _renderManager;
 		std::unique_ptr<tf::Executor> _taskExecutor;
+        std::unique_ptr<Vk::GpuUploader> _gpuUploader;
 	};
 }
 

@@ -31,6 +31,7 @@ namespace Syn::Vk {
 
         VkPhysicalDeviceDescriptorBufferFeaturesEXT descriptorBufferFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_FEATURES_EXT };
         descriptorBufferFeatures.descriptorBuffer = VK_TRUE;
+        descriptorBufferFeatures.descriptorBufferPushDescriptors = VK_TRUE;
 
         VkPhysicalDeviceExtendedDynamicStateFeaturesEXT dynamicState1{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT };
         dynamicState1.extendedDynamicState = VK_TRUE;

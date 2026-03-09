@@ -5,6 +5,7 @@
 #include "Vk/Shader/Shader.h"
 #include "Vk/Shader/ShaderProgram.h"
 #include "Vk/Buffer/SynVkBuffer.h"
+#include "Vk/Rendering/GpuUploader.h"
 
 #include "Engine/Manager/ResourceManager.h"
 #include "Engine/Manager/ShaderManager.h"
@@ -40,11 +41,9 @@ namespace Syn
 
 	void Engine::Update()
 	{
-		auto modelManager = ServiceLocator::GetModelManager();
-		modelManager->Update();
-
-		auto imageManager = ServiceLocator::GetImageManager();
-		imageManager->Update();
+		ServiceLocator::GetModelManager()->Update();
+		ServiceLocator::GetImageManager()->Update();
+		ServiceLocator::GetGpuUploader()->ProcessUploads();
 	}
 
 	void Engine::Render()
@@ -169,6 +168,9 @@ namespace Syn
 		
 		//Swapchain images relie on service locator!
 		_vkContext->InitSwapChain(vkContextParams);
+
+		_gpuUploader = std::make_unique<Vk::GpuUploader>();
+		ServiceLocator::ProvideGpuUploader(_gpuUploader.get());
 	}
 
 	void Engine::InitResourceManager()

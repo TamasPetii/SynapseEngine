@@ -128,7 +128,7 @@ namespace Syn
 
     void TestMeshPass::PushConstants(const RenderContext & context) {
         auto modelManager = ServiceLocator::GetModelManager();
-        auto sponza = modelManager->GetModel("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
+        auto sponza = modelManager->GetResource("C:/Users/User/Desktop/Models/Sponza-master/sponza.obj");
 
         if (!sponza || sponza->hardwareBuffers.indirectMeshletBuffer == nullptr)
             return;
@@ -193,7 +193,7 @@ namespace Syn
     void TestMeshPass::Draw(const RenderContext& context)
     {
         auto modelManager = ServiceLocator::GetModelManager();
-        auto sponza = modelManager->GetModel("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
+        auto sponza = modelManager->GetResource("C:/Users/User/Desktop/Models/Sponza-master/sponza.obj");
 
         if (!sponza || sponza->hardwareBuffers.indirectMeshletBuffer == nullptr)
             return;

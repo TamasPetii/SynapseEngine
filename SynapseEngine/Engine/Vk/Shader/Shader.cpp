@@ -25,10 +25,7 @@ namespace Syn::Vk {
             VkDescriptorSetLayoutCreateInfo layoutInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
             layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
             layoutInfo.pBindings = bindings.data();
-            layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
 
-            /* NOT WORKING, CANNOT MIX BUFFER WITH PUSH DESCRIPTOR
-            * 
 			//Set 0 -> Global Descriptor Buffer Extension
             if (setIndex == 0) {
                 layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
@@ -37,7 +34,6 @@ namespace Syn::Vk {
             else {
                 layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR;
             }
-            */
 
             VkDescriptorSetLayout setLayout;
             SYN_VK_ASSERT_MSG(vkCreateDescriptorSetLayout(device->Handle(), &layoutInfo, nullptr, &setLayout), "Failed to create descriptor set layout from reflection!");

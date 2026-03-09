@@ -10,6 +10,7 @@ namespace Syn {
 	tf::Executor* ServiceLocator::_taskExecutor = nullptr;
 	ImageManager* ServiceLocator::_imageManager = nullptr;
 	ImageBuilder* ServiceLocator::_imageBuilder = nullptr;
+	Vk::GpuUploader* ServiceLocator::_gpuUploader = nullptr;
 
 	void ServiceLocator::Shutdown()
 	{
@@ -22,5 +23,6 @@ namespace Syn {
 		_taskExecutor = nullptr;
 		_imageManager = nullptr;
 		_imageBuilder = nullptr;
+		_gpuUploader = nullptr;
 	}
 }

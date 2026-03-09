@@ -10,7 +10,6 @@ namespace Syn
     ImageUploadResult DefaultGpuImageUploader::Upload(const GpuImage& data, VkCommandBuffer cmd)
     {
         ImageUploadResult result;
-        result.texture = std::make_shared<Texture>();
 
         uint32_t targetMipLevels = data.mipLevels;
         if (data.autoGenerateMipmaps) {
@@ -30,14 +29,14 @@ namespace Syn
             imgConfig.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
         }
 
-        result.texture->image = std::make_shared<Vk::Image>(imgConfig);
+        result.texture = std::make_shared<Vk::Image>(imgConfig);
 
         //Staging Buffer
         size_t byteSize = data.pixels.size();
         result.stagingBuffer = Vk::BufferFactory::CreateStaging(byteSize);
         result.stagingBuffer->Write(data.pixels.data(), byteSize, 0);
 
-        result.texture->image->TransitionLayout(
+        result.texture->TransitionLayout(
             cmd,
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             VK_PIPELINE_STAGE_2_TRANSFER_BIT,
@@ -51,7 +50,7 @@ namespace Syn
 
                 Vk::BufferToImageCopyInfo copyInfo{};
                 copyInfo.srcBuffer = result.stagingBuffer->Handle();
-                copyInfo.dstImage = result.texture->image->Handle();
+                copyInfo.dstImage = result.texture->Handle();
 
                 copyInfo.width = mip.width;
                 copyInfo.height = mip.height;
@@ -71,7 +70,7 @@ namespace Syn
         else {
             Vk::BufferToImageCopyInfo copyInfo{};
             copyInfo.srcBuffer = result.stagingBuffer->Handle();
-            copyInfo.dstImage = result.texture->image->Handle();
+            copyInfo.dstImage = result.texture->Handle();
 
             copyInfo.width = data.width;
             copyInfo.height = data.height;
@@ -91,14 +90,14 @@ namespace Syn
         if (data.autoGenerateMipmaps && targetMipLevels > 1) {
             Vk::ImageUtils::GenerateMipMaps(
                 cmd,
-                result.texture->image->Handle(),
+                result.texture->Handle(),
                 data.format,
                 data.width,
                 data.height,
                 targetMipLevels
             );
 
-            result.texture->image->OverrideInternalState(
+            result.texture->OverrideInternalState(
                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
                 VK_ACCESS_2_SHADER_READ_BIT
@@ -107,7 +106,7 @@ namespace Syn
             result.requiresGraphicsQueue = true;
         }
         else {
-            result.texture->image->TransitionLayout(
+            result.texture->TransitionLayout(
                 cmd,
                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT,
@@ -115,7 +114,7 @@ namespace Syn
                 false
             );
 
-            result.texture->image->OverrideInternalState(
+            result.texture->OverrideInternalState(
                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
                 VK_ACCESS_2_SHADER_READ_BIT

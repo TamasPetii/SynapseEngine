@@ -5,6 +5,7 @@
 
 namespace Syn::Vk { 
     class Context;
+    class GpuUploader;
 }
 
 namespace Syn {
@@ -53,8 +54,12 @@ namespace Syn
 
 		static void ProvideImageBuilder(ImageBuilder* builder) { _imageBuilder = builder; }
 		static ImageBuilder* GetImageBuilder() { return _imageBuilder; }
+
+        static void ProvideGpuUploader(Vk::GpuUploader* uploader) { _gpuUploader = uploader; }
+        static Vk::GpuUploader* GetGpuUploader() { return _gpuUploader; }
     private:
         static Vk::Context* _vkContext;
+        static Vk::GpuUploader* _gpuUploader;
 		static ShaderManager* _shaderManager;
 		static ResourceManager* _resourceManager;
 		static ModelManager* _modelManager;

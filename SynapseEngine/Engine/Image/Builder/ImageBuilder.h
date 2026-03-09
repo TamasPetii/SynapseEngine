@@ -6,6 +6,7 @@
 #include "Engine/Image/Converter/IGpuImageConverter.h"
 #include "Engine/Image/Source/IImageSource.h"
 #include "Engine/Image/Data/Gpu/GpuImage.h"
+#include "Engine/Image/Data/Texture.h"
 
 #include <memory>
 #include <string>
@@ -29,9 +30,8 @@ namespace Syn
         void RegisterLoader(std::shared_ptr<IImageLoader> loader, int priority = 0);
         void RegisterProcessor(std::unique_ptr<IImageProcessor> processor);
 
-        std::optional<GpuImage> BuildFromFile(const std::string& filePath);
-        std::optional<GpuImage> BuildFromSource(IImageSource& source);
-
+        std::shared_ptr<Texture> BuildFromFile(const std::string& filePath);
+        std::shared_ptr<Texture> BuildFromSource(IImageSource& source);
     private:
         std::unique_ptr<IImageLoaderRegistry> _registry;
         std::unique_ptr<IImageProcessorPipeline> _pipeline;

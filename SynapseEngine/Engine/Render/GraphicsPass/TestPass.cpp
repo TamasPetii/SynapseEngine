@@ -125,7 +125,7 @@ namespace Syn {
 
     void TestPass::PushConstants(const RenderContext& context) {
         auto modelManager = ServiceLocator::GetModelManager();
-        auto sponza = modelManager->GetModel(0);
+        auto sponza = modelManager->GetResource(0);
 
         if (!sponza || sponza->hardwareBuffers.indirectBuffer == nullptr) 
             return;
@@ -193,7 +193,7 @@ namespace Syn {
     void TestPass::Draw(const RenderContext& context)
     {
         auto modelManager = ServiceLocator::GetModelManager();
-        auto sponza = modelManager->GetModel(0);
+        auto sponza = modelManager->GetResource(0);
 
         if (!sponza || sponza->hardwareBuffers.indirectBuffer == nullptr)
             return;

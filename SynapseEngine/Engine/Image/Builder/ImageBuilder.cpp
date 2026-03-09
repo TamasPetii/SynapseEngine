@@ -24,28 +24,32 @@ namespace Syn
         _pipeline->AddProcessor(std::move(processor));
     }
 
-    std::optional<GpuImage> ImageBuilder::BuildFromFile(const std::string& filePath)
+    std::shared_ptr<Texture> ImageBuilder::BuildFromFile(const std::string& filePath)
     {
         std::string ext = std::filesystem::path(filePath).extension().string();
         IImageLoader* loader = _registry->GetLoaderForExtension(ext);
 
         if (!loader)
-            return std::nullopt;
+            return nullptr;
 
         FileImageSource source(filePath, loader);
         return BuildFromSource(source);
     }
 
-    std::optional<GpuImage> ImageBuilder::BuildFromSource(IImageSource& source)
+    std::shared_ptr<Texture> ImageBuilder::BuildFromSource(IImageSource& source)
     {
-        auto rawOpt = source.Produce();
-        if (!rawOpt)
-            return std::nullopt;
+        auto rawTextureOpt = source.Produce();
 
-        CookedImage cooked = _cooker->Cook(std::move(rawOpt).value());
+        if (!rawTextureOpt)
+            return nullptr;
 
-        _pipeline->Run(cooked);
+		auto texture = std::make_shared<Texture>();
+		texture->cpuData = _cooker->Cook(std::move(rawTextureOpt).value());
 
-        return _converter->Convert(cooked);
+        _pipeline->Run(texture->cpuData);
+
+        texture->gpuData = _converter->Convert(texture->cpuData);
+
+        return texture;
     }
 }

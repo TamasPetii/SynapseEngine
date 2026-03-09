@@ -179,6 +179,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Vk\Rendering\GpuUploader.cpp" />
+    <ClCompile Include="Manager\BaseResourceManager.cpp" />
+    <ClCompile Include="Image\Data\Texture.cpp" />
+    <ClCompile Include="Vk\Rendering\RenderTargetGroup.cpp" />
+    <ClCompile Include="Vk\Descriptor\DescriptorLayoutBuilder.cpp" />
+    <ClCompile Include="Vk\Descriptor\DescriptorWriter.cpp" />
+    <ClCompile Include="Vk\Descriptor\DescriptorPool.cpp" />
+    <ClCompile Include="Vk\Descriptor\PushDescriptorWriter.cpp" />
+    <ClCompile Include="Vk\Descriptor\DescriptorBuffer.cpp" />
     <ClCompile Include="Manager\ImageManager.cpp" />
     <ClCompile Include="Image\Uploader\DefaultGpuImageUploader.cpp" />
     <ClCompile Include="Image\Uploader\IGpuImageUploader.cpp" />
@@ -346,6 +355,15 @@
     <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Vk\Rendering\GpuUploader.h" />
+    <ClInclude Include="Manager\BaseResourceManager.h" />
+    <ClInclude Include="Image\Data\Texture.h" />
+    <ClInclude Include="Vk\Rendering\RenderTargetGroup.h" />
+    <ClInclude Include="Vk\Descriptor\DescriptorLayoutBuilder.h" />
+    <ClInclude Include="Vk\Descriptor\DescriptorWriter.h" />
+    <ClInclude Include="Vk\Descriptor\DescriptorPool.h" />
+    <ClInclude Include="Vk\Descriptor\PushDescriptorWriter.h" />
+    <ClInclude Include="Vk\Descriptor\DescriptorBuffer.h" />
     <ClInclude Include="Manager\ImageManager.h" />
     <ClInclude Include="Image\Uploader\DefaultGpuImageUploader.h" />
     <ClInclude Include="Image\Uploader\IGpuImageUploader.h" />
