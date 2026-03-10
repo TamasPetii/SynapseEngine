@@ -61,14 +61,30 @@ namespace Syn
         template<uint32_t... Bits> 
         SYN_INLINE void ResetBit(EntityID entity);
 
+        template<uint32_t... Bits>
+        SYN_INLINE bool IsStateBitSet() const;
+
+        template<uint32_t... Bits>
+        SYN_INLINE void ResetStateBit();
+
+        SYN_INLINE void ResetAllStateBits();
+
         SYN_INLINE StoragePolicy& GetStorage() { return _storage; }
         SYN_INLINE const StoragePolicy& GetStorage() const { return _storage; }
 
         SYN_INLINE MappingPolicy& GetMapping() { return _mapping; }
         SYN_INLINE const MappingPolicy& GetMapping() const { return _mapping; }
+
+        SYN_INLINE uint32_t GetMappingVersion() const { return _mappingVersion; }
+        SYN_INLINE void IncrementMappingVersion() { _mappingVersion++; }
+
+        SYN_INLINE uint32_t GetChangeVersion() const { return _changeVersion; }
+        SYN_INLINE void IncrementChangeVersion() { _changeVersion++; }
     private:
         StoragePolicy _storage;
         MappingPolicy _mapping;
+        uint32_t _changeVersion = 1;
+        uint32_t _mappingVersion = 1;
     };
 }
 
@@ -194,5 +210,28 @@ namespace Syn
     SYN_INLINE size_t Pool<T, StoragePolicy, MappingPolicy>::Size() const
     {
         return _storage.Size();
+    }
+
+    template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
+    template<uint32_t... Bits>
+    SYN_INLINE bool Pool<T, StoragePolicy, MappingPolicy>::IsStateBitSet() const
+    {
+        return _storage.template IsStateBitSet<Bits...>();
+    }
+
+    template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
+    template<uint32_t... Bits>
+    SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::ResetStateBit()
+    {
+        _storage.template ResetStateBit<Bits...>();
+    }
+
+    template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
+    SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::ResetAllStateBits()
+    {
+        _storage.ResetAllStateBits();
     }
 }

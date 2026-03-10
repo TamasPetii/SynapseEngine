@@ -30,7 +30,7 @@ namespace Syn
         SYN_INLINE void FlagIndexChangedImpl(DenseIndex index) {
             constexpr uint8_t mask = (1 << INDEX_CHANGED_BIT);
             _flags[index] |= mask;
-            _state |= mask; // Figyelem: Parallel írásnál ez nem atomi!
+            _state |= mask;
         }
 
         SYN_INLINE void ClearFlagsImpl() 

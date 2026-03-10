@@ -28,6 +28,9 @@
 #include "Engine/Render/RenderPipeline.h"
 
 #include "Engine/Manager/InputManager.h"
+#include "Engine/Logger/LogUtils.h"
+#include "Engine/Scene/SceneManager.h"
+#include "Engine/Scene/TestScene.h"
 
 namespace Syn
 {
@@ -46,6 +49,8 @@ namespace Syn
 		ServiceLocator::GetModelManager()->Update();
 		ServiceLocator::GetImageManager()->Update();
 		ServiceLocator::GetGpuUploader()->ProcessUploads();
+
+		_sceneManager->Update(_frameContext.deltaTime, _frameContext.currentFrameIndex);
 	}
 
 	void Engine::Render()
@@ -57,27 +62,14 @@ namespace Syn
 
 		_renderManager->WaitForFrame(currentFrame);
 
-		//UpdateGPU();
-		//RenderScene scene = _sceneManager->GetScene();
+		_sceneManager->UpdateGPU(currentFrame);
+
 		RenderScene scene;
 		_renderManager->RenderFrame(currentFrame, scene);
 
+		_sceneManager->Finish();
+
 		AdvanceFrameIndex();
-
-		static auto lastTime = std::chrono::high_resolution_clock::now();
-		static uint32_t frameCount = 0;
-
-		auto currentTime = std::chrono::high_resolution_clock::now();
-		frameCount++;
-
-		float timeDiff = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
-
-		if (timeDiff >= 1.0f) {
-			Info("FPS: {} ({} ms/frame)", frameCount, 1000.0f / frameCount);
-
-			frameCount = 0;
-			lastTime = currentTime;
-		}
 	}
 
 	void Engine::Init(const EngineInitParams& params)
@@ -91,6 +83,7 @@ namespace Syn
 		InitTaskExecutor();
 		InitResourceManager();
 		InitRenderPipelines();
+		InitSceneManager();
 
 		auto shaderManager = ServiceLocator::GetShaderManager();
 		shaderManager->CreateProgram("TestComputeProgram", { "../Engine/Shaders/Test.comp" });
@@ -187,6 +180,21 @@ namespace Syn
 	void Engine::AdvanceFrameIndex() {
 		_frameContext.currentFrameIndex = (_frameContext.currentFrameIndex + 1) % _frameContext.framesInFlight;
 		//Todo?? _frameContext.deltaTime
+
+		static auto lastTime = std::chrono::high_resolution_clock::now();
+		static uint32_t frameCount = 0;
+
+		auto currentTime = std::chrono::high_resolution_clock::now();
+		frameCount++;
+
+		float timeDiff = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
+
+		if (timeDiff >= 1.0f) {
+			Info("FPS: {} ({} ms/frame)", frameCount, 1000.0f / frameCount);
+
+			frameCount = 0;
+			lastTime = currentTime;
+		}
 	}
 
 	void Engine::InitRenderPipelines()
@@ -203,6 +211,19 @@ namespace Syn
 	}
 
 	void Engine::Shutdown() {
+		if (EnableLogging && _taskObserver) {
+			std::string filename = std::format("Profile/EngineTaskFlowProfile_{}.json", Syn::LogUtils::GetCurrentTimeForFileName());
+
+			std::ofstream ofs(filename);
+			_taskObserver->dump(ofs);
+			ofs.close();
+		}
+
+		_taskObserver.reset();
+		_taskExecutor.reset();
+		_inputManager.reset();
+
+		_sceneManager.reset();
 		_renderManager.reset();
 		_resourceManager.reset();
 		_vkContext.reset(); //This has to be the last one!
@@ -224,6 +245,10 @@ namespace Syn
 		size_t workerThreads = std::max<size_t>(1, hardwareThreads - 1);
 
 		_taskExecutor = std::make_unique<tf::Executor>(workerThreads);
+
+		if(EnableLogging)
+			_taskObserver = _taskExecutor->make_observer<tf::TFProfObserver>();
+
 		ServiceLocator::ProvideTaskExecutor(_taskExecutor.get());
 	}
 
@@ -252,5 +277,19 @@ namespace Syn
 	void Engine::OnMouseMove(float x, float y)
 	{
 		_inputManager->SetMousePosition(x, y);
+	}
+
+	void Engine::InitSceneManager()
+	{
+		uint32_t frames = _frameContext.framesInFlight;
+
+		_sceneManager = std::make_unique<SceneManager>();
+		ServiceLocator::ProvideSceneManager(_sceneManager.get());
+
+		_sceneManager->RegisterScene("TestLevel", [frames]() {
+			return std::make_shared<TestScene>(frames);
+		});
+
+		_sceneManager->LoadScene("TestLevel");
 	}
 }

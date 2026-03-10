@@ -179,6 +179,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Scene\SceneManager.cpp" />
     <ClCompile Include="System\ComponentSystem.cpp" />
     <ClCompile Include="Manager\InputManager.cpp" />
     <ClCompile Include="System\CameraSystem.cpp" />
@@ -189,6 +190,7 @@
     <ClCompile Include="System\ISystem.cpp" />
     <ClCompile Include="System\TransformSystem.cpp" />
     <ClCompile Include="Component\TransformComponent.cpp" />
+    <ClCompile Include="Scene\TestScene.cpp" />
     <ClCompile Include="Vk\Rendering\GpuUploader.cpp" />
     <ClCompile Include="Manager\BaseResourceManager.cpp" />
     <ClCompile Include="Image\Data\Texture.cpp" />
@@ -366,6 +368,8 @@
     <ClCompile Include="Utils\WindowedBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Scene\SceneManager.h" />
+    <ClInclude Include="Scene\BufferNames.h" />
     <ClInclude Include="System\ComponentSystem.h" />
     <ClInclude Include="Manager\InputManager.h" />
     <ClInclude Include="System\CameraSystem.h" />
@@ -376,6 +380,7 @@
     <ClInclude Include="System\ISystem.h" />
     <ClInclude Include="System\TransformSystem.h" />
     <ClInclude Include="Component\TransformComponent.h" />
+    <ClInclude Include="Scene\TestScene.h" />
     <ClInclude Include="Vk\Rendering\GpuUploader.h" />
     <ClInclude Include="Manager\BaseResourceManager.h" />
     <ClInclude Include="Image\Data\Texture.h" />

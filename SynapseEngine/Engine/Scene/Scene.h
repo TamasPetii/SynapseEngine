@@ -24,7 +24,7 @@ namespace Syn
     {
     public:
         Scene(uint32_t frameCount);
-        ~Scene();
+        virtual ~Scene();
 
         void Update(float deltaTime, uint32_t frameIndex);
         void UpdateGPU(uint32_t frameIndex);
@@ -43,6 +43,9 @@ namespace Syn
 
         template<typename TComponent, typename TGpuStruct>
         void RegisterComponentBuffer(const std::string& name);
+
+        template<typename TComponent>
+        void RegisterComponentSparseMapBuffer(const std::string& name);
     private:
         EntityID _sceneCameraEntity = NULL_ENTITY;
         std::shared_ptr<Registry> _registry;
@@ -70,6 +73,15 @@ namespace Syn
         _componentBufferManager->RegisterBuffer(name, sizeof(TGpuStruct), [this]() -> uint32_t {
             auto pool = _registry->GetPool<TComponent>();
             return pool ? static_cast<uint32_t>(pool->Size()) : 0;
+            });
+    }
+
+    template<typename TComponent>
+    SYN_INLINE void Scene::RegisterComponentSparseMapBuffer(const std::string& name)
+    {
+        _componentBufferManager->RegisterBuffer(name, sizeof(DenseIndex), [this]() -> uint32_t {
+            auto pool = _registry->GetPool<TComponent>();
+            return pool ? static_cast<uint32_t>(pool->GetSparseIndices().size()) : 0;
             });
     }
 }

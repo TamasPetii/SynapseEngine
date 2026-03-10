@@ -7,9 +7,11 @@ namespace Syn
     class SYN_API TransformSystem : public ComponentSystem<TransformComponent>
     {
     public:
-        void OnUpdate(std::shared_ptr<Registry> registry, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) override;
-        void OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_ptr<ComponentBufferManager> componentBufferManager, uint32_t frameIndex, tf::Subflow& subflow) override;
-
         std::string GetName() const override { return "TransformSystem"; }
+    protected:
+        std::string GetSparseBufferName() const override { return BufferNames::TransformSparseMap; }
+    protected:
+        void UpdateComponents(std::shared_ptr<Registry> registry, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) override;
+        void UploadComponents(std::shared_ptr<Registry> registry, std::shared_ptr<ComponentBufferManager> componentBufferManager, uint32_t frameIndex, tf::Subflow& subflow) override;
     };
 }

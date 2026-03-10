@@ -18,6 +18,7 @@ namespace Syn {
     class StaticMeshBuilder;
     class RenderManager;
     class InputManager;
+    class SceneManager;
 }
 
 namespace Syn
@@ -50,6 +51,7 @@ namespace Syn
         void InitFrameContext(uint32_t framesInFlight);
         void InitRenderPipelines();
         void InitTaskExecutor();
+        void InitSceneManager();
         void Shutdown();
     private:
         void AdvanceFrameIndex();
@@ -57,11 +59,13 @@ namespace Syn
 		bool _isMinimized = false;
         FrameContext _frameContext;
 		std::unique_ptr<Vk::Context> _vkContext;
+        std::unique_ptr<Vk::GpuUploader> _gpuUploader;
 		std::unique_ptr<ResourceManager> _resourceManager;
 		std::unique_ptr<RenderManager> _renderManager;
-		std::unique_ptr<tf::Executor> _taskExecutor;
-        std::unique_ptr<Vk::GpuUploader> _gpuUploader;
         std::unique_ptr<InputManager> _inputManager;
+        std::unique_ptr<SceneManager> _sceneManager;
+		std::unique_ptr<tf::Executor> _taskExecutor;
+        std::shared_ptr<tf::TFProfObserver> _taskObserver;
 	};
 }
 

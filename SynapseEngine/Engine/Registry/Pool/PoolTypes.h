@@ -3,7 +3,9 @@
 #include "Pool.h"
 #include "Storage/Core/FlatStorageImpl.h"
 #include "Storage/Core/SegmentedStorageImpl.h"
+#include "Storage/Extension/SegmentedStorageImplExtension.h"
 #include "Mapping/Core/SparseVectorMapping.h"
+#include "Mapping/Extension/SparseVectorMappingExtension.h"
 
 namespace Syn
 {

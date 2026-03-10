@@ -6,13 +6,13 @@
 
 namespace Syn
 {
-    void TransformSystem::OnUpdate(std::shared_ptr<Registry> registry, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
+    void TransformSystem::UpdateComponents(std::shared_ptr<Registry> registry, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
     {
-        auto pool = registry->GetPool<TransformComponent>();
-        if (!pool) return;
+        auto transformPool = registry->GetPool<TransformComponent>();
+        if (!transformPool) return;
 
-        ParallelForEach(pool, subflow, [&pool](EntityID entity) {
-            auto& transformComponent = pool->Get(entity);
+        ParallelForEachIf<UPDATE_BIT>(transformPool, subflow, [transformPool](EntityID entity) {
+            auto& transformComponent = transformPool->Get(entity);
 
             transformComponent.transform = glm::mat4(1.0f);
             transformComponent.transform = glm::translate(transformComponent.transform, transformComponent.translation);
@@ -22,24 +22,24 @@ namespace Syn
             transformComponent.transform = glm::scale(transformComponent.transform, transformComponent.scale);
             transformComponent.transformIT = glm::transpose(glm::inverse(transformComponent.transform));
 
-            pool->SetBit<CHANGED_BIT>(entity);
+            transformPool->SetBit<CHANGED_BIT>(entity);
             transformComponent.version++;
             });
     }
 
-    void TransformSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_ptr<ComponentBufferManager> componentBufferManager, uint32_t frameIndex, tf::Subflow& subflow)
+    void TransformSystem::UploadComponents(std::shared_ptr<Registry> registry, std::shared_ptr<ComponentBufferManager> componentBufferManager, uint32_t frameIndex, tf::Subflow& subflow)
     {
-        auto pool = registry->GetPool<TransformComponent>();
-        if (!pool) return;
+        auto transformPool = registry->GetPool<TransformComponent>();
+        if (!transformPool) return;
 
-        auto componentBuffer = componentBufferManager->GetComponentBuffer("TransformData", frameIndex);
+        auto componentBuffer = componentBufferManager->GetComponentBuffer(BufferNames::TransformData, frameIndex);
         if (!componentBuffer.buffer) return;
 
         auto bufferHandler = static_cast<TransformComponentGPU*>(componentBuffer.buffer->Map());
 
-        ParallelForEach(pool, subflow, [&pool, bufferHandler, componentBuffer](EntityID entity) {
-            auto& transformComponent = pool->Get(entity);
-            auto transformIndex = pool->GetMapping().Get(entity);
+        ParallelForEach(transformPool, subflow, [transformPool, bufferHandler, componentBuffer](EntityID entity) {
+            auto& transformComponent = transformPool->Get(entity);
+            auto transformIndex = transformPool->GetMapping().Get(entity);
 
             if (componentBuffer.versions[transformIndex] != transformComponent.version)
             {

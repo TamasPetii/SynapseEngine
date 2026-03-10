@@ -63,7 +63,9 @@ namespace Syn
             ((_state.reset(Bits)), ...);
         }
 
-        SYN_INLINE void ResetAllStateBitsImpl() { _state.reset(); }
+        SYN_INLINE void ResetAllStateBitsImpl() { 
+            _state.reset();
+        }
 
     protected:
         std::vector<std::bitset<N>> _flags;

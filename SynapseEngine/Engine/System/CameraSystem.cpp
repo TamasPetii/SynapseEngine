@@ -3,22 +3,21 @@
 #include "Engine/Manager/InputManager.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
+#include <taskflow/algorithm/for_each.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform2.hpp>
 
 namespace Syn
 {
-    void CameraSystem::OnUpdate(std::shared_ptr<Registry> registry, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
+    void CameraSystem::UpdateComponents(std::shared_ptr<Registry> registry, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
     {
         auto cameraPool = registry->GetPool<CameraComponent>();
         if (!cameraPool) return;
 
         auto inputManager = ServiceLocator::GetInputManager();
 
-        auto processEntity = [&cameraPool, inputManager, deltaTime](EntityID entity) {
-            if (inputManager->IsKeyHeld(KEY_W) || inputManager->IsKeyHeld(KEY_S) ||
-                inputManager->IsKeyHeld(KEY_A) || inputManager->IsKeyHeld(KEY_D) ||
-                inputManager->IsButtonHeld(BUTTON_RIGHT))
+        auto processEntity = [cameraPool, inputManager, deltaTime](EntityID entity) {
+            if (inputManager->IsKeyHeld(KEY_W) || inputManager->IsKeyHeld(KEY_S) || inputManager->IsKeyHeld(KEY_A) || inputManager->IsKeyHeld(KEY_D) || inputManager->IsButtonHeld(BUTTON_RIGHT))
             {
                 cameraPool->SetBit<UPDATE_BIT>(entity);
             }
@@ -74,20 +73,20 @@ namespace Syn
         ParallelForEach(cameraPool, subflow, processEntity);
     }
 
-    void CameraSystem::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_ptr<ComponentBufferManager> componentBufferManager, uint32_t frameIndex, tf::Subflow& subflow)
+    void CameraSystem::UploadComponents(std::shared_ptr<Registry> registry, std::shared_ptr<ComponentBufferManager> componentBufferManager, uint32_t frameIndex, tf::Subflow& subflow)
     {
         auto cameraPool = registry->GetPool<CameraComponent>();
         if (!cameraPool) return;
 
-        auto componentBuffer = componentBufferManager->GetComponentBuffer("CameraData", frameIndex);
+        auto componentBuffer = componentBufferManager->GetComponentBuffer(BufferNames::CameraData, frameIndex);
         if (!componentBuffer.buffer) return;
         auto bufferHandler = static_cast<CameraComponentGPU*>(componentBuffer.buffer->Map());
 
-        auto cameraFrustumBuffer = componentBufferManager->GetComponentBuffer("CameraFrustumData", frameIndex);
+        auto cameraFrustumBuffer = componentBufferManager->GetComponentBuffer(BufferNames::CameraFrustumData, frameIndex);
         if (!cameraFrustumBuffer.buffer) return;
         auto cameraFrustumBufferHandler = static_cast<CameraFrustumGPU*>(cameraFrustumBuffer.buffer->Map());
 
-        auto processUpload = [&cameraPool, bufferHandler, cameraFrustumBufferHandler, componentBuffer, cameraFrustumBuffer](EntityID entity) {
+        auto processUpload = [cameraPool, bufferHandler, cameraFrustumBufferHandler, componentBuffer, cameraFrustumBuffer](EntityID entity) {
             auto& cameraComponent = cameraPool->Get(entity);
             auto cameraIndex = cameraPool->GetMapping().Get(entity);
 
@@ -95,11 +94,16 @@ namespace Syn
             {
                 componentBuffer.versions[cameraIndex] = cameraComponent.version;
 
-                CameraComponentGPU cameraGPU{ cameraComponent };
-                cameraGPU.projVulkan = cameraComponent.proj;
-                cameraGPU.projVulkanInv = cameraComponent.projInv;
-                cameraGPU.viewProjVulkan = cameraComponent.viewProj;
-                cameraGPU.viewProjVulkanInv = cameraComponent.viewProjInv;
+                CameraComponent component = cameraComponent;
+
+                glm::mat4 vulkanProj = component.proj;
+                vulkanProj[1][1] *= -1;
+
+                CameraComponentGPU cameraGPU{ component };
+                cameraGPU.projVulkan = vulkanProj;
+                cameraGPU.projVulkanInv = glm::inverse(cameraGPU.projVulkan);
+                cameraGPU.viewProjVulkan = vulkanProj * component.view;
+                cameraGPU.viewProjVulkanInv = glm::inverse(cameraGPU.viewProjVulkan);
 
                 bufferHandler[cameraIndex] = cameraGPU;
             }
@@ -129,11 +133,5 @@ namespace Syn
             };
 
         ParallelForEach(cameraPool, subflow, processUpload);
-    }
-
-    float CameraSystem::ConvertDepthToLinearNormalized(float depth, float nearPlane, float farPlane)
-    {
-        float linear = (nearPlane * farPlane) / (farPlane - depth * (farPlane - nearPlane));
-        return (linear - nearPlane) / (farPlane - nearPlane);
     }
 }

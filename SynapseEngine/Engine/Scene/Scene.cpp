@@ -4,6 +4,7 @@
 #include "Engine/Component/TransformComponent.h"
 #include "Engine/System/CameraSystem.h"
 #include "Engine/Component/CameraComponent.h"
+#include "BufferNames.h"
 
 namespace Syn
 {
@@ -38,10 +39,12 @@ namespace Syn
 
     void Scene::InitializeComponentBuffers()
     {
-        //Todo: Register sparse list!
-        RegisterComponentBuffer<TransformComponent, TransformComponentGPU>("TransformData");   
-        RegisterComponentBuffer<CameraComponent, CameraComponentGPU>("CameraData");
-        RegisterComponentBuffer<CameraComponent, CameraFrustumGPU>("CameraFrustumData");
+        RegisterComponentSparseMapBuffer<TransformComponent>(BufferNames::TransformSparseMap);
+        RegisterComponentBuffer<TransformComponent, TransformComponentGPU>(BufferNames::TransformData);   
+
+        RegisterComponentSparseMapBuffer<CameraComponent>(BufferNames::CameraSparseMap);
+        RegisterComponentBuffer<CameraComponent, CameraComponentGPU>(BufferNames::CameraData);
+        RegisterComponentBuffer<CameraComponent, CameraFrustumGPU>(BufferNames::CameraFrustumData);
     }
 
     void Scene::BuildTaskflowGraph(tf::Taskflow& taskflow, SystemPhase phase)
