@@ -51,6 +51,10 @@ namespace Syn
         SYN_INLINE std::span<const EntityID> GetStreamEntities() const;
 
         SYN_INLINE void ResetStaticDirtyCounter();
+
+        SYN_INLINE bool IsStatic(DenseIndex index) const;
+        SYN_INLINE bool IsDynamic(DenseIndex index) const;
+        SYN_INLINE bool IsStream(DenseIndex index) const;
     private:
         SYN_INLINE void EnsureDirtyCapacity();
     protected:
@@ -272,5 +276,23 @@ namespace Syn
     SYN_INLINE void SegmentedStorageImpl<T, FlagMixinPolicy>::ResetStaticDirtyCounter()
     {
         _dirtyStaticCount.store(0, std::memory_order_release);
+    }
+
+    template<typename T, typename FlagMixinPolicy>
+    SYN_INLINE bool SegmentedStorageImpl<T, FlagMixinPolicy>::IsStatic(DenseIndex index) const
+    {
+        return index < _staticEnd;
+    }
+
+    template<typename T, typename FlagMixinPolicy>
+    SYN_INLINE bool SegmentedStorageImpl<T, FlagMixinPolicy>::IsDynamic(DenseIndex index) const
+    {
+        return index >= _staticEnd && index < _dynamicEnd;
+    }
+
+    template<typename T, typename FlagMixinPolicy>
+    SYN_INLINE bool SegmentedStorageImpl<T, FlagMixinPolicy>::IsStream(DenseIndex index) const
+    {
+        return index >= _dynamicEnd;
     }
 }

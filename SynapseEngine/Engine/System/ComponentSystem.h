@@ -20,7 +20,7 @@ namespace Syn
         virtual void OnFinish(std::shared_ptr<Registry> registry, tf::Subflow& subflow) override;
     protected:
         virtual void UpdateComponents(std::shared_ptr<Registry> registry, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow);
-        virtual void UploadComponents(std::shared_ptr<Registry> registry, std::shared_ptr<ComponentBufferManager> componentBufferManager, uint32_t frameIndex, tf::Subflow& subflow);
+        virtual void UploadComponents(std::shared_ptr<Registry> registry, std::shared_ptr<ComponentBufferManager> componentBufferManager, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic);
         virtual std::string GetSparseBufferName() const;
     protected:
         template <typename TPool>
@@ -37,6 +37,9 @@ namespace Syn
 
         template <typename TPool, typename Func>
         void ForEachStaticDirty(TPool* pool, tf::Subflow& subflow, Func&& func);
+
+        template <typename TPool, typename Func>
+        void ForEachStatic(TPool* pool, tf::Subflow& subflow, Func&& func);
 
         template <typename TPool, typename Func>
         void ParallelForEach(TPool* pool, tf::Subflow& subflow, Func&& func);
@@ -68,19 +71,7 @@ namespace Syn
         auto pool = registry->GetPool<TComponent>();
         if (!pool) return;
 
-        if (pool->template IsStateBitSet<INDEX_CHANGED_BIT>())
-        {
-            pool->IncrementMappingVersion();
-            Info("[{}] INDEX_CHANGED_BIT detected! Mapping Version bumped to: {}", GetName(), pool->GetMappingVersion());
-        }
-
         UpdateComponents(registry, frameIndex, deltaTime, subflow);
-
-        if (pool->template IsStateBitSet<CHANGED_BIT>())
-        {
-            pool->IncrementChangeVersion();
-            Info("[{}] CHANGED_BIT detected! CPU Change Version bumped to: {}", GetName(), pool->GetChangeVersion());
-        }
     }
 
     template <typename TComponent>
@@ -88,6 +79,18 @@ namespace Syn
     {
         auto pool = registry->GetPool<TComponent>();
         if (!pool) return;
+
+        if (pool->template IsStateBitSet<INDEX_CHANGED_BIT>())
+        {
+            pool->IncrementMappingVersion();
+            Info("[{}] INDEX_CHANGED_BIT detected! Mapping Version bumped to: {}", GetName(), pool->GetMappingVersion());
+        }
+
+        if (pool->template IsStateBitSet<CHANGED_BIT>())
+        {
+            pool->IncrementChangeVersion();
+            Info("[{}] CHANGED_BIT detected! CPU Change Version bumped to: {}", GetName(), pool->GetChangeVersion());
+        }
 
         std::string sparseName = GetSparseBufferName();
 
@@ -107,9 +110,12 @@ namespace Syn
             });
         }
 
-        if (ShouldUploadDenseData(pool, frameIndex))
+        bool uploadDynamic = ShouldUploadDenseData(pool, frameIndex);
+        bool hasStream = !pool->GetStorage().GetStreamEntities().empty();
+
+        if (hasStream || uploadDynamic)
         {
-            UploadComponents(registry, componentBufferManager, frameIndex, subflow);
+            UploadComponents(registry, componentBufferManager, frameIndex, subflow, uploadDynamic);
         }
     }
 
@@ -119,6 +125,13 @@ namespace Syn
         auto pool = registry->GetPool<TComponent>();
         if (!pool) return;
 
+        bool hasChanged = pool->template IsStateBitSet<CHANGED_BIT>();
+        bool hasUpdate = pool->template IsStateBitSet<UPDATE_BIT>();
+        bool hasIndex = pool->template IsStateBitSet<INDEX_CHANGED_BIT>();
+
+        if (!hasChanged && !hasUpdate && !hasIndex)
+            return;
+
         auto processFinish = [pool](EntityID entity) {
             if (pool->template IsBitSet<CHANGED_BIT>(entity)) pool->template ResetBit<CHANGED_BIT>(entity);
             if (pool->template IsBitSet<UPDATE_BIT>(entity)) pool->template ResetBit<UPDATE_BIT>(entity);
@@ -127,7 +140,10 @@ namespace Syn
 
         ParallelForEach(pool, subflow, processFinish);
 
-        pool->ResetAllStateBits();
+        ExecuteTask(subflow, [pool]() {
+            pool->ResetAllStateBits();
+            pool->ResetStaticDirtyCounter();
+            });
     }
 
     template <typename TComponent>
@@ -135,7 +151,7 @@ namespace Syn
     {}
 
     template <typename TComponent>
-    SYN_INLINE void ComponentSystem<TComponent>::UploadComponents(std::shared_ptr<Registry> registry, std::shared_ptr<ComponentBufferManager> componentBufferManager, uint32_t frameIndex, tf::Subflow& subflow)
+    SYN_INLINE void ComponentSystem<TComponent>::UploadComponents(std::shared_ptr<Registry> registry, std::shared_ptr<ComponentBufferManager> componentBufferManager, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic)
     {}
 
     template <typename TComponent>
@@ -153,7 +169,7 @@ namespace Syn
 
         if (pool->template IsStateBitSet<CHANGED_BIT>())
         {
-            _gpuDenseVersions[frameIndex] = pool->GetChangeVersion() + 1;
+            _gpuDenseVersions[frameIndex] = pool->GetChangeVersion();
             Info("[{}] GPU Upload: REQUIRED (Active changes in frame {}). GPU Buffer set to expected Version: {}", GetName(), frameIndex, _gpuDenseVersions[frameIndex]);
             return true;
         }
@@ -223,6 +239,18 @@ namespace Syn
         {
             Info("[{}] ForEachStaticDirty: Scheduling {} entities.", GetName(), staticDirtySpan.size());
             subflow.for_each(staticDirtySpan.begin(), staticDirtySpan.end(), func);
+        }
+    }
+
+    template <typename TComponent>
+    template <typename TPool, typename Func>
+    SYN_INLINE void ComponentSystem<TComponent>::ForEachStatic(TPool* pool, tf::Subflow& subflow, Func&& func)
+    {
+        auto staticSpan = pool->GetStorage().GetStaticEntities();
+        if (!staticSpan.empty())
+        {
+            Info("[{}] ForEachStatic: Scheduling {} entities.", GetName(), staticSpan.size());
+            subflow.for_each(staticSpan.begin(), staticSpan.end(), func);
         }
     }
 

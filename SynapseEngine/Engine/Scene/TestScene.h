@@ -36,7 +36,17 @@ namespace Syn
                     (rand() % 100) - 50.0f
                 );
 
-                transformPool->SetCategory(e, StorageCategory::Dynamic);
+                int randomCat = rand() % 3;
+                StorageCategory category;
+
+                switch (randomCat)
+                {
+                case 0: category = StorageCategory::Static; break;
+                case 1: category = StorageCategory::Dynamic; break;
+                case 2: category = StorageCategory::Stream; break;
+                }
+
+                transformPool->SetCategory(e, category);
             }
         }
     };

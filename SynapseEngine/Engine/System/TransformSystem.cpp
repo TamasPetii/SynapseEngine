@@ -13,6 +13,7 @@ namespace Syn
 
         ParallelForEachIf<UPDATE_BIT>(transformPool, subflow, [transformPool](EntityID entity) {
             auto& transformComponent = transformPool->Get(entity);
+            DenseIndex transformIndex = transformPool->GetMapping().Get(entity);
 
             transformComponent.transform = glm::mat4(1.0f);
             transformComponent.transform = glm::translate(transformComponent.transform, transformComponent.translation);
@@ -22,12 +23,14 @@ namespace Syn
             transformComponent.transform = glm::scale(transformComponent.transform, transformComponent.scale);
             transformComponent.transformIT = glm::transpose(glm::inverse(transformComponent.transform));
 
-            transformPool->SetBit<CHANGED_BIT>(entity);
+            if (transformPool->GetStorage().IsDynamic(transformIndex))
+                transformPool->SetBit<CHANGED_BIT>(entity);
+
             transformComponent.version++;
             });
     }
 
-    void TransformSystem::UploadComponents(std::shared_ptr<Registry> registry, std::shared_ptr<ComponentBufferManager> componentBufferManager, uint32_t frameIndex, tf::Subflow& subflow)
+    void TransformSystem::UploadComponents(std::shared_ptr<Registry> registry, std::shared_ptr<ComponentBufferManager> componentBufferManager, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic)
     {
         auto transformPool = registry->GetPool<TransformComponent>();
         if (!transformPool) return;
@@ -37,7 +40,7 @@ namespace Syn
 
         auto bufferHandler = static_cast<TransformComponentGPU*>(componentBuffer.buffer->Map());
 
-        ParallelForEach(transformPool, subflow, [transformPool, bufferHandler, componentBuffer](EntityID entity) {
+        auto processUpload = [transformPool, bufferHandler, componentBuffer](EntityID entity) {
             auto& transformComponent = transformPool->Get(entity);
             auto transformIndex = transformPool->GetMapping().Get(entity);
 
@@ -46,6 +49,16 @@ namespace Syn
                 componentBuffer.versions[transformIndex] = transformComponent.version;
                 bufferHandler[transformIndex] = TransformComponentGPU(transformComponent);
             }
-            });
+            };
+
+        ForEachStream(transformPool, subflow, processUpload);
+
+        if (uploadDynamic)
+        {
+            ForEachDynamic(transformPool, subflow, processUpload);
+            
+            //Full range needed! UpdateDynamic problematic?
+            ForEachStatic(transformPool, subflow, processUpload);
+        }
     }
 }

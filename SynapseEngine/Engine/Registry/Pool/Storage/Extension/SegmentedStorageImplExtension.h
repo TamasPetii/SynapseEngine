@@ -65,6 +65,21 @@ namespace Syn
         {
             AsDerived().GetStorage().ResetStaticDirtyCounter();
         }
+
+        SYN_INLINE bool IsStatic(DenseIndex index) const
+        {
+            return AsDerived().GetStorage().IsStatic(index);
+        }
+
+        SYN_INLINE bool IsDynamic(DenseIndex index) const
+        {
+            return AsDerived().GetStorage().IsDynamic(index);
+        }
+
+        SYN_INLINE bool IsStream(DenseIndex index) const
+        {
+            return AsDerived().GetStorage().IsStream(index);
+        }
     };
 
     template<typename T>

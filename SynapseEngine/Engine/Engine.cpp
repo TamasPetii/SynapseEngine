@@ -32,6 +32,8 @@
 #include "Engine/Scene/SceneManager.h"
 #include "Engine/Scene/TestScene.h"
 
+#include <print>
+
 namespace Syn
 {
 	Engine::Engine(const EngineInitParams& params)
@@ -141,8 +143,8 @@ namespace Syn
 	void Engine::InitLogger()
 	{
 		Logger::Get().AddSink(std::make_shared<Syn::ConsoleSink>());
-		Logger::Get().AddSink(std::make_shared<Syn::MemorySink>());
-		Logger::Get().AddSink(std::make_shared<Syn::FileSink>());
+		//Logger::Get().AddSink(std::make_shared<Syn::MemorySink>());
+		//Logger::Get().AddSink(std::make_shared<Syn::FileSink>());
 	}
 
 	void Engine::InitVulkan(const EngineInitParams& params)
@@ -190,7 +192,7 @@ namespace Syn
 		float timeDiff = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
 
 		if (timeDiff >= 1.0f) {
-			Info("FPS: {} ({} ms/frame)", frameCount, 1000.0f / frameCount);
+			std::println("FPS: {} ({} ms/frame)", frameCount, 1000.0f / frameCount);
 
 			frameCount = 0;
 			lastTime = currentTime;
