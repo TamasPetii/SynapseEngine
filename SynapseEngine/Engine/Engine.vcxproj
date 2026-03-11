@@ -179,6 +179,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Component\ModelComponent.cpp" />
+    <ClCompile Include="Component\BaseComponent\RenderStateComponent.cpp" />
     <ClCompile Include="Scene\SceneManager.cpp" />
     <ClCompile Include="System\ComponentSystem.cpp" />
     <ClCompile Include="Manager\InputManager.cpp" />
@@ -244,9 +246,6 @@
     <ClCompile Include="Render\RenderContext.cpp" />
     <ClCompile Include="Render\Renderer.cpp" />
     <ClCompile Include="Render\RenderManager.cpp" />
-    <ClCompile Include="Render\Data\RenderScene.cpp" />
-    <ClCompile Include="Render\Data\RenderView.cpp" />
-    <ClCompile Include="Render\Data\RenderTask.cpp" />
     <ClCompile Include="Render\RenderPipeline.cpp" />
     <ClCompile Include="Render\ComputePass\BaseComputePass.cpp" />
     <ClCompile Include="Render\GraphicsPass\BaseRenderPass.cpp" />
@@ -368,6 +367,8 @@
     <ClCompile Include="Utils\WindowedBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Component\ModelComponent.h" />
+    <ClInclude Include="Component\BaseComponent\RenderStateComponent.h" />
     <ClInclude Include="Scene\SceneManager.h" />
     <ClInclude Include="Scene\BufferNames.h" />
     <ClInclude Include="System\ComponentSystem.h" />
@@ -434,9 +435,6 @@
     <ClInclude Include="Render\RenderContext.h" />
     <ClInclude Include="Render\Renderer.h" />
     <ClInclude Include="Render\RenderManager.h" />
-    <ClInclude Include="Render\Data\RenderScene.h" />
-    <ClInclude Include="Render\Data\RenderView.h" />
-    <ClInclude Include="Render\Data\RenderTask.h" />
     <ClInclude Include="Render\RenderPipeline.h" />
     <ClInclude Include="Render\ComputePass\BaseComputePass.h" />
     <ClInclude Include="Render\GraphicsPass\BaseRenderPass.h" />

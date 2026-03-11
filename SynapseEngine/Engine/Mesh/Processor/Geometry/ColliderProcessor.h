@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include "../IMeshProcessor.h"
+#include <taskflow/taskflow.hpp>
 
 namespace Syn
 {
@@ -11,7 +12,7 @@ namespace Syn
         virtual void Process(CookedModel& cookedModel) override;
     private:
         void ComputeMeshLocalBounds(CookedMesh& mesh);
-        void ComputeMeshletBounds(CookedMesh& mesh);
-        void ComputeGlobalBounds(CookedModel& cookedModel);
+        void ComputeMeshletBoundsJob(CookedMesh& mesh, CookedMeshLod& lod, CookedMeshlet& meshlet);
+        void ComputeGlobalBounds(CookedModel& cookedModel, tf::Taskflow& taskflow);
     };
 }

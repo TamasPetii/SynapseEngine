@@ -11,6 +11,10 @@
 #include <future>
 #include <iostream>
 
+#include "Engine/ServiceLocator.h"
+#include <taskflow/taskflow.hpp>
+#include <taskflow/algorithm/for_each.hpp>
+
 namespace Syn
 {
     std::optional<RawModel> AssimpLoader::LoadFile(const std::filesystem::path& path)
@@ -96,16 +100,19 @@ namespace Syn
 
     void AssimpLoader::ProcessSceneHierarchy(const aiScene* scene, RawModel& outModel)
     {
-        ProcessMaterials(scene, outModel);
-        ProcessMeshVertices(scene, outModel);
-        ProcessMeshIndices(scene, outModel);
+        tf::Taskflow taskflow;
+
+        ProcessMaterials(scene, outModel, taskflow);
+        ProcessMeshVertices(scene, outModel, taskflow);
+        ProcessMeshIndices(scene, outModel, taskflow);
+
+        ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
     }
 
-    void AssimpLoader::ProcessMaterials(const aiScene* scene, RawModel& outModel)
+    void AssimpLoader::ProcessMaterials(const aiScene* scene, RawModel& outModel, tf::Taskflow& taskflow)
     {
-        auto material_range = std::views::iota(0u, scene->mNumMaterials);
-        std::for_each(std::execution::seq, material_range.begin(), material_range.end(),
-            [&](uint32_t matIndex) {
+        taskflow.for_each_index(0u, scene->mNumMaterials, 1u, 
+            [&, scene](uint32_t matIndex) {
                 aiMaterial* matAI = scene->mMaterials[matIndex];
                 MaterialInfo& matInfo = outModel.materials[matIndex];
 
@@ -176,15 +183,14 @@ namespace Syn
         );
     }
 
-    void AssimpLoader::ProcessMeshVertices(const aiScene* scene, RawModel& outModel)
+    void AssimpLoader::ProcessMeshVertices(const aiScene* scene, RawModel& outModel, tf::Taskflow& taskflow)
     {
-        auto mesh_range = std::views::iota(0u, scene->mNumMeshes);
-        std::for_each(std::execution::seq, mesh_range.begin(), mesh_range.end(),
-            [&](uint32_t meshIndex) {
+        taskflow.for_each_index(0u, scene->mNumMeshes, 1u, 
+            [&, scene](uint32_t meshIndex) {
                 aiMesh* ai_mesh = scene->mMeshes[meshIndex];
                 RawMesh& raw_mesh = outModel.meshes[meshIndex];
-				raw_mesh.hasNormals = ai_mesh->HasNormals();
-				raw_mesh.hasTangents = ai_mesh->HasTangentsAndBitangents();
+                raw_mesh.hasNormals = ai_mesh->HasNormals();
+                raw_mesh.hasTangents = ai_mesh->HasTangentsAndBitangents();
 
                 for (uint32_t v = 0; v < ai_mesh->mNumVertices; ++v)
                 {
@@ -208,11 +214,10 @@ namespace Syn
         );
     }
 
-    void AssimpLoader::ProcessMeshIndices(const aiScene* scene, RawModel& outModel)
+    void AssimpLoader::ProcessMeshIndices(const aiScene* scene, RawModel& outModel, tf::Taskflow& taskflow)
     {
-        auto mesh_range = std::views::iota(0u, scene->mNumMeshes);
-        std::for_each(std::execution::seq, mesh_range.begin(), mesh_range.end(),
-            [&](uint32_t meshIndex) {
+        taskflow.for_each_index(0u, scene->mNumMeshes, 1u, 
+            [&, scene](uint32_t meshIndex) {
                 aiMesh* ai_mesh = scene->mMeshes[meshIndex];
                 RawMesh& raw_mesh = outModel.meshes[meshIndex];
 

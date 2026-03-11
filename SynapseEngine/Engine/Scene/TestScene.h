@@ -20,10 +20,12 @@ namespace Syn
             auto& cam = registry->GetComponent<CameraComponent>(cameraEntity);
             cam.position = glm::vec3(0.0f, 0.0f, 5.0f);
             cam.isMain = true;
+            
+            _sceneCameraEntity = cameraEntity;
 
             auto transformPool = registry->GetPool<TransformComponent>();
 
-            for (int i = 0; i < 100000; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);

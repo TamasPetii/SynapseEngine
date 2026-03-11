@@ -1,6 +1,9 @@
 #include "MeshoptimizerLodProcessor.h"
 #include <meshoptimizer.h>
 #include <cmath>
+#include "Engine/ServiceLocator.h"
+#include <taskflow/taskflow.hpp>
+#include <taskflow/algorithm/for_each.hpp>
 
 namespace Syn
 {
@@ -10,47 +13,51 @@ namespace Syn
 
     void MeshoptimizerLodProcessor::Process(CookedModel& cookedModel)
     {
-        for (auto& mesh : cookedModel.meshes)
-        {
-            if (mesh.vertices.empty() || mesh.lods.empty() || mesh.lods[0].indices.empty())
-                continue;
+        tf::Taskflow taskflow;
 
-            float reductionFactor = 0.5f;
+        taskflow.for_each(cookedModel.meshes.begin(), cookedModel.meshes.end(),
+            [&](CookedMesh& mesh) {
+                if (mesh.vertices.empty() || mesh.lods.empty() || mesh.lods[0].indices.empty())
+                    return;
 
-            for (uint32_t i = 1; i < _maxLods; ++i)
-            {
-                //Cannot cache reference outside of the look, dangling pointer!
-                const std::vector<uint32_t>& baseIndices = mesh.lods[0].indices;
-                size_t baseIndexCount = baseIndices.size();
-                size_t targetIndexCount = static_cast<size_t>(baseIndexCount * std::pow(reductionFactor, i));
+                float reductionFactor = 0.5f;
 
-                //Todo: Too small??
+                for (uint32_t i = 1; i < _maxLods; ++i)
+                {
+                    //Cannot cache reference outside of the look, dangling pointer!
+                    const std::vector<uint32_t>& baseIndices = mesh.lods[0].indices;
+                    size_t baseIndexCount = baseIndices.size();
+                    size_t targetIndexCount = static_cast<size_t>(baseIndexCount * std::pow(reductionFactor, i));
 
-                std::vector<uint32_t> lodIndices(baseIndexCount);
-                float lodError = 0.0f;
+                    //Todo: Too small??
 
-                size_t newIndexCount = meshopt_simplify(
-                    lodIndices.data(),
-                    baseIndices.data(),
-                    baseIndexCount,
-                    &mesh.vertices[0].position.x,   
-                    mesh.vertices.size(),
-                    sizeof(Vertex),
-                    targetIndexCount,
-                    _targetError,
-                    0,
-                    &lodError
-                );
+                    std::vector<uint32_t> lodIndices(baseIndexCount);
+                    float lodError = 0.0f;
 
-                if (newIndexCount == baseIndexCount || newIndexCount == 0)
-                    break;
+                    size_t newIndexCount = meshopt_simplify(
+                        lodIndices.data(),
+                        baseIndices.data(),
+                        baseIndexCount,
+                        &mesh.vertices[0].position.x,
+                        mesh.vertices.size(),
+                        sizeof(Vertex),
+                        targetIndexCount,
+                        _targetError,
+                        0,
+                        &lodError
+                    );
 
-                lodIndices.resize(newIndexCount);
+                    if (newIndexCount == baseIndexCount || newIndexCount == 0)
+                        break;
 
-                CookedMeshLod newLod{};
-                newLod.indices = std::move(lodIndices);
-                mesh.lods.push_back(std::move(newLod));
-            }
-        }
+                    lodIndices.resize(newIndexCount);
+
+                    CookedMeshLod newLod{};
+                    newLod.indices = std::move(lodIndices);
+                    mesh.lods.push_back(std::move(newLod));
+                }
+            });
+
+        ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
     }
 }

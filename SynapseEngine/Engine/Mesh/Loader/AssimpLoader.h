@@ -2,6 +2,7 @@
 #include "Engine/SynApi.h"
 #include "IMeshLoader.h"
 #include <assimp/scene.h>
+#include <taskflow/taskflow.hpp>
 
 namespace Syn
 {
@@ -14,9 +15,9 @@ namespace Syn
 	private:
 		void PreProcessSceneHierarchy(const aiScene* scene, RawModel& outModel);
 		void ProcessSceneHierarchy(const aiScene* scene, RawModel& outModel);
-		void ProcessMaterials(const aiScene* scene, RawModel& outModel);
-		void ProcessMeshIndices(const aiScene* scene, RawModel& outModel);
-		void ProcessMeshVertices(const aiScene* scene, RawModel& outModel);
+		void ProcessMaterials(const aiScene* scene, RawModel& outModel, tf::Taskflow& taskflow);
+		void ProcessMeshIndices(const aiScene* scene, RawModel& outModel, tf::Taskflow& taskflow);
+		void ProcessMeshVertices(const aiScene* scene, RawModel& outModel, tf::Taskflow& taskflow);
 	};
 }
 

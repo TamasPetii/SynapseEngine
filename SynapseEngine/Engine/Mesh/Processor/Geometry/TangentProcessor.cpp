@@ -1,17 +1,21 @@
 #include "TangentProcessor.h"
 #include <glm/glm.hpp>
+#include "Engine/ServiceLocator.h"
+#include <taskflow/taskflow.hpp>
+#include <taskflow/algorithm/for_each.hpp>
 
 namespace Syn
 {
     void TangentProcessor::Process(CookedModel& cookedModel)
     {
-        for (auto& mesh : cookedModel.meshes)
-        {
+        tf::Taskflow taskflow;
+
+        taskflow.for_each(cookedModel.meshes.begin(), cookedModel.meshes.end(), [](CookedMesh& mesh) {
             if (mesh.hasTangents || !mesh.hasNormals)
-                continue;
+                return;
 
             if (mesh.lods.empty() || mesh.lods[0].indices.empty())
-                continue;
+                return;
 
             for (auto& vertex : mesh.vertices)
                 vertex.tangent = glm::vec3(0.0f);
@@ -66,6 +70,8 @@ namespace Syn
             }
 
             mesh.hasTangents = true;
-        }
+            });
+
+        ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
     }
 }

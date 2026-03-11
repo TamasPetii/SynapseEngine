@@ -6,6 +6,7 @@
 
 #include "Renderer.h"
 #include "RenderPipeline.h"
+#include "Engine/Scene/Scene.h"
 
 namespace Syn {
     class SYN_API RenderManager {
@@ -19,7 +20,7 @@ namespace Syn {
         void SetActivePipeline(const std::string& name);
 
         void WaitForFrame(uint32_t frameIndex);
-        void RenderFrame(uint32_t frameIndex, const RenderScene& scene);
+        void RenderFrame(uint32_t frameIndex, std::shared_ptr<Scene> scene);
     private:
         std::unique_ptr<Renderer> _renderer;
         std::unordered_map<std::string, std::unique_ptr<RenderPipeline>> _pipelines;

@@ -46,11 +46,14 @@ namespace Syn
 
         template<typename TComponent>
         void RegisterComponentSparseMapBuffer(const std::string& name);
-    private:
+    protected:
         EntityID _sceneCameraEntity = NULL_ENTITY;
         std::shared_ptr<Registry> _registry;
         std::vector<std::shared_ptr<ISystem>> _systems;
         std::shared_ptr<ComponentBufferManager> _componentBufferManager;
+
+        std::shared_ptr<Vk::Buffer> globalInstanceBuffer;
+        std::shared_ptr<Vk::Buffer> globalIndirectCommandBuffer;
 
         tf::Taskflow _updateTaskflow;
         tf::Taskflow _gpuTaskflow;

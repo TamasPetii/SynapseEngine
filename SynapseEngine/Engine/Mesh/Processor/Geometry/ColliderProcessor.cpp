@@ -5,20 +5,50 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/norm.hpp>
 
+#include "Engine/ServiceLocator.h"
+#include <taskflow/taskflow.hpp>
+#include <taskflow/algorithm/for_each.hpp>
+#include <limits>
+
 namespace Syn
 {
+    struct MeshletJob {
+        CookedMesh* mesh;
+        CookedMeshLod* lod;
+        CookedMeshlet* meshlet;
+    };
+
     void ColliderProcessor::Process(CookedModel& cookedModel)
     {
-        for (auto& mesh : cookedModel.meshes)
-        {
-            if (mesh.vertices.empty())
-                continue;
+        tf::Taskflow taskflow;
 
-            ComputeMeshLocalBounds(mesh);
-            ComputeMeshletBounds(mesh);
+        taskflow.for_each(cookedModel.meshes.begin(), cookedModel.meshes.end(), [this](CookedMesh& mesh) {
+            if (!mesh.vertices.empty()) {
+                ComputeMeshLocalBounds(mesh);
+            }
+            });
+
+        ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
+        taskflow.clear();
+
+        std::vector<MeshletJob> meshletJobs;
+        for (auto& mesh : cookedModel.meshes) {
+            for (auto& lod : mesh.lods) {
+                for (auto& meshlet : lod.meshlets) {
+                    meshletJobs.push_back({ &mesh, &lod, &meshlet });
+                }
+            }
         }
 
-        ComputeGlobalBounds(cookedModel);
+        taskflow.for_each(meshletJobs.begin(), meshletJobs.end(), [this](MeshletJob& job) {
+            ComputeMeshletBoundsJob(*job.mesh, *job.lod, *job.meshlet);
+            });
+
+        ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
+        taskflow.clear();
+
+        // (Map-Reduce Párhuzamosan)
+        ComputeGlobalBounds(cookedModel, taskflow);
     }
 
     void ColliderProcessor::ComputeMeshLocalBounds(CookedMesh& mesh)
@@ -47,58 +77,54 @@ namespace Syn
         mesh.collider.sphere.radius = std::sqrt(maxRadiusSq);
     }
 
-    void ColliderProcessor::ComputeMeshletBounds(CookedMesh& mesh)
+    void ColliderProcessor::ComputeMeshletBoundsJob(CookedMesh& mesh, CookedMeshLod& lod, CookedMeshlet& meshlet)
     {
-        for (auto& lod : mesh.lods)
+        meshopt_Bounds bounds = meshopt_computeMeshletBounds(
+            &lod.meshletVertexIndices[meshlet.vertexOffset],
+            &lod.meshletTriangleIndices[meshlet.triangleOffset],
+            meshlet.triangleCount,
+            &mesh.vertices[0].position.x,
+            mesh.vertices.size(),
+            sizeof(Vertex)
+        );
+
+        meshlet.collider.sphere.center = glm::vec3(bounds.center[0], bounds.center[1], bounds.center[2]);
+        meshlet.collider.sphere.radius = bounds.radius;
+
+        meshlet.collider.cone.apex = glm::vec3(bounds.cone_apex[0], bounds.cone_apex[1], bounds.cone_apex[2]);
+        meshlet.collider.cone.axis = glm::vec3(bounds.cone_axis[0], bounds.cone_axis[1], bounds.cone_axis[2]);
+        meshlet.collider.cone.cutoff = bounds.cone_cutoff;
+
+        glm::vec3 mMin(std::numeric_limits<float>::max());
+        glm::vec3 mMax(std::numeric_limits<float>::lowest());
+
+        for (uint32_t i = 0; i < meshlet.vertexCount; ++i)
         {
-            for (auto& meshlet : lod.meshlets)
-            {
-                //Todo: Meshopt?? Need a factory that connects ColliderProcessor with MeshletProcessor!
+            uint32_t vertexIndex = lod.meshletVertexIndices[meshlet.vertexOffset + i];
+            const glm::vec3& pos = mesh.vertices[vertexIndex].position;
 
-                meshopt_Bounds bounds = meshopt_computeMeshletBounds(
-                    &lod.meshletVertexIndices[meshlet.vertexOffset],
-                    &lod.meshletTriangleIndices[meshlet.triangleOffset],
-                    meshlet.triangleCount,
-                    &mesh.vertices[0].position.x,
-                    mesh.vertices.size(),
-                    sizeof(Vertex)
-                );
-
-                meshlet.collider.sphere.center = glm::vec3(bounds.center[0], bounds.center[1], bounds.center[2]);
-                meshlet.collider.sphere.radius = bounds.radius;
-
-                meshlet.collider.cone.apex = glm::vec3(bounds.cone_apex[0], bounds.cone_apex[1], bounds.cone_apex[2]);
-                meshlet.collider.cone.axis = glm::vec3(bounds.cone_axis[0], bounds.cone_axis[1], bounds.cone_axis[2]);
-                meshlet.collider.cone.cutoff = bounds.cone_cutoff;
-
-                glm::vec3 mMin(std::numeric_limits<float>::max());
-                glm::vec3 mMax(std::numeric_limits<float>::lowest());
-
-                for (uint32_t i = 0; i < meshlet.vertexCount; ++i)
-                {
-                    uint32_t vertexIndex = lod.meshletVertexIndices[meshlet.vertexOffset + i];
-                    const glm::vec3& pos = mesh.vertices[vertexIndex].position;
-
-                    mMin = glm::min(mMin, pos);
-                    mMax = glm::max(mMax, pos);
-                }
-
-                meshlet.collider.aabb.min = mMin;
-                meshlet.collider.aabb.max = mMax;
-            }
+            mMin = glm::min(mMin, pos);
+            mMax = glm::max(mMax, pos);
         }
+
+        meshlet.collider.aabb.min = mMin;
+        meshlet.collider.aabb.max = mMax;
     }
 
-    void ColliderProcessor::ComputeGlobalBounds(CookedModel& cookedModel)
+    void ColliderProcessor::ComputeGlobalBounds(CookedModel& cookedModel, tf::Taskflow& taskflow)
     {
-        glm::vec3 globalMin(std::numeric_limits<float>::max());
-        glm::vec3 globalMax(std::numeric_limits<float>::lowest());
-        bool hasGlobalData = false;
+        if (cookedModel.meshNodeDescriptors.empty()) return;
 
-        for (const auto& desc : cookedModel.meshNodeDescriptors)
-        {
+        size_t descCount = cookedModel.meshNodeDescriptors.size();
+
+        std::vector<glm::vec3> nodeMins(descCount, glm::vec3(std::numeric_limits<float>::max()));
+        std::vector<glm::vec3> nodeMaxs(descCount, glm::vec3(std::numeric_limits<float>::lowest()));
+
+        // AABB MAP FÁZIS
+        taskflow.for_each_index(size_t(0), descCount, size_t(1), [&](size_t i) {
+            const auto& desc = cookedModel.meshNodeDescriptors[i];
             if (desc.meshIndex >= cookedModel.meshes.size() || desc.nodeIndex >= cookedModel.nodeTransforms.size())
-                continue;
+                return;
 
             const CookedMesh& mesh = cookedModel.meshes[desc.meshIndex];
             const glm::mat4& transform = cookedModel.nodeTransforms[desc.nodeIndex].globalTransform;
@@ -107,49 +133,70 @@ namespace Syn
             glm::vec3 localMax = mesh.collider.aabb.max;
 
             glm::vec3 corners[8] = {
-                {localMin.x, localMin.y, localMin.z},
-                {localMax.x, localMin.y, localMin.z},
-                {localMin.x, localMax.y, localMin.z},
-                {localMax.x, localMax.y, localMin.z},
-                {localMin.x, localMin.y, localMax.z},
-                {localMax.x, localMin.y, localMax.z},
-                {localMin.x, localMax.y, localMax.z},
-                {localMax.x, localMax.y, localMax.z}
+                {localMin.x, localMin.y, localMin.z}, {localMax.x, localMin.y, localMin.z},
+                {localMin.x, localMax.y, localMin.z}, {localMax.x, localMax.y, localMin.z},
+                {localMin.x, localMin.y, localMax.z}, {localMax.x, localMin.y, localMax.z},
+                {localMin.x, localMax.y, localMax.z}, {localMax.x, localMax.y, localMax.z}
             };
 
-            for (int i = 0; i < 8; ++i)
-            {
-                glm::vec3 transformedCorner = glm::vec3(transform * glm::vec4(corners[i], 1.0f));
-                globalMin = glm::min(globalMin, transformedCorner);
-                globalMax = glm::max(globalMax, transformedCorner);
+            glm::vec3 nMin(std::numeric_limits<float>::max());
+            glm::vec3 nMax(std::numeric_limits<float>::lowest());
+
+            for (int c = 0; c < 8; ++c) {
+                glm::vec3 transformedCorner = glm::vec3(transform * glm::vec4(corners[c], 1.0f));
+                nMin = glm::min(nMin, transformedCorner);
+                nMax = glm::max(nMax, transformedCorner);
             }
 
-            hasGlobalData = true;
+            nodeMins[i] = nMin;
+            nodeMaxs[i] = nMax;
+            });
+
+        ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
+        taskflow.clear();
+
+        //AABB REDUCE
+        glm::vec3 globalMin(std::numeric_limits<float>::max());
+        glm::vec3 globalMax(std::numeric_limits<float>::lowest());
+        for (size_t i = 0; i < descCount; ++i) {
+            globalMin = glm::min(globalMin, nodeMins[i]);
+            globalMax = glm::max(globalMax, nodeMaxs[i]);
         }
 
-        if (hasGlobalData)
-        {
-            cookedModel.globalCollider.aabb.min = globalMin;
-            cookedModel.globalCollider.aabb.max = globalMax;
+        cookedModel.globalCollider.aabb.min = globalMin;
+        cookedModel.globalCollider.aabb.max = globalMax;
 
-            glm::vec3 globalCenter = (globalMin + globalMax) * 0.5f;
-            cookedModel.globalCollider.sphere.center = globalCenter;
+        glm::vec3 globalCenter = (globalMin + globalMax) * 0.5f;
+        cookedModel.globalCollider.sphere.center = globalCenter;
+
+        // SPHERE MAP FÁZIS
+        std::vector<float> nodeMaxRadiusSq(descCount, 0.0f);
+
+        taskflow.for_each_index(size_t(0), descCount, size_t(1), [&](size_t i) {
+            const auto& desc = cookedModel.meshNodeDescriptors[i];
+            if (desc.meshIndex >= cookedModel.meshes.size() || desc.nodeIndex >= cookedModel.nodeTransforms.size())
+                return;
+
+            const CookedMesh& mesh = cookedModel.meshes[desc.meshIndex];
+            const glm::mat4& transform = cookedModel.nodeTransforms[desc.nodeIndex].globalTransform;
 
             float maxRadiusSq = 0.0f;
-            for (const auto& desc : cookedModel.meshNodeDescriptors)
-            {
-                const CookedMesh& mesh = cookedModel.meshes[desc.meshIndex];
-                const glm::mat4& transform = cookedModel.nodeTransforms[desc.nodeIndex].globalTransform;
-
-                for (const auto& v : mesh.vertices)
-                {
-                    glm::vec3 worldPos = glm::vec3(transform * glm::vec4(v.position, 1.0f));
-                    float distSq = glm::length2(worldPos - globalCenter);
-                    if (distSq > maxRadiusSq)
-                        maxRadiusSq = distSq;
-                }
+            for (const auto& v : mesh.vertices) {
+                glm::vec3 worldPos = glm::vec3(transform * glm::vec4(v.position, 1.0f));
+                float distSq = glm::length2(worldPos - globalCenter);
+                if (distSq > maxRadiusSq)
+                    maxRadiusSq = distSq;
             }
-            cookedModel.globalCollider.sphere.radius = std::sqrt(maxRadiusSq);
+            nodeMaxRadiusSq[i] = maxRadiusSq;
+            });
+
+        ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
+
+        // SPHERE REDUCE
+        float finalMaxRadiusSq = 0.0f;
+        for (float rSq : nodeMaxRadiusSq) {
+            if (rSq > finalMaxRadiusSq) finalMaxRadiusSq = rSq;
         }
+        cookedModel.globalCollider.sphere.radius = std::sqrt(finalMaxRadiusSq);
     }
 }

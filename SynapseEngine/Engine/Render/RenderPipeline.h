@@ -4,7 +4,6 @@
 #include <memory>
 
 #include "IRenderPass.h"
-#include "Data/RenderScene.h"
 
 namespace Syn
 {

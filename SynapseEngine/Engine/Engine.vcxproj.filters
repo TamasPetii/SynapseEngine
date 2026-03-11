@@ -366,15 +366,6 @@
     <ClCompile Include="Render\RenderPipeline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Data\RenderTask.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\Data\RenderView.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\Data\RenderScene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Render\RenderManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -574,6 +565,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Scene\TestScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\ModelComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\BaseComponent\RenderStateComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1004,15 +1001,6 @@
     <ClInclude Include="Render\RenderPipeline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Data\RenderTask.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\Data\RenderView.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\Data\RenderScene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Render\RenderManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1215,6 +1203,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scene\TestScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\ModelComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\BaseComponent\RenderStateComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -20,7 +20,6 @@
 #include "Engine/Mesh/Factory/MeshFactory.h"
 
 #include "Engine/Render/RenderManager.h"
-#include "Engine/Render/Data/RenderScene.h"
 
 #include "Engine/Render/GraphicsPass/TestPass.h"
 #include "Engine/Render/GraphicsPass/TestMeshPass.h"
@@ -66,8 +65,7 @@ namespace Syn
 
 		_sceneManager->UpdateGPU(currentFrame);
 
-		RenderScene scene;
-		_renderManager->RenderFrame(currentFrame, scene);
+		_renderManager->RenderFrame(currentFrame, _sceneManager->GetActiveScene());
 
 		_sceneManager->Finish();
 

@@ -28,7 +28,7 @@ namespace Syn {
         _renderer->WaitForFrame(frameIndex);
     }
 
-    void RenderManager::RenderFrame(uint32_t frameIndex, const RenderScene& scene) {
+    void RenderManager::RenderFrame(uint32_t frameIndex, std::shared_ptr<Scene> scene) {
         if (!_activePipeline) 
             return;
 

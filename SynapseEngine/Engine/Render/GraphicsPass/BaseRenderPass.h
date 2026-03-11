@@ -6,7 +6,6 @@
 #include <vector>
 #include <memory>
 
-#include "../Data/RenderScene.h"
 #include "../IRenderPass.h"
 
 namespace Syn
