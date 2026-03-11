@@ -70,60 +70,39 @@ namespace Syn {
         });
     }
 
-    void ModelManager::FinalizeResource(EntryType& entry) {
-        uint32_t meshLodCount = entry.resource->gpuData.indexedData.meshDescriptors.size();
+    void ModelManager::FinalizeResource(EntryType& entry)
+    {
+        auto& gpuData = entry.resource->gpuData;
+        size_t totalLodCount = gpuData.indexedData.meshDescriptors.size();
 
+        entry.resource->hardwareBuffers.baseDrawCommands.reserve(totalLodCount);
+
+        for (size_t i = 0; i < totalLodCount; ++i)
         {
-            std::vector<VkDrawIndirectCommand> indirectCommands;
-            indirectCommands.reserve(meshLodCount);
+            const auto& tradDesc = gpuData.indexedData.meshDescriptors[i];
 
-            int index = 0;
-            for (auto& desc : entry.resource->gpuData.indexedData.meshDescriptors) {
-                VkDrawIndirectCommand cmd{};
-                cmd.vertexCount = desc.indexCount;
-                cmd.instanceCount = index % 4 == 0 ? 1 : 0;
-                cmd.firstVertex = desc.indexOffset;
-                cmd.firstInstance = 0;
+            bool hasMeshlet = i < gpuData.meshletData.drawDescriptors.size();
+            const auto& meshletDesc = hasMeshlet ? gpuData.meshletData.drawDescriptors[i] : GpuMeshletDrawDescriptor{};
 
-                indirectCommands.push_back(cmd);
-                index++;
+            MeshDrawBlueprint blueprint{};
+
+            blueprint.traditionalCmd.vertexCount = tradDesc.indexCount;
+            blueprint.traditionalCmd.instanceCount = 0;
+            blueprint.traditionalCmd.firstVertex = tradDesc.indexOffset;
+            blueprint.traditionalCmd.firstInstance = 0;
+
+            blueprint.meshletCmd.groupCountX = meshletDesc.meshletCount; // GPU fogja növelni?? = 0!
+            blueprint.meshletCmd.groupCountY = 1;
+            blueprint.meshletCmd.groupCountZ = 1;
+
+            if (hasMeshlet && tradDesc.indexCount > 5000) {
+                blueprint.isMeshletPipeline = MeshDrawBlueprint::PIPELINE_MESHLET;
+            }
+            else {
+                blueprint.isMeshletPipeline = MeshDrawBlueprint::PIPELINE_TRADITIONAL;
             }
 
-            entry.resource->hardwareBuffers.indirectBuffer = Vk::BufferFactory::CreatePersistent(
-                indirectCommands.size() * sizeof(VkDrawIndirectCommand),
-                VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
-            );
-
-            entry.resource->hardwareBuffers.indirectBuffer->Write(
-                indirectCommands.data(),
-                indirectCommands.size() * sizeof(VkDrawIndirectCommand)
-            );
-        }
-
-        {
-            std::vector<VkDrawMeshTasksIndirectCommandEXT> meshIndirectCommands;
-            meshIndirectCommands.reserve(meshLodCount);
-
-            int index = 0;
-            for (auto& desc : entry.resource->gpuData.meshletData.drawDescriptors) {
-                VkDrawMeshTasksIndirectCommandEXT cmd{};
-                cmd.groupCountX = index % 4 == 0 ? desc.meshletCount : 0;
-                cmd.groupCountY = 1;
-                cmd.groupCountZ = 1;
-
-                meshIndirectCommands.push_back(cmd);
-                index++;
-            }
-
-            entry.resource->hardwareBuffers.indirectMeshletBuffer = Vk::BufferFactory::CreatePersistent(
-                meshIndirectCommands.size() * sizeof(VkDrawMeshTasksIndirectCommandEXT),
-                VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
-            );
-
-            entry.resource->hardwareBuffers.indirectMeshletBuffer->Write(
-                meshIndirectCommands.data(),
-                meshIndirectCommands.size() * sizeof(VkDrawMeshTasksIndirectCommandEXT)
-            );
+            entry.resource->hardwareBuffers.baseDrawCommands.push_back(blueprint);
         }
     }
 }

@@ -185,6 +185,8 @@ namespace Syn
 
     void AssimpLoader::ProcessMeshVertices(const aiScene* scene, RawModel& outModel, tf::Taskflow& taskflow)
     {
+        tf::GuidedPartitioner partitioner(1);
+
         taskflow.for_each_index(0u, scene->mNumMeshes, 1u, 
             [&, scene](uint32_t meshIndex) {
                 aiMesh* ai_mesh = scene->mMeshes[meshIndex];
@@ -210,12 +212,15 @@ namespace Syn
 
                     raw_mesh.vertices[v] = vertex;
                 }
-            }
+            }, 
+            partitioner
         );
     }
 
     void AssimpLoader::ProcessMeshIndices(const aiScene* scene, RawModel& outModel, tf::Taskflow& taskflow)
     {
+        tf::GuidedPartitioner partitioner(1);
+
         taskflow.for_each_index(0u, scene->mNumMeshes, 1u, 
             [&, scene](uint32_t meshIndex) {
                 aiMesh* ai_mesh = scene->mMeshes[meshIndex];
@@ -230,7 +235,8 @@ namespace Syn
                     raw_mesh.indices[offset + 1] = face.mIndices[1];
                     raw_mesh.indices[offset + 2] = face.mIndices[2];
                 }
-            }
+            },
+            partitioner
         );
     }
 }

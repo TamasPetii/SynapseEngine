@@ -13,6 +13,7 @@ namespace Syn
     void MeshoptimizerMeshletProcessor::Process(CookedModel& cookedModel)
     {
         tf::Taskflow taskflow;
+        tf::GuidedPartitioner partitioner(1);
 
         taskflow.for_each(cookedModel.meshes.begin(), cookedModel.meshes.end(),
             [&](CookedMesh& mesh) {
@@ -65,7 +66,9 @@ namespace Syn
                         lod.meshlets.push_back(cookedMeshlet);
                     }
                 }
-            });
+            },
+            partitioner
+        );
 
         ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
     }

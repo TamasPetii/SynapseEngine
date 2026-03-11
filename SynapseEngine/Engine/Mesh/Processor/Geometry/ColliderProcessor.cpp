@@ -21,12 +21,16 @@ namespace Syn
     void ColliderProcessor::Process(CookedModel& cookedModel)
     {
         tf::Taskflow taskflow;
+        tf::GuidedPartitioner partitioner(1);
 
-        taskflow.for_each(cookedModel.meshes.begin(), cookedModel.meshes.end(), [this](CookedMesh& mesh) {
+        taskflow.for_each(cookedModel.meshes.begin(), cookedModel.meshes.end(), 
+            [this](CookedMesh& mesh) {
             if (!mesh.vertices.empty()) {
                 ComputeMeshLocalBounds(mesh);
             }
-            });
+            },
+            partitioner
+        );
 
         ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
         taskflow.clear();
@@ -40,14 +44,17 @@ namespace Syn
             }
         }
 
-        taskflow.for_each(meshletJobs.begin(), meshletJobs.end(), [this](MeshletJob& job) {
+        taskflow.for_each(meshletJobs.begin(), meshletJobs.end(), 
+            [this](MeshletJob& job) {
             ComputeMeshletBoundsJob(*job.mesh, *job.lod, *job.meshlet);
-            });
+            },
+            partitioner
+        );
 
         ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
         taskflow.clear();
 
-        // (Map-Reduce Párhuzamosan)
+        // (Map-Reduce)
         ComputeGlobalBounds(cookedModel, taskflow);
     }
 
@@ -115,13 +122,16 @@ namespace Syn
     {
         if (cookedModel.meshNodeDescriptors.empty()) return;
 
+        tf::GuidedPartitioner partitioner(1);
+
         size_t descCount = cookedModel.meshNodeDescriptors.size();
 
         std::vector<glm::vec3> nodeMins(descCount, glm::vec3(std::numeric_limits<float>::max()));
         std::vector<glm::vec3> nodeMaxs(descCount, glm::vec3(std::numeric_limits<float>::lowest()));
 
         // AABB MAP FÁZIS
-        taskflow.for_each_index(size_t(0), descCount, size_t(1), [&](size_t i) {
+        taskflow.for_each_index(size_t(0), descCount, size_t(1), 
+            [&](size_t i) {
             const auto& desc = cookedModel.meshNodeDescriptors[i];
             if (desc.meshIndex >= cookedModel.meshes.size() || desc.nodeIndex >= cookedModel.nodeTransforms.size())
                 return;
@@ -150,7 +160,9 @@ namespace Syn
 
             nodeMins[i] = nMin;
             nodeMaxs[i] = nMax;
-            });
+            },
+            partitioner
+        );
 
         ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
         taskflow.clear();
@@ -172,7 +184,8 @@ namespace Syn
         // SPHERE MAP FÁZIS
         std::vector<float> nodeMaxRadiusSq(descCount, 0.0f);
 
-        taskflow.for_each_index(size_t(0), descCount, size_t(1), [&](size_t i) {
+        taskflow.for_each_index(size_t(0), descCount, size_t(1), 
+            [&](size_t i) {
             const auto& desc = cookedModel.meshNodeDescriptors[i];
             if (desc.meshIndex >= cookedModel.meshes.size() || desc.nodeIndex >= cookedModel.nodeTransforms.size())
                 return;
@@ -188,7 +201,9 @@ namespace Syn
                     maxRadiusSq = distSq;
             }
             nodeMaxRadiusSq[i] = maxRadiusSq;
-            });
+            },
+            partitioner
+        );
 
         ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
 

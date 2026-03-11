@@ -1,32 +1,22 @@
-#include "TestPass.h"
+#include "TraditionalRenderPass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
 #include "Engine/Manager/ShaderManager.h"
-#include "Engine/Mesh/Data/StaticMesh.h"
-#include "Engine/Manager/ModelManager.h"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include "Engine/Logger/SynLog.h"
 #include "Engine/Vk/Image/ImageFactory.h"
-
-#include <Windows.h>
+#include "Engine/System/RenderSystem.h"
 
 namespace Syn {
-    
-    struct RenderPushConstants {
-        VkDeviceAddress positionsAddr;
-        VkDeviceAddress attributesAddr;
-        VkDeviceAddress indicesAddr;
-        VkDeviceAddress nodesAddr;
-        glm::mat4 viewProj;
+
+    struct TraditionalPushConstants {
+
     };
 
-    void TestPass::Initialize() {
+    void TraditionalRenderPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 
-        _shaderProgram = shaderManager->CreateProgram("TestColorProgram", {
-                "../Engine/Shaders/Test.vert",
-                "../Engine/Shaders/Test.frag"
+        _shaderProgram = shaderManager->CreateProgram("TraditionalColorProgram", {
+                "../Engine/Shaders/Traditional.vert",
+                "../Engine/Shaders/Traditional.frag"
             });
 
         _graphicsState = {
@@ -56,7 +46,7 @@ namespace Syn {
         };
     }
 
-    void TestPass::PrepareFrame(const RenderContext& context) {
+    void TraditionalRenderPass::PrepareFrame(const RenderContext& context) {
         auto vkContext = ServiceLocator::GetVkContext();
         auto swapChain = vkContext->GetSwapChain();
 
@@ -122,85 +112,26 @@ namespace Syn {
             });
     }
 
+    void TraditionalRenderPass::PushConstants(const RenderContext& context) {
 
-    void TestPass::PushConstants(const RenderContext& context) {
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto sponza = modelManager->GetResource("C:/Users/User/Desktop/Models/Sponza-master/sponza.obj");
-
-        /*
-        if (!sponza || sponza->hardwareBuffers.indirectBuffer == nullptr) 
-            return;
-
-        static glm::vec3 camPos = glm::vec3(0.0f, 5.0f, 0.0f);
-        static float yaw = 0.0f; 
-        static float pitch = 0.0f;
-
-        float moveSpeed = 0.5f;
-        float rotSpeed = 0.02f;
-
-        if (GetAsyncKeyState(VK_LEFT) & 0x8000)  yaw -= rotSpeed;
-        if (GetAsyncKeyState(VK_RIGHT) & 0x8000) yaw += rotSpeed;
-        if (GetAsyncKeyState(VK_UP) & 0x8000)    pitch += rotSpeed;
-        if (GetAsyncKeyState(VK_DOWN) & 0x8000)  pitch -= rotSpeed;
-
-        pitch = glm::clamp(pitch, -1.5f, 1.5f);
-
-        glm::vec3 front;
-        front.x = cos(yaw) * cos(pitch);
-        front.y = sin(pitch);
-        front.z = sin(yaw) * cos(pitch);
-        front = glm::normalize(front);
-
-        glm::vec3 right = glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f)));
-        glm::vec3 up = glm::normalize(glm::cross(right, front));
-
-        if (GetAsyncKeyState('W') & 0x8000) camPos += front * moveSpeed;
-        if (GetAsyncKeyState('S') & 0x8000) camPos -= front * moveSpeed;
-        if (GetAsyncKeyState('A') & 0x8000) camPos -= right * moveSpeed;
-        if (GetAsyncKeyState('D') & 0x8000) camPos += right * moveSpeed;
-
-        if (GetAsyncKeyState('Q') & 0x8000) camPos -= up * moveSpeed;
-        if (GetAsyncKeyState('E') & 0x8000) camPos += up * moveSpeed;
-
-        glm::vec3 camTarget = camPos + front;
-        glm::mat4 view = glm::lookAt(camPos, camTarget, up);
-        glm::mat4 proj = glm::perspective(glm::radians(60.0f), 16.0f / 9.0f, 0.1f, 5000.0f);
-        proj[1][1] *= -1.0f;
-
-        RenderPushConstants pc{};
-        pc.positionsAddr = sponza->hardwareBuffers.vertexPositions->GetDeviceAddress();
-        pc.attributesAddr = sponza->hardwareBuffers.vertexAttributes->GetDeviceAddress();
-        pc.indicesAddr = sponza->hardwareBuffers.indices->GetDeviceAddress();
-        pc.nodesAddr = sponza->hardwareBuffers.nodeTransforms->GetDeviceAddress();
-        pc.viewProj = proj * view;
-
-        vkCmdPushConstants(
-            context.cmd,
-            _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL_GRAPHICS,
-            0,
-            sizeof(RenderPushConstants),
-            &pc
-        );
-        */
     }
 
-    void TestPass::Draw(const RenderContext& context)
+    void TraditionalRenderPass::Draw(const RenderContext& context)
     {
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto sponza = modelManager->GetResource("C:/Users/User/Desktop/Models/Sponza-master/sponza.obj");
+        auto scene = context.scene;
+        if (!scene) return;
 
-        /*
-        if (!sponza || sponza->hardwareBuffers.indirectBuffer == nullptr)
-            return;
+        auto indirectBuffer = scene->GetGlobalIndirectCommandBuffer()->Handle();
+        auto countBuffer = scene->GetGlobalDrawCountBuffer()->Handle();
 
-        vkCmdDrawIndirect(
+        vkCmdDrawIndexedIndirectCount(
             context.cmd,
-            sponza->hardwareBuffers.indirectBuffer->Handle(),
+            indirectBuffer,
             0,
-            sponza->gpuData.indexedData.meshDescriptors.size(),
+            countBuffer,
+            0,
+            RenderSystem::MAX_INDIRECT_COMMANDS,
             sizeof(VkDrawIndirectCommand)
         );
-        */
     }
 }

@@ -6,8 +6,9 @@
 
 namespace Syn
 {
-    void TransformSystem::UpdateComponents(std::shared_ptr<Registry> registry, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
+    void TransformSystem::UpdateComponents(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
     {
+        auto registry = scene->GetRegistry();
         auto transformPool = registry->GetPool<TransformComponent>();
         if (!transformPool) return;
 
@@ -30,8 +31,10 @@ namespace Syn
             });
     }
 
-    void TransformSystem::UploadComponents(std::shared_ptr<Registry> registry, std::shared_ptr<ComponentBufferManager> componentBufferManager, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic)
+    void TransformSystem::UploadComponents(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic)
     {
+        auto registry = scene->GetRegistry();
+        auto componentBufferManager = scene->GetComponentBufferManager();
         auto transformPool = registry->GetPool<TransformComponent>();
         if (!transformPool) return;
 

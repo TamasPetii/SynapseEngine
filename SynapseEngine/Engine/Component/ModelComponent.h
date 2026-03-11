@@ -12,7 +12,7 @@ namespace Syn
 		bool castShadow;
 		bool receiveShadow;
 		bool hasDirectxNormals;
-		std::shared_ptr<StaticMesh> model;
+		uint32_t modelIndex;
 	};
 
 	struct SYN_API ModelComponentGPU

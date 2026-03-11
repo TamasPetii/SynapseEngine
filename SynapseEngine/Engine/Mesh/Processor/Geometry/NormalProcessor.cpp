@@ -9,8 +9,10 @@ namespace Syn
     void NormalProcessor::Process(CookedModel& cookedModel)
     {
         tf::Taskflow taskflow;
+        tf::GuidedPartitioner partitioner(1);
 
-        taskflow.for_each(cookedModel.meshes.begin(), cookedModel.meshes.end(), [](CookedMesh& mesh) {
+        taskflow.for_each(cookedModel.meshes.begin(), cookedModel.meshes.end(), 
+            [](CookedMesh& mesh) {
             if (mesh.hasNormals)
                 return;
 
@@ -50,7 +52,9 @@ namespace Syn
             }
 
             mesh.hasNormals = true;
-            });
+            },
+            partitioner
+        );
 
         ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
     }

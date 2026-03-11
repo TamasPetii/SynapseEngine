@@ -14,6 +14,7 @@ namespace Syn
     void MeshoptimizerLodProcessor::Process(CookedModel& cookedModel)
     {
         tf::Taskflow taskflow;
+        tf::GuidedPartitioner partitioner(1);
 
         taskflow.for_each(cookedModel.meshes.begin(), cookedModel.meshes.end(),
             [&](CookedMesh& mesh) {
@@ -56,7 +57,9 @@ namespace Syn
                     newLod.indices = std::move(lodIndices);
                     mesh.lods.push_back(std::move(newLod));
                 }
-            });
+            },
+            partitioner
+        );
 
         ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
     }

@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include "Engine/Vk/Buffer/Buffer.h"
+#include "Engine/Mesh/MeshDrawBlueprint.h"
 
 namespace Syn
 {
@@ -26,8 +27,7 @@ namespace Syn
         //Hierarchy Buffers
         std::unique_ptr<Vk::Buffer> nodeTransforms;
 
-        //Indirect buffers
-        std::unique_ptr<Vk::Buffer> indirectBuffer;
-        std::unique_ptr<Vk::Buffer> indirectMeshletBuffer;
+        //Draw Data
+        std::vector<MeshDrawBlueprint> baseDrawCommands;
     };
 }

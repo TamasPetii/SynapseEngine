@@ -1,7 +1,6 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include "Engine/Registry/Registry.h"
-#include "Engine/System/ISystem.h"
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Vk/Buffer/Buffer.h"
 #include "Engine/Vk/Buffer/BufferFactory.h"
@@ -13,6 +12,8 @@
 
 namespace Syn
 {
+    class ISystem;
+
     enum class SystemPhase
     {
         Update,
@@ -30,11 +31,16 @@ namespace Syn
         void UpdateGPU(uint32_t frameIndex);
         void Finish();
 
-        std::shared_ptr<Registry> GetRegistry() { return _registry; }
-        std::shared_ptr<ComponentBufferManager> GetComponentBufferManager() { return _componentBufferManager; }
+        std::shared_ptr<Registry> GetRegistry() const { return _registry; }
+        std::shared_ptr<ComponentBufferManager> GetComponentBufferManager() const { return _componentBufferManager; }
+        std::shared_ptr<Vk::Buffer> GetGlobalInstanceBuffer() const { return globalInstanceBuffer; }
+        std::shared_ptr<Vk::Buffer> GetGlobalIndirectCommandBuffer() const { return globalIndirectCommandBuffer; }
+        std::shared_ptr<Vk::Buffer> GetGlobalDescriptorBuffer() const { return globalIndirectCommandDescriptorBuffer; }
+        std::shared_ptr<Vk::Buffer> GetGlobalDrawCountBuffer() const { return globalDrawCountBuffer; }
     private:
         void InitializeSystems();
         void InitializeComponentBuffers();
+        void InitializeGlobalBuffers();
         void BuildTaskflowGraph(tf::Taskflow& taskflow, SystemPhase phase);
         void UpdateComponentBuffers(uint32_t frameIndex);
 
@@ -54,6 +60,8 @@ namespace Syn
 
         std::shared_ptr<Vk::Buffer> globalInstanceBuffer;
         std::shared_ptr<Vk::Buffer> globalIndirectCommandBuffer;
+        std::shared_ptr<Vk::Buffer> globalIndirectCommandDescriptorBuffer;
+        std::shared_ptr<Vk::Buffer> globalDrawCountBuffer;
 
         tf::Taskflow _updateTaskflow;
         tf::Taskflow _gpuTaskflow;

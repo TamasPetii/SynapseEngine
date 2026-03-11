@@ -1,4 +1,5 @@
 #include "ModelComponent.h"
+#include "Engine/Registry/Entity.h"
 
 namespace Syn
 {
@@ -6,6 +7,6 @@ namespace Syn
 		castShadow(true),
 		receiveShadow(true),
 		hasDirectxNormals(false),
-		model(nullptr)
+		modelIndex(NULL_INDEX)
 	{}
 }

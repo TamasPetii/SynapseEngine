@@ -181,6 +181,10 @@
   <ItemGroup>
     <ClCompile Include="Component\ModelComponent.cpp" />
     <ClCompile Include="Component\BaseComponent\RenderStateComponent.cpp" />
+    <ClCompile Include="Render\GraphicsPass\MeshletRenderPass.cpp" />
+    <ClCompile Include="Mesh\MeshDrawBlueprint.cpp" />
+    <ClCompile Include="Mesh\MeshDrawDescriptor.cpp" />
+    <ClCompile Include="System\RenderSystem.cpp" />
     <ClCompile Include="Scene\SceneManager.cpp" />
     <ClCompile Include="System\ComponentSystem.cpp" />
     <ClCompile Include="Manager\InputManager.cpp" />
@@ -193,6 +197,7 @@
     <ClCompile Include="System\TransformSystem.cpp" />
     <ClCompile Include="Component\TransformComponent.cpp" />
     <ClCompile Include="Scene\TestScene.cpp" />
+    <ClCompile Include="Render\GraphicsPass\TraditionalRenderPass.cpp" />
     <ClCompile Include="Vk\Rendering\GpuUploader.cpp" />
     <ClCompile Include="Manager\BaseResourceManager.cpp" />
     <ClCompile Include="Image\Data\Texture.cpp" />
@@ -369,6 +374,10 @@
   <ItemGroup>
     <ClInclude Include="Component\ModelComponent.h" />
     <ClInclude Include="Component\BaseComponent\RenderStateComponent.h" />
+    <ClInclude Include="Render\GraphicsPass\MeshletRenderPass.h" />
+    <ClInclude Include="Mesh\MeshDrawBlueprint.h" />
+    <ClInclude Include="Mesh\MeshDrawDescriptor.h" />
+    <ClInclude Include="System\RenderSystem.h" />
     <ClInclude Include="Scene\SceneManager.h" />
     <ClInclude Include="Scene\BufferNames.h" />
     <ClInclude Include="System\ComponentSystem.h" />
@@ -382,6 +391,7 @@
     <ClInclude Include="System\TransformSystem.h" />
     <ClInclude Include="Component\TransformComponent.h" />
     <ClInclude Include="Scene\TestScene.h" />
+    <ClInclude Include="Render\GraphicsPass\TraditionalRenderPass.h" />
     <ClInclude Include="Vk\Rendering\GpuUploader.h" />
     <ClInclude Include="Manager\BaseResourceManager.h" />
     <ClInclude Include="Image\Data\Texture.h" />

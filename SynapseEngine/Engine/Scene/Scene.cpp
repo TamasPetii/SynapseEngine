@@ -4,6 +4,8 @@
 #include "Engine/Component/TransformComponent.h"
 #include "Engine/System/CameraSystem.h"
 #include "Engine/Component/CameraComponent.h"
+#include "Engine/System/RenderSystem.h"
+#include "Engine/Mesh/MeshDrawDescriptor.h"
 #include "BufferNames.h"
 
 namespace Syn
@@ -15,6 +17,7 @@ namespace Syn
 
         InitializeSystems();
         InitializeComponentBuffers();
+        InitializeGlobalBuffers();
 
         BuildTaskflowGraph(_updateTaskflow, SystemPhase::Update);
         BuildTaskflowGraph(_gpuTaskflow, SystemPhase::UploadGPU);
@@ -35,6 +38,7 @@ namespace Syn
     {
         RegisterSystem<TransformSystem>();
         RegisterSystem<CameraSystem>();
+        RegisterSystem<RenderSystem>();
     }
 
     void Scene::InitializeComponentBuffers()
@@ -60,13 +64,13 @@ namespace Syn
                 switch (phase)
                 {
                 case SystemPhase::Update:
-                    sys->OnUpdate(_registry, _currentFrameIndex, _currentDeltaTime, subflow);
+                    sys->OnUpdate(this, _currentFrameIndex, _currentDeltaTime, subflow);
                     break;
                 case SystemPhase::UploadGPU:
-                    sys->OnUploadToGpu(_registry, _componentBufferManager, _currentFrameIndex, subflow);
+                    sys->OnUploadToGpu(this, _currentFrameIndex, subflow);
                     break;
                 case SystemPhase::Finish:
-                    sys->OnFinish(_registry, subflow);
+                    sys->OnFinish(this, subflow);
                     break;
                 }
                 }).name(system->GetName());
@@ -119,5 +123,32 @@ namespace Syn
     void Scene::Finish()
     {
         ServiceLocator::GetTaskExecutor()->run(_finishTaskflow).wait();
+    }
+
+    void Scene::InitializeGlobalBuffers()
+    {
+        uint32_t maxInstances = 10000000;
+        globalInstanceBuffer = Vk::BufferFactory::CreatePersistent(
+            maxInstances * sizeof(uint32_t),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT 
+        );
+
+        globalIndirectCommandDescriptorBuffer = Vk::BufferFactory::CreatePersistent(
+            RenderSystem::MAX_INDIRECT_COMMANDS * sizeof(MeshDrawDescriptor),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+        );
+
+        size_t traditionalBytes = RenderSystem::MESHLET_OFFSET_START * sizeof(VkDrawIndirectCommand);
+        size_t meshletBytes = (RenderSystem::MAX_INDIRECT_COMMANDS - RenderSystem::MESHLET_OFFSET_START) * sizeof(VkDrawMeshTasksIndirectCommandEXT);
+
+        globalIndirectCommandBuffer = Vk::BufferFactory::CreatePersistent(
+            traditionalBytes + meshletBytes,
+            VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+        );
+
+        globalDrawCountBuffer = Vk::BufferFactory::CreatePersistent(
+            2 * sizeof(uint32_t),
+            VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+        );
     }
 }

@@ -11,7 +11,7 @@ namespace Syn
     protected:
         std::string GetSparseBufferName() const override { return BufferNames::CameraSparseMap; }
     protected:
-        void UpdateComponents(std::shared_ptr<Registry> registry, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) override;
-        void UploadComponents(std::shared_ptr<Registry> registry, std::shared_ptr<ComponentBufferManager> componentBufferManager, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic) override;
+        void UpdateComponents(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) override;
+        void UploadComponents(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic) override;
     };
 }

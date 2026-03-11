@@ -15,12 +15,12 @@ namespace Syn
         virtual std::vector<TypeID> GetReadDependencies() const override;
         virtual std::vector<TypeID> GetWriteDependencies() const override;
 
-        virtual void OnUpdate(std::shared_ptr<Registry> registry, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) override;
-        virtual void OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_ptr<ComponentBufferManager> componentBufferManager, uint32_t frameIndex, tf::Subflow& subflow) override;
-        virtual void OnFinish(std::shared_ptr<Registry> registry, tf::Subflow& subflow) override;
+        virtual void OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) override;
+        virtual void OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow) override;
+        virtual void OnFinish(Scene* scene, tf::Subflow& subflow) override;
     protected:
-        virtual void UpdateComponents(std::shared_ptr<Registry> registry, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow);
-        virtual void UploadComponents(std::shared_ptr<Registry> registry, std::shared_ptr<ComponentBufferManager> componentBufferManager, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic);
+        virtual void UpdateComponents(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow);
+        virtual void UploadComponents(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic);
         virtual std::string GetSparseBufferName() const;
     protected:
         template <typename TPool>
@@ -66,17 +66,21 @@ namespace Syn
     }
 
     template <typename TComponent>
-    SYN_INLINE void ComponentSystem<TComponent>::OnUpdate(std::shared_ptr<Registry> registry, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
+    SYN_INLINE void ComponentSystem<TComponent>::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
     {
+        auto registry = scene->GetRegistry();
         auto pool = registry->GetPool<TComponent>();
         if (!pool) return;
 
-        UpdateComponents(registry, frameIndex, deltaTime, subflow);
+        UpdateComponents(scene, frameIndex, deltaTime, subflow);
     }
 
     template <typename TComponent>
-    SYN_INLINE void ComponentSystem<TComponent>::OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_ptr<ComponentBufferManager> componentBufferManager, uint32_t frameIndex, tf::Subflow& subflow)
+    SYN_INLINE void ComponentSystem<TComponent>::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
     {
+        auto registry = scene->GetRegistry();
+        auto componentBufferManager = scene->GetComponentBufferManager();
+
         auto pool = registry->GetPool<TComponent>();
         if (!pool) return;
 
@@ -115,13 +119,14 @@ namespace Syn
 
         if (hasStream || uploadDynamic)
         {
-            UploadComponents(registry, componentBufferManager, frameIndex, subflow, uploadDynamic);
+            UploadComponents(scene, frameIndex, subflow, uploadDynamic);
         }
     }
 
     template <typename TComponent>
-    SYN_INLINE void ComponentSystem<TComponent>::OnFinish(std::shared_ptr<Registry> registry, tf::Subflow& subflow)
+    SYN_INLINE void ComponentSystem<TComponent>::OnFinish(Scene* scene, tf::Subflow& subflow)
     {
+        auto registry = scene->GetRegistry();
         auto pool = registry->GetPool<TComponent>();
         if (!pool) return;
 
@@ -147,11 +152,11 @@ namespace Syn
     }
 
     template <typename TComponent>
-    SYN_INLINE void ComponentSystem<TComponent>::UpdateComponents(std::shared_ptr<Registry> registry, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
+    SYN_INLINE void ComponentSystem<TComponent>::UpdateComponents(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
     {}
 
     template <typename TComponent>
-    SYN_INLINE void ComponentSystem<TComponent>::UploadComponents(std::shared_ptr<Registry> registry, std::shared_ptr<ComponentBufferManager> componentBufferManager, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic)
+    SYN_INLINE void ComponentSystem<TComponent>::UploadComponents(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic)
     {}
 
     template <typename TComponent>

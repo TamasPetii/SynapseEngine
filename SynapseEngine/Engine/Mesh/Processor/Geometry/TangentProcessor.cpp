@@ -9,8 +9,10 @@ namespace Syn
     void TangentProcessor::Process(CookedModel& cookedModel)
     {
         tf::Taskflow taskflow;
+        tf::GuidedPartitioner partitioner(1);
 
-        taskflow.for_each(cookedModel.meshes.begin(), cookedModel.meshes.end(), [](CookedMesh& mesh) {
+        taskflow.for_each(cookedModel.meshes.begin(), cookedModel.meshes.end(),
+            [](CookedMesh& mesh) {
             if (mesh.hasTangents || !mesh.hasNormals)
                 return;
 
@@ -70,7 +72,9 @@ namespace Syn
             }
 
             mesh.hasTangents = true;
-            });
+            },
+            partitioner
+        );
 
         ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
     }

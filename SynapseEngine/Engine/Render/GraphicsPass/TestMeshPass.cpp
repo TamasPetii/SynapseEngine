@@ -128,8 +128,9 @@ namespace Syn
 
     void TestMeshPass::PushConstants(const RenderContext & context) {
         auto modelManager = ServiceLocator::GetModelManager();
-        auto sponza = modelManager->GetResource("C:/Users/User/Desktop/Models/Sponza-master/sponza.obj");
+        auto sponza = modelManager->GetResource("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
 
+        /*
         if (!sponza || sponza->hardwareBuffers.indirectMeshletBuffer == nullptr)
             return;
 
@@ -188,13 +189,15 @@ namespace Syn
             sizeof(RenderPushConstants),
             &pc
         );
+        */
     }
 
     void TestMeshPass::Draw(const RenderContext& context)
     {
         auto modelManager = ServiceLocator::GetModelManager();
-        auto sponza = modelManager->GetResource("C:/Users/User/Desktop/Models/Sponza-master/sponza.obj");
+        auto sponza = modelManager->GetResource("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
 
+        /*
         if (!sponza || sponza->hardwareBuffers.indirectMeshletBuffer == nullptr)
             return;
 
@@ -205,5 +208,6 @@ namespace Syn
             static_cast<uint32_t>(sponza->gpuData.meshletData.drawDescriptors.size()),
             sizeof(VkDrawMeshTasksIndirectCommandEXT)
         );
+        */
     }
 }

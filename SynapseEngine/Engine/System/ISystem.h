@@ -6,10 +6,9 @@
 #include <vector>
 #include <string>
 
-#include "Engine/Manager/ComponentBufferManager.h"
-
 #include <taskflow/taskflow.hpp>
 #include <taskflow/algorithm/for_each.hpp>
+#include "Engine/Scene/Scene.h"
 
 namespace Syn
 {
@@ -18,9 +17,9 @@ namespace Syn
     public:
         virtual ~ISystem() = default;
 
-        virtual void OnUpdate(std::shared_ptr<Registry> registry, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) = 0;
-        virtual void OnUploadToGpu(std::shared_ptr<Registry> registry, std::shared_ptr<ComponentBufferManager> componentBufferManager, uint32_t frameIndex, tf::Subflow& subflow) = 0;
-        virtual void OnFinish(std::shared_ptr<Registry> registry, tf::Subflow& subflow) = 0;
+        virtual void OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) = 0;
+        virtual void OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow) = 0;
+        virtual void OnFinish(Scene* scene, tf::Subflow& subflow) = 0;
 
         virtual std::vector<TypeID> GetReadDependencies() const { return {}; }
         virtual std::vector<TypeID> GetWriteDependencies() const { return {}; }
