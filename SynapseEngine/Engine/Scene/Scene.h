@@ -10,6 +10,8 @@
 #include <unordered_map>
 #include <string>
 
+#include "SceneDrawData.h"
+
 namespace Syn
 {
     class ISystem;
@@ -25,6 +27,8 @@ namespace Syn
     {
     public:
         static constexpr uint32_t MAX_INSTANCES = 10000000;
+        static constexpr uint32_t MAX_INDIRECT_COMMANDS = 200000;
+        static constexpr uint32_t MESHLET_OFFSET_START = 100000;
 
         Scene(uint32_t frameCount);
         virtual ~Scene();
@@ -33,18 +37,12 @@ namespace Syn
         void UpdateGPU(uint32_t frameIndex);
         void Finish();
 
-        std::shared_ptr<Registry> GetRegistry() const { return _registry; }
-        std::shared_ptr<ComponentBufferManager> GetComponentBufferManager() const { return _componentBufferManager; }
-        std::shared_ptr<Vk::Buffer> GetGlobalInstanceBuffer() const { return globalInstanceBuffer; }
-        std::shared_ptr<Vk::Buffer> GetGlobalIndirectCommandBuffer() const { return globalIndirectCommandBuffer; }
-        std::shared_ptr<Vk::Buffer> GetGlobalDescriptorBuffer() const { return globalIndirectCommandDescriptorBuffer; }
-        std::shared_ptr<Vk::Buffer> GetGlobalDrawCountBuffer() const { return globalDrawCountBuffer; }
-        std::shared_ptr<Vk::Buffer> GetGlobalModelAllocationBuffer() const { return globalModelAllocationBuffer; }
-        std::shared_ptr<Vk::Buffer> GetGlobalMeshAllocationBuffer() const { return globalMeshAllocationBuffer; }
+        Registry* GetRegistry() const { return _registry.get(); }
+        ComponentBufferManager* GetComponentBufferManager() const { return _componentBufferManager.get(); }
+        SceneDrawData* GetSceneDrawData() const { return _sceneDrawData.get(); }
     private:
         void InitializeSystems();
         void InitializeComponentBuffers();
-        void InitializeGlobalBuffers();
         void BuildTaskflowGraph(tf::Taskflow& taskflow, SystemPhase phase);
         void UpdateComponentBuffers(uint32_t frameIndex);
 
@@ -58,26 +56,16 @@ namespace Syn
         void RegisterComponentSparseMapBuffer(const std::string& name);
     protected:
         EntityID _sceneCameraEntity = NULL_ENTITY;
-        std::shared_ptr<Registry> _registry;
-        std::vector<std::shared_ptr<ISystem>> _systems;
-        std::shared_ptr<ComponentBufferManager> _componentBufferManager;
+
+        std::unique_ptr<Registry> _registry;
+        std::unique_ptr<SceneDrawData> _sceneDrawData;
+        std::unique_ptr<ComponentBufferManager> _componentBufferManager;
+
+        std::vector<std::unique_ptr<ISystem>> _systems;
 
         tf::Taskflow _updateTaskflow;
         tf::Taskflow _gpuTaskflow;
         tf::Taskflow _finishTaskflow;
-
-        std::shared_ptr<Vk::Buffer> globalInstanceBuffer;
-        std::shared_ptr<Vk::Buffer> globalIndirectCommandBuffer;
-        std::shared_ptr<Vk::Buffer> globalIndirectCommandDescriptorBuffer;
-        std::shared_ptr<Vk::Buffer> globalDrawCountBuffer;
-        std::shared_ptr<Vk::Buffer> globalModelAllocationBuffer;
-        std::shared_ptr<Vk::Buffer> globalMeshAllocationBuffer;
-        
-        std::vector<ModelAllocationInfo> _modelAllocations;
-        std::vector<MeshAllocationInfo> _meshAllocations;
-        std::vector<VkDrawIndirectCommand> _traditionalCommands;
-        std::vector<VkDrawMeshTasksIndirectCommandEXT> _meshletCommands;
-        std::vector<uint32_t> _cpuInstanceBuffer;
 
         float _currentDeltaTime = 0.0f;
         uint32_t _currentFrameIndex = 0;
@@ -87,7 +75,7 @@ namespace Syn
     SYN_INLINE void Scene::RegisterSystem()
     {
         static_assert(std::is_base_of_v<ISystem, T>, "T must be derived from ISystem");
-        _systems.push_back(std::make_shared<T>());
+        _systems.push_back(std::make_unique<T>());
     }
 
     template<typename TComponent, typename TGpuStruct>

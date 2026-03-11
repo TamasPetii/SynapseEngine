@@ -3,28 +3,13 @@
 #include "Engine/Component/ModelComponent.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Manager/ModelManager.h"
-#include "Engine/Mesh/MeshDrawDescriptor.h"
-#include "Engine/Component/ModelComponent.h"
+#include "Engine/System/ModelSystem.h"
 
 namespace Syn
 {
     std::vector<TypeID> RenderSystem::GetReadDependencies() const
     {
-        return { TypeInfo<ModelComponent>::ID };
-    }
-
-    RenderSystem::RenderSystem()
-    {
-        _descriptors.resize(MAX_INDIRECT_COMMANDS);
-        _traditionalCommands.resize(MESHLET_OFFSET_START, { 0,0,0,0 });
-        _meshletCommands.resize(MAX_INDIRECT_COMMANDS - MESHLET_OFFSET_START, { 0,0,0 });
-    }
-
-    const ModelAllocationInfo* RenderSystem::GetModelAllocation(uint32_t modelId) const
-    {
-        if (modelId < _modelAllocations.size())
-            return &_modelAllocations[modelId];
-        return nullptr;
+        return { TypeInfo<ModelSystem>::ID };
     }
 
     void RenderSystem::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
@@ -33,12 +18,11 @@ namespace Syn
         auto pool = registry->GetPool<ModelComponent>();
         if (!pool) return;
 
-        // Lekérjük a modellek számát a Taskflow lambda ELŐTT
         auto modelManager = ServiceLocator::GetModelManager();
         uint32_t totalModels = static_cast<uint32_t>(modelManager->GetResourceCount());
 
         subflow.emplace([this, scene, pool, totalModels]() {
-            if (!pool->IsStateBitSet<CHANGED_BIT>() && !pool->IsStateBitSet<INDEX_CHANGED_BIT>() && !_needsRebuild)
+            if (false && !pool->IsStateBitSet<CHANGED_BIT>() && !pool->IsStateBitSet<INDEX_CHANGED_BIT>() && !_needsRebuild)
                 return;
 
             if (totalModels > _modelCapacities.size()) {
@@ -76,7 +60,9 @@ namespace Syn
             if (capacityExceeded || _needsRebuild)
             {
                 RebuildGlobalBuffers(scene);
-                _needsUpload = true;
+
+                auto drawData = scene->GetSceneDrawData();
+                _framesToUpload = static_cast<uint32_t>(drawData->globalIndirectCommandBuffers.size());
             }
             }).name("RenderSystem Update");
     }
@@ -84,100 +70,143 @@ namespace Syn
     void RenderSystem::RebuildGlobalBuffers(Scene* scene)
     {
         auto modelManager = ServiceLocator::GetModelManager();
+        auto drawData = scene->GetSceneDrawData();
 
-        _activeDescriptorCount = 0;
-        _activeTraditionalCount = 0;
-        _activeMeshletCount = 0;
+        drawData->activeDescriptorCount = 0;
+        drawData->activeTraditionalCount = 0;
+        drawData->activeMeshletCount = 0;
 
         uint32_t globalInstanceOffset = 0;
-
-        if (_modelCapacities.size() > _modelAllocations.size())
-            _modelAllocations.resize(_modelCapacities.size());
-
+        
         for (uint32_t modelId = 0; modelId < _modelCapacities.size(); ++modelId)
         {
             uint32_t capacity = _modelCapacities[modelId];
             if (capacity == 0) continue;
 
-            //Mutex miatt lehet nagyon lassú?
             auto model = modelManager->GetResource(modelId);
             if (!model) continue;
 
             const auto& blueprints = model->hardwareBuffers.baseDrawCommands;
 
-            ModelAllocationInfo& allocationInfo = _modelAllocations[modelId];
+            ModelAllocationInfo& allocationInfo = drawData->modelAllocations[modelId];
             allocationInfo.maxInstances = capacity;
-            allocationInfo.meshAllocations.clear();
-            allocationInfo.meshAllocations.reserve(blueprints.size());
+            allocationInfo.meshAllocationOffset = drawData->activeDescriptorCount;
+            allocationInfo.meshAllocationCount = static_cast<uint32_t>(blueprints.size());
 
             for (size_t i = 0; i < blueprints.size(); ++i)
             {
                 const auto& blueprint = blueprints[i];
 
-                uint32_t meshIdx = static_cast<uint32_t>(i / 4);
-                uint32_t lodIdx = static_cast<uint32_t>(i % 4);
-
-                MeshDrawDescriptor& desc = _descriptors[_activeDescriptorCount];
+                MeshDrawDescriptor desc{};
                 desc.modelIndex = modelId;
-                desc.meshIndex = meshIdx;
-                desc.lodIndex = lodIdx;
+                desc.meshIndex = static_cast<uint32_t>(i / 4);
+                desc.lodIndex = static_cast<uint32_t>(i % 4);
                 desc.instanceOffset = globalInstanceOffset;
                 desc.maxInstances = capacity;
                 desc.isMeshletPipeline = blueprint.isMeshletPipeline;
 
                 MeshAllocationInfo meshAlloc{};
-                meshAlloc.descriptorIndex = _activeDescriptorCount;
+                meshAlloc.descriptorIndex = drawData->activeDescriptorCount;
                 meshAlloc.instanceOffset = globalInstanceOffset;
                 meshAlloc.isMeshletPipeline = blueprint.isMeshletPipeline;
 
                 if (blueprint.isMeshletPipeline == MeshDrawBlueprint::PIPELINE_MESHLET)
                 {
-                    desc.indirectIndex = MESHLET_OFFSET_START + _activeMeshletCount;
-                    _meshletCommands[_activeMeshletCount] = blueprint.meshletCmd;
+                    desc.indirectIndex = SceneDrawData::MESHLET_OFFSET_START + drawData->activeMeshletCount;
+                    drawData->meshletCommands[drawData->activeMeshletCount] = blueprint.meshletCmd;
                     meshAlloc.indirectIndex = desc.indirectIndex;
-                    _activeMeshletCount++;
+                    drawData->activeMeshletCount++;
                 }
                 else
                 {
-                    desc.indirectIndex = _activeTraditionalCount;
-                    _traditionalCommands[_activeTraditionalCount] = blueprint.traditionalCmd;
+                    desc.indirectIndex = drawData->activeTraditionalCount;
+                    drawData->traditionalCommands[drawData->activeTraditionalCount] = blueprint.traditionalCmd;
                     meshAlloc.indirectIndex = desc.indirectIndex;
-                    _activeTraditionalCount++;
+                    drawData->activeTraditionalCount++;
                 }
 
-                allocationInfo.meshAllocations.push_back(meshAlloc);
+                drawData->drawDescriptors[drawData->activeDescriptorCount] = desc;
+                drawData->meshAllocations[drawData->activeDescriptorCount] = meshAlloc;
 
-                _activeDescriptorCount++;
+                drawData->activeDescriptorCount++;
                 globalInstanceOffset += capacity;
             }
         }
+
+        drawData->totalAllocatedInstances = globalInstanceOffset;
+
+        Info("================================================================================");
+        Info(" RENDER SYSTEM REBUILD REPORT");
+        Info("--------------------------------------------------------------------------------");
+        Info(" Summary:");
+        Info("   - Active Descriptors:      {}", drawData->activeDescriptorCount);
+        Info("   - Traditional Commands:    {}", drawData->activeTraditionalCount);
+        Info("   - Meshlet Commands:        {}", drawData->activeMeshletCount);
+        Info("   - Total Allocated Inst:    {}", drawData->totalAllocatedInstances);
+        Info("--------------------------------------------------------------------------------");
+
+        for (uint32_t modelId = 0; modelId < drawData->modelAllocations.size(); ++modelId)
+        {
+            const auto& mAlloc = drawData->modelAllocations[modelId];
+            if (mAlloc.maxInstances == 0) continue;
+
+            Info(" Model [{}] - MaxInstances: {}, MeshOffset: {}, MeshCount: {}",
+                modelId, mAlloc.maxInstances, mAlloc.meshAllocationOffset, mAlloc.meshAllocationCount);
+
+            for (uint32_t i = 0; i < mAlloc.meshAllocationCount; ++i)
+            {
+                uint32_t meshAllocIdx = mAlloc.meshAllocationOffset + i;
+
+                // Ellenőrzés, hogy ne indexeljünk túl a vektorokon
+                if (meshAllocIdx >= drawData->meshAllocations.size()) continue;
+
+                const auto& meshAlloc = drawData->meshAllocations[meshAllocIdx];
+                const auto& desc = drawData->drawDescriptors[meshAlloc.descriptorIndex];
+
+                Info("   MeshAlloc [{}] -> DescIdx: {}, IndirectIdx: {}, InstOffset: {}, Type: {}",
+                    i, meshAlloc.descriptorIndex, meshAlloc.indirectIndex, meshAlloc.instanceOffset,
+                    (meshAlloc.isMeshletPipeline ? "MESHLET" : "TRADITIONAL"));
+
+                Info("     Descriptor -> SubMesh: {}, LOD: {}, MaxInst: {}, GlobalIndirectIdx: {}",
+                    desc.meshIndex, desc.lodIndex, desc.maxInstances, desc.indirectIndex);
+            }
+        }
+        Info("================================================================================");
     }
 
     void RenderSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
     {
-        subflow.emplace([this, scene]() {
-            if (!_needsUpload) return;
+        subflow.emplace([this, scene, frameIndex]() {
+            if (_framesToUpload == 0) return;
 
-            size_t descSize = _activeDescriptorCount * sizeof(MeshDrawDescriptor);
-            scene->GetGlobalDescriptorBuffer()->Write(_descriptors.data(), descSize);
+            auto drawData = scene->GetSceneDrawData();
 
-            size_t tradSize = _activeTraditionalCount * sizeof(VkDrawIndirectCommand);
-            scene->GetGlobalIndirectCommandBuffer()->Write(_traditionalCommands.data(), tradSize);
+            size_t descSize = drawData->activeDescriptorCount * sizeof(MeshDrawDescriptor);
+            if (descSize > 0)
+                drawData->globalIndirectCommandDescriptorBuffers[frameIndex]->Write(drawData->drawDescriptors.data(), descSize, 0);
 
-            size_t meshletSize = _activeMeshletCount * sizeof(VkDrawMeshTasksIndirectCommandEXT);
-            size_t meshletGpuOffset = MESHLET_OFFSET_START * sizeof(VkDrawIndirectCommand);
-            scene->GetGlobalIndirectCommandBuffer()->Write(_meshletCommands.data(), meshletSize, meshletGpuOffset);
+            size_t modelAllocSize = drawData->activeDescriptorCount * sizeof(ModelAllocationInfo);
+            if (modelAllocSize > 0)
+                drawData->globalModelAllocationBuffers[frameIndex]->Write(drawData->modelAllocations.data(), modelAllocSize, 0);
 
-            uint32_t counts[2] = { _activeTraditionalCount, _activeMeshletCount };
-            scene->GetGlobalDrawCountBuffer()->Write(counts, sizeof(counts));
+            size_t meshAllocSize = drawData->activeDescriptorCount * sizeof(MeshAllocationInfo);
+            if (meshAllocSize > 0)
+                drawData->globalMeshAllocationBuffers[frameIndex]->Write(drawData->meshAllocations.data(), meshAllocSize, 0);
+
+            uint32_t counts[2] = { drawData->activeTraditionalCount, drawData->activeMeshletCount };
+            drawData->globalDrawCountBuffers[frameIndex]->Write(counts, sizeof(counts), 0);
+
             }).name("RenderSystem GPU Upload");
     }
 
     void RenderSystem::OnFinish(Scene* scene, tf::Subflow& subflow)
     {
         subflow.emplace([this]() {
-            _needsRebuild = false;
-            _needsUpload = false;
+            _needsRebuild = true;
+
+            if (_framesToUpload > 0) {
+                _framesToUpload--;
+            }
             }).name("RenderSystem Finish");
     }
 }

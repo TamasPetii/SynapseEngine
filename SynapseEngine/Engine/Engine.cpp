@@ -84,58 +84,6 @@ namespace Syn
 		InitResourceManager();
 		InitRenderPipelines();
 		InitSceneManager();
-
-		auto shaderManager = ServiceLocator::GetShaderManager();
-		shaderManager->CreateProgram("TestComputeProgram", { "../Engine/Shaders/Test.comp" });
-		shaderManager->CreateProgram("ComplexTestProgram", { "../Engine/Shaders/ComplexTest.vert", "../Engine/Shaders/ComplexTest.frag", "../Engine/Shaders/ComplexTest.geom" });
-	
-		auto modelManager = ServiceLocator::GetModelManager();
-		modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Sponza-master/sponza.obj");
-		modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
-
-		modelManager->LoadModelFromStaticMeshAsync("Sphere", []() {
-				return MeshFactory::CreateSphere();
-			});
-
-		modelManager->LoadModelFromStaticMeshAsync("Cube", []() {
-			return MeshFactory::CreateCube();
-			});
-
-		modelManager->LoadModelFromStaticMeshAsync("Quad", []() {
-			return MeshFactory::CreateQuad();
-			});
-
-		modelManager->LoadModelFromStaticMeshAsync("ScreenQuad", []() {
-			return MeshFactory::CreateScreenQuad();
-			});
-
-		modelManager->LoadModelFromStaticMeshAsync("Cylinder", []() {
-			return MeshFactory::CreateCylinder();
-			});
-
-		modelManager->LoadModelFromStaticMeshAsync("Cone", []() {
-			return MeshFactory::CreateCone();
-			});
-
-		modelManager->LoadModelFromStaticMeshAsync("Capsule", []() {
-			return MeshFactory::CreateCapsule();
-			});
-
-		modelManager->LoadModelFromStaticMeshAsync("Hemisphere", []() {
-			return MeshFactory::CreateHemisphere();
-			});
-
-		modelManager->LoadModelFromStaticMeshAsync("Pyramid", []() {
-			return MeshFactory::CreatePyramid();
-			});
-
-		modelManager->LoadModelFromStaticMeshAsync("Grid", []() {
-			return MeshFactory::CreateGrid();
-			});
-
-		modelManager->LoadModelFromStaticMeshAsync("Torus", []() {
-			return MeshFactory::CreateTorus();
-			});
 	}
 
 	void Engine::InitLogger()

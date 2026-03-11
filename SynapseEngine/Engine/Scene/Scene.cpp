@@ -1,24 +1,29 @@
 #include "Scene.h"
 #include "Engine/ServiceLocator.h"
-#include "Engine/System/TransformSystem.h"
-#include "Engine/Component/TransformComponent.h"
-#include "Engine/System/CameraSystem.h"
-#include "Engine/Component/CameraComponent.h"
-#include "Engine/System/RenderSystem.h"
 #include "Engine/Mesh/MeshDrawDescriptor.h"
 #include "Engine/Manager/ModelManager.h"
 #include "BufferNames.h"
+
+#include "Engine/Component/TransformComponent.h"
+#include "Engine/Component/CameraComponent.h"
+#include "Engine/Component/ModelComponent.h"
+
+#include "Engine/System/TransformSystem.h"
+#include "Engine/System/RenderSystem.h"
+#include "Engine/System/CameraSystem.h"
+#include "Engine/System/ModelSystem.h"
+#include "Engine/System/FrustumCullingSystem.h"
 
 namespace Syn
 {
     Scene::Scene(uint32_t frameCount)
     {
-        _registry = std::make_shared<Registry>();
-        _componentBufferManager = std::make_shared<ComponentBufferManager>(frameCount);
+        _registry = std::make_unique<Registry>();
+        _componentBufferManager = std::make_unique<ComponentBufferManager>(frameCount);
+        _sceneDrawData = std::make_unique<SceneDrawData>(frameCount);
 
         InitializeSystems();
         InitializeComponentBuffers();
-        InitializeGlobalBuffers();
 
         BuildTaskflowGraph(_updateTaskflow, SystemPhase::Update);
         BuildTaskflowGraph(_gpuTaskflow, SystemPhase::UploadGPU);
@@ -40,6 +45,8 @@ namespace Syn
         RegisterSystem<TransformSystem>();
         RegisterSystem<CameraSystem>();
         RegisterSystem<RenderSystem>();
+        RegisterSystem<ModelSystem>();
+        RegisterSystem<FrustumCullingSystem>();
     }
 
     void Scene::InitializeComponentBuffers()
@@ -50,6 +57,9 @@ namespace Syn
         RegisterComponentSparseMapBuffer<CameraComponent>(BufferNames::CameraSparseMap);
         RegisterComponentBuffer<CameraComponent, CameraComponentGPU>(BufferNames::CameraData);
         RegisterComponentBuffer<CameraComponent, CameraFrustumGPU>(BufferNames::CameraFrustumData);
+
+        RegisterComponentSparseMapBuffer<ModelComponent>(BufferNames::ModelSparseMap);
+        RegisterComponentBuffer<ModelComponent, ModelComponentGPU>(BufferNames::ModelData);
     }
 
     void Scene::BuildTaskflowGraph(tf::Taskflow& taskflow, SystemPhase phase)
@@ -124,52 +134,5 @@ namespace Syn
     void Scene::Finish()
     {
         ServiceLocator::GetTaskExecutor()->run(_finishTaskflow).wait();
-    }
-
-    void Scene::InitializeGlobalBuffers()
-    {
-        _modelAllocations.reserve(ModelManager::MAX_MODELS);
-        _meshAllocations.reserve(RenderSystem::MAX_INDIRECT_COMMANDS);
-        _traditionalCommands.resize(RenderSystem::MESHLET_OFFSET_START, { 0,0,0,0 });
-        _meshletCommands.resize(RenderSystem::MAX_INDIRECT_COMMANDS - RenderSystem::MESHLET_OFFSET_START, { 0,0,0 });
-        _cpuInstanceBuffer.resize(Scene::MAX_INSTANCES, 0);
-
-        globalInstanceBuffer = Vk::BufferFactory::CreatePersistent(
-            Scene::MAX_INSTANCES * sizeof(uint32_t),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
-        );
-
-        globalIndirectCommandDescriptorBuffer = Vk::BufferFactory::CreatePersistent(
-            RenderSystem::MAX_INDIRECT_COMMANDS * sizeof(MeshDrawDescriptor),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
-        );
-
-        size_t traditionalBytes = RenderSystem::MESHLET_OFFSET_START * sizeof(VkDrawIndirectCommand);
-        size_t meshletBytes = (RenderSystem::MAX_INDIRECT_COMMANDS - RenderSystem::MESHLET_OFFSET_START) * sizeof(VkDrawMeshTasksIndirectCommandEXT);
-
-        globalIndirectCommandBuffer = Vk::BufferFactory::CreatePersistent(
-            traditionalBytes + meshletBytes,
-            VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
-        );
-
-        globalDrawCountBuffer = Vk::BufferFactory::CreatePersistent(
-            2 * sizeof(uint32_t),
-            VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
-        );
-
-        globalIndirectCommandDescriptorBuffer = Vk::BufferFactory::CreatePersistent(
-            RenderSystem::MAX_INDIRECT_COMMANDS * sizeof(MeshDrawDescriptor),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
-        );
-
-        globalModelAllocationBuffer = Vk::BufferFactory::CreatePersistent(
-            ModelManager::MAX_MODELS * sizeof(ModelAllocationInfo),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
-        );
-
-        globalMeshAllocationBuffer = Vk::BufferFactory::CreatePersistent(
-            RenderSystem::MAX_INDIRECT_COMMANDS * sizeof(MeshAllocationInfo),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
-        );
     }
 }

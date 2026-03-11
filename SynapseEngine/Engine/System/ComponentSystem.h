@@ -62,7 +62,7 @@ namespace Syn
     template <typename TComponent>
     SYN_INLINE std::vector<TypeID> ComponentSystem<TComponent>::GetWriteDependencies() const
     {
-        return { TypeInfo<TComponent>::ID };
+        return {};
     }
 
     template <typename TComponent>

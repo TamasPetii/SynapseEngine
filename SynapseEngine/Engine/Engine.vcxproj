@@ -181,10 +181,13 @@
   <ItemGroup>
     <ClCompile Include="Component\ModelComponent.cpp" />
     <ClCompile Include="Component\BaseComponent\RenderStateComponent.cpp" />
+    <ClCompile Include="System\FrustumCullingSystem.cpp" />
     <ClCompile Include="Mesh\MeshAllocationInfo.cpp" />
+    <ClCompile Include="System\ModelSystem.cpp" />
     <ClCompile Include="Render\GraphicsPass\MeshletRenderPass.cpp" />
     <ClCompile Include="Mesh\MeshDrawBlueprint.cpp" />
     <ClCompile Include="Mesh\MeshDrawDescriptor.cpp" />
+    <ClCompile Include="Scene\SceneDrawData.cpp" />
     <ClCompile Include="System\RenderSystem.cpp" />
     <ClCompile Include="Scene\SceneManager.cpp" />
     <ClCompile Include="System\ComponentSystem.cpp" />
@@ -375,10 +378,13 @@
   <ItemGroup>
     <ClInclude Include="Component\ModelComponent.h" />
     <ClInclude Include="Component\BaseComponent\RenderStateComponent.h" />
+    <ClInclude Include="System\FrustumCullingSystem.h" />
     <ClInclude Include="Mesh\MeshAllocationInfo.h" />
+    <ClInclude Include="System\ModelSystem.h" />
     <ClInclude Include="Render\GraphicsPass\MeshletRenderPass.h" />
     <ClInclude Include="Mesh\MeshDrawBlueprint.h" />
     <ClInclude Include="Mesh\MeshDrawDescriptor.h" />
+    <ClInclude Include="Scene\SceneDrawData.h" />
     <ClInclude Include="System\RenderSystem.h" />
     <ClInclude Include="Scene\SceneManager.h" />
     <ClInclude Include="Scene\BufferNames.h" />

@@ -121,10 +121,12 @@ namespace Syn
         auto scene = context.scene;
         if (!scene) return;
 
-        auto indirectBuffer = scene->GetGlobalIndirectCommandBuffer()->Handle();
-        auto countBuffer = scene->GetGlobalDrawCountBuffer()->Handle();
+        auto drawData = scene->GetSceneDrawData();
 
-        VkDeviceSize indirectOffset = RenderSystem::MESHLET_OFFSET_START * sizeof(VkDrawIndirectCommand);
+        auto indirectBuffer = drawData->globalIndirectCommandBuffers[context.frameIndex]->Handle();
+        auto countBuffer = drawData->globalDrawCountBuffers[context.frameIndex]->Handle();
+
+        VkDeviceSize indirectOffset = SceneDrawData::MESHLET_OFFSET_START * sizeof(VkDrawIndirectCommand);
         VkDeviceSize countOffset = sizeof(uint32_t);
 
         vkCmdDrawMeshTasksIndirectCountEXT(
@@ -133,7 +135,7 @@ namespace Syn
             indirectOffset,
             countBuffer,
             countOffset,
-            RenderSystem::MAX_INDIRECT_COMMANDS,
+            SceneDrawData::MAX_INDIRECT_COMMANDS,
             sizeof(VkDrawMeshTasksIndirectCommandEXT)
         );
     }

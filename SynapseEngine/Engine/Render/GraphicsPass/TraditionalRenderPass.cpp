@@ -121,8 +121,10 @@ namespace Syn {
         auto scene = context.scene;
         if (!scene) return;
 
-        auto indirectBuffer = scene->GetGlobalIndirectCommandBuffer()->Handle();
-        auto countBuffer = scene->GetGlobalDrawCountBuffer()->Handle();
+        auto drawData = scene->GetSceneDrawData();
+
+        auto indirectBuffer = drawData->globalIndirectCommandBuffers[context.frameIndex]->Handle();
+        auto countBuffer = drawData->globalDrawCountBuffers[context.frameIndex]->Handle();
 
         vkCmdDrawIndexedIndirectCount(
             context.cmd,
@@ -130,7 +132,7 @@ namespace Syn {
             0,
             countBuffer,
             0,
-            RenderSystem::MAX_INDIRECT_COMMANDS,
+            SceneDrawData::MAX_INDIRECT_COMMANDS,
             sizeof(VkDrawIndirectCommand)
         );
     }

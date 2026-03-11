@@ -95,7 +95,7 @@ namespace Syn {
             blueprint.meshletCmd.groupCountY = 1;
             blueprint.meshletCmd.groupCountZ = 1;
 
-            if (hasMeshlet && tradDesc.indexCount > 5000) {
+            if (false && hasMeshlet && tradDesc.indexCount > 5000) {
                 blueprint.isMeshletPipeline = MeshDrawBlueprint::PIPELINE_MESHLET;
             }
             else {
