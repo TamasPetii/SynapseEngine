@@ -588,6 +588,9 @@
     <ClCompile Include="Render\GraphicsPass\MeshletRenderPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Mesh\MeshAllocationInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1239,6 +1242,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\GraphicsPass\MeshletRenderPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh\MeshAllocationInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

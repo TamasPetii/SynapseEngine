@@ -24,6 +24,8 @@ namespace Syn
     class SYN_API Scene
     {
     public:
+        static constexpr uint32_t MAX_INSTANCES = 10000000;
+
         Scene(uint32_t frameCount);
         virtual ~Scene();
 
@@ -37,6 +39,8 @@ namespace Syn
         std::shared_ptr<Vk::Buffer> GetGlobalIndirectCommandBuffer() const { return globalIndirectCommandBuffer; }
         std::shared_ptr<Vk::Buffer> GetGlobalDescriptorBuffer() const { return globalIndirectCommandDescriptorBuffer; }
         std::shared_ptr<Vk::Buffer> GetGlobalDrawCountBuffer() const { return globalDrawCountBuffer; }
+        std::shared_ptr<Vk::Buffer> GetGlobalModelAllocationBuffer() const { return globalModelAllocationBuffer; }
+        std::shared_ptr<Vk::Buffer> GetGlobalMeshAllocationBuffer() const { return globalMeshAllocationBuffer; }
     private:
         void InitializeSystems();
         void InitializeComponentBuffers();
@@ -58,14 +62,22 @@ namespace Syn
         std::vector<std::shared_ptr<ISystem>> _systems;
         std::shared_ptr<ComponentBufferManager> _componentBufferManager;
 
+        tf::Taskflow _updateTaskflow;
+        tf::Taskflow _gpuTaskflow;
+        tf::Taskflow _finishTaskflow;
+
         std::shared_ptr<Vk::Buffer> globalInstanceBuffer;
         std::shared_ptr<Vk::Buffer> globalIndirectCommandBuffer;
         std::shared_ptr<Vk::Buffer> globalIndirectCommandDescriptorBuffer;
         std::shared_ptr<Vk::Buffer> globalDrawCountBuffer;
-
-        tf::Taskflow _updateTaskflow;
-        tf::Taskflow _gpuTaskflow;
-        tf::Taskflow _finishTaskflow;
+        std::shared_ptr<Vk::Buffer> globalModelAllocationBuffer;
+        std::shared_ptr<Vk::Buffer> globalMeshAllocationBuffer;
+        
+        std::vector<ModelAllocationInfo> _modelAllocations;
+        std::vector<MeshAllocationInfo> _meshAllocations;
+        std::vector<VkDrawIndirectCommand> _traditionalCommands;
+        std::vector<VkDrawMeshTasksIndirectCommandEXT> _meshletCommands;
+        std::vector<uint32_t> _cpuInstanceBuffer;
 
         float _currentDeltaTime = 0.0f;
         uint32_t _currentFrameIndex = 0;

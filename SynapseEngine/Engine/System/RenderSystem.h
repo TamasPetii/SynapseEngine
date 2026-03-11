@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <vulkan/vulkan.h>
 #include "Engine/Mesh/MeshDrawDescriptor.h"
+#include "Engine/Mesh/MeshAllocationInfo.h"
 
 namespace Syn
 {
@@ -21,12 +22,20 @@ namespace Syn
         void OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) override;
         void OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow) override;
         void OnFinish(Scene* scene, tf::Subflow& subflow) override;
+
+        uint32_t GetActiveTraditionalCount() const { return _activeTraditionalCount; }
+        uint32_t GetActiveMeshletCount() const { return _activeMeshletCount; }
+
+        const ModelAllocationInfo* GetModelAllocation(uint32_t modelId) const;
     private:
-        void RebuildGlobalBuffers(Scene* scene, const std::unordered_map<uint32_t, uint32_t>& currentCounts);
+        void RebuildGlobalBuffers(Scene* scene);
     private:
-        std::unordered_map<uint32_t, uint32_t> _modelCapacities;
+        std::vector<uint32_t> _currentCounts;
+        std::vector<uint32_t> _modelCapacities;
+        std::vector<ModelAllocationInfo> _modelAllocations;
+
         bool _needsRebuild = true;
-        bool _needsUpload = true;
+        bool _needsUpload = false;
 
         std::vector<MeshDrawDescriptor> _descriptors;
         std::vector<VkDrawIndirectCommand> _traditionalCommands;

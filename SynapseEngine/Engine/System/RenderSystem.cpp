@@ -20,21 +20,39 @@ namespace Syn
         _meshletCommands.resize(MAX_INDIRECT_COMMANDS - MESHLET_OFFSET_START, { 0,0,0 });
     }
 
+    const ModelAllocationInfo* RenderSystem::GetModelAllocation(uint32_t modelId) const
+    {
+        if (modelId < _modelAllocations.size())
+            return &_modelAllocations[modelId];
+        return nullptr;
+    }
+
     void RenderSystem::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
     {
         auto registry = scene->GetRegistry();
         auto pool = registry->GetPool<ModelComponent>();
         if (!pool) return;
 
-        subflow.emplace([this, scene, pool]() {
-            //Todo: Nem elég a changed bit, vagy akkor model component esetén mindenhol be kell állítani?
+        // Lekérjük a modellek számát a Taskflow lambda ELŐTT
+        auto modelManager = ServiceLocator::GetModelManager();
+        uint32_t totalModels = static_cast<uint32_t>(modelManager->GetResourceCount());
+
+        subflow.emplace([this, scene, pool, totalModels]() {
             if (!pool->IsStateBitSet<CHANGED_BIT>() && !pool->IsStateBitSet<INDEX_CHANGED_BIT>() && !_needsRebuild)
                 return;
 
-            std::unordered_map<uint32_t, uint32_t> currentCounts;
+            if (totalModels > _modelCapacities.size()) {
+                _modelCapacities.resize(totalModels, 0);
+            }
 
-            auto countFunc = [&pool, &currentCounts](EntityID entity) {
-                currentCounts[pool->Get(entity).modelIndex]++;
+            if (totalModels > _currentCounts.size()) {
+                _currentCounts.resize(totalModels, 0);
+            }
+
+            std::fill(_currentCounts.begin(), _currentCounts.begin() + totalModels, 0);
+
+            auto countFunc = [this, &pool](EntityID entity) {
+                _currentCounts[pool->Get(entity).modelIndex]++;
                 };
 
             for (auto e : pool->GetStorage().GetStaticEntities()) countFunc(e);
@@ -42,8 +60,12 @@ namespace Syn
             for (auto e : pool->GetStorage().GetStreamEntities()) countFunc(e);
 
             bool capacityExceeded = false;
-            for (const auto& [modelId, count] : currentCounts)
+
+            for (uint32_t modelId = 0; modelId < totalModels; ++modelId)
             {
+                uint32_t count = _currentCounts[modelId];
+                if (count == 0) continue;
+
                 if (count > _modelCapacities[modelId])
                 {
                     capacityExceeded = true;
@@ -53,13 +75,13 @@ namespace Syn
 
             if (capacityExceeded || _needsRebuild)
             {
-                RebuildGlobalBuffers(scene, currentCounts);
+                RebuildGlobalBuffers(scene);
                 _needsUpload = true;
             }
             }).name("RenderSystem Update");
     }
 
-    void RenderSystem::RebuildGlobalBuffers(Scene* scene, const std::unordered_map<uint32_t, uint32_t>& currentCounts)
+    void RenderSystem::RebuildGlobalBuffers(Scene* scene)
     {
         auto modelManager = ServiceLocator::GetModelManager();
 
@@ -68,15 +90,25 @@ namespace Syn
         _activeMeshletCount = 0;
 
         uint32_t globalInstanceOffset = 0;
-        uint32_t tradCommandIndex = 0;
-        uint32_t meshletCommandIndex = MESHLET_OFFSET_START;
 
-        for (const auto& [modelId, capacity] : _modelCapacities)
+        if (_modelCapacities.size() > _modelAllocations.size())
+            _modelAllocations.resize(_modelCapacities.size());
+
+        for (uint32_t modelId = 0; modelId < _modelCapacities.size(); ++modelId)
         {
+            uint32_t capacity = _modelCapacities[modelId];
+            if (capacity == 0) continue;
+
+            //Mutex miatt lehet nagyon lassú?
             auto model = modelManager->GetResource(modelId);
             if (!model) continue;
 
             const auto& blueprints = model->hardwareBuffers.baseDrawCommands;
+
+            ModelAllocationInfo& allocationInfo = _modelAllocations[modelId];
+            allocationInfo.maxInstances = capacity;
+            allocationInfo.meshAllocations.clear();
+            allocationInfo.meshAllocations.reserve(blueprints.size());
 
             for (size_t i = 0; i < blueprints.size(); ++i)
             {
@@ -93,18 +125,27 @@ namespace Syn
                 desc.maxInstances = capacity;
                 desc.isMeshletPipeline = blueprint.isMeshletPipeline;
 
+                MeshAllocationInfo meshAlloc{};
+                meshAlloc.descriptorIndex = _activeDescriptorCount;
+                meshAlloc.instanceOffset = globalInstanceOffset;
+                meshAlloc.isMeshletPipeline = blueprint.isMeshletPipeline;
+
                 if (blueprint.isMeshletPipeline == MeshDrawBlueprint::PIPELINE_MESHLET)
                 {
                     desc.indirectIndex = MESHLET_OFFSET_START + _activeMeshletCount;
                     _meshletCommands[_activeMeshletCount] = blueprint.meshletCmd;
+                    meshAlloc.indirectIndex = desc.indirectIndex;
                     _activeMeshletCount++;
                 }
                 else
                 {
                     desc.indirectIndex = _activeTraditionalCount;
                     _traditionalCommands[_activeTraditionalCount] = blueprint.traditionalCmd;
+                    meshAlloc.indirectIndex = desc.indirectIndex;
                     _activeTraditionalCount++;
                 }
+
+                allocationInfo.meshAllocations.push_back(meshAlloc);
 
                 _activeDescriptorCount++;
                 globalInstanceOffset += capacity;

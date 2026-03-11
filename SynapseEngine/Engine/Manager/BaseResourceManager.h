@@ -42,6 +42,7 @@ namespace Syn {
         void Update();
         std::shared_ptr<TResource> GetResource(uint32_t id) const;
         std::shared_ptr<TResource> GetResource(const std::string& name) const;
+        size_t GetResourceCount() const;
     protected:
         uint32_t InternalLoadAsync(const std::string& key, std::function<std::shared_ptr<TResource>()> task);
         std::shared_ptr<TResource> GetResource(uint32_t id, bool internalCall) const;
@@ -115,5 +116,11 @@ namespace Syn {
         if (id >= _entries.size()) return nullptr;
         if (_entries[id].state == ResourceState::Ready) return _entries[id].resource;
         return nullptr;
+    }
+
+    template <typename TResource>
+    size_t BaseResourceManager<TResource>::GetResourceCount() const {
+        std::lock_guard<std::mutex> lock(_mutex);
+        return _entries.size();
     }
 }

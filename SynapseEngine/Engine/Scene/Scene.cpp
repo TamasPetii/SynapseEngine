@@ -6,6 +6,7 @@
 #include "Engine/Component/CameraComponent.h"
 #include "Engine/System/RenderSystem.h"
 #include "Engine/Mesh/MeshDrawDescriptor.h"
+#include "Engine/Manager/ModelManager.h"
 #include "BufferNames.h"
 
 namespace Syn
@@ -127,15 +128,20 @@ namespace Syn
 
     void Scene::InitializeGlobalBuffers()
     {
-        uint32_t maxInstances = 10000000;
+        _modelAllocations.reserve(ModelManager::MAX_MODELS);
+        _meshAllocations.reserve(RenderSystem::MAX_INDIRECT_COMMANDS);
+        _traditionalCommands.resize(RenderSystem::MESHLET_OFFSET_START, { 0,0,0,0 });
+        _meshletCommands.resize(RenderSystem::MAX_INDIRECT_COMMANDS - RenderSystem::MESHLET_OFFSET_START, { 0,0,0 });
+        _cpuInstanceBuffer.resize(Scene::MAX_INSTANCES, 0);
+
         globalInstanceBuffer = Vk::BufferFactory::CreatePersistent(
-            maxInstances * sizeof(uint32_t),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT 
+            Scene::MAX_INSTANCES * sizeof(uint32_t),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
         );
 
         globalIndirectCommandDescriptorBuffer = Vk::BufferFactory::CreatePersistent(
             RenderSystem::MAX_INDIRECT_COMMANDS * sizeof(MeshDrawDescriptor),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
         );
 
         size_t traditionalBytes = RenderSystem::MESHLET_OFFSET_START * sizeof(VkDrawIndirectCommand);
@@ -143,12 +149,27 @@ namespace Syn
 
         globalIndirectCommandBuffer = Vk::BufferFactory::CreatePersistent(
             traditionalBytes + meshletBytes,
-            VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+            VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
         );
 
         globalDrawCountBuffer = Vk::BufferFactory::CreatePersistent(
             2 * sizeof(uint32_t),
-            VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+            VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+        );
+
+        globalIndirectCommandDescriptorBuffer = Vk::BufferFactory::CreatePersistent(
+            RenderSystem::MAX_INDIRECT_COMMANDS * sizeof(MeshDrawDescriptor),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
+        );
+
+        globalModelAllocationBuffer = Vk::BufferFactory::CreatePersistent(
+            ModelManager::MAX_MODELS * sizeof(ModelAllocationInfo),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
+        );
+
+        globalMeshAllocationBuffer = Vk::BufferFactory::CreatePersistent(
+            RenderSystem::MAX_INDIRECT_COMMANDS * sizeof(MeshAllocationInfo),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
         );
     }
 }

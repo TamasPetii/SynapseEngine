@@ -181,6 +181,7 @@
   <ItemGroup>
     <ClCompile Include="Component\ModelComponent.cpp" />
     <ClCompile Include="Component\BaseComponent\RenderStateComponent.cpp" />
+    <ClCompile Include="Mesh\MeshAllocationInfo.cpp" />
     <ClCompile Include="Render\GraphicsPass\MeshletRenderPass.cpp" />
     <ClCompile Include="Mesh\MeshDrawBlueprint.cpp" />
     <ClCompile Include="Mesh\MeshDrawDescriptor.cpp" />
@@ -374,6 +375,7 @@
   <ItemGroup>
     <ClInclude Include="Component\ModelComponent.h" />
     <ClInclude Include="Component\BaseComponent\RenderStateComponent.h" />
+    <ClInclude Include="Mesh\MeshAllocationInfo.h" />
     <ClInclude Include="Render\GraphicsPass\MeshletRenderPass.h" />
     <ClInclude Include="Mesh\MeshDrawBlueprint.h" />
     <ClInclude Include="Mesh\MeshDrawDescriptor.h" />

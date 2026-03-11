@@ -15,6 +15,8 @@ namespace Syn {
 
     class SYN_API ModelManager : public BaseResourceManager<StaticMesh> {
     public:
+        static constexpr uint32_t MAX_MODELS = 10000;
+
         ModelManager(std::shared_ptr<StaticMeshBuilder> builder, std::unique_ptr<IGpuModelUploader> uploader, TextureLoadCallback textureLoadCallback = nullptr);
         ~ModelManager() = default;
 
