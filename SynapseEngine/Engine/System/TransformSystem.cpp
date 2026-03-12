@@ -6,6 +6,11 @@
 
 namespace Syn
 {
+    std::vector<TypeID> TransformSystem::GetWriteDependencies() const
+    {
+        { return { TypeInfo<TransformSystem>::ID }; }
+    }
+
     void TransformSystem::UpdateComponents(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
     {
         auto registry = scene->GetRegistry();

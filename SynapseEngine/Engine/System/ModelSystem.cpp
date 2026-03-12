@@ -2,6 +2,10 @@
 
 namespace Syn
 {
+    std::vector<TypeID> ModelSystem::GetWriteDependencies() const { 
+        return { TypeInfo<ModelSystem>::ID };
+    }
+
     void ModelSystem::UpdateComponents(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
     {
         auto registry = scene->GetRegistry();

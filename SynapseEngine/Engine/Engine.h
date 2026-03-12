@@ -36,7 +36,7 @@ namespace Syn
         Engine(const EngineInitParams& params);
         ~Engine();
 
-        void Update();
+        void Update(float deltaTime);
         void Render();
         void WindowResizeEvent(uint32_t width, uint32_t height);
 

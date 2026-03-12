@@ -19,5 +19,8 @@ void main() {
         color = vec3(1.0, 0.8, 0.1); //Sárga
     }
 
-    outFragColor = vec4(color, 1.0);
+    vec3 lightDir = normalize(vec3(0.5, 1.0, 0.3));
+    float ndotl = max(dot(normalize(inNormal), lightDir), 0.0);
+
+    outFragColor = vec4(color * ndotl, 1.0);
 }

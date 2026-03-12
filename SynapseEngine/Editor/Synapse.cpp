@@ -39,7 +39,7 @@ void Synapse::OnInit() {
 
 void Synapse::OnUpdate(float dt) {
     if (_engine) {
-        _engine->Update();
+        _engine->Update(dt);
     }
 }
 

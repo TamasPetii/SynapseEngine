@@ -17,8 +17,6 @@
 namespace Syn {
 
     struct TraditionalPushConstants {
-        glm::mat4 viewProj;
-
         VkDeviceAddress modelAddressBuffer;
 
         VkDeviceAddress globalDrawCountBuffers;
@@ -37,6 +35,9 @@ namespace Syn {
 
         uint32_t activeCameraEntity;
         uint32_t meshletOffsetStart;
+
+        uint32_t padding0;
+        uint32_t padding1;
     };
 
     void TraditionalRenderPass::Initialize() {
@@ -149,42 +150,6 @@ namespace Syn {
         auto registry = scene->GetRegistry();
         auto componentBufferManager = scene->GetComponentBufferManager();
 
-        static glm::vec3 camPos = glm::vec3(0.0f, 5.0f, 0.0f);
-        static float yaw = 0.0f;
-        static float pitch = 0.0f;
-
-        float moveSpeed = 0.5f;
-        float rotSpeed = 0.02f;
-
-        if (GetAsyncKeyState(VK_LEFT) & 0x8000)  yaw -= rotSpeed;
-        if (GetAsyncKeyState(VK_RIGHT) & 0x8000) yaw += rotSpeed;
-        if (GetAsyncKeyState(VK_UP) & 0x8000)    pitch += rotSpeed;
-        if (GetAsyncKeyState(VK_DOWN) & 0x8000)  pitch -= rotSpeed;
-
-        pitch = glm::clamp(pitch, -1.5f, 1.5f);
-
-        glm::vec3 front;
-        front.x = cos(yaw) * cos(pitch);
-        front.y = sin(pitch);
-        front.z = sin(yaw) * cos(pitch);
-        front = glm::normalize(front);
-
-        glm::vec3 right = glm::normalize(glm::cross(front, glm::vec3(0.0f, 1.0f, 0.0f)));
-        glm::vec3 up = glm::normalize(glm::cross(right, front));
-
-        if (GetAsyncKeyState('W') & 0x8000) camPos += front * moveSpeed;
-        if (GetAsyncKeyState('S') & 0x8000) camPos -= front * moveSpeed;
-        if (GetAsyncKeyState('A') & 0x8000) camPos -= right * moveSpeed;
-        if (GetAsyncKeyState('D') & 0x8000) camPos += right * moveSpeed;
-
-        if (GetAsyncKeyState('Q') & 0x8000) camPos -= up * moveSpeed;
-        if (GetAsyncKeyState('E') & 0x8000) camPos += up * moveSpeed;
-
-        glm::vec3 camTarget = camPos + front;
-        glm::mat4 view = glm::lookAt(camPos, camTarget, up);
-        glm::mat4 proj = glm::perspective(glm::radians(60.0f), 16.0f / 9.0f, 0.1f, 5000.0f);
-        proj[1][1] *= -1.0f;
-
         TraditionalPushConstants pc{};
 
         // 1. Model Manager globális címei
@@ -207,8 +172,6 @@ namespace Syn {
 
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.meshletOffsetStart = SceneDrawData::MESHLET_OFFSET_START;
-
-        pc.viewProj = proj * view;
 
         vkCmdPushConstants(
             context.cmd,

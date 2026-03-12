@@ -12,6 +12,11 @@ namespace Syn
         return { TypeInfo<ModelSystem>::ID };
     }
 
+    std::vector<TypeID> RenderSystem::GetWriteDependencies() const
+    {
+        return { TypeInfo<RenderSystem>::ID };
+    }
+
     void RenderSystem::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
     {
         auto registry = scene->GetRegistry();

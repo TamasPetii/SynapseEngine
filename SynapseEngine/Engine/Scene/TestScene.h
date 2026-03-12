@@ -27,7 +27,6 @@ namespace Syn
 
             std::vector<uint32_t> geoIds;
             geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Cube", []() { return MeshFactory::CreateCube(); }));
-            /*
             geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Sphere", []() { return MeshFactory::CreateSphere(); }));
             geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Quad", []() { return MeshFactory::CreateQuad(); }));
             geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("ScreenQuad", []() { return MeshFactory::CreateScreenQuad(); }));
@@ -38,7 +37,6 @@ namespace Syn
             geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Pyramid", []() { return MeshFactory::CreatePyramid(); }));
             geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Grid", []() { return MeshFactory::CreateGrid(); }));
             geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Torus", []() { return MeshFactory::CreateTorus(); }));   
-            */
 
             //Camera
             EntityID cameraEntity = registry->CreateEntity();
@@ -48,7 +46,6 @@ namespace Syn
             cam.isMain = true;
             _sceneCameraEntity = cameraEntity;
 
-            /*
             // Sponza
             EntityID sponzaEntity = registry->CreateEntity();
             registry->AddComponent<TransformComponent>(sponzaEntity);
@@ -70,10 +67,9 @@ namespace Syn
 
             registry->GetPool<TransformComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
             registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
-            */
 
             // Random Geometry
-            for (int i = 0; i < 1000000; i++)
+            for (int i = 0; i < 50000; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);

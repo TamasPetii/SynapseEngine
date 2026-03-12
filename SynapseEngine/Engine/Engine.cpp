@@ -47,13 +47,17 @@ namespace Syn
 		Shutdown();
 	}
 
-	void Engine::Update()
+	void Engine::Update(float deltaTime)
 	{
+		_frameContext.deltaTime = deltaTime;
+
 		ServiceLocator::GetModelManager()->Update();
 		ServiceLocator::GetImageManager()->Update();
 		ServiceLocator::GetGpuUploader()->ProcessUploads();
 
 		_sceneManager->Update(_frameContext.deltaTime, _frameContext.currentFrameIndex);
+	
+		ServiceLocator::GetInputManager()->UpdatePrevious();
 	}
 
 	void Engine::Render()
@@ -79,7 +83,7 @@ namespace Syn
 		_inputManager = std::make_unique<InputManager>();
 		ServiceLocator::ProvideInputManager(_inputManager.get());
 
-		InitFrameContext(1);
+		InitFrameContext(3);
 		InitLogger();
 		InitVulkan(params);
 		InitTaskExecutor();

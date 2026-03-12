@@ -80,8 +80,6 @@ layout(buffer_reference, std430) readonly buffer TransformPool      { TransformC
 layout(buffer_reference, std430) readonly buffer CameraPool         { CameraComponent data[]; };
 
 layout(push_constant) uniform PushConstants {
-    mat4 viewProj;
-
     uint64_t modelAddressBuffer;
 
     uint64_t globalDrawCountBuffers;
@@ -100,6 +98,9 @@ layout(push_constant) uniform PushConstants {
 
     uint activeCameraEntity;
     uint meshletOffsetStart;
+
+    uint padding0;
+    uint padding1;
 } pc;
 
 layout(location = 0) out vec3 outNormal;
@@ -146,7 +147,7 @@ void main() {
     GpuNodeTransform nodeTransform = nodes.data[nodeIndex];
 
     // 8. Végső mátrixszorzások (Camera * Transform * Node * Vertex)
-    gl_Position = pc.viewProj * transform.transform * nodeTransform.globalTransform * vec4(v.position, 1.0);
+    gl_Position = camera.viewProjVulkan * transform.transform * nodeTransform.globalTransform * vec4(v.position, 1.0);
    
     // Normálvektor transzformálása
     outNormal = normalize(transform.transformIT * nodeTransform.globalTransformIT * vec4(attr.normal, 0)).xyz;

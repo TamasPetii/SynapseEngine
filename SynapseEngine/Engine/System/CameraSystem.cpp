@@ -9,6 +9,11 @@
 
 namespace Syn
 {
+    std::vector<TypeID> CameraSystem::GetWriteDependencies() const
+    { 
+        return { TypeInfo<CameraSystem>::ID };
+    }
+
     void CameraSystem::UpdateComponents(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
     {
         auto registry = scene->GetRegistry();
@@ -99,7 +104,6 @@ namespace Syn
                 bufferHandler[cameraIndex] = CameraComponentGPU(cameraComponent);
             }
 
-            /*
             if (cameraFrustumBuffer.versions[cameraIndex] != cameraComponent.version)
             {
                 cameraFrustumBuffer.versions[cameraIndex] = cameraComponent.version;
@@ -120,7 +124,6 @@ namespace Syn
 
                 cameraFrustumBufferHandler[cameraIndex] = cameraFrustum;
             }
-            */
             };
 
         ForEachStream(cameraPool, subflow, processUpload);
