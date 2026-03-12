@@ -6,6 +6,7 @@
 
 #include "Engine/Vk/Core/ThreadSafeQueue.h"
 #include "Engine/Vk/Command/CommandPool.h"
+#include "Engine/Utils/WindowedBuffer.h"
 
 namespace Syn {
 
@@ -23,6 +24,9 @@ namespace Syn {
         uint32_t LoadModelAsync(const std::string& filePath);
         uint32_t LoadModelFromSourceAsync(const std::string& name, MeshSourceFactory factory);
         uint32_t LoadModelFromStaticMeshAsync(const std::string& name, StaticMeshFactory factory);
+
+        Vk::Buffer* GetModelAddressBuffer() const { return _modelAddressBuffer.get(); }
+
     protected:
         void StartGpuUpload(EntryType& entry) override;
         void FinalizeResource(EntryType& entry) override;
@@ -30,5 +34,6 @@ namespace Syn {
         TextureLoadCallback _textureLoadCallback;
         std::shared_ptr<StaticMeshBuilder> _builder;
         std::unique_ptr<IGpuModelUploader> _uploader;
+        std::unique_ptr<Vk::Buffer> _modelAddressBuffer;
     };
 }

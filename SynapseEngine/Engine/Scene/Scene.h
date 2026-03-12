@@ -40,6 +40,7 @@ namespace Syn
         Registry* GetRegistry() const { return _registry.get(); }
         ComponentBufferManager* GetComponentBufferManager() const { return _componentBufferManager.get(); }
         SceneDrawData* GetSceneDrawData() const { return _sceneDrawData.get(); }
+        EntityID GetSceneCameraEntity() const { return _sceneCameraEntity; }
     private:
         void InitializeSystems();
         void InitializeComponentBuffers();

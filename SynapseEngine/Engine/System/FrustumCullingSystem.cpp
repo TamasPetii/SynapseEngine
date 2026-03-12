@@ -39,7 +39,7 @@ namespace Syn
             const auto& modelAlloc = drawData->modelAllocations[modelComp.modelIndex];
 
             bool isVisible = true;
-            uint32_t calculatedLod = 0;
+            uint32_t calculatedLod = rand() % 4;
 
             if (isVisible)
             {

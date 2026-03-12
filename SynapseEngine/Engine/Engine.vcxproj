@@ -609,6 +609,8 @@
     <None Include="Shaders\Test.frag" />
     <None Include="Shaders\TestMesh.mesh" />
     <None Include="Shaders\Test.vert" />
+    <None Include="Shaders\Traditional.frag" />
+    <None Include="Shaders\Traditional.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

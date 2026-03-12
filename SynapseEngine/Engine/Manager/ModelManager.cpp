@@ -5,12 +5,18 @@
 #include "Engine/Vk/Rendering/GpuUploader.h"
 #include "Engine/Vk/Buffer/BufferFactory.h"
 #include "Engine/Logger/SynLog.h"
+#include "Engine/Utils/WindowedBuffer.h"
+#include "Engine/Vk/Buffer/Buffer.h"
 
 namespace Syn {
 
     ModelManager::ModelManager(std::shared_ptr<StaticMeshBuilder> builder, std::unique_ptr<IGpuModelUploader> uploader, TextureLoadCallback textureLoadCallback)
         : _builder(builder), _uploader(std::move(uploader)), _textureLoadCallback(std::move(textureLoadCallback))
     {
+        _modelAddressBuffer = Vk::BufferFactory::CreatePersistent(
+            MAX_MODELS * sizeof(GpuModelAddresses),
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
+        );
     }
 
     uint32_t ModelManager::LoadModelAsync(const std::string& filePath) {
@@ -104,5 +110,33 @@ namespace Syn {
 
             entry.resource->hardwareBuffers.baseDrawCommands.push_back(blueprint);
         }
+        
+        uint32_t entryIndex = _pathToId.at(entry.path);
+
+        GpuModelAddresses addresses{};
+        const auto& hw = entry.resource->hardwareBuffers;
+
+        auto getAddr = [](const std::unique_ptr<Vk::Buffer>& buf) -> VkDeviceAddress {
+            return buf ? buf->GetDeviceAddress() : 0;
+            };
+
+        addresses.vertexPositions = getAddr(hw.vertexPositions);
+        addresses.vertexAttributes = getAddr(hw.vertexAttributes);
+        addresses.indices = getAddr(hw.indices);
+
+        addresses.meshDescriptors = getAddr(hw.meshDescriptors);
+        addresses.meshColliders = getAddr(hw.meshColliders);
+        addresses.lodDescriptors = getAddr(hw.lodDescriptors);
+
+        addresses.meshletVertexIndices = getAddr(hw.meshletVertexIndices);
+        addresses.meshletTriangleIndices = getAddr(hw.meshletTriangleIndices);
+        addresses.meshletDescriptors = getAddr(hw.meshletDescriptors);
+        addresses.meshletDrawDescriptors = getAddr(hw.meshletDrawDescriptors);
+        addresses.meshletColliders = getAddr(hw.meshletColliders);
+
+        addresses.nodeTransforms = getAddr(hw.nodeTransforms);
+
+        size_t offset = entryIndex * sizeof(GpuModelAddresses);
+        _modelAddressBuffer->Write(&addresses, sizeof(GpuModelAddresses), offset);
     }
 }

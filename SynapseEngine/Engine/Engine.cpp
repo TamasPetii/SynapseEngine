@@ -31,6 +31,8 @@
 #include "Engine/Scene/SceneManager.h"
 #include "Engine/Scene/TestScene.h"
 
+#include "Engine/Render/GraphicsPass/TraditionalRenderPass.h"
+
 #include <print>
 
 namespace Syn
@@ -77,7 +79,7 @@ namespace Syn
 		_inputManager = std::make_unique<InputManager>();
 		ServiceLocator::ProvideInputManager(_inputManager.get());
 
-		InitFrameContext(3);
+		InitFrameContext(1);
 		InitLogger();
 		InitVulkan(params);
 		InitTaskExecutor();
@@ -151,7 +153,7 @@ namespace Syn
 		_renderManager = std::make_unique<RenderManager>(framesInFlight);
 
 		auto pipeline = std::make_unique<RenderPipeline>();
-		pipeline->AddPass(std::make_unique<TestMeshPass>());
+		pipeline->AddPass(std::make_unique<TraditionalRenderPass>());
 		pipeline->AddPass(std::make_unique<PresentationPass>());
 		pipeline->InitializeAll();
 

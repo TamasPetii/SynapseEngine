@@ -40,9 +40,10 @@ namespace Syn {
         virtual ~BaseResourceManager() = default;
 
         void Update();
+        size_t GetResourceCount() const;
+        ResourceState GetEntryState(uint32_t id) const;
         std::shared_ptr<TResource> GetResource(uint32_t id) const;
         std::shared_ptr<TResource> GetResource(const std::string& name) const;
-        size_t GetResourceCount() const;
     protected:
         uint32_t InternalLoadAsync(const std::string& key, std::function<std::shared_ptr<TResource>()> task);
         std::shared_ptr<TResource> GetResource(uint32_t id, bool internalCall) const;
@@ -122,5 +123,11 @@ namespace Syn {
     size_t BaseResourceManager<TResource>::GetResourceCount() const {
         std::lock_guard<std::mutex> lock(_mutex);
         return _entries.size();
+    }
+    template <typename TResource>
+    ResourceState BaseResourceManager<TResource>::GetEntryState(uint32_t id) const
+    {
+        std::lock_guard<std::mutex> lock(_mutex);
+        return _entries[id].state;
     }
 }

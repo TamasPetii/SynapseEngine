@@ -20,9 +20,9 @@ namespace Syn
         static constexpr uint32_t MESHLET_OFFSET_START = 100000;
 
         std::vector<std::shared_ptr<Vk::Buffer>> globalInstanceBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> globalDrawCountBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> globalIndirectCommandBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> globalIndirectCommandDescriptorBuffers;
-        std::vector<std::shared_ptr<Vk::Buffer>> globalDrawCountBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> globalModelAllocationBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> globalMeshAllocationBuffers;
 

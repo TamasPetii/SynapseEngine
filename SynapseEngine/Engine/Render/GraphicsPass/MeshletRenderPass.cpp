@@ -135,7 +135,7 @@ namespace Syn
             indirectOffset,
             countBuffer,
             countOffset,
-            SceneDrawData::MAX_INDIRECT_COMMANDS,
+            SceneDrawData::MAX_INDIRECT_COMMANDS - SceneDrawData::SceneDrawData::MESHLET_OFFSET_START,
             sizeof(VkDrawMeshTasksIndirectCommandEXT)
         );
     }

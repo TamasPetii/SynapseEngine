@@ -53,7 +53,7 @@ namespace Syn
                 if (count > _modelCapacities[modelId])
                 {
                     capacityExceeded = true;
-                    _modelCapacities[modelId] = count + 256;
+                    _modelCapacities[modelId] = count + 64;
                 }
             }
 
@@ -135,43 +135,46 @@ namespace Syn
 
         drawData->totalAllocatedInstances = globalInstanceOffset;
 
-        Info("================================================================================");
-        Info(" RENDER SYSTEM REBUILD REPORT");
-        Info("--------------------------------------------------------------------------------");
-        Info(" Summary:");
-        Info("   - Active Descriptors:      {}", drawData->activeDescriptorCount);
-        Info("   - Traditional Commands:    {}", drawData->activeTraditionalCount);
-        Info("   - Meshlet Commands:        {}", drawData->activeMeshletCount);
-        Info("   - Total Allocated Inst:    {}", drawData->totalAllocatedInstances);
-        Info("--------------------------------------------------------------------------------");
-
-        for (uint32_t modelId = 0; modelId < drawData->modelAllocations.size(); ++modelId)
+        if (false)
         {
-            const auto& mAlloc = drawData->modelAllocations[modelId];
-            if (mAlloc.maxInstances == 0) continue;
+            Info("================================================================================");
+            Info(" RENDER SYSTEM REBUILD REPORT");
+            Info("--------------------------------------------------------------------------------");
+            Info(" Summary:");
+            Info("   - Active Descriptors:      {}", drawData->activeDescriptorCount);
+            Info("   - Traditional Commands:    {}", drawData->activeTraditionalCount);
+            Info("   - Meshlet Commands:        {}", drawData->activeMeshletCount);
+            Info("   - Total Allocated Inst:    {}", drawData->totalAllocatedInstances);
+            Info("--------------------------------------------------------------------------------");
 
-            Info(" Model [{}] - MaxInstances: {}, MeshOffset: {}, MeshCount: {}",
-                modelId, mAlloc.maxInstances, mAlloc.meshAllocationOffset, mAlloc.meshAllocationCount);
-
-            for (uint32_t i = 0; i < mAlloc.meshAllocationCount; ++i)
+            for (uint32_t modelId = 0; modelId < drawData->modelAllocations.size(); ++modelId)
             {
-                uint32_t meshAllocIdx = mAlloc.meshAllocationOffset + i;
+                const auto& mAlloc = drawData->modelAllocations[modelId];
+                if (mAlloc.maxInstances == 0) continue;
 
-                // Ellenőrzés, hogy ne indexeljünk túl a vektorokon
-                if (meshAllocIdx >= drawData->meshAllocations.size()) continue;
+                Info(" Model [{}] - MaxInstances: {}, MeshOffset: {}, MeshCount: {}",
+                    modelId, mAlloc.maxInstances, mAlloc.meshAllocationOffset, mAlloc.meshAllocationCount);
 
-                const auto& meshAlloc = drawData->meshAllocations[meshAllocIdx];
-                const auto& desc = drawData->drawDescriptors[meshAlloc.descriptorIndex];
+                for (uint32_t i = 0; i < mAlloc.meshAllocationCount; ++i)
+                {
+                    uint32_t meshAllocIdx = mAlloc.meshAllocationOffset + i;
 
-                Info("   MeshAlloc [{}] -> DescIdx: {}, IndirectIdx: {}, InstOffset: {}, Type: {}",
-                    i, meshAlloc.descriptorIndex, meshAlloc.indirectIndex, meshAlloc.instanceOffset,
-                    (meshAlloc.isMeshletPipeline ? "MESHLET" : "TRADITIONAL"));
+                    // Ellenőrzés, hogy ne indexeljünk túl a vektorokon
+                    if (meshAllocIdx >= drawData->meshAllocations.size()) continue;
 
-                Info("     Descriptor -> SubMesh: {}, LOD: {}, MaxInst: {}, GlobalIndirectIdx: {}",
-                    desc.meshIndex, desc.lodIndex, desc.maxInstances, desc.indirectIndex);
+                    const auto& meshAlloc = drawData->meshAllocations[meshAllocIdx];
+                    const auto& desc = drawData->drawDescriptors[meshAlloc.descriptorIndex];
+
+                    Info("   MeshAlloc [{}] -> DescIdx: {}, IndirectIdx: {}, InstOffset: {}, Type: {}",
+                        i, meshAlloc.descriptorIndex, meshAlloc.indirectIndex, meshAlloc.instanceOffset,
+                        (meshAlloc.isMeshletPipeline ? "MESHLET" : "TRADITIONAL"));
+
+                    Info("     Descriptor -> SubMesh: {}, LOD: {}, MaxInst: {}, GlobalIndirectIdx: {}",
+                        desc.meshIndex, desc.lodIndex, desc.maxInstances, desc.indirectIndex);
+                }
             }
-        }
-        Info("================================================================================");
+            Info("================================================================================");
+        }     
     }
 
     void RenderSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)

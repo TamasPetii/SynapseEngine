@@ -30,4 +30,20 @@ namespace Syn
         //Draw Data
         std::vector<MeshDrawBlueprint> baseDrawCommands;
     };
+
+    struct SYN_API GpuModelAddresses
+    {
+        VkDeviceAddress vertexPositions;
+        VkDeviceAddress vertexAttributes;
+        VkDeviceAddress indices;
+        VkDeviceAddress meshDescriptors;
+        VkDeviceAddress meshColliders;
+        VkDeviceAddress lodDescriptors;
+        VkDeviceAddress meshletVertexIndices;
+        VkDeviceAddress meshletTriangleIndices;
+        VkDeviceAddress meshletDescriptors;
+        VkDeviceAddress meshletDrawDescriptors;
+        VkDeviceAddress meshletColliders;
+        VkDeviceAddress nodeTransforms;
+    };
 }

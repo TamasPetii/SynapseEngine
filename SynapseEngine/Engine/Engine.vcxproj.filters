@@ -1277,5 +1277,7 @@
     <None Include="Shaders\Test.frag" />
     <None Include="Shaders\TestMesh.mesh" />
     <None Include="Shaders\TestMesh.frag" />
+    <None Include="Shaders\Traditional.vert" />
+    <None Include="Shaders\Traditional.frag" />
   </ItemGroup>
 </Project>

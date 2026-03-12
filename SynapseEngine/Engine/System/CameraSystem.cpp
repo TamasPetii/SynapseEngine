@@ -96,19 +96,7 @@ namespace Syn
             if (componentBuffer.versions[cameraIndex] != cameraComponent.version)
             {
                 componentBuffer.versions[cameraIndex] = cameraComponent.version;
-
-                CameraComponent component = cameraComponent;
-
-                glm::mat4 vulkanProj = component.proj;
-                vulkanProj[1][1] *= -1;
-
-                CameraComponentGPU cameraGPU{ component };
-                cameraGPU.projVulkan = vulkanProj;
-                cameraGPU.projVulkanInv = glm::inverse(cameraGPU.projVulkan);
-                cameraGPU.viewProjVulkan = vulkanProj * component.view;
-                cameraGPU.viewProjVulkanInv = glm::inverse(cameraGPU.viewProjVulkan);
-
-                bufferHandler[cameraIndex] = cameraGPU;
+                bufferHandler[cameraIndex] = CameraComponentGPU(cameraComponent);
             }
 
             /*

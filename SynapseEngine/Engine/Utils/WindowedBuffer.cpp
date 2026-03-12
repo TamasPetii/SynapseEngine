@@ -4,7 +4,8 @@ namespace Syn
 {
     WindowedBuffer::WindowedBuffer(const Vk::BufferConfig& baseConfig, uint32_t elementSize, uint32_t upWindow, uint32_t downWindow)
         : _baseConfig(baseConfig), _elementSize(elementSize), _upWindow(upWindow), _downWindow(downWindow)
-    {}
+    {
+    }
 
     bool WindowedBuffer::UpdateCapacity(uint32_t requiredElements)
     {
