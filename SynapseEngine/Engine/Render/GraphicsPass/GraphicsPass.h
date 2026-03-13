@@ -10,10 +10,10 @@
 
 namespace Syn
 {
-    class SYN_API BaseRenderPass : public IRenderPass
+    class SYN_API GraphicsPass : public IRenderPass
     {
     public:
-        void Execute(const RenderContext& context);
+        void Execute(const RenderContext& context) override;
     protected:
         virtual void PrepareFrame(const RenderContext& context) {}
         virtual void BindDescriptors(const RenderContext& context) {}

@@ -1,8 +1,10 @@
-#include "BaseComputePass.h"
+#include "ComputePass.h"
 
 namespace Syn {
-    void BaseComputePass::Execute(const RenderContext& context)
+    void ComputePass::Execute(const RenderContext& context)
     {
+        _imageTransitions.clear();
+
         PrepareFrame(context);
 
         for (const auto& transition : _imageTransitions) {

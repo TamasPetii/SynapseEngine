@@ -1,9 +1,9 @@
 #pragma once
 #include "Engine/SynApi.h"
-#include "BaseRenderPass.h"
+#include "GraphicsPass.h"
 
 namespace Syn {
-    class SYN_API TraditionalRenderPass : public BaseRenderPass {
+    class SYN_API TraditionalRenderPass : public GraphicsPass {
     public:
         std::string GetName() const override { return "TraditionalRenderPass"; }
         void Initialize() override;

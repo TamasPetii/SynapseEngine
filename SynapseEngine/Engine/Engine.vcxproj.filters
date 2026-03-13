@@ -357,10 +357,10 @@
     <ClCompile Include="Render\IRenderPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\BaseRenderPass.cpp">
+    <ClCompile Include="Render\GraphicsPass\GraphicsPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\ComputePass\BaseComputePass.cpp">
+    <ClCompile Include="Render\ComputePass\ComputePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\RenderPipeline.cpp">
@@ -381,7 +381,7 @@
     <ClCompile Include="Vk\Image\ImageConfig.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\PresentationPass.cpp">
+    <ClCompile Include="Render\TransferPass\PresentationPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mesh\Data\Gpu\GpuVertexData.cpp">
@@ -598,6 +598,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\RendererFactory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\GBufferInitPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\TransferPass\CopyToSwapchainPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\TransferPass\TransferPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1019,10 +1028,10 @@
     <ClInclude Include="Render\IRenderPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\BaseRenderPass.h">
+    <ClInclude Include="Render\GraphicsPass\GraphicsPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\ComputePass\BaseComputePass.h">
+    <ClInclude Include="Render\ComputePass\ComputePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\RenderPipeline.h">
@@ -1043,7 +1052,7 @@
     <ClInclude Include="Vk\Image\ImageConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\PresentationPass.h">
+    <ClInclude Include="Render\TransferPass\PresentationPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mesh\Data\Gpu\GpuVertexData.h">
@@ -1272,6 +1281,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\RendererFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\GBufferInitPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\TransferPass\CopyToSwapchainPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\TransferPass\TransferPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

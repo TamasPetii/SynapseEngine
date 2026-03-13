@@ -10,17 +10,14 @@
 
 namespace Syn
 {
-    class SYN_API BaseComputePass : public IRenderPass
+    class SYN_API TransferPass : public IRenderPass
     {
     public:
-        void Execute(const RenderContext& context);
+        void Execute(const RenderContext& context) override;
     protected:
         virtual void PrepareFrame(const RenderContext& context) {}
-        virtual void BindDescriptors(const RenderContext& context) {}
-        virtual void PushConstants(const RenderContext& context) {}
-        virtual void Dispatch(const RenderContext& context) {};
+        virtual void Transfer(const RenderContext& context) {}
     protected:
         std::vector<PassImageTransition> _imageTransitions;
-        std::shared_ptr<Vk::ShaderProgram> _shaderProgram;
     };
 }

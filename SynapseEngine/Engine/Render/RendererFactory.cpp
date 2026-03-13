@@ -1,20 +1,25 @@
 #include "RendererFactory.h"
 #include "Engine/Vk/Image/ImageConfig.h"
-#include "Engine/Render/GraphicsPass/PresentationPass.h"
+#include "Engine/Render/GraphicsPass/GBufferInitPass.h"
 #include "Engine/Render/GraphicsPass/TraditionalRenderPass.h"
 #include "Engine/Render/GraphicsPass/MeshletRenderPass.h"
+#include "Engine/Render/TransferPass/PresentationPass.h"
+#include "Engine/Render/TransferPass/CopyToSwapchainPass.h"
+
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "RenderNames.h"
 
-namespace Syn {
-
+namespace Syn 
+{
     std::unique_ptr<RenderManager> RendererFactory::CreateDeferredRenderer(uint32_t framesInFlight) {
         auto renderManager = std::make_unique<RenderManager>(framesInFlight);
         auto rtManager = renderManager->GetRenderTargetManager();
 
         auto pipeline = std::make_unique<RenderPipeline>();
+        pipeline->AddPass(std::make_unique<GBufferInitPass>());
         pipeline->AddPass(std::make_unique<TraditionalRenderPass>());
-        //pipeline->AddPass(std::make_unique<MeshletRenderPass>());
+        pipeline->AddPass(std::make_unique<MeshletRenderPass>());
+        pipeline->AddPass(std::make_unique<CopyToSwapchainPass>());
         pipeline->AddPass(std::make_unique<PresentationPass>());
         pipeline->InitializeAll();
 

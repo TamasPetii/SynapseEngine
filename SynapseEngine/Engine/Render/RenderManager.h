@@ -22,7 +22,7 @@ namespace Syn {
 
         void WaitForFrame(uint32_t frameIndex);
         void RenderFrame(uint32_t frameIndex, Scene* scene);
-        void OnResize(uint32_t frameIndex, uint32_t width, uint32_t height);
+        void OnResize(uint32_t width, uint32_t height);
 
         RenderTargetManager* GetRenderTargetManager() const { return _renderTargetManager.get(); }
     private:
@@ -30,5 +30,9 @@ namespace Syn {
         std::unique_ptr<RenderTargetManager> _renderTargetManager;
         std::unordered_map<std::string, std::unique_ptr<RenderPipeline>> _pipelines;
         RenderPipeline* _activePipeline = nullptr;
+
+        std::vector<bool> _frameNeedsResize;
+        uint32_t _newWidth = 0;
+        uint32_t _newHeight = 0;
     };
 }

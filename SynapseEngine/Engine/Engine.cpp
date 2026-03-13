@@ -181,6 +181,7 @@ namespace Syn
 
 		_isMinimized = false;
 		_vkContext->GetSwapChain()->Recreate();
+		_renderManager->OnResize(width, height);
 	}
 
 	void Engine::InitTaskExecutor()

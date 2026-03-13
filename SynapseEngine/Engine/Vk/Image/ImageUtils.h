@@ -35,6 +35,8 @@ namespace Syn::Vk {
         uint32_t srcBaseLayer = 0;
         uint32_t dstBaseLayer = 0;
         uint32_t layerCount = 1;
+
+        VkFilter filter = VK_FILTER_NEAREST;
     };
 
     struct SYN_API ImageToBufferCopyInfo {

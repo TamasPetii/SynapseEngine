@@ -181,6 +181,8 @@
   <ItemGroup>
     <ClCompile Include="Component\ModelComponent.cpp" />
     <ClCompile Include="Component\BaseComponent\RenderStateComponent.cpp" />
+    <ClCompile Include="Render\TransferPass\CopyToSwapchainPass.cpp" />
+    <ClCompile Include="Render\GraphicsPass\GBufferInitPass.cpp" />
     <ClCompile Include="Render\RendererFactory.cpp" />
     <ClCompile Include="Render\RenderTargetManager.cpp" />
     <ClCompile Include="System\FrustumCullingSystem.cpp" />
@@ -204,6 +206,7 @@
     <ClCompile Include="Component\TransformComponent.cpp" />
     <ClCompile Include="Scene\TestScene.cpp" />
     <ClCompile Include="Render\GraphicsPass\TraditionalRenderPass.cpp" />
+    <ClCompile Include="Render\TransferPass\TransferPass.cpp" />
     <ClCompile Include="Vk\Rendering\GpuUploader.cpp" />
     <ClCompile Include="Manager\BaseResourceManager.cpp" />
     <ClCompile Include="Image\Data\Texture.cpp" />
@@ -250,15 +253,15 @@
     <ClCompile Include="Image\Data\Raw\RawImage.cpp" />
     <ClCompile Include="Image\Source\Procedural\ProceduralImageSource.cpp" />
     <ClCompile Include="Image\Data\Common\MipLevelInfo.cpp" />
-    <ClCompile Include="Render\GraphicsPass\PresentationPass.cpp" />
+    <ClCompile Include="Render\TransferPass\PresentationPass.cpp" />
     <ClCompile Include="Image\Loader\StbImageLoader.cpp" />
     <ClCompile Include="Vk\Image\ImageConfig.cpp" />
     <ClCompile Include="Render\RenderContext.cpp" />
     <ClCompile Include="Render\Renderer.cpp" />
     <ClCompile Include="Render\RenderManager.cpp" />
     <ClCompile Include="Render\RenderPipeline.cpp" />
-    <ClCompile Include="Render\ComputePass\BaseComputePass.cpp" />
-    <ClCompile Include="Render\GraphicsPass\BaseRenderPass.cpp" />
+    <ClCompile Include="Render\ComputePass\ComputePass.cpp" />
+    <ClCompile Include="Render\GraphicsPass\GraphicsPass.cpp" />
     <ClCompile Include="Collision\Colliders\AabbCollider.cpp" />
     <ClCompile Include="Collision\Colliders\ConeCollider.cpp" />
     <ClCompile Include="Render\IRenderPass.cpp" />
@@ -378,6 +381,8 @@
   <ItemGroup>
     <ClInclude Include="Component\ModelComponent.h" />
     <ClInclude Include="Component\BaseComponent\RenderStateComponent.h" />
+    <ClInclude Include="Render\TransferPass\CopyToSwapchainPass.h" />
+    <ClInclude Include="Render\GraphicsPass\GBufferInitPass.h" />
     <ClInclude Include="Render\RendererFactory.h" />
     <ClInclude Include="Render\RenderTargetManager.h" />
     <ClInclude Include="Render\RenderNames.h" />
@@ -404,6 +409,7 @@
     <ClInclude Include="Component\TransformComponent.h" />
     <ClInclude Include="Scene\TestScene.h" />
     <ClInclude Include="Render\GraphicsPass\TraditionalRenderPass.h" />
+    <ClInclude Include="Render\TransferPass\TransferPass.h" />
     <ClInclude Include="Vk\Image\ImageViewNames.h" />
     <ClInclude Include="Vk\Rendering\GpuUploader.h" />
     <ClInclude Include="Manager\BaseResourceManager.h" />
@@ -451,15 +457,15 @@
     <ClInclude Include="Image\Data\Raw\RawImage.h" />
     <ClInclude Include="Image\Source\Procedural\ProceduralImageSource.h" />
     <ClInclude Include="Image\Data\Common\MipLevelInfo.h" />
-    <ClInclude Include="Render\GraphicsPass\PresentationPass.h" />
+    <ClInclude Include="Render\TransferPass\PresentationPass.h" />
     <ClInclude Include="Image\Loader\StbImageLoader.h" />
     <ClInclude Include="Vk\Image\ImageConfig.h" />
     <ClInclude Include="Render\RenderContext.h" />
     <ClInclude Include="Render\Renderer.h" />
     <ClInclude Include="Render\RenderManager.h" />
     <ClInclude Include="Render\RenderPipeline.h" />
-    <ClInclude Include="Render\ComputePass\BaseComputePass.h" />
-    <ClInclude Include="Render\GraphicsPass\BaseRenderPass.h" />
+    <ClInclude Include="Render\ComputePass\ComputePass.h" />
+    <ClInclude Include="Render\GraphicsPass\GraphicsPass.h" />
     <ClInclude Include="Collision\Colliders\AabbCollider.h" />
     <ClInclude Include="Collision\Colliders\ConeCollider.h" />
     <ClInclude Include="Render\IRenderPass.h" />

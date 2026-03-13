@@ -1,8 +1,11 @@
-#include "BaseRenderPass.h"
+#include "GraphicsPass.h"
 
 namespace Syn {
-    void BaseRenderPass::Execute(const RenderContext& context)
+    void GraphicsPass::Execute(const RenderContext& context)
     {
+        _colorAttachments.clear();
+        _imageTransitions.clear();
+
         PrepareFrame(context);
 
         for (const auto& transition : _imageTransitions) {

@@ -75,69 +75,38 @@ namespace Syn {
     }
 
     void MeshletRenderPass::PrepareFrame(const RenderContext& context) {
-        auto vkContext = ServiceLocator::GetVkContext();
-        auto swapChain = vkContext->GetSwapChain();
-
-        auto image = swapChain->GetImage(context.swapchainImageIndex);
-        VkExtent2D extent = swapChain->GetExtent();
-
+        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
         _graphicsState.renderArea = extent;
 
-        static std::unique_ptr<Vk::Image> depthImage = nullptr;
+        std::vector<std::string> targets = {
+            RenderTargetNames::Main
+        };
 
-        if (!depthImage || depthImage->GetExtent().width != extent.width || depthImage->GetExtent().height != extent.height) {
-            depthImage = Vk::ImageFactory::CreateAttachment(
-                extent.width,
-                extent.height,
-                VK_FORMAT_D32_SFLOAT,
-                VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT
-            );
+        for (const auto& name : targets) 
+        {
+            _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
+                    .imageView = group->GetImage(name)->GetView(Vk::ImageViewNames::Default),
+                    .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                    .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+                    .storeOp = VK_ATTACHMENT_STORE_OP_STORE
+                }));
         }
 
-        Vk::AttachmentConfig colorConfig = {
-            .imageView = image->GetView(Vk::ImageViewNames::Default),
-            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            .clearValue = VkClearValue{{{0.1f, 0.1f, 0.1f, 1.0f}}},
-            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-            .storeOp = VK_ATTACHMENT_STORE_OP_STORE
-        };
-
-        Vk::AttachmentConfig depthConfig = {
-            .imageView = depthImage->GetView(Vk::ImageViewNames::Default),
+        _depthAttachment = Vk::RenderUtils::CreateAttachment({
+            .imageView = group->GetImage(RenderTargetNames::Depth)->GetView(Vk::ImageViewNames::Default),
             .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-            .clearValue = VkClearValue{.depthStencil = {1.0f, 0}},
             .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
             .storeOp = VK_ATTACHMENT_STORE_OP_STORE
-        };
-
-        _colorAttachments = { Vk::RenderUtils::CreateAttachment(colorConfig) };
-        _depthAttachment = Vk::RenderUtils::CreateAttachment(depthConfig);
+            });
 
         _renderInfo = Vk::RenderingInfoConfig{
             .renderArea = extent,
             .colorAttachments = _colorAttachments,
-            .depthAttachment = _depthAttachment.has_value() ? &_depthAttachment.value() : nullptr,
-            .stencilAttachment = _stencilAttachment.has_value() ? &_stencilAttachment.value() : nullptr,
+            .depthAttachment = &_depthAttachment.value(),
             .layerCount = 1
         };
 
-        _imageTransitions.clear();
-
-        _imageTransitions.push_back({
-            .image = image,
-            .newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            .dstStage = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
-            .dstAccess = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-            .discardContent = false
-            });
-
-        _imageTransitions.push_back({
-            .image = depthImage.get(),
-            .newLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-            .dstStage = VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT,
-            .dstAccess = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-            .discardContent = false
-            });
     }
 
     void MeshletRenderPass::PushConstants(const RenderContext& context) {

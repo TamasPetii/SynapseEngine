@@ -7,6 +7,7 @@ namespace Syn {
     RenderManager::RenderManager(uint32_t framesInFlight) {
         _renderer = std::make_unique<Renderer>(framesInFlight);
         _renderTargetManager = std::make_unique<RenderTargetManager>(framesInFlight);
+        _frameNeedsResize.resize(framesInFlight, false);
     }
 
     void RenderManager::RegisterPipeline(const std::string& name, std::unique_ptr<RenderPipeline> pipeline) {
@@ -33,6 +34,11 @@ namespace Syn {
         if (!_activePipeline) 
             return;
 
+        if (_frameNeedsResize[frameIndex]) {
+            _renderTargetManager->Resize(frameIndex, _newWidth, _newHeight);
+            _frameNeedsResize[frameIndex] = false;
+        }
+        
         auto cmd = _renderer->BeginFrame(frameIndex);
 
         if (!cmd) 
@@ -51,8 +57,13 @@ namespace Syn {
         _renderer->EndFrame(frameIndex);
     }
 
-    void RenderManager::OnResize(uint32_t frameIndex, uint32_t width, uint32_t height)
+    void RenderManager::OnResize(uint32_t width, uint32_t height)
     {
-        _renderTargetManager->Resize(frameIndex, width, height);
+        _newWidth = width;
+        _newHeight = height;
+
+        for (size_t i = 0; i < _frameNeedsResize.size(); ++i) {
+            _frameNeedsResize[i] = true;
+        }
     }
 }

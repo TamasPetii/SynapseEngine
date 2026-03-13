@@ -91,7 +91,7 @@ namespace Syn::Vk {
         blitInfo.srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
         blitInfo.dstImage = info.dstImage;
         blitInfo.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-        blitInfo.filter = VK_FILTER_LINEAR;
+        blitInfo.filter = info.filter;
         blitInfo.regionCount = 1;
         blitInfo.pRegions = &blit;
 

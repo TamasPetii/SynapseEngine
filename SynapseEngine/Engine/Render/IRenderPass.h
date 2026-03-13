@@ -10,6 +10,7 @@
 
 #include "RenderContext.h"
 #include "ShaderNames.h"
+#include "RenderNames.h"
 
 namespace Syn 
 {
@@ -26,8 +27,8 @@ namespace Syn
     {
     public:
         virtual ~IRenderPass() = default;
-        virtual void Initialize() = 0;
-        virtual void Execute(const RenderContext& context) = 0;
+        virtual void Initialize() {};
+        virtual void Execute(const RenderContext& context) {};
         virtual std::string GetName() const = 0;
     };
 }
