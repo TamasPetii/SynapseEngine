@@ -14,33 +14,34 @@ namespace Syn
 
     bool CollisionTester::TestSphereFrustum(const GpuMeshCollider& collider, std::span<const FrustumFace> frustum)
     {
-        for (const auto& plane : frustum)
+        for (const auto& face : frustum)
         {
-            float distance = glm::dot(plane.normal, collider.center) + plane.distance;
-
-            if (distance < -collider.radius)
-            {
+            if (!(GetSignedDistance(face, collider.center) > -collider.radius))
                 return false;
-            }
         }
+
         return true;
     }
 
     bool CollisionTester::TestAABBFrustum(const GpuMeshCollider& collider, std::span<const FrustumFace> frustum)
     {
-        for (const auto& plane : frustum)
-        {
-            glm::vec3 positiveVertex = collider.aabbMin;
-            if (plane.normal.x >= 0.0f) positiveVertex.x = collider.aabbMax.x;
-            if (plane.normal.y >= 0.0f) positiveVertex.y = collider.aabbMax.y;
-            if (plane.normal.z >= 0.0f) positiveVertex.z = collider.aabbMax.z;
+        glm::vec3 extents = (collider.aabbMax - collider.aabbMin) * 0.5f;
+        glm::vec3 center = (collider.aabbMax + collider.aabbMin) * 0.5f;
 
-            float distance = glm::dot(plane.normal, positiveVertex) + plane.distance;
-            if (distance < 0.0f)
-            {
+        for (const auto& face : frustum)
+        {
+            float r = glm::dot(extents, glm::abs(face.normal));
+
+            if (!(-r <= GetSignedDistance(face, center)))
                 return false;
-            }
         }
+
         return true;
     }
+
+    float CollisionTester::GetSignedDistance(const FrustumFace& face, const glm::vec3& point)
+    {
+        return glm::dot(face.normal, point) - face.distance;
+    }
+
 }

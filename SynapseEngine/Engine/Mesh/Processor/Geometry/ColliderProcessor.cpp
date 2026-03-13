@@ -133,6 +133,7 @@ namespace Syn
         taskflow.for_each_index(size_t(0), descCount, size_t(1), 
             [&](size_t i) {
             const auto& desc = cookedModel.meshNodeDescriptors[i];
+
             if (desc.meshIndex >= cookedModel.meshes.size() || desc.nodeIndex >= cookedModel.nodeTransforms.size())
                 return;
 

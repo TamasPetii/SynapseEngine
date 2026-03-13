@@ -1,5 +1,6 @@
 #include "DefaultGpuModelConverter.h"
 #include <algorithm>
+#include "Engine/Mesh/Utils/MeshUtils.h"
 
 namespace Syn
 {
@@ -53,12 +54,15 @@ namespace Syn
             const uint32_t currentMeshVertexOffset = static_cast<uint32_t>(result.vertexData.vertexPositions.size());
 
             // A) MESH COLLIDER BEMÁSOLÁSA
-            GpuMeshCollider meshCollider{};
-            meshCollider.center = cookedMesh.collider.sphere.center;
-            meshCollider.radius = cookedMesh.collider.sphere.radius;
-            meshCollider.aabbMin = cookedMesh.collider.aabb.min;
-            meshCollider.aabbMax = cookedMesh.collider.aabb.max;
-            result.indexedData.meshColliders.push_back(meshCollider);
+            GpuMeshCollider localMeshCollider{};
+            localMeshCollider.center = cookedMesh.collider.sphere.center;
+            localMeshCollider.radius = cookedMesh.collider.sphere.radius;
+            localMeshCollider.aabbMin = cookedMesh.collider.aabb.min;
+            localMeshCollider.aabbMax = cookedMesh.collider.aabb.max;
+
+            const glm::mat4& nodeTransform = cookedModel.nodeTransforms[instanceDesc.nodeIndex].globalTransform;
+            GpuMeshCollider modelSpaceCollider = MeshUtils::TransformCollider(localMeshCollider, nodeTransform);
+            result.indexedData.meshColliders.push_back(modelSpaceCollider);
 
             // B) VERTEX ADATOK MÁSOLÁSA ÉS INDEXEK ELTOLÁSA
             for (const auto& v : cookedMesh.vertices)

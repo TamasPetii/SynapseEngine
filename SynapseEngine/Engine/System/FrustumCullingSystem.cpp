@@ -9,6 +9,7 @@
 #include "Engine/System/CameraSystem.h"
 #include <atomic>
 
+#include "Engine/Mesh/Utils/MeshUtils.h"
 #include "Engine/Collision/Tester/CollisionTester.h"
 #include <glm/gtc/matrix_access.hpp>
 #include <span>
@@ -32,7 +33,7 @@ namespace Syn
         if (!modelPool || !transformPool || !cameraPool || cameraEntity == NULL_ENTITY) return;
 
         const auto& cameraComp = cameraPool->Get(cameraEntity);
-        std::span<const FrustumFace> frustum = cameraComp.frustum;
+        
 
         auto drawData = scene->GetSceneDrawData();
         auto modelSnapshot = modelManager->GetResourceSnapshot();
@@ -46,26 +47,8 @@ namespace Syn
             }
             }).name("FrustumCulling Init");
 
-        auto transformCollider = [](const GpuMeshCollider& local, const glm::mat4& transform, const glm::mat3& absTransform, float maxScale) {
-            glm::vec3 worldCenter = glm::vec3(transform * glm::vec4(local.center, 1.0f));
-            float worldRadius = local.radius * maxScale;
-
-            glm::vec3 localAabbCenter = (local.aabbMax + local.aabbMin) * 0.5f;
-            glm::vec3 localAabbExtents = (local.aabbMax - local.aabbMin) * 0.5f;
-
-            glm::vec3 worldAabbCenter = glm::vec3(transform * glm::vec4(localAabbCenter, 1.0f));
-            glm::vec3 worldAabbExtents = absTransform * localAabbExtents;
-
-            GpuMeshCollider world;
-            world.center = worldCenter;
-            world.radius = worldRadius;
-            world.aabbMin = worldAabbCenter - worldAabbExtents;
-            world.aabbMax = worldAabbCenter + worldAabbExtents;
-
-            return world;
-            };
-
-        auto cullFunc = [drawData, modelPool, transformPool, modelSnapshot, frustum, transformCollider](EntityID entity) {
+        auto cullFunc = [drawData, modelPool, transformPool, modelSnapshot, cameraComp](EntityID entity) {   
+            std::span<const FrustumFace> frustum = cameraComp.frustum;
             const auto& modelComp = modelPool->Get(entity);
             const auto& transformComp = transformPool->Get(entity);
 
@@ -85,21 +68,11 @@ namespace Syn
             auto resource = snapshotEntry.resource;
 
             const glm::mat4& transform = transformComp.transform;
-            glm::mat3 rotMatrix = glm::mat3(transform);
-            glm::mat3 absTransform(
-                glm::abs(rotMatrix[0]),
-                glm::abs(rotMatrix[1]),
-                glm::abs(rotMatrix[2])
-            );
 
-            float scaleX = glm::length(absTransform[0]);
-            float scaleY = glm::length(absTransform[1]);
-            float scaleZ = glm::length(absTransform[2]);
-            float maxScale = std::max({ scaleX, scaleY, scaleZ });
-
-            //Frustum culling on the whole model!
+            //Frustum culling on the full model!
             const auto& globalLocalCollider = resource->gpuData.globalCollider;
-            GpuMeshCollider globalWorldCollider = transformCollider(globalLocalCollider, transform, absTransform, maxScale);
+            GpuMeshCollider globalWorldCollider = MeshUtils::TransformCollider(globalLocalCollider, transform);
+
             if (!CollisionTester::IsInFrustum(globalWorldCollider, frustum))
                 return;
 
@@ -107,19 +80,27 @@ namespace Syn
             {
                 bool isVisible = true;
 
+                float distance = glm::length(cameraComp.position - globalWorldCollider.center);
                 if (meshCount > 1)
                 {
                     //Frustum culling on meshes
                     const auto& localCollider = resource->gpuData.indexedData.meshColliders[m];
-                    GpuMeshCollider worldCollider = transformCollider(localCollider, transform, absTransform, maxScale);
+                    GpuMeshCollider worldCollider = MeshUtils::TransformCollider(localCollider, transform);
                     isVisible = CollisionTester::IsInFrustum(worldCollider, frustum);
+                    distance = glm::length(cameraComp.position - worldCollider.center);
                 }
 
                 if (isVisible)
                 {
-                    uint32_t calculatedLod = rand() % 4;
+                    //Todo: Project Sphere to screne, and lod has to calculated according to it!
 
-                    uint32_t allocIndex = modelAlloc.meshAllocationOffset + (m * 4) + calculatedLod;
+                    uint32_t lod;
+                    if (distance < 50.0f) lod = 0;
+                    else if (distance < 120.0f) lod = 1;
+                    else if (distance < 300.0f) lod = 2;
+                    else lod = 3;
+
+                    uint32_t allocIndex = modelAlloc.meshAllocationOffset + (m * 4) + lod;
                     const auto& meshAlloc = drawData->meshAllocations[allocIndex];
 
                     uint32_t slotIndex = 0;

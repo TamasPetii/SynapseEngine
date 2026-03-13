@@ -32,7 +32,7 @@ namespace Syn
             geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Hemisphere", []() { return MeshFactory::CreateHemisphere(); }));
             geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Pyramid", []() { return MeshFactory::CreatePyramid(); }));
             geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Grid", []() { return MeshFactory::CreateGrid(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Torus", []() { return MeshFactory::CreateTorus(); }));   
+            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Torus", []() { return MeshFactory::CreateTorus(); }));  
 
             //Camera
             EntityID cameraEntity = registry->CreateEntity();
@@ -65,7 +65,7 @@ namespace Syn
             registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
 
             // Random Geometry
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 0; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
