@@ -16,11 +16,7 @@ namespace Syn
         TestScene(uint32_t frameCount) : Scene(frameCount)
         {
             auto registry = GetRegistry();
-            auto shaderManager = ServiceLocator::GetShaderManager();
             auto modelManager = ServiceLocator::GetModelManager();
-
-            shaderManager->CreateProgram("TestComputeProgram", { "../Engine/Shaders/Test.comp" });
-            shaderManager->CreateProgram("ComplexTestProgram", { "../Engine/Shaders/ComplexTest.vert", "../Engine/Shaders/ComplexTest.frag", "../Engine/Shaders/ComplexTest.geom" });
 
             uint32_t sponzaId = modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Sponza-master/sponza.obj");
             uint32_t bistroId = modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
@@ -69,7 +65,7 @@ namespace Syn
             registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
 
             // Random Geometry
-            for (int i = 0; i < 50000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);

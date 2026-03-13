@@ -6,6 +6,7 @@ namespace Syn {
 
     RenderManager::RenderManager(uint32_t framesInFlight) {
         _renderer = std::make_unique<Renderer>(framesInFlight);
+        _renderTargetManager = std::make_unique<RenderTargetManager>(framesInFlight);
     }
 
     void RenderManager::RegisterPipeline(const std::string& name, std::unique_ptr<RenderPipeline> pipeline) {
@@ -28,7 +29,7 @@ namespace Syn {
         _renderer->WaitForFrame(frameIndex);
     }
 
-    void RenderManager::RenderFrame(uint32_t frameIndex, std::shared_ptr<Scene> scene) {
+    void RenderManager::RenderFrame(uint32_t frameIndex, Scene* scene) {
         if (!_activePipeline) 
             return;
 
@@ -42,10 +43,16 @@ namespace Syn {
             .frameIndex = frameIndex,
 			.swapchainImageIndex = _renderer->GetCurrentImageIndex(),
             .scene = scene,
+            .renderTargetManager = _renderTargetManager.get()
         };
 
         _activePipeline->Execute(context);
 
         _renderer->EndFrame(frameIndex);
+    }
+
+    void RenderManager::OnResize(uint32_t frameIndex, uint32_t width, uint32_t height)
+    {
+        _renderTargetManager->Resize(frameIndex, width, height);
     }
 }

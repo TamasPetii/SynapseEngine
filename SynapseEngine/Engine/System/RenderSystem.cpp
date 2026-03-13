@@ -120,6 +120,7 @@ namespace Syn
                     desc.indirectIndex = SceneDrawData::MESHLET_OFFSET_START + drawData->activeMeshletCount;
                     drawData->meshletCommands[drawData->activeMeshletCount] = blueprint.meshletCmd;
                     meshAlloc.indirectIndex = desc.indirectIndex;
+                    drawData->drawDescriptors[desc.indirectIndex] = desc;
                     drawData->activeMeshletCount++;
                 }
                 else
@@ -127,12 +128,11 @@ namespace Syn
                     desc.indirectIndex = drawData->activeTraditionalCount;
                     drawData->traditionalCommands[drawData->activeTraditionalCount] = blueprint.traditionalCmd;
                     meshAlloc.indirectIndex = desc.indirectIndex;
+                    drawData->drawDescriptors[desc.indirectIndex] = desc;
                     drawData->activeTraditionalCount++;
                 }
 
-                drawData->drawDescriptors[drawData->activeDescriptorCount] = desc;
                 drawData->meshAllocations[drawData->activeDescriptorCount] = meshAlloc;
-
                 drawData->activeDescriptorCount++;
                 globalInstanceOffset += capacity;
             }
@@ -189,9 +189,21 @@ namespace Syn
 
             auto drawData = scene->GetSceneDrawData();
 
-            size_t descSize = drawData->activeDescriptorCount * sizeof(MeshDrawDescriptor);
-            if (descSize > 0)
-                drawData->globalIndirectCommandDescriptorBuffers[frameIndex]->Write(drawData->drawDescriptors.data(), descSize, 0);
+            // Traditional Descriptorok feltöltése
+            size_t tradDescSize = drawData->activeTraditionalCount * sizeof(MeshDrawDescriptor);
+            if (tradDescSize > 0)
+                drawData->globalIndirectCommandDescriptorBuffers[frameIndex]->Write(drawData->drawDescriptors.data(), tradDescSize, 0);
+
+            // Meshlet Descriptorok feltöltése, offsettől kezdve
+            size_t meshletDescSize = drawData->activeMeshletCount * sizeof(MeshDrawDescriptor);
+            if (meshletDescSize > 0) {
+                size_t meshletDescGpuOffset = SceneDrawData::MESHLET_OFFSET_START * sizeof(MeshDrawDescriptor);
+                drawData->globalIndirectCommandDescriptorBuffers[frameIndex]->Write(
+                    drawData->drawDescriptors.data() + SceneDrawData::MESHLET_OFFSET_START,
+                    meshletDescSize,
+                    meshletDescGpuOffset
+                );
+            }
 
             size_t modelAllocSize = drawData->activeDescriptorCount * sizeof(ModelAllocationInfo);
             if (modelAllocSize > 0)

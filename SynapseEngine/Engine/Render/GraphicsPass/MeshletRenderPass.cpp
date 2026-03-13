@@ -4,19 +4,47 @@
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Vk/Image/ImageFactory.h"
 #include "Engine/System/RenderSystem.h"
+#include "Engine/Manager/ModelManager.h"
+#include "Engine/Component/TransformComponent.h"
+#include "Engine/Component/CameraComponent.h"
+#include "Engine/Scene/BufferNames.h"
+#include "Engine/Manager/ComponentBufferManager.h"
+#include "Engine/Vk/Image/ImageViewNames.h"
 
-namespace Syn
-{
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+
+namespace Syn {
     struct MeshletPushConstants {
+        VkDeviceAddress modelAddressBuffer;
 
+        VkDeviceAddress globalDrawCountBuffers;
+        VkDeviceAddress globalInstanceBuffers;
+        VkDeviceAddress globalIndirectCommandBuffers;
+        VkDeviceAddress globalIndirectCommandDescriptorBuffers;
+        VkDeviceAddress globalModelAllocationBuffers;
+        VkDeviceAddress globalMeshAllocationBuffers;
+
+        VkDeviceAddress cameraBufferAddr;
+        VkDeviceAddress cameraSparseMapBufferAddr;
+        VkDeviceAddress transformBufferAddr;
+        VkDeviceAddress transformSparseMapBufferAddr;
+        VkDeviceAddress modelBufferAddr;
+        VkDeviceAddress modelSparseMapBufferAddr;
+
+        uint32_t activeCameraEntity;
+        uint32_t meshletOffsetStart;
+
+        uint32_t padding0;
+        uint32_t padding1;
     };
 
     void MeshletRenderPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 
-        _shaderProgram = shaderManager->CreateProgram("MeshletColorProgram", {
-                "../Engine/Shaders/Meshlet.mesh",
-                "../Engine/Shaders/Meshlet.frag"
+        _shaderProgram = shaderManager->CreateProgram("MeshletProgram", {
+            ShaderNames::MeshletMesh,
+            ShaderNames::MeshletFrag
             });
 
         _graphicsState = {
@@ -67,18 +95,18 @@ namespace Syn
         }
 
         Vk::AttachmentConfig colorConfig = {
-            .imageView = image->GetView("_default"),
+            .imageView = image->GetView(Vk::ImageViewNames::Default),
             .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             .clearValue = VkClearValue{{{0.1f, 0.1f, 0.1f, 1.0f}}},
-            .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
             .storeOp = VK_ATTACHMENT_STORE_OP_STORE
         };
 
         Vk::AttachmentConfig depthConfig = {
-            .imageView = depthImage->GetView("_default"),
+            .imageView = depthImage->GetView(Vk::ImageViewNames::Default),
             .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
             .clearValue = VkClearValue{.depthStencil = {1.0f, 0}},
-            .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
             .storeOp = VK_ATTACHMENT_STORE_OP_STORE
         };
 
@@ -100,7 +128,7 @@ namespace Syn
             .newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             .dstStage = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
             .dstAccess = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-            .discardContent = true
+            .discardContent = false
             });
 
         _imageTransitions.push_back({
@@ -108,12 +136,47 @@ namespace Syn
             .newLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
             .dstStage = VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT,
             .dstAccess = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-            .discardContent = true
+            .discardContent = false
             });
     }
 
     void MeshletRenderPass::PushConstants(const RenderContext& context) {
+        auto scene = context.scene;
+        if (!scene) return;
 
+        auto drawData = scene->GetSceneDrawData();
+        auto modelManager = ServiceLocator::GetModelManager();
+        auto registry = scene->GetRegistry();
+        auto componentBufferManager = scene->GetComponentBufferManager();
+
+        MeshletPushConstants pc{};
+
+        pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
+
+        uint32_t fIdx = context.frameIndex;
+        pc.globalDrawCountBuffers = drawData->globalDrawCountBuffers[fIdx]->GetDeviceAddress();
+        pc.globalInstanceBuffers = drawData->globalInstanceBuffers[fIdx]->GetDeviceAddress();
+        pc.globalIndirectCommandBuffers = drawData->globalIndirectCommandBuffers[fIdx]->GetDeviceAddress();
+        pc.globalIndirectCommandDescriptorBuffers = drawData->globalIndirectCommandDescriptorBuffers[fIdx]->GetDeviceAddress();
+        pc.globalModelAllocationBuffers = drawData->globalModelAllocationBuffers[fIdx]->GetDeviceAddress();
+        pc.globalMeshAllocationBuffers = drawData->globalMeshAllocationBuffers[fIdx]->GetDeviceAddress();
+
+        pc.transformBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::TransformData, fIdx).buffer->GetDeviceAddress();
+        pc.transformSparseMapBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::TransformSparseMap, fIdx).buffer->GetDeviceAddress();
+        pc.cameraBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::CameraData, fIdx).buffer->GetDeviceAddress();
+        pc.cameraSparseMapBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::CameraSparseMap, fIdx).buffer->GetDeviceAddress();
+
+        pc.activeCameraEntity = scene->GetSceneCameraEntity();
+        pc.meshletOffsetStart = SceneDrawData::MESHLET_OFFSET_START;
+
+        vkCmdPushConstants(
+            context.cmd,
+            _shaderProgram->GetLayout(),
+            VK_SHADER_STAGE_ALL_GRAPHICS,
+            0,
+            sizeof(MeshletPushConstants),
+            &pc
+        );
     }
 
     void MeshletRenderPass::Draw(const RenderContext& context)
@@ -135,7 +198,7 @@ namespace Syn
             indirectOffset,
             countBuffer,
             countOffset,
-            SceneDrawData::MAX_INDIRECT_COMMANDS - SceneDrawData::SceneDrawData::MESHLET_OFFSET_START,
+            SceneDrawData::MAX_INDIRECT_COMMANDS - SceneDrawData::MESHLET_OFFSET_START,
             sizeof(VkDrawMeshTasksIndirectCommandEXT)
         );
     }

@@ -58,9 +58,6 @@ namespace Syn
                         auto& cmd = drawData->meshletCommands[localCmdIndex];
 
                         std::atomic_ref<uint32_t> countRef(cmd.groupCountX);
-
-                        // Mesh shader esetén a groupCountX a feladatok száma. 
-                        // TODO: Itt majd a meshletCount-ot kell hozzáadni (atomic fetch_add(meshletCount))
                         slotIndex = countRef.fetch_add(1, std::memory_order_relaxed);
                     }
                     else

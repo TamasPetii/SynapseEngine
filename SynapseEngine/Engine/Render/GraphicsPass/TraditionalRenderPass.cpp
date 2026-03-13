@@ -9,6 +9,7 @@
 #include "Engine/Component/CameraComponent.h"
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Manager/ComponentBufferManager.h"
+#include "Engine/Vk/Image/ImageViewNames.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -43,9 +44,9 @@ namespace Syn {
     void TraditionalRenderPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 
-        _shaderProgram = shaderManager->CreateProgram("TraditionalColorProgram", {
-                "../Engine/Shaders/Traditional.vert",
-                "../Engine/Shaders/Traditional.frag"
+        _shaderProgram = shaderManager->CreateProgram("TraditionalProgram", {
+            ShaderNames::TraditionalVert,
+            ShaderNames::TraditionalFrag
             });
 
         _graphicsState = {
@@ -96,7 +97,7 @@ namespace Syn {
         }
 
         Vk::AttachmentConfig colorConfig = {
-            .imageView = image->GetView("_default"),
+            .imageView = image->GetView(Vk::ImageViewNames::Default),
             .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             .clearValue = VkClearValue{{{0.1f, 0.1f, 0.1f, 1.0f}}},
             .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
@@ -104,7 +105,7 @@ namespace Syn {
         };
 
         Vk::AttachmentConfig depthConfig = {
-            .imageView = depthImage->GetView("_default"),
+            .imageView = depthImage->GetView(Vk::ImageViewNames::Default),
             .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
             .clearValue = VkClearValue{.depthStencil = {1.0f, 0}},
             .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,

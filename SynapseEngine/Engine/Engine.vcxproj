@@ -181,6 +181,8 @@
   <ItemGroup>
     <ClCompile Include="Component\ModelComponent.cpp" />
     <ClCompile Include="Component\BaseComponent\RenderStateComponent.cpp" />
+    <ClCompile Include="Render\RendererFactory.cpp" />
+    <ClCompile Include="Render\RenderTargetManager.cpp" />
     <ClCompile Include="System\FrustumCullingSystem.cpp" />
     <ClCompile Include="Mesh\MeshAllocationInfo.cpp" />
     <ClCompile Include="System\ModelSystem.cpp" />
@@ -249,7 +251,6 @@
     <ClCompile Include="Image\Source\Procedural\ProceduralImageSource.cpp" />
     <ClCompile Include="Image\Data\Common\MipLevelInfo.cpp" />
     <ClCompile Include="Render\GraphicsPass\PresentationPass.cpp" />
-    <ClCompile Include="Render\GraphicsPass\TestMeshPass.cpp" />
     <ClCompile Include="Image\Loader\StbImageLoader.cpp" />
     <ClCompile Include="Vk\Image\ImageConfig.cpp" />
     <ClCompile Include="Render\RenderContext.cpp" />
@@ -283,7 +284,6 @@
     <ClCompile Include="Collision\Colliders\SphereCollider.cpp" />
     <ClCompile Include="Mesh\Builder\StaticMeshBuilder.cpp" />
     <ClCompile Include="Mesh\Data\StaticMesh.cpp" />
-    <ClCompile Include="Render\GraphicsPass\TestPass.cpp" />
     <ClCompile Include="Utils\AssimpUtils.cpp" />
     <ClCompile Include="Mesh\Loader\MeshLoaderRegistry.cpp" />
     <ClCompile Include="Mesh\Data\Common\MeshInstanceDescriptor.cpp" />
@@ -378,6 +378,10 @@
   <ItemGroup>
     <ClInclude Include="Component\ModelComponent.h" />
     <ClInclude Include="Component\BaseComponent\RenderStateComponent.h" />
+    <ClInclude Include="Render\RendererFactory.h" />
+    <ClInclude Include="Render\RenderTargetManager.h" />
+    <ClInclude Include="Render\RenderNames.h" />
+    <ClInclude Include="Render\ShaderNames.h" />
     <ClInclude Include="System\FrustumCullingSystem.h" />
     <ClInclude Include="Mesh\MeshAllocationInfo.h" />
     <ClInclude Include="System\ModelSystem.h" />
@@ -448,7 +452,6 @@
     <ClInclude Include="Image\Source\Procedural\ProceduralImageSource.h" />
     <ClInclude Include="Image\Data\Common\MipLevelInfo.h" />
     <ClInclude Include="Render\GraphicsPass\PresentationPass.h" />
-    <ClInclude Include="Render\GraphicsPass\TestMeshPass.h" />
     <ClInclude Include="Image\Loader\StbImageLoader.h" />
     <ClInclude Include="Vk\Image\ImageConfig.h" />
     <ClInclude Include="Render\RenderContext.h" />
@@ -485,7 +488,6 @@
     <ClInclude Include="Collision\Colliders\SphereCollider.h" />
     <ClInclude Include="Mesh\Builder\StaticMeshBuilder.h" />
     <ClInclude Include="Mesh\Data\StaticMesh.h" />
-    <ClInclude Include="Render\GraphicsPass\TestPass.h" />
     <ClInclude Include="Utils\AssimpUtils.h" />
     <ClInclude Include="Mesh\Loader\MeshLoaderRegistry.h" />
     <ClInclude Include="Mesh\Data\Common\MeshInstanceDescriptor.h" />
@@ -600,16 +602,10 @@
     <ClInclude Include="Utils\WindowedBuffer.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\ComplexTest.frag" />
-    <None Include="Shaders\ComplexTest.geom" />
-    <None Include="Shaders\ComplexTest.vert" />
     <None Include="Shaders\Fullscreen.frag" />
     <None Include="Shaders\Fullscreen.vert" />
-    <None Include="Shaders\TestMesh.frag" />
-    <None Include="Shaders\Test.comp" />
-    <None Include="Shaders\Test.frag" />
-    <None Include="Shaders\TestMesh.mesh" />
-    <None Include="Shaders\Test.vert" />
+    <None Include="Shaders\Meshlet.frag" />
+    <None Include="Shaders\Meshlet.mesh" />
     <None Include="Shaders\Traditional.frag" />
     <None Include="Shaders\Traditional.vert" />
   </ItemGroup>

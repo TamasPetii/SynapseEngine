@@ -28,7 +28,7 @@ namespace Syn
         {
             if (_sceneFactories.contains(_pendingSceneName))
             {
-                _activeScene = _sceneFactories[_pendingSceneName]();
+                _activeScene = std::move(_sceneFactories[_pendingSceneName]());
                 Info("Successfully loaded scene: {}", _pendingSceneName);
             }
 

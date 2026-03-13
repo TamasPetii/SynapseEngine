@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "RenderContext.h"
+#include "ShaderNames.h"
 
 namespace Syn 
 {

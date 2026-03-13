@@ -375,9 +375,6 @@
     <ClCompile Include="FrameContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\TestPass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Render\RenderContext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -424,9 +421,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Manager\ModelManager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\TestMeshPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Image\Data\Raw\RawImage.cpp">
@@ -598,6 +592,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="System\FrustumCullingSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\RenderTargetManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\RendererFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1037,9 +1037,6 @@
     <ClInclude Include="FrameContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\TestPass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Render\RenderContext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1086,9 +1083,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Manager\ModelManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\TestMeshPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Image\Data\Raw\RawImage.h">
@@ -1268,18 +1262,24 @@
     <ClInclude Include="Vk\Image\ImageViewNames.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\ShaderNames.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\RenderTargetManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\RenderNames.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\RendererFactory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Test.comp" />
-    <None Include="Shaders\ComplexTest.vert" />
-    <None Include="Shaders\ComplexTest.geom" />
-    <None Include="Shaders\ComplexTest.frag" />
     <None Include="Shaders\Fullscreen.vert" />
     <None Include="Shaders\Fullscreen.frag" />
-    <None Include="Shaders\Test.vert" />
-    <None Include="Shaders\Test.frag" />
-    <None Include="Shaders\TestMesh.mesh" />
-    <None Include="Shaders\TestMesh.frag" />
+    <None Include="Shaders\Meshlet.mesh" />
+    <None Include="Shaders\Meshlet.frag" />
     <None Include="Shaders\Traditional.vert" />
     <None Include="Shaders\Traditional.frag" />
   </ItemGroup>

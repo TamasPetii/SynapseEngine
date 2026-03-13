@@ -21,9 +21,7 @@
 
 #include "Engine/Render/RenderManager.h"
 
-#include "Engine/Render/GraphicsPass/TestPass.h"
-#include "Engine/Render/GraphicsPass/TestMeshPass.h"
-#include "Engine/Render/GraphicsPass/PresentationPass.h"
+
 #include "Engine/Render/RenderPipeline.h"
 
 #include "Engine/Manager/InputManager.h"
@@ -31,7 +29,7 @@
 #include "Engine/Scene/SceneManager.h"
 #include "Engine/Scene/TestScene.h"
 
-#include "Engine/Render/GraphicsPass/TraditionalRenderPass.h"
+#include "Engine/Render/RendererFactory.h"
 
 #include <print>
 
@@ -88,7 +86,7 @@ namespace Syn
 		InitVulkan(params);
 		InitTaskExecutor();
 		InitResourceManager();
-		InitRenderPipelines();
+		InitRenderManager();
 		InitSceneManager();
 	}
 
@@ -151,17 +149,9 @@ namespace Syn
 		}
 	}
 
-	void Engine::InitRenderPipelines()
+	void Engine::InitRenderManager()
 	{
-		uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
-		_renderManager = std::make_unique<RenderManager>(framesInFlight);
-
-		auto pipeline = std::make_unique<RenderPipeline>();
-		pipeline->AddPass(std::make_unique<TraditionalRenderPass>());
-		pipeline->AddPass(std::make_unique<PresentationPass>());
-		pipeline->InitializeAll();
-
-		_renderManager->RegisterPipeline("MainPipeline", std::move(pipeline));
+		_renderManager = std::move(RendererFactory::CreateDeferredRenderer(_frameContext.framesInFlight));
 	}
 
 	void Engine::Shutdown() {
@@ -241,7 +231,7 @@ namespace Syn
 		ServiceLocator::ProvideSceneManager(_sceneManager.get());
 
 		_sceneManager->RegisterScene("TestLevel", [frames]() {
-			return std::make_shared<TestScene>(frames);
+			return std::make_unique<TestScene>(frames);
 		});
 
 		_sceneManager->LoadScene("TestLevel");

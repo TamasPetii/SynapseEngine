@@ -93,15 +93,16 @@ namespace Syn {
             MeshDrawBlueprint blueprint{};
 
             blueprint.traditionalCmd.vertexCount = tradDesc.indexCount;
-            blueprint.traditionalCmd.instanceCount = 0;
+            blueprint.traditionalCmd.instanceCount = 0; // GPU/CPU culling fogja növelni!
             blueprint.traditionalCmd.firstVertex = tradDesc.indexOffset;
             blueprint.traditionalCmd.firstInstance = 0;
 
-            blueprint.meshletCmd.groupCountX = meshletDesc.meshletCount; // GPU fogja növelni?? = 0!
-            blueprint.meshletCmd.groupCountY = 1;
+            blueprint.meshletCmd.groupCountX = 0; // GPU/CPU culling fogja növelni!
+            blueprint.meshletCmd.groupCountY = meshletDesc.meshletCount;
             blueprint.meshletCmd.groupCountZ = 1;
 
-            if (false && hasMeshlet && tradDesc.indexCount > 5000) {
+            /*if (hasMeshlet && tradDesc.indexCount > 5000) { */
+            if (false && (hasMeshlet && rand() % 2 == 0)) {
                 blueprint.isMeshletPipeline = MeshDrawBlueprint::PIPELINE_MESHLET;
             }
             else {

@@ -49,7 +49,7 @@ namespace Syn
         void InitVulkan(const EngineInitParams& params);
         void InitResourceManager();
         void InitFrameContext(uint32_t framesInFlight);
-        void InitRenderPipelines();
+        void InitRenderManager();
         void InitTaskExecutor();
         void InitSceneManager();
         void Shutdown();
