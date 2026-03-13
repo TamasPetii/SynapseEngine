@@ -609,6 +609,9 @@
     <ClCompile Include="Render\TransferPass\TransferPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Collision\Tester\CollisionTester.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1290,6 +1293,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\TransferPass\TransferPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Collision\Tester\CollisionTester.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

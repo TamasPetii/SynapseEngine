@@ -15,6 +15,7 @@ namespace Syn
         GpuMeshletDrawData meshletData;
         std::vector<MaterialInfo> materials;
         std::vector<GpuNodeTransform> nodeTransforms;
+        GpuMeshCollider globalCollider;
     };
 }
 

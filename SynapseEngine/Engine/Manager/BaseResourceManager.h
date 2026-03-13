@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <future>
 #include <mutex>
+#include <span>
 #include <optional>
 
 #include "Engine/Vk/Synchronization/Fence.h"
@@ -37,6 +38,22 @@ namespace Syn {
     protected:
         using EntryType = ResourceEntry<TResource>;
     public:
+        struct ResourceSnapshot {
+            std::shared_ptr<TResource> resource;
+            ResourceState state;
+        };
+
+        std::vector<ResourceSnapshot> GetResourceSnapshot() const {
+            std::lock_guard<std::mutex> lock(_mutex);
+            std::vector<ResourceSnapshot> snapshot;
+            snapshot.reserve(_entries.size());
+
+            for (const auto& entry : _entries) {
+                snapshot.push_back({ entry.resource, entry.state });
+            }
+            return snapshot;
+        }
+
         virtual ~BaseResourceManager() = default;
 
         void Update();
@@ -44,6 +61,7 @@ namespace Syn {
         ResourceState GetEntryState(uint32_t id) const;
         std::shared_ptr<TResource> GetResource(uint32_t id) const;
         std::shared_ptr<TResource> GetResource(const std::string& name) const;
+        uint32_t GetVersion() const { return _version.load(std::memory_order_acquire); }
     protected:
         uint32_t InternalLoadAsync(const std::string& key, std::function<std::shared_ptr<TResource>()> task);
         std::shared_ptr<TResource> GetResource(uint32_t id, bool internalCall) const;
@@ -51,6 +69,7 @@ namespace Syn {
         virtual void StartGpuUpload(EntryType& entry) = 0;
         virtual void FinalizeResource(EntryType& entry) = 0;
     protected:
+        std::atomic<uint32_t> _version;
         std::vector<EntryType> _entries;
         std::unordered_map<std::string, uint32_t> _pathToId;
         mutable std::mutex _mutex;
@@ -124,6 +143,7 @@ namespace Syn {
         std::lock_guard<std::mutex> lock(_mutex);
         return _entries.size();
     }
+
     template <typename TResource>
     ResourceState BaseResourceManager<TResource>::GetEntryState(uint32_t id) const
     {

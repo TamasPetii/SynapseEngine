@@ -10,6 +10,10 @@ namespace Syn
     {
         GpuBatchedModel result;
 		result.materials = std::move(cookedModel.materials);
+        result.globalCollider.center = cookedModel.globalCollider.sphere.center;
+        result.globalCollider.radius = cookedModel.globalCollider.sphere.radius;
+        result.globalCollider.aabbMin = cookedModel.globalCollider.aabb.min;
+        result.globalCollider.aabbMax = cookedModel.globalCollider.aabb.max;
 
         // ------------------------------------------------------------------
         // 1. GLOBÁLIS OFFSETEK
@@ -52,6 +56,8 @@ namespace Syn
             GpuMeshCollider meshCollider{};
             meshCollider.center = cookedMesh.collider.sphere.center;
             meshCollider.radius = cookedMesh.collider.sphere.radius;
+            meshCollider.aabbMin = cookedMesh.collider.aabb.min;
+            meshCollider.aabbMax = cookedMesh.collider.aabb.max;
             result.indexedData.meshColliders.push_back(meshCollider);
 
             // B) VERTEX ADATOK MÁSOLÁSA ÉS INDEXEK ELTOLÁSA

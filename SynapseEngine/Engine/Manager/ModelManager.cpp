@@ -71,6 +71,7 @@ namespace Syn {
                 entry.stagingBuffer.reset();
                 entry.state = ResourceState::Ready;
                 Info("Model '{}' is ready", entry.path);
+                _version.fetch_add(1, std::memory_order_release);
             },
             .needsGraphics = false
         });

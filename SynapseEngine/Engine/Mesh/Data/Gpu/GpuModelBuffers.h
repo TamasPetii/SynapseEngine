@@ -28,6 +28,7 @@ namespace Syn
         std::unique_ptr<Vk::Buffer> nodeTransforms;
 
         //Draw Data
+
         std::vector<MeshDrawBlueprint> baseDrawCommands;
     };
 

@@ -41,6 +41,7 @@ namespace Syn {
                 entry.stagingBuffer.reset();
                 entry.state = ResourceState::Ready;
 				Info("Image '{}' is ready", entry.path);
+                _version++;
             },
             .needsGraphics = needsGraphics
             });

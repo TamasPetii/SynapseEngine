@@ -179,6 +179,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Collision\Tester\CollisionTester.cpp" />
     <ClCompile Include="Component\ModelComponent.cpp" />
     <ClCompile Include="Component\BaseComponent\RenderStateComponent.cpp" />
     <ClCompile Include="Render\TransferPass\CopyToSwapchainPass.cpp" />
@@ -379,6 +380,7 @@
     <ClCompile Include="Utils\WindowedBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Collision\Tester\CollisionTester.h" />
     <ClInclude Include="Component\ModelComponent.h" />
     <ClInclude Include="Component\BaseComponent\RenderStateComponent.h" />
     <ClInclude Include="Render\TransferPass\CopyToSwapchainPass.h" />

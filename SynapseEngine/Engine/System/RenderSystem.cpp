@@ -25,9 +25,15 @@ namespace Syn
 
         auto modelManager = ServiceLocator::GetModelManager();
         uint32_t totalModels = static_cast<uint32_t>(modelManager->GetResourceCount());
+        uint32_t currentModelManagerVersion = modelManager->GetVersion();
 
-        subflow.emplace([this, scene, pool, totalModels]() {
-            if (false && !pool->IsStateBitSet<CHANGED_BIT>() && !pool->IsStateBitSet<INDEX_CHANGED_BIT>() && !_needsRebuild)
+        subflow.emplace([this, scene, pool, totalModels, currentModelManagerVersion]() {
+            if (_lastModelManagerVersion != currentModelManagerVersion) {
+                _needsRebuild = true;
+                _lastModelManagerVersion = currentModelManagerVersion;
+            }
+
+            if (!pool->IsStateBitSet<CHANGED_BIT>() && !pool->IsStateBitSet<INDEX_CHANGED_BIT>() && !_needsRebuild)
                 return;
 
             if (totalModels > _modelCapacities.size()) {
@@ -58,7 +64,7 @@ namespace Syn
                 if (count > _modelCapacities[modelId])
                 {
                     capacityExceeded = true;
-                    _modelCapacities[modelId] = count + 64;
+                    _modelCapacities[modelId] = count + 16;
                 }
             }
 
@@ -222,7 +228,7 @@ namespace Syn
     void RenderSystem::OnFinish(Scene* scene, tf::Subflow& subflow)
     {
         subflow.emplace([this]() {
-            _needsRebuild = true;
+            _needsRebuild = false;
 
             if (_framesToUpload > 0) {
                 _framesToUpload--;

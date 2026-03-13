@@ -22,6 +22,7 @@ namespace Syn
     private:
         void RebuildGlobalBuffers(Scene* scene);
     private:
+        uint32_t _lastModelManagerVersion = 0;
         std::vector<uint32_t> _currentCounts;
         std::vector<uint32_t> _modelCapacities;
 
