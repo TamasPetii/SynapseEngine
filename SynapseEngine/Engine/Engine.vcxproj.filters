@@ -1265,6 +1265,9 @@
     <ClInclude Include="System\FrustumCullingSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Vk\Image\ImageViewNames.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Test.comp" />

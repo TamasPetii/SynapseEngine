@@ -64,6 +64,7 @@ struct CameraComponent {
 	mat4 viewProjVulkanInv;
 	vec4 eye;
 	vec4 params;
+    vec4 frustum[6];
 };
 
 layout(buffer_reference, std430) readonly buffer PositionBuffer   { GpuVertexPosition data[]; };

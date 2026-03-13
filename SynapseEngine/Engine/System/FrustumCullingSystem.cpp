@@ -39,14 +39,14 @@ namespace Syn
             const auto& modelAlloc = drawData->modelAllocations[modelComp.modelIndex];
 
             bool isVisible = true;
-            uint32_t calculatedLod = rand() % 4;
-
             if (isVisible)
             {
                 uint32_t meshCount = modelAlloc.meshAllocationCount / 4;
 
                 for (uint32_t m = 0; m < meshCount; ++m)
                 {
+                    uint32_t calculatedLod = rand() % 4;
+
                     uint32_t allocIndex = modelAlloc.meshAllocationOffset + (m * 4) + calculatedLod;
                     const auto& meshAlloc = drawData->meshAllocations[allocIndex];
 

@@ -400,6 +400,7 @@
     <ClInclude Include="Component\TransformComponent.h" />
     <ClInclude Include="Scene\TestScene.h" />
     <ClInclude Include="Render\GraphicsPass\TraditionalRenderPass.h" />
+    <ClInclude Include="Vk\Image\ImageViewNames.h" />
     <ClInclude Include="Vk\Rendering\GpuUploader.h" />
     <ClInclude Include="Manager\BaseResourceManager.h" />
     <ClInclude Include="Image\Data\Texture.h" />

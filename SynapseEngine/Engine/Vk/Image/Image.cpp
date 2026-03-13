@@ -3,6 +3,7 @@
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
 #include "ImageUtils.h"
+#include "ImageViewNames.h"
 
 namespace Syn::Vk {
     Image::Image(const ImageConfig& config)
@@ -39,8 +40,8 @@ namespace Syn::Vk {
 
     VkImageView Image::GetView(const std::string& name) const {
         if (name.empty()) {
-            if (_imageViews.contains("_default"))
-                return _imageViews.at("_default");
+            if (_imageViews.contains(ImageViewNames::Default))
+                return _imageViews.at(ImageViewNames::Default);
             return VK_NULL_HANDLE;
         }
 

@@ -2,6 +2,7 @@
 #include "ImageUtils.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
+#include "ImageViewNames.h"
 
 namespace Syn::Vk {
 
@@ -43,14 +44,14 @@ namespace Syn::Vk {
     void ImageFactory::CreateViews(Image* image) {
         auto device = ServiceLocator::GetVkContext()->GetDevice();
 
-        if (!image->_config.imageViewConfigs.contains("_default")) {
+        if (!image->_config.imageViewConfigs.contains(ImageViewNames::Default)) {
             ImageViewConfig defaultConfig;
             defaultConfig.viewType = (image->_config.arrayLayers > 1) ?
                 (image->_config.flags & VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT ?
                     VK_IMAGE_VIEW_TYPE_CUBE :
                     VK_IMAGE_VIEW_TYPE_2D_ARRAY) :
                 VK_IMAGE_VIEW_TYPE_2D;
-            image->_config.imageViewConfigs["_default"] = defaultConfig;
+            image->_config.imageViewConfigs[ImageViewNames::Default] = defaultConfig;
         }
 
         auto createView = [&](const std::string& name, const ImageViewConfig& config) {
@@ -85,7 +86,7 @@ namespace Syn::Vk {
                     mipConfig.baseMipLevel = currentMip;
                     mipConfig.mipLevelCount = 1;
 
-                    std::string mipName = name + "_mip" + std::to_string(currentMip);
+                    std::string mipName = name + ImageViewNames::Mip + std::to_string(currentMip);
                     createView(mipName, mipConfig);
                 }
             }

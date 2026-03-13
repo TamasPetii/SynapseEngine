@@ -71,6 +71,18 @@ namespace Syn
                 cameraComponent.viewProj = cameraComponent.proj * cameraComponent.view;
                 cameraComponent.viewProjInv = glm::inverse(cameraComponent.viewProj);
 
+                float fovY = glm::radians(cameraComponent.fov);
+                float aspectRatio = cameraComponent.width / cameraComponent.height;
+                float halfV = cameraComponent.farPlane * tanf(fovY * 0.5f);
+                float halfH = halfV * aspectRatio;
+
+                cameraComponent.frustum[0] = FrustumFace(cameraComponent.direction, cameraComponent.position + cameraComponent.direction * cameraComponent.nearPlane);
+                cameraComponent.frustum[1] = FrustumFace(-glm::cross(glm::normalize(cameraComponent.direction * cameraComponent.farPlane + cameraComponent.right * halfH), cameraComponent.up), cameraComponent.position);
+                cameraComponent.frustum[2] = FrustumFace(-glm::cross(cameraComponent.up, glm::normalize(cameraComponent.direction * cameraComponent.farPlane - cameraComponent.right * halfH)), cameraComponent.position);
+                cameraComponent.frustum[3] = FrustumFace(-glm::cross(cameraComponent.right, glm::normalize(cameraComponent.direction * cameraComponent.farPlane + cameraComponent.up * halfV)), cameraComponent.position);
+                cameraComponent.frustum[4] = FrustumFace(-glm::cross(glm::normalize(cameraComponent.direction * cameraComponent.farPlane - cameraComponent.up * halfV), cameraComponent.right), cameraComponent.position);
+                cameraComponent.frustum[5] = FrustumFace(-cameraComponent.direction, cameraComponent.position + cameraComponent.direction * cameraComponent.farPlane);
+
                 cameraPool->SetBit<CHANGED_BIT>(entity);
                 cameraComponent.version++;
             }
@@ -90,11 +102,7 @@ namespace Syn
         if (!componentBuffer.buffer) return;
         auto bufferHandler = static_cast<CameraComponentGPU*>(componentBuffer.buffer->Map());
 
-        auto cameraFrustumBuffer = componentBufferManager->GetComponentBuffer(BufferNames::CameraFrustumData, frameIndex);
-        if (!cameraFrustumBuffer.buffer) return;
-        auto cameraFrustumBufferHandler = static_cast<CameraFrustumGPU*>(cameraFrustumBuffer.buffer->Map());
-
-        auto processUpload = [cameraPool, bufferHandler, cameraFrustumBufferHandler, componentBuffer, cameraFrustumBuffer](EntityID entity) {
+        auto processUpload = [cameraPool, bufferHandler, componentBuffer](EntityID entity) {
             auto& cameraComponent = cameraPool->Get(entity);
             auto cameraIndex = cameraPool->GetMapping().Get(entity);
 
@@ -103,28 +111,7 @@ namespace Syn
                 componentBuffer.versions[cameraIndex] = cameraComponent.version;
                 bufferHandler[cameraIndex] = CameraComponentGPU(cameraComponent);
             }
-
-            if (cameraFrustumBuffer.versions[cameraIndex] != cameraComponent.version)
-            {
-                cameraFrustumBuffer.versions[cameraIndex] = cameraComponent.version;
-
-                float fovY = glm::radians(cameraComponent.fov);
-                float aspectRatio = cameraComponent.width / cameraComponent.height;
-                float halfV = cameraComponent.farPlane * tanf(fovY * 0.5f);
-                float halfH = halfV * aspectRatio;
-
-                CameraFrustumGPU cameraFrustum;
-
-                cameraFrustum.near = FrustumFace(cameraComponent.direction, cameraComponent.position + cameraComponent.direction * cameraComponent.nearPlane);
-                cameraFrustum.right = FrustumFace(-glm::cross(glm::normalize(cameraComponent.direction * cameraComponent.farPlane + cameraComponent.right * halfH), cameraComponent.up), cameraComponent.position);
-                cameraFrustum.left = FrustumFace(-glm::cross(cameraComponent.up, glm::normalize(cameraComponent.direction * cameraComponent.farPlane - cameraComponent.right * halfH)), cameraComponent.position);
-                cameraFrustum.top = FrustumFace(-glm::cross(cameraComponent.right, glm::normalize(cameraComponent.direction * cameraComponent.farPlane + cameraComponent.up * halfV)), cameraComponent.position);
-                cameraFrustum.bottom = FrustumFace(-glm::cross(glm::normalize(cameraComponent.direction * cameraComponent.farPlane - cameraComponent.up * halfV), cameraComponent.right), cameraComponent.position);
-                cameraFrustum.far = FrustumFace(-cameraComponent.direction, cameraComponent.position + cameraComponent.direction * cameraComponent.farPlane);
-
-                cameraFrustumBufferHandler[cameraIndex] = cameraFrustum;
-            }
-            };
+        };
 
         ForEachStream(cameraPool, subflow, processUpload);
 

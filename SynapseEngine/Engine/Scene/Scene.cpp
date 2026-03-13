@@ -56,7 +56,6 @@ namespace Syn
 
         RegisterComponentSparseMapBuffer<CameraComponent>(BufferNames::CameraSparseMap);
         RegisterComponentBuffer<CameraComponent, CameraComponentGPU>(BufferNames::CameraData);
-        RegisterComponentBuffer<CameraComponent, CameraFrustumGPU>(BufferNames::CameraFrustumData);
 
         RegisterComponentSparseMapBuffer<ModelComponent>(BufferNames::ModelSparseMap);
         RegisterComponentBuffer<ModelComponent, ModelComponentGPU>(BufferNames::ModelData);

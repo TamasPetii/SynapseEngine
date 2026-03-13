@@ -4,6 +4,21 @@
 
 namespace Syn
 {
+	struct SYN_API FrustumFace
+	{
+		FrustumFace() = default;
+		FrustumFace(const glm::vec3& normal, float distance);
+		FrustumFace(const glm::vec3& normal, const glm::vec3 point);
+
+		operator glm::vec4() const
+		{
+			return glm::vec4(normal, distance);
+		}
+
+		glm::vec3 normal;
+		float distance;
+	};
+
 	struct SYN_API CameraComponent : public Component
 	{
 		CameraComponent();
@@ -35,11 +50,12 @@ namespace Syn
 		glm::mat4 projInv;
 		glm::mat4 viewProj;
 		glm::mat4 viewProjInv;
+
+		std::vector<FrustumFace> frustum;
 	};
 
 	struct SYN_API CameraComponentGPU
 	{
-	public:
 		CameraComponentGPU(const CameraComponent& component);
 
 		glm::mat4 view;
@@ -54,16 +70,7 @@ namespace Syn
 		glm::mat4 viewProjVulkanInv;
 		glm::vec4 eye;
 		glm::vec4 params;
-	};
-
-	struct SYN_API CameraFrustumGPU
-	{
-		glm::vec4 near;
-		glm::vec4 right;
-		glm::vec4 left;
-		glm::vec4 top;
-		glm::vec4 bottom;
-		glm::vec4 far;
+		glm::vec4 frustum[6];
 	};
 }
 

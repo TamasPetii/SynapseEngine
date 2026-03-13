@@ -1,14 +1,17 @@
 #pragma once
+#include "Engine/SynApi.h"
 
-namespace Syn::BufferNames
+namespace Syn
 {
-    constexpr const char* TransformSparseMap = "TransformSparseMap";
-    constexpr const char* TransformData = "TransformData";
+    struct SYN_API BufferNames
+    {
+        static constexpr const char* TransformSparseMap = "TransformSparseMap";
+        static constexpr const char* TransformData = "TransformData";
 
-    constexpr const char* CameraSparseMap = "CameraSparseMap";
-    constexpr const char* CameraData = "CameraData";
-    constexpr const char* CameraFrustumData = "CameraFrustumData";
+        static constexpr const char* CameraSparseMap = "CameraSparseMap";
+        static constexpr const char* CameraData = "CameraData";
 
-    constexpr const char* ModelSparseMap = "ModelSparseMap";
-    constexpr const char* ModelData = "ModelData";
+        static constexpr const char* ModelSparseMap = "ModelSparseMap";
+        static constexpr const char* ModelData = "ModelData";
+    };
 }

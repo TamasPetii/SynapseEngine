@@ -1,6 +1,7 @@
 #include "SwapChain.h"
 #include <algorithm>
 #include <limits>
+#include "Engine/Vk/Image/ImageViewNames.h"
 
 namespace Syn::Vk {
 
@@ -94,7 +95,7 @@ namespace Syn::Vk {
 
         ImageViewConfig viewConfig{};
         viewConfig.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        swapchainImageConfig.AddView("_default", viewConfig);
+        swapchainImageConfig.AddView(ImageViewNames::Default, viewConfig);
 
         _images.clear();
         _images.reserve(imageCount);
