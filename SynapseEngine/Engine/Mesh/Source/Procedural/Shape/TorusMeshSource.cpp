@@ -44,12 +44,12 @@ namespace Syn
                 uint32_t next = current + (_tubeSegments + 1);
 
                 outIndices.push_back(current);
-                outIndices.push_back(next);
                 outIndices.push_back(current + 1);
+                outIndices.push_back(next);
 
                 outIndices.push_back(current + 1);
-                outIndices.push_back(next);
                 outIndices.push_back(next + 1);
+                outIndices.push_back(next);
             }
         }
     }

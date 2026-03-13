@@ -74,8 +74,8 @@ namespace Syn
         for (uint32_t x = 0; x < _radialSegments; ++x)
         {
             outIndices.push_back(bottomCenter);
-            outIndices.push_back(bottomEdge + x + 1);
             outIndices.push_back(bottomEdge + x);
+            outIndices.push_back(bottomEdge + x + 1);
         }
 
         offset += _radialSegments + 2;
@@ -86,8 +86,8 @@ namespace Syn
         for (uint32_t x = 0; x < _radialSegments; ++x)
         {
             outIndices.push_back(topCenter);
-            outIndices.push_back(topEdge + x);
             outIndices.push_back(topEdge + x + 1);
+            outIndices.push_back(topEdge + x);
         }
     }
 

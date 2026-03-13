@@ -50,12 +50,12 @@ namespace Syn
                 uint32_t next = current + (_sectors + 1);
 
                 outIndices.push_back(current);
-                outIndices.push_back(next);
                 outIndices.push_back(current + 1);
+                outIndices.push_back(next);
 
                 outIndices.push_back(current + 1);
-                outIndices.push_back(next);
                 outIndices.push_back(next + 1);
+                outIndices.push_back(next);
             }
         }
 
@@ -67,8 +67,8 @@ namespace Syn
         for (uint32_t sector = 0; sector < _sectors; ++sector)
         {
             outIndices.push_back(centerIndex);
-            outIndices.push_back(edgeIndex + sector + 1);
             outIndices.push_back(edgeIndex + sector);
+            outIndices.push_back(edgeIndex + sector + 1);
         }
     }
 

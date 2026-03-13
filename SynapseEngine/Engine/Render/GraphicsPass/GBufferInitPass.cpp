@@ -11,10 +11,7 @@ namespace Syn {
         _graphicsState.renderArea = extent;
 
         std::vector<std::string> colorTargets = {
-            RenderTargetNames::Main, 
-            RenderTargetNames::ColorMetallic,
-            RenderTargetNames::NormalRoughness, 
-            RenderTargetNames::EmissiveAo
+            RenderTargetNames::Main
         };
 
         for (const auto& name : colorTargets) 
