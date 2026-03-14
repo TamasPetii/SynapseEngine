@@ -64,6 +64,8 @@ namespace Syn::Vk {
         features12.scalarBlockLayout = VK_TRUE;
         features12.samplerFilterMinmax = VK_TRUE;
         features12.drawIndirectCount = VK_TRUE;
+        features12.storageBuffer8BitAccess = VK_TRUE;
+        features12.uniformAndStorageBuffer8BitAccess = VK_TRUE;
 
         VkPhysicalDeviceVulkan11Features features11{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES };
         features11.shaderDrawParameters = VK_TRUE;

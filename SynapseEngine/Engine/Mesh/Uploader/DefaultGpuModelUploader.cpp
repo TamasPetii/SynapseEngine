@@ -16,7 +16,7 @@ namespace Syn
         totalStagingSize += getAlignedSize(data.indexedData.meshColliders.size() * sizeof(GpuMeshCollider));
         totalStagingSize += getAlignedSize(data.indexedData.lodDescriptors.size() * sizeof(GpuMeshLodDescriptor));
         totalStagingSize += getAlignedSize(data.meshletData.vertexIndices.size() * sizeof(uint32_t));
-        totalStagingSize += getAlignedSize(data.meshletData.triangleIndices.size() * sizeof(uint32_t));
+        totalStagingSize += getAlignedSize(data.meshletData.triangleIndices.size() * sizeof(uint8_t));
         totalStagingSize += getAlignedSize(data.meshletData.meshletDescriptors.size() * sizeof(GpuMeshletDescriptor));
         totalStagingSize += getAlignedSize(data.meshletData.drawDescriptors.size() * sizeof(GpuMeshletDrawDescriptor));
         totalStagingSize += getAlignedSize(data.meshletData.meshletColliders.size() * sizeof(GpuMeshletCollider));

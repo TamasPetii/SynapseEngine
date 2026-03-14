@@ -45,7 +45,7 @@ namespace Syn
 		std::vector<uint32_t> vertexIndices;
 
 		//[Lod0 | Lod1 | Lod2 | Lod3]
-		std::vector<uint32_t> triangleIndices;
+		std::vector<uint8_t> triangleIndices;
 
 		//New: [(Mesh0_Lod0, Mesh0_Lod1, Mesh0_Lod2, Mesh0_Lod3), (Mesh1_Lod0, ...)] 
 		std::vector<GpuMeshletDescriptor> meshletDescriptors;
