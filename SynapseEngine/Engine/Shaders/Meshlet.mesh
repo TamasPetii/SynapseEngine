@@ -156,7 +156,8 @@ void main() {
 
     // 6. Meshlet specifikus adatok lekérése a modellen belül
     MeshletDrawDescBuffer meshletDraws = MeshletDrawDescBuffer(addrs.meshletDrawDescriptors);
-    GpuMeshletDrawDescriptor submeshMeshletData = meshletDraws.data[desc.meshIndex];
+    uint flatLodIndex = (desc.meshIndex * 4) + desc.lodIndex; 
+    GpuMeshletDrawDescriptor submeshMeshletData = meshletDraws.data[flatLodIndex];
     
     uint globalMeshletIdx = submeshMeshletData.meshletOffset + localMeshletID;
 
@@ -164,9 +165,7 @@ void main() {
     GpuMeshletDescriptor meshlet = descBuf.data[globalMeshletIdx];
 
     // 7. Szálak szinkronizálása és Mesh kimenet beállítása
-    if (threadIdx == 0) {
-        SetMeshOutputsEXT(uint(meshlet.vertexCount), uint(meshlet.triangleCount));
-    }
+    SetMeshOutputsEXT(uint(meshlet.vertexCount), uint(meshlet.triangleCount));
 
     // 8. Vertexek feldolgozása (32-esével lépkedve)
     VertexIndicesBuffer vtxIdxBuf = VertexIndicesBuffer(addrs.meshletVertexIndices);
