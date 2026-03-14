@@ -25,6 +25,7 @@ namespace Syn
         std::vector<std::shared_ptr<Vk::Buffer>> globalIndirectCommandDescriptorBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> globalModelAllocationBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> globalMeshAllocationBuffers;
+
         std::vector<std::shared_ptr<Vk::Buffer>> aabbIndirectCommandBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> sphereIndirectCommandBuffers;
 

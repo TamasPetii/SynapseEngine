@@ -100,10 +100,11 @@ layout(buffer_reference, std430) readonly buffer SparseMapBuffer    { uint data[
 layout(buffer_reference, std430) readonly buffer VisibleModelList   { VisibleModelData data[]; };
 layout(buffer_reference, std430) readonly buffer DispatchCountBuffer{ DispatchCommand cmd; };
 layout(buffer_reference, std430) readonly buffer MeshAllocBuffer    { MeshAllocationInfo data[]; };
+layout(buffer_reference, std430) buffer GlobalInstanceBuffer        { uint data[]; };
+
+layout(buffer_reference, std430) readonly buffer MeshColliderBuffer { GpuMeshCollider data[]; };
 layout(buffer_reference, std430) buffer TraditionalCmdBuffer        { VkDrawIndirectCommand data[]; };
 layout(buffer_reference, std430) buffer MeshletCmdBuffer            { VkDrawMeshTasksIndirectCommandEXT data[]; };
-layout(buffer_reference, std430) buffer GlobalInstanceBuffer        { uint data[]; };
-layout(buffer_reference, std430) readonly buffer MeshColliderBuffer { GpuMeshCollider data[]; };
 
 layout(push_constant) uniform PushConstants {
     uint64_t cameraBufferAddr;
@@ -111,19 +112,20 @@ layout(push_constant) uniform PushConstants {
     uint64_t transformBufferAddr;
     uint64_t transformSparseMapBufferAddr;
     uint64_t modelCompBufferAddr; 
+
+    uint64_t meshAllocBufferAddr;
     uint64_t modelAllocBufferAddr;
     uint64_t modelAddressBufferAddr; 
     
     uint64_t visibleModelListAddr;
     uint64_t visibleModelCountAddr; 
     
-    uint64_t meshAllocBufferAddr;
-    uint64_t traditionalCmdBufferAddr;
-    uint64_t meshletCmdBufferAddr;
+    uint64_t globalIndirectCommandBuffers;
     uint64_t globalInstanceBufferAddr;
     
     uint totalModelsToTest; 
     uint activeCameraEntity;
+    uint meshletOffsetStart;
 } pc;
 
 // 0 = Outside, 1 = Intersect, 2 = Inside
@@ -200,10 +202,12 @@ void main() {
             
             uint slotIndex = 0;
             if (meshAlloc.isMeshletPipeline == 1) {
-                MeshletCmdBuffer cmdBuf = MeshletCmdBuffer(pc.meshletCmdBufferAddr);
-                slotIndex = atomicAdd(cmdBuf.data[meshAlloc.indirectIndex].groupCountX, 1);
+                uint64_t meshletBaseAddr = pc.globalIndirectCommandBuffers + (pc.meshletOffsetStart * 16ul);
+                MeshletCmdBuffer cmdBuf = MeshletCmdBuffer(meshletBaseAddr); 
+                uint localCmdIndex = meshAlloc.indirectIndex - pc.meshletOffsetStart;
+                slotIndex = atomicAdd(cmdBuf.data[localCmdIndex].groupCountX, 1);
             } else {
-                TraditionalCmdBuffer cmdBuf = TraditionalCmdBuffer(pc.traditionalCmdBufferAddr);
+                TraditionalCmdBuffer cmdBuf = TraditionalCmdBuffer(pc.globalIndirectCommandBuffers);
                 slotIndex = atomicAdd(cmdBuf.data[meshAlloc.indirectIndex].instanceCount, 1);
             }
 
