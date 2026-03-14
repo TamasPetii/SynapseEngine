@@ -73,8 +73,11 @@ namespace Syn
             const auto& globalLocalCollider = resource->gpuData.globalCollider;
             GpuMeshCollider globalWorldCollider = MeshUtils::TransformCollider(globalLocalCollider, transform);
 
-            if (!CollisionTester::IsInFrustum(globalWorldCollider, frustum))
+            IntersectionType visibility = CollisionTester::IsInFrustumIntersectionType(globalWorldCollider, frustum);
+            if (visibility == IntersectionType::Outside)
                 return;
+
+            bool parentFullyInside = (visibility == IntersectionType::Inside);
 
             for (uint32_t m = 0; m < meshCount; ++m)
             {
@@ -83,10 +86,12 @@ namespace Syn
                 float distance = glm::length(cameraComp.position - globalWorldCollider.center);
                 if (meshCount > 1)
                 {
-                    //Frustum culling on meshes
                     const auto& localCollider = resource->gpuData.indexedData.meshColliders[m];
                     GpuMeshCollider worldCollider = MeshUtils::TransformCollider(localCollider, transform);
-                    isVisible = CollisionTester::IsInFrustum(worldCollider, frustum);
+
+                    if(!parentFullyInside)
+                        isVisible = CollisionTester::IsInFrustum(worldCollider, frustum);
+
                     distance = glm::length(cameraComp.position - worldCollider.center);
                 }
 
