@@ -190,7 +190,6 @@ void main() {
         // Csak akkor Frustum tesztelünk, ha a modell nincs teljesen a képernyőn belül
         if (!parentFullyInside) {
             uint visibility = TestFrustum(worldCollider, camera);
-            visibility = 2;
             if (visibility == 0) isVisible = false;
         }
 

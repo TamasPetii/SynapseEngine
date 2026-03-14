@@ -191,7 +191,6 @@ void main() {
 
     // Culling
     uint visibility = TestFrustum(globalWorldCollider, camera);
-    visibility = 2;
     if (visibility == 0) return;
 
     const uint MAX_MESH_COUNT = 16u;
@@ -227,7 +226,6 @@ void main() {
         return;
     }
 
-    /*
     uint needsWrite = 1;
     uint subgroupWriteCount = subgroupAdd(needsWrite);
     uint localOffset = subgroupExclusiveAdd(needsWrite);
@@ -247,8 +245,8 @@ void main() {
         outList.data[finalIndex].modelIndex = modelComp.modelIndex;
         outList.data[finalIndex].packedFlags = (visibility == 2) ? 1 : 0; 
     }
-    */
 
+    /*
     DispatchCountBuffer counter = DispatchCountBuffer(pc.visibleModelCountAddr);
     uint finalIndex = atomicAdd(counter.cmd.groupCountX, 1);
 
@@ -256,4 +254,5 @@ void main() {
     outList.data[finalIndex].entityId = entityId;
     outList.data[finalIndex].modelIndex = modelComp.modelIndex;
     outList.data[finalIndex].packedFlags = (visibility == 2) ? 1 : 0;
+    */
 }

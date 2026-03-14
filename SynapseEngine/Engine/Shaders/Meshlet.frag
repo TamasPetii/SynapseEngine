@@ -36,13 +36,13 @@ void main() {
     vec3 color;
 
     if (inLodIndex == 0) {
-        color = vec3(0, 0.9, 0);
+        color = vec3(0, 0, 0.9);
     } else if (inLodIndex == 1) {
-        color = vec3(0, 0.6, 0);
+        color = vec3(0, 0, 0.6);
     } else if (inLodIndex == 2) {
-        color = vec3(0, 0.35, 0);
+        color = vec3(0, 0, 0.35);
     } else {
-        color = vec3(0, 0.15, 0);
+        color = vec3(0, 0, 0.15);
     }
 
     color *= pc.visualizeMeshlet == 1 ? inMeshletColor.x : 1.0;
