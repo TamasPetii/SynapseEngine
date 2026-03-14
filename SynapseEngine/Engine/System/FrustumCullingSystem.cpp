@@ -95,9 +95,9 @@ namespace Syn
                     //Todo: Project Sphere to screne, and lod has to calculated according to it!
 
                     uint32_t lod;
-                    if (distance < 50.0f) lod = 0;
-                    else if (distance < 120.0f) lod = 1;
-                    else if (distance < 300.0f) lod = 2;
+                    if (distance < 25.0f) lod = 0;
+                    else if (distance < 50.0f) lod = 1;
+                    else if (distance < 100.0f) lod = 2;
                     else lod = 3;
 
                     uint32_t allocIndex = modelAlloc.meshAllocationOffset + (m * 4) + lod;

@@ -48,6 +48,7 @@ namespace Syn
             registry->AddComponent<ModelComponent>(sponzaEntity);
 
             registry->GetComponent<TransformComponent>(sponzaEntity).translation = glm::vec3(0.0f, 0.0f, 0.0f);
+            registry->GetComponent<TransformComponent>(sponzaEntity).scale = glm::vec3(0.2f, 0.2f, 0.2f);
             registry->GetComponent<ModelComponent>(sponzaEntity).modelIndex = sponzaId;
 
             registry->GetPool<TransformComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
@@ -65,7 +66,7 @@ namespace Syn
             registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
 
             // Random Geometry
-            for (int i = 0; i < 1000000; i++)
+            for (int i = 0; i < 0; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);

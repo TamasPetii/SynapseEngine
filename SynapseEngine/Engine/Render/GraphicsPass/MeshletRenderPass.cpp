@@ -34,8 +34,8 @@ namespace Syn {
 
         uint32_t activeCameraEntity;
         uint32_t meshletOffsetStart;
+        uint32_t visualizeMeshlet;
 
-        uint32_t padding0;
         uint32_t padding1;
     };
 
@@ -137,6 +137,8 @@ namespace Syn {
 
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.meshletOffsetStart = SceneDrawData::MESHLET_OFFSET_START;
+
+        pc.visualizeMeshlet = 1;
 
         vkCmdPushConstants(
             context.cmd,

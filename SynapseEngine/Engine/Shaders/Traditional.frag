@@ -4,23 +4,25 @@
 
 layout(location = 0) in vec3 inNormal;
 layout(location = 1) flat in uint inLodIndex;
+
 layout(location = 0) out vec4 outFragColor;
 
 void main() {
     vec3 color;
 
     if (inLodIndex == 0) {
-        color = vec3(1.0, 0.2, 0.2); //Piros
+        color = vec3(0.9, 0, 0);
     } else if (inLodIndex == 1) {
-        color = vec3(0.2, 1.0, 0.2); //Zöld
+        color = vec3(0.6, 0, 0);
     } else if (inLodIndex == 2) {
-        color = vec3(0.2, 0.5, 1.0); //Kék
+        color = vec3(0.35, 0, 0);
     } else {
-        color = vec3(1.0, 0.8, 0.1); //Sárga
+        color = vec3(0.15, 0, 0);
     }
 
     vec3 lightDir = normalize(vec3(0.5, 1.0, 0.3));
     float ndotl = max(dot(normalize(inNormal), lightDir), 0.0);
+    vec3 finalColor = color;
 
-    outFragColor = vec4(color * ndotl, 1.0);
+    outFragColor = vec4(finalColor, 1.0);
 }

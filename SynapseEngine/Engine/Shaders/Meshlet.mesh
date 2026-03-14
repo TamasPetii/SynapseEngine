@@ -117,12 +117,27 @@ layout(push_constant) uniform PushConstants {
 
     uint activeCameraEntity;
     uint meshletOffsetStart;
-    uint padding0;
+    uint visualizeMeshlet;
     uint padding1;
 } pc;
 
 layout(location = 0) out vec3 outNormal[];
 layout(location = 1) flat out uint outLodIndex[];
+layout(location = 2) out vec3 outMeshletColor[];
+
+vec3 generateMeshletColor(uint meshletID) {
+    uint hash = (meshletID ^ 61) ^ (meshletID >> 16);
+    hash = hash + (hash << 3);
+    hash = hash ^ (hash >> 4);
+    hash = hash * 0x27d4eb2d;
+    hash = hash ^ (hash >> 15);
+    
+    float r = float((hash & 0xFF0000) >> 16) / 255.0;
+    float g = float((hash & 0x00FF00) >> 8) / 255.0;
+    float b = float(hash & 0x0000FF) / 255.0;
+    
+    return vec3(r, g, b);
+}
 
 void main() {
     uint threadIdx = gl_LocalInvocationID.x;
@@ -160,6 +175,7 @@ void main() {
     GpuMeshletDrawDescriptor submeshMeshletData = meshletDraws.data[flatLodIndex];
     
     uint globalMeshletIdx = submeshMeshletData.meshletOffset + localMeshletID;
+    vec3 meshletColor = generateMeshletColor(globalMeshletIdx);
 
     MeshletDescBuffer descBuf = MeshletDescBuffer(addrs.meshletDescriptors);
     GpuMeshletDescriptor meshlet = descBuf.data[globalMeshletIdx];
@@ -187,6 +203,7 @@ void main() {
         
         outNormal[i] = normalize(transform.transformIT * nodeTransform.globalTransformIT * vec4(attr.normal, 0)).xyz;
         outLodIndex[i] = desc.lodIndex;
+        outMeshletColor[i] = meshletColor;
     }
 
     // 9. Háromszög indexek feldolgozása (32-esével lépkedve)

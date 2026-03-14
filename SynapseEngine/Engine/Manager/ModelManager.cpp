@@ -103,7 +103,7 @@ namespace Syn {
             blueprint.meshletCmd.groupCountZ = 1;
 
             /*if (hasMeshlet && tradDesc.indexCount > 5000) { */
-            if (true || (hasMeshlet && rand() % 2 == 0)) {
+            if (true || rand() % 2 == 0) {
                 blueprint.isMeshletPipeline = MeshDrawBlueprint::PIPELINE_MESHLET;
             }
             else {
