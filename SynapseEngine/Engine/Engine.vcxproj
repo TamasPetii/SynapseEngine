@@ -616,8 +616,10 @@
   <ItemGroup>
     <None Include="Shaders\Fullscreen.frag" />
     <None Include="Shaders\Fullscreen.vert" />
+    <None Include="Shaders\MeshCulling.comp" />
     <None Include="Shaders\Meshlet.frag" />
     <None Include="Shaders\Meshlet.mesh" />
+    <None Include="Shaders\ModelCulling.comp" />
     <None Include="Shaders\Traditional.frag" />
     <None Include="Shaders\Traditional.vert" />
   </ItemGroup>

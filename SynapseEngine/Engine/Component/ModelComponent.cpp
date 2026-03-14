@@ -10,10 +10,10 @@ namespace Syn
 		modelIndex(NULL_INDEX)
 	{}
 
-	ModelComponentGPU::ModelComponentGPU(const ModelComponent& component) :
+	ModelComponentGPU::ModelComponentGPU(uint32_t entityIndex, const ModelComponent& component) :
+		entityIndex(entityIndex),
 		modelIndex(component.modelIndex),
-		pad0(0),
-		pad1(0)
+		pad0(0)
 	{
 		uint32_t flags = 0;
 		if (component.castShadow)        flags |= (1 << 0);

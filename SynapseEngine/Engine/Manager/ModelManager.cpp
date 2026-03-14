@@ -138,6 +138,11 @@ namespace Syn {
 
         addresses.nodeTransforms = getAddr(hw.nodeTransforms);
 
+        addresses.globalCollider = entry.resource->gpuData.globalCollider;
+        addresses.vertexCount = entry.resource->gpuData.globalVertexCount;
+        addresses.indexCount = entry.resource->gpuData.globalIndexCount;
+        addresses.averageLodIndexCount = entry.resource->gpuData.globalAverageLodIndexCount;
+
         size_t offset = entryIndex * sizeof(GpuModelAddresses);
         _modelAddressBuffer->Write(&addresses, sizeof(GpuModelAddresses), offset);
     }

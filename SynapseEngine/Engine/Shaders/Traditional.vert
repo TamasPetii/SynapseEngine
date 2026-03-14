@@ -20,6 +20,15 @@ struct GpuNodeTransform {
     mat4 globalTransformIT;
 };
 
+struct GpuMeshCollider { 
+    vec3 center; 
+    float radius; 
+    vec3 aabbMin; 
+    float padding0; 
+    vec3 aabbMax; 
+    float padding1;
+};
+
 struct GpuModelAddresses {
     uint64_t vertexPositions;
     uint64_t vertexAttributes;
@@ -33,6 +42,11 @@ struct GpuModelAddresses {
     uint64_t meshletDrawDescriptors;
     uint64_t meshletColliders;
     uint64_t nodeTransforms;
+    GpuMeshCollider globalCollider;
+    uint vertexCount;
+    uint indexCount;
+    uint averageLodIndexCount;
+    uint meshCount;
 };
 
 struct MeshDrawDescriptor {

@@ -1318,5 +1318,7 @@
     <None Include="Shaders\Meshlet.frag" />
     <None Include="Shaders\Traditional.vert" />
     <None Include="Shaders\Traditional.frag" />
+    <None Include="Shaders\ModelCulling.comp" />
+    <None Include="Shaders\MeshCulling.comp" />
   </ItemGroup>
 </Project>

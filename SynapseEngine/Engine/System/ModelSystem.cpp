@@ -39,7 +39,7 @@ namespace Syn
             if (componentBuffer.versions[modelIndex] != modelComponent.version)
             {
                 componentBuffer.versions[modelIndex] = modelComponent.version;
-                bufferHandler[modelIndex] = ModelComponentGPU(modelComponent);
+                bufferHandler[modelIndex] = ModelComponentGPU(entity, modelComponent);
             }
             };
 

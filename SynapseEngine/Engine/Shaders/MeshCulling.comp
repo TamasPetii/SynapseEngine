@@ -1,0 +1,214 @@
+#version 460
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
+struct GpuMeshCollider { 
+    vec3 center; 
+    float radius; 
+    vec3 aabbMin; 
+    float padding0; 
+    vec3 aabbMax; 
+    float padding1; 
+};
+
+struct GpuModelAddresses { 
+    uint64_t vertexPositions; 
+    uint64_t vertexAttributes; 
+    uint64_t indices; 
+    uint64_t meshDescriptors; 
+    uint64_t meshColliders; 
+    uint64_t lodDescriptors; 
+    uint64_t meshletVertexIndices; 
+    uint64_t meshletTriangleIndices; 
+    uint64_t meshletDescriptors; 
+    uint64_t meshletDrawDescriptors; 
+    uint64_t meshletColliders; 
+    uint64_t nodeTransforms; 
+    GpuMeshCollider globalCollider; 
+    uint vertexCount; 
+    uint indexCount; 
+    uint averageLodIndexCount; 
+    uint meshCount; 
+};
+
+struct CameraComponent { 
+    mat4 view; 
+    mat4 viewInv; 
+    mat4 proj; 
+    mat4 projInv; 
+    mat4 projVulkan; 
+    mat4 projVulkanInv; 
+    mat4 viewProj; 
+    mat4 viewProjInv; 
+    mat4 viewProjVulkan; 
+    mat4 viewProjVulkanInv; 
+    vec4 eye; 
+    vec4 params; 
+    vec4 frustum[6]; 
+};
+
+struct TransformComponent { 
+    mat4 transform; 
+    mat4 transformIT; 
+};
+
+struct VisibleModelData { 
+    uint entityId; 
+    uint modelIndex; 
+    uint packedFlags; 
+    uint padding; 
+};
+
+struct DispatchCommand { 
+    uint groupCountX; 
+    uint groupCountY; 
+    uint groupCountZ; 
+};
+
+struct ModelAllocationInfo { 
+    uint maxInstances; 
+    uint meshAllocationOffset; 
+    uint meshAllocationCount; 
+    uint padding; 
+};
+
+struct MeshAllocationInfo { 
+    uint descriptorIndex; 
+    uint indirectIndex; 
+    uint instanceOffset; 
+    uint isMeshletPipeline; 
+};
+
+struct VkDrawIndirectCommand { 
+    uint vertexCount; 
+    uint instanceCount; 
+    uint firstVertex; 
+    uint firstInstance; 
+};
+
+struct VkDrawMeshTasksIndirectCommandEXT { 
+    uint groupCountX; 
+    uint groupCountY; 
+    uint groupCountZ; 
+};
+
+layout(buffer_reference, std430) readonly buffer ModelAddressBuffer { GpuModelAddresses data[]; };
+layout(buffer_reference, std430) readonly buffer CameraPool         { CameraComponent data[]; };
+layout(buffer_reference, std430) readonly buffer TransformPool      { TransformComponent data[]; };
+layout(buffer_reference, std430) readonly buffer ModelAllocBuffer   { ModelAllocationInfo data[]; }; 
+layout(buffer_reference, std430) readonly buffer SparseMapBuffer    { uint data[]; };
+layout(buffer_reference, std430) readonly buffer VisibleModelList   { VisibleModelData data[]; };
+layout(buffer_reference, std430) readonly buffer DispatchCountBuffer{ DispatchCommand cmd; };
+layout(buffer_reference, std430) readonly buffer MeshAllocBuffer    { MeshAllocationInfo data[]; };
+layout(buffer_reference, std430) buffer TraditionalCmdBuffer        { VkDrawIndirectCommand data[]; };
+layout(buffer_reference, std430) buffer MeshletCmdBuffer            { VkDrawMeshTasksIndirectCommandEXT data[]; };
+layout(buffer_reference, std430) buffer GlobalInstanceBuffer        { uint data[]; };
+layout(buffer_reference, std430) readonly buffer MeshColliderBuffer { GpuMeshCollider data[]; };
+
+layout(push_constant) uniform PushConstants {
+    uint64_t cameraBufferAddr;
+    uint64_t cameraSparseMapBufferAddr;
+    uint64_t transformBufferAddr;
+    uint64_t transformSparseMapBufferAddr;
+    uint64_t modelCompBufferAddr; 
+    uint64_t modelAllocBufferAddr;
+    uint64_t modelAddressBufferAddr; 
+    
+    uint64_t visibleModelListAddr;
+    uint64_t visibleModelCountAddr; 
+    
+    uint64_t meshAllocBufferAddr;
+    uint64_t traditionalCmdBufferAddr;
+    uint64_t meshletCmdBufferAddr;
+    uint64_t globalInstanceBufferAddr;
+    
+    uint totalModelsToTest; 
+    uint activeCameraEntity;
+} pc;
+
+// 0 = Outside, 1 = Intersect, 2 = Inside
+uint TestFrustum(GpuMeshCollider collider, CameraComponent camera) {
+    bool isIntersecting = false;
+
+    for(int i = 0; i < 6; ++i) 
+    {
+        vec4 plane = camera.frustum[i];
+        float dist = dot(plane.xyz, collider.center) - plane.w;
+
+        if(dist < -collider.radius) 
+            return 0;
+
+        if(dist < collider.radius) 
+            isIntersecting = true;
+    }
+
+    return isIntersecting ? 1 : 2; 
+}
+
+GpuMeshCollider TransformCollider(GpuMeshCollider local, mat4 transform) {
+    GpuMeshCollider world;
+    world.center = (transform * vec4(local.center, 1.0)).xyz;
+    vec3 scale = vec3(length(transform[0].xyz), length(transform[1].xyz), length(transform[2].xyz));
+    world.radius = local.radius * max(scale.x, max(scale.y, scale.z));
+    return world;
+}
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+void main() {
+    uint jobIndex = gl_WorkGroupID.x; // model
+    uint localThreadId = gl_LocalInvocationID.x; // 0..31 meshek
+
+    DispatchCountBuffer counter = DispatchCountBuffer(pc.visibleModelCountAddr);
+    if (jobIndex >= counter.cmd.groupCountX) return;
+
+    VisibleModelList inList = VisibleModelList(pc.visibleModelListAddr);
+    VisibleModelData modelData = inList.data[jobIndex];
+    
+    bool parentFullyInside = (modelData.packedFlags == 1);
+
+    SparseMapBuffer transformMap = SparseMapBuffer(pc.transformSparseMapBufferAddr);
+    TransformComponent transform = TransformPool(pc.transformBufferAddr).data[transformMap.data[modelData.entityId]];
+
+    SparseMapBuffer cameraMap = SparseMapBuffer(pc.cameraSparseMapBufferAddr);
+    CameraComponent camera = CameraPool(pc.cameraBufferAddr).data[cameraMap.data[pc.activeCameraEntity]];
+
+    ModelAllocationInfo mAlloc = ModelAllocBuffer(pc.modelAllocBufferAddr).data[modelData.modelIndex];
+    GpuModelAddresses addrs = ModelAddressBuffer(pc.modelAddressBufferAddr).data[modelData.modelIndex];
+    MeshColliderBuffer colliders = MeshColliderBuffer(addrs.meshColliders);
+
+    // Kollaborative Mesh Culling
+    for (uint m = localThreadId; m < addrs.meshCount; m += 32) 
+    {    
+        bool isVisible = true;
+        
+        GpuMeshCollider localMeshCollider = colliders.data[m];
+        GpuMeshCollider worldCollider = TransformCollider(localMeshCollider, transform.transform);
+
+        // Csak akkor Frustum tesztelünk, ha a modell nincs teljesen a képernyőn belül
+        if (!parentFullyInside) {
+            uint vis = TestFrustum(worldCollider, camera);
+            if (vis == 0) isVisible = false;
+        }
+
+        if (isVisible) {
+            float dist = length(camera.eye.xyz - worldCollider.center);
+            uint lod = (dist < 25.0) ? 0 : (dist < 50.0) ? 1 : (dist < 100.0) ? 2 : 3;
+
+            uint allocIndex = mAlloc.meshAllocationOffset + (m * 4) + lod;
+            MeshAllocationInfo meshAlloc = MeshAllocBuffer(pc.meshAllocBufferAddr).data[allocIndex];
+            
+            uint slotIndex = 0;
+            if (meshAlloc.isMeshletPipeline == 1) {
+                MeshletCmdBuffer cmdBuf = MeshletCmdBuffer(pc.meshletCmdBufferAddr);
+                slotIndex = atomicAdd(cmdBuf.data[meshAlloc.indirectIndex].groupCountX, 1);
+            } else {
+                TraditionalCmdBuffer cmdBuf = TraditionalCmdBuffer(pc.traditionalCmdBufferAddr);
+                slotIndex = atomicAdd(cmdBuf.data[meshAlloc.indirectIndex].instanceCount, 1);
+            }
+
+            GlobalInstanceBuffer instBuf = GlobalInstanceBuffer(pc.globalInstanceBufferAddr);
+            instBuf.data[meshAlloc.instanceOffset + slotIndex] = modelData.entityId;
+        }
+    }
+}

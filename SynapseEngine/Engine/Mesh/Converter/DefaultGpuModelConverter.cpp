@@ -16,16 +16,10 @@ namespace Syn
         result.globalCollider.aabbMin = cookedModel.globalCollider.aabb.min;
         result.globalCollider.aabbMax = cookedModel.globalCollider.aabb.max;
 
-        // ------------------------------------------------------------------
-        // 1. GLOBÁLIS OFFSETEK
-        // ------------------------------------------------------------------
         const uint32_t globalMeshIdOffset = static_cast<uint32_t>(result.indexedData.meshDescriptors.size()) / MAX_LODS;
         const uint32_t globalVertexOffset = static_cast<uint32_t>(result.vertexData.vertexPositions.size());
         const uint32_t globalNodeOffset = static_cast<uint32_t>(result.nodeTransforms.size());
 
-        // ------------------------------------------------------------------
-        // 2. GLOBÁLIS NODE TRANSFORMOK BEMÁSOLÁSA
-        // ------------------------------------------------------------------
         for (const auto& node : cookedModel.nodeTransforms) {
             GpuNodeTransform gpuNode{};
             gpuNode.transform = node.globalTransform;
@@ -41,9 +35,6 @@ namespace Syn
             }
         }
 
-        // ------------------------------------------------------------------
-        // 3. KITERÍTÉS A DESCRIPTOROK ALAPJÁN (FLATTENING)
-        // ------------------------------------------------------------------
         for (size_t instanceIdx = 0; instanceIdx < cookedModel.meshNodeDescriptors.size(); ++instanceIdx)
         {
             const auto& instanceDesc = cookedModel.meshNodeDescriptors[instanceIdx];
@@ -53,7 +44,7 @@ namespace Syn
             uint32_t globalNodeIndex = globalNodeOffset + instanceDesc.nodeIndex;
             const uint32_t currentMeshVertexOffset = static_cast<uint32_t>(result.vertexData.vertexPositions.size());
 
-            // A) MESH COLLIDER BEMÁSOLÁSA
+            // MESH COLLIDER BEMÁSOLÁSA
             GpuMeshCollider localMeshCollider{};
             localMeshCollider.center = cookedMesh.collider.sphere.center;
             localMeshCollider.radius = cookedMesh.collider.sphere.radius;
@@ -64,7 +55,7 @@ namespace Syn
             GpuMeshCollider modelSpaceCollider = MeshUtils::TransformCollider(localMeshCollider, nodeTransform);
             result.indexedData.meshColliders.push_back(modelSpaceCollider);
 
-            // B) VERTEX ADATOK MÁSOLÁSA ÉS INDEXEK ELTOLÁSA
+            // VERTEX ADATOK MÁSOLÁSA ÉS INDEXEK ELTOLÁSA
             for (const auto& v : cookedMesh.vertices)
             {
                 GpuVertexPosition pos;
@@ -114,7 +105,7 @@ namespace Syn
                         result.meshletData.drawDescriptors.push_back(meshletDrawDesc);
                         lastValidMeshletDrawDesc = meshletDrawDesc;
 
-                        // 3. Apró Meshletek Adatainak Másolása
+                        // Apró Meshletek Adatainak Másolása
                         for (const auto& cookedMeshlet : lodData.meshlets)
                         {
                             GpuMeshletDescriptor meshletDesc{};
@@ -156,6 +147,11 @@ namespace Syn
                 result.indexedData.lodDescriptors[i].indexCount = static_cast<uint32_t>(result.indexedData.indices.size());
             }
         }
+
+        result.globalVertexCount = static_cast<uint32_t>(result.vertexData.vertexPositions.size());
+        result.globalIndexCount = static_cast<uint32_t>(result.indexedData.indices.size());
+        result.globalAverageLodIndexCount = result.globalIndexCount / MAX_LODS;
+        result.globalMeshCount = static_cast<uint32_t>(result.indexedData.meshDescriptors.size() / 4);
 
         return result;
     }
