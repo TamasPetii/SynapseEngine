@@ -6,6 +6,7 @@
 #include <span>
 #include <memory>
 
+#include "Profiler/TaskProfilerObserver.h"
 #include <taskflow/taskflow.hpp>
 
 namespace Syn::Vk { 
@@ -65,7 +66,8 @@ namespace Syn
         std::unique_ptr<InputManager> _inputManager;
         std::unique_ptr<SceneManager> _sceneManager;
 		std::unique_ptr<tf::Executor> _taskExecutor;
-        std::shared_ptr<tf::TFProfObserver> _taskObserver;
+        std::shared_ptr<tf::TFProfObserver> _jsonTaskObserver;
+        std::shared_ptr<TaskProfilerObserver> _guiTaskObserver;
 	};
 }
 

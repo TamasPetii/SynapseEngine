@@ -12,7 +12,7 @@ namespace Syn
         auto modelPool = registry->GetPool<ModelComponent>();
         if (!modelPool) return;
 
-        ParallelForEachIf<UPDATE_BIT>(modelPool, subflow, [modelPool](EntityID entity) {
+        ParallelForEachIf<UPDATE_BIT>(modelPool, subflow, SystemPhaseNames::Update, [modelPool](EntityID entity) {
             auto& modelComponent = modelPool->Get(entity);
 
             modelPool->SetBit<CHANGED_BIT>(entity);
@@ -43,12 +43,12 @@ namespace Syn
             }
             };
 
-        ForEachStream(modelPool, subflow, processUpload);
+        ForEachStream(modelPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
 
         if (uploadDynamic)
         {
-            ForEachDynamic(modelPool, subflow, processUpload);
-            ForEachStatic(modelPool, subflow, processUpload);
+            ForEachDynamic(modelPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
+            ForEachStatic(modelPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
         }
     }
 }

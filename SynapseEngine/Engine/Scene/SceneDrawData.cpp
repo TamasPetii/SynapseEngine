@@ -12,6 +12,8 @@ namespace Syn
         traditionalCommands.resize(MESHLET_OFFSET_START, { 0,0,0,0 });
         meshletCommands.resize(MAX_INDIRECT_COMMANDS - MESHLET_OFFSET_START, { 0,0,0 });
         cpuInstanceBuffer.resize(MAX_INSTANCES, 0);
+        aabbIndirectCommands.resize(MAX_INDIRECT_COMMANDS);
+        sphereIndirectCommands.resize(MAX_INDIRECT_COMMANDS);
 
         globalInstanceBuffers.resize(frameCount);
         globalIndirectCommandBuffers.resize(frameCount);
@@ -19,6 +21,8 @@ namespace Syn
         globalDrawCountBuffers.resize(frameCount);
         globalModelAllocationBuffers.resize(frameCount);
         globalMeshAllocationBuffers.resize(frameCount);
+        aabbIndirectCommandBuffers.resize(frameCount);
+        sphereIndirectCommandBuffers.resize(frameCount);
 
         size_t traditionalBytes = MESHLET_OFFSET_START * sizeof(VkDrawIndirectCommand);
         size_t meshletBytes = (MAX_INDIRECT_COMMANDS - MESHLET_OFFSET_START) * sizeof(VkDrawMeshTasksIndirectCommandEXT);
@@ -53,6 +57,16 @@ namespace Syn
             globalMeshAllocationBuffers[i] = Vk::BufferFactory::CreatePersistent(
                 MAX_INDIRECT_COMMANDS * sizeof(MeshAllocationInfo),
                 VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
+            );
+
+            aabbIndirectCommandBuffers[i] = Vk::BufferFactory::CreatePersistent(
+                MAX_INDIRECT_COMMANDS * sizeof(VkDrawIndirectCommand),
+                VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+            );
+
+            sphereIndirectCommandBuffers[i] = Vk::BufferFactory::CreatePersistent(
+                MAX_INDIRECT_COMMANDS * sizeof(VkDrawIndirectCommand),
+                VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
             );
         }
     }

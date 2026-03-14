@@ -64,6 +64,8 @@ namespace Syn {
         uint32_t GetVersion() const { return _version.load(std::memory_order_acquire); }
     protected:
         uint32_t InternalLoadAsync(const std::string& key, std::function<std::shared_ptr<TResource>()> task);
+        uint32_t InternalLoadSync(const std::string& key, std::function<std::shared_ptr<TResource>()> task);
+        uint32_t InternalLoad(const std::string& key, std::function<std::shared_ptr<TResource>()> task, bool isAsync);
         std::shared_ptr<TResource> GetResource(uint32_t id, bool internalCall) const;
     protected:
         virtual void StartGpuUpload(EntryType& entry) = 0;
@@ -110,7 +112,7 @@ namespace Syn {
     }
 
     template <typename TResource>
-    uint32_t BaseResourceManager<TResource>::InternalLoadAsync(const std::string& key, std::function<std::shared_ptr<TResource>()> task) {
+    uint32_t BaseResourceManager<TResource>::InternalLoad(const std::string& key, std::function<std::shared_ptr<TResource>()> task, bool isAsync) {
         std::lock_guard<std::mutex> lock(_mutex);
 
         if (_pathToId.contains(key)) {
@@ -124,11 +126,28 @@ namespace Syn {
         newEntry.path = key;
         newEntry.state = ResourceState::LoadingCPU;
 
-        auto executor = ServiceLocator::GetTaskExecutor();
-        newEntry.cpuFuture = executor->async(std::move(task));
+        if (isAsync) {
+            auto executor = ServiceLocator::GetTaskExecutor();
+            newEntry.cpuFuture = executor->async(std::move(task));
+        }
+        else {
+            std::promise<std::shared_ptr<TResource>> promise;
+            promise.set_value(task());
+            newEntry.cpuFuture = promise.get_future();
+        }
 
         _entries.push_back(std::move(newEntry));
         return newId;
+    }
+
+    template <typename TResource>
+    uint32_t BaseResourceManager<TResource>::InternalLoadAsync(const std::string& key, std::function<std::shared_ptr<TResource>()> task) {
+        return InternalLoad(key, std::move(task), true);
+    }
+
+    template <typename TResource>
+    uint32_t BaseResourceManager<TResource>::InternalLoadSync(const std::string& key, std::function<std::shared_ptr<TResource>()> task) {
+        return InternalLoad(key, std::move(task), false);
     }
 
     template <typename TResource>

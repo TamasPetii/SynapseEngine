@@ -88,7 +88,7 @@ namespace Syn
             }
             };
 
-        ParallelForEach(cameraPool, subflow, processEntity);
+        ParallelForEach(cameraPool, subflow, SystemPhaseNames::Update, processEntity);
     }
 
     void CameraSystem::UploadComponents(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic)
@@ -113,12 +113,12 @@ namespace Syn
             }
         };
 
-        ForEachStream(cameraPool, subflow, processUpload);
+        ForEachStream(cameraPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
 
         if (uploadDynamic)
         {
-            ForEachDynamic(cameraPool, subflow, processUpload);
-            ForEachStatic(cameraPool, subflow, processUpload);
+            ForEachDynamic(cameraPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
+            ForEachStatic(cameraPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
         }
     }
 }

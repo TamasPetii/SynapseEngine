@@ -208,6 +208,7 @@
     <ClCompile Include="Scene\TestScene.cpp" />
     <ClCompile Include="Render\GraphicsPass\TraditionalRenderPass.cpp" />
     <ClCompile Include="Render\TransferPass\TransferPass.cpp" />
+    <ClCompile Include="Profiler\TaskProfilerObserver.cpp" />
     <ClCompile Include="Vk\Rendering\GpuUploader.cpp" />
     <ClCompile Include="Manager\BaseResourceManager.cpp" />
     <ClCompile Include="Image\Data\Texture.cpp" />
@@ -383,6 +384,7 @@
     <ClInclude Include="Collision\Tester\CollisionTester.h" />
     <ClInclude Include="Component\ModelComponent.h" />
     <ClInclude Include="Component\BaseComponent\RenderStateComponent.h" />
+    <ClInclude Include="Mesh\MeshSourceNames.h" />
     <ClInclude Include="Render\TransferPass\CopyToSwapchainPass.h" />
     <ClInclude Include="Render\GraphicsPass\GBufferInitPass.h" />
     <ClInclude Include="Render\RendererFactory.h" />
@@ -407,11 +409,13 @@
     <ClInclude Include="Component\BaseComponent\Component.h" />
     <ClInclude Include="Scene\Scene.h" />
     <ClInclude Include="System\ISystem.h" />
+    <ClInclude Include="System\SystemPhaseNames.h" />
     <ClInclude Include="System\TransformSystem.h" />
     <ClInclude Include="Component\TransformComponent.h" />
     <ClInclude Include="Scene\TestScene.h" />
     <ClInclude Include="Render\GraphicsPass\TraditionalRenderPass.h" />
     <ClInclude Include="Render\TransferPass\TransferPass.h" />
+    <ClInclude Include="Profiler\TaskProfilerObserver.h" />
     <ClInclude Include="Vk\Image\ImageViewNames.h" />
     <ClInclude Include="Vk\Rendering\GpuUploader.h" />
     <ClInclude Include="Manager\BaseResourceManager.h" />

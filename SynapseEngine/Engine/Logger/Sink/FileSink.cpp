@@ -6,12 +6,17 @@
 namespace Syn
 {
     FileSink::FileSink() {
-        std::filesystem::path logDir = "Logs";
+        const char* appDataPath = std::getenv("APPDATA");
+        std::filesystem::path baseDir = appDataPath ? appDataPath : ".";
+        std::filesystem::path logDir = baseDir / "Synapse" / "Logs";
+
         if (!std::filesystem::exists(logDir)) {
-            std::filesystem::create_directory(logDir);
+            std::filesystem::create_directories(logDir);
         }
 
-        std::string filename = std::format("Logs/Engine_{}.log", Syn::LogUtils::GetCurrentTimeForFileName());
+        std::string filename = std::format("{}/SynapseEngine_{}.log",
+            logDir.string(),
+            Syn::LogUtils::GetCurrentTimeForFileName());
 
         _file.open(filename, std::ios::out);
     }

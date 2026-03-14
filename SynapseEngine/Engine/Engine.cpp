@@ -32,6 +32,7 @@
 #include "Engine/Render/RendererFactory.h"
 
 #include <print>
+#include <filesystem>
 
 namespace Syn
 {
@@ -73,6 +74,8 @@ namespace Syn
 
 		_sceneManager->Finish();
 
+		std::vector<TaskProfileData> frameTasks = _guiTaskObserver->ExtractFrameData();
+
 		AdvanceFrameIndex();
 	}
 
@@ -93,8 +96,8 @@ namespace Syn
 	void Engine::InitLogger()
 	{
 		Logger::Get().AddSink(std::make_shared<Syn::ConsoleSink>());
-		//Logger::Get().AddSink(std::make_shared<Syn::MemorySink>());
-		//Logger::Get().AddSink(std::make_shared<Syn::FileSink>());
+		Logger::Get().AddSink(std::make_shared<Syn::MemorySink>());
+		Logger::Get().AddSink(std::make_shared<Syn::FileSink>());
 	}
 
 	void Engine::InitVulkan(const EngineInitParams& params)
@@ -131,7 +134,6 @@ namespace Syn
 
 	void Engine::AdvanceFrameIndex() {
 		_frameContext.currentFrameIndex = (_frameContext.currentFrameIndex + 1) % _frameContext.framesInFlight;
-		//Todo?? _frameContext.deltaTime
 
 		static auto lastTime = std::chrono::high_resolution_clock::now();
 		static uint32_t frameCount = 0;
@@ -154,16 +156,35 @@ namespace Syn
 		_renderManager = std::move(RendererFactory::CreateDeferredRenderer(_frameContext.framesInFlight));
 	}
 
-	void Engine::Shutdown() {
-		if (EnableLogging && _taskObserver) {
-			std::string filename = std::format("Profile/EngineTaskFlowProfile_{}.json", Syn::LogUtils::GetCurrentTimeForFileName());
+	void Engine::Shutdown() 
+	{
+		if (EnableLogging && _jsonTaskObserver) {
+			const char* appDataPath = std::getenv("APPDATA");
+
+			std::filesystem::path baseDir = appDataPath ? appDataPath : ".";
+			std::filesystem::path directory = baseDir / "Synapse" / "Profile";
+
+			if (!std::filesystem::exists(directory)) {
+				std::filesystem::create_directories(directory);
+			}
+
+			std::string filename = std::format("{}/EngineTaskFlowProfile_{}.json",
+				directory.string(),
+				Syn::LogUtils::GetCurrentTimeForFileName());
 
 			std::ofstream ofs(filename);
-			_taskObserver->dump(ofs);
-			ofs.close();
+			if (ofs.is_open()) {
+				_jsonTaskObserver->dump(ofs);
+				ofs.close();
+				Info("Taskflow profile successfully saved to: {}", filename);
+			}
+			else {
+				Error("Failed to open profile file for writing: {}", filename);
+			}
 		}
 
-		_taskObserver.reset();
+		_guiTaskObserver.reset();
+		_jsonTaskObserver.reset();
 		_taskExecutor.reset();
 		_inputManager.reset();
 
@@ -191,8 +212,11 @@ namespace Syn
 
 		_taskExecutor = std::make_unique<tf::Executor>(workerThreads);
 
-		if(EnableLogging)
-			_taskObserver = _taskExecutor->make_observer<tf::TFProfObserver>();
+		if (EnableLogging)
+		{
+			_guiTaskObserver = _taskExecutor->make_observer<TaskProfilerObserver>();
+			_jsonTaskObserver = _taskExecutor->make_observer<tf::TFProfObserver>();
+		}
 
 		ServiceLocator::ProvideTaskExecutor(_taskExecutor.get());
 	}

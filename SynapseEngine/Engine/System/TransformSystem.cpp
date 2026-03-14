@@ -17,7 +17,7 @@ namespace Syn
         auto transformPool = registry->GetPool<TransformComponent>();
         if (!transformPool) return;
 
-        ParallelForEachIf<UPDATE_BIT>(transformPool, subflow, [transformPool](EntityID entity) {
+        ParallelForEachIf<UPDATE_BIT>(transformPool, subflow, SystemPhaseNames::Update, [transformPool](EntityID entity) {
             auto& transformComponent = transformPool->Get(entity);
             DenseIndex transformIndex = transformPool->GetMapping().Get(entity);
 
@@ -59,14 +59,14 @@ namespace Syn
             }
             };
 
-        ForEachStream(transformPool, subflow, processUpload);
+        ForEachStream(transformPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
 
         if (uploadDynamic)
         {
-            ForEachDynamic(transformPool, subflow, processUpload);
-            
+            ForEachDynamic(transformPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
+
             //Full range needed! UpdateDynamic problematic?
-            ForEachStatic(transformPool, subflow, processUpload);
+            ForEachStatic(transformPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
         }
     }
 }

@@ -5,10 +5,12 @@
 #include "Engine/Registry/Type/TypeInfo.h"
 #include <vector>
 #include <string>
+#include <optional>
 
 #include <taskflow/taskflow.hpp>
 #include <taskflow/algorithm/for_each.hpp>
 #include "Engine/Scene/Scene.h"
+#include "SystemPhaseNames.h"
 
 namespace Syn
 {
@@ -24,5 +26,52 @@ namespace Syn
         virtual std::vector<TypeID> GetReadDependencies() const { return {}; }
         virtual std::vector<TypeID> GetWriteDependencies() const { return {}; }
         virtual std::string GetName() const = 0;
+    protected:
+        template <typename Func>
+        tf::Task EmplaceTask(tf::Subflow& subflow, const std::string& taskName, Func&& func);
+
+        template <typename Iterable, typename Func>
+        std::optional<tf::Task> ForEach(const Iterable& iterable, tf::Subflow& subflow, const std::string& taskName, Func&& func);
+
+        template <typename Iterator, typename Func>
+        std::optional<tf::Task> ForEach(Iterator first, Iterator last, tf::Subflow& subflow, const std::string& taskName, Func&& func);
+
+        template <typename BegType, typename EndType, typename StepType, typename Func>
+        std::optional<tf::Task> ForEachIndex(BegType first, EndType last, StepType step, tf::Subflow& subflow, const std::string& taskName, Func&& func);
     };
+
+    template <typename Func>
+    SYN_INLINE tf::Task ISystem::EmplaceTask(tf::Subflow& subflow, const std::string& taskName, Func&& func)
+    {
+        tf::Task task = subflow.emplace(std::forward<Func>(func));
+        task.name(GetName() + " " + taskName);
+        return task;
+    }
+
+    template <typename Iterable, typename Func>
+    SYN_INLINE std::optional<tf::Task> ISystem::ForEach(const Iterable& iterable, tf::Subflow& subflow, const std::string& taskName, Func&& func)
+    {
+        if (iterable.empty()) return std::nullopt;
+        tf::Task task = subflow.for_each(iterable.begin(), iterable.end(), std::forward<Func>(func));
+        task.name(GetName() + " " + taskName);
+        return task;
+    }
+
+    template <typename Iterator, typename Func>
+    SYN_INLINE std::optional<tf::Task> ISystem::ForEach(Iterator first, Iterator last, tf::Subflow& subflow, const std::string& taskName, Func&& func)
+    {
+        if (first == last) return std::nullopt;
+        tf::Task task = subflow.for_each(first, last, std::forward<Func>(func));
+        task.name(GetName() + " " + taskName);
+        return task;
+    }
+
+    template <typename BegType, typename EndType, typename StepType, typename Func>
+    SYN_INLINE std::optional<tf::Task> ISystem::ForEachIndex(BegType first, EndType last, StepType step, tf::Subflow& subflow, const std::string& taskName, Func&& func)
+    {
+        if (first >= last) return std::nullopt;
+        tf::Task task = subflow.for_each_index(first, last, step, std::forward<Func>(func));
+        task.name(GetName() + " " + taskName);
+        return task;
+    }
 }

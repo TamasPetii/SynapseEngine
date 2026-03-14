@@ -38,14 +38,14 @@ namespace Syn
         auto drawData = scene->GetSceneDrawData();
         auto modelSnapshot = modelManager->GetResourceSnapshot();
 
-        tf::Task initTask = subflow.emplace([drawData]() {
+        tf::Task initTask = this->EmplaceTask(subflow, "Update Init", [drawData]() {
             for (uint32_t i = 0; i < drawData->activeTraditionalCount; ++i) {
                 drawData->traditionalCommands[i].instanceCount = 0;
             }
             for (uint32_t i = 0; i < drawData->activeMeshletCount; ++i) {
                 drawData->meshletCommands[i].groupCountX = 0;
             }
-            }).name("FrustumCulling Init");
+            });
 
         auto cullFunc = [drawData, modelPool, transformPool, modelSnapshot, cameraComp](EntityID entity) {   
             std::span<const FrustumFace> frustum = cameraComp.frustum;
@@ -133,19 +133,20 @@ namespace Syn
         const auto& dynamicEntities = modelPool->GetStorage().GetDynamicEntities();
         const auto& streamEntities = modelPool->GetStorage().GetStreamEntities();
 
-        tf::Task staticTask = subflow.for_each(staticEntities.begin(), staticEntities.end(), cullFunc).name("Cull Static");
-        tf::Task dynamicTask = subflow.for_each(dynamicEntities.begin(), dynamicEntities.end(), cullFunc).name("Cull Dynamic");
-        tf::Task streamTask = subflow.for_each(streamEntities.begin(), streamEntities.end(), cullFunc).name("Cull Stream");
+        auto staticTask = this->ForEach(staticEntities, subflow, "Update Static", cullFunc);
+        auto dynamicTask = this->ForEach(dynamicEntities, subflow, "Update Dynamic", cullFunc);
+        auto streamTask = this->ForEach(streamEntities, subflow, "Update Stream", cullFunc);
 
-        initTask.precede(staticTask, dynamicTask, streamTask);
+        if (staticTask) initTask.precede(*staticTask);
+        if (dynamicTask) initTask.precede(*dynamicTask);
+        if (streamTask) initTask.precede(*streamTask);
     }
 
     void FrustumCullingSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
     {
-        subflow.emplace([scene, frameIndex]() {
+        this->EmplaceTask(subflow, SystemPhaseNames::UploadGPU, [scene, frameIndex]() {
             auto drawData = scene->GetSceneDrawData();
 
-            //Ez nem kell gpu driven esetén a többi kell!
             size_t instanceSize = drawData->totalAllocatedInstances * sizeof(uint32_t);
             if (instanceSize > 0) {
                 drawData->globalInstanceBuffers[frameIndex]->Write(drawData->cpuInstanceBuffer.data(), instanceSize, 0);
@@ -161,7 +162,6 @@ namespace Syn
                 size_t meshletGpuOffset = SceneDrawData::MESHLET_OFFSET_START * sizeof(VkDrawIndirectCommand);
                 drawData->globalIndirectCommandBuffers[frameIndex]->Write(drawData->meshletCommands.data(), meshletSize, meshletGpuOffset);
             }
-
-            }).name("FrustumCulling GPU Upload");
+            });
     }
 }

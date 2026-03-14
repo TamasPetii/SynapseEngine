@@ -612,6 +612,9 @@
     <ClCompile Include="Collision\Tester\CollisionTester.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Profiler\TaskProfilerObserver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1296,6 +1299,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Collision\Tester\CollisionTester.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh\MeshSourceNames.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\SystemPhaseNames.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiler\TaskProfilerObserver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

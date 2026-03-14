@@ -25,6 +25,8 @@ namespace Syn
         std::vector<std::shared_ptr<Vk::Buffer>> globalIndirectCommandDescriptorBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> globalModelAllocationBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> globalMeshAllocationBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> aabbIndirectCommandBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> sphereIndirectCommandBuffers;
 
         uint32_t activeDescriptorCount = 0;
         uint32_t activeTraditionalCount = 0;
@@ -37,5 +39,8 @@ namespace Syn
         std::vector<VkDrawIndirectCommand> traditionalCommands;
         std::vector<VkDrawMeshTasksIndirectCommandEXT> meshletCommands;
         std::vector<uint32_t> cpuInstanceBuffer;
+
+        std::vector<VkDrawIndirectCommand> aabbIndirectCommands;
+        std::vector<VkDrawIndirectCommand> sphereIndirectCommands;
     };
 }
