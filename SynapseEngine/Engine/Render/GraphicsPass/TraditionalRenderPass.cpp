@@ -146,7 +146,7 @@ namespace Syn {
         vkCmdPushConstants(
             context.cmd,
             _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL_GRAPHICS,
+            VK_SHADER_STAGE_ALL,
             0,
             sizeof(TraditionalPushConstants),
             &pc

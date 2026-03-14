@@ -9,5 +9,7 @@ namespace Syn
         static constexpr const char* TraditionalFrag = "../Engine/Shaders/Traditional.frag";
         static constexpr const char* MeshletMesh = "../Engine/Shaders/Meshlet.mesh";
         static constexpr const char* MeshletFrag = "../Engine/Shaders/Meshlet.frag";
+        static constexpr const char* MeshCulling = "../Engine/Shaders/MeshCulling.comp";
+        static constexpr const char* ModelCulling = "../Engine/Shaders/ModelCulling.comp";
     };
 }

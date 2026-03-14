@@ -110,7 +110,7 @@ namespace Syn::Vk {
         uint32_t maxPushConstantSize = physicalDevice->GetProperties().limits.maxPushConstantsSize;
 
         VkPushConstantRange universalPushConstant{};
-        universalPushConstant.stageFlags = VK_SHADER_STAGE_ALL_GRAPHICS;
+        universalPushConstant.stageFlags = VK_SHADER_STAGE_ALL;
         universalPushConstant.offset = 0;
         universalPushConstant.size = maxPushConstantSize;
 

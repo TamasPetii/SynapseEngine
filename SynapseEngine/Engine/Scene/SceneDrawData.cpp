@@ -21,6 +21,8 @@ namespace Syn
         globalDrawCountBuffers.resize(frameCount);
         globalModelAllocationBuffers.resize(frameCount);
         globalMeshAllocationBuffers.resize(frameCount);
+        globalModelComputeCountBuffer.resize(frameCount);
+
         aabbIndirectCommandBuffers.resize(frameCount);
         sphereIndirectCommandBuffers.resize(frameCount);
 
@@ -59,6 +61,11 @@ namespace Syn
                 VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
             );
 
+            globalModelComputeCountBuffer[i] = Vk::BufferFactory::CreatePersistent(
+                1 * sizeof(VkDispatchIndirectCommand),
+                VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
+            );
+
             aabbIndirectCommandBuffers[i] = Vk::BufferFactory::CreatePersistent(
                 MAX_INDIRECT_COMMANDS * sizeof(VkDrawIndirectCommand),
                 VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
@@ -68,6 +75,8 @@ namespace Syn
                 MAX_INDIRECT_COMMANDS * sizeof(VkDrawIndirectCommand),
                 VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
             );
+
+            
         }
     }
 }

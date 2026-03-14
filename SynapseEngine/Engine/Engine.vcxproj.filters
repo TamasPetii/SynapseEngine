@@ -615,6 +615,12 @@
     <ClCompile Include="Profiler\TaskProfilerObserver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\ComputePass\ModelCullingPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ComputePass\MeshCullingPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1308,6 +1314,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Profiler\TaskProfilerObserver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ComputePass\ModelCullingPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ComputePass\MeshCullingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

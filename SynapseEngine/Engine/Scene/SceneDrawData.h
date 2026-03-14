@@ -15,6 +15,8 @@ namespace Syn
     {
         SceneDrawData(uint32_t frameCount);
 
+        bool useGpuCulling = true;
+
         static constexpr uint32_t MAX_INSTANCES = 10000000;
         static constexpr uint32_t MAX_INDIRECT_COMMANDS = 200000;
         static constexpr uint32_t MESHLET_OFFSET_START = 100000;
@@ -25,6 +27,7 @@ namespace Syn
         std::vector<std::shared_ptr<Vk::Buffer>> globalIndirectCommandDescriptorBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> globalModelAllocationBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> globalMeshAllocationBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> globalModelComputeCountBuffer;
 
         std::vector<std::shared_ptr<Vk::Buffer>> aabbIndirectCommandBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> sphereIndirectCommandBuffers;

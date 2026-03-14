@@ -22,21 +22,7 @@ namespace Syn
 
     void FrustumCullingSystem::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
     {
-        auto modelManager = ServiceLocator::GetModelManager();
-
-        auto registry = scene->GetRegistry();
-        auto modelPool = registry->GetPool<ModelComponent>();
-        auto transformPool = registry->GetPool<TransformComponent>();
-        auto cameraPool = registry->GetPool<CameraComponent>();
-
-        EntityID cameraEntity = scene->GetSceneCameraEntity();
-        if (!modelPool || !transformPool || !cameraPool || cameraEntity == NULL_ENTITY) return;
-
-        const auto& cameraComp = cameraPool->Get(cameraEntity);
-        
-
         auto drawData = scene->GetSceneDrawData();
-        auto modelSnapshot = modelManager->GetResourceSnapshot();
 
         tf::Task initTask = this->EmplaceTask(subflow, "Update Init", [drawData]() {
             for (uint32_t i = 0; i < drawData->activeTraditionalCount; ++i) {
@@ -46,6 +32,22 @@ namespace Syn
                 drawData->meshletCommands[i].groupCountX = 0;
             }
             });
+
+        if (drawData->useGpuCulling) {
+            return;
+        }
+
+        auto modelManager = ServiceLocator::GetModelManager();
+        auto registry = scene->GetRegistry();
+        auto modelPool = registry->GetPool<ModelComponent>();
+        auto transformPool = registry->GetPool<TransformComponent>();
+        auto cameraPool = registry->GetPool<CameraComponent>();
+
+        EntityID cameraEntity = scene->GetSceneCameraEntity();
+        if (!modelPool || !transformPool || !cameraPool || cameraEntity == NULL_ENTITY) return;
+
+        const auto& cameraComp = cameraPool->Get(cameraEntity);
+        auto modelSnapshot = modelManager->GetResourceSnapshot();
 
         auto cullFunc = [drawData, modelPool, transformPool, modelSnapshot, cameraComp](EntityID entity) {   
             std::span<const FrustumFace> frustum = cameraComp.frustum;
@@ -152,10 +154,13 @@ namespace Syn
         this->EmplaceTask(subflow, SystemPhaseNames::UploadGPU, [scene, frameIndex]() {
             auto drawData = scene->GetSceneDrawData();
 
-            size_t instanceSize = drawData->totalAllocatedInstances * sizeof(uint32_t);
-            if (instanceSize > 0) {
-                drawData->globalInstanceBuffers[frameIndex]->Write(drawData->cpuInstanceBuffer.data(), instanceSize, 0);
+            if (!drawData->useGpuCulling) {
+                size_t instanceSize = drawData->totalAllocatedInstances * sizeof(uint32_t);
+                if (instanceSize > 0) {
+                    drawData->globalInstanceBuffers[frameIndex]->Write(drawData->cpuInstanceBuffer.data(), instanceSize, 0);
+                }
             }
+
 
             size_t tradSize = drawData->activeTraditionalCount * sizeof(VkDrawIndirectCommand);
             if (tradSize > 0)
@@ -166,6 +171,11 @@ namespace Syn
             {
                 size_t meshletGpuOffset = SceneDrawData::MESHLET_OFFSET_START * sizeof(VkDrawIndirectCommand);
                 drawData->globalIndirectCommandBuffers[frameIndex]->Write(drawData->meshletCommands.data(), meshletSize, meshletGpuOffset);
+            }
+
+            if (drawData->useGpuCulling) {
+                uint32_t zeroDispatch[3] = { 0, 1, 1 };
+                drawData->globalModelComputeCountBuffer[frameIndex]->Write(zeroDispatch, sizeof(zeroDispatch), 0);
             }
             });
     }

@@ -216,7 +216,7 @@ namespace Syn
                 );
             }
 
-            size_t modelAllocSize = drawData->activeDescriptorCount * sizeof(ModelAllocationInfo);
+            size_t modelAllocSize = drawData->modelAllocations.size() * sizeof(ModelAllocationInfo);
             if (modelAllocSize > 0)
                 drawData->globalModelAllocationBuffers[frameIndex]->Write(drawData->modelAllocations.data(), modelAllocSize, 0);
 

@@ -5,6 +5,8 @@
 #include "Engine/Render/GraphicsPass/MeshletRenderPass.h"
 #include "Engine/Render/TransferPass/PresentationPass.h"
 #include "Engine/Render/TransferPass/CopyToSwapchainPass.h"
+#include "Engine/Render/ComputePass/ModelCullingPass.h"
+#include "Engine/Render/ComputePass/MeshCullingPass.h"
 
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "RenderNames.h"
@@ -16,6 +18,8 @@ namespace Syn
         auto rtManager = renderManager->GetRenderTargetManager();
 
         auto pipeline = std::make_unique<RenderPipeline>();
+        pipeline->AddPass(std::make_unique<ModelCullingPass>());
+        pipeline->AddPass(std::make_unique<MeshCullingPass>());
         pipeline->AddPass(std::make_unique<GBufferInitPass>());
         pipeline->AddPass(std::make_unique<TraditionalRenderPass>());
         pipeline->AddPass(std::make_unique<MeshletRenderPass>());

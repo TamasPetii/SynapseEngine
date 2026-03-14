@@ -59,6 +59,7 @@ namespace Syn
 
         RegisterComponentSparseMapBuffer<ModelComponent>(BufferNames::ModelSparseMap);
         RegisterComponentBuffer<ModelComponent, ModelComponentGPU>(BufferNames::ModelData);
+        RegisterComponentBuffer<ModelComponent, VisibleModelData>(BufferNames::ModelVisibleData);
     }
 
     void Scene::BuildTaskflowGraph(tf::Taskflow& taskflow, SystemPhase phase)

@@ -115,7 +115,8 @@ namespace Syn::Vk {
                 VK_SHADER_STAGE_GEOMETRY_BIT,
                 VK_SHADER_STAGE_FRAGMENT_BIT,
                 VK_SHADER_STAGE_TASK_BIT_EXT,
-                VK_SHADER_STAGE_MESH_BIT_EXT
+                VK_SHADER_STAGE_MESH_BIT_EXT,
+                VK_SHADER_STAGE_COMPUTE_BIT
         };
 
         std::vector<VkShaderEXT> shaderHandles(stages.size(), VK_NULL_HANDLE);

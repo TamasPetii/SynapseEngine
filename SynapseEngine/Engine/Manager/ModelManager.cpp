@@ -103,7 +103,7 @@ namespace Syn {
             blueprint.meshletCmd.groupCountZ = 1;
 
             /*if (hasMeshlet && tradDesc.indexCount > 5000) { */
-            if (true || rand() % 2 == 0) {
+            if (false && rand() % 2 == 0) {
                 blueprint.isMeshletPipeline = MeshDrawBlueprint::PIPELINE_MESHLET;
             }
             else {
@@ -142,6 +142,7 @@ namespace Syn {
         addresses.vertexCount = entry.resource->gpuData.globalVertexCount;
         addresses.indexCount = entry.resource->gpuData.globalIndexCount;
         addresses.averageLodIndexCount = entry.resource->gpuData.globalAverageLodIndexCount;
+        addresses.meshCount = entry.resource->gpuData.globalMeshCount;
 
         size_t offset = entryIndex * sizeof(GpuModelAddresses);
         _modelAddressBuffer->Write(&addresses, sizeof(GpuModelAddresses), offset);

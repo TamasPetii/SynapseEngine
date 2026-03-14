@@ -182,6 +182,8 @@
     <ClCompile Include="Collision\Tester\CollisionTester.cpp" />
     <ClCompile Include="Component\ModelComponent.cpp" />
     <ClCompile Include="Component\BaseComponent\RenderStateComponent.cpp" />
+    <ClCompile Include="Render\ComputePass\MeshCullingPass.cpp" />
+    <ClCompile Include="Render\ComputePass\ModelCullingPass.cpp" />
     <ClCompile Include="Render\TransferPass\CopyToSwapchainPass.cpp" />
     <ClCompile Include="Render\GraphicsPass\GBufferInitPass.cpp" />
     <ClCompile Include="Render\RendererFactory.cpp" />
@@ -384,6 +386,8 @@
     <ClInclude Include="Collision\Tester\CollisionTester.h" />
     <ClInclude Include="Component\ModelComponent.h" />
     <ClInclude Include="Component\BaseComponent\RenderStateComponent.h" />
+    <ClInclude Include="Render\ComputePass\MeshCullingPass.h" />
+    <ClInclude Include="Render\ComputePass\ModelCullingPass.h" />
     <ClInclude Include="Mesh\MeshSourceNames.h" />
     <ClInclude Include="Render\TransferPass\CopyToSwapchainPass.h" />
     <ClInclude Include="Render\GraphicsPass\GBufferInitPass.h" />
