@@ -11,24 +11,23 @@
 namespace Syn {
 
     struct CullingPushConstants {
-        uint64_t cameraBufferAddr;
-        uint64_t cameraSparseMapBufferAddr;
-        uint64_t transformBufferAddr;
+        uint64_t cameraBufferAddr;            
+        uint64_t cameraSparseMapBufferAddr;   
+        uint64_t transformBufferAddr;         
         uint64_t transformSparseMapBufferAddr;
-        uint64_t modelCompBufferAddr;
-        uint64_t modelAllocBufferAddr;
-        uint64_t modelAddressBufferAddr;
+        uint64_t modelCompBufferAddr;         
 
-        uint64_t visibleModelListAddr;
-        uint64_t visibleModelCountAddr;
+        uint64_t meshAllocBufferAddr;         
+        uint64_t modelAllocBufferAddr;        
+        uint64_t modelAddressBufferAddr;      
+        uint64_t visibleModelListAddr;        
+        uint64_t visibleModelCountAddr;       
 
-        uint64_t meshAllocBufferAddr;
         uint64_t globalIndirectCommandBuffers;
-        uint64_t globalInstanceBufferAddr;
-
-        uint32_t totalModelsToTest;
-        uint32_t activeCameraEntity;
-        uint32_t meshletOffsetStart;
+        uint64_t globalInstanceBufferAddr;    
+        uint32_t totalModelsToTest;           
+        uint32_t activeCameraEntity;          
+        uint32_t meshletOffsetStart;          
     };
 
     void ModelCullingPass::Initialize() {
