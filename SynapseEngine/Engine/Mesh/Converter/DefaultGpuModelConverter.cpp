@@ -1,6 +1,7 @@
 #include "DefaultGpuModelConverter.h"
 #include <algorithm>
 #include "Engine/Mesh/Utils/MeshUtils.h"
+#include "Engine/Material/MaterialNames.h"
 
 namespace Syn
 {
@@ -10,11 +11,17 @@ namespace Syn
     GpuBatchedModel DefaultGpuModelConverter::Convert(const CookedModel& cookedModel) const
     {
         GpuBatchedModel result;
-		result.materials = std::move(cookedModel.materials);
         result.globalCollider.center = cookedModel.globalCollider.sphere.center;
         result.globalCollider.radius = cookedModel.globalCollider.sphere.radius;
         result.globalCollider.aabbMin = cookedModel.globalCollider.aabb.min;
         result.globalCollider.aabbMax = cookedModel.globalCollider.aabb.max;
+		result.materials = std::move(cookedModel.materials);
+
+        if (result.materials.empty()) {
+            MaterialInfo defaultRef{};
+            defaultRef.name = MaterialNames::EngineDefault;
+            result.materials.push_back(defaultRef);
+        }
 
         const uint32_t globalMeshIdOffset = static_cast<uint32_t>(result.indexedData.meshDescriptors.size()) / MAX_LODS;
         const uint32_t globalVertexOffset = static_cast<uint32_t>(result.vertexData.vertexPositions.size());

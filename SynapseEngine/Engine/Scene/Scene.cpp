@@ -12,6 +12,7 @@
 #include "Engine/System/RenderSystem.h"
 #include "Engine/System/CameraSystem.h"
 #include "Engine/System/ModelSystem.h"
+#include "Engine/System/MaterialSystem.h"
 #include "Engine/System/FrustumCullingSystem.h"
 
 namespace Syn
@@ -43,6 +44,7 @@ namespace Syn
     void Scene::InitializeSystems()
     {
         RegisterSystem<TransformSystem>();
+        RegisterSystem<MaterialSystem>();
         RegisterSystem<CameraSystem>();
         RegisterSystem<RenderSystem>();
         RegisterSystem<ModelSystem>();

@@ -630,6 +630,9 @@
     <ClCompile Include="Image\Source\Procedural\DefaultImageSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="System\MaterialSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1338,6 +1341,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Image\Source\Procedural\DefaultImageSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\MaterialSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Material\MaterialNames.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

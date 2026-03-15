@@ -1,6 +1,7 @@
 #include "MaterialManager.h"
 #include "Engine/Vk/Buffer/BufferFactory.h"
 #include "Engine/Logger/SynLog.h"
+#include "Engine/Material/MaterialNames.h"
 
 namespace Syn {
 
@@ -11,6 +12,8 @@ namespace Syn {
             MAX_MATERIALS * sizeof(GpuMaterial),
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
         );
+
+        LoadDefaultMaterialSync();
     }
 
     uint32_t MaterialManager::LoadMaterial(const std::string& name, const MaterialInfo& info) {
@@ -54,6 +57,18 @@ namespace Syn {
         _version.fetch_add(1, std::memory_order_release);
 
         Info("Material '{}' is ready", entry.path);
+    }
+
+    void MaterialManager::LoadDefaultMaterialSync()
+    {
+        MaterialInfo defaultInfo{};
+        uint32_t defaultId = LoadMaterial(MaterialNames::EngineDefault, defaultInfo);
+
+        auto& entry = _entries[defaultId];
+        entry.resource = entry.cpuFuture.get();
+        entry.state = ResourceState::UploadingGPU;
+
+        StartGpuUpload(entry);
     }
 
     void MaterialManager::FinalizeResource(EntryType& entry) {

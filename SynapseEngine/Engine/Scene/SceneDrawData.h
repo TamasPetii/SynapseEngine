@@ -28,6 +28,7 @@ namespace Syn
         std::vector<std::shared_ptr<Vk::Buffer>> globalModelAllocationBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> globalMeshAllocationBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> globalModelComputeCountBuffer;
+        std::vector<std::shared_ptr<Vk::Buffer>> globalMaterialIndexBuffers;
 
         std::vector<std::shared_ptr<Vk::Buffer>> aabbIndirectCommandBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> sphereIndirectCommandBuffers;
@@ -36,6 +37,7 @@ namespace Syn
         uint32_t activeTraditionalCount = 0;
         uint32_t activeMeshletCount = 0;
         uint32_t totalAllocatedInstances = 0;
+        size_t requiredMaterialBufferSize = 0;
 
         std::vector<ModelAllocationInfo> modelAllocations;
         std::vector<MeshAllocationInfo> meshAllocations;

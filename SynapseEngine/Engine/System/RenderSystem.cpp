@@ -82,20 +82,27 @@ namespace Syn
     {
         auto modelManager = ServiceLocator::GetModelManager();
         auto drawData = scene->GetSceneDrawData();
+        auto modelSnapshots = modelManager->GetResourceSnapshot();
 
         drawData->activeDescriptorCount = 0;
         drawData->activeTraditionalCount = 0;
         drawData->activeMeshletCount = 0;
 
         uint32_t globalInstanceOffset = 0;
-        
+        uint32_t totalMaterialIndicesCapacity = 0;
+
         for (uint32_t modelId = 0; modelId < _modelCapacities.size(); ++modelId)
         {
             uint32_t capacity = _modelCapacities[modelId];
             if (capacity == 0) continue;
 
-            auto model = modelManager->GetResource(modelId);
+            if (modelId >= modelSnapshots.size()) continue;
+            auto model = modelSnapshots[modelId].resource;
+
             if (!model) continue;
+
+            uint32_t meshCount = static_cast<uint32_t>(model->hardwareBuffers.meshMaterialIndices.size());
+            totalMaterialIndicesCapacity += capacity * meshCount;
 
             const auto& blueprints = model->hardwareBuffers.baseDrawCommands;
 
@@ -145,6 +152,7 @@ namespace Syn
         }
 
         drawData->totalAllocatedInstances = globalInstanceOffset;
+        drawData->requiredMaterialBufferSize = totalMaterialIndicesCapacity * sizeof(uint32_t);
 
         if (false)
         {

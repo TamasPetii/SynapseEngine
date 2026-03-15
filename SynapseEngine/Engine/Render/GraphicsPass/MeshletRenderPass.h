@@ -11,6 +11,7 @@ namespace Syn
     protected:
         void PrepareFrame(const RenderContext& context) override;
         void PushConstants(const RenderContext& context) override;
+        void BindDescriptors(const RenderContext& context) override;
         void Draw(const RenderContext& context) override;
     };
 }

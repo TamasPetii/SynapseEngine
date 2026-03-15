@@ -20,7 +20,8 @@ namespace Syn {
     protected:
         void StartGpuUpload(EntryType& entry) override;
         void FinalizeResource(EntryType& entry) override;
-
+    private:
+        void LoadDefaultMaterialSync();
     private:
         TextureLoadCallback _textureLoadCallback;
         std::unique_ptr<Vk::Buffer> _materialBuffer;

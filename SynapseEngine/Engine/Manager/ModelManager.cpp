@@ -7,6 +7,7 @@
 #include "Engine/Logger/SynLog.h"
 #include "Engine/Utils/WindowedBuffer.h"
 #include "Engine/Vk/Buffer/Buffer.h"
+#include "Engine/Material/MaterialNames.h"
 
 namespace Syn {
 
@@ -61,7 +62,10 @@ namespace Syn {
                 resolvePath(matInfo.emissivePath);
                 resolvePath(matInfo.ambientOcclusionPath);
 
-                std::string uniqueMatName = entry.path + "_" + matInfo.name;
+                std::string uniqueMatName = (matInfo.name == MaterialNames::EngineDefault)
+                    ? matInfo.name
+                    : entry.path + "_" + matInfo.name;
+
                 uint32_t matId = _materialLoadCallback(uniqueMatName, matInfo);
 
                 entry.resource->hardwareBuffers.meshMaterialIndices.push_back(matId);

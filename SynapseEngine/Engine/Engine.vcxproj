@@ -184,6 +184,7 @@
     <ClCompile Include="Component\BaseComponent\RenderStateComponent.cpp" />
     <ClCompile Include="Image\Source\Procedural\DefaultImageSource.cpp" />
     <ClCompile Include="Manager\MaterialManager.cpp" />
+    <ClCompile Include="System\MaterialSystem.cpp" />
     <ClCompile Include="Material\Material.cpp" />
     <ClCompile Include="Render\ComputePass\MeshCullingPass.cpp" />
     <ClCompile Include="Render\ComputePass\ModelCullingPass.cpp" />
@@ -391,6 +392,8 @@
     <ClInclude Include="Component\BaseComponent\RenderStateComponent.h" />
     <ClInclude Include="Image\Source\Procedural\DefaultImageSource.h" />
     <ClInclude Include="Manager\MaterialManager.h" />
+    <ClInclude Include="Material\MaterialNames.h" />
+    <ClInclude Include="System\MaterialSystem.h" />
     <ClInclude Include="Material\Material.h" />
     <ClInclude Include="Render\ComputePass\MeshCullingPass.h" />
     <ClInclude Include="Render\ComputePass\ModelCullingPass.h" />

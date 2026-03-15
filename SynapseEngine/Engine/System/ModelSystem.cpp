@@ -1,7 +1,12 @@
 #include "ModelSystem.h"
+#include "MaterialSystem.h"
 
 namespace Syn
 {
+    std::vector<TypeID> ModelSystem::GetReadDependencies() const {
+        return { TypeInfo<MaterialSystem>::ID };
+    }
+
     std::vector<TypeID> ModelSystem::GetWriteDependencies() const { 
         return { TypeInfo<ModelSystem>::ID };
     }

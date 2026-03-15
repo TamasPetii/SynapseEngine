@@ -10,6 +10,8 @@
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
+#include "Engine/Manager/MaterialManager.h"
+#include "Engine/Manager/ImageManager.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -17,7 +19,6 @@
 namespace Syn {
     struct MeshletPushConstants {
         VkDeviceAddress modelAddressBuffer;
-
         VkDeviceAddress globalDrawCountBuffers;
         VkDeviceAddress globalInstanceBuffers;
         VkDeviceAddress globalIndirectCommandBuffers;
@@ -29,8 +30,11 @@ namespace Syn {
         VkDeviceAddress cameraSparseMapBufferAddr;
         VkDeviceAddress transformBufferAddr;
         VkDeviceAddress transformSparseMapBufferAddr;
+
         VkDeviceAddress modelBufferAddr;
         VkDeviceAddress modelSparseMapBufferAddr;
+        VkDeviceAddress materialLookupBuffer;
+        VkDeviceAddress materialBuffer;
 
         uint32_t activeCameraEntity;
         uint32_t meshletOffsetStart;
@@ -115,6 +119,7 @@ namespace Syn {
         auto modelManager = ServiceLocator::GetModelManager();
         auto registry = scene->GetRegistry();
         auto componentBufferManager = scene->GetComponentBufferManager();
+        auto materialManager = ServiceLocator::GetMaterialManager();
 
         MeshletPushConstants pc{};
 
@@ -132,10 +137,14 @@ namespace Syn {
         pc.transformSparseMapBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::TransformSparseMap, fIdx).buffer->GetDeviceAddress();
         pc.cameraBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::CameraData, fIdx).buffer->GetDeviceAddress();
         pc.cameraSparseMapBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::CameraSparseMap, fIdx).buffer->GetDeviceAddress();
+        
+        pc.modelBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::ModelData, fIdx).buffer->GetDeviceAddress();
+        pc.modelSparseMapBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::ModelSparseMap, fIdx).buffer->GetDeviceAddress();
+        pc.materialLookupBuffer = drawData->globalMaterialIndexBuffers[fIdx]->GetDeviceAddress();
+        pc.materialBuffer = materialManager->GetMaterialBuffer()->GetDeviceAddress();
 
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.meshletOffsetStart = SceneDrawData::MESHLET_OFFSET_START;
-
         pc.visualizeMeshlet = 1;
 
         vkCmdPushConstants(
@@ -146,6 +155,15 @@ namespace Syn {
             sizeof(MeshletPushConstants),
             &pc
         );
+    }
+
+    void MeshletRenderPass::BindDescriptors(const RenderContext& context)
+    {
+        auto imageManager = ServiceLocator::GetImageManager();
+        auto bindlessBuffer = imageManager->GetBindlessBuffer();
+        if (!bindlessBuffer) return;
+
+        bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
     void MeshletRenderPass::Draw(const RenderContext& context)

@@ -13,7 +13,7 @@ namespace Syn
 	ModelComponentGPU::ModelComponentGPU(uint32_t entityIndex, const ModelComponent& component) :
 		entityIndex(entityIndex),
 		modelIndex(component.modelIndex),
-		pad0(0)
+		materialOffset(component.materialOffset)
 	{
 		uint32_t flags = 0;
 		if (component.castShadow)        flags |= (1 << 0);

@@ -22,6 +22,7 @@ namespace Syn
         globalModelAllocationBuffers.resize(frameCount);
         globalMeshAllocationBuffers.resize(frameCount);
         globalModelComputeCountBuffer.resize(frameCount);
+        globalMaterialIndexBuffers.resize(frameCount);
 
         aabbIndirectCommandBuffers.resize(frameCount);
         sphereIndirectCommandBuffers.resize(frameCount);
@@ -76,7 +77,10 @@ namespace Syn
                 VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
             );
 
-            
+            globalMaterialIndexBuffers[i] = Vk::BufferFactory::CreatePersistent(
+                sizeof(int32_t),
+                VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
+            );
         }
     }
 }
