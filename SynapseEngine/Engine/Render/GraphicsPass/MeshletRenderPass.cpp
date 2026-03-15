@@ -35,8 +35,6 @@ namespace Syn {
         uint32_t activeCameraEntity;
         uint32_t meshletOffsetStart;
         uint32_t visualizeMeshlet;
-
-        uint32_t padding1;
     };
 
     void MeshletRenderPass::Initialize() {

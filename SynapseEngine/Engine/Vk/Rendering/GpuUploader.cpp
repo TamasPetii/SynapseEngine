@@ -74,4 +74,35 @@ namespace Syn::Vk {
         _activeBatches.push_back({ fence, std::move(cmd), std::move(callbacks) });
         requests.clear();
     }
+
+    void GpuUploader::UploadSync(GpuUploadRequest request) {
+        std::lock_guard<std::mutex> lock(_mutex);
+
+        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        Vk::ThreadSafeQueue* queue = request.needsGraphics ? _graphicsQueue : _transferQueue;
+        Vk::CommandPool* pool = request.needsGraphics ? _graphicsPool.get() : _transferPool.get();
+
+        auto cmd = pool->AllocateBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+        auto fence = std::make_shared<Vk::Fence>(false);
+
+        cmd->Begin(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+        request.uploadCallback(cmd->Handle());
+        cmd->End();
+
+        VkCommandBufferSubmitInfo cmdSubmitInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO };
+        cmdSubmitInfo.commandBuffer = cmd->Handle();
+
+        VkSubmitInfo2 submitInfo{ VK_STRUCTURE_TYPE_SUBMIT_INFO_2 };
+        submitInfo.commandBufferInfoCount = 1;
+        submitInfo.pCommandBufferInfos = &cmdSubmitInfo;
+
+        queue->Submit(&submitInfo, fence->Handle());
+
+        VkFence vkFence = fence->Handle();
+        vkWaitForFences(device->Handle(), 1, &vkFence, VK_TRUE, UINT64_MAX);
+
+        if (request.onFinished) {
+            request.onFinished();
+        }
+    }
 }

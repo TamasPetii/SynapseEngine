@@ -7,10 +7,7 @@ namespace Syn::Vk {
 
     DescriptorLayoutBuilder& DescriptorLayoutBuilder::AddBindlessBinding(uint32_t binding, VkDescriptorType type, VkShaderStageFlags stageFlags, uint32_t count)
     {
-        VkDescriptorBindingFlags bindlessFlags =
-            VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT |
-            VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT |
-            VK_DESCRIPTOR_BINDING_VARIABLE_DESCRIPTOR_COUNT_BIT;
+        VkDescriptorBindingFlags bindlessFlags = VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT;
 
         return AddBinding(binding, type, stageFlags, count, bindlessFlags);
     }

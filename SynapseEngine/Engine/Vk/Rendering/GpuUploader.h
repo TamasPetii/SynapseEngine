@@ -22,6 +22,7 @@ namespace Syn::Vk
         ~GpuUploader() = default;
 
         void Enqueue(GpuUploadRequest request);
+        void UploadSync(GpuUploadRequest request);
         void ProcessUploads();
     private:
         struct ActiveBatch {

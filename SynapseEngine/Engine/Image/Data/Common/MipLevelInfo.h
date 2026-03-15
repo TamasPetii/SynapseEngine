@@ -2,7 +2,6 @@
 #include "Engine/SynApi.h"
 #include <vector>
 
-
 namespace Syn
 {
     struct SYN_API MipLevelInfo {

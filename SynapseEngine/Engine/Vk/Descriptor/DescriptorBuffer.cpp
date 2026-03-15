@@ -30,6 +30,30 @@ namespace Syn::Vk {
         _buffer = BufferFactory::CreatePersistent(layoutSizeInBytes, usage);
     }
 
+    void DescriptorBuffer::FillSampledImages(uint32_t binding, uint32_t count, VkImageView view, VkImageLayout layout)
+    {
+        auto device = ServiceLocator::GetVkContext()->GetDevice();
+
+        VkDescriptorImageInfo imageInfo{ VK_NULL_HANDLE, view, layout };
+
+        VkDescriptorGetInfoEXT getInfo{ VK_STRUCTURE_TYPE_DESCRIPTOR_GET_INFO_EXT };
+        getInfo.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+        getInfo.data.pSampledImage = &imageInfo;
+
+        VkDeviceSize bindingOffset;
+        vkGetDescriptorSetLayoutBindingOffsetEXT(device->Handle(), _layout, binding, &bindingOffset);
+
+        void* mappedData = _buffer->Map();
+        char* targetBaseAddress = static_cast<char*>(mappedData) + bindingOffset;
+
+        std::vector<char> descriptorPayload(_sampledImageSize);
+        vkGetDescriptorEXT(device->Handle(), &getInfo, _sampledImageSize, descriptorPayload.data());
+
+        for (uint32_t i = 0; i < count; ++i) {
+            std::memcpy(targetBaseAddress + (i * _sampledImageSize), descriptorPayload.data(), _sampledImageSize);
+        }
+    }
+
     void DescriptorBuffer::WriteDescriptor(uint32_t binding, uint32_t arrayElement, size_t descriptorSize, const VkDescriptorGetInfoEXT& getInfo)
     {
         auto device = ServiceLocator::GetVkContext()->GetDevice();

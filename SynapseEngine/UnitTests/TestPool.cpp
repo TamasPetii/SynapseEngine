@@ -813,7 +813,7 @@ TEST(PoolTest, Segmented_BitFlag_StaticDirty_Idempotency) {
     EXPECT_TRUE((pool.IsBitSet<DIRTY_STATIC_BIT>(e)));
 
     // Verify we didn't duplicate in the list
-    std::span<EntityID> dirty = pool.GetDirtyStatics();
+    auto dirty = pool.GetDirtyStatics();
     int count = 0;
     for (auto id : dirty) {
         if (id == e) count++;

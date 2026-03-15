@@ -51,6 +51,7 @@ namespace Syn
 		_frameContext.deltaTime = deltaTime;
 
 		ServiceLocator::GetModelManager()->Update();
+		ServiceLocator::GetMaterialManager()->Update();
 		ServiceLocator::GetImageManager()->Update();
 		ServiceLocator::GetGpuUploader()->ProcessUploads();
 

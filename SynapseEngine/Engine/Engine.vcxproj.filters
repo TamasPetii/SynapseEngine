@@ -621,6 +621,15 @@
     <ClCompile Include="Render\ComputePass\MeshCullingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Manager\MaterialManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Material\Material.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\Source\Procedural\DefaultImageSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1320,6 +1329,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\ComputePass\MeshCullingPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\MaterialManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Material\Material.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\Source\Procedural\DefaultImageSource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

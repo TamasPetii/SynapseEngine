@@ -13,6 +13,7 @@ namespace Syn {
 	Vk::GpuUploader* ServiceLocator::_gpuUploader = nullptr;
 	InputManager* ServiceLocator::_inputManager = nullptr;
 	SceneManager* ServiceLocator::_sceneManager = nullptr;
+	MaterialManager* ServiceLocator::_materialManager = nullptr;
 
 	void ServiceLocator::Shutdown()
 	{
@@ -28,5 +29,6 @@ namespace Syn {
 		_gpuUploader = nullptr;
 		_inputManager = nullptr;
 		_sceneManager = nullptr;
+		_materialManager = nullptr;
 	}
 }

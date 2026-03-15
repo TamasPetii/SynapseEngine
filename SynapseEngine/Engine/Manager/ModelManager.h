@@ -10,7 +10,7 @@
 
 namespace Syn {
 
-    using TextureLoadCallback = std::function<void(const std::string& fullPath)>;
+    using MaterialLoadCallback = std::function<uint32_t(const std::string& name, const MaterialInfo& info)>;
     using MeshSourceFactory = std::function<std::unique_ptr<IMeshSource>()>;
     using StaticMeshFactory = std::function<std::shared_ptr<StaticMesh>()>;
 
@@ -18,7 +18,7 @@ namespace Syn {
     public:
         static constexpr uint32_t MAX_MODELS = 10000;
 
-        ModelManager(std::shared_ptr<StaticMeshBuilder> builder, std::unique_ptr<IGpuModelUploader> uploader, TextureLoadCallback textureLoadCallback = nullptr);
+        ModelManager(std::shared_ptr<StaticMeshBuilder> builder, std::unique_ptr<IGpuModelUploader> uploader, MaterialLoadCallback materialLoadCallback = nullptr);
         ~ModelManager() = default;
 
         uint32_t LoadModelAsync(const std::string& filePath);
@@ -31,7 +31,7 @@ namespace Syn {
         void StartGpuUpload(EntryType& entry) override;
         void FinalizeResource(EntryType& entry) override;
     private:
-        TextureLoadCallback _textureLoadCallback;
+        MaterialLoadCallback _materialLoadCallback;
         std::shared_ptr<StaticMeshBuilder> _builder;
         std::unique_ptr<IGpuModelUploader> _uploader;
         std::unique_ptr<Vk::Buffer> _modelAddressBuffer;

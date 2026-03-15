@@ -25,6 +25,7 @@ namespace Syn {
     ResourceManager::ResourceManager() {
 		InitShaderManager();
 		InitImageManager();
+		InitMaterialManager();
 		InitModelManager();
     }
 
@@ -32,35 +33,6 @@ namespace Syn {
 	{
 		_shaderManager = std::make_unique<ShaderManager>();
 		ServiceLocator::ProvideShaderManager(_shaderManager.get());
-	}
-
-	void ResourceManager::InitModelManager()
-	{
-		_staticMeshBuilder = std::make_shared<StaticMeshBuilder>(
-			std::make_unique<MeshLoaderRegistry>(),
-			std::make_unique<MeshProcessorPipeline>(),
-			std::make_unique<DefaultGpuModelConverter>(),
-			std::make_unique<DefaultModelCooker>()
-		);
-
-		_staticMeshBuilder->RegisterLoader(std::make_shared<AssimpLoader>(), 1);
-		_staticMeshBuilder->RegisterProcessor(std::make_unique<NormalProcessor>());
-		_staticMeshBuilder->RegisterProcessor(std::make_unique<TangentProcessor>());
-		_staticMeshBuilder->RegisterProcessor(std::make_unique<ColliderProcessor>());
-		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerLodProcessor>());
-		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerMeshletProcessor>());
-
-		ServiceLocator::ProvideStaticMeshBuilder(_staticMeshBuilder.get());
-
-		_modelManager = std::make_unique<ModelManager>(
-			_staticMeshBuilder,
-			std::make_unique<DefaultGpuModelUploader>(),
-			[this](const std::string& texPath) {
-				_imageManager->LoadImageAsync(texPath);
-			}
-		);
-
-		ServiceLocator::ProvideModelManager(_modelManager.get());
 	}
 
 	void ResourceManager::InitImageManager()
@@ -85,6 +57,46 @@ namespace Syn {
 		ServiceLocator::ProvideImageManager(_imageManager.get());
 	}
 
+	void ResourceManager::InitMaterialManager()
+	{
+		_materialManager = std::make_unique<MaterialManager>(
+			[this](const std::string& fullPath) -> uint32_t {
+				return _imageManager->LoadImageAsync(fullPath);
+			}
+		);
+
+		ServiceLocator::ProvideMaterialManager(_materialManager.get());
+	}
+
+	void ResourceManager::InitModelManager()
+	{
+		_staticMeshBuilder = std::make_shared<StaticMeshBuilder>(
+			std::make_unique<MeshLoaderRegistry>(),
+			std::make_unique<MeshProcessorPipeline>(),
+			std::make_unique<DefaultGpuModelConverter>(),
+			std::make_unique<DefaultModelCooker>()
+		);
+
+		_staticMeshBuilder->RegisterLoader(std::make_shared<AssimpLoader>(), 1);
+		_staticMeshBuilder->RegisterProcessor(std::make_unique<NormalProcessor>());
+		_staticMeshBuilder->RegisterProcessor(std::make_unique<TangentProcessor>());
+		_staticMeshBuilder->RegisterProcessor(std::make_unique<ColliderProcessor>());
+		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerLodProcessor>());
+		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerMeshletProcessor>());
+
+		ServiceLocator::ProvideStaticMeshBuilder(_staticMeshBuilder.get());
+
+		_modelManager = std::make_unique<ModelManager>(
+			_staticMeshBuilder,
+			std::make_unique<DefaultGpuModelUploader>(),
+			[this](const std::string& name, const MaterialInfo& info) -> uint32_t {
+				return _materialManager->LoadMaterial(name, info);
+			}
+		);
+
+		ServiceLocator::ProvideModelManager(_modelManager.get());
+	}
+
     ResourceManager::~ResourceManager() {
         ServiceLocator::ProvideShaderManager(nullptr);
         ServiceLocator::ProvideResourceManager(nullptr);
@@ -92,5 +104,6 @@ namespace Syn {
 		ServiceLocator::ProvideModelManager(nullptr);
 		ServiceLocator::ProvideImageBuilder(nullptr);
 		ServiceLocator::ProvideImageManager(nullptr);
+		ServiceLocator::ProvideMaterialManager(nullptr);
     }
 }

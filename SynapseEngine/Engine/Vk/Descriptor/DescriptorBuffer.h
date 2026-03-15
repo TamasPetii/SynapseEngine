@@ -15,6 +15,7 @@ namespace Syn::Vk {
 
         Buffer* GetBuffer() const { return _buffer.get(); }
 
+        void FillSampledImages(uint32_t binding, uint32_t count, VkImageView view, VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         void WriteCombinedImageSampler(uint32_t binding, uint32_t arrayElement, VkImageView view, VkSampler sampler, VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         void WriteSampledImage(uint32_t binding, uint32_t arrayElement, VkImageView view, VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         void WriteSampler(uint32_t binding, uint32_t arrayElement, VkSampler sampler);

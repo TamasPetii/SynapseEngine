@@ -10,8 +10,8 @@
 
 namespace Syn {
 
-    ModelManager::ModelManager(std::shared_ptr<StaticMeshBuilder> builder, std::unique_ptr<IGpuModelUploader> uploader, TextureLoadCallback textureLoadCallback)
-        : _builder(builder), _uploader(std::move(uploader)), _textureLoadCallback(std::move(textureLoadCallback))
+    ModelManager::ModelManager(std::shared_ptr<StaticMeshBuilder> builder, std::unique_ptr<IGpuModelUploader> uploader, MaterialLoadCallback materialLoadCallback)
+        : _builder(builder), _uploader(std::move(uploader)), _materialLoadCallback(std::move(materialLoadCallback))
     {
         _modelAddressBuffer = Vk::BufferFactory::CreatePersistent(
             MAX_MODELS * sizeof(GpuModelAddresses),
@@ -41,22 +41,30 @@ namespace Syn {
     }
 
     void ModelManager::StartGpuUpload(EntryType& entry) {
-        if (_textureLoadCallback && entry.resource) {
+        if (_materialLoadCallback && entry.resource) {
             std::filesystem::path modelDir = std::filesystem::path(entry.path).parent_path();
 
-            for (const auto& mat : entry.resource->cpuData.materials) {
-                auto submitTexture = [&](const std::string& texPath) {
-                    if (!texPath.empty()) {
-                        std::string fullPath = (modelDir / texPath).lexically_normal().string();
-                        _textureLoadCallback(fullPath);
+            entry.resource->hardwareBuffers.meshMaterialIndices.clear();
+
+            for (auto& matInfo : entry.resource->gpuData.materials) {
+                auto resolvePath = [&](std::string& path) {
+                    if (!path.empty()) {
+                        path = (modelDir / path).lexically_normal().string();
                     }
                     };
 
-                submitTexture(mat.albedoPath);
-                submitTexture(mat.normalPath);
-                submitTexture(mat.metallicRoughnessPath);
-                submitTexture(mat.emissivePath);
-                submitTexture(mat.ambientOcclusionPath);
+                resolvePath(matInfo.albedoPath);
+                resolvePath(matInfo.normalPath);
+                resolvePath(matInfo.metalnessPath);
+                resolvePath(matInfo.roughnessPath);
+                resolvePath(matInfo.metallicRoughnessPath);
+                resolvePath(matInfo.emissivePath);
+                resolvePath(matInfo.ambientOcclusionPath);
+
+                std::string uniqueMatName = entry.path + "_" + matInfo.name;
+                uint32_t matId = _materialLoadCallback(uniqueMatName, matInfo);
+
+                entry.resource->hardwareBuffers.meshMaterialIndices.push_back(matId);
             }
         }
 
@@ -70,8 +78,8 @@ namespace Syn {
                 FinalizeResource(entry);
                 entry.stagingBuffer.reset();
                 entry.state = ResourceState::Ready;
-                Info("Model '{}' is ready", entry.path);
                 _version.fetch_add(1, std::memory_order_release);
+                Info("Model '{}' is ready", entry.path);
             },
             .needsGraphics = false
         });

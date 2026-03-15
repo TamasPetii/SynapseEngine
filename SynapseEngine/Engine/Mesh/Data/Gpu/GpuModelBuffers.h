@@ -30,6 +30,7 @@ namespace Syn
 
         //Draw Data
         std::vector<MeshDrawBlueprint> baseDrawCommands;
+        std::vector<uint32_t> meshMaterialIndices;
     };
 
     struct SYN_API GpuModelAddresses

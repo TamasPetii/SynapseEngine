@@ -18,6 +18,7 @@ namespace Syn {
     class ImageBuilder;
     class InputManager;
     class SceneManager;
+    class MaterialManager;
 }
 
 namespace Syn 
@@ -65,6 +66,9 @@ namespace Syn
 
         static void ProvideSceneManager(SceneManager* manager) { _sceneManager = manager; }
         static SceneManager* GetSceneManager() { return _sceneManager; }
+
+        static void ProvideMaterialManager(MaterialManager* manager) { _materialManager = manager; }
+        static MaterialManager* GetMaterialManager() { return _materialManager; }
     private:
         static Vk::Context* _vkContext;
         static Vk::GpuUploader* _gpuUploader;
@@ -78,5 +82,6 @@ namespace Syn
 		static StaticMeshBuilder* _staticMeshBuilder;
         static InputManager* _inputManager;
         static SceneManager* _sceneManager;
+        static MaterialManager* _materialManager;
     };
 }
