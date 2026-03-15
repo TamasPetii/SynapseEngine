@@ -26,11 +26,15 @@ namespace Syn::Vk {
         std::replace(cacheFilename.begin(), cacheFilename.end(), '\\', '_');
         std::replace(cacheFilename.begin(), cacheFilename.end(), ':', '_');
         
-#ifdef SYN_DEBUG
-        cacheFilename += "_debug";
-#else
-        cacheFilename += "_release";
-#endif
+        #if defined(SYN_DEBUG)
+                cacheFilename += "_debug";
+        #elif defined(SYN_RELEASE)
+                cacheFilename += "_release";
+        #elif defined(SYN_DIST)
+                cacheFilename += "_dist";
+        #else
+            cacheFilename += "_unknown";
+        #endif
         
         fs::path cachePath = cacheDir / (cacheFilename + ".spv");
 
