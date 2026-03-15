@@ -162,8 +162,10 @@ namespace Syn {
             .uploadCallback = [this, entry](VkCommandBuffer cmd) {
                 auto uploadResult = _uploader->Upload(entry->resource->gpuData, cmd);
                 entry->resource->image = uploadResult.texture;
+                entry->stagingBuffer = std::move(uploadResult.stagingBuffer);
             },
             .onFinished = [this, entry]() {
+                entry->stagingBuffer.reset();
                 entry->state = ResourceState::Ready;
             },
             .needsGraphics = false

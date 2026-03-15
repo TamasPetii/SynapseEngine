@@ -17,9 +17,13 @@ namespace Syn::Vk {
         VkPipelineLayout GetLayout() const { return _pipelineLayout; }
         const std::vector<const Shader*>& GetShaders() const { return _shaders; }
     private:
-        void CreatePipelineLayout();
+        void CreatePipelineLayoutAndShaders();
     private:
         VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
         std::vector<const Shader*> _shaders;
+
+        std::vector<VkShaderEXT> _shaderObjects;
+        std::vector<VkDescriptorSetLayout> _createdLayouts;
+        std::vector<VkDescriptorSetLayout> _bindLayouts;
     };
 }

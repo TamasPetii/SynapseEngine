@@ -15,10 +15,11 @@ namespace Syn
         auto pool = registry->GetPool<ModelComponent>();
         if (!pool) return;
 
+        auto drawData = scene->GetSceneDrawData();
         auto modelManager = ServiceLocator::GetModelManager();
         uint32_t currentModelManagerVersion = modelManager->GetVersion();
 
-        this->EmplaceTask(subflow, SystemPhaseNames::Update, [this, scene, pool, modelManager, currentModelManagerVersion]() {
+        this->EmplaceTask(subflow, SystemPhaseNames::Update, [this, scene, pool, modelManager, currentModelManagerVersion, drawData]() {
 
             bool needsRebuild = false;
             if (_lastModelManagerVersion != currentModelManagerVersion) {
@@ -77,6 +78,7 @@ namespace Syn
             for (auto e : pool->GetStorage().GetStreamEntities()) processEntity(e);
 
             _needsUpload = true;
+            _framesToUpload = static_cast<uint32_t>(drawData->globalMaterialIndexBuffers.size());
             });
     }
 
@@ -103,6 +105,11 @@ namespace Syn
             currentBuffer->Write(_flatMaterialIndices.data(), actualDataSize, 0);
 
             _needsUpload = false;
+
+            //Do we need this?
+            if (_framesToUpload > 0) {
+                _framesToUpload--;
+            }
             });
     }
 }

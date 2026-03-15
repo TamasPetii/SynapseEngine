@@ -19,9 +19,9 @@ namespace Syn
     public:
         virtual ~ISystem() = default;
 
-        virtual void OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) = 0;
-        virtual void OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow) = 0;
-        virtual void OnFinish(Scene* scene, tf::Subflow& subflow) = 0;
+        virtual void OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) {};
+        virtual void OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow) {};
+        virtual void OnFinish(Scene* scene, tf::Subflow& subflow) {};
 
         virtual std::vector<TypeID> GetReadDependencies() const { return {}; }
         virtual std::vector<TypeID> GetWriteDependencies() const { return {}; }

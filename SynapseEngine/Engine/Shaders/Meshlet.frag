@@ -72,8 +72,9 @@ vec4 sampleLoadedTexture2D(uint textureID, uint samplerID, vec2 uv) {
     return texture(sampler2D(bindlessTextures[nonuniformEXT(textureID)], globalSamplers[nonuniformEXT(samplerID)]), uv); 
 }
 
-void main() { 
-
+void main() 
+{ 
+/*
     ModelSparseMap sparseMap = ModelSparseMap(pc.modelSparseMapBufferAddr); 
     ModelComponentBuffer modelComponents = ModelComponentBuffer(pc.modelBufferAddr); 
     MaterialLookupBuffer materialLookup = MaterialLookupBuffer(pc.materialLookupBuffer); 
@@ -86,10 +87,13 @@ void main() {
     uint materialId = materialLookup.data[flatMaterialIndex]; 
     GpuMaterial mat = globalMaterials.data[materialId]; 
 
-    vec4 texColor = sampleLoadedTexture2D(mat.albedoTexture, 0, inUV * mat.uvScale);
+    //vec4 texColor = sampleLoadedTexture2D(mat.albedoTexture, 0, inUV * mat.uvScale);
+    vec4 texColor = vec4(1);
     vec3 baseColor = mat.color.rgb * texColor.rgb; 
       
     vec3 lightDir = normalize(vec3(0.5, 1.0, 0.3)); 
     float ndotl = max(dot(normalize(inNormal), lightDir), 0.1); 
     outFragColor = vec4(baseColor * ndotl, mat.color.a * texColor.a); 
+    */
+    outFragColor = vec4(inMeshletColor, 1); 
 }

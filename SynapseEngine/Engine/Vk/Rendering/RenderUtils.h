@@ -62,6 +62,5 @@ namespace Syn::Vk {
         static void BeginRendering(VkCommandBuffer cmd, const RenderingInfoConfig& config);
         static void EndRendering(VkCommandBuffer cmd);
         static void SetGraphicsState(VkCommandBuffer cmd, const GraphicsPipelineConfig& config);
-        static void BindShaders(VkCommandBuffer cmd, std::span<const Shader* const> shaders);
     };
 }

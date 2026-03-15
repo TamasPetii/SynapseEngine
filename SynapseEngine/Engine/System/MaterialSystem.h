@@ -6,7 +6,7 @@
 
 namespace Syn
 {
-    class SYN_API MaterialSystem : public ComponentSystem<ModelComponent>
+    class SYN_API MaterialSystem : public ISystem
     {
     public:
         std::string GetName() const override { return "MaterialSystem"; }
@@ -18,5 +18,7 @@ namespace Syn
         bool _needsUpload = false;
         uint32_t _lastModelManagerVersion = 0;
         std::vector<uint32_t> _flatMaterialIndices;
+
+        uint32_t _framesToUpload = 0;
     };
 }

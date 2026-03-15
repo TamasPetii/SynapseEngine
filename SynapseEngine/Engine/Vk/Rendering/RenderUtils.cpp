@@ -106,37 +106,4 @@ namespace Syn::Vk {
             0, nullptr
         );
     }
-
-    void RenderUtils::BindShaders(VkCommandBuffer cmd, std::span<const Shader* const> shaders) {
-        static const std::vector<VkShaderStageFlagBits> stages = {
-                VK_SHADER_STAGE_VERTEX_BIT,
-                VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
-                VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
-                VK_SHADER_STAGE_GEOMETRY_BIT,
-                VK_SHADER_STAGE_FRAGMENT_BIT,
-                VK_SHADER_STAGE_TASK_BIT_EXT,
-                VK_SHADER_STAGE_MESH_BIT_EXT,
-                VK_SHADER_STAGE_COMPUTE_BIT
-        };
-
-        std::vector<VkShaderEXT> shaderHandles(stages.size(), VK_NULL_HANDLE);
-        for (const auto* shader : shaders) {
-            if (shader) {
-                VkShaderStageFlagBits currentStage = shader->GetStage();
-                for (size_t i = 0; i < stages.size(); ++i) {
-                    if (stages[i] == currentStage) {
-                        shaderHandles[i] = shader->Handle();
-                        break;
-                    }
-                }
-            }
-        }
-
-        vkCmdBindShadersEXT(
-            cmd,
-            static_cast<uint32_t>(stages.size()),
-            stages.data(),
-            shaderHandles.data()
-        );
-    }
 }

@@ -15,7 +15,7 @@ namespace Syn
     {
         SceneDrawData(uint32_t frameCount);
 
-        bool useGpuCulling = true;
+        bool useGpuCulling = false;
 
         static constexpr uint32_t MAX_INSTANCES = 10000000;
         static constexpr uint32_t MAX_INDIRECT_COMMANDS = 200000;
