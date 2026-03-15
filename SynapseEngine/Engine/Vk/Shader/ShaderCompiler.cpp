@@ -2,16 +2,68 @@
 #include "Engine/SynMacro.h"
 #include <fstream>
 #include <filesystem>
+#include <algorithm>
 #include <print>
 #include "ShaderIncluder.h"
 #include "Engine/Logger/Logger.h"
 
 namespace Syn::Vk {
     std::vector<uint32_t> ShaderCompiler::Compile(const std::string& filepath, VkShaderStageFlagBits stage) {
+        namespace fs = std::filesystem;
+
+        fs::path sourcePath(filepath);
+
+        const char* appDataPath = std::getenv("APPDATA");
+        fs::path baseDir = appDataPath ? appDataPath : ".";
+        fs::path cacheDir = baseDir / "Synapse" / "Shaders";
+
+        if (!fs::exists(cacheDir)) {
+            fs::create_directories(cacheDir);
+        }
+
+        std::string cacheFilename = filepath;
+        std::replace(cacheFilename.begin(), cacheFilename.end(), '/', '_');
+        std::replace(cacheFilename.begin(), cacheFilename.end(), '\\', '_');
+        std::replace(cacheFilename.begin(), cacheFilename.end(), ':', '_');
+        
+#ifdef SYN_DEBUG
+        cacheFilename += "_debug";
+#else
+        cacheFilename += "_release";
+#endif
+        
+        fs::path cachePath = cacheDir / (cacheFilename + ".spv");
+
+        bool needsCompile = true;
+
+        if (fs::exists(cachePath) && fs::exists(sourcePath)) {
+            auto sourceTime = fs::last_write_time(sourcePath);
+            auto cacheTime = fs::last_write_time(cachePath);
+
+            if (cacheTime >= sourceTime) {
+                needsCompile = false;
+            }
+        }
+
+        if (!needsCompile) {
+            std::ifstream file(cachePath, std::ios::ate | std::ios::binary);
+            if (file.is_open()) {
+                size_t fileSize = (size_t)file.tellg();
+                std::vector<uint32_t> spirv(fileSize / sizeof(uint32_t));
+
+                file.seekg(0);
+                file.read(reinterpret_cast<char*>(spirv.data()), fileSize);
+                file.close();
+
+                Info("Loaded cached shader: {}", filepath);
+                return spirv;
+            }
+        }
+
         shaderc::Compiler compiler;
         shaderc::CompileOptions options;
 
-        options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_3);
+        options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_4);
         options.SetTargetSpirv(shaderc_spirv_version_1_6);
         options.SetIncluder(std::make_unique<ShaderIncluder>());
 
@@ -28,11 +80,20 @@ namespace Syn::Vk {
 
         if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
             std::string errorMsg = result.GetErrorMessage();
-			Logger::Get().Dispatch(LogLevel::Error, std::format("SHADER COMPILE ERROR in {}:\n{}", filepath, errorMsg), "ShaderCompiler", 0);
+            Error("Shader compile Error in {}:\n{}", filepath, errorMsg);
             SYN_ASSERT(false, "Shader compilation failed!");
         }
 
-        return { result.begin(), result.end() };
+        std::vector<uint32_t> spirv(result.begin(), result.end());
+
+        std::ofstream outFile(cachePath, std::ios::out | std::ios::binary);
+        if (outFile.is_open()) {
+            outFile.write(reinterpret_cast<const char*>(spirv.data()), spirv.size() * sizeof(uint32_t));
+            outFile.close();
+        }
+
+        Info("Compiled and cached shader: {}", filepath);
+        return spirv;
     }
 
     std::string ShaderCompiler::LoadFile(const std::string& filepath) {
