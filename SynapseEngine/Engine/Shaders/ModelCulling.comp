@@ -139,7 +139,7 @@ layout(push_constant) uniform PushConstants {
 } pc;
 
 // 0 = Outside, 1 = Intersect, 2 = Inside
-uint TestFrustum(GpuMeshCollider collider, CameraComponent camera) {
+uint TestSphereFrustum(GpuMeshCollider collider, CameraComponent camera) {
     bool isIntersecting = false;
 
     for(int i = 0; i < 6; ++i) 
@@ -157,11 +157,58 @@ uint TestFrustum(GpuMeshCollider collider, CameraComponent camera) {
     return isIntersecting ? 1 : 2; 
 }
 
+// 0 = Outside, 1 = Intersect, 2 = Inside
+uint TestAABBFrustum(GpuMeshCollider collider, CameraComponent camera) {
+    vec3 extents = (collider.aabbMax - collider.aabbMin) * 0.5;
+    vec3 center = (collider.aabbMax + collider.aabbMin) * 0.5;
+
+    bool isIntersecting = false;
+    for(int i = 0; i < 6; ++i) {
+        vec4 plane = camera.frustum[i];
+        
+        float r = dot(extents, abs(plane.xyz));
+        float dist = dot(plane.xyz, center) - plane.w;
+
+        if (dist < -r) 
+            return 0;
+            
+        if (dist < r) 
+            isIntersecting = true;
+    }
+
+    return isIntersecting ? 1 : 2;
+}
+
+uint TestFrustum(GpuMeshCollider collider, CameraComponent camera) {
+    uint sphereResult = TestSphereFrustum(collider, camera);
+
+    if (sphereResult != 1) {
+        return sphereResult;
+    }
+    
+    return TestAABBFrustum(collider, camera);
+}
+
 GpuMeshCollider TransformCollider(GpuMeshCollider local, mat4 transform) {
     GpuMeshCollider world;
     world.center = (transform * vec4(local.center, 1.0)).xyz;
     vec3 scale = vec3(length(transform[0].xyz), length(transform[1].xyz), length(transform[2].xyz));
     world.radius = local.radius * max(scale.x, max(scale.y, scale.z));
+
+    vec3 localExtents = (local.aabbMax - local.aabbMin) * 0.5;
+    vec3 localCenter = (local.aabbMax + local.aabbMin) * 0.5;
+    vec3 worldCenter = (transform * vec4(localCenter, 1.0)).xyz;
+    
+    mat3 absMatrix = mat3(
+        abs(transform[0].xyz),
+        abs(transform[1].xyz),
+        abs(transform[2].xyz)
+    );
+    vec3 worldExtents = absMatrix * localExtents;
+   
+    world.aabbMin = worldCenter - worldExtents;
+    world.aabbMax = worldCenter + worldExtents;
+    
     return world;
 }
 

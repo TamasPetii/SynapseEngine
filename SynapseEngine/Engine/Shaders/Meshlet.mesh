@@ -72,6 +72,7 @@ struct TransformComponent {
     mat4 transform; 
     mat4 transformIT;
 };
+
 struct CameraComponent {
     mat4 view; 
     mat4 viewInv; 

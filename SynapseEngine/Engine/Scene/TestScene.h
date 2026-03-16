@@ -66,7 +66,7 @@ namespace Syn
             registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
 
             // Random Geometry
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 100000; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
