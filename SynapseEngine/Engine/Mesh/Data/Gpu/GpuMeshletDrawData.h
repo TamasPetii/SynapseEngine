@@ -28,8 +28,14 @@ namespace Syn
 	{
 		glm::vec3 center;
 		float radius;
-		glm::vec3 coneAxis;
-		float coneCutoff;
+		glm::vec3 aabbMin;
+		float padding0;
+		glm::vec3 aabbMax;
+		float padding1;
+		glm::vec3 apex;
+		float cutoff;
+		glm::vec3 axis;
+		float padding2;
 	};
 
 	struct SYN_API GpuMeshletDrawDescriptor {

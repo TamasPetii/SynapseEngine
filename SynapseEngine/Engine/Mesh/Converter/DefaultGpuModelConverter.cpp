@@ -59,6 +59,8 @@ namespace Syn
             localMeshCollider.aabbMax = cookedMesh.collider.aabb.max;
 
             const glm::mat4& nodeTransform = cookedModel.nodeTransforms[instanceDesc.nodeIndex].globalTransform;
+            const glm::mat4& nodeTransformIT = cookedModel.nodeTransforms[instanceDesc.nodeIndex].globalTransformIT;
+
             GpuMeshCollider modelSpaceCollider = MeshUtils::TransformCollider(localMeshCollider, nodeTransform);
             result.indexedData.meshColliders.push_back(modelSpaceCollider);
 
@@ -125,8 +127,13 @@ namespace Syn
                             GpuMeshletCollider colliderDesc{};
                             colliderDesc.center = cookedMeshlet.collider.sphere.center;
                             colliderDesc.radius = cookedMeshlet.collider.sphere.radius;
-                            colliderDesc.coneAxis = cookedMeshlet.collider.cone.axis;
-                            colliderDesc.coneCutoff = cookedMeshlet.collider.cone.cutoff;
+                            colliderDesc.aabbMax = cookedMeshlet.collider.aabb.max;
+                            colliderDesc.aabbMin = cookedMeshlet.collider.aabb.min;
+                            colliderDesc.axis = cookedMeshlet.collider.cone.axis;
+                            colliderDesc.cutoff = cookedMeshlet.collider.cone.cutoff;
+                            colliderDesc.apex = cookedMeshlet.collider.cone.apex;
+
+                            colliderDesc = MeshUtils::TransformCollider(colliderDesc, nodeTransform, nodeTransformIT);
                             result.meshletData.meshletColliders.push_back(colliderDesc);
 
                             uint32_t localVtxOffset = cookedMeshlet.vertexOffset;
