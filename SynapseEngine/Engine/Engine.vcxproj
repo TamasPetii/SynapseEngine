@@ -631,6 +631,8 @@
     <None Include="Shaders\Fullscreen.vert" />
     <None Include="Shaders\MeshCulling.comp" />
     <None Include="Shaders\Meshlet.frag" />
+    <None Include="Shaders\MeshletOld.mesh" />
+    <None Include="Shaders\Meshlet.task" />
     <None Include="Shaders\Meshlet.mesh" />
     <None Include="Shaders\ModelCulling.comp" />
     <None Include="Shaders\Traditional.frag" />

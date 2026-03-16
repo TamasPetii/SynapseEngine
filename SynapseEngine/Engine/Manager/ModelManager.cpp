@@ -111,7 +111,8 @@ namespace Syn {
             blueprint.traditionalCmd.firstInstance = 0;
 
             blueprint.meshletCmd.groupCountX = 0; // GPU/CPU culling fogja növelni!
-            blueprint.meshletCmd.groupCountY = meshletDesc.meshletCount;
+            //blueprint.meshletCmd.groupCountY = meshletDesc.meshletCount;
+            blueprint.meshletCmd.groupCountY = (meshletDesc.meshletCount + 31) / 32;
             blueprint.meshletCmd.groupCountZ = 1;
 
             /*if (hasMeshlet && tradDesc.indexCount > 5000) { */

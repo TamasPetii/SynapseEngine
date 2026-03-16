@@ -175,12 +175,13 @@ uint TestFrustum(GpuMeshCollider collider, CameraComponent camera) {
     if (sphereResult != 1) {
         return sphereResult;
     }
-    
+
     return TestAABBFrustum(collider, camera);
 }
 
 GpuMeshCollider TransformCollider(GpuMeshCollider local, mat4 transform) {
     GpuMeshCollider world;
+
     world.center = (transform * vec4(local.center, 1.0)).xyz;
     vec3 scale = vec3(length(transform[0].xyz), length(transform[1].xyz), length(transform[2].xyz));
     world.radius = local.radius * max(scale.x, max(scale.y, scale.z));
@@ -235,8 +236,12 @@ void main() {
         GpuMeshCollider worldCollider = TransformCollider(localMeshCollider, transform.transform);
 
         // Csak akkor Frustum tesztelünk, ha a modell nincs teljesen a képernyőn belül
+        uint visibility = 2;
         if (!parentFullyInside) {
-            uint visibility = TestFrustum(worldCollider, camera);
+            visibility = TestFrustum(worldCollider, camera);
+
+            //Todo: Occlusion culling
+
             if (visibility == 0) isVisible = false;
         }
 
@@ -259,7 +264,15 @@ void main() {
             }
 
             GlobalInstanceBuffer instBuf = GlobalInstanceBuffer(pc.globalInstanceBufferAddr);
-            instBuf.data[meshAlloc.instanceOffset + slotIndex] = modelData.entityId;
+
+            uint payloadEntityId = modelData.entityId;
+
+            if (visibility == 2) {
+                //31 bit az entitásban úgysem lesz használva, ez mondja meg a task shadernek hogy kelle frustum culling
+                payloadEntityId |= (1u << 31);
+            }
+
+            instBuf.data[meshAlloc.instanceOffset + slotIndex] = payloadEntityId;
         }
     }
 }

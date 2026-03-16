@@ -152,7 +152,22 @@ namespace Syn
                 else
                 {
                     result.indexedData.meshDescriptors.push_back(lastValidMeshDesc);
-                    result.meshletData.drawDescriptors.push_back(lastValidMeshletDrawDesc);
+
+                    GpuMeshletDrawDescriptor newLodDrawDesc = lastValidMeshletDrawDesc;
+                    newLodDrawDesc.meshletOffset = static_cast<uint32_t>(result.meshletData.meshletDescriptors.size());
+                    result.meshletData.drawDescriptors.push_back(newLodDrawDesc);
+
+                    uint32_t count = lastValidMeshletDrawDesc.meshletCount;
+                    uint32_t startIdx = lastValidMeshletDrawDesc.meshletOffset;
+
+                    for (uint32_t i = 0; i < count; ++i)
+                    {
+                        auto descCopy = result.meshletData.meshletDescriptors[startIdx + i];
+                        auto collCopy = result.meshletData.meshletColliders[startIdx + i];
+
+                        result.meshletData.meshletDescriptors.push_back(descCopy);
+                        result.meshletData.meshletColliders.push_back(collCopy);
+                    }
                 }
             }
 

@@ -1,0 +1,291 @@
+#version 460
+#extension GL_EXT_mesh_shader : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+struct GpuMeshCollider {
+    vec3 center;
+    float radius;
+    vec3 aabbMin;
+    float padding0;
+    vec3 aabbMax;
+    float padding1;
+};
+
+struct GpuMeshletCollider {
+    vec3 center;
+    float radius;
+    vec3 aabbMin;
+    float padding0;
+    vec3 aabbMax;
+    float padding1;
+    vec3 apex;
+    float cutoff;
+    vec3 axis;
+    float padding2;
+};
+
+struct CameraComponent {
+    mat4 view;
+    mat4 viewInv;
+    mat4 proj;
+    mat4 projInv;
+    mat4 projVulkan;
+    mat4 projVulkanInv;
+    mat4 viewProj;
+    mat4 viewProjInv;
+    mat4 viewProjVulkan;
+    mat4 viewProjVulkanInv;
+    vec4 eye;
+    vec4 params;
+    vec4 frustum[6];
+};
+
+struct TransformComponent {
+    mat4 transform;
+    mat4 transformIT;
+};
+
+struct MeshDrawDescriptor {
+    uint modelIndex;
+    uint meshIndex;
+    uint lodIndex;
+    uint instanceOffset;
+    uint maxInstances;
+    uint indirectIndex;
+    uint isMeshletPipeline;
+    uint padding;
+};
+
+struct GpuMeshletDrawDescriptor {
+    uint meshletOffset;
+    uint meshletCount;
+    uint materialIndex;
+    uint padding;
+};
+
+struct GpuModelAddresses {
+    uint64_t vertexPositions;
+    uint64_t vertexAttributes;
+    uint64_t indices;
+    uint64_t meshDescriptors;
+    uint64_t meshColliders;
+    uint64_t lodDescriptors;
+    uint64_t meshletVertexIndices;
+    uint64_t meshletTriangleIndices;
+    uint64_t meshletDescriptors;
+    uint64_t meshletDrawDescriptors;
+    uint64_t meshletColliders;
+    uint64_t nodeTransforms;
+    GpuMeshCollider globalCollider;
+    uint vertexCount;
+    uint indexCount;
+    uint averageLodIndexCount;
+    uint meshCount;
+};
+
+layout(buffer_reference, std430) readonly buffer ModelAddressBuffer { GpuModelAddresses data[]; };
+layout(buffer_reference, std430) readonly buffer DescriptorBuffer { MeshDrawDescriptor data[]; };
+layout(buffer_reference, std430) readonly buffer InstanceBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly buffer SparseMapBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly buffer TransformPool { TransformComponent data[]; };
+layout(buffer_reference, std430) readonly buffer CameraPool { CameraComponent data[]; };
+layout(buffer_reference, std430) readonly buffer MeshletDrawDescBuffer { GpuMeshletDrawDescriptor data[]; };
+layout(buffer_reference, std430) readonly buffer MeshletColliderBuffer { GpuMeshletCollider data[]; };
+
+layout(push_constant) uniform PushConstants {
+    uint64_t modelAddressBuffer; 
+    uint64_t globalDrawCountBuffers; 
+    uint64_t globalInstanceBuffers; 
+    uint64_t globalIndirectCommandBuffers; 
+    uint64_t globalIndirectCommandDescriptorBuffers;   
+    uint64_t globalModelAllocationBuffers;
+    uint64_t globalMeshAllocationBuffers; 
+    uint64_t cameraBufferAddr; 
+    uint64_t cameraSparseMapBufferAddr; 
+    uint64_t transformBufferAddr; 
+    uint64_t transformSparseMapBufferAddr; 
+    uint64_t modelBufferAddr; 
+    uint64_t modelSparseMapBufferAddr; 
+    uint64_t materialLookupBuffer; 
+    uint64_t materialBuffer; 
+    uint activeCameraEntity;
+    uint meshletOffsetStart; 
+    uint visualizeMeshlet; 
+} pc;
+
+struct TaskPayload {
+    uint drawId;
+    uint instanceId;
+    uint meshletIndices[32];
+};
+
+taskPayloadSharedEXT TaskPayload payload;
+shared uint survivingMeshletCount;
+
+bool TestConeCulling(GpuMeshletCollider collider, vec3 cameraEye) {
+    vec3 view = normalize(cameraEye - collider.apex);  
+    return dot(view, collider.axis) < collider.cutoff;
+}
+
+// 0 = Outside, 1 = Intersect, 2 = Inside
+uint TestSphereFrustum(GpuMeshCollider collider, CameraComponent camera) {
+    bool isIntersecting = false;
+
+    for(int i = 0; i < 6; ++i) 
+    {
+        vec4 plane = camera.frustum[i];
+        float dist = dot(plane.xyz, collider.center) - plane.w;
+
+        if(dist < -collider.radius) 
+            return 0;
+
+        if(dist < collider.radius) 
+            isIntersecting = true;
+    }
+
+    return isIntersecting ? 1 : 2; 
+}
+
+// 0 = Outside, 1 = Intersect, 2 = Inside
+uint TestAABBFrustum(GpuMeshCollider collider, CameraComponent camera) {
+    vec3 extents = (collider.aabbMax - collider.aabbMin) * 0.5;
+    vec3 center = (collider.aabbMax + collider.aabbMin) * 0.5;
+
+    bool isIntersecting = false;
+    for(int i = 0; i < 6; ++i) {
+        vec4 plane = camera.frustum[i];
+        
+        float r = dot(extents, abs(plane.xyz));
+        float dist = dot(plane.xyz, center) - plane.w;
+
+        if (dist < -r) 
+            return 0;
+            
+        if (dist < r) 
+            isIntersecting = true;
+    }
+
+    return isIntersecting ? 1 : 2;
+}
+
+uint TestFrustum(GpuMeshCollider collider, CameraComponent camera) {
+    uint sphereResult = TestSphereFrustum(collider, camera);
+
+    if (sphereResult != 1) {
+        return sphereResult;
+    }
+
+    return TestAABBFrustum(collider, camera);
+}
+
+GpuMeshletCollider TransformMeshletCollider(GpuMeshletCollider local, mat4 transform, mat4 transformIT) {
+    GpuMeshletCollider world;
+
+    world.center = (transform * vec4(local.center, 1.0)).xyz;
+    vec3 scale = vec3(length(transform[0].xyz), length(transform[1].xyz), length(transform[2].xyz));
+    world.radius = local.radius * max(scale.x, max(scale.y, scale.z));
+
+    vec3 localExtents = (local.aabbMax - local.aabbMin) * 0.5;
+    vec3 localCenter = (local.aabbMax + local.aabbMin) * 0.5;
+    vec3 worldCenter = (transform * vec4(localCenter, 1.0)).xyz;
+    
+    mat3 absMatrix = mat3(
+        abs(transform[0].xyz),
+        abs(transform[1].xyz),
+        abs(transform[2].xyz)
+    );
+    vec3 worldExtents = absMatrix * localExtents;
+    world.aabbMin = worldCenter - worldExtents;
+    world.aabbMax = worldCenter + worldExtents;
+
+    //Cone
+    world.apex = (transform * vec4(local.apex, 1.0)).xyz;
+    world.axis = normalize((transformIT * vec4(local.axis, 0.0)).xyz);
+    world.cutoff = local.cutoff;
+
+    return world;
+}
+
+void main() {
+    uint threadIdx = gl_LocalInvocationID.x; // Meshlet
+    uint localInstanceID = gl_WorkGroupID.x; // Entity
+    uint meshletGroupOffset = gl_WorkGroupID.y * 32; // Block
+
+    if (threadIdx == 0) {
+        survivingMeshletCount = 0;
+        payload.drawId = gl_DrawID;
+        payload.instanceId = localInstanceID;
+    }
+
+    barrier();
+
+    DescriptorBuffer descriptors = DescriptorBuffer(pc.globalIndirectCommandDescriptorBuffers);
+    MeshDrawDescriptor desc = descriptors.data[pc.meshletOffsetStart + gl_DrawID];
+
+    InstanceBuffer instances = InstanceBuffer(pc.globalInstanceBuffers);
+    uint rawEntityData = instances.data[desc.instanceOffset + localInstanceID];
+    
+    bool isFullyInside = (rawEntityData & (1u << 31)) != 0;
+    uint entityId = rawEntityData & ~(1u << 31);
+
+    ModelAddressBuffer modelAddresses = ModelAddressBuffer(pc.modelAddressBuffer);
+    GpuModelAddresses addrs = modelAddresses.data[desc.modelIndex];
+
+    SparseMapBuffer transformMap = SparseMapBuffer(pc.transformSparseMapBufferAddr);
+    TransformPool transforms = TransformPool(pc.transformBufferAddr);
+    TransformComponent transform = transforms.data[transformMap.data[entityId]];
+
+    SparseMapBuffer cameraMap = SparseMapBuffer(pc.cameraSparseMapBufferAddr);
+    CameraPool cameras = CameraPool(pc.cameraBufferAddr);
+    CameraComponent camera = cameras.data[cameraMap.data[pc.activeCameraEntity]];
+
+    MeshletDrawDescBuffer meshletDraws = MeshletDrawDescBuffer(addrs.meshletDrawDescriptors);
+    uint flatLodIndex = (desc.meshIndex * 4) + desc.lodIndex; 
+    GpuMeshletDrawDescriptor submeshData = meshletDraws.data[flatLodIndex];
+
+    uint currentMeshletIdx = meshletGroupOffset + threadIdx;   
+    bool isValidMeshlet = currentMeshletIdx < submeshData.meshletCount;
+    bool isVisible = isValidMeshlet;
+
+    if (isValidMeshlet) {
+        uint globalMeshletIdx = submeshData.meshletOffset + currentMeshletIdx;
+        MeshletColliderBuffer colliders = MeshletColliderBuffer(addrs.meshletColliders);
+
+        GpuMeshletCollider localCollider = colliders.data[globalMeshletIdx];
+        GpuMeshletCollider collider = TransformMeshletCollider(localCollider, transform.transform, transform.transformIT);
+        
+        if (TestConeCulling(collider, camera.eye.xyz)) {
+            isVisible = false;
+        }
+
+        if (isVisible && !isFullyInside) {
+            GpuMeshCollider baseCollider;
+            baseCollider.center = collider.center;
+            baseCollider.radius = collider.radius;
+            baseCollider.aabbMin = collider.aabbMin;
+            baseCollider.aabbMax = collider.aabbMax;
+
+            uint visibility = TestFrustum(baseCollider, camera);
+            
+            if (visibility == 0) {
+                isVisible = false;
+            }
+        }
+
+        //Todo: Occlusion culling
+
+        if (isVisible) {
+            uint slot = atomicAdd(survivingMeshletCount, 1);
+            payload.meshletIndices[slot] = currentMeshletIdx;
+        }
+    }
+
+    barrier();
+
+    if (threadIdx == 0) {
+        EmitMeshTasksEXT(survivingMeshletCount, 1, 1);
+    }
+}

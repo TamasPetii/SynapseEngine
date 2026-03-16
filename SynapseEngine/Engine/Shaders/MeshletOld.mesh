@@ -142,14 +142,6 @@ layout(push_constant) uniform PushConstants {
     uint visualizeMeshlet; 
 } pc;
 
-struct TaskPayload {
-    uint drawId;
-    uint instanceId;
-    uint meshletIndices[32];
-};
-
-taskPayloadSharedEXT TaskPayload payload;
-
 layout(location = 0) out vec3 outNormal[];
 layout(location = 1) out vec2 outUV[];
 layout(location = 2) out vec3 outMeshletColor[];
@@ -173,12 +165,12 @@ void main() {
     uint threadIdx = gl_LocalInvocationID.x;
 
     // 1. Dimenziók feloldása (X = Instance, Y = Meshlet)
-    uint localInstanceID = payload.instanceId;
-    uint localMeshletID = payload.meshletIndices[gl_WorkGroupID.x];
+    uint localInstanceID = gl_WorkGroupID.x; 
+    uint localMeshletID = gl_WorkGroupID.y;
 
     // 2. Melyik Descriptorhoz tartozik ez a draw hívás?
     DescriptorBuffer descriptors = DescriptorBuffer(pc.globalIndirectCommandDescriptorBuffers);
-    MeshDrawDescriptor desc = descriptors.data[pc.meshletOffsetStart + payload.drawId];
+    MeshDrawDescriptor desc = descriptors.data[pc.meshletOffsetStart + gl_DrawID];
 
     // 3. Entitás és globális memóriacímek lekérése
     InstanceBuffer instances = InstanceBuffer(pc.globalInstanceBuffers);

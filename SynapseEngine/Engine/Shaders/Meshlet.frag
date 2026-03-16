@@ -95,5 +95,5 @@ void main()
     float ndotl = max(dot(normalize(inNormal), lightDir), 0.1); 
     outFragColor = vec4(baseColor * ndotl, mat.color.a * texColor.a); 
     */
-    outFragColor = vec4(inMeshletColor, 1.0); 
+    outFragColor = vec4(inMeshletColor.xyz, 1.0); 
 }

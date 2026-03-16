@@ -238,6 +238,9 @@ void main() {
 
     // Culling
     uint visibility = TestFrustum(globalWorldCollider, camera);
+
+    //Todo: Occlusion culling
+
     if (visibility == 0) return;
 
     const uint MAX_MESH_COUNT = 16u;

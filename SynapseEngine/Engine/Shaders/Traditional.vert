@@ -128,7 +128,8 @@ void main() {
 
     // 2. Melyik Entitást rajzoljuk éppen? (Frustum Culling eredménye)
     InstanceBuffer instances = InstanceBuffer(pc.globalInstanceBuffers);
-    uint entityId = instances.data[desc.instanceOffset + gl_InstanceIndex];
+    uint rawEntityData = instances.data[desc.instanceOffset + gl_InstanceIndex];
+    uint entityId = rawEntityData & ~(1u << 31);
 
     // 3. Modell memóriacímeinek feloldása
     ModelAddressBuffer modelAddresses = ModelAddressBuffer(pc.modelAddressBuffer);

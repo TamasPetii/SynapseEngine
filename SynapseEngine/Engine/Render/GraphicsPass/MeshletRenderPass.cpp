@@ -45,6 +45,7 @@ namespace Syn {
         auto shaderManager = ServiceLocator::GetShaderManager();
 
         _shaderProgram = shaderManager->CreateProgram("MeshletProgram", {
+            ShaderNames::MeshletTask,
             ShaderNames::MeshletMesh,
             ShaderNames::MeshletFrag
             });

@@ -1353,11 +1353,13 @@
   <ItemGroup>
     <None Include="Shaders\Fullscreen.vert" />
     <None Include="Shaders\Fullscreen.frag" />
-    <None Include="Shaders\Meshlet.mesh" />
+    <None Include="Shaders\MeshletOld.mesh" />
     <None Include="Shaders\Meshlet.frag" />
     <None Include="Shaders\Traditional.vert" />
     <None Include="Shaders\Traditional.frag" />
     <None Include="Shaders\ModelCulling.comp" />
     <None Include="Shaders\MeshCulling.comp" />
+    <None Include="Shaders\Meshlet.task" />
+    <None Include="Shaders\Meshlet.mesh" />
   </ItemGroup>
 </Project>

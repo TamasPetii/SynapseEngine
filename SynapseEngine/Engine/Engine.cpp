@@ -193,6 +193,7 @@ namespace Syn
 		_sceneManager.reset();
 		_renderManager.reset();
 		_resourceManager.reset();
+		_gpuUploader.reset();
 		_vkContext.reset(); //This has to be the last one!
 		ServiceLocator::Shutdown();
 	}
