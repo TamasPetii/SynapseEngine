@@ -131,12 +131,17 @@ namespace Syn::Vk {
         return imageIndex;
     }
 
-    void SwapChain::Present(uint32_t imageIndex, VkSemaphore renderFinishedSemaphore) {
+    void SwapChain::Present(uint32_t imageIndex, VkSemaphore renderFinishedSemaphore, VkFence presentFence) {
         if (_handle == VK_NULL_HANDLE) return;
+
+        VkSwapchainPresentFenceInfoEXT presentFenceInfo{ VK_STRUCTURE_TYPE_SWAPCHAIN_PRESENT_FENCE_INFO_EXT };
+        presentFenceInfo.swapchainCount = 1;
+        presentFenceInfo.pFences = &presentFence;
 
         VkPresentInfoKHR presentInfo{ VK_STRUCTURE_TYPE_PRESENT_INFO_KHR };
         presentInfo.waitSemaphoreCount = 1;
         presentInfo.pWaitSemaphores = &renderFinishedSemaphore;
+        presentInfo.pNext = &presentFenceInfo;
 
         VkSwapchainKHR swapChains[] = { _handle };
         presentInfo.swapchainCount = 1;

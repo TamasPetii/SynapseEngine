@@ -31,6 +31,7 @@ namespace Syn {
             _imageAvailableSemaphores.push_back(std::make_unique<Vk::BinarySemaphore>());
             _renderFinishedSemaphores.push_back(std::make_unique<Vk::BinarySemaphore>());
             _inFlightFences.push_back(std::make_unique<Vk::Fence>(true));
+            _presentFences.push_back(std::make_unique<Vk::Fence>(true));
             _commandBuffers.push_back(_commandPool->AllocateBuffer());
         }
     }
@@ -41,8 +42,14 @@ namespace Syn {
     }
 
     void Renderer::WaitForFrame(uint32_t frameIndex) {
-        auto currentFence = _inFlightFences[frameIndex].get();
-        currentFence->Wait();
+        VkFence fences[] = {
+            _inFlightFences[frameIndex]->Handle(),
+            _presentFences[frameIndex]->Handle()
+        };
+
+        auto device = ServiceLocator::GetVkContext()->GetDevice()->Handle();
+        vkWaitForFences(device, 2, fences, VK_TRUE, UINT64_MAX);
+        vkResetFences(device, 2, fences);
     }
 
     Vk::CommandBuffer* Renderer::BeginFrame(uint32_t frameIndex) {
@@ -54,9 +61,6 @@ namespace Syn {
         }
 
         _imageIndex = imageIndex;
-
-        auto currentFence = _inFlightFences[frameIndex].get();
-        currentFence->Reset();
 
         auto cmd = _commandBuffers[frameIndex].get();
         cmd->Reset();
@@ -91,6 +95,6 @@ namespace Syn {
         _graphicsQueue->Submit(&submitInfo, _inFlightFences[frameIndex]->Handle());
 
         auto swapChain = ServiceLocator::GetVkContext()->GetSwapChain();
-        swapChain->Present(_imageIndex, _renderFinishedSemaphores[frameIndex]->Handle());
+        swapChain->Present(_imageIndex, _renderFinishedSemaphores[frameIndex]->Handle(), _presentFences[frameIndex]->Handle());
     }
 }

@@ -27,8 +27,6 @@ namespace Syn {
             .dstAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT,
             .discardContent = true
             });
-
-
     }
 
     void CopyToSwapchainPass::Transfer(const RenderContext& context) {

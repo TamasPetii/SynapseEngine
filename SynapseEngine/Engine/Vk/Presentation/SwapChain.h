@@ -34,7 +34,7 @@ namespace Syn::Vk {
 		Image* GetImage(uint32_t index) const { return _images[index].get(); }
 
         uint32_t AcquireNextImage(VkSemaphore presentSemaphore);
-        void Present(uint32_t imageIndex, VkSemaphore renderFinishedSemaphore);
+        void Present(uint32_t imageIndex, VkSemaphore renderFinishedSemaphore, VkFence presentFence);
     private:
         void Init();
         void Cleanup();

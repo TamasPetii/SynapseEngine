@@ -35,5 +35,6 @@ namespace Syn {
         std::vector<std::unique_ptr<Vk::BinarySemaphore>> _imageAvailableSemaphores;
         std::vector<std::unique_ptr<Vk::BinarySemaphore>> _renderFinishedSemaphores;
         std::vector<std::unique_ptr<Vk::Fence>> _inFlightFences;
+        std::vector<std::unique_ptr<Vk::Fence>> _presentFences;
     };
 }

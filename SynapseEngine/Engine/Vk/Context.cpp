@@ -6,6 +6,7 @@ namespace Syn::Vk {
     static std::vector<const char*> GetRequiredExtensions() {
         return {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+            VK_EXT_SWAPCHAIN_MAINTENANCE_1_EXTENSION_NAME,
             VK_KHR_PUSH_DESCRIPTOR_EXTENSION_NAME,
             VK_EXT_MESH_SHADER_EXTENSION_NAME,
             VK_EXT_SHADER_OBJECT_EXTENSION_NAME,

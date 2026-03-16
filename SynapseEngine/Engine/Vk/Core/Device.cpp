@@ -47,6 +47,9 @@ namespace Syn::Vk {
         dynamicState3.extendedDynamicState3ColorBlendEnable = VK_TRUE;
         dynamicState3.extendedDynamicState3LogicOpEnable = VK_TRUE;
 
+        VkPhysicalDeviceSwapchainMaintenance1FeaturesEXT maintenance1Features{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SWAPCHAIN_MAINTENANCE_1_FEATURES_EXT };
+        maintenance1Features.swapchainMaintenance1 = VK_TRUE;
+
         VkPhysicalDeviceVulkan13Features features13{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES };
         features13.synchronization2 = VK_TRUE;
         features13.dynamicRendering = VK_TRUE;
@@ -88,7 +91,8 @@ namespace Syn::Vk {
         descriptorBufferFeatures.pNext = &dynamicState1;
         dynamicState1.pNext = &dynamicState2;
         dynamicState2.pNext = &dynamicState3;
-        dynamicState3.pNext = nullptr;
+        dynamicState3.pNext = &maintenance1Features;
+        maintenance1Features.pNext = nullptr;
 
         VkDeviceCreateInfo createInfo{ VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO };
         createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());

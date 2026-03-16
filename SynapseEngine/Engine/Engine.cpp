@@ -200,6 +200,7 @@ namespace Syn
 	void Engine::WindowResizeEvent(uint32_t width, uint32_t height) {
 		if (width == 0 || height == 0) {
 			_isMinimized = true;
+			return;
 		}
 
 		_isMinimized = false;
@@ -216,7 +217,7 @@ namespace Syn
 
 		if (EnableLogging)
 		{
-			_guiTaskObserver = _taskExecutor->make_observer<TaskProfilerObserver>();
+			//_guiTaskObserver = _taskExecutor->make_observer<TaskProfilerObserver>();
 			_jsonTaskObserver = _taskExecutor->make_observer<tf::TFProfObserver>();
 		}
 
