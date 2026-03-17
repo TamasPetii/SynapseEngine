@@ -270,7 +270,14 @@ void main() {
             }
 
             GlobalInstanceBuffer instBuf = GlobalInstanceBuffer(pc.globalInstanceBufferAddr);
-            instBuf.data[meshAlloc.instanceOffset + slotIndex] = entityId;
+            uint payloadEntityId = entityId;
+
+            if (visibility == 2) {
+                //31 bit az entitásban úgysem lesz használva, ez mondja meg a task shadernek hogy kelle frustum culling
+                payloadEntityId |= (1u << 31);
+            }
+
+            instBuf.data[meshAlloc.instanceOffset + slotIndex] = payloadEntityId;
         }
         
         return;
