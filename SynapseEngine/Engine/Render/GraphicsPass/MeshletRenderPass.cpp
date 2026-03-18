@@ -4,14 +4,14 @@
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Vk/Image/ImageFactory.h"
 #include "Engine/System/RenderSystem.h"
-#include "Engine/Manager/ModelManager.h"
+#include "Engine/Mesh/ModelManager.h"
 #include "Engine/Component/TransformComponent.h"
 #include "Engine/Component/CameraComponent.h"
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
-#include "Engine/Manager/MaterialManager.h"
-#include "Engine/Manager/ImageManager.h"
+#include "Engine/Material/MaterialManager.h"
+#include "Engine/Image/ImageManager.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>

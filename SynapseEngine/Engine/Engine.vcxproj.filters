@@ -420,7 +420,7 @@
     <ClCompile Include="Mesh\Converter\DefaultModelCooker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Manager\ModelManager.cpp">
+    <ClCompile Include="Mesh\ModelManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Image\Data\Raw\RawImage.cpp">
@@ -489,7 +489,7 @@
     <ClCompile Include="Image\Uploader\DefaultGpuImageUploader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Manager\ImageManager.cpp">
+    <ClCompile Include="Image\ImageManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mesh\Data\Common\MaterialInfo.cpp">
@@ -621,7 +621,7 @@
     <ClCompile Include="Render\ComputePass\MeshCullingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Manager\MaterialManager.cpp">
+    <ClCompile Include="Material\MaterialManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Material\Material.cpp">
@@ -631,6 +631,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="System\MaterialSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh\Processor\Optimizer\IMeshOptimizer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh\Processor\Optimizer\MeshoptimizerOptimizerProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1115,7 +1121,7 @@
     <ClInclude Include="Mesh\Converter\DefaultModelCooker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Manager\ModelManager.h">
+    <ClInclude Include="Mesh\ModelManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Image\Data\Raw\RawImage.h">
@@ -1184,7 +1190,7 @@
     <ClInclude Include="Image\Uploader\DefaultGpuImageUploader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Manager\ImageManager.h">
+    <ClInclude Include="Image\ImageManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mesh\Data\Common\MaterialInfo.h">
@@ -1334,7 +1340,7 @@
     <ClInclude Include="Render\ComputePass\MeshCullingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Manager\MaterialManager.h">
+    <ClInclude Include="Material\MaterialManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Material\Material.h">
@@ -1347,6 +1353,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Material\MaterialNames.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\SamplerNames.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh\Processor\Optimizer\IMeshOptimizer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh\Processor\Optimizer\MeshoptimizerOptimizerProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

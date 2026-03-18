@@ -1,9 +1,9 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include "Engine/Manager/ShaderManager.h"
-#include "Engine/Manager/ModelManager.h"
-#include "Engine/Manager/ImageManager.h"
-#include "Engine/Manager/MaterialManager.h"
+#include "Engine/Mesh/ModelManager.h"
+#include "Engine/Image/ImageManager.h"
+#include "Engine/Material/MaterialManager.h"
 #include <memory>
 
 namespace Syn {

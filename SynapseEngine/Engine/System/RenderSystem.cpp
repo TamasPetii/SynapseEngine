@@ -2,7 +2,7 @@
 #include "Engine/Scene/Scene.h"
 #include "Engine/Component/ModelComponent.h"
 #include "Engine/ServiceLocator.h"
-#include "Engine/Manager/ModelManager.h"
+#include "Engine/Mesh/ModelManager.h"
 #include "Engine/System/ModelSystem.h"
 
 namespace Syn

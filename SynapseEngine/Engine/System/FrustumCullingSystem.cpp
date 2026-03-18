@@ -5,7 +5,7 @@
 #include "Engine/System/ModelSystem.h"
 #include "Engine/System/TransformSystem.h"
 #include "Engine/System/RenderSystem.h"
-#include "Engine/Manager/ModelManager.h"
+#include "Engine/Mesh/ModelManager.h"
 #include "Engine/System/CameraSystem.h"
 #include <atomic>
 
@@ -160,7 +160,6 @@ namespace Syn
                     drawData->globalInstanceBuffers[frameIndex]->Write(drawData->cpuInstanceBuffer.data(), instanceSize, 0);
                 }
             }
-
 
             size_t tradSize = drawData->activeTraditionalCount * sizeof(VkDrawIndirectCommand);
             if (tradSize > 0)

@@ -183,7 +183,9 @@
     <ClCompile Include="Component\ModelComponent.cpp" />
     <ClCompile Include="Component\BaseComponent\RenderStateComponent.cpp" />
     <ClCompile Include="Image\Source\Procedural\DefaultImageSource.cpp" />
-    <ClCompile Include="Manager\MaterialManager.cpp" />
+    <ClCompile Include="Mesh\Processor\Optimizer\MeshoptimizerOptimizerProcessor.cpp" />
+    <ClCompile Include="Mesh\Processor\Optimizer\IMeshOptimizer.cpp" />
+    <ClCompile Include="Material\MaterialManager.cpp" />
     <ClCompile Include="System\MaterialSystem.cpp" />
     <ClCompile Include="Material\Material.cpp" />
     <ClCompile Include="Render\ComputePass\MeshCullingPass.cpp" />
@@ -224,7 +226,7 @@
     <ClCompile Include="Vk\Descriptor\DescriptorPool.cpp" />
     <ClCompile Include="Vk\Descriptor\PushDescriptorWriter.cpp" />
     <ClCompile Include="Vk\Descriptor\DescriptorBuffer.cpp" />
-    <ClCompile Include="Manager\ImageManager.cpp" />
+    <ClCompile Include="Image\ImageManager.cpp" />
     <ClCompile Include="Image\Uploader\DefaultGpuImageUploader.cpp" />
     <ClCompile Include="Image\Uploader\IGpuImageUploader.cpp" />
     <ClCompile Include="Image\Builder\ImageBuilder.cpp" />
@@ -257,7 +259,7 @@
     <ClCompile Include="Mesh\Data\Gpu\GpuMeshletDrawData.cpp" />
     <ClCompile Include="Mesh\Data\Gpu\GpuIndexedDrawData.cpp" />
     <ClCompile Include="Mesh\Data\Gpu\GpuVertexData.cpp" />
-    <ClCompile Include="Manager\ModelManager.cpp" />
+    <ClCompile Include="Mesh\ModelManager.cpp" />
     <ClCompile Include="Image\Data\Raw\RawImage.cpp" />
     <ClCompile Include="Image\Source\Procedural\ProceduralImageSource.cpp" />
     <ClCompile Include="Image\Data\Common\MipLevelInfo.cpp" />
@@ -391,7 +393,10 @@
     <ClInclude Include="Component\ModelComponent.h" />
     <ClInclude Include="Component\BaseComponent\RenderStateComponent.h" />
     <ClInclude Include="Image\Source\Procedural\DefaultImageSource.h" />
-    <ClInclude Include="Manager\MaterialManager.h" />
+    <ClInclude Include="Mesh\Processor\Optimizer\MeshoptimizerOptimizerProcessor.h" />
+    <ClInclude Include="Mesh\Processor\Optimizer\IMeshOptimizer.h" />
+    <ClInclude Include="Material\MaterialManager.h" />
+    <ClInclude Include="Image\SamplerNames.h" />
     <ClInclude Include="Material\MaterialNames.h" />
     <ClInclude Include="System\MaterialSystem.h" />
     <ClInclude Include="Material\Material.h" />
@@ -439,7 +444,7 @@
     <ClInclude Include="Vk\Descriptor\DescriptorPool.h" />
     <ClInclude Include="Vk\Descriptor\PushDescriptorWriter.h" />
     <ClInclude Include="Vk\Descriptor\DescriptorBuffer.h" />
-    <ClInclude Include="Manager\ImageManager.h" />
+    <ClInclude Include="Image\ImageManager.h" />
     <ClInclude Include="Image\Uploader\DefaultGpuImageUploader.h" />
     <ClInclude Include="Image\Uploader\IGpuImageUploader.h" />
     <ClInclude Include="Image\Builder\ImageBuilder.h" />
@@ -472,7 +477,7 @@
     <ClInclude Include="Mesh\Data\Gpu\GpuMeshletDrawData.h" />
     <ClInclude Include="Mesh\Data\Gpu\GpuIndexedDrawData.h" />
     <ClInclude Include="Mesh\Data\Gpu\GpuVertexData.h" />
-    <ClInclude Include="Manager\ModelManager.h" />
+    <ClInclude Include="Mesh\ModelManager.h" />
     <ClInclude Include="Image\Data\Raw\RawImage.h" />
     <ClInclude Include="Image\Source\Procedural\ProceduralImageSource.h" />
     <ClInclude Include="Image\Data\Common\MipLevelInfo.h" />

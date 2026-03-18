@@ -4,7 +4,7 @@
 #include "Engine/Component/CameraComponent.h"
 #include "Engine/Component/ModelComponent.h"
 #include "Engine/Mesh/Factory/MeshFactory.h"
-#include "Engine/Manager/ModelManager.h"
+#include "Engine/Mesh/ModelManager.h"
 #include "Engine/Manager/ShaderManager.h"
 #include <random>
 
@@ -22,8 +22,8 @@ namespace Syn
             uint32_t bistroId = modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
 
             std::vector<uint32_t> geoIds;
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Cube", []() { return MeshFactory::CreateCube(); }));
             geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Sphere", []() { return MeshFactory::CreateSphere(); }));
+            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Cube", []() { return MeshFactory::CreateCube(); }));
             geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Quad", []() { return MeshFactory::CreateQuad(); }));
             geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("ScreenQuad", []() { return MeshFactory::CreateScreenQuad(); }));
             geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Cylinder", []() { return MeshFactory::CreateCylinder(); }));
@@ -66,7 +66,7 @@ namespace Syn
             registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
 
             // Random Geometry
-            for (int i = 0; i < 100000; i++)
+            for (int i = 0; i < 1000000; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);

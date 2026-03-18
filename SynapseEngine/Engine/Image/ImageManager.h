@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine/SynApi.h"
-#include "BaseResourceManager.h"
+#include "Engine/Manager/BaseResourceManager.h"
 #include "Engine/Image/Builder/ImageBuilder.h"
 #include "Engine/Image/Uploader/IGpuImageUploader.h"
 

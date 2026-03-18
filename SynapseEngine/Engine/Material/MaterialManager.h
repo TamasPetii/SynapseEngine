@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine/SynApi.h"
-#include "BaseResourceManager.h"
+#include "Engine/Manager/BaseResourceManager.h"
 #include "Engine/Vk/Buffer/Buffer.h"
 #include "Engine/Material/Material.h"
 #include "Engine/Mesh/Data/Common/MaterialInfo.h"

@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine/SynApi.h"
-#include "BaseResourceManager.h"
+#include "Engine/Manager/BaseResourceManager.h"
 #include "Engine/Mesh/Builder/StaticMeshBuilder.h"
 #include "Engine/Mesh/Uploader/IGpuModelUploader.h"
 

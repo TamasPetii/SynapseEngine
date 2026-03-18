@@ -1,7 +1,7 @@
 #include "MaterialSystem.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/ServiceLocator.h"
-#include "Engine/Manager/ModelManager.h"
+#include "Engine/Mesh/ModelManager.h"
 
 namespace Syn
 {

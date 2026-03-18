@@ -10,7 +10,7 @@
 #include "Engine/Mesh/Loader/MeshLoaders.h"
 #include "Engine/Mesh/Source/MeshSources.h"
 #include "Engine/Mesh/Factory/MeshFactory.h"
-#include "Engine/Mesh/Processor/MeshProcessors.h"
+#include "Engine/Mesh/Processor/MeshProcessors.h" 
 
 #include "Engine/Image/Loader/ImageLoaderRegistry.h"
 #include "Engine/Image/Processor/ImageProcessorPipeline.h"
@@ -80,9 +80,10 @@ namespace Syn {
 		_staticMeshBuilder->RegisterLoader(std::make_shared<AssimpLoader>(), 1);
 		_staticMeshBuilder->RegisterProcessor(std::make_unique<NormalProcessor>());
 		_staticMeshBuilder->RegisterProcessor(std::make_unique<TangentProcessor>());
-		_staticMeshBuilder->RegisterProcessor(std::make_unique<ColliderProcessor>());
 		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerLodProcessor>());
+		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerOptimizerProcessor>());
 		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerMeshletProcessor>());
+		_staticMeshBuilder->RegisterProcessor(std::make_unique<ColliderProcessor>());
 
 		ServiceLocator::ProvideStaticMeshBuilder(_staticMeshBuilder.get());
 

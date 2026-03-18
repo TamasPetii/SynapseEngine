@@ -6,6 +6,7 @@
 #include "Engine/Logger/SynLog.h"
 #include "Engine/Vk/Descriptor/DescriptorLayoutBuilder.h";
 #include "Engine/Image/Source/Procedural/DefaultImageSource.h"
+#include "SamplerNames.h"
 
 namespace Syn {
 
@@ -39,7 +40,7 @@ namespace Syn {
             config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
             config.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
             config.anisotropyEnable = false;
-            RegisterSampler("Linear", config);
+            RegisterSampler(SamplerNames::Linear, config);
         }
 
         {
@@ -53,7 +54,7 @@ namespace Syn {
             config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
             config.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
             config.anisotropyEnable = false;
-            RegisterSampler("Nearest", config);
+            RegisterSampler(SamplerNames::Nearest, config);
         }
 
         {
@@ -67,7 +68,7 @@ namespace Syn {
             config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
             config.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
             config.anisotropyEnable = true;
-            RegisterSampler("LinearAniso", config);
+            RegisterSampler(SamplerNames::LinearAniso, config);
         }
 
         {
@@ -81,7 +82,7 @@ namespace Syn {
             config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
             config.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
             config.anisotropyEnable = true;
-            RegisterSampler("NearestAniso", config);
+            RegisterSampler(SamplerNames::NearestAniso, config);
         }
 
         {
@@ -98,7 +99,7 @@ namespace Syn {
             config.minLod = 0.0f;
             config.maxLod = 16.0f;
             config.reductionMode = VK_SAMPLER_REDUCTION_MODE_MAX;
-            RegisterSampler("MaxReduction", config);
+            RegisterSampler(SamplerNames::MaxReduction, config);
         }
 
         {
@@ -112,7 +113,7 @@ namespace Syn {
             config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
             config.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
             config.anisotropyEnable = false;
-            RegisterSampler("BloomSampler", config);
+            RegisterSampler(SamplerNames::BloomSampler, config);
         }
 
         {
@@ -128,7 +129,7 @@ namespace Syn {
             config.anisotropyEnable = false;
             config.compareEnable = true;
             config.compareOp = VK_COMPARE_OP_LESS;
-            RegisterSampler("ShadowSampler", config);
+            RegisterSampler(SamplerNames::ShadowSampler, config);
         }
     }
 

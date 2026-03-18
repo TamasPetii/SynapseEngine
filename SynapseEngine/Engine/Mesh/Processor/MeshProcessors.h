@@ -9,3 +9,4 @@
 #include "Lod/MeshoptimizerLodProcessor.h"
 #include "Meshlet/IMeshletProcessor.h"
 #include "Meshlet/MeshoptimizerMeshletProcessor.h"
+#include "Optimizer/MeshoptimizerOptimizerProcessor.h"

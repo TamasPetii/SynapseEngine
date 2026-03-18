@@ -1,7 +1,7 @@
 #include "Scene.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Mesh/MeshDrawDescriptor.h"
-#include "Engine/Manager/ModelManager.h"
+#include "Engine/Mesh/ModelManager.h"
 #include "BufferNames.h"
 
 #include "Engine/Component/TransformComponent.h"

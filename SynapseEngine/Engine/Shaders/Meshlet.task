@@ -126,8 +126,8 @@ taskPayloadSharedEXT TaskPayload payload;
 shared uint survivingMeshletCount;
 
 bool TestConeCulling(GpuMeshletCollider collider, vec3 cameraEye) {
-    vec3 view = normalize(cameraEye - collider.apex);  
-    return dot(view, collider.axis) < collider.cutoff;
+    vec3 view = normalize(collider.apex - cameraEye);
+    return dot(view, collider.axis) >= collider.cutoff;
 }
 
 // 0 = Outside, 1 = Intersect, 2 = Inside
