@@ -33,6 +33,9 @@ namespace Syn::Vk {
         descriptorBufferFeatures.descriptorBuffer = VK_TRUE;
         descriptorBufferFeatures.descriptorBufferPushDescriptors = VK_TRUE;
 
+        VkPhysicalDeviceMutableDescriptorTypeFeaturesEXT mutableFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MUTABLE_DESCRIPTOR_TYPE_FEATURES_EXT };
+        mutableFeatures.mutableDescriptorType = VK_TRUE;
+
         VkPhysicalDeviceExtendedDynamicStateFeaturesEXT dynamicState1{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_EXTENDED_DYNAMIC_STATE_FEATURES_EXT };
         dynamicState1.extendedDynamicState = VK_TRUE;
 
@@ -88,7 +91,8 @@ namespace Syn::Vk {
         features13.pNext = &meshFeatures;
         meshFeatures.pNext = &shaderObjectFeatures;
         shaderObjectFeatures.pNext = &descriptorBufferFeatures;
-        descriptorBufferFeatures.pNext = &dynamicState1;
+        descriptorBufferFeatures.pNext = &mutableFeatures;
+        mutableFeatures.pNext = &dynamicState1;
         dynamicState1.pNext = &dynamicState2;
         dynamicState2.pNext = &dynamicState3;
         dynamicState3.pNext = &maintenance1Features;

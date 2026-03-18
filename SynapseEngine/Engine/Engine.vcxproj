@@ -182,6 +182,8 @@
     <ClCompile Include="Collision\Tester\CollisionTester.cpp" />
     <ClCompile Include="Component\ModelComponent.cpp" />
     <ClCompile Include="Component\BaseComponent\RenderStateComponent.cpp" />
+    <ClCompile Include="Render\ComputePass\HizLinearPreparePass.cpp" />
+    <ClCompile Include="Render\ComputePass\HizDownsamplePass.cpp" />
     <ClCompile Include="Image\Source\Procedural\DefaultImageSource.cpp" />
     <ClCompile Include="Mesh\Processor\Optimizer\MeshoptimizerOptimizerProcessor.cpp" />
     <ClCompile Include="Mesh\Processor\Optimizer\IMeshOptimizer.cpp" />
@@ -392,6 +394,9 @@
     <ClInclude Include="Collision\Tester\CollisionTester.h" />
     <ClInclude Include="Component\ModelComponent.h" />
     <ClInclude Include="Component\BaseComponent\RenderStateComponent.h" />
+    <ClInclude Include="Render\ComputeGroupSize.h" />
+    <ClInclude Include="Render\ComputePass\HizLinearPreparePass.h" />
+    <ClInclude Include="Render\ComputePass\HizDownsamplePass.h" />
     <ClInclude Include="Image\Source\Procedural\DefaultImageSource.h" />
     <ClInclude Include="Mesh\Processor\Optimizer\MeshoptimizerOptimizerProcessor.h" />
     <ClInclude Include="Mesh\Processor\Optimizer\IMeshOptimizer.h" />
@@ -634,6 +639,8 @@
   <ItemGroup>
     <None Include="Shaders\Fullscreen.frag" />
     <None Include="Shaders\Fullscreen.vert" />
+    <None Include="Shaders\HizDownsample.comp" />
+    <None Include="Shaders\LinearizeDepth.comp" />
     <None Include="Shaders\MeshCulling.comp" />
     <None Include="Shaders\Meshlet.frag" />
     <None Include="Shaders\MeshletOld.mesh" />

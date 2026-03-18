@@ -30,7 +30,7 @@ namespace Syn {
 
     void ImageManager::CreateSamplers() {
         {
-            // Linear
+            // Linear Repeat
             Vk::SamplerConfig config{};
             config.magFilter = VK_FILTER_LINEAR;
             config.minFilter = VK_FILTER_LINEAR;
@@ -40,11 +40,25 @@ namespace Syn {
             config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
             config.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
             config.anisotropyEnable = false;
-            RegisterSampler(SamplerNames::Linear, config);
+            RegisterSampler(SamplerNames::LinearRepeat, config);
         }
 
         {
-            // Nearest
+            // Linear Repeat
+            Vk::SamplerConfig config{};
+            config.magFilter = VK_FILTER_LINEAR;
+            config.minFilter = VK_FILTER_LINEAR;
+            config.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+            config.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+            config.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+            config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+            config.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+            config.anisotropyEnable = false;
+            RegisterSampler(SamplerNames::LinearClampEdge, config);
+        }
+
+        {
+            // Nearest Repeat
             Vk::SamplerConfig config{};
             config.magFilter = VK_FILTER_NEAREST;
             config.minFilter = VK_FILTER_NEAREST;
@@ -54,7 +68,21 @@ namespace Syn {
             config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
             config.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
             config.anisotropyEnable = false;
-            RegisterSampler(SamplerNames::Nearest, config);
+            RegisterSampler(SamplerNames::NearestRepeat, config);
+        }
+
+        {
+            // Nearest Clamp Edge
+            Vk::SamplerConfig config{};
+            config.magFilter = VK_FILTER_NEAREST;
+            config.minFilter = VK_FILTER_NEAREST;
+            config.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+            config.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+            config.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+            config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+            config.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+            config.anisotropyEnable = false;
+            RegisterSampler(SamplerNames::NearestClampEdge, config);
         }
 
         {
@@ -147,6 +175,12 @@ namespace Syn {
     uint32_t ImageManager::GetSamplerIndex(const std::string& name) const {
         auto it = _samplerNameToIndex.find(name);
         return it != _samplerNameToIndex.end() ? it->second : 0;
+    }
+
+    Vk::Sampler* ImageManager::GetSampler(const std::string& name) const
+    {
+        auto index = GetSamplerIndex(name);
+        return _samplers[index].get();
     }
 
     void ImageManager::LoadDefaultImageSync() {

@@ -150,10 +150,12 @@ struct TaskPayload {
 
 taskPayloadSharedEXT TaskPayload payload;
 
-layout(location = 0) out vec3 outNormal[];
-layout(location = 1) out vec2 outUV[];
-layout(location = 2) out vec3 outMeshletColor[];
-layout(location = 3) out flat uvec4 outIndices[];
+//layout(location = 0) out vec3 outNormal[];
+//layout(location = 1) out vec2 outUV[];
+//layout(location = 2) out vec3 outMeshletColor[];
+//layout(location = 3) out flat uvec4 outIndices[];
+
+layout(location = 0) out vec3 outMeshletColor[];
 
 vec3 generateMeshletColor(uint meshletID) {
     uint hash = (meshletID ^ 61) ^ (meshletID >> 16);
@@ -234,9 +236,9 @@ void main() {
         // Mátrix szorzások
         gl_MeshVerticesEXT[i].gl_Position = camera.viewProjVulkan * transform.transform * nodeTransform.globalTransform * vec4(v.position, 1.0);
         
-        outNormal[i] = normalize(transform.transformIT * nodeTransform.globalTransformIT * vec4(attr.normal, 0)).xyz;
-        outUV[i] = vec2(attr.uv_x, attr.uv_y); //Todo: Vulkan flip?
-        outIndices[i] = uvec4(entityId, desc.modelIndex, meshIndex, desc.lodIndex); //meshIndex is not loaded from desc, to handle batched meshes too!
+        //outNormal[i] = normalize(transform.transformIT * nodeTransform.globalTransformIT * vec4(attr.normal, 0)).xyz;
+        //outUV[i] = vec2(attr.uv_x, attr.uv_y); //Todo: Vulkan flip?
+        //outIndices[i] = uvec4(entityId, desc.modelIndex, meshIndex, desc.lodIndex); //meshIndex is not loaded from desc, to handle batched meshes too!
         outMeshletColor[i] = meshletColor;
     }
 

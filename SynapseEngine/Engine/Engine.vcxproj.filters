@@ -639,6 +639,12 @@
     <ClCompile Include="Mesh\Processor\Optimizer\MeshoptimizerOptimizerProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\ComputePass\HizDownsamplePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ComputePass\HizLinearPreparePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1364,6 +1370,15 @@
     <ClInclude Include="Mesh\Processor\Optimizer\MeshoptimizerOptimizerProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\ComputePass\HizDownsamplePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ComputePass\HizLinearPreparePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ComputeGroupSize.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Fullscreen.vert" />
@@ -1376,5 +1391,7 @@
     <None Include="Shaders\MeshCulling.comp" />
     <None Include="Shaders\Meshlet.task" />
     <None Include="Shaders\Meshlet.mesh" />
+    <None Include="Shaders\LinearizeDepth.comp" />
+    <None Include="Shaders\HizDownsample.comp" />
   </ItemGroup>
 </Project>

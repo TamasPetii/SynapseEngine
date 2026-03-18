@@ -7,6 +7,8 @@
 #include "Engine/Render/TransferPass/CopyToSwapchainPass.h"
 #include "Engine/Render/ComputePass/ModelCullingPass.h"
 #include "Engine/Render/ComputePass/MeshCullingPass.h"
+#include "Engine/Render/ComputePass/HizLinearPreparePass.h"
+#include "Engine/Render/ComputePass/HizDownsamplePass.h"
 
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "RenderNames.h"
@@ -18,6 +20,8 @@ namespace Syn
         auto rtManager = renderManager->GetRenderTargetManager();
 
         auto pipeline = std::make_unique<RenderPipeline>();
+        pipeline->AddPass(std::make_unique<HizLinearPreparePass>());
+        pipeline->AddPass(std::make_unique<HizDownsamplePass>());
         pipeline->AddPass(std::make_unique<ModelCullingPass>());
         pipeline->AddPass(std::make_unique<MeshCullingPass>());
         pipeline->AddPass(std::make_unique<GBufferInitPass>());

@@ -28,6 +28,7 @@ namespace Syn {
 
         Vk::DescriptorBuffer* GetBindlessBuffer() const { return _bindlessBuffer.get(); }
         VkDescriptorSetLayout GetBindlessLayout() const { return _bindlessLayout; }
+        Vk::Sampler* GetSampler(const std::string& name) const;
         uint32_t GetSamplerIndex(const std::string& name) const;
     protected:
         void StartGpuUpload(EntryType& entry) override;

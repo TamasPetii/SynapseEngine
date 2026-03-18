@@ -36,6 +36,7 @@ namespace Syn::Vk {
 
         if (type == DescriptorLayoutType::PushDescriptor) {
             layoutInfo.flags |= VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR;
+            layoutInfo.flags |= VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
         }
         else if (type == DescriptorLayoutType::DescriptorBuffer) {
             layoutInfo.flags |= VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;

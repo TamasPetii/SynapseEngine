@@ -8,6 +8,7 @@
 #include "Engine/Utils/WindowedBuffer.h"
 #include "Engine/Vk/Buffer/Buffer.h"
 #include "Engine/Material/MaterialNames.h"
+#include "Engine/Render/ComputeGroupSize.h"
 
 namespace Syn {
 
@@ -110,9 +111,14 @@ namespace Syn {
             blueprint.traditionalCmd.firstVertex = tradDesc.indexOffset;
             blueprint.traditionalCmd.firstInstance = 0;
 
+            /*
+            * Mesh shader: blueprint.meshletCmd.groupCountY = meshletDesc.meshletCount;
+            * Task shader: blueprint.meshletCmd.groupCountY = (meshletDesc.meshletCount + 31) / 32;
+            */
+
+            uint32_t groupCountY = ComputeGroupSize::CalculateDispatchCount(meshletDesc.meshletCount, ComputeGroupSize::Buffer32D);
             blueprint.meshletCmd.groupCountX = 0; // GPU/CPU culling fogja növelni!
-            //blueprint.meshletCmd.groupCountY = meshletDesc.meshletCount;
-            blueprint.meshletCmd.groupCountY = (meshletDesc.meshletCount + 31) / 32;
+            blueprint.meshletCmd.groupCountY = groupCountY;
             blueprint.meshletCmd.groupCountZ = 1;
 
             /*if (hasMeshlet && tradDesc.indexCount > 5000) { */

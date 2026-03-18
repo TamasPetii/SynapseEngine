@@ -1,0 +1,64 @@
+#version 460
+
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+// NEAREST SAMPLER!
+layout(set = 2, binding = 0) uniform sampler2D inImage;
+layout(set = 2, binding = 1, r32f) uniform writeonly image2D outImage;
+
+struct CameraComponent {
+    mat4 view; 
+    mat4 viewInv; 
+    mat4 proj; 
+    mat4 projInv;
+    mat4 projVulkan; 
+    mat4 projVulkanInv; 
+    mat4 viewProj; 
+    mat4 viewProjInv;
+    mat4 viewProjVulkan; 
+    mat4 viewProjVulkanInv; 
+    vec4 eye; 
+    vec4 params;
+    vec4 frustum[6];
+};
+
+layout(buffer_reference, std430) readonly buffer SparseMapBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly buffer CameraPool { CameraComponent data[]; };
+
+layout(push_constant) uniform PushConstants {
+    uint64_t cameraBufferAddr; 
+    uint64_t cameraSparseMapBufferAddr;  
+    vec2 outImageSize;
+    uint activeCameraEntity;
+} pc;
+
+float ConvertDepthToLinear(float depth, float nearPlane, float farPlane) {
+    return (nearPlane * farPlane) / (farPlane - depth * (farPlane - nearPlane));
+}
+
+float ConvertDepthToLinearNormalized(float depth, float nearPlane, float farPlane) {
+    float linear = ConvertDepthToLinear(depth, nearPlane, farPlane);
+    return (linear - nearPlane) / (farPlane - nearPlane);
+}
+
+void main() {
+    ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
+    if (pos.x >= int(pc.outImageSize.x) || pos.y >= int(pc.outImageSize.y)) return;
+
+    SparseMapBuffer cameraMap = SparseMapBuffer(pc.cameraSparseMapBufferAddr);
+    CameraPool cameras = CameraPool(pc.cameraBufferAddr);   
+    uint cameraDenseIndex = cameraMap.data[pc.activeCameraEntity];
+    CameraComponent camera = cameras.data[cameraDenseIndex];
+
+    vec2 uv = (vec2(pos) + vec2(0.5)) / pc.outImageSize;
+    float depth = texture(inImage, uv).x;
+
+    float nearPlane = camera.params.x;
+    float farPlane = camera.params.y;
+    float linearDepth = ConvertDepthToLinearNormalized(depth, nearPlane, farPlane);
+
+    imageStore(outImage, pos, vec4(linearDepth));
+}

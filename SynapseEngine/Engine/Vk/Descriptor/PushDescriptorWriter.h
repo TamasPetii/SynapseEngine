@@ -11,6 +11,7 @@ namespace Syn::Vk {
 
         PushDescriptorWriter& AddCombinedImageSampler(uint32_t binding, VkImageView view, VkSampler sampler, VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         PushDescriptorWriter& AddSampledImage(uint32_t binding, VkImageView view, VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        PushDescriptorWriter& AddStorageImage(uint32_t binding, VkImageView view, VkImageLayout layout = VK_IMAGE_LAYOUT_GENERAL);
         PushDescriptorWriter& AddSampler(uint32_t binding, VkSampler sampler);
         PushDescriptorWriter& AddBuffer(uint32_t binding, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range, VkDescriptorType type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER);
 

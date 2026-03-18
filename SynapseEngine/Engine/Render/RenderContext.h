@@ -8,6 +8,7 @@ namespace Syn {
     struct SYN_API RenderContext {
         VkCommandBuffer cmd;
         uint32_t frameIndex;
+        uint32_t framesInFlight;
         uint32_t swapchainImageIndex;
         Scene* scene;
         RenderTargetManager* renderTargetManager;

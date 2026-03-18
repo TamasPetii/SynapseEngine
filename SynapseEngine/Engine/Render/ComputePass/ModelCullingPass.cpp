@@ -7,6 +7,7 @@
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Component/ModelComponent.h"
 #include "Engine/Vk/Buffer/BufferUtils.h"
+#include "Engine/Render/ComputeGroupSize.h"
 
 namespace Syn {
 
@@ -84,7 +85,8 @@ namespace Syn {
         auto compManager = scene->GetComponentBufferManager();
         uint32_t fIdx = context.frameIndex;
 
-        uint32_t groupCountX = (_totalModelsToTest + 31) / 32;
+        uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_totalModelsToTest, ComputeGroupSize::Buffer32D);
+
         vkCmdDispatch(context.cmd, groupCountX, 1, 1);
 
         Vk::BufferBarrierInfo countBarrier{};

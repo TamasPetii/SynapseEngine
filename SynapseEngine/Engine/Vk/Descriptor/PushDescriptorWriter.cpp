@@ -23,6 +23,16 @@ namespace Syn::Vk {
         return *this;
     }
 
+    PushDescriptorWriter& PushDescriptorWriter::AddStorageImage(uint32_t binding, VkImageView view, VkImageLayout layout)
+    {
+        VkDescriptorImageInfo info{};
+        info.imageView = view;
+        info.imageLayout = layout;
+
+        _imageWrites.push_back({ binding, VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, info });
+        return *this;
+    }
+
     PushDescriptorWriter& PushDescriptorWriter::AddSampler(uint32_t binding, VkSampler sampler)
     {
         VkDescriptorImageInfo info{};

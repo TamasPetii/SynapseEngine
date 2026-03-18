@@ -65,13 +65,13 @@ namespace Syn
 		if (_isMinimized)
 			return;
 
-		uint32_t currentFrame = ServiceLocator::GetFrameContext()->currentFrameIndex;
+		uint32_t currentFrame = _frameContext.currentFrameIndex;
 
 		_renderManager->WaitForFrame(currentFrame);
 
 		_sceneManager->UpdateGPU(currentFrame);
 
-		_renderManager->RenderFrame(currentFrame, _sceneManager->GetActiveScene());
+		_renderManager->RenderFrame(currentFrame, _frameContext.framesInFlight, _sceneManager->GetActiveScene());
 
 		_sceneManager->Finish();
 
@@ -86,7 +86,7 @@ namespace Syn
 		_inputManager = std::make_unique<InputManager>();
 		ServiceLocator::ProvideInputManager(_inputManager.get());
 
-		InitFrameContext(1);
+		InitFrameContext(3);
 		InitLogger();
 		InitVulkan(params);
 		InitTaskExecutor();

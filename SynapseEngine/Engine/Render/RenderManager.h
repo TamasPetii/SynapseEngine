@@ -21,7 +21,7 @@ namespace Syn {
         void SetActivePipeline(const std::string& name);
 
         void WaitForFrame(uint32_t frameIndex);
-        void RenderFrame(uint32_t frameIndex, Scene* scene);
+        void RenderFrame(uint32_t frameIndex, uint32_t framesInFlight, Scene* scene);
         void OnResize(uint32_t width, uint32_t height);
 
         RenderTargetManager* GetRenderTargetManager() const { return _renderTargetManager.get(); }

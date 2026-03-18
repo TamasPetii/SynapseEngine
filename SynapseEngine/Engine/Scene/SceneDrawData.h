@@ -39,12 +39,12 @@ namespace Syn
         uint32_t totalAllocatedInstances = 0;
         size_t requiredMaterialBufferSize = 0;
 
+        std::vector<uint32_t> cpuInstanceBuffer;
         std::vector<ModelAllocationInfo> modelAllocations;
         std::vector<MeshAllocationInfo> meshAllocations;
         std::vector<MeshDrawDescriptor> drawDescriptors;
         std::vector<VkDrawIndirectCommand> traditionalCommands;
         std::vector<VkDrawMeshTasksIndirectCommandEXT> meshletCommands;
-        std::vector<uint32_t> cpuInstanceBuffer;
 
         std::vector<VkDrawIndirectCommand> aabbIndirectCommands;
         std::vector<VkDrawIndirectCommand> sphereIndirectCommands;

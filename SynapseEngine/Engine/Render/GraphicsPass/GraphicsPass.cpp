@@ -3,6 +3,8 @@
 namespace Syn {
     void GraphicsPass::Execute(const RenderContext& context)
     {
+        if (!context.scene) return;
+
         _colorAttachments.clear();
         _imageTransitions.clear();
 

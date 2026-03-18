@@ -30,7 +30,7 @@ namespace Syn {
         _renderer->WaitForFrame(frameIndex);
     }
 
-    void RenderManager::RenderFrame(uint32_t frameIndex, Scene* scene) {
+    void RenderManager::RenderFrame(uint32_t frameIndex, uint32_t framesInFlight, Scene* scene) {
         if (!_activePipeline) 
             return;
 
@@ -47,6 +47,7 @@ namespace Syn {
         RenderContext context = {
             .cmd = cmd->Handle(),
             .frameIndex = frameIndex,
+            .framesInFlight = framesInFlight,
 			.swapchainImageIndex = _renderer->GetCurrentImageIndex(),
             .scene = scene,
             .renderTargetManager = _renderTargetManager.get()

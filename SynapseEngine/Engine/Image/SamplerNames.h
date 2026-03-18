@@ -5,8 +5,10 @@ namespace Syn
 {
     struct SYN_API SamplerNames
     {
-        static constexpr const char* Linear = "Linear";
-        static constexpr const char* Nearest = "Nearest";
+        static constexpr const char* LinearRepeat = "LinearRepeat";
+        static constexpr const char* LinearClampEdge = "LinearClampEdge";
+        static constexpr const char* NearestRepeat = "NearestRepeat";
+        static constexpr const char* NearestClampEdge = "NearestClampEdge";
         static constexpr const char* LinearAniso = "LinearAniso";
         static constexpr const char* NearestAniso = "NearestAniso";
         static constexpr const char* MaxReduction = "MaxReduction";
