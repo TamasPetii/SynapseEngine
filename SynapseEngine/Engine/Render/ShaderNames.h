@@ -18,5 +18,8 @@ namespace Syn
 
         static constexpr const char* LinearizeDepth = "../Engine/Shaders/LinearizeDepth.comp";
         static constexpr const char* HizDownsample = "../Engine/Shaders/HizDownsample.comp";
+
+        static constexpr const char* CompositeVert = "../Engine/Shaders/Composite.vert";
+        static constexpr const char* CompositeFrag = "../Engine/Shaders/Composite.frag";
     };
 }

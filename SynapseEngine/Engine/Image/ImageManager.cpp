@@ -207,7 +207,7 @@ namespace Syn {
             });
 
         _bindlessBuffer->FillSampledImages(BINDING_TEXTURES, MAX_IMAGES, entry->resource->image->GetView());
-        Info("Default Fallback Texture (ID: 0) generated and bound to all bindless slots.");
+        //Info("Default Fallback Texture (ID: 0) generated and bound to all bindless slots.");
     }
 
     uint32_t ImageManager::LoadImageAsync(const std::string& filePath) {
@@ -239,7 +239,7 @@ namespace Syn {
                 entry.stagingBuffer.reset();
                 entry.state = ResourceState::Ready;
                 _version.fetch_add(1, std::memory_order_release);
-				Info("Image '{}' is ready", entry.path);
+				//Info("Image '{}' is ready", entry.path);
             },
             .needsGraphics = needsGraphics
             });

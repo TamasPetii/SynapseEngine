@@ -119,20 +119,11 @@ namespace Syn {
 
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
 
-        Vk::ImageBarrierInfo barrier{};
-        barrier.image = depthPyramid->Handle();
-        barrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        barrier.srcAccess = VK_ACCESS_2_SHADER_WRITE_BIT;
-        barrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        barrier.dstAccess = VK_ACCESS_2_SHADER_READ_BIT;
-        barrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
-        barrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
-        barrier.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        barrier.baseMipLevel = 0;
-        barrier.levelCount = 1;
-        barrier.baseArrayLayer = 0;
-        barrier.layerCount = 1;
-
-        Vk::ImageUtils::InsertBarrier(context.cmd, barrier);
+        depthPyramid->TransitionLayout(
+            context.cmd,
+            VK_IMAGE_LAYOUT_GENERAL,
+            VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
+            VK_ACCESS_2_SHADER_READ_BIT
+        );
     }
 }

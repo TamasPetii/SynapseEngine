@@ -84,7 +84,7 @@ namespace Syn {
                 entry.stagingBuffer.reset();
                 entry.state = ResourceState::Ready;
                 _version.fetch_add(1, std::memory_order_release);
-                Info("Model '{}' is ready", entry.path);
+                //Info("Model '{}' is ready", entry.path);
             },
             .needsGraphics = false
         });

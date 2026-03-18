@@ -110,20 +110,11 @@ namespace Syn {
             currentInSize = currentOutSize;
         }
 
-        Vk::ImageBarrierInfo finalBarrier{};
-        finalBarrier.image = depthPyramid->Handle();
-        finalBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        finalBarrier.srcAccess = VK_ACCESS_2_SHADER_WRITE_BIT | VK_ACCESS_2_SHADER_READ_BIT;
-        finalBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        finalBarrier.dstAccess = VK_ACCESS_2_SHADER_READ_BIT;
-        finalBarrier.oldLayout = VK_IMAGE_LAYOUT_GENERAL;
-        finalBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        finalBarrier.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        finalBarrier.baseMipLevel = 0;
-        finalBarrier.levelCount = mipLevels;
-        finalBarrier.baseArrayLayer = 0;
-        finalBarrier.layerCount = 1;
-
-        Vk::ImageUtils::InsertBarrier(context.cmd, finalBarrier);
+        depthPyramid->TransitionLayout(
+            context.cmd,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
+            VK_ACCESS_2_SHADER_READ_BIT
+        );
     }
 }

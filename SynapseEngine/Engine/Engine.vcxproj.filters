@@ -645,6 +645,9 @@
     <ClCompile Include="Render\ComputePass\HizLinearPreparePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\CompositePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1379,10 +1382,13 @@
     <ClInclude Include="Render\ComputeGroupSize.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\CompositePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Fullscreen.vert" />
-    <None Include="Shaders\Fullscreen.frag" />
+    <None Include="Shaders\Composite.vert" />
+    <None Include="Shaders\Composite.frag" />
     <None Include="Shaders\MeshletOld.mesh" />
     <None Include="Shaders\Meshlet.frag" />
     <None Include="Shaders\Traditional.vert" />

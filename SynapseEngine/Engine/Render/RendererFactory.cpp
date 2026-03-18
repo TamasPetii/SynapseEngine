@@ -9,6 +9,7 @@
 #include "Engine/Render/ComputePass/MeshCullingPass.h"
 #include "Engine/Render/ComputePass/HizLinearPreparePass.h"
 #include "Engine/Render/ComputePass/HizDownsamplePass.h"
+#include "Engine/Render/GraphicsPass/CompositePass.h"
 
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "RenderNames.h"
@@ -27,7 +28,7 @@ namespace Syn
         pipeline->AddPass(std::make_unique<GBufferInitPass>());
         pipeline->AddPass(std::make_unique<TraditionalRenderPass>());
         pipeline->AddPass(std::make_unique<MeshletRenderPass>());
-        pipeline->AddPass(std::make_unique<CopyToSwapchainPass>());
+        pipeline->AddPass(std::make_unique<CompositePass>());
         pipeline->AddPass(std::make_unique<PresentationPass>());
         pipeline->InitializeAll();
 
