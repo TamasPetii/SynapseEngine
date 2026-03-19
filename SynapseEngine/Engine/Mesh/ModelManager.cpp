@@ -46,7 +46,9 @@ namespace Syn {
         if (_materialLoadCallback && entry.resource) {
             std::filesystem::path modelDir = std::filesystem::path(entry.path).parent_path();
 
-            entry.resource->meshMaterialIndices.clear();
+
+            std::vector<uint32_t> loadedMaterialIds;
+            loadedMaterialIds.reserve(entry.resource->gpuData.materials.size());
 
             for (auto& matInfo : entry.resource->gpuData.materials) {
                 auto resolvePath = [&](std::string& path) {
@@ -72,7 +74,24 @@ namespace Syn {
 
                 uint32_t matId = _materialLoadCallback(uniqueMatName, matInfo);
 
-                entry.resource->meshMaterialIndices.push_back(matId);
+                loadedMaterialIds.push_back(matId);
+            }
+
+            size_t totalDescriptors = entry.resource->gpuData.indexedData.meshDescriptors.size();
+            size_t meshCount = totalDescriptors / 4;
+
+            entry.resource->meshMaterialIndices.clear();
+            entry.resource->meshMaterialIndices.reserve(meshCount);
+
+            for (size_t i = 0; i < meshCount; ++i) {
+                uint32_t localMatIndex = entry.resource->gpuData.indexedData.meshDescriptors[i * 4].materialIndex;
+
+                if (localMatIndex >= loadedMaterialIds.size()) {
+                    localMatIndex = 0;
+                }
+
+                uint32_t globalMatId = loadedMaterialIds[localMatIndex];
+                entry.resource->meshMaterialIndices.push_back(globalMatId);
             }
         }
 

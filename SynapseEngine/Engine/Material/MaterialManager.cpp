@@ -62,7 +62,7 @@ namespace Syn {
         entry.state = ResourceState::Ready;
         _version.fetch_add(1, std::memory_order_release);
 
-        Info("Material '{}' is ready", entry.path);
+        //Info("Material '{}' is ready", entry.path);
     }
 
     void MaterialManager::LoadDefaultMaterialSync()

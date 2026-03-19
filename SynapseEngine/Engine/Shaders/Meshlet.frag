@@ -6,7 +6,8 @@
 layout(location = 0) in vec3 inNormal;
 layout(location = 1) in vec2 inUV;
 layout(location = 2) in vec3 inMeshletColor;
-layout(location = 3) in flat uvec4 inIndices; // x: entityId, y: modelIndex, z: meshIndex, w: lodIndex
+layout(location = 3) in flat uint inEntityId;
+layout(location = 4) in flat uint inMaterialId;
 
 layout(location = 0) out vec4 outFragColor;
 
@@ -73,17 +74,8 @@ vec4 sampleLoadedTexture2D(uint textureID, uint samplerID, vec2 uv) {
 
 void main() 
 { 
-    ModelSparseMap sparseMap = ModelSparseMap(pc.modelSparseMapBufferAddr); 
-    ModelComponentBuffer modelComponents = ModelComponentBuffer(pc.modelBufferAddr); 
-    MaterialLookupBuffer materialLookup = MaterialLookupBuffer(pc.materialLookupBuffer); 
     MaterialBuffer globalMaterials = MaterialBuffer(pc.materialBuffer); 
-
-    uint entityId = inIndices.x; 
-    ModelComponent comp = modelComponents.data[sparseMap.data[entityId]]; 
-
-    uint flatMaterialIndex = comp.materialOffset + inIndices.z; 
-    uint materialId = materialLookup.data[flatMaterialIndex]; 
-    GpuMaterial mat = globalMaterials.data[materialId]; 
+    GpuMaterial mat = globalMaterials.data[inMaterialId]; 
 
     /*
     vec4 texColor = sampleLoadedTexture2D(mat.albedoTexture, 0, inUV * mat.uvScale);

@@ -48,7 +48,7 @@ namespace Syn
             for (auto e : pool->GetStorage().GetDynamicEntities()) countFunc(e);
             for (auto e : pool->GetStorage().GetStreamEntities()) countFunc(e);
 
-            Info("MaterialSystem: Rebuilding material indices. Total materials expected: {}", totalExactMaterials);
+            //Info("MaterialSystem: Rebuilding material indices. Total materials expected: {}", totalExactMaterials);
 
             _flatMaterialIndices.resize(totalExactMaterials);
             uint32_t currentOffset = 0;
@@ -80,7 +80,7 @@ namespace Syn
                     pool->SetBit<CHANGED_BIT>(entity);
                 }
 
-                Info("MaterialSystem: Entity {} assigned offset: {}, material count: {}", (uint32_t)entity, currentOffset, materialCount);
+                //Info("MaterialSystem: Entity {} assigned offset: {}, material count: {}", (uint32_t)entity, currentOffset, materialCount);
 
                 for (uint32_t i = 0; i < materialCount; ++i) {
                     if (!overrides.empty() && overrides[i] != UINT32_MAX) {
@@ -97,6 +97,9 @@ namespace Syn
             for (auto e : pool->GetStorage().GetStaticEntities()) processEntity(e);
             for (auto e : pool->GetStorage().GetDynamicEntities()) processEntity(e);
             for (auto e : pool->GetStorage().GetStreamEntities()) processEntity(e);
+
+            Info("MaterialSystem:");
+
 
             _framesToUpload = static_cast<uint32_t>(drawData->globalMaterialIndexBuffers.size());
             });
@@ -116,10 +119,9 @@ namespace Syn
 
             if (!currentBuffer || currentBuffer->GetSize() < bufferSizeToAllocate)
             {
-                Info("MaterialSystem: [RUG PULL WARNING] Reallocating GPU buffer for frame {}! Old size: {}, New size: {}",
-                 frameIndex,
-                 currentBuffer ? currentBuffer->GetSize() : 0,
-                 bufferSizeToAllocate);
+                size_t oldSize = currentBuffer ? currentBuffer->GetSize() : 0;
+
+                Info("MaterialSystem: [BUFFER REALLOCATION] Reallocating global material buffer for frame {}! Old size: {} bytes, New size: {} bytes", frameIndex, oldSize, bufferSizeToAllocate);
 
                 currentBuffer = Vk::BufferFactory::CreatePersistent(
                     bufferSizeToAllocate,

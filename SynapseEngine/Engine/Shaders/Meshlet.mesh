@@ -103,6 +103,13 @@ struct GpuMeshletDescriptor {
     uint triangleCount;
 };
 
+struct ModelComponent { 
+    uint entityIndex; 
+    uint modelIndex; 
+    uint flags; 
+    uint materialOffset;  
+};
+
 layout(buffer_reference, std430) readonly buffer PositionBuffer        { GpuVertexPosition data[]; };
 layout(buffer_reference, std430) readonly buffer AttributeBuffer       { GpuVertexAttributes data[]; };
 layout(buffer_reference, std430) readonly buffer NodeBuffer            { GpuNodeTransform data[]; };
@@ -117,6 +124,10 @@ layout(buffer_reference, std430) readonly buffer MeshletDrawDescBuffer { GpuMesh
 layout(buffer_reference, std430) readonly buffer MeshletDescBuffer     { GpuMeshletDescriptor data[]; };
 layout(buffer_reference, std430) readonly buffer VertexIndicesBuffer   { uint data[]; };
 layout(buffer_reference, std430) readonly buffer TriangleIndicesBuffer { uint8_t data[]; };
+
+layout(buffer_reference, std430) readonly buffer ModelSparseMap       { uint data[]; };
+layout(buffer_reference, std430) readonly buffer MaterialLookupBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly buffer ModelComponentBuffer { ModelComponent data[]; };
 
 layout(push_constant) uniform PushConstants {
     uint64_t modelAddressBuffer; 
@@ -152,7 +163,8 @@ taskPayloadSharedEXT TaskPayload payload;
 layout(location = 0) out vec3 outNormal[];
 layout(location = 1) out vec2 outUV[];
 layout(location = 2) out vec3 outMeshletColor[];
-layout(location = 3) out flat uvec4 outIndices[];
+layout(location = 3) out flat uint outEntityId[];
+layout(location = 4) out flat uint outMaterialId[];
 
 vec3 generateMeshletColor(uint meshletID) {
     uint hash = (meshletID ^ 61) ^ (meshletID >> 16);
@@ -183,6 +195,16 @@ void main() {
     InstanceBuffer instances = InstanceBuffer(pc.globalInstanceBuffers);
     uint rawEntityData = instances.data[desc.instanceOffset + localInstanceID];
     uint entityId = rawEntityData & ~(1u << 31);
+
+    // 3+. Material index kiszámítása
+    ModelSparseMap sparseMap = ModelSparseMap(pc.modelSparseMapBufferAddr);
+    ModelComponentBuffer modelComponents = ModelComponentBuffer(pc.modelBufferAddr);
+    MaterialLookupBuffer materialLookup = MaterialLookupBuffer(pc.materialLookupBuffer);
+
+    uint sparseIndex = sparseMap.data[entityId];
+    ModelComponent comp = modelComponents.data[sparseIndex];
+    uint flatMaterialIndex = comp.materialOffset + desc.meshIndex;
+    uint resolvedMaterialId = materialLookup.data[flatMaterialIndex];
 
     ModelAddressBuffer modelAddresses = ModelAddressBuffer(pc.modelAddressBuffer);
     GpuModelAddresses addrs = modelAddresses.data[desc.modelIndex];
@@ -235,7 +257,8 @@ void main() {
         
         outNormal[i] = normalize(transform.transformIT * nodeTransform.globalTransformIT * vec4(attr.normal, 0)).xyz;
         outUV[i] = vec2(attr.uv_x, attr.uv_y); //Todo: Vulkan flip?
-        outIndices[i] = uvec4(entityId, desc.modelIndex, meshIndex, desc.lodIndex); //meshIndex is not loaded from desc, to handle batched meshes too!
+        outEntityId[i] = entityId;
+        outMaterialId[i] = resolvedMaterialId; //V.meshIndex not used?? No batches? -> Culling would be wrong!
         outMeshletColor[i] = meshletColor;
     }
 

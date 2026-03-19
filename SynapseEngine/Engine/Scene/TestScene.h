@@ -7,6 +7,8 @@
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Mesh/MeshSourceNames.h"
+#include "Engine/Component/MaterialOverrideComponent.h"
+#include "Engine/Material/MaterialManager.h"
 #include <random>
 
 namespace Syn
@@ -66,12 +68,15 @@ namespace Syn
             registry->GetPool<TransformComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
             registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
 
+            auto materialManager = ServiceLocator::GetMaterialManager();
+
             // Random Geometry
-            for (int i = 0; i < 0; i++)
+            for (int i = 0; i < 100000; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
                 registry->AddComponent<ModelComponent>(e);
+                registry->AddComponent<MaterialOverrideComponent>(e);
 
                 auto& transform = registry->GetComponent<TransformComponent>(e);
                 transform.translation = glm::vec3(
@@ -85,6 +90,20 @@ namespace Syn
 
                 registry->GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Static);
                 registry->GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
+
+
+                float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+
+                MaterialInfo randomMatInfo{};
+                randomMatInfo.color = glm::vec4(r, g, b, 1.0f);
+
+                std::string matName = "RandomGeometryMat_" + std::to_string(i);
+                uint32_t randomMatId = materialManager->LoadMaterial(matName, randomMatInfo);
+
+                auto& overrideComp = registry->GetComponent<MaterialOverrideComponent>(e);
+                overrideComp.materials.push_back(randomMatId);
             }
         }
     };
