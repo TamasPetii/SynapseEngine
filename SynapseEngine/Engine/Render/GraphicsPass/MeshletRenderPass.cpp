@@ -139,32 +139,27 @@ namespace Syn {
         auto componentBufferManager = scene->GetComponentBufferManager();
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
-        MeshletPushConstants pc{};
-
-        pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
-
         uint32_t fIdx = context.frameIndex;
+
+        MeshletPushConstants pc{};
+        pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
         pc.globalDrawCountBuffers = drawData->globalDrawCountBuffers[fIdx]->GetDeviceAddress();
         pc.globalInstanceBuffers = drawData->globalInstanceBuffers[fIdx]->GetDeviceAddress();
         pc.globalIndirectCommandBuffers = drawData->globalIndirectCommandBuffers[fIdx]->GetDeviceAddress();
         pc.globalIndirectCommandDescriptorBuffers = drawData->globalIndirectCommandDescriptorBuffers[fIdx]->GetDeviceAddress();
         pc.globalModelAllocationBuffers = drawData->globalModelAllocationBuffers[fIdx]->GetDeviceAddress();
         pc.globalMeshAllocationBuffers = drawData->globalMeshAllocationBuffers[fIdx]->GetDeviceAddress();
-
         pc.transformBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::TransformData, fIdx).buffer->GetDeviceAddress();
         pc.transformSparseMapBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::TransformSparseMap, fIdx).buffer->GetDeviceAddress();
         pc.cameraBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::CameraData, fIdx).buffer->GetDeviceAddress();
         pc.cameraSparseMapBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::CameraSparseMap, fIdx).buffer->GetDeviceAddress();
-        
         pc.modelBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::ModelData, fIdx).buffer->GetDeviceAddress();
         pc.modelSparseMapBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::ModelSparseMap, fIdx).buffer->GetDeviceAddress();
         pc.materialLookupBuffer = drawData->globalMaterialIndexBuffers[fIdx]->GetDeviceAddress();
         pc.materialBuffer = materialManager->GetMaterialBuffer()->GetDeviceAddress();
-
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.meshletOffsetStart = SceneDrawData::MESHLET_OFFSET_START;
         pc.visualizeMeshlet = 1;
-
         pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
         pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
 
@@ -181,11 +176,10 @@ namespace Syn {
     void MeshletRenderPass::BindDescriptors(const RenderContext& context)
     {
         auto imageManager = ServiceLocator::GetImageManager();
+        auto bindlessBuffer = imageManager->GetBindlessBuffer();
 
         //This deletes all pushdescriptors, need to call this first!
-        auto bindlessBuffer = imageManager->GetBindlessBuffer();
         bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
-
 
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);

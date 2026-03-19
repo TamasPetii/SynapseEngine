@@ -71,7 +71,7 @@ namespace Syn
             auto materialManager = ServiceLocator::GetMaterialManager();
 
             // Random Geometry
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
@@ -91,6 +91,7 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Static);
                 registry->GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
 
+                /*
                 float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                 float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                 float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
@@ -103,6 +104,7 @@ namespace Syn
 
                 auto& overrideComp = registry->GetComponent<MaterialOverrideComponent>(e);
                 overrideComp.materials.push_back(randomMatId);
+                */
             }
         }
     };

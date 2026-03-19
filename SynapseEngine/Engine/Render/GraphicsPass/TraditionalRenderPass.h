@@ -8,6 +8,7 @@ namespace Syn {
         std::string GetName() const override { return "TraditionalRenderPass"; }
         void Initialize() override;
     protected:
+        void BindDescriptors(const RenderContext& context) override;
         void PrepareFrame(const RenderContext& context) override;
         void PushConstants(const RenderContext& context) override;
         void Draw(const RenderContext& context) override;

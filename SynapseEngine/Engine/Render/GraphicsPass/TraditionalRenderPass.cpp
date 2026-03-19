@@ -10,6 +10,8 @@
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
+#include "Engine/Image/ImageManager.h"
+#include "Engine/Material/MaterialManager.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -19,7 +21,6 @@ namespace Syn {
 
     struct TraditionalPushConstants {
         VkDeviceAddress modelAddressBuffer;
-
         VkDeviceAddress globalDrawCountBuffers;
         VkDeviceAddress globalInstanceBuffers;
         VkDeviceAddress globalIndirectCommandBuffers;
@@ -31,23 +32,34 @@ namespace Syn {
         VkDeviceAddress cameraSparseMapBufferAddr;
         VkDeviceAddress transformBufferAddr;
         VkDeviceAddress transformSparseMapBufferAddr;
+
         VkDeviceAddress modelBufferAddr;
         VkDeviceAddress modelSparseMapBufferAddr;
+        VkDeviceAddress materialLookupBuffer;
+        VkDeviceAddress materialBuffer;
 
         uint32_t activeCameraEntity;
         uint32_t meshletOffsetStart;
-
-        uint32_t padding0;
-        uint32_t padding1;
     };
 
     void TraditionalRenderPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
+        auto imageManager = ServiceLocator::GetImageManager();
+
+        Vk::ShaderProgramConfig config;
+        config.useDescriptorBuffers = true;
+        config.layoutOverride = [imageManager](uint32_t setIndex) {
+            if (setIndex == 0) {
+                return imageManager->GetBindlessLayout();
+            }
+            return VkDescriptorSetLayout{};
+            };
+        
 
         _shaderProgram = shaderManager->CreateProgram("TraditionalProgram", {
             ShaderNames::TraditionalVert,
             ShaderNames::TraditionalFrag
-            });
+            }, config);
 
         _graphicsState = {
             .raster = {
@@ -118,27 +130,27 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         auto modelManager = ServiceLocator::GetModelManager();
         auto registry = scene->GetRegistry();
+        auto materialManager = ServiceLocator::GetMaterialManager();
         auto componentBufferManager = scene->GetComponentBufferManager();
 
-        TraditionalPushConstants pc{};
-
-        // 1. Model Manager globális címei
-        pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
-
-        // 2. Jelenet culling és draw bufferei az aktuális frame-hez
         uint32_t fIdx = context.frameIndex;
+
+        TraditionalPushConstants pc{};
+        pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
         pc.globalDrawCountBuffers = drawData->globalDrawCountBuffers[fIdx]->GetDeviceAddress();
         pc.globalInstanceBuffers = drawData->globalInstanceBuffers[fIdx]->GetDeviceAddress();
         pc.globalIndirectCommandBuffers = drawData->globalIndirectCommandBuffers[fIdx]->GetDeviceAddress();
         pc.globalIndirectCommandDescriptorBuffers = drawData->globalIndirectCommandDescriptorBuffers[fIdx]->GetDeviceAddress();
         pc.globalModelAllocationBuffers = drawData->globalModelAllocationBuffers[fIdx]->GetDeviceAddress();
         pc.globalMeshAllocationBuffers = drawData->globalMeshAllocationBuffers[fIdx]->GetDeviceAddress();
-
-        // 3. ECS Bufferek bekötése
         pc.transformBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::TransformData, fIdx).buffer->GetDeviceAddress();
         pc.transformSparseMapBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::TransformSparseMap, fIdx).buffer->GetDeviceAddress();
         pc.cameraBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::CameraData, fIdx).buffer->GetDeviceAddress();
         pc.cameraSparseMapBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::CameraSparseMap, fIdx).buffer->GetDeviceAddress();
+        pc.modelBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::ModelData, fIdx).buffer->GetDeviceAddress();
+        pc.modelSparseMapBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::ModelSparseMap, fIdx).buffer->GetDeviceAddress();
+        pc.materialLookupBuffer = drawData->globalMaterialIndexBuffers[fIdx]->GetDeviceAddress();
+        pc.materialBuffer = materialManager->GetMaterialBuffer()->GetDeviceAddress();
 
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.meshletOffsetStart = SceneDrawData::MESHLET_OFFSET_START;
@@ -151,6 +163,13 @@ namespace Syn {
             sizeof(TraditionalPushConstants),
             &pc
         );
+    }
+
+    void TraditionalRenderPass::BindDescriptors(const RenderContext& context)
+    {
+        auto imageManager = ServiceLocator::GetImageManager();
+        auto bindlessBuffer = imageManager->GetBindlessBuffer();
+        bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
     void TraditionalRenderPass::Draw(const RenderContext& context)

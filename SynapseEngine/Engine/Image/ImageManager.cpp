@@ -46,7 +46,7 @@ namespace Syn {
         }
 
         {
-            // Linear Repeat
+            // Linear Clamp To Edge
             Vk::SamplerConfig config{};
             config.magFilter = VK_FILTER_LINEAR;
             config.minFilter = VK_FILTER_LINEAR;
@@ -74,7 +74,7 @@ namespace Syn {
         }
 
         {
-            // Nearest Clamp Edge
+            // Nearest Clamp To Edge
             Vk::SamplerConfig config{};
             config.magFilter = VK_FILTER_NEAREST;
             config.minFilter = VK_FILTER_NEAREST;

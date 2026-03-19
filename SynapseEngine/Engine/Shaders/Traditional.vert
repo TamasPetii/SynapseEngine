@@ -81,6 +81,13 @@ struct CameraComponent {
     vec4 frustum[6];
 };
 
+struct ModelComponent { 
+    uint entityIndex; 
+    uint modelIndex; 
+    uint flags; 
+    uint materialOffset;  
+};
+
 layout(buffer_reference, std430) readonly buffer PositionBuffer   { GpuVertexPosition data[]; };
 layout(buffer_reference, std430) readonly buffer AttributeBuffer  { GpuVertexAttributes data[]; };
 layout(buffer_reference, std430) readonly buffer IndexBuffer      { uint data[]; };
@@ -94,29 +101,34 @@ layout(buffer_reference, std430) readonly buffer SparseMapBuffer    { uint data[
 layout(buffer_reference, std430) readonly buffer TransformPool      { TransformComponent data[]; };
 layout(buffer_reference, std430) readonly buffer CameraPool         { CameraComponent data[]; };
 
+layout(buffer_reference, std430) readonly buffer ModelSparseMap       { uint data[]; };
+layout(buffer_reference, std430) readonly buffer MaterialLookupBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly buffer ModelComponentBuffer { ModelComponent data[]; };
+
 layout(push_constant) uniform PushConstants {
-    uint64_t modelAddressBuffer;
-
-    uint64_t globalDrawCountBuffers;
-    uint64_t globalInstanceBuffers;
-    uint64_t globalIndirectCommandBuffers;
-    uint64_t globalIndirectCommandDescriptorBuffers;
+    uint64_t modelAddressBuffer; 
+    uint64_t globalDrawCountBuffers; 
+    uint64_t globalInstanceBuffers; 
+    uint64_t globalIndirectCommandBuffers; 
+    uint64_t globalIndirectCommandDescriptorBuffers;   
     uint64_t globalModelAllocationBuffers;
-    uint64_t globalMeshAllocationBuffers;
-
-    uint64_t cameraBufferAddr;
-    uint64_t cameraSparseMapBufferAddr;
-    uint64_t transformBufferAddr;
-    uint64_t transformSparseMapBufferAddr;
-    uint64_t modelBufferAddr;
-    uint64_t modelSparseMapBufferAddr;
-
+    uint64_t globalMeshAllocationBuffers; 
+    uint64_t cameraBufferAddr; 
+    uint64_t cameraSparseMapBufferAddr; 
+    uint64_t transformBufferAddr; 
+    uint64_t transformSparseMapBufferAddr; 
+    uint64_t modelBufferAddr; 
+    uint64_t modelSparseMapBufferAddr; 
+    uint64_t materialLookupBuffer; 
+    uint64_t materialBuffer; 
     uint activeCameraEntity;
-    uint meshletOffsetStart;
+    uint meshletOffsetStart; 
 } pc;
 
 layout(location = 0) out vec3 outNormal;
-layout(location = 1) flat out uint outLodIndex;
+layout(location = 1) out vec2 outUV;
+layout(location = 2) out flat uint outEntityId;
+layout(location = 3) out flat uint outMaterialId;
 
 void main() {
     // 1. Melyik Descriptorhoz tartozik ez a draw hívás?
@@ -127,6 +139,14 @@ void main() {
     InstanceBuffer instances = InstanceBuffer(pc.globalInstanceBuffers);
     uint rawEntityData = instances.data[desc.instanceOffset + gl_InstanceIndex];
     uint entityId = rawEntityData & ~(1u << 31);
+
+    // 2+. Material index kiszámítása
+    ModelSparseMap sparseMap = ModelSparseMap(pc.modelSparseMapBufferAddr);
+    ModelComponentBuffer modelComponents = ModelComponentBuffer(pc.modelBufferAddr);
+    MaterialLookupBuffer materialLookup = MaterialLookupBuffer(pc.materialLookupBuffer);
+
+    uint sparseIndex = sparseMap.data[entityId];
+    ModelComponent comp = modelComponents.data[sparseIndex];
 
     // 3. Modell memóriacímeinek feloldása
     ModelAddressBuffer modelAddresses = ModelAddressBuffer(pc.modelAddressBuffer);
@@ -155,14 +175,21 @@ void main() {
     CameraComponent camera = cameras.data[cameraDenseIndex];
 
     // 7. Modell belső hierarchia transzformáció
-    uint nodeIndex = v.packedIndex & 0xFFFFu;
+    uint packedIndex = v.packedIndex;
+    uint meshIndex = (packedIndex >> 16) & 0xFFFFu;
+    uint nodeIndex = packedIndex & 0xFFFFu;
     NodeBuffer nodes = NodeBuffer(addrs.nodeTransforms);
     GpuNodeTransform nodeTransform = nodes.data[nodeIndex];
+
+    uint flatMaterialIndex = comp.materialOffset + meshIndex;
+    uint resolvedMaterialId = materialLookup.data[flatMaterialIndex];
 
     // 8. Végső mátrixszorzások (Camera * Transform * Node * Vertex)
     gl_Position = camera.viewProjVulkan * transform.transform * nodeTransform.globalTransform * vec4(v.position, 1.0);
    
     // Normálvektor transzformálása
     outNormal = normalize(transform.transformIT * nodeTransform.globalTransformIT * vec4(attr.normal, 0)).xyz;
-    outLodIndex = desc.lodIndex;
+    outUV = vec2(attr.uv_x, 1.0 - attr.uv_y);
+    outEntityId = entityId;
+    outMaterialId = resolvedMaterialId;
 }

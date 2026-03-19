@@ -8,9 +8,6 @@
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = 64, max_primitives = 64) out;
 
-layout(set = 0, binding = 0) uniform sampler globalSamplers[];
-layout(set = 0, binding = 1) uniform texture2D bindlessTextures[];
-
 struct GpuVertexPosition { 
     vec3 position; 
     uint packedIndex;
@@ -258,7 +255,7 @@ void main() {
         gl_MeshVerticesEXT[i].gl_Position = camera.viewProjVulkan * transform.transform * nodeTransform.globalTransform * vec4(v.position, 1.0);
         
         outNormal[i] = normalize(transform.transformIT * nodeTransform.globalTransformIT * vec4(attr.normal, 0)).xyz;
-        outUV[i] = vec2(attr.uv_x, attr.uv_y); //Todo: Vulkan flip?
+        outUV[i] = vec2(attr.uv_x, 1.0 - attr.uv_y);
         outEntityId[i] = entityId;
         outMaterialId[i] = resolvedMaterialId;
         outMeshletColor[i] = meshletColor;

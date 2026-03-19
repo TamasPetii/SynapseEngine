@@ -35,17 +35,7 @@ struct GpuMaterial {
     uint padding2; 
 };
 
-struct ModelComponent { 
-    uint entityIndex; 
-    uint modelIndex; 
-    uint flags; 
-    uint materialOffset;  
-};
-
 layout(buffer_reference, std430) readonly buffer MaterialBuffer       { GpuMaterial data[]; };
-layout(buffer_reference, std430) readonly buffer MaterialLookupBuffer { uint data[]; };
-layout(buffer_reference, std430) readonly buffer ModelComponentBuffer { ModelComponent data[]; };
-layout(buffer_reference, std430) readonly buffer ModelSparseMap       { uint data[]; };
 
 layout(push_constant) uniform PushConstants {
     uint64_t modelAddressBuffer; 
@@ -71,7 +61,7 @@ layout(push_constant) uniform PushConstants {
 } pc;
 
 vec4 sampleLoadedTexture2D(uint textureID, uint samplerID, vec2 uv) { 
-    return textureLod(sampler2D(bindlessTextures[nonuniformEXT(textureID)], globalSamplers[nonuniformEXT(samplerID)]), uv, 0); 
+    return texture(sampler2D(bindlessTextures[nonuniformEXT(textureID)], globalSamplers[nonuniformEXT(samplerID)]), uv); 
 }
 
 void main() 
@@ -79,6 +69,12 @@ void main()
     MaterialBuffer globalMaterials = MaterialBuffer(pc.materialBuffer); 
     GpuMaterial mat = globalMaterials.data[inMaterialId]; 
 
-    vec4 texColor = sampleLoadedTexture2D(mat.albedoTexture, 0, inUV * mat.uvScale);
-    outFragColor = vec4(texColor.xyz, 1.0);
+    vec4 albedoTex = sampleLoadedTexture2D(mat.albedoTexture, 0, inUV * mat.uvScale);
+    vec4 baseColor = mat.color * albedoTex;
+
+    if (baseColor.a < 0.5) {
+        discard;
+    }
+
+    outFragColor = vec4(baseColor.xyz, 1.0);
 }
