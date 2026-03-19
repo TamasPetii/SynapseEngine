@@ -1,0 +1,41 @@
+#version 460
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout(set = 2, binding = 0) uniform sampler2D inImage;
+layout(set = 2, binding = 1, rgba16f) uniform image2D outImage;
+
+layout(push_constant) uniform PushConstants
+{
+	vec2 texelSize;
+	float filterRadius;
+} pc;
+
+vec3 UpsampleTent(sampler2D tex, vec2 uv, vec2 texelSize, float radius) 
+{
+    vec4 d = texelSize.xyxy * vec4(1.0, 1.0, -1.0, 0.0) * radius;
+    vec3 s;
+    s =  texture(tex, uv - d.xy).rgb;
+    s += texture(tex, uv - d.wy).rgb * 2.0;
+    s += texture(tex, uv - d.zy).rgb;
+    s += texture(tex, uv + d.zw).rgb * 2.0;
+    s += texture(tex, uv       ).rgb * 4.0;
+    s += texture(tex, uv + d.xw).rgb * 2.0;
+    s += texture(tex, uv + d.zy).rgb;
+    s += texture(tex, uv + d.wy).rgb * 2.0;
+    s += texture(tex, uv + d.xy).rgb;
+    return s * (1.0 / 16.0);
+}
+
+void main()
+{
+	ivec2 imgSize = imageSize(outImage);
+	ivec2 id = ivec2(gl_GlobalInvocationID.xy);
+	if (id.x >= imgSize.x || id.y >= imgSize.y) return;
+
+	vec2 uv = (vec2(id) + vec2(0.5)) / vec2(imgSize);
+	
+	vec3 upsampledColor = UpsampleTent(inImage, uv, pc.texelSize, pc.filterRadius);
+	vec3 existingColor = imageLoad(outImage, id).rgb;
+
+	imageStore(outImage, id, vec4(existingColor + upsampledColor, 1.0));
+}

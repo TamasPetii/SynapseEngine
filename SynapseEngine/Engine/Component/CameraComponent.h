@@ -23,8 +23,6 @@ namespace Syn
 	{
 		CameraComponent();
 
-		bool isMain;
-
 		float yaw;
 		float pitch;
 

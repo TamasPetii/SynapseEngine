@@ -14,7 +14,6 @@ namespace Syn
         float metalness = 0.0f;
         float roughness = 1.0f;
         float aoStrength = 1.0f;
-        bool useBloom = false;
         bool doubleSided = false;
         bool isTransparent = false;
 

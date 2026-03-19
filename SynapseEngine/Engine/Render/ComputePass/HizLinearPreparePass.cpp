@@ -23,7 +23,7 @@ namespace Syn {
     void HizLinearPreparePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
         _shaderProgram = shaderManager->CreateProgram("HizLinearizeDepthProgram", {
-            ShaderNames::LinearizeDepth
+            ShaderNames::HizLinearizeDepth
             });
     }
 

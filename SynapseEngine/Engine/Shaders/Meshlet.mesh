@@ -159,9 +159,9 @@ taskPayloadSharedEXT TaskPayload payload;
 
 layout(location = 0) out vec3 outNormal[];
 layout(location = 1) out vec2 outUV[];
-layout(location = 2) out vec3 outMeshletColor[];
-layout(location = 3) out flat uint outEntityId[];
-layout(location = 4) out flat uint outMaterialId[];
+layout(location = 2) out flat uint outEntityId[];
+layout(location = 3) out flat uint outMaterialId[];
+layout(location = 4) out vec3 outMeshletColor[];
 
 vec3 generateMeshletColor(uint meshletID) {
     uint hash = (meshletID ^ 61) ^ (meshletID >> 16);

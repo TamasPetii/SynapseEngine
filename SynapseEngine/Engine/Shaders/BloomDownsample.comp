@@ -1,0 +1,45 @@
+#version 460
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout(set = 2, binding = 0) uniform sampler2D inImage;
+layout(set = 2, binding = 1, rgba16f) uniform writeonly image2D outImage;
+
+layout(push_constant) uniform PushConstants
+{
+	vec2 texelSize;
+} pc;
+
+vec3 DownsampleBox13Tap(sampler2D tex, vec2 uv, vec2 texelSize) 
+{
+    vec3 a = texture(tex, uv + vec2(-2,-2) * texelSize).rgb;
+    vec3 b = texture(tex, uv + vec2( 0,-2) * texelSize).rgb;
+    vec3 c = texture(tex, uv + vec2( 2,-2) * texelSize).rgb;
+    vec3 d = texture(tex, uv + vec2(-2, 0) * texelSize).rgb;
+    vec3 e = texture(tex, uv + vec2( 0, 0) * texelSize).rgb;
+    vec3 f = texture(tex, uv + vec2( 2, 0) * texelSize).rgb;
+    vec3 g = texture(tex, uv + vec2(-2, 2) * texelSize).rgb;
+    vec3 h = texture(tex, uv + vec2( 0, 2) * texelSize).rgb;
+    vec3 i = texture(tex, uv + vec2( 2, 2) * texelSize).rgb;
+    vec3 j = texture(tex, uv + vec2(-1,-1) * texelSize).rgb;
+    vec3 k = texture(tex, uv + vec2( 1,-1) * texelSize).rgb;
+    vec3 l = texture(tex, uv + vec2(-1, 1) * texelSize).rgb;
+    vec3 m = texture(tex, uv + vec2( 1, 1) * texelSize).rgb;
+
+    vec3 downsampled = e * 0.125;
+    downsampled += (a+c+g+i) * 0.03125;
+    downsampled += (b+d+f+h) * 0.0625;
+    downsampled += (j+k+l+m) * 0.125;
+    return downsampled;
+}
+
+void main()
+{
+	ivec2 imgSize = imageSize(outImage);
+	ivec2 id = ivec2(gl_GlobalInvocationID.xy);
+	if (id.x >= imgSize.x || id.y >= imgSize.y) return;
+
+	vec2 uv = (vec2(id) + vec2(0.5)) / vec2(imgSize);
+	vec3 color = DownsampleBox13Tap(inImage, uv, pc.texelSize);
+
+	imageStore(outImage, id, vec4(color, 1.0));
+}

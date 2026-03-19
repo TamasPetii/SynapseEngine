@@ -654,6 +654,18 @@
     <ClCompile Include="Component\MaterialOverrideComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\ComputePass\BloomPrefilterPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ComputePass\BloomDownsamplePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ComputePass\BloomUpsamplePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\ComputePass\BloomCompositePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1397,6 +1409,18 @@
     <ClInclude Include="Component\MaterialOverrideComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\ComputePass\BloomPrefilterPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ComputePass\BloomDownsamplePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ComputePass\BloomUpsamplePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ComputePass\BloomCompositePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Composite.vert" />
@@ -1409,7 +1433,11 @@
     <None Include="Shaders\MeshCulling.comp" />
     <None Include="Shaders\Meshlet.task" />
     <None Include="Shaders\Meshlet.mesh" />
-    <None Include="Shaders\LinearizeDepth.comp" />
+    <None Include="Shaders\HizLinearizeDepth.comp" />
     <None Include="Shaders\HizDownsample.comp" />
+    <None Include="Shaders\BloomPrefilter.comp" />
+    <None Include="Shaders\BloomUpsample.comp" />
+    <None Include="Shaders\BloomDownsample.comp" />
+    <None Include="Shaders\BloomComposite.comp" />
   </ItemGroup>
 </Project>

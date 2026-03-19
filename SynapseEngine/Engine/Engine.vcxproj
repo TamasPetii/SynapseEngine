@@ -179,6 +179,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Render\ComputePass\BloomCompositePass.cpp" />
+    <ClCompile Include="Render\ComputePass\BloomUpsamplePass.cpp" />
+    <ClCompile Include="Render\ComputePass\BloomDownsamplePass.cpp" />
+    <ClCompile Include="Render\ComputePass\BloomPrefilterPass.cpp" />
     <ClCompile Include="Collision\Tester\CollisionTester.cpp" />
     <ClCompile Include="Component\ModelComponent.cpp" />
     <ClCompile Include="Component\BaseComponent\RenderStateComponent.cpp" />
@@ -394,6 +398,10 @@
     <ClCompile Include="Render\GraphicsPass\WireframeAabbPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\ComputePass\BloomCompositePass.h" />
+    <ClInclude Include="Render\ComputePass\BloomUpsamplePass.h" />
+    <ClInclude Include="Render\ComputePass\BloomDownsamplePass.h" />
+    <ClInclude Include="Render\ComputePass\BloomPrefilterPass.h" />
     <ClInclude Include="Collision\Tester\CollisionTester.h" />
     <ClInclude Include="Component\ModelComponent.h" />
     <ClInclude Include="Component\BaseComponent\RenderStateComponent.h" />
@@ -643,10 +651,14 @@
     <ClInclude Include="Render\GraphicsPass\WireframeAabbPass.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\BloomComposite.comp" />
+    <None Include="Shaders\BloomDownsample.comp" />
+    <None Include="Shaders\BloomPrefilter.comp" />
+    <None Include="Shaders\BloomUpsample.comp" />
     <None Include="Shaders\Composite.frag" />
     <None Include="Shaders\Composite.vert" />
     <None Include="Shaders\HizDownsample.comp" />
-    <None Include="Shaders\LinearizeDepth.comp" />
+    <None Include="Shaders\HizLinearizeDepth.comp" />
     <None Include="Shaders\MeshCulling.comp" />
     <None Include="Shaders\Meshlet.frag" />
     <None Include="Shaders\_old_Meshlet.mesh" />

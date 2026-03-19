@@ -5,9 +5,9 @@
 
 layout(location = 0) in vec3 inNormal;
 layout(location = 1) in vec2 inUV;
-layout(location = 2) in vec3 inMeshletColor;
-layout(location = 3) in flat uint inEntityId;
-layout(location = 4) in flat uint inMaterialId;
+layout(location = 2) in flat uint inEntityId;
+layout(location = 3) in flat uint inMaterialId;
+layout(location = 4) in vec3 inMeshletColor;
 
 layout(location = 0) out vec4 outFragColor;
 
@@ -72,9 +72,9 @@ void main()
     vec4 albedoTex = sampleLoadedTexture2D(mat.albedoTexture, 0, inUV * mat.uvScale);
     vec4 baseColor = mat.color * albedoTex;
 
-    if (baseColor.a < 0.5) {
+    if (baseColor.a < 0.1) {
         discard;
     }
 
-    outFragColor = vec4(baseColor.xyz, 1.0);
+    outFragColor = vec4(inMeshletColor * baseColor.xyz * 2.0, 1.0);
 }

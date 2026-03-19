@@ -16,10 +16,15 @@ namespace Syn
         static constexpr const char* MeshCulling = "../Engine/Shaders/MeshCulling.comp";
         static constexpr const char* ModelCulling = "../Engine/Shaders/ModelCulling.comp";
 
-        static constexpr const char* LinearizeDepth = "../Engine/Shaders/LinearizeDepth.comp";
+        static constexpr const char* HizLinearizeDepth = "../Engine/Shaders/HizLinearizeDepth.comp";
         static constexpr const char* HizDownsample = "../Engine/Shaders/HizDownsample.comp";
 
         static constexpr const char* CompositeVert = "../Engine/Shaders/Composite.vert";
         static constexpr const char* CompositeFrag = "../Engine/Shaders/Composite.frag";
+
+        static constexpr const char* BloomPrefilter = "../Engine/Shaders/BloomPrefilter.comp";
+        static constexpr const char* BloomUpsample = "../Engine/Shaders/BloomUpsample.comp";
+        static constexpr const char* BloomDownsample = "../Engine/Shaders/BloomDownsample.comp";
+        static constexpr const char* BloomComposite = "../Engine/Shaders/BloomComposite.comp";
     };
 }

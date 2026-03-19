@@ -37,13 +37,14 @@ namespace Syn
             geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Grid, []() { return MeshFactory::CreateGrid(); }));
             geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Torus, []() { return MeshFactory::CreateTorus(); }));
 
-            //Camera
-            EntityID cameraEntity = registry->CreateEntity();
-            registry->AddComponent<CameraComponent>(cameraEntity);
-            auto& cam = registry->GetComponent<CameraComponent>(cameraEntity);
-            cam.position = glm::vec3(0.0f, 0.0f, 5.0f);
-            cam.isMain = true;
-            _sceneCameraEntity = cameraEntity;
+            {
+                //Main Camera
+                EntityID cameraEntity = registry->CreateEntity();
+                registry->AddComponent<CameraComponent>(cameraEntity);
+                auto& cam = registry->GetComponent<CameraComponent>(cameraEntity);
+                cam.position = glm::vec3(0.0f, 0.0f, 5.0f);
+                _sceneCameraEntity = cameraEntity;
+            }
 
             // Sponza
             EntityID sponzaEntity = registry->CreateEntity();
@@ -71,7 +72,7 @@ namespace Syn
             auto materialManager = ServiceLocator::GetMaterialManager();
 
             // Random Geometry
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 100000; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
@@ -91,7 +92,6 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Static);
                 registry->GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
 
-                /*
                 float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                 float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                 float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
@@ -104,7 +104,6 @@ namespace Syn
 
                 auto& overrideComp = registry->GetComponent<MaterialOverrideComponent>(e);
                 overrideComp.materials.push_back(randomMatId);
-                */
             }
         }
     };

@@ -36,7 +36,6 @@ namespace Syn {
             mat.metalness = info.metallicFactor;
             mat.roughness = info.roughnessFactor;
             mat.aoStrength = info.aoStrength;
-            mat.useBloom = info.useBloom;
             mat.doubleSided = info.doubleSided;
             mat.isTransparent = info.isTransparent;
 

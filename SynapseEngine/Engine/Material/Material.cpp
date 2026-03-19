@@ -1,6 +1,5 @@
 #include "Material.h"
-
-#include <limits> // Az UINT32_MAX-hoz érdemes, vagy használhatsz konkrétan UINT32_MAX makrót is
+#include <limits>
 
 namespace Syn {
 
@@ -25,9 +24,8 @@ namespace Syn {
     {
         uint32_t flags = 0;
 
-        if (material.useBloom)      flags |= (1 << 0);
-        if (material.isTransparent) flags |= (1 << 1);
-        if (material.doubleSided)   flags |= (1 << 2);
+        if (material.isTransparent) flags |= (1 << 0);
+        if (material.doubleSided)   flags |= (1 << 1);
 
         this->packedFlags = flags;
     }
