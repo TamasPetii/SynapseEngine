@@ -31,7 +31,6 @@ namespace Syn {
         VkDescriptorSetLayout GetBindlessLayout() const { return _bindlessLayout; }
         Vk::Sampler* GetSampler(const std::string& name) const;
         uint32_t GetSamplerIndex(const std::string& name) const;
-        VkDescriptorSet GetBindlessSet() const { return _bindlessSet; }
     protected:
         void StartGpuUpload(EntryType& entry) override;
         void FinalizeResource(EntryType& entry) override;
@@ -43,9 +42,6 @@ namespace Syn {
     private:
         std::shared_ptr<ImageBuilder> _builder;
         std::unique_ptr<IGpuImageUploader> _uploader;
-
-        std::unique_ptr<Vk::DescriptorPool> _descriptorPool;
-        VkDescriptorSet _bindlessSet = VK_NULL_HANDLE;
 
         VkDescriptorSetLayout _bindlessLayout = VK_NULL_HANDLE;
         std::unique_ptr<Vk::DescriptorBuffer> _bindlessBuffer;

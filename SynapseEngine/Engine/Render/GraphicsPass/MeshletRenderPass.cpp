@@ -53,7 +53,7 @@ namespace Syn {
         auto imageManager = ServiceLocator::GetImageManager();
 
         Vk::ShaderProgramConfig config;
-        config.useDescriptorBuffers = false; 
+        config.useDescriptorBuffers = true; 
         config.layoutOverride = [imageManager](uint32_t setIndex) {
             if (setIndex == 0) {
                 return imageManager->GetBindlessLayout();
@@ -181,26 +181,11 @@ namespace Syn {
     void MeshletRenderPass::BindDescriptors(const RenderContext& context)
     {
         auto imageManager = ServiceLocator::GetImageManager();
-        VkDescriptorSet set = imageManager->GetBindlessSet();
-
-        if (set != VK_NULL_HANDLE) {
-            vkCmdBindDescriptorSets(
-                context.cmd,
-                VK_PIPELINE_BIND_POINT_GRAPHICS,
-                _shaderProgram->GetLayout(),
-                0,
-                1,
-                &set,
-                0,
-                nullptr
-            );
-        }
 
         //This deletes all pushdescriptors, need to call this first!
-        /*
         auto bindlessBuffer = imageManager->GetBindlessBuffer();
         bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
-        */
+
 
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
