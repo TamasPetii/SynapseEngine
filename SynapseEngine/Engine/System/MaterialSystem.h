@@ -15,10 +15,8 @@ namespace Syn
         void OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) override;
         void OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow) override;
     private:
-        bool _needsUpload = false;
+        uint32_t _framesToUpload = 0;
         uint32_t _lastModelManagerVersion = 0;
         std::vector<uint32_t> _flatMaterialIndices;
-
-        uint32_t _framesToUpload = 0;
     };
 }

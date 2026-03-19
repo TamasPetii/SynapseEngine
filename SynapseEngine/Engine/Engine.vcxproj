@@ -182,6 +182,7 @@
     <ClCompile Include="Collision\Tester\CollisionTester.cpp" />
     <ClCompile Include="Component\ModelComponent.cpp" />
     <ClCompile Include="Component\BaseComponent\RenderStateComponent.cpp" />
+    <ClCompile Include="Component\MaterialOverrideComponent.cpp" />
     <ClCompile Include="Render\GraphicsPass\CompositePass.cpp" />
     <ClCompile Include="Render\ComputePass\HizLinearPreparePass.cpp" />
     <ClCompile Include="Render\ComputePass\HizDownsamplePass.cpp" />
@@ -390,11 +391,13 @@
     <ClCompile Include="Registry\Pool\Storage\Extension\SegmentedStorageImplExtension.cpp" />
     <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.cpp" />
     <ClCompile Include="Utils\WindowedBuffer.cpp" />
+    <ClCompile Include="Render\GraphicsPass\WireframeAabbPass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Collision\Tester\CollisionTester.h" />
     <ClInclude Include="Component\ModelComponent.h" />
     <ClInclude Include="Component\BaseComponent\RenderStateComponent.h" />
+    <ClInclude Include="Component\MaterialOverrideComponent.h" />
     <ClInclude Include="Render\GraphicsPass\CompositePass.h" />
     <ClInclude Include="Render\ComputeGroupSize.h" />
     <ClInclude Include="Render\ComputePass\HizLinearPreparePass.h" />
@@ -637,6 +640,7 @@
     <ClInclude Include="SynMacro.h" />
     <ClInclude Include="Registry\Type\TypeManager.h" />
     <ClInclude Include="Utils\WindowedBuffer.h" />
+    <ClInclude Include="Render\GraphicsPass\WireframeAabbPass.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Composite.frag" />
@@ -645,7 +649,7 @@
     <None Include="Shaders\LinearizeDepth.comp" />
     <None Include="Shaders\MeshCulling.comp" />
     <None Include="Shaders\Meshlet.frag" />
-    <None Include="Shaders\MeshletOld.mesh" />
+    <None Include="Shaders\_old_Meshlet.mesh" />
     <None Include="Shaders\Meshlet.task" />
     <None Include="Shaders\Meshlet.mesh" />
     <None Include="Shaders\ModelCulling.comp" />

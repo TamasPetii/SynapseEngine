@@ -11,6 +11,9 @@ namespace Syn
         CookedModel cpuData;
         GpuBatchedModel gpuData;
         GpuModelBuffers hardwareBuffers;
+
+        std::vector<uint32_t> meshMaterialIndices;
+        std::vector<MeshDrawBlueprint> baseDrawCommands;
     };
 }
 

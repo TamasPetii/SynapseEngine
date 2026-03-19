@@ -5,6 +5,8 @@
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
+layout(set = 2, binding = 0) uniform sampler2D depthPyramid;
+
 struct GpuMeshCollider {
     vec3 center;
     float radius;
@@ -114,6 +116,8 @@ layout(push_constant) uniform PushConstants {
     uint activeCameraEntity;
     uint meshletOffsetStart; 
     uint visualizeMeshlet; 
+    float screenWidth;
+    float screenHeight;
 } pc;
 
 struct TaskPayload {
@@ -201,12 +205,38 @@ GpuMeshletCollider TransformMeshletCollider(GpuMeshletCollider local, mat4 trans
     world.aabbMin = worldCenter - worldExtents;
     world.aabbMax = worldCenter + worldExtents;
 
-    //Cone
     world.apex = (transform * vec4(local.apex, 1.0)).xyz;
     world.axis = normalize((transformIT * vec4(local.axis, 0.0)).xyz);
     world.cutoff = local.cutoff;
 
     return world;
+}
+
+// Zeux Approximate Sphere Projection
+bool ProjectSphere(vec3 viewCenter, float radius, mat4 proj, float near, out vec2 minUV, out vec2 maxUV) {
+    if (-viewCenter.z - radius < near) 
+        return false; 
+    
+    vec2 cx = vec2(viewCenter.x, -viewCenter.z);
+    vec2 vx = vec2(sqrt(dot(cx, cx) - radius * radius), radius);
+    vec2 minx = mat2(vx.x, vx.y, -vx.y, vx.x) * cx;
+    vec2 maxx = mat2(vx.x, -vx.y, vx.y, vx.x) * cx;
+
+    vec2 cy = vec2(viewCenter.y, -viewCenter.z);
+    vec2 vy = vec2(sqrt(dot(cy, cy) - radius * radius), radius);
+    vec2 miny = mat2(vy.x, vy.y, -vy.y, vy.x) * cy;
+    vec2 maxy = mat2(vy.x, -vy.y, vy.y, vy.x) * cy;
+
+    float p00 = abs(proj[0][0]);
+    float p11 = abs(proj[1][1]);
+
+    minUV = vec2(minx.x / minx.y * p00, miny.x / miny.y * p11);
+    maxUV = vec2(maxx.x / maxx.y * p00, maxy.x / maxy.y * p11);
+
+    minUV = minUV * 0.5 + 0.5;
+    maxUV = maxUV * 0.5 + 0.5;
+
+    return true;
 }
 
 void main() {
@@ -257,10 +287,12 @@ void main() {
         GpuMeshletCollider localCollider = colliders.data[globalMeshletIdx];
         GpuMeshletCollider collider = TransformMeshletCollider(localCollider, transform.transform, transform.transformIT);
         
+        //Cone culling
         if (TestConeCulling(collider, camera.eye.xyz)) {
             isVisible = false;
         }
 
+        //Frustum culling
         if (isVisible && !isFullyInside) {
             GpuMeshCollider baseCollider;
             baseCollider.center = collider.center;
@@ -275,7 +307,36 @@ void main() {
             }
         }
 
-        //Todo: Occlusion culling
+        //Occlusion culling
+        if (isVisible) {
+            vec3 viewCenter = (camera.view * vec4(collider.center, 1.0)).xyz;
+            float radius = collider.radius;
+
+            vec2 minUV, maxUV;
+            if (ProjectSphere(viewCenter, radius, camera.proj, camera.params.x, minUV, maxUV)) {
+                minUV = clamp(minUV, 0.0, 1.0);
+                maxUV = clamp(maxUV, 0.0, 1.0);
+
+                vec2 viewportSize = vec2(pc.screenWidth, pc.screenHeight);
+                vec2 sizeInPixels = (maxUV - minUV) * viewportSize;
+
+                // 1 mipmap higher, to ensure proper fit!
+                float lod = max(0.0, ceil(log2(max(sizeInPixels.x, sizeInPixels.y) / 2.0)));
+
+                vec2 centerUV = (minUV + maxUV) * 0.5;
+                centerUV.y = 1.0 - centerUV.y;
+                float maxBackgroundDepth = textureLod(depthPyramid, centerUV, lod).r;
+                float sphereClosestDepth = -viewCenter.z - radius;
+
+                float near = camera.params.x;
+                float far = camera.params.y;
+                float normalizedSphereDepth = (sphereClosestDepth - near) / (far - near);
+
+                if (normalizedSphereDepth > maxBackgroundDepth) {
+                    isVisible = false;
+                }
+            }
+        }
 
         if (isVisible) {
             uint slot = atomicAdd(survivingMeshletCount, 1);

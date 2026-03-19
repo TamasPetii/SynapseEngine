@@ -13,6 +13,10 @@
 #include "Engine/Material/MaterialManager.h"
 #include "Engine/Image/ImageManager.h"
 
+#include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
+#include "Engine/Image/SamplerNames.h"
+#include "Engine/Render/RenderNames.h"
+
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -39,6 +43,9 @@ namespace Syn {
         uint32_t activeCameraEntity;
         uint32_t meshletOffsetStart;
         uint32_t visualizeMeshlet;
+
+        float screenWidth;
+        float screenHeight;
     };
 
     void MeshletRenderPass::Initialize() {
@@ -114,13 +121,13 @@ namespace Syn {
 
     void MeshletRenderPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
-        if (!scene) return;
+        auto modelManager = ServiceLocator::GetModelManager();
+        auto materialManager = ServiceLocator::GetMaterialManager();
 
         auto drawData = scene->GetSceneDrawData();
-        auto modelManager = ServiceLocator::GetModelManager();
         auto registry = scene->GetRegistry();
         auto componentBufferManager = scene->GetComponentBufferManager();
-        auto materialManager = ServiceLocator::GetMaterialManager();
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
         MeshletPushConstants pc{};
 
@@ -148,6 +155,9 @@ namespace Syn {
         pc.meshletOffsetStart = SceneDrawData::MESHLET_OFFSET_START;
         pc.visualizeMeshlet = 1;
 
+        pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
+        pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
+
         vkCmdPushConstants(
             context.cmd,
             _shaderProgram->GetLayout(),
@@ -164,16 +174,29 @@ namespace Syn {
         auto bindlessBuffer = imageManager->GetBindlessBuffer();
         if (!bindlessBuffer) return;
 
+        //This deletes all pushdescriptors, need to call this first4
         bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
+
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
+        auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);
+
+        Vk::PushDescriptorWriter pushWriter;
+
+        pushWriter.AddCombinedImageSampler(
+            0,
+            depthPyramid->GetView(Vk::ImageViewNames::Default),
+            maxSampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
     void MeshletRenderPass::Draw(const RenderContext& context)
     {
         auto scene = context.scene;
-        if (!scene) return;
-
         auto drawData = scene->GetSceneDrawData();
-
         auto indirectBuffer = drawData->globalIndirectCommandBuffers[context.frameIndex]->Handle();
         auto countBuffer = drawData->globalDrawCountBuffers[context.frameIndex]->Handle();
 

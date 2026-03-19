@@ -46,7 +46,7 @@ namespace Syn {
         if (_materialLoadCallback && entry.resource) {
             std::filesystem::path modelDir = std::filesystem::path(entry.path).parent_path();
 
-            entry.resource->hardwareBuffers.meshMaterialIndices.clear();
+            entry.resource->meshMaterialIndices.clear();
 
             for (auto& matInfo : entry.resource->gpuData.materials) {
                 auto resolvePath = [&](std::string& path) {
@@ -67,9 +67,12 @@ namespace Syn {
                     ? matInfo.name
                     : entry.path + "_" + matInfo.name;
 
+                std::mt19937 rng(std::random_device{}());
+                std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+
                 uint32_t matId = _materialLoadCallback(uniqueMatName, matInfo);
 
-                entry.resource->hardwareBuffers.meshMaterialIndices.push_back(matId);
+                entry.resource->meshMaterialIndices.push_back(matId);
             }
         }
 
@@ -95,7 +98,7 @@ namespace Syn {
         auto& gpuData = entry.resource->gpuData;
         size_t totalLodCount = gpuData.indexedData.meshDescriptors.size();
 
-        entry.resource->hardwareBuffers.baseDrawCommands.reserve(totalLodCount);
+        entry.resource->baseDrawCommands.reserve(totalLodCount);
 
         for (size_t i = 0; i < totalLodCount; ++i)
         {
@@ -129,7 +132,7 @@ namespace Syn {
                 blueprint.isMeshletPipeline = MeshDrawBlueprint::PIPELINE_TRADITIONAL;
             }
 
-            entry.resource->hardwareBuffers.baseDrawCommands.push_back(blueprint);
+            entry.resource->baseDrawCommands.push_back(blueprint);
         }
         
         uint32_t entryIndex = _pathToId.at(entry.path);

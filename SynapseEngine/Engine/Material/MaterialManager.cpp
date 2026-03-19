@@ -13,6 +13,12 @@ namespace Syn {
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
         );
 
+        Material emptyMat;
+        GpuMaterial safeDefaultMaterial(emptyMat);
+        std::vector<GpuMaterial> safeData(MAX_MATERIALS, safeDefaultMaterial);
+
+        _materialBuffer->Write(safeData.data(), safeData.size() * sizeof(GpuMaterial), 0);
+
         LoadDefaultMaterialSync();
     }
 
@@ -56,7 +62,7 @@ namespace Syn {
         entry.state = ResourceState::Ready;
         _version.fetch_add(1, std::memory_order_release);
 
-        //Info("Material '{}' is ready", entry.path);
+        Info("Material '{}' is ready", entry.path);
     }
 
     void MaterialManager::LoadDefaultMaterialSync()

@@ -101,10 +101,11 @@ namespace Syn
 
             if (!model) continue;
 
-            uint32_t meshCount = static_cast<uint32_t>(model->hardwareBuffers.meshMaterialIndices.size());
+            //Hmm: meshCount from material?
+            uint32_t meshCount = static_cast<uint32_t>(model->meshMaterialIndices.size());
             totalMaterialIndicesCapacity += capacity * meshCount;
 
-            const auto& blueprints = model->hardwareBuffers.baseDrawCommands;
+            const auto& blueprints = model->baseDrawCommands;
 
             ModelAllocationInfo& allocationInfo = drawData->modelAllocations[modelId];
             allocationInfo.maxInstances = capacity;
@@ -152,6 +153,8 @@ namespace Syn
         }
 
         drawData->totalAllocatedInstances = globalInstanceOffset;
+
+        //Hmm??
         drawData->requiredMaterialBufferSize = totalMaterialIndicesCapacity * sizeof(uint32_t);
 
         if (false)

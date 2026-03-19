@@ -27,10 +27,6 @@ namespace Syn
 
         //Hierarchy Buffers
         std::unique_ptr<Vk::Buffer> nodeTransforms;
-
-        //Draw Data
-        std::vector<MeshDrawBlueprint> baseDrawCommands;
-        std::vector<uint32_t> meshMaterialIndices;
     };
 
     struct SYN_API GpuModelAddresses

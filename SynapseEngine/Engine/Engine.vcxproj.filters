@@ -648,6 +648,12 @@
     <ClCompile Include="Render\GraphicsPass\CompositePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\WireframeAabbPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\MaterialOverrideComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1385,11 +1391,17 @@
     <ClInclude Include="Render\GraphicsPass\CompositePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\WireframeAabbPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\MaterialOverrideComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Composite.vert" />
     <None Include="Shaders\Composite.frag" />
-    <None Include="Shaders\MeshletOld.mesh" />
+    <None Include="Shaders\_old_Meshlet.mesh" />
     <None Include="Shaders\Meshlet.frag" />
     <None Include="Shaders\Traditional.vert" />
     <None Include="Shaders\Traditional.frag" />

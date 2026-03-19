@@ -124,22 +124,21 @@ layout(push_constant) uniform PushConstants {
     uint64_t globalInstanceBuffers; 
     uint64_t globalIndirectCommandBuffers; 
     uint64_t globalIndirectCommandDescriptorBuffers;   
-    uint64_t globalModelAllocationBuffers; 
+    uint64_t globalModelAllocationBuffers;
     uint64_t globalMeshAllocationBuffers; 
-
     uint64_t cameraBufferAddr; 
     uint64_t cameraSparseMapBufferAddr; 
     uint64_t transformBufferAddr; 
     uint64_t transformSparseMapBufferAddr; 
-
     uint64_t modelBufferAddr; 
     uint64_t modelSparseMapBufferAddr; 
     uint64_t materialLookupBuffer; 
     uint64_t materialBuffer; 
-
-    uint activeCameraEntity; 
+    uint activeCameraEntity;
     uint meshletOffsetStart; 
     uint visualizeMeshlet; 
+    float screenWidth;
+    float screenHeight;
 } pc;
 
 struct TaskPayload {
@@ -150,12 +149,10 @@ struct TaskPayload {
 
 taskPayloadSharedEXT TaskPayload payload;
 
-//layout(location = 0) out vec3 outNormal[];
-//layout(location = 1) out vec2 outUV[];
-//layout(location = 2) out vec3 outMeshletColor[];
-//layout(location = 3) out flat uvec4 outIndices[];
-
-layout(location = 0) out vec3 outMeshletColor[];
+layout(location = 0) out vec3 outNormal[];
+layout(location = 1) out vec2 outUV[];
+layout(location = 2) out vec3 outMeshletColor[];
+layout(location = 3) out flat uvec4 outIndices[];
 
 vec3 generateMeshletColor(uint meshletID) {
     uint hash = (meshletID ^ 61) ^ (meshletID >> 16);
@@ -236,9 +233,9 @@ void main() {
         // Mátrix szorzások
         gl_MeshVerticesEXT[i].gl_Position = camera.viewProjVulkan * transform.transform * nodeTransform.globalTransform * vec4(v.position, 1.0);
         
-        //outNormal[i] = normalize(transform.transformIT * nodeTransform.globalTransformIT * vec4(attr.normal, 0)).xyz;
-        //outUV[i] = vec2(attr.uv_x, attr.uv_y); //Todo: Vulkan flip?
-        //outIndices[i] = uvec4(entityId, desc.modelIndex, meshIndex, desc.lodIndex); //meshIndex is not loaded from desc, to handle batched meshes too!
+        outNormal[i] = normalize(transform.transformIT * nodeTransform.globalTransformIT * vec4(attr.normal, 0)).xyz;
+        outUV[i] = vec2(attr.uv_x, attr.uv_y); //Todo: Vulkan flip?
+        outIndices[i] = uvec4(entityId, desc.modelIndex, meshIndex, desc.lodIndex); //meshIndex is not loaded from desc, to handle batched meshes too!
         outMeshletColor[i] = meshletColor;
     }
 

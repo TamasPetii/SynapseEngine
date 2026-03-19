@@ -13,9 +13,7 @@ namespace Syn
 		bool receiveShadow;
 		bool hasDirectxNormals;
 		uint32_t modelIndex;
-
-		uint32_t materialOffset = 0;
-		std::vector<uint32_t> materialOverrides;
+		uint32_t materialOffset = UINT32_MAX;
 	};
 
 	struct SYN_API ModelComponentGPU

@@ -6,6 +6,7 @@
 #include "Engine/Mesh/Factory/MeshFactory.h"
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Manager/ShaderManager.h"
+#include "Engine/Mesh/MeshSourceNames.h"
 #include <random>
 
 namespace Syn
@@ -22,17 +23,17 @@ namespace Syn
             uint32_t bistroId = modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
 
             std::vector<uint32_t> geoIds;
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Sphere", []() { return MeshFactory::CreateSphere(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Cube", []() { return MeshFactory::CreateCube(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Quad", []() { return MeshFactory::CreateQuad(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("ScreenQuad", []() { return MeshFactory::CreateScreenQuad(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Cylinder", []() { return MeshFactory::CreateCylinder(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Cone", []() { return MeshFactory::CreateCone(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Capsule", []() { return MeshFactory::CreateCapsule(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Hemisphere", []() { return MeshFactory::CreateHemisphere(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Pyramid", []() { return MeshFactory::CreatePyramid(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Grid", []() { return MeshFactory::CreateGrid(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync("Torus", []() { return MeshFactory::CreateTorus(); }));  
+            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Sphere, []() { return MeshFactory::CreateSphere(); }));
+            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Cube, []() { return MeshFactory::CreateCube(); }));
+            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Quad, []() { return MeshFactory::CreateQuad(); }));
+            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::ScreenQuad, []() { return MeshFactory::CreateScreenQuad(); }));
+            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Cylinder, []() { return MeshFactory::CreateCylinder(); }));
+            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Cone, []() { return MeshFactory::CreateCone(); }));
+            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Capsule, []() { return MeshFactory::CreateCapsule(); }));
+            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Hemisphere, []() { return MeshFactory::CreateHemisphere(); }));
+            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Pyramid, []() { return MeshFactory::CreatePyramid(); }));
+            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Grid, []() { return MeshFactory::CreateGrid(); }));
+            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Torus, []() { return MeshFactory::CreateTorus(); }));
 
             //Camera
             EntityID cameraEntity = registry->CreateEntity();
@@ -66,7 +67,7 @@ namespace Syn
             registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
 
             // Random Geometry
-            for (int i = 0; i < 100000; i++)
+            for (int i = 0; i < 0; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);

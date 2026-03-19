@@ -113,9 +113,6 @@ layout(push_constant) uniform PushConstants {
 
     uint activeCameraEntity;
     uint meshletOffsetStart;
-
-    uint padding0;
-    uint padding1;
 } pc;
 
 layout(location = 0) out vec3 outNormal;
