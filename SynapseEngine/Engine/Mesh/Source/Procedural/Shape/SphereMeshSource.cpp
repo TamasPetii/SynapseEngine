@@ -48,7 +48,7 @@ namespace Syn
         }
     }
 
-    void SphereMeshSource::GenerateUVs(std::vector<glm::vec2>& outUVs)
+    void SphereMeshSource::GenerateUVs(std::span<glm::vec2> outUVs)
     {
         uint32_t index = 0;
         for (uint32_t stack = 0; stack <= _stacks; ++stack)
@@ -63,7 +63,7 @@ namespace Syn
         }
     }
 
-    void SphereMeshSource::GenerateNormals(const std::vector<glm::vec3>& positions, const std::vector<uint32_t>& indices, std::vector<glm::vec3>& outNormals)
+    void SphereMeshSource::GenerateNormals(std::span<const glm::vec3> positions, std::span<const uint32_t> indices, std::span<glm::vec3> outNormals)
     {
         for (size_t i = 0; i < positions.size(); ++i)
         {

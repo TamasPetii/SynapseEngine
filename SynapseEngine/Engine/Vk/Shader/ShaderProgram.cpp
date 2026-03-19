@@ -6,7 +6,9 @@
 
 namespace Syn::Vk {
 
-    ShaderProgram::ShaderProgram(std::span<const Shader* const> shaders) {
+    ShaderProgram::ShaderProgram(std::span<const Shader* const> shaders, const ShaderProgramConfig& config) :
+        _config(config)
+    {
         _shaders.assign(shaders.begin(), shaders.end());
         CreatePipelineLayoutAndShaders();
     }
@@ -88,30 +90,61 @@ namespace Syn::Vk {
         }
 
         _bindLayouts.resize(maxSetIndex + 1, VK_NULL_HANDLE);
-        for (uint32_t set = 0; set <= maxSetIndex; ++set) {
+
+        for (uint32_t set = 0; set <= maxSetIndex; ++set) 
+        {
+            if (_config.layoutOverride) {
+                VkDescriptorSetLayout overridenLayout = _config.layoutOverride(set);
+                if (overridenLayout != VK_NULL_HANDLE) {
+                    _bindLayouts[set] = overridenLayout;
+                    continue;
+                }
+            }
+
             if (mergedBindings.contains(set)) {
                 std::vector<VkDescriptorSetLayoutBinding> bindingsVec;
+                std::vector<VkDescriptorBindingFlags> bindingFlags;
+
                 for (const auto& [bIdx, bind] : mergedBindings[set]) {
                     bindingsVec.push_back(bind);
+
+                    if (bind.descriptorCount > 1) {
+                        bindingFlags.push_back(VK_DESCRIPTOR_BINDING_PARTIALLY_BOUND_BIT | VK_DESCRIPTOR_BINDING_UPDATE_AFTER_BIND_BIT);
+                    }
+                    else {
+                        bindingFlags.push_back(0);
+                    }
                 }
+
+                VkDescriptorSetLayoutBindingFlagsCreateInfo flagsInfo{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_BINDING_FLAGS_CREATE_INFO };
+                flagsInfo.bindingCount = static_cast<uint32_t>(bindingFlags.size());
+                flagsInfo.pBindingFlags = bindingFlags.data();
 
                 VkDescriptorSetLayoutCreateInfo layoutInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
                 layoutInfo.bindingCount = static_cast<uint32_t>(bindingsVec.size());
                 layoutInfo.pBindings = bindingsVec.data();
-                layoutInfo.flags = VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
+                layoutInfo.pNext = &flagsInfo;
+                layoutInfo.flags = 0;
+
+                if (_config.useDescriptorBuffers) {
+                    layoutInfo.flags |= VK_DESCRIPTOR_SET_LAYOUT_CREATE_DESCRIPTOR_BUFFER_BIT_EXT;
+                }
+                else {
+                    layoutInfo.flags |= VK_DESCRIPTOR_SET_LAYOUT_CREATE_UPDATE_AFTER_BIND_POOL_BIT;
+                }
 
                 if (set == 2) {
                     layoutInfo.flags |= VK_DESCRIPTOR_SET_LAYOUT_CREATE_PUSH_DESCRIPTOR_BIT_KHR;
                 }
 
                 VkDescriptorSetLayout setLayout;
-                SYN_VK_ASSERT_MSG(vkCreateDescriptorSetLayout(device->Handle(), &layoutInfo, nullptr, &setLayout), "Failed to create merged descriptor set layout!");
+                SYN_VK_ASSERT_MSG(vkCreateDescriptorSetLayout(device->Handle(), &layoutInfo, nullptr, &setLayout), "Failed to create Descriptor Set Layout");
 
                 _createdLayouts.push_back(setLayout);
                 _bindLayouts[set] = setLayout;
             }
             else {
-                _bindLayouts[set] = DescriptorUtils::GetEmptyDescriptorSetLayout();
+                _bindLayouts[set] = DescriptorUtils::GetEmptyDescriptorSetLayout(_config.useDescriptorBuffers);
             }
         }
 

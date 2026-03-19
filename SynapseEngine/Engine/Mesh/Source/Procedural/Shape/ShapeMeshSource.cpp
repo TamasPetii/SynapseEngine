@@ -63,7 +63,7 @@ namespace Syn
         return model;
     }
 
-    void ShapeMeshSource::GenerateNormals(const std::vector<glm::vec3>& positions, const std::vector<uint32_t>& indices, std::vector<glm::vec3>& outNormals)
+    void ShapeMeshSource::GenerateNormals(std::span<const glm::vec3> positions, std::span<const uint32_t> indices, std::span<glm::vec3> outNormals)
     {
         auto getQuantizedPos = [](const glm::vec3& p) -> std::tuple<int, int, int> {
             constexpr float precision = 10000.0f;

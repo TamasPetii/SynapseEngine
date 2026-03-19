@@ -62,7 +62,7 @@ namespace Syn
 
                 const auto& defaultMaterials = model->meshMaterialIndices;
                 uint32_t materialCount = static_cast<uint32_t>(defaultMaterials.size());
-
+                
                 std::span<const uint32_t> overrides;
                 if (overridePool && overridePool->Has(entity)) {
                     auto& overrideComp = overridePool->Get(entity);
@@ -97,9 +97,6 @@ namespace Syn
             for (auto e : pool->GetStorage().GetStaticEntities()) processEntity(e);
             for (auto e : pool->GetStorage().GetDynamicEntities()) processEntity(e);
             for (auto e : pool->GetStorage().GetStreamEntities()) processEntity(e);
-
-            Info("MaterialSystem:");
-
 
             _framesToUpload = static_cast<uint32_t>(drawData->globalMaterialIndexBuffers.size());
             });

@@ -30,7 +30,9 @@ struct GpuMaterial {
     uint metallicRoughnessTexture; 
     uint emissiveTexture; 
     uint ambientOcclusionTexture; 
-    uint padding[3]; 
+    uint padding0; 
+    uint padding1; 
+    uint padding2; 
 };
 
 struct ModelComponent { 
@@ -69,7 +71,7 @@ layout(push_constant) uniform PushConstants {
 } pc;
 
 vec4 sampleLoadedTexture2D(uint textureID, uint samplerID, vec2 uv) { 
-    return texture(sampler2D(bindlessTextures[nonuniformEXT(textureID)], globalSamplers[nonuniformEXT(samplerID)]), uv); 
+    return textureLod(sampler2D(bindlessTextures[nonuniformEXT(textureID)], globalSamplers[nonuniformEXT(samplerID)]), uv, 0); 
 }
 
 void main() 
@@ -77,14 +79,6 @@ void main()
     MaterialBuffer globalMaterials = MaterialBuffer(pc.materialBuffer); 
     GpuMaterial mat = globalMaterials.data[inMaterialId]; 
 
-    /*
     vec4 texColor = sampleLoadedTexture2D(mat.albedoTexture, 0, inUV * mat.uvScale);
-    vec3 baseColor = mat.color.rgb * texColor.rgb; 
-      
-    vec3 lightDir = normalize(vec3(0.5, 1.0, 0.3)); 
-    float ndotl = max(dot(normalize(inNormal), lightDir), 0.1); 
-    outFragColor = vec4(baseColor * ndotl, mat.color.a * texColor.a); 
-    */
-
-    outFragColor = vec4(mat.color.xyz, 1.0); 
+    outFragColor = vec4(texColor.xyz, 1.0);
 }

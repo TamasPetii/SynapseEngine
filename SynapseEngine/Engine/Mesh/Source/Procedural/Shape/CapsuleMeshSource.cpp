@@ -67,7 +67,7 @@ namespace Syn
         }
     }
 
-    void CapsuleMeshSource::GenerateUVs(std::vector<glm::vec2>& outUVs)
+    void CapsuleMeshSource::GenerateUVs(std::span<glm::vec2> outUVs)
     {
         uint32_t totalRings = (_hemisphereSegments * 2) + 2;
         uint32_t index = 0;
@@ -105,7 +105,7 @@ namespace Syn
         }
     }
 
-    void CapsuleMeshSource::GenerateNormals(const std::vector<glm::vec3>& positions, const std::vector<uint32_t>& indices, std::vector<glm::vec3>& outNormals)
+    void CapsuleMeshSource::GenerateNormals(std::span<const glm::vec3> positions, std::span<const uint32_t> indices, std::span<glm::vec3> outNormals)
     {
         uint32_t totalRings = (_hemisphereSegments * 2) + 2;
         uint32_t index = 0;

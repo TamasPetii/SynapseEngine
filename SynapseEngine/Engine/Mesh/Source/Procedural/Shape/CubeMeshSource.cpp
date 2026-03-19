@@ -44,10 +44,8 @@ namespace Syn
         }
     }
 
-    void CubeMeshSource::GenerateUVs(std::vector<glm::vec2>& outUVs)
+    void CubeMeshSource::GenerateUVs(std::span<glm::vec2> outUVs)
     {
-        outUVs.reserve(24);
-
         glm::vec2 faceUVs[4] = {
             {0.0f, 1.0f},
             {1.0f, 1.0f},
@@ -55,19 +53,18 @@ namespace Syn
             {0.0f, 0.0f}
         };
 
+        uint32_t idx = 0;
         for (int i = 0; i < 6; ++i)
         {
-            outUVs.push_back(faceUVs[0]);
-            outUVs.push_back(faceUVs[1]);
-            outUVs.push_back(faceUVs[2]);
-            outUVs.push_back(faceUVs[3]);
+            outUVs[idx++] = faceUVs[0];
+            outUVs[idx++] = faceUVs[1];
+            outUVs[idx++] = faceUVs[2];
+            outUVs[idx++] = faceUVs[3];
         }
     }
 
-    void CubeMeshSource::GenerateNormals(const std::vector<glm::vec3>& positions, const std::vector<uint32_t>& indices, std::vector<glm::vec3>& outNormals)
+    void CubeMeshSource::GenerateNormals(std::span<const glm::vec3> positions, std::span<const uint32_t> indices, std::span<glm::vec3> outNormals)
     {
-        outNormals.reserve(24);
-
         glm::vec3 faceNormals[6] = {
             { 0.0f,  0.0f,  1.0f}, // Front
             { 0.0f,  0.0f, -1.0f}, // Back
@@ -77,12 +74,13 @@ namespace Syn
             { 0.0f, -1.0f,  0.0f}  // Bottom
         };
 
+        uint32_t idx = 0;
         for (int i = 0; i < 6; ++i)
         {
-            outNormals.push_back(faceNormals[i]);
-            outNormals.push_back(faceNormals[i]);
-            outNormals.push_back(faceNormals[i]);
-            outNormals.push_back(faceNormals[i]);
+            outNormals[idx++] = faceNormals[i];
+            outNormals[idx++] = faceNormals[i];
+            outNormals[idx++] = faceNormals[i];
+            outNormals[idx++] = faceNormals[i];
         }
     }
 }

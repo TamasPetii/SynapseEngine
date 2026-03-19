@@ -34,7 +34,7 @@ namespace Syn {
         return ptr;
     }
 
-    Vk::ShaderProgram* ShaderManager::CreateProgram(const std::string& programName, const std::vector<std::string>& shaderFiles) {
+    Vk::ShaderProgram* ShaderManager::CreateProgram(const std::string& programName, const std::vector<std::string>& shaderFiles, const Vk::ShaderProgramConfig& config) {
         auto it = _programs.find(programName);
         if (it != _programs.end()) {
             return it->second.get();
@@ -50,7 +50,7 @@ namespace Syn {
             }
         }
 
-        auto program = std::make_unique<Vk::ShaderProgram>(shadersForProgram);
+        auto program = std::make_unique<Vk::ShaderProgram>(shadersForProgram, config);
         Vk::ShaderProgram* ptr = program.get();
 
         _programs[programName] = std::move(program);

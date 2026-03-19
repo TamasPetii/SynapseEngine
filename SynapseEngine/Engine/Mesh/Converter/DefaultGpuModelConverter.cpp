@@ -15,7 +15,7 @@ namespace Syn
         result.globalCollider.radius = cookedModel.globalCollider.sphere.radius;
         result.globalCollider.aabbMin = cookedModel.globalCollider.aabb.min;
         result.globalCollider.aabbMax = cookedModel.globalCollider.aabb.max;
-		result.materials = std::move(cookedModel.materials);
+		result.materials = cookedModel.materials;
 
         if (result.materials.empty()) {
             MaterialInfo defaultRef{};

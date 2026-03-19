@@ -12,8 +12,8 @@ namespace Syn
     protected:
         virtual void GeneratePositions(std::vector<glm::vec3>& outPositions) override;
         virtual void GenerateIndices(std::vector<uint32_t>& outIndices) override;
-        virtual void GenerateUVs(std::vector<glm::vec2>& outUVs) override;
-        virtual void GenerateNormals(const std::vector<glm::vec3>& positions, const std::vector<uint32_t>& indices, std::vector<glm::vec3>& outNormals) override;
+        virtual void GenerateUVs(std::span<glm::vec2> outUVs) override;
+        virtual void GenerateNormals(std::span<const glm::vec3> positions, std::span<const uint32_t> indices, std::span<glm::vec3> outNormals) override;
     private:
         float _radius;
         uint32_t _sectors;

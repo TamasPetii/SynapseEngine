@@ -27,7 +27,7 @@ namespace Syn
         };
     }
 
-    void QuadMeshSource::GenerateUVs(std::vector<glm::vec2>& outUVs)
+    void QuadMeshSource::GenerateUVs(std::span<glm::vec2> outUVs)
     {
         uint32_t index = 0;
         outUVs[index++] = glm::vec2(0.0f, 0.0f);
@@ -36,7 +36,7 @@ namespace Syn
         outUVs[index++] = glm::vec2(1.0f, 1.0f);
     }
 
-    void QuadMeshSource::GenerateNormals(const std::vector<glm::vec3>& positions, const std::vector<uint32_t>& indices, std::vector<glm::vec3>& outNormals)
+    void QuadMeshSource::GenerateNormals(std::span<const glm::vec3> positions, std::span<const uint32_t> indices, std::span<glm::vec3> outNormals)
     {
         uint32_t index = 0;
 

@@ -25,6 +25,7 @@ namespace Syn::Vk {
 
         VkBufferUsageFlags usage =
             VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT |
+            VK_BUFFER_USAGE_SAMPLER_DESCRIPTOR_BUFFER_BIT_EXT |
             VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
 
         _buffer = BufferFactory::CreatePersistent(layoutSizeInBytes, usage);
@@ -132,7 +133,7 @@ namespace Syn::Vk {
     {
         VkDescriptorBufferBindingInfoEXT bindingInfo{ VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT };
         bindingInfo.address = _buffer->GetDeviceAddress();
-        bindingInfo.usage = VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT;
+        bindingInfo.usage = VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT | VK_BUFFER_USAGE_SAMPLER_DESCRIPTOR_BUFFER_BIT_EXT;
 
         vkCmdBindDescriptorBuffersEXT(cmd, 1, &bindingInfo);
 

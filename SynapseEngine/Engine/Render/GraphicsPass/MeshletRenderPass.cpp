@@ -50,12 +50,22 @@ namespace Syn {
 
     void MeshletRenderPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
+        auto imageManager = ServiceLocator::GetImageManager();
+
+        Vk::ShaderProgramConfig config;
+        config.useDescriptorBuffers = false; 
+        config.layoutOverride = [imageManager](uint32_t setIndex) {
+            if (setIndex == 0) {
+                return imageManager->GetBindlessLayout();
+            }
+            return VkDescriptorSetLayout{};
+            };
 
         _shaderProgram = shaderManager->CreateProgram("MeshletProgram", {
             ShaderNames::MeshletTask,
             ShaderNames::MeshletMesh,
             ShaderNames::MeshletFrag
-            });
+            }, config);
 
         _graphicsState = {
             .raster = {
@@ -171,11 +181,26 @@ namespace Syn {
     void MeshletRenderPass::BindDescriptors(const RenderContext& context)
     {
         auto imageManager = ServiceLocator::GetImageManager();
-        auto bindlessBuffer = imageManager->GetBindlessBuffer();
-        if (!bindlessBuffer) return;
+        VkDescriptorSet set = imageManager->GetBindlessSet();
 
-        //This deletes all pushdescriptors, need to call this first4
+        if (set != VK_NULL_HANDLE) {
+            vkCmdBindDescriptorSets(
+                context.cmd,
+                VK_PIPELINE_BIND_POINT_GRAPHICS,
+                _shaderProgram->GetLayout(),
+                0,
+                1,
+                &set,
+                0,
+                nullptr
+            );
+        }
+
+        //This deletes all pushdescriptors, need to call this first!
+        /*
+        auto bindlessBuffer = imageManager->GetBindlessBuffer();
         bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
+        */
 
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
@@ -190,7 +215,7 @@ namespace Syn {
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 
-        pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
+        //pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
     void MeshletRenderPass::Draw(const RenderContext& context)

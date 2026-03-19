@@ -91,7 +91,7 @@ namespace Syn
         }
     }
 
-    void CylinderMeshSource::GenerateUVs(std::vector<glm::vec2>& outUVs)
+    void CylinderMeshSource::GenerateUVs(std::span<glm::vec2> outUVs)
     {
         uint32_t index = 0;
 
@@ -125,7 +125,7 @@ namespace Syn
         }
     }
 
-    void CylinderMeshSource::GenerateNormals(const std::vector<glm::vec3>& positions, const std::vector<uint32_t>& indices, std::vector<glm::vec3>& outNormals)
+    void CylinderMeshSource::GenerateNormals(std::span<const glm::vec3> positions, std::span<const uint32_t> indices, std::span<glm::vec3> outNormals)
     {
         float slopeY = (_bottomRadius - _topRadius) / _height;
         uint32_t index = 0;

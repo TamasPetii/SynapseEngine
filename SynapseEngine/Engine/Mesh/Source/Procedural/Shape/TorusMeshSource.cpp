@@ -54,7 +54,7 @@ namespace Syn
         }
     }
 
-    void TorusMeshSource::GenerateUVs(std::vector<glm::vec2>& outUVs)
+    void TorusMeshSource::GenerateUVs(std::span<glm::vec2> outUVs)
     {
         uint32_t index = 0;
         for (uint32_t i = 0; i <= _mainSegments; ++i)
@@ -69,7 +69,7 @@ namespace Syn
         }
     }
 
-    void TorusMeshSource::GenerateNormals(const std::vector<glm::vec3>& positions, const std::vector<uint32_t>& indices, std::vector<glm::vec3>& outNormals)
+    void TorusMeshSource::GenerateNormals(std::span<const glm::vec3> positions, std::span<const uint32_t> indices, std::span<glm::vec3> outNormals)
     {
         uint32_t index = 0;
         for (uint32_t i = 0; i <= _mainSegments; ++i)

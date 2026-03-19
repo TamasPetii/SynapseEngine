@@ -8,6 +8,7 @@
 #include "Engine/Vk/Command/CommandPool.h"
 #include "Engine/Vk/Descriptor/DescriptorBuffer.h"
 #include "Engine/Vk/Image/Sampler.h"
+#include "Engine/Vk/Descriptor/DescriptorPool.h"
 
 namespace Syn {
 
@@ -15,7 +16,7 @@ namespace Syn {
 
     class SYN_API ImageManager : public BaseResourceManager<Texture> {
     public:
-        static constexpr uint32_t MAX_IMAGES = 10000;
+        static constexpr uint32_t MAX_IMAGES = 2048;
         static constexpr uint32_t MAX_SAMPLERS = 32;
         static constexpr uint32_t BINDING_SAMPLERS = 0;
         static constexpr uint32_t BINDING_TEXTURES = 1;
@@ -30,6 +31,7 @@ namespace Syn {
         VkDescriptorSetLayout GetBindlessLayout() const { return _bindlessLayout; }
         Vk::Sampler* GetSampler(const std::string& name) const;
         uint32_t GetSamplerIndex(const std::string& name) const;
+        VkDescriptorSet GetBindlessSet() const { return _bindlessSet; }
     protected:
         void StartGpuUpload(EntryType& entry) override;
         void FinalizeResource(EntryType& entry) override;
@@ -41,6 +43,9 @@ namespace Syn {
     private:
         std::shared_ptr<ImageBuilder> _builder;
         std::unique_ptr<IGpuImageUploader> _uploader;
+
+        std::unique_ptr<Vk::DescriptorPool> _descriptorPool;
+        VkDescriptorSet _bindlessSet = VK_NULL_HANDLE;
 
         VkDescriptorSetLayout _bindlessLayout = VK_NULL_HANDLE;
         std::unique_ptr<Vk::DescriptorBuffer> _bindlessBuffer;

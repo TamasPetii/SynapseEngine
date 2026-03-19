@@ -4,9 +4,16 @@
 
 namespace Syn::Vk {
 
+    using DescriptorLayoutOverride = std::function<VkDescriptorSetLayout(uint32_t setIndex)>;
+
+    struct ShaderProgramConfig {
+        DescriptorLayoutOverride layoutOverride = nullptr;
+        bool useDescriptorBuffers = false;
+    };
+
     class SYN_API ShaderProgram {
     public:
-        ShaderProgram(std::span<const Shader* const> shaders);
+        ShaderProgram(std::span<const Shader* const> shaders, const ShaderProgramConfig& config = {});
         ~ShaderProgram();
 
         ShaderProgram(const ShaderProgram&) = delete;
@@ -22,6 +29,7 @@ namespace Syn::Vk {
         VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
         std::vector<const Shader*> _shaders;
 
+        ShaderProgramConfig _config;
         std::vector<VkShaderEXT> _shaderObjects;
         std::vector<VkDescriptorSetLayout> _createdLayouts;
         std::vector<VkDescriptorSetLayout> _bindLayouts;

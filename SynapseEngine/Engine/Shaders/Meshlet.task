@@ -308,7 +308,7 @@ void main() {
         }
 
         //Occlusion culling
-        if (isVisible) {
+        if (false && isVisible) {
             vec3 viewCenter = (camera.view * vec4(collider.center, 1.0)).xyz;
             float radius = collider.radius;
 

@@ -203,8 +203,6 @@ void main() {
 
     uint sparseIndex = sparseMap.data[entityId];
     ModelComponent comp = modelComponents.data[sparseIndex];
-    uint flatMaterialIndex = comp.materialOffset + desc.meshIndex;
-    uint resolvedMaterialId = materialLookup.data[flatMaterialIndex];
 
     ModelAddressBuffer modelAddresses = ModelAddressBuffer(pc.modelAddressBuffer);
     GpuModelAddresses addrs = modelAddresses.data[desc.modelIndex];
@@ -252,13 +250,17 @@ void main() {
         uint nodeIndex = packedIndex & 0xFFFFu;
         GpuNodeTransform nodeTransform = nodes.data[nodeIndex];
 
+        //To handle batched meshes too!
+        uint flatMaterialIndex = comp.materialOffset + meshIndex;
+        uint resolvedMaterialId = materialLookup.data[flatMaterialIndex];
+
         // Mátrix szorzások
         gl_MeshVerticesEXT[i].gl_Position = camera.viewProjVulkan * transform.transform * nodeTransform.globalTransform * vec4(v.position, 1.0);
         
         outNormal[i] = normalize(transform.transformIT * nodeTransform.globalTransformIT * vec4(attr.normal, 0)).xyz;
         outUV[i] = vec2(attr.uv_x, attr.uv_y); //Todo: Vulkan flip?
         outEntityId[i] = entityId;
-        outMaterialId[i] = resolvedMaterialId; //V.meshIndex not used?? No batches? -> Culling would be wrong!
+        outMaterialId[i] = resolvedMaterialId;
         outMeshletColor[i] = meshletColor;
     }
 

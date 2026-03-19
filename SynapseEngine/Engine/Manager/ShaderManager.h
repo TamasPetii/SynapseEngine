@@ -20,7 +20,7 @@ namespace Syn {
         Vk::Shader* LoadShader(const std::string& filepath, VkShaderStageFlagBits stage);
         Vk::Shader* GetShader(const std::string& filepath) const;
 
-        Vk::ShaderProgram* CreateProgram(const std::string& programName, const std::vector<std::string>& shaderFiles);
+        Vk::ShaderProgram* CreateProgram(const std::string& programName, const std::vector<std::string>& shaderFiles, const Vk::ShaderProgramConfig& config = {});
         Vk::ShaderProgram* GetProgram(const std::string& programName) const;
 
         void Clear();

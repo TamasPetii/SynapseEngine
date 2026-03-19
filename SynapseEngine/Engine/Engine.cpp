@@ -86,7 +86,7 @@ namespace Syn
 		_inputManager = std::make_unique<InputManager>();
 		ServiceLocator::ProvideInputManager(_inputManager.get());
 
-		InitFrameContext(1);
+		InitFrameContext(3);
 		InitLogger();
 		InitVulkan(params);
 		InitTaskExecutor();

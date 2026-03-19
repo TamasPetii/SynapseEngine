@@ -7,6 +7,7 @@
 #include "Engine/Vk/Descriptor/DescriptorLayoutBuilder.h";
 #include "Engine/Image/Source/Procedural/DefaultImageSource.h"
 #include "SamplerNames.h"
+#include "Engine/Vk/Descriptor/DescriptorWriter.h"
 
 namespace Syn {
 
@@ -19,10 +20,23 @@ namespace Syn {
     void ImageManager::InitializeBindlessSetup()
     {
         Vk::DescriptorLayoutBuilder layoutBuilder;
-        layoutBuilder.AddBindlessBinding(BINDING_SAMPLERS, VK_DESCRIPTOR_TYPE_SAMPLER, VK_SHADER_STAGE_ALL, MAX_SAMPLERS);
-        layoutBuilder.AddBindlessBinding(BINDING_TEXTURES, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_ALL, MAX_IMAGES);
+        layoutBuilder.AddBinding(BINDING_SAMPLERS, VK_DESCRIPTOR_TYPE_SAMPLER, VK_SHADER_STAGE_ALL, MAX_SAMPLERS);
+        layoutBuilder.AddBinding(BINDING_TEXTURES, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_ALL, MAX_IMAGES);
+        
+        /*
         _bindlessLayout = layoutBuilder.Build(Vk::DescriptorLayoutType::DescriptorBuffer);
         _bindlessBuffer = std::make_unique<Vk::DescriptorBuffer>(_bindlessLayout);
+        */
+
+        _bindlessLayout = layoutBuilder.Build(Vk::DescriptorLayoutType::Standard);
+
+        std::vector<VkDescriptorPoolSize> poolSizes = {
+            { VK_DESCRIPTOR_TYPE_SAMPLER, MAX_SAMPLERS },
+            { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, MAX_IMAGES }
+        };
+
+        _descriptorPool = std::make_unique<Vk::DescriptorPool>(10, poolSizes, VK_DESCRIPTOR_POOL_CREATE_UPDATE_AFTER_BIND_BIT);
+        _bindlessSet = _descriptorPool->AllocateSet(_bindlessLayout);
 
         CreateSamplers();
         LoadDefaultImageSync();
@@ -165,7 +179,11 @@ namespace Syn {
         uint32_t index = static_cast<uint32_t>(_samplers.size());
         auto sampler = std::make_unique<Vk::Sampler>(config);
 
-        _bindlessBuffer->WriteSampler(BINDING_SAMPLERS, index, sampler->Handle());
+        //_bindlessBuffer->WriteSampler(BINDING_SAMPLERS, index, sampler->Handle());
+
+        Vk::DescriptorWriter()
+            .AddSampler(BINDING_SAMPLERS, index, sampler->Handle())
+            .UpdateSet(_bindlessSet);
 
         _samplers.push_back(std::move(sampler));
         _samplerNameToIndex[name] = index;
@@ -206,8 +224,14 @@ namespace Syn {
             .needsGraphics = false
             });
 
-        _bindlessBuffer->FillSampledImages(BINDING_TEXTURES, MAX_IMAGES, entry->resource->image->GetView());
-        //Info("Default Fallback Texture (ID: 0) generated and bound to all bindless slots.");
+        //_bindlessBuffer->FillSampledImages(BINDING_TEXTURES, MAX_IMAGES, entry->resource->image->GetView());
+
+        Vk::DescriptorWriter writer;
+        for (uint32_t i = 0; i < MAX_IMAGES; ++i) {
+            writer.AddSampledImage(BINDING_TEXTURES, i, entry->resource->image->GetView());
+        }
+
+        writer.UpdateSet(_bindlessSet);
     }
 
     uint32_t ImageManager::LoadImageAsync(const std::string& filePath) {
@@ -249,11 +273,17 @@ namespace Syn {
         uint32_t descriptorIndex = _pathToId.at(entry.path);
 
         if (descriptorIndex != 0 && _bindlessBuffer) {
+            /*
             _bindlessBuffer->WriteSampledImage(
                 BINDING_TEXTURES,
                 descriptorIndex,
                 entry.resource->image->GetView()
             );
+            */
+
+            Vk::DescriptorWriter()
+                .AddSampledImage(BINDING_TEXTURES, descriptorIndex, entry.resource->image->GetView())
+                .UpdateSet(_bindlessSet);
         }
     }
 }

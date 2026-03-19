@@ -109,8 +109,8 @@ namespace Syn
             result.texture->TransitionLayout(
                 cmd,
                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                VK_PIPELINE_STAGE_2_ALL_TRANSFER_BIT,
-                VK_ACCESS_2_TRANSFER_WRITE_BIT,
+                VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT,
+                VK_ACCESS_2_NONE,                                      
                 false
             );
 

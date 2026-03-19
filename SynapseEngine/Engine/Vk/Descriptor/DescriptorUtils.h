@@ -4,6 +4,6 @@
 namespace Syn::Vk {
     class SYN_API DescriptorUtils {
     public:
-        static VkDescriptorSetLayout GetEmptyDescriptorSetLayout();
+        static VkDescriptorSetLayout GetEmptyDescriptorSetLayout(bool useDescriptorBuffers);
      };
 }
