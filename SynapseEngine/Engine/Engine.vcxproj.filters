@@ -666,6 +666,9 @@
     <ClCompile Include="Render\ComputePass\BloomCompositePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\WireframeSpherePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1421,6 +1424,12 @@
     <ClInclude Include="Render\ComputePass\BloomCompositePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\WireframeSpherePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\ImageNames.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Composite.vert" />
@@ -1439,5 +1448,8 @@
     <None Include="Shaders\BloomUpsample.comp" />
     <None Include="Shaders\BloomDownsample.comp" />
     <None Include="Shaders\BloomComposite.comp" />
+    <None Include="Shaders\WireframeSetup.comp" />
+    <None Include="Shaders\Wireframe.vert" />
+    <None Include="Shaders\Wireframe.frag" />
   </ItemGroup>
 </Project>

@@ -25,8 +25,11 @@ namespace Syn {
         uint32_t LoadModelFromSourceAsync(const std::string& name, MeshSourceFactory factory);
         uint32_t LoadModelFromStaticMeshAsync(const std::string& name, StaticMeshFactory factory);
 
-        Vk::Buffer* GetModelAddressBuffer() const { return _modelAddressBuffer.get(); }
+        uint32_t LoadModelSync(const std::string& filePath);
+        uint32_t LoadModelFromSourceSync(const std::string& name, MeshSourceFactory factory);
+        uint32_t LoadModelFromStaticMeshSync(const std::string& name, StaticMeshFactory factory);
 
+        Vk::Buffer* GetModelAddressBuffer() const { return _modelAddressBuffer.get(); }
     protected:
         void StartGpuUpload(EntryType& entry) override;
         void FinalizeResource(EntryType& entry) override;

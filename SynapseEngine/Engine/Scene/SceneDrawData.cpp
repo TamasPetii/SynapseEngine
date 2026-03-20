@@ -1,11 +1,14 @@
 #include "SceneDrawData.h"
 #include "Engine/Vk/Buffer/BufferFactory.h"
 #include "Engine/Mesh/ModelManager.h"
+#include "Engine/Mesh/MeshSourceNames.h"
 
 namespace Syn
 {
     SceneDrawData::SceneDrawData(uint32_t frameCount)
     {
+        auto modelManager = ServiceLocator::GetModelManager();
+
         modelAllocations.resize(ModelManager::MAX_MODELS);
         meshAllocations.resize(MAX_INDIRECT_COMMANDS);
         drawDescriptors.resize(MAX_INDIRECT_COMMANDS);
@@ -29,6 +32,23 @@ namespace Syn
 
         size_t traditionalBytes = MESHLET_OFFSET_START * sizeof(VkDrawIndirectCommand);
         size_t meshletBytes = (MAX_INDIRECT_COMMANDS - MESHLET_OFFSET_START) * sizeof(VkDrawMeshTasksIndirectCommandEXT);
+
+        auto cube = modelManager->GetResource(MeshSourceNames::Cube);
+        VkDrawIndirectCommand aabbCmd{};
+        aabbCmd.vertexCount = cube->baseDrawCommands[0].traditionalCmd.vertexCount;
+        aabbCmd.instanceCount = 0;
+        aabbCmd.firstVertex = cube->baseDrawCommands[0].traditionalCmd.firstVertex;
+        aabbCmd.firstInstance = 0;
+
+        auto sphere = modelManager->GetResource(MeshSourceNames::Sphere);
+        VkDrawIndirectCommand sphereCmd{};
+        sphereCmd.vertexCount = sphere->baseDrawCommands[0].traditionalCmd.vertexCount;
+        sphereCmd.instanceCount = 0;
+        sphereCmd.firstVertex = sphere->baseDrawCommands[0].traditionalCmd.firstVertex;
+        sphereCmd.firstInstance = 0;
+
+        std::vector<VkDrawIndirectCommand> aabbCommands(MAX_INDIRECT_COMMANDS, aabbCmd);
+        std::vector<VkDrawIndirectCommand> sphereCommands(MAX_INDIRECT_COMMANDS, sphereCmd);
 
         for (uint32_t i = 0; i < frameCount; ++i)
         {
@@ -67,6 +87,11 @@ namespace Syn
                 VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
             );
 
+            globalMaterialIndexBuffers[i] = Vk::BufferFactory::CreatePersistent(
+                sizeof(int32_t),
+                VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
+            );
+
             aabbIndirectCommandBuffers[i] = Vk::BufferFactory::CreatePersistent(
                 MAX_INDIRECT_COMMANDS * sizeof(VkDrawIndirectCommand),
                 VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
@@ -77,10 +102,8 @@ namespace Syn
                 VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
             );
 
-            globalMaterialIndexBuffers[i] = Vk::BufferFactory::CreatePersistent(
-                sizeof(int32_t),
-                VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
-            );
+            aabbIndirectCommandBuffers[i]->Write(aabbCommands.data(), aabbCommands.size() * sizeof(VkDrawIndirectCommand));
+            sphereIndirectCommandBuffers[i]->Write(sphereCommands.data(), sphereCommands.size() * sizeof(VkDrawIndirectCommand));
         }
     }
 }

@@ -25,17 +25,17 @@ namespace Syn
             uint32_t bistroId = modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
 
             std::vector<uint32_t> geoIds;
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Sphere, []() { return MeshFactory::CreateSphere(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Cube, []() { return MeshFactory::CreateCube(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Quad, []() { return MeshFactory::CreateQuad(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::ScreenQuad, []() { return MeshFactory::CreateScreenQuad(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Cylinder, []() { return MeshFactory::CreateCylinder(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Cone, []() { return MeshFactory::CreateCone(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Capsule, []() { return MeshFactory::CreateCapsule(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Hemisphere, []() { return MeshFactory::CreateHemisphere(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Pyramid, []() { return MeshFactory::CreatePyramid(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Grid, []() { return MeshFactory::CreateGrid(); }));
-            geoIds.push_back(modelManager->LoadModelFromStaticMeshAsync(MeshSourceNames::Torus, []() { return MeshFactory::CreateTorus(); }));
+            geoIds.push_back(modelManager->GetResourceIndex(MeshSourceNames::Sphere));
+            geoIds.push_back(modelManager->GetResourceIndex(MeshSourceNames::Cube));
+            geoIds.push_back(modelManager->GetResourceIndex(MeshSourceNames::Quad));
+            geoIds.push_back(modelManager->GetResourceIndex(MeshSourceNames::ScreenQuad));
+            geoIds.push_back(modelManager->GetResourceIndex(MeshSourceNames::Cylinder));
+            geoIds.push_back(modelManager->GetResourceIndex(MeshSourceNames::Cone));
+            geoIds.push_back(modelManager->GetResourceIndex(MeshSourceNames::Capsule));
+            geoIds.push_back(modelManager->GetResourceIndex(MeshSourceNames::Hemisphere));
+            geoIds.push_back(modelManager->GetResourceIndex(MeshSourceNames::Pyramid));
+            geoIds.push_back(modelManager->GetResourceIndex(MeshSourceNames::Grid));
+            geoIds.push_back(modelManager->GetResourceIndex(MeshSourceNames::Torus));
 
             {
                 //Main Camera
@@ -72,7 +72,7 @@ namespace Syn
             auto materialManager = ServiceLocator::GetMaterialManager();
 
             // Random Geometry
-            for (int i = 0; i < 100000; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
@@ -92,6 +92,7 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Static);
                 registry->GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
 
+                /*
                 float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                 float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                 float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
@@ -104,6 +105,7 @@ namespace Syn
 
                 auto& overrideComp = registry->GetComponent<MaterialOverrideComponent>(e);
                 overrideComp.materials.push_back(randomMatId);
+                */
             }
         }
     };

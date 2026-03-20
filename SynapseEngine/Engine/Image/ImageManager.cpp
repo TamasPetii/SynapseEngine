@@ -8,6 +8,7 @@
 #include "Engine/Image/Source/Procedural/DefaultImageSource.h"
 #include "SamplerNames.h"
 #include "Engine/Vk/Descriptor/DescriptorWriter.h"
+#include "ImageNames.h"
 
 namespace Syn {
 
@@ -186,29 +187,16 @@ namespace Syn {
     }
 
     void ImageManager::LoadDefaultImageSync() {
-        uint32_t defaultId = InternalLoadSync("DefaultTexture", [this]() {
+        uint32_t defaultId = InternalLoadSync(ImageNames::Default, [this]() {
             auto source = std::make_unique<DefaultImageSource>();
             return _builder->BuildFromSource(*source);
             });
 
-        auto entry = &_entries[defaultId];
-        entry->resource = entry->cpuFuture.get();
-        entry->state = ResourceState::UploadingGPU;
+        auto resource = GetResource(defaultId);
 
-        ServiceLocator::GetGpuUploader()->UploadSync({
-            .uploadCallback = [this, entry](VkCommandBuffer cmd) {
-                auto uploadResult = _uploader->Upload(entry->resource->gpuData, cmd);
-                entry->resource->image = uploadResult.texture;
-                entry->stagingBuffer = std::move(uploadResult.stagingBuffer);
-            },
-            .onFinished = [this, entry]() {
-                entry->stagingBuffer.reset();
-                entry->state = ResourceState::Ready;
-            },
-            .needsGraphics = false
-            });
-
-        _bindlessBuffer->FillSampledImages(BINDING_TEXTURES, MAX_IMAGES, entry->resource->image->GetView());
+        if (resource && resource->image) {
+            _bindlessBuffer->FillSampledImages(BINDING_TEXTURES, MAX_IMAGES, resource->image->GetView());
+        }
     }
 
     uint32_t ImageManager::LoadImageAsync(const std::string& filePath) {
@@ -229,7 +217,7 @@ namespace Syn {
     void ImageManager::StartGpuUpload(EntryType& entry) {
         bool needsGraphics = entry.resource->gpuData.autoGenerateMipmaps;
 
-        ServiceLocator::GetGpuUploader()->Enqueue({
+        Vk::GpuUploadRequest request{
             .uploadCallback = [this, &entry](VkCommandBuffer cmd) {
                 auto uploadResult = _uploader->Upload(entry.resource->gpuData, cmd);
                 entry.resource->image = uploadResult.texture;
@@ -240,10 +228,12 @@ namespace Syn {
                 entry.stagingBuffer.reset();
                 entry.state = ResourceState::Ready;
                 _version.fetch_add(1, std::memory_order_release);
-				//Info("Image '{}' is ready", entry.path);
+                //Info("Image '{}' is ready", entry.path);
             },
             .needsGraphics = needsGraphics
-            });
+        };
+
+        SubmitGpuRequest(entry, std::move(request));
     }
 
     void ImageManager::FinalizeResource(EntryType& entry) {

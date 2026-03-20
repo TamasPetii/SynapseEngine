@@ -67,13 +67,7 @@ namespace Syn {
     void MaterialManager::LoadDefaultMaterialSync()
     {
         MaterialInfo defaultInfo{};
-        uint32_t defaultId = LoadMaterial(MaterialNames::EngineDefault, defaultInfo);
-
-        auto& entry = _entries[defaultId];
-        entry.resource = entry.cpuFuture.get();
-        entry.state = ResourceState::UploadingGPU;
-
-        StartGpuUpload(entry);
+        LoadMaterial(MaterialNames::EngineDefault, defaultInfo);
     }
 
     void MaterialManager::FinalizeResource(EntryType& entry) {

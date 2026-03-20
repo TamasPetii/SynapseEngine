@@ -20,6 +20,8 @@
 #include "Engine/Image/Loader/GliImageLoader.h"
 #include "Engine/Image/Uploader/DefaultGpuImageUploader.h"
 
+#include "Engine/Mesh/MeshSourceNames.h"
+
 namespace Syn {
 
     ResourceManager::ResourceManager() {
@@ -81,7 +83,7 @@ namespace Syn {
 		_staticMeshBuilder->RegisterProcessor(std::make_unique<NormalProcessor>());
 		_staticMeshBuilder->RegisterProcessor(std::make_unique<TangentProcessor>());
 		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerLodProcessor>());
-		//_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerOptimizerProcessor>());
+		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerOptimizerProcessor>());
 		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerMeshletProcessor>());
 		_staticMeshBuilder->RegisterProcessor(std::make_unique<ColliderProcessor>());
 
@@ -96,6 +98,19 @@ namespace Syn {
 		);
 
 		ServiceLocator::ProvideModelManager(_modelManager.get());
+
+		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::Sphere, []() { return MeshFactory::CreateSphere(); });
+		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::Cube, []() { return MeshFactory::CreateCube(); });
+		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::Quad, []() { return MeshFactory::CreateQuad(); });
+		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::ScreenQuad, []() { return MeshFactory::CreateScreenQuad(); });
+		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::Cylinder, []() { return MeshFactory::CreateCylinder(); });
+		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::Cone, []() { return MeshFactory::CreateCone(); });
+		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::Capsule, []() { return MeshFactory::CreateCapsule(); });
+		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::Hemisphere, []() { return MeshFactory::CreateHemisphere(); });
+		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::Pyramid, []() { return MeshFactory::CreatePyramid(); });
+		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::Grid, []() { return MeshFactory::CreateGrid(); });
+		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::Torus, []() { return MeshFactory::CreateTorus(); });
+
 	}
 
     ResourceManager::~ResourceManager() {

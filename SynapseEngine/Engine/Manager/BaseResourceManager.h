@@ -13,6 +13,7 @@
 #include "Engine/Vk/Command/CommandBuffer.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Core/ThreadSafeQueue.h"
+#include "Engine/Vk/Rendering/GpuUploader.h"
 
 namespace Syn {
 
@@ -27,6 +28,7 @@ namespace Syn {
     struct ResourceEntry {
         ResourceState state = ResourceState::LoadingCPU;
         std::string path;
+        bool isSyncLoad = false;
 
         std::shared_ptr<TResource> resource;
         std::unique_ptr<Vk::Buffer> stagingBuffer;
@@ -43,24 +45,15 @@ namespace Syn {
             ResourceState state;
         };
 
-        std::vector<ResourceSnapshot> GetResourceSnapshot() const {
-            std::lock_guard<std::mutex> lock(_mutex);
-            std::vector<ResourceSnapshot> snapshot;
-            snapshot.reserve(_entries.size());
-
-            for (const auto& entry : _entries) {
-                snapshot.push_back({ entry.resource, entry.state });
-            }
-            return snapshot;
-        }
-
         virtual ~BaseResourceManager() = default;
 
         void Update();
         size_t GetResourceCount() const;
         ResourceState GetEntryState(uint32_t id) const;
+        uint32_t GetResourceIndex(const std::string& name) const;
         std::shared_ptr<TResource> GetResource(uint32_t id) const;
         std::shared_ptr<TResource> GetResource(const std::string& name) const;
+        std::vector<ResourceSnapshot> GetResourceSnapshot() const;
         uint32_t GetVersion() const { return _version.load(std::memory_order_acquire); }
     protected:
         uint32_t InternalLoadAsync(const std::string& key, std::function<std::shared_ptr<TResource>()> task);
@@ -68,6 +61,7 @@ namespace Syn {
         uint32_t InternalLoad(const std::string& key, std::function<std::shared_ptr<TResource>()> task, bool isAsync);
         std::shared_ptr<TResource> GetResource(uint32_t id, bool internalCall) const;
     protected:
+        void SubmitGpuRequest(const EntryType& entry, Vk::GpuUploadRequest&& request);
         virtual void StartGpuUpload(EntryType& entry) = 0;
         virtual void FinalizeResource(EntryType& entry) = 0;
     protected:
@@ -99,6 +93,14 @@ namespace Syn {
     }
 
     template <typename TResource>
+    uint32_t BaseResourceManager<TResource>::GetResourceIndex(const std::string& name) const
+    {
+        std::lock_guard<std::mutex> lock(_mutex);
+        if (_pathToId.find(name) == _pathToId.end()) return UINT32_MAX;
+        return _pathToId.at(name);
+    }
+
+    template <typename TResource>
     std::shared_ptr<TResource> BaseResourceManager<TResource>::GetResource(uint32_t id) const {
         std::lock_guard<std::mutex> lock(_mutex);
         return GetResource(id, true);
@@ -125,18 +127,27 @@ namespace Syn {
         EntryType newEntry{};
         newEntry.path = key;
         newEntry.state = ResourceState::LoadingCPU;
+        newEntry.isSyncLoad = !isAsync;
 
         if (isAsync) {
             auto executor = ServiceLocator::GetTaskExecutor();
             newEntry.cpuFuture = executor->async(std::move(task));
+            _entries.push_back(std::move(newEntry));
         }
         else {
-            std::promise<std::shared_ptr<TResource>> promise;
-            promise.set_value(task());
-            newEntry.cpuFuture = promise.get_future();
+            newEntry.resource = task();
+
+            if (newEntry.resource != nullptr) {
+                newEntry.state = ResourceState::UploadingGPU;
+                _entries.push_back(std::move(newEntry));
+                StartGpuUpload(_entries.back());
+            }
+            else {
+                newEntry.state = ResourceState::Failed;
+                _entries.push_back(std::move(newEntry));
+            }
         }
 
-        _entries.push_back(std::move(newEntry));
         return newId;
     }
 
@@ -168,5 +179,28 @@ namespace Syn {
     {
         std::lock_guard<std::mutex> lock(_mutex);
         return _entries[id].state;
+    }
+
+    template <typename TResource>
+    void BaseResourceManager<TResource>::SubmitGpuRequest(const EntryType& entry, Vk::GpuUploadRequest&& request) {
+        auto uploader = ServiceLocator::GetGpuUploader();
+        if (entry.isSyncLoad) {
+            uploader->UploadSync(std::move(request));
+        }
+        else {
+            uploader->Enqueue(std::move(request));
+        }
+    }
+
+    template <typename TResource>
+    std::vector<typename BaseResourceManager<TResource>::ResourceSnapshot> BaseResourceManager<TResource>::GetResourceSnapshot() const {
+        std::lock_guard<std::mutex> lock(_mutex);
+        std::vector<ResourceSnapshot> snapshot;
+        snapshot.reserve(_entries.size());
+
+        for (const auto& entry : _entries) {
+            snapshot.push_back({ entry.resource, entry.state });
+        }
+        return snapshot;
     }
 }

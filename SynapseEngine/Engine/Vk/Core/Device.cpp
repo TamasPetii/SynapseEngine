@@ -57,6 +57,7 @@ namespace Syn::Vk {
         features13.synchronization2 = VK_TRUE;
         features13.dynamicRendering = VK_TRUE;
         features13.maintenance4 = VK_TRUE;
+        features13.shaderDemoteToHelperInvocation = VK_TRUE;
 
         VkPhysicalDeviceVulkan12Features features12{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES };
         features12.bufferDeviceAddress = VK_TRUE;

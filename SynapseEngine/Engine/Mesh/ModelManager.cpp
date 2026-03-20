@@ -42,10 +42,30 @@ namespace Syn {
             });
     }
 
+    uint32_t ModelManager::LoadModelSync(const std::string& filePath) {
+        return InternalLoadSync(filePath, [this, filePath]() {
+            return _builder->BuildFromFile(filePath);
+            });
+    }
+
+    uint32_t ModelManager::LoadModelFromSourceSync(const std::string& name, MeshSourceFactory factory) {
+        return InternalLoadSync(name, [this, factory]() {
+            if (auto source = factory()) {
+                return _builder->BuildFromSource(*source);
+            }
+            return std::shared_ptr<StaticMesh>(nullptr);
+            });
+    }
+
+    uint32_t ModelManager::LoadModelFromStaticMeshSync(const std::string& name, StaticMeshFactory factory) {
+        return InternalLoadSync(name, [factory]() {
+            return factory();
+            });
+    }
+
     void ModelManager::StartGpuUpload(EntryType& entry) {
         if (_materialLoadCallback && entry.resource) {
             std::filesystem::path modelDir = std::filesystem::path(entry.path).parent_path();
-
 
             std::vector<uint32_t> loadedMaterialIds;
             loadedMaterialIds.reserve(entry.resource->gpuData.materials.size());
@@ -95,7 +115,7 @@ namespace Syn {
             }
         }
 
-        ServiceLocator::GetGpuUploader()->Enqueue({
+        Vk::GpuUploadRequest request{
             .uploadCallback = [this, &entry](VkCommandBuffer cmd) {
                 auto uploadResult = _uploader->Upload(entry.resource->gpuData, cmd);
                 entry.resource->hardwareBuffers = std::move(uploadResult.hardwareBuffers);
@@ -106,10 +126,11 @@ namespace Syn {
                 entry.stagingBuffer.reset();
                 entry.state = ResourceState::Ready;
                 _version.fetch_add(1, std::memory_order_release);
-                //Info("Model '{}' is ready", entry.path);
             },
             .needsGraphics = false
-        });
+        };
+
+        SubmitGpuRequest(entry, std::move(request));
     }
 
     void ModelManager::FinalizeResource(EntryType& entry)
