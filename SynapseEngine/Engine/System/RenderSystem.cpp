@@ -90,6 +90,7 @@ namespace Syn
 
         uint32_t globalInstanceOffset = 0;
         uint32_t totalMaterialIndicesCapacity = 0;
+        uint32_t totalMaxMeshletInstances = 0;
 
         for (uint32_t modelId = 0; modelId < _modelCapacities.size(); ++modelId)
         {
@@ -101,8 +102,19 @@ namespace Syn
 
             if (!model) continue;
 
-            //Hmm: meshCount from material?
-            uint32_t meshCount = static_cast<uint32_t>(model->meshMaterialIndices.size());
+            uint32_t maxMeshletsForModel = 0;
+            uint32_t meshCount = model->gpuData.globalMeshCount;
+
+            for (uint32_t m = 0; m < meshCount; ++m)
+            {
+                uint32_t lod0Index = m * 4;
+                if (lod0Index < model->gpuData.meshletData.drawDescriptors.size())
+                {
+                    maxMeshletsForModel += model->gpuData.meshletData.drawDescriptors[lod0Index].meshletCount;
+                }
+            }
+
+            totalMaxMeshletInstances += capacity * maxMeshletsForModel;
             totalMaterialIndicesCapacity += capacity * meshCount;
 
             const auto& blueprints = model->baseDrawCommands;
@@ -153,8 +165,7 @@ namespace Syn
         }
 
         drawData->totalAllocatedInstances = globalInstanceOffset;
-
-        //Hmm??
+        drawData->totalMaxMeshletInstances = totalMaxMeshletInstances;
         drawData->requiredMaterialBufferSize = totalMaterialIndicesCapacity * sizeof(uint32_t);
 
         if (false)
@@ -212,6 +223,20 @@ namespace Syn
             if (_framesToUpload == 0) return;
 
             auto drawData = scene->GetSceneDrawData();
+
+            size_t requiredDataSize = drawData->totalMaxMeshletInstances * sizeof(DebugMeshletInstance);
+            auto& currentDebugBuffer = drawData->debugInstanceBuffers[frameIndex];
+
+            if (requiredDataSize > 0 && currentDebugBuffer->GetSize() < requiredDataSize)
+            {
+                size_t oldSize = currentDebugBuffer->GetSize();
+                Info("RenderSystem: [BUFFER REALLOCATION] Reallocating debug instance buffer for frame {}! Old size: {} bytes, New size: {} bytes", frameIndex, oldSize, requiredDataSize);
+
+                currentDebugBuffer = Vk::BufferFactory::CreatePersistent(
+                    requiredDataSize,
+                    VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
+                );
+            }
 
             size_t tradDescSize = drawData->activeTraditionalCount * sizeof(MeshDrawDescriptor);
             if (tradDescSize > 0)

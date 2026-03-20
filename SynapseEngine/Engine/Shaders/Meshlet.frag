@@ -53,6 +53,11 @@ layout(push_constant) uniform PushConstants {
     uint64_t modelSparseMapBufferAddr; 
     uint64_t materialLookupBuffer; 
     uint64_t materialBuffer; 
+
+    uint64_t debugInstanceBufferAddr;
+    uint64_t debugAabbIndirectAddr;
+    uint64_t debugSphereIndirectAddr;
+
     uint activeCameraEntity;
     uint meshletOffsetStart; 
     uint visualizeMeshlet; 

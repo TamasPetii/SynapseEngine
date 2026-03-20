@@ -672,6 +672,15 @@
     <ClCompile Include="Render\ComputePass\WireframeSetupPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\WireframeMeshletAabbPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\WireframeMeshletSpherePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\TransferPass\WireframeMeshletInitPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1436,6 +1445,15 @@
     <ClInclude Include="Render\ComputePass\WireframeSetupPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\WireframeMeshletAabbPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\WireframeMeshletSpherePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\TransferPass\WireframeMeshletInitPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Composite.vert" />
@@ -1457,5 +1475,6 @@
     <None Include="Shaders\WireframeSetup.comp" />
     <None Include="Shaders\Wireframe.vert" />
     <None Include="Shaders\Wireframe.frag" />
+    <None Include="Shaders\WireframeMeshlet.vert" />
   </ItemGroup>
 </Project>

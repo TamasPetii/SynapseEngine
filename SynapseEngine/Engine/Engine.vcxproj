@@ -398,6 +398,9 @@
     <ClCompile Include="Render\GraphicsPass\WireframeAabbPass.cpp" />
     <ClCompile Include="Render\GraphicsPass\WireframeSpherePass.cpp" />
     <ClCompile Include="Render\ComputePass\WireframeSetupPass.cpp" />
+    <ClCompile Include="Render\GraphicsPass\WireframeMeshletAabbPass.cpp" />
+    <ClCompile Include="Render\GraphicsPass\WireframeMeshletSpherePass.cpp" />
+    <ClCompile Include="Render\TransferPass\WireframeMeshletInitPass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Image\ImageNames.h" />
@@ -654,6 +657,9 @@
     <ClInclude Include="Render\GraphicsPass\WireframeAabbPass.h" />
     <ClInclude Include="Render\GraphicsPass\WireframeSpherePass.h" />
     <ClInclude Include="Render\ComputePass\WireframeSetupPass.h" />
+    <ClInclude Include="Render\GraphicsPass\WireframeMeshletAabbPass.h" />
+    <ClInclude Include="Render\GraphicsPass\WireframeMeshletSpherePass.h" />
+    <ClInclude Include="Render\TransferPass\WireframeMeshletInitPass.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\BloomComposite.comp" />
@@ -664,6 +670,7 @@
     <None Include="Shaders\Composite.vert" />
     <None Include="Shaders\Wireframe.frag" />
     <None Include="Shaders\Wireframe.vert" />
+    <None Include="Shaders\WireframeMeshlet.vert" />
     <None Include="Shaders\WireframeSetup.comp" />
     <None Include="Shaders\HizDownsample.comp" />
     <None Include="Shaders\HizLinearizeDepth.comp" />

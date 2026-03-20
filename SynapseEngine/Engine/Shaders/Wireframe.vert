@@ -3,12 +3,14 @@
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 #extension GL_ARB_shader_draw_parameters : require
 
-struct GpuVertexPosition {
+struct GpuVertexPosition 
+{
     vec3 position;
     uint packedIndex;
 };
 
-struct GpuMeshCollider { 
+struct GpuMeshCollider 
+{ 
     vec3 center; 
     float radius; 
     vec3 aabbMin; 
@@ -17,12 +19,8 @@ struct GpuMeshCollider {
     float padding1; 
 };
 
-struct GpuNodeTransform {
-    mat4 globalTransform;
-    mat4 globalTransformIT;
-};
-
-struct GpuModelAddresses { 
+struct GpuModelAddresses 
+{ 
     uint64_t vertexPositions; 
     uint64_t vertexAttributes; 
     uint64_t indices; 
@@ -42,7 +40,8 @@ struct GpuModelAddresses {
     uint meshCount; 
 };
 
-struct MeshDrawDescriptor {
+struct MeshDrawDescriptor 
+{
     uint modelIndex;
     uint meshIndex;
     uint lodIndex;
@@ -53,7 +52,8 @@ struct MeshDrawDescriptor {
     uint padding;
 };
 
-struct CameraComponent { 
+struct CameraComponent 
+{ 
     mat4 view; 
     mat4 viewInv; 
     mat4 proj; 
@@ -69,23 +69,24 @@ struct CameraComponent {
     vec4 frustum[6]; 
 };
 
-struct TransformComponent { 
+struct TransformComponent 
+{ 
     mat4 transform; 
     mat4 transformIT; 
 };
 
-layout(buffer_reference, std430) readonly buffer PositionBuffer     { GpuVertexPosition data[]; };
-layout(buffer_reference, std430) readonly buffer IndexBuffer        { uint data[]; };
-layout(buffer_reference, std430) readonly buffer InstanceBuffer     { uint data[]; };
-layout(buffer_reference, std430) readonly buffer DescriptorBuffer   { MeshDrawDescriptor data[]; };
+layout(buffer_reference, std430) readonly buffer PositionBuffer { GpuVertexPosition data[]; };
+layout(buffer_reference, std430) readonly buffer IndexBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly buffer InstanceBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly buffer DescriptorBuffer { MeshDrawDescriptor data[]; };
 layout(buffer_reference, std430) readonly buffer ModelAddressBuffer { GpuModelAddresses data[]; };
-layout(buffer_reference, std430) readonly buffer MeshColliderPool   { GpuMeshCollider data[]; };
-layout(buffer_reference, std430) readonly buffer TransformPool      { TransformComponent data[]; };
-layout(buffer_reference, std430) readonly buffer CameraPool         { CameraComponent data[]; };
-layout(buffer_reference, std430) readonly buffer SparseMapBuffer    { uint data[]; };
-layout(buffer_reference, std430) readonly buffer NodeBuffer         { GpuNodeTransform data[]; }; 
+layout(buffer_reference, std430) readonly buffer MeshColliderPool { GpuMeshCollider data[]; };
+layout(buffer_reference, std430) readonly buffer TransformPool { TransformComponent data[]; };
+layout(buffer_reference, std430) readonly buffer CameraPool { CameraComponent data[]; };
+layout(buffer_reference, std430) readonly buffer SparseMapBuffer { uint data[]; };
 
-layout(push_constant) uniform PushConstants {
+layout(push_constant) uniform PushConstants 
+{
     uint64_t modelAddressBuffer;
     uint64_t globalInstanceBuffers;
     uint64_t globalIndirectCommandDescriptorBuffers;
@@ -103,7 +104,8 @@ layout(push_constant) uniform PushConstants {
 
 layout(location = 0) out vec4 outColor;
 
-vec3 generateWireframeColor(uint id) {
+vec3 generateWireframeColor(uint id) 
+{
     uint hash = (id ^ 61) ^ (id >> 16);
     hash = hash + (hash << 3);
     hash = hash ^ (hash >> 4);
@@ -117,7 +119,8 @@ vec3 generateWireframeColor(uint id) {
     return vec3(r, g, b);
 }
 
-void main() {
+void main() 
+{
     DescriptorBuffer descriptors = DescriptorBuffer(pc.globalIndirectCommandDescriptorBuffers);
     MeshDrawDescriptor desc = descriptors.data[pc.drawIdOffset + gl_DrawIDARB];
 
@@ -138,9 +141,12 @@ void main() {
     GpuMeshCollider collider = colliders.data[desc.meshIndex];
 
     vec3 localPos;
-    if (pc.isSphere == 1) {
+    if (pc.isSphere == 1) 
+    {
         localPos = collider.center + (v.position * collider.radius);
-    } else {
+    } 
+    else 
+    {
         vec3 localExtents = (collider.aabbMax - collider.aabbMin) * 0.5;
         vec3 localCenter = (collider.aabbMax + collider.aabbMin) * 0.5;
         localPos = localCenter + (v.position * localExtents); 
@@ -156,13 +162,6 @@ void main() {
     uint cameraDenseIndex = cameraMap.data[pc.activeCameraEntity];
     CameraComponent camera = cameras.data[cameraDenseIndex];
 
-    uint packedIndex = v.packedIndex;
-    uint meshIndex = (packedIndex >> 16) & 0xFFFFu;
-    uint nodeIndex = packedIndex & 0xFFFFu;
-    NodeBuffer nodes = NodeBuffer(addrs.nodeTransforms);
-    GpuNodeTransform nodeTransform = nodes.data[nodeIndex];
-
-    gl_Position = camera.viewProjVulkan * transform.transform * nodeTransform.globalTransform * vec4(localPos, 1.0);
-    outColor = vec4(generateWireframeColor(gl_DrawIDARB), 1);
-    //outColor = pc.debugColor;
+    gl_Position = camera.viewProjVulkan * transform.transform * vec4(localPos, 1.0);   
+    outColor = vec4(generateWireframeColor(gl_DrawIDARB), 1.0);
 }

@@ -30,6 +30,10 @@ namespace Syn
         aabbIndirectCommandBuffers.resize(frameCount);
         sphereIndirectCommandBuffers.resize(frameCount);
 
+        debugInstanceBuffers.resize(frameCount);
+        debugAabbIndirectBuffers.resize(frameCount);
+        debugSphereIndirectBuffers.resize(frameCount);
+
         size_t traditionalBytes = MESHLET_OFFSET_START * sizeof(VkDrawIndirectCommand);
         size_t meshletBytes = (MAX_INDIRECT_COMMANDS - MESHLET_OFFSET_START) * sizeof(VkDrawMeshTasksIndirectCommandEXT);
 
@@ -37,7 +41,7 @@ namespace Syn
         VkDrawIndirectCommand aabbCmd{};
         aabbCmd.vertexCount = cube->baseDrawCommands[0].traditionalCmd.vertexCount;
         aabbCmd.instanceCount = 0;
-        aabbCmd.firstVertex = cube->baseDrawCommands[0].traditionalCmd.firstVertex;
+        aabbCmd.firstVertex = cube->baseDrawCommands[0].traditionalCmd.firstVertex;;
         aabbCmd.firstInstance = 0;
 
         auto sphere = modelManager->GetResource(MeshSourceNames::Sphere);
@@ -49,6 +53,9 @@ namespace Syn
 
         std::vector<VkDrawIndirectCommand> aabbCommands(MAX_INDIRECT_COMMANDS, aabbCmd);
         std::vector<VkDrawIndirectCommand> sphereCommands(MAX_INDIRECT_COMMANDS, sphereCmd);
+
+        debugAabbCmdTemplate = aabbCmd;
+        debugSphereCmdTemplate = sphereCmd;
 
         for (uint32_t i = 0; i < frameCount; ++i)
         {
@@ -100,6 +107,21 @@ namespace Syn
             sphereIndirectCommandBuffers[i] = Vk::BufferFactory::CreatePersistent(
                 MAX_INDIRECT_COMMANDS * sizeof(VkDrawIndirectCommand),
                 VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+            );
+
+            debugAabbIndirectBuffers[i] = Vk::BufferFactory::CreatePersistent(
+                sizeof(VkDrawIndirectCommand),
+                VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+            );
+
+            debugSphereIndirectBuffers[i] = Vk::BufferFactory::CreatePersistent(
+                sizeof(VkDrawIndirectCommand),
+                VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
+            );
+
+            debugInstanceBuffers[i] = Vk::BufferFactory::CreatePersistent(
+                sizeof(uint32_t),
+                VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
             );
 
             aabbIndirectCommandBuffers[i]->Write(aabbCommands.data(), aabbCommands.size() * sizeof(VkDrawIndirectCommand));

@@ -30,5 +30,6 @@ namespace Syn
         static constexpr const char* WireframeSetup = "../Engine/Shaders/WireframeSetup.comp";
         static constexpr const char* WireframeVert = "../Engine/Shaders/Wireframe.vert";
         static constexpr const char* WireframeFrag = "../Engine/Shaders/Wireframe.frag";
+        static constexpr const char* WireframeMeshletVert = "../Engine/Shaders/WireframeMeshlet.vert";
     };
 }

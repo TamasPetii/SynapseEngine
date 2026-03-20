@@ -11,6 +11,11 @@
 
 namespace Syn
 {
+    struct DebugMeshletInstance {
+        uint32_t entityId;
+        uint32_t globalMeshletIdx;
+    };
+
     struct SYN_API SceneDrawData
     {
         SceneDrawData(uint32_t frameCount);
@@ -30,9 +35,6 @@ namespace Syn
         std::vector<std::shared_ptr<Vk::Buffer>> globalModelComputeCountBuffer;
         std::vector<std::shared_ptr<Vk::Buffer>> globalMaterialIndexBuffers;
 
-        std::vector<std::shared_ptr<Vk::Buffer>> aabbIndirectCommandBuffers;
-        std::vector<std::shared_ptr<Vk::Buffer>> sphereIndirectCommandBuffers;
-
         uint32_t activeDescriptorCount = 0;
         uint32_t activeTraditionalCount = 0;
         uint32_t activeMeshletCount = 0;
@@ -46,7 +48,16 @@ namespace Syn
         std::vector<VkDrawIndirectCommand> traditionalCommands;
         std::vector<VkDrawMeshTasksIndirectCommandEXT> meshletCommands;
 
+        std::vector<std::shared_ptr<Vk::Buffer>> aabbIndirectCommandBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> sphereIndirectCommandBuffers;
         std::vector<VkDrawIndirectCommand> aabbIndirectCommands;
         std::vector<VkDrawIndirectCommand> sphereIndirectCommands;
+
+        std::vector<std::shared_ptr<Vk::Buffer>> debugInstanceBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> debugAabbIndirectBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> debugSphereIndirectBuffers;
+        VkDrawIndirectCommand debugAabbCmdTemplate{};
+        VkDrawIndirectCommand debugSphereCmdTemplate{};
+        uint32_t totalMaxMeshletInstances = 0;
     };
 }

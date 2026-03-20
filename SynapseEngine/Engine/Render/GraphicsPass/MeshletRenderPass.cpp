@@ -40,6 +40,10 @@ namespace Syn {
         VkDeviceAddress materialLookupBuffer;
         VkDeviceAddress materialBuffer;
 
+        VkDeviceAddress debugInstanceBufferAddr;
+        VkDeviceAddress debugAabbIndirectAddr;
+        VkDeviceAddress debugSphereIndirectAddr;
+
         uint32_t activeCameraEntity;
         uint32_t meshletOffsetStart;
         uint32_t visualizeMeshlet;
@@ -157,6 +161,11 @@ namespace Syn {
         pc.modelSparseMapBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::ModelSparseMap, fIdx).buffer->GetDeviceAddress();
         pc.materialLookupBuffer = drawData->globalMaterialIndexBuffers[fIdx]->GetDeviceAddress();
         pc.materialBuffer = materialManager->GetMaterialBuffer()->GetDeviceAddress();
+
+        pc.debugInstanceBufferAddr = drawData->debugInstanceBuffers[fIdx]->GetDeviceAddress();
+        pc.debugAabbIndirectAddr = drawData->debugAabbIndirectBuffers[fIdx]->GetDeviceAddress();
+        pc.debugSphereIndirectAddr = drawData->debugSphereIndirectBuffers[fIdx]->GetDeviceAddress();
+        
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.meshletOffsetStart = SceneDrawData::MESHLET_OFFSET_START;
         pc.visualizeMeshlet = 1;

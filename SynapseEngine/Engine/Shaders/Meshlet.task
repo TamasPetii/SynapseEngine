@@ -7,6 +7,18 @@ layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
 layout(set = 2, binding = 0) uniform sampler2D depthPyramid;
 
+struct DebugMeshletInstance {
+    uint entityId;
+    uint globalMeshletIdx;
+};
+
+struct DrawIndirectCommand {
+    uint vertexCount;
+    uint instanceCount;
+    uint firstVertex;
+    uint firstInstance;
+};
+
 struct GpuMeshCollider {
     vec3 center;
     float radius;
@@ -96,6 +108,8 @@ layout(buffer_reference, std430) readonly buffer TransformPool { TransformCompon
 layout(buffer_reference, std430) readonly buffer CameraPool { CameraComponent data[]; };
 layout(buffer_reference, std430) readonly buffer MeshletDrawDescBuffer { GpuMeshletDrawDescriptor data[]; };
 layout(buffer_reference, std430) readonly buffer MeshletColliderBuffer { GpuMeshletCollider data[]; };
+layout(buffer_reference, std430) buffer DebugInstanceBuffer { DebugMeshletInstance instances[]; };
+layout(buffer_reference, std430) buffer DebugIndirectCommandBuffer { DrawIndirectCommand cmd; };
 
 layout(push_constant) uniform PushConstants {
     uint64_t modelAddressBuffer; 
@@ -113,6 +127,11 @@ layout(push_constant) uniform PushConstants {
     uint64_t modelSparseMapBufferAddr; 
     uint64_t materialLookupBuffer; 
     uint64_t materialBuffer; 
+
+    uint64_t debugInstanceBufferAddr;
+    uint64_t debugAabbIndirectAddr;
+    uint64_t debugSphereIndirectAddr;
+
     uint activeCameraEntity;
     uint meshletOffsetStart; 
     uint visualizeMeshlet; 
@@ -341,6 +360,19 @@ void main() {
         if (isVisible) {
             uint slot = atomicAdd(survivingMeshletCount, 1);
             payload.meshletIndices[slot] = currentMeshletIdx;
+
+            if (pc.visualizeMeshlet == 1) 
+            {
+                DebugInstanceBuffer debugInstanceBuffer = DebugInstanceBuffer(pc.debugInstanceBufferAddr);
+                DebugIndirectCommandBuffer debugAabbCmdBuffer = DebugIndirectCommandBuffer(pc.debugAabbIndirectAddr);
+                DebugIndirectCommandBuffer debugSphereCmdBuffer = DebugIndirectCommandBuffer(pc.debugSphereIndirectAddr);
+
+                uint debugInstanceIndex = atomicAdd(debugAabbCmdBuffer.cmd.instanceCount, 1);
+                atomicAdd(debugSphereCmdBuffer.cmd.instanceCount, 1);
+
+                debugInstanceBuffer.instances[debugInstanceIndex].entityId = entityId;
+                debugInstanceBuffer.instances[debugInstanceIndex].globalMeshletIdx = globalMeshletIdx;
+            }
         }
     }
 
