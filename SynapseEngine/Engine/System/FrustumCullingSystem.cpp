@@ -17,7 +17,12 @@
 namespace Syn
 {
     std::vector<TypeID> FrustumCullingSystem::GetReadDependencies() const {
-        return { TypeInfo<ModelSystem>::ID, TypeInfo<TransformSystem>::ID, TypeInfo<RenderSystem>::ID, TypeInfo<CameraSystem>::ID };
+        return { 
+            TypeInfo<ModelSystem>::ID,
+            TypeInfo<TransformSystem>::ID,
+            TypeInfo<RenderSystem>::ID,
+            TypeInfo<CameraSystem>::ID
+        };
     }
 
     void FrustumCullingSystem::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)

@@ -8,10 +8,15 @@ namespace Syn
     void WireframeMeshletInitPass::Transfer(const RenderContext& context)
     {
         auto scene = context.scene;
-        auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
 
-        if (!scene || drawData->activeDescriptorCount == 0 || !drawData->debugInstanceBuffers[fIdx]) return;
+        if (!scene)
+            return;
+
+        auto drawData = scene->GetSceneDrawData();
+
+        if (drawData->activeDescriptorCount == 0)
+            return;
 
         Vk::BufferBarrierInfo instanceBarrier{};
         instanceBarrier.buffer = drawData->debugInstanceBuffers[fIdx]->Handle();

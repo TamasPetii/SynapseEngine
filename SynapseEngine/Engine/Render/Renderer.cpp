@@ -42,17 +42,14 @@ namespace Syn {
     }
 
     void Renderer::WaitForFrame(uint32_t frameIndex) {
-        VkFence fences[] = {
-            _inFlightFences[frameIndex]->Handle(),
-            _presentFences[frameIndex]->Handle()
-        };
-
         auto device = ServiceLocator::GetVkContext()->GetDevice()->Handle();
+
+        VkFence fences[] = { _inFlightFences[frameIndex]->Handle(), _presentFences[frameIndex]->Handle() };
         vkWaitForFences(device, 2, fences, VK_TRUE, UINT64_MAX);
-        vkResetFences(device, 2, fences);
     }
 
     Vk::CommandBuffer* Renderer::BeginFrame(uint32_t frameIndex) {
+        auto device = ServiceLocator::GetVkContext()->GetDevice()->Handle();
         auto swapChain = ServiceLocator::GetVkContext()->GetSwapChain();
         uint32_t imageIndex = swapChain->AcquireNextImage(_imageAvailableSemaphores[frameIndex]->Handle());
 
@@ -61,6 +58,9 @@ namespace Syn {
         }
 
         _imageIndex = imageIndex;
+
+        VkFence fences[] = { _inFlightFences[frameIndex]->Handle(), _presentFences[frameIndex]->Handle() };
+        vkResetFences(device, 2, fences);
 
         auto cmd = _commandBuffers[frameIndex].get();
         cmd->Reset();

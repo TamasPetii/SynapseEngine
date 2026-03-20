@@ -8,6 +8,7 @@ namespace Syn
     {
     public:
         std::string GetName() const override { return "CameraSystem"; }
+        std::vector<TypeID> GetReadDependencies() const override;
         std::vector<TypeID> GetWriteDependencies() const override;
     protected:
         std::string GetSparseBufferName() const override { return BufferNames::CameraSparseMap; }

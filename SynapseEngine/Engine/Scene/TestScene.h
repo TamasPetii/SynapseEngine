@@ -41,8 +41,9 @@ namespace Syn
                 //Main Camera
                 EntityID cameraEntity = registry->CreateEntity();
                 registry->AddComponent<CameraComponent>(cameraEntity);
-                auto& cam = registry->GetComponent<CameraComponent>(cameraEntity);
-                cam.position = glm::vec3(0.0f, 0.0f, 5.0f);
+                registry->AddComponent<TransformComponent>(cameraEntity);
+                registry->GetPool<CameraComponent>()->SetCategory(cameraEntity, StorageCategory::Stream);
+                registry->GetPool<TransformComponent>()->SetCategory(cameraEntity, StorageCategory::Stream);
                 _sceneCameraEntity = cameraEntity;
             }
 

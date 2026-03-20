@@ -74,6 +74,7 @@ namespace Syn
         for (auto& system : _systems)
         {
             tf::Task sysTask = taskflow.emplace([sys = system.get(), phase, this](tf::Subflow& subflow) {
+
                 switch (phase)
                 {
                 case SystemPhase::Update:
@@ -86,6 +87,7 @@ namespace Syn
                     sys->OnFinish(this, subflow);
                     break;
                 }
+
                 }).name(system->GetName());
 
             if (phase == SystemPhase::Update)
@@ -107,7 +109,10 @@ namespace Syn
                     }
                     for (auto& readerTask : lastReaders[typeId])
                     {
-                        sysTask.succeed(readerTask);
+                        if (readerTask != sysTask)
+                        {
+                            sysTask.succeed(readerTask);
+                        }
                     }
 
                     lastReaders[typeId].clear();

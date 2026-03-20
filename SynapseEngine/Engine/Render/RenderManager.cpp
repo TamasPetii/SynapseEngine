@@ -1,6 +1,8 @@
 #include "RenderManager.h"
 
 #include "Engine/Vk/Command/CommandBuffer.h"
+#include "Engine/ServiceLocator.h"
+#include "Engine/Vk/Context.h"
 
 namespace Syn {
 
@@ -34,7 +36,9 @@ namespace Syn {
         if (!_activePipeline) 
             return;
 
-        if (_frameNeedsResize[frameIndex]) {
+        if (_frameNeedsResize[frameIndex]) 
+        {
+            vkDeviceWaitIdle(ServiceLocator::GetVkContext()->GetDevice()->Handle());
             _renderTargetManager->Resize(frameIndex, _newWidth, _newHeight);
             _frameNeedsResize[frameIndex] = false;
         }
