@@ -669,6 +669,9 @@
     <ClCompile Include="Render\GraphicsPass\WireframeSpherePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\ComputePass\WireframeSetupPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1428,6 +1431,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Image\ImageNames.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\ComputePass\WireframeSetupPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

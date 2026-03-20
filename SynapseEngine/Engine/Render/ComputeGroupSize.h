@@ -12,6 +12,7 @@ namespace Syn
 
         static constexpr uint32_t Buffer32D = 32;
         static constexpr uint32_t Buffer64D = 64;
+        static constexpr uint32_t Buffer256D = 256;
 
         static constexpr uint32_t CalculateDispatchCount(uint32_t elementCount, uint32_t groupSize)
         {

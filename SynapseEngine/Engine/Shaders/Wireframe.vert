@@ -97,14 +97,29 @@ layout(push_constant) uniform PushConstants {
     uint64_t vertexBufferAddr;
     uint activeCameraEntity;
     uint isSphere;
+    uint drawIdOffset;
     vec4 debugColor;
 } pc;
 
 layout(location = 0) out vec4 outColor;
 
+vec3 generateWireframeColor(uint id) {
+    uint hash = (id ^ 61) ^ (id >> 16);
+    hash = hash + (hash << 3);
+    hash = hash ^ (hash >> 4);
+    hash = hash * 0x27d4eb2d;
+    hash = hash ^ (hash >> 15);
+    
+    float r = float((hash & 0xFF0000) >> 16) / 255.0;
+    float g = float((hash & 0x00FF00) >> 8) / 255.0;
+    float b = float(hash & 0x0000FF) / 255.0;
+    
+    return vec3(r, g, b);
+}
+
 void main() {
     DescriptorBuffer descriptors = DescriptorBuffer(pc.globalIndirectCommandDescriptorBuffers);
-    MeshDrawDescriptor desc = descriptors.data[gl_DrawIDARB];
+    MeshDrawDescriptor desc = descriptors.data[pc.drawIdOffset + gl_DrawIDARB];
 
     InstanceBuffer instances = InstanceBuffer(pc.globalInstanceBuffers);
     uint rawEntityData = instances.data[desc.instanceOffset + gl_InstanceIndex];
@@ -148,5 +163,6 @@ void main() {
     GpuNodeTransform nodeTransform = nodes.data[nodeIndex];
 
     gl_Position = camera.viewProjVulkan * transform.transform * nodeTransform.globalTransform * vec4(localPos, 1.0);
-    outColor = pc.debugColor;
+    outColor = vec4(generateWireframeColor(gl_DrawIDARB), 1);
+    //outColor = pc.debugColor;
 }

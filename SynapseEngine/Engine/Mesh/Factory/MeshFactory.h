@@ -17,7 +17,7 @@ namespace Syn
 
         static std::shared_ptr<StaticMesh> CreateCone(float radius = 1.0f, float height = 2.0f, uint32_t radialSegments = 32, uint32_t heightSegments = 1);
 
-        static std::shared_ptr<StaticMesh> CreateCube(float size = 1.0f);
+        static std::shared_ptr<StaticMesh> CreateCube(float size = 2.0f);
 
         static std::shared_ptr<StaticMesh> CreateCylinder(float bottomRadius = 1.0f, float topRadius = 1.0f, float height = 2.0f, uint32_t radialSegments = 32, uint32_t heightSegments = 1);
 

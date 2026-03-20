@@ -397,6 +397,7 @@
     <ClCompile Include="Utils\WindowedBuffer.cpp" />
     <ClCompile Include="Render\GraphicsPass\WireframeAabbPass.cpp" />
     <ClCompile Include="Render\GraphicsPass\WireframeSpherePass.cpp" />
+    <ClCompile Include="Render\ComputePass\WireframeSetupPass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Image\ImageNames.h" />
@@ -652,6 +653,7 @@
     <ClInclude Include="Utils\WindowedBuffer.h" />
     <ClInclude Include="Render\GraphicsPass\WireframeAabbPass.h" />
     <ClInclude Include="Render\GraphicsPass\WireframeSpherePass.h" />
+    <ClInclude Include="Render\ComputePass\WireframeSetupPass.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\BloomComposite.comp" />

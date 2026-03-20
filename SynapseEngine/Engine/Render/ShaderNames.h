@@ -26,5 +26,9 @@ namespace Syn
         static constexpr const char* BloomUpsample = "../Engine/Shaders/BloomUpsample.comp";
         static constexpr const char* BloomDownsample = "../Engine/Shaders/BloomDownsample.comp";
         static constexpr const char* BloomComposite = "../Engine/Shaders/BloomComposite.comp";
+
+        static constexpr const char* WireframeSetup = "../Engine/Shaders/WireframeSetup.comp";
+        static constexpr const char* WireframeVert = "../Engine/Shaders/Wireframe.vert";
+        static constexpr const char* WireframeFrag = "../Engine/Shaders/Wireframe.frag";
     };
 }

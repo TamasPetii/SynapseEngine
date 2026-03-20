@@ -1,4 +1,15 @@
 #pragma once
-class WireframeAabbPass
-{};
+#include "Engine/SynApi.h"
+#include "Engine/Render/GraphicsPass/GraphicsPass.h"
 
+namespace Syn {
+    class SYN_API WireframeAabbPass : public GraphicsPass {
+    public:
+        std::string GetName() const override { return "WireframeAABBPass"; }
+        void Initialize() override;
+    protected:
+        void PrepareFrame(const RenderContext& context) override;
+        void PushConstants(const RenderContext& context) override;
+        void Draw(const RenderContext& context) override;
+    };
+}

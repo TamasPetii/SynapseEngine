@@ -7,7 +7,7 @@ namespace Syn
     class SYN_API CubeMeshSource : public ShapeMeshSource
     {
     public:
-        CubeMeshSource(float size = 1.0f);
+        CubeMeshSource(float size = 2.0f);
         virtual ~CubeMeshSource() override = default;
 
     protected:
