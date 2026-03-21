@@ -134,6 +134,7 @@ namespace Syn {
                 entry.stagingBuffer.reset();
                 SetResourceState(entryId, ResourceState::Ready);
                 _version.fetch_add(1, std::memory_order_release);
+                Info("Model loaded: {}", entry.path);
             },
             .needsGraphics = false
         };

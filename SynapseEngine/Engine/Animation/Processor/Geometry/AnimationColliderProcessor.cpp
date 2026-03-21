@@ -52,6 +52,7 @@ namespace Syn
                 for (size_t v = 0; v < staticMesh.vertices.size(); ++v)
                 {
                     glm::mat4 skinMat(0.0f);
+
                     for (int i = 0; i < 4; ++i)
                     {
                         uint32_t boneIdx = skinData.vertices[v].boneIndices[i];
@@ -62,9 +63,6 @@ namespace Syn
                             skinMat += currentFrame.bakedNodeTransforms[boneIdx] * weight;
                         }
                     }
-
-                    if (skinMat == glm::mat4(0.0f)) 
-                        skinMat = glm::mat4(1.0f);
 
                     glm::vec3 animPos = glm::vec3(skinMat * glm::vec4(staticMesh.vertices[v].position, 1.0f));
                     deformedPositions[v] = animPos;

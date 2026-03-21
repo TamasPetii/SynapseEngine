@@ -9,6 +9,7 @@
 #include "Engine/Mesh/MeshSourceNames.h"
 #include "Engine/Component/MaterialOverrideComponent.h"
 #include "Engine/Material/MaterialManager.h"
+#include "Engine/Animation/AnimationManager.h"
 #include <random>
 
 namespace Syn
@@ -20,9 +21,12 @@ namespace Syn
         {
             auto registry = GetRegistry();
             auto modelManager = ServiceLocator::GetModelManager();
+            auto animationManager = ServiceLocator::GetAnimationManager();
 
-            uint32_t sponzaId = modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Sponza-master/sponza.obj");
-            uint32_t bistroId = modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
+            //uint32_t sponzaId = modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Sponza-master/sponza.obj");
+            //uint32_t bistroId = modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
+            uint32_t characterId = modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Character/Jump.dae");
+            uint32_t characterAnimId = animationManager->LoadAnimationAsync("C:/Users/User/Desktop/Models/Character/Jump.dae", characterId);
 
             std::vector<uint32_t> geoIds;
             geoIds.push_back(modelManager->GetResourceIndex(MeshSourceNames::Sphere));
@@ -47,29 +51,51 @@ namespace Syn
                 _sceneCameraEntity = cameraEntity;
             }
 
-            // Sponza
-            EntityID sponzaEntity = registry->CreateEntity();
-            registry->AddComponent<TransformComponent>(sponzaEntity);
-            registry->AddComponent<ModelComponent>(sponzaEntity);
+            {
+                /*
+                // Sponza
+                EntityID sponzaEntity = registry->CreateEntity();
+                registry->AddComponent<TransformComponent>(sponzaEntity);
+                registry->AddComponent<ModelComponent>(sponzaEntity);
 
-            registry->GetComponent<TransformComponent>(sponzaEntity).translation = glm::vec3(0.0f, 0.0f, 0.0f);
-            registry->GetComponent<TransformComponent>(sponzaEntity).scale = glm::vec3(0.2f, 0.2f, 0.2f);
-            registry->GetComponent<ModelComponent>(sponzaEntity).modelIndex = sponzaId;
+                registry->GetComponent<TransformComponent>(sponzaEntity).translation = glm::vec3(0.0f, 0.0f, 0.0f);
+                registry->GetComponent<TransformComponent>(sponzaEntity).scale = glm::vec3(0.2f, 0.2f, 0.2f);
+                registry->GetComponent<ModelComponent>(sponzaEntity).modelIndex = sponzaId;
 
-            registry->GetPool<TransformComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
-            registry->GetPool<ModelComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
+                registry->GetPool<TransformComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
+                registry->GetPool<ModelComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
+                */
+            }
 
-            // Bistro
-            EntityID bistroEntity = registry->CreateEntity();
-            registry->AddComponent<TransformComponent>(bistroEntity);
-            registry->AddComponent<ModelComponent>(bistroEntity);
+            {
+                /*
+                // Bistro
+                EntityID bistroEntity = registry->CreateEntity();
+                registry->AddComponent<TransformComponent>(bistroEntity);
+                registry->AddComponent<ModelComponent>(bistroEntity);
 
-            registry->GetComponent<TransformComponent>(bistroEntity).translation = glm::vec3(50.0f, 0.0f, 0.0f);
-            registry->GetComponent<ModelComponent>(bistroEntity).modelIndex = bistroId;
+                registry->GetComponent<TransformComponent>(bistroEntity).translation = glm::vec3(50.0f, 0.0f, 0.0f);
+                registry->GetComponent<ModelComponent>(bistroEntity).modelIndex = bistroId;
 
-            registry->GetPool<TransformComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
-            registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
+                registry->GetPool<TransformComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
+                registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
+                */
+            }
 
+            {
+                // Character
+                EntityID characterEntity = registry->CreateEntity();
+                registry->AddComponent<TransformComponent>(characterEntity);
+                registry->AddComponent<ModelComponent>(characterEntity);
+
+                registry->GetComponent<TransformComponent>(characterEntity).translation = glm::vec3(50.0f, 0.0f, 0.0f);
+                registry->GetComponent<TransformComponent>(characterEntity).scale = glm::vec3(5.f);
+                registry->GetComponent<ModelComponent>(characterEntity).modelIndex = characterId;
+
+                registry->GetPool<TransformComponent>()->SetCategory(characterEntity, StorageCategory::Static);
+                registry->GetPool<ModelComponent>()->SetCategory(characterEntity, StorageCategory::Static);
+            }
+          
             auto materialManager = ServiceLocator::GetMaterialManager();
 
             // Random Geometry

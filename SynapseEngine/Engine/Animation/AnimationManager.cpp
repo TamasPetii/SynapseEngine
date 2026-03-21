@@ -66,6 +66,7 @@ namespace Syn {
                 entry.stagingBuffer.reset();
                 entry.state = ResourceState::Ready;
                 _version.fetch_add(1, std::memory_order_release);
+                Info("Animation loaded: {}", entry.path);
             },
             .needsGraphics = false
         };

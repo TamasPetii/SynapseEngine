@@ -35,10 +35,10 @@ namespace Syn
         pipeline->AddPass(std::make_unique<HizDownsamplePass>());
         pipeline->AddPass(std::make_unique<ModelCullingPass>());
         pipeline->AddPass(std::make_unique<MeshCullingPass>());
-        //pipeline->AddPass(std::make_unique<WireframeSetupPass>());
         pipeline->AddPass(std::make_unique<GBufferInitPass>());
         pipeline->AddPass(std::make_unique<TraditionalRenderPass>());
         pipeline->AddPass(std::make_unique<MeshletRenderPass>());
+        //pipeline->AddPass(std::make_unique<WireframeSetupPass>());
         //pipeline->AddPass(std::make_unique<WireframeAabbPass>());
         //pipeline->AddPass(std::make_unique<WireframeSpherePass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletInitPass>());

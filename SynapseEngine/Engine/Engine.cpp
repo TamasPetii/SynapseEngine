@@ -50,6 +50,7 @@ namespace Syn
 	{
 		_frameContext.deltaTime = deltaTime;
 
+		ServiceLocator::GetAnimationManager()->Update();
 		ServiceLocator::GetModelManager()->Update();
 		ServiceLocator::GetMaterialManager()->Update();
 		ServiceLocator::GetImageManager()->Update();

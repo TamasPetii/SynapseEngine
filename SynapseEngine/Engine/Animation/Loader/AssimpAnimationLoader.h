@@ -14,7 +14,7 @@ namespace Syn
         virtual std::vector<std::string> GetSupportedExtensions() const override;
     private:
         void BuildLinearHierarchy(const aiScene* scene, RawAnimation& outAnim);
-        void ProcessBoneWeights(const aiScene* scene, RawAnimation& outAnim, tf::Taskflow& taskflow);
-        void ProcessAnimationTracks(const aiScene* scene, RawAnimation& outAnim, tf::Taskflow& taskflow);
+        void ProcessBoneWeights(const aiScene* scene, RawAnimation& outAnim, const std::unordered_map<std::string, uint32_t>& nodeNameMap, tf::Taskflow& taskflow);
+        void ProcessAnimationTracks(const aiScene* scene, RawAnimation& outAnim, const std::unordered_map<std::string, uint32_t>& nodeNameMap, tf::Taskflow& taskflow);
     };
 }

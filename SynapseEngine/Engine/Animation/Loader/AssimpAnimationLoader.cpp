@@ -38,10 +38,15 @@ namespace Syn
 
         BuildLinearHierarchy(scene, rawAnim);
 
+        std::unordered_map<std::string, uint32_t> nodeNameMap;
+        for (uint32_t i = 0; i < rawAnim.nodes.size(); ++i) {
+            nodeNameMap[rawAnim.nodes[i].name] = i;
+        }
+
         tf::Taskflow taskflow;
 
-        ProcessAnimationTracks(scene, rawAnim, taskflow);
-        ProcessBoneWeights(scene, rawAnim, taskflow);
+        ProcessAnimationTracks(scene, rawAnim, nodeNameMap, taskflow);
+        ProcessBoneWeights(scene, rawAnim, nodeNameMap, taskflow);
 
         ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
 
@@ -50,7 +55,7 @@ namespace Syn
 
     std::vector<std::string> AssimpAnimationLoader::GetSupportedExtensions() const
     {
-        return { ".fbx", ".dae", ".gltf", ".glb" };
+        return { ".fbx", ".dae", ".gltf", ".glb", ".dae" };
     }
 
     void AssimpAnimationLoader::BuildLinearHierarchy(const aiScene* scene, RawAnimation& outAnim)
@@ -76,17 +81,12 @@ namespace Syn
         }
     }
 
-    void AssimpAnimationLoader::ProcessAnimationTracks(const aiScene* scene, RawAnimation& outAnim, tf::Taskflow& taskflow)
+    void AssimpAnimationLoader::ProcessAnimationTracks(const aiScene* scene, RawAnimation& outAnim, const std::unordered_map<std::string, uint32_t>& nodeNameMap, tf::Taskflow& taskflow)
     {
         tf::GuidedPartitioner partitioner(1);
         
         aiAnimation* aiAnim = scene->mAnimations[0];
         outAnim.tracks.resize(aiAnim->mNumChannels);
-
-        std::unordered_map<std::string, uint32_t> nodeNameMap;
-        for (uint32_t i = 0; i < outAnim.nodes.size(); ++i) {
-            nodeNameMap[outAnim.nodes[i].name] = i;
-        }
 
         taskflow.for_each_index(0u, aiAnim->mNumChannels, 1u,
             [&, aiAnim](uint32_t channelIndex) {
@@ -129,16 +129,11 @@ namespace Syn
         );
     }
 
-    void AssimpAnimationLoader::ProcessBoneWeights(const aiScene* scene, RawAnimation& outAnim, tf::Taskflow& taskflow)
+    void AssimpAnimationLoader::ProcessBoneWeights(const aiScene* scene, RawAnimation& outAnim, const std::unordered_map<std::string, uint32_t>& nodeNameMap, tf::Taskflow& taskflow)
     {
         tf::GuidedPartitioner partitioner(1);
 
         outAnim.meshSkins.resize(scene->mNumMeshes);
-
-        std::unordered_map<std::string, uint32_t> nodeNameMap;
-        for (uint32_t i = 0; i < outAnim.nodes.size(); ++i) {
-            nodeNameMap[outAnim.nodes[i].name] = i;
-        }
 
         taskflow.for_each_index(0u, scene->mNumMeshes, 1u,
             [&, scene](uint32_t meshIndex) {

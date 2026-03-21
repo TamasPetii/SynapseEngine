@@ -39,6 +39,7 @@ namespace Syn {
 		InitImageManager();
 		InitMaterialManager();
 		InitModelManager();
+		InitAnimationManager();
     }
 
 	void ResourceManager::InitShaderManager()
