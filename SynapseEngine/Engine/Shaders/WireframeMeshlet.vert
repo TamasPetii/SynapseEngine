@@ -91,6 +91,34 @@ struct DebugMeshletInstance
     uint globalMeshletIdx;
 };
 
+struct AnimationComponent {
+    uint animationIndex;
+    uint frameIndex;
+    uint padding0;
+    uint padding1;
+};
+
+struct GpuAnimationDescriptor {
+    uint frameCount;
+    uint nodeCount;
+    uint globalVertexCount;
+    uint globalMeshCount;
+    uint globalMeshletCount;
+    float durationInSeconds;
+    float sampleRate;
+    float padding;
+};
+
+struct GpuAnimationAddresses {
+    uint64_t vertexSkinData;
+    uint64_t nodeTransforms;
+    uint64_t frameGlobalColliders;
+    uint64_t frameMeshColliders;
+    uint64_t frameMeshletColliders;
+    uint64_t padding;
+    GpuAnimationDescriptor descriptor;
+};
+
 layout(buffer_reference, std430) readonly buffer ModelAddressBuffer { GpuModelAddresses data[]; };
 layout(buffer_reference, std430) readonly buffer InstanceBuffer { uint data[]; };
 layout(buffer_reference, std430) readonly buffer TransformPool { TransformComponent data[]; };
@@ -102,9 +130,15 @@ layout(buffer_reference, std430) readonly buffer IndexBuffer { uint data[]; };
 layout(buffer_reference, std430) readonly buffer DebugInstanceBuffer { DebugMeshletInstance instances[]; };
 layout(buffer_reference, std430) readonly buffer ModelSparseMap { uint data[]; };
 layout(buffer_reference, std430) readonly buffer ModelComponentBuffer { ModelComponent data[]; };
+layout(buffer_reference, std430) readonly buffer AnimationComponentBuffer { AnimationComponent data[]; };
+layout(buffer_reference, std430) readonly buffer AnimationAddressBuffer { GpuAnimationAddresses data[]; };
+layout(buffer_reference, std430) readonly buffer FrameMeshletColliderBuffer { GpuMeshletCollider data[]; };
 
 layout(push_constant) uniform PushConstants 
 {
+    uint64_t animationAddressBuffer;
+    uint64_t animationBufferAddr;
+    uint64_t animationSparseMapBufferAddr;
     uint64_t modelAddressBuffer;
     uint64_t globalInstanceBuffers;
     uint64_t globalIndirectCommandDescriptorBuffers;
@@ -153,7 +187,26 @@ void main()
     GpuModelAddresses addrs = modelAddresses.data[comp.modelIndex];
     
     MeshletColliderBuffer colliders = MeshletColliderBuffer(addrs.meshletColliders);
+
+    //Static Mesh Collider
     GpuMeshletCollider collider = colliders.data[instanceData.globalMeshletIdx];
+
+    SparseMapBuffer animSparseMap = SparseMapBuffer(pc.animationSparseMapBufferAddr);
+    uint animSparseIndex = animSparseMap.data[instanceData.entityId];
+
+    if (animSparseIndex != 0xFFFFFFFFu) {
+        AnimationComponentBuffer animComponents = AnimationComponentBuffer(pc.animationBufferAddr);
+        AnimationComponent animComp = animComponents.data[animSparseIndex];
+
+        if (animComp.animationIndex != 0xFFFFFFFFu) {
+            AnimationAddressBuffer animAddresses = AnimationAddressBuffer(pc.animationAddressBuffer);
+            GpuAnimationAddresses animAddrs = animAddresses.data[animComp.animationIndex];
+
+            FrameMeshletColliderBuffer animColliders = FrameMeshletColliderBuffer(animAddrs.frameMeshletColliders);
+            uint frameOffset = animComp.frameIndex * animAddrs.descriptor.globalMeshletCount;
+            collider = animColliders.data[frameOffset + instanceData.globalMeshletIdx];
+        }
+    }
 
     IndexBuffer indices = IndexBuffer(pc.indexBufferAddr);
     PositionBuffer positions = PositionBuffer(pc.vertexBufferAddr);

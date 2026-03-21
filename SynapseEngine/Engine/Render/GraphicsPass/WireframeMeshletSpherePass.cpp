@@ -8,11 +8,16 @@
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Mesh/MeshSourceNames.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
+#include "Engine/Animation/AnimationManager.h"
+
 
 namespace Syn
 {
     struct WireframeMeshletPushConstants
     {
+        VkDeviceAddress animationAddressBuffer;
+        VkDeviceAddress animationBufferAddr;
+        VkDeviceAddress animationSparseMapBufferAddr;
         VkDeviceAddress modelAddressBuffer;
         VkDeviceAddress globalInstanceBuffers;
         VkDeviceAddress globalIndirectCommandDescriptorBuffers;
@@ -108,8 +113,13 @@ namespace Syn
         auto modelManager = ServiceLocator::GetModelManager();
         auto compManager = scene->GetComponentBufferManager();
         auto sphereMesh = modelManager->GetResource(MeshSourceNames::Sphere);
+        auto animationManager = ServiceLocator::GetAnimationManager();
 
         WireframeMeshletPushConstants pc{};
+        pc.animationAddressBuffer = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
+        pc.animationBufferAddr = compManager->GetComponentBuffer(BufferNames::AnimationData, fIdx).buffer->GetDeviceAddress();
+        pc.animationSparseMapBufferAddr = compManager->GetComponentBuffer(BufferNames::AnimationSparseMap, fIdx).buffer->GetDeviceAddress();
+
         pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
         pc.globalInstanceBuffers = drawData->globalInstanceBuffers[fIdx]->GetDeviceAddress();
         pc.globalIndirectCommandDescriptorBuffers = drawData->globalIndirectCommandDescriptorBuffers[fIdx]->GetDeviceAddress();

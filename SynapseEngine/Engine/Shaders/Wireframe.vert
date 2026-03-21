@@ -75,6 +75,34 @@ struct TransformComponent
     mat4 transformIT; 
 };
 
+struct AnimationComponent {
+    uint animationIndex;
+    uint frameIndex;
+    uint padding0;
+    uint padding1;
+};
+
+struct GpuAnimationDescriptor {
+    uint frameCount;
+    uint nodeCount;
+    uint globalVertexCount;
+    uint globalMeshCount;
+    uint globalMeshletCount;
+    float durationInSeconds;
+    float sampleRate;
+    float padding;
+};
+
+struct GpuAnimationAddresses {
+    uint64_t vertexSkinData;
+    uint64_t nodeTransforms;
+    uint64_t frameGlobalColliders;
+    uint64_t frameMeshColliders;
+    uint64_t frameMeshletColliders;
+    uint64_t padding;
+    GpuAnimationDescriptor descriptor;
+};
+
 layout(buffer_reference, std430) readonly buffer PositionBuffer { GpuVertexPosition data[]; };
 layout(buffer_reference, std430) readonly buffer IndexBuffer { uint data[]; };
 layout(buffer_reference, std430) readonly buffer InstanceBuffer { uint data[]; };
@@ -84,9 +112,15 @@ layout(buffer_reference, std430) readonly buffer MeshColliderPool { GpuMeshColli
 layout(buffer_reference, std430) readonly buffer TransformPool { TransformComponent data[]; };
 layout(buffer_reference, std430) readonly buffer CameraPool { CameraComponent data[]; };
 layout(buffer_reference, std430) readonly buffer SparseMapBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly buffer AnimationComponentBuffer { AnimationComponent data[]; };
+layout(buffer_reference, std430) readonly buffer AnimationAddressBuffer { GpuAnimationAddresses data[]; };
+layout(buffer_reference, std430) readonly buffer FrameMeshColliderBuffer { GpuMeshCollider data[]; };
 
 layout(push_constant) uniform PushConstants 
 {
+    uint64_t animationAddressBuffer;
+    uint64_t animationBufferAddr;
+    uint64_t animationSparseMapBufferAddr;
     uint64_t modelAddressBuffer;
     uint64_t globalInstanceBuffers;
     uint64_t globalIndirectCommandDescriptorBuffers;
@@ -128,6 +162,9 @@ void main()
     uint rawEntityData = instances.data[desc.instanceOffset + gl_InstanceIndex];
     uint entityId = rawEntityData & ~(1u << 31);
 
+    uint meshIndex = desc.meshIndex;
+    uint modelIndex = desc.modelIndex;
+
     IndexBuffer indices = IndexBuffer(pc.indexBufferAddr);
     PositionBuffer positions = PositionBuffer(pc.vertexBufferAddr);
     
@@ -135,10 +172,29 @@ void main()
     GpuVertexPosition v = positions.data[realVertexIndex];
 
     ModelAddressBuffer addresses = ModelAddressBuffer(pc.modelAddressBuffer);
-    GpuModelAddresses addrs = addresses.data[desc.modelIndex];
+    GpuModelAddresses addrs = addresses.data[modelIndex];
 
     MeshColliderPool colliders = MeshColliderPool(addrs.meshColliders);
+    
+    //Static Mesh Collider
     GpuMeshCollider collider = colliders.data[desc.meshIndex];
+
+    SparseMapBuffer animSparseMap = SparseMapBuffer(pc.animationSparseMapBufferAddr);
+    uint animSparseIndex = animSparseMap.data[entityId];
+
+    if (animSparseIndex != 0xFFFFFFFFu) {
+        AnimationComponentBuffer animComponents = AnimationComponentBuffer(pc.animationBufferAddr);
+        AnimationComponent animComp = animComponents.data[animSparseIndex];
+
+        if (animComp.animationIndex != 0xFFFFFFFFu) {
+            AnimationAddressBuffer animAddresses = AnimationAddressBuffer(pc.animationAddressBuffer);
+            GpuAnimationAddresses animAddrs = animAddresses.data[animComp.animationIndex];
+
+            FrameMeshColliderBuffer animColliders = FrameMeshColliderBuffer(animAddrs.frameMeshColliders);
+            uint frameOffset = animComp.frameIndex * animAddrs.descriptor.globalMeshCount;
+            collider = animColliders.data[frameOffset + desc.meshIndex];
+        }
+    }
 
     vec3 localPos;
     if (pc.isSphere == 1) 
