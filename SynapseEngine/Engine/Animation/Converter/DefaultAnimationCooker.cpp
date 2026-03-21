@@ -9,7 +9,7 @@ namespace Syn
         CookedAnimation cookedAnim;
 
         cookedAnim.name = rawAnimation.name;
-        cookedAnim.ticksPerSecond = rawAnimation.ticksPerSecond > 0.0f ? rawAnimation.ticksPerSecond : 25.0f;
+        cookedAnim.ticksPerSecond = rawAnimation.ticksPerSecond > 0.0f ? rawAnimation.ticksPerSecond : 60.0f;
         cookedAnim.durationInSeconds = rawAnimation.duration / cookedAnim.ticksPerSecond;
         cookedAnim.sampleRate = sampleRate;
 

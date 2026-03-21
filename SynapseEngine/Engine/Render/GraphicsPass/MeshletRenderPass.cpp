@@ -12,6 +12,7 @@
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "Engine/Material/MaterialManager.h"
 #include "Engine/Image/ImageManager.h"
+#include "Engine/Animation/AnimationManager.h"
 
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
 #include "Engine/Image/SamplerNames.h"
@@ -23,6 +24,11 @@
 namespace Syn {
     struct MeshletPushConstants {
         VkDeviceAddress modelAddressBuffer;
+
+        VkDeviceAddress animationAddressBuffer;
+        VkDeviceAddress animationBufferAddr;
+        VkDeviceAddress animationSparseMapBufferAddr;
+
         VkDeviceAddress globalDrawCountBuffers;
         VkDeviceAddress globalInstanceBuffers;
         VkDeviceAddress globalIndirectCommandBuffers;
@@ -142,11 +148,15 @@ namespace Syn {
         auto registry = scene->GetRegistry();
         auto componentBufferManager = scene->GetComponentBufferManager();
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto animationManager = ServiceLocator::GetAnimationManager();
 
         uint32_t fIdx = context.frameIndex;
 
         MeshletPushConstants pc{};
         pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
+        pc.animationAddressBuffer = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
+        pc.animationBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::AnimationData, fIdx).buffer->GetDeviceAddress();
+        pc.animationSparseMapBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::AnimationSparseMap, fIdx).buffer->GetDeviceAddress();
         pc.globalDrawCountBuffers = drawData->globalDrawCountBuffers[fIdx]->GetDeviceAddress();
         pc.globalInstanceBuffers = drawData->globalInstanceBuffers[fIdx]->GetDeviceAddress();
         pc.globalIndirectCommandBuffers = drawData->globalIndirectCommandBuffers[fIdx]->GetDeviceAddress();

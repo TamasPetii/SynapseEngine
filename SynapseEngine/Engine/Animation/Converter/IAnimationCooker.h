@@ -9,6 +9,6 @@ namespace Syn
     {
     public:
         virtual ~IAnimationCooker() = default;
-        virtual CookedAnimation Cook(const RawAnimation& rawAnimation, float sampleRate = 30.0f) = 0;
+        virtual CookedAnimation Cook(const RawAnimation& rawAnimation, float sampleRate = 60.0f) = 0;
     };
 }

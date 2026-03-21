@@ -39,6 +39,10 @@ layout(buffer_reference, std430) readonly buffer MaterialBuffer       { GpuMater
 
 layout(push_constant) uniform PushConstants {
     uint64_t modelAddressBuffer; 
+    uint64_t animationAddressBuffer;
+    uint64_t animationBufferAddr;
+    uint64_t animationSparseMapBufferAddr;
+
     uint64_t globalDrawCountBuffers; 
     uint64_t globalInstanceBuffers; 
     uint64_t globalIndirectCommandBuffers; 

@@ -9,6 +9,6 @@ namespace Syn
         DefaultAnimationCooker() = default;
         ~DefaultAnimationCooker() override = default;
 
-        CookedAnimation Cook(const RawAnimation& rawAnimation, float sampleRate = 30.0f) override;
+        CookedAnimation Cook(const RawAnimation& rawAnimation, float sampleRate = 60.0f) override;
     };
 }
