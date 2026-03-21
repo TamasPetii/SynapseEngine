@@ -34,7 +34,10 @@ namespace Syn
 
             for (const auto& transform : cookedFrame.bakedNodeTransforms)
             {
-                result.nodeTransforms.push_back(transform);
+                GpuNodeTransform gpuNode{};
+                gpuNode.transform = transform.globalTransform;
+                gpuNode.transformIT = transform.globalTransformIT;
+                result.nodeTransforms.push_back(gpuNode);
             }
 
             GpuMeshCollider globalCol{};
@@ -54,16 +57,12 @@ namespace Syn
                 const CookedAnimationFrameMesh& animMesh = cookedFrame.meshes[instanceDesc.meshIndex];
                 const CookedMesh& cookedMesh = baseModel.meshes[instanceDesc.meshIndex];
 
-                const glm::mat4& nodeTransform = baseModel.nodeTransforms[instanceDesc.nodeIndex].globalTransform;
-                const glm::mat4& nodeTransformIT = baseModel.nodeTransforms[instanceDesc.nodeIndex].globalTransformIT;
 
-                GpuMeshCollider localMeshCollider{};
-                localMeshCollider.center = animMesh.collider.sphere.center;
-                localMeshCollider.radius = animMesh.collider.sphere.radius;
-                localMeshCollider.aabbMin = animMesh.collider.aabb.min;
-                localMeshCollider.aabbMax = animMesh.collider.aabb.max;
-
-                GpuMeshCollider modelSpaceCollider = MeshUtils::TransformCollider(localMeshCollider, nodeTransform);
+                GpuMeshCollider modelSpaceCollider{};
+                modelSpaceCollider.center = animMesh.collider.sphere.center;
+                modelSpaceCollider.radius = animMesh.collider.sphere.radius;
+                modelSpaceCollider.aabbMin = animMesh.collider.aabb.min;
+                modelSpaceCollider.aabbMax = animMesh.collider.aabb.max;
                 result.frameMeshColliders.push_back(modelSpaceCollider);
 
                 for (uint32_t lodLevel = 0; lodLevel < MAX_LODS; ++lodLevel)
@@ -84,8 +83,6 @@ namespace Syn
                             colliderDesc.apex = meshlet.collider.cone.apex;
                             colliderDesc.axis = meshlet.collider.cone.axis;
                             colliderDesc.cutoff = meshlet.collider.cone.cutoff;
-
-                            colliderDesc = MeshUtils::TransformCollider(colliderDesc, nodeTransform, nodeTransformIT);
                             result.frameMeshletColliders.push_back(colliderDesc);
                         }
                     }

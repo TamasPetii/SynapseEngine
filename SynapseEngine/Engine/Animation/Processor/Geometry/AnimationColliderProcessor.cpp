@@ -60,7 +60,7 @@ namespace Syn
 
                         if (boneIdx != UINT32_MAX && weight > 0.0f)
                         {
-                            skinMat += currentFrame.bakedNodeTransforms[boneIdx] * weight;
+                            skinMat += currentFrame.bakedNodeTransforms[boneIdx].globalTransform * weight;
                         }
                     }
 

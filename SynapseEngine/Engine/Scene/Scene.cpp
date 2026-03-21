@@ -7,6 +7,7 @@
 #include "Engine/Component/TransformComponent.h"
 #include "Engine/Component/CameraComponent.h"
 #include "Engine/Component/ModelComponent.h"
+#include "Engine/Component/AnimationComponent.h"
 
 #include "Engine/System/TransformSystem.h"
 #include "Engine/System/RenderSystem.h"
@@ -14,6 +15,7 @@
 #include "Engine/System/ModelSystem.h"
 #include "Engine/System/MaterialSystem.h"
 #include "Engine/System/FrustumCullingSystem.h"
+#include "Engine/System/AnimationSystem.h"
 
 namespace Syn
 {
@@ -49,6 +51,7 @@ namespace Syn
         RegisterSystem<RenderSystem>();
         RegisterSystem<ModelSystem>();
         RegisterSystem<FrustumCullingSystem>();
+        RegisterSystem<AnimationSystem>();
     }
 
     void Scene::InitializeComponentBuffers()
@@ -62,6 +65,9 @@ namespace Syn
         RegisterComponentSparseMapBuffer<ModelComponent>(BufferNames::ModelSparseMap);
         RegisterComponentBuffer<ModelComponent, ModelComponentGPU>(BufferNames::ModelData);
         RegisterComponentBuffer<ModelComponent, VisibleModelData>(BufferNames::ModelVisibleData);
+
+        RegisterComponentSparseMapBuffer<AnimationComponent>(BufferNames::AnimationSparseMap);
+        RegisterComponentBuffer<AnimationComponent, AnimationComponentGPU>(BufferNames::AnimationData);
     }
 
     void Scene::BuildTaskflowGraph(tf::Taskflow& taskflow, SystemPhase phase)

@@ -73,6 +73,7 @@ namespace Syn
             AnimationNode rawNode;
             rawNode.name = currentNode->mName.C_Str();
             rawNode.parentIndex = parentNodeIndex;
+            rawNode.defaultLocalTransform = AssimpUtils::ConvertAssimpToGlm(currentNode->mTransformation);
 
             outAnim.nodes.push_back(rawNode);
 

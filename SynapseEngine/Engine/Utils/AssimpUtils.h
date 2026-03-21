@@ -23,6 +23,7 @@ namespace Syn
 		static constexpr aiPostProcessSteps ImportFlags = static_cast<aiPostProcessSteps>(
 			aiProcess_Triangulate | 
 			aiProcess_JoinIdenticalVertices | 
-			aiProcess_CalcTangentSpace);
+			aiProcess_CalcTangentSpace | 
+			aiProcess_LimitBoneWeights);
 	};
 }

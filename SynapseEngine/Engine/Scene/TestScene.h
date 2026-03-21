@@ -10,6 +10,7 @@
 #include "Engine/Component/MaterialOverrideComponent.h"
 #include "Engine/Material/MaterialManager.h"
 #include "Engine/Animation/AnimationManager.h"
+#include "Engine/Component/AnimationComponent.h"
 #include <random>
 
 namespace Syn
@@ -87,13 +88,16 @@ namespace Syn
                 EntityID characterEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(characterEntity);
                 registry->AddComponent<ModelComponent>(characterEntity);
+                registry->AddComponent<AnimationComponent>(characterEntity);
 
                 registry->GetComponent<TransformComponent>(characterEntity).translation = glm::vec3(50.0f, 0.0f, 0.0f);
                 registry->GetComponent<TransformComponent>(characterEntity).scale = glm::vec3(5.f);
                 registry->GetComponent<ModelComponent>(characterEntity).modelIndex = characterId;
+                registry->GetComponent<AnimationComponent>(characterEntity).animationIndex = characterAnimId;
 
                 registry->GetPool<TransformComponent>()->SetCategory(characterEntity, StorageCategory::Static);
                 registry->GetPool<ModelComponent>()->SetCategory(characterEntity, StorageCategory::Static);
+                registry->GetPool<AnimationComponent>()->SetCategory(characterEntity, StorageCategory::Stream);
             }
           
             auto materialManager = ServiceLocator::GetMaterialManager();

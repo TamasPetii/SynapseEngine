@@ -179,6 +179,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="System\AnimationSystem.cpp" />
+    <ClCompile Include="Component\AnimationComponent.cpp" />
     <ClCompile Include="Animation\AnimationManager.cpp" />
     <ClCompile Include="Animation\Builder\AnimationBuilder.cpp" />
     <ClCompile Include="Animation\Data\Animation.cpp" />
@@ -214,7 +216,6 @@
     <ClCompile Include="Render\ComputePass\BloomPrefilterPass.cpp" />
     <ClCompile Include="Collision\Tester\CollisionTester.cpp" />
     <ClCompile Include="Component\ModelComponent.cpp" />
-    <ClCompile Include="Component\BaseComponent\RenderStateComponent.cpp" />
     <ClCompile Include="Component\MaterialOverrideComponent.cpp" />
     <ClCompile Include="Render\GraphicsPass\CompositePass.cpp" />
     <ClCompile Include="Render\ComputePass\HizLinearPreparePass.cpp" />
@@ -433,6 +434,8 @@
     <ClCompile Include="Render\TransferPass\WireframeMeshletInitPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="System\AnimationSystem.h" />
+    <ClInclude Include="Component\AnimationComponent.h" />
     <ClInclude Include="Animation\AnimationManager.h" />
     <ClInclude Include="Animation\Builder\AnimationBuilder.h" />
     <ClInclude Include="Animation\Data\Animation.h" />
@@ -469,7 +472,6 @@
     <ClInclude Include="Render\ComputePass\BloomPrefilterPass.h" />
     <ClInclude Include="Collision\Tester\CollisionTester.h" />
     <ClInclude Include="Component\ModelComponent.h" />
-    <ClInclude Include="Component\BaseComponent\RenderStateComponent.h" />
     <ClInclude Include="Component\MaterialOverrideComponent.h" />
     <ClInclude Include="Render\GraphicsPass\CompositePass.h" />
     <ClInclude Include="Render\ComputeGroupSize.h" />

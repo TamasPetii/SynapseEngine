@@ -65,7 +65,10 @@ namespace Syn
                 globalTransforms[i] = globalTransforms[node.parentIndex] * localTransform;
             }
 
-            currentFrame.bakedNodeTransforms[i] = globalTransforms[i] * node.offsetMatrix;
+            glm::mat4 globalBoneMatrix = globalTransforms[i] * node.offsetMatrix;
+            currentFrame.bakedNodeTransforms[i].localTransform = localTransform;
+            currentFrame.bakedNodeTransforms[i].globalTransform = globalBoneMatrix;
+            currentFrame.bakedNodeTransforms[i].globalTransformIT = glm::transpose(glm::inverse(globalBoneMatrix));
         }
     }
 

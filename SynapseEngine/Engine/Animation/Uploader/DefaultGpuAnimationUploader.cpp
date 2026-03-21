@@ -10,7 +10,7 @@ namespace Syn
 
         size_t totalStagingSize = 0;
         totalStagingSize += getAlignedSize(data.vertexSkinData.size() * sizeof(VertexSkinData));
-        totalStagingSize += getAlignedSize(data.nodeTransforms.size() * sizeof(glm::mat4));
+        totalStagingSize += getAlignedSize(data.nodeTransforms.size() * sizeof(GpuNodeTransform));
         totalStagingSize += getAlignedSize(data.frameGlobalColliders.size() * sizeof(GpuMeshCollider));
         totalStagingSize += getAlignedSize(data.frameMeshColliders.size() * sizeof(GpuMeshCollider));
         totalStagingSize += getAlignedSize(data.frameMeshletColliders.size() * sizeof(GpuMeshletCollider));

@@ -1,5 +1,4 @@
 #include "ModelComponent.h"
-#include "Engine/Registry/Entity.h"
 
 namespace Syn
 {
@@ -7,7 +6,7 @@ namespace Syn
 		castShadow(true),
 		receiveShadow(true),
 		hasDirectxNormals(false),
-		modelIndex(NULL_INDEX)
+		modelIndex(UINT32_MAX)
 	{}
 
 	ModelComponentGPU::ModelComponentGPU(uint32_t entityIndex, const ModelComponent& component) :

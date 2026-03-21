@@ -12,6 +12,7 @@
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Material/MaterialManager.h"
+#include "Engine/Animation/AnimationManager.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -21,6 +22,11 @@ namespace Syn {
 
     struct TraditionalPushConstants {
         VkDeviceAddress modelAddressBuffer;
+
+        VkDeviceAddress animationAddressBuffer;
+        VkDeviceAddress animationBufferAddr;
+        VkDeviceAddress animationSparseMapBufferAddr;
+
         VkDeviceAddress globalDrawCountBuffers;
         VkDeviceAddress globalInstanceBuffers;
         VkDeviceAddress globalIndirectCommandBuffers;
@@ -132,11 +138,16 @@ namespace Syn {
         auto registry = scene->GetRegistry();
         auto materialManager = ServiceLocator::GetMaterialManager();
         auto componentBufferManager = scene->GetComponentBufferManager();
+        auto animationManager = ServiceLocator::GetAnimationManager();
 
+        
         uint32_t fIdx = context.frameIndex;
 
         TraditionalPushConstants pc{};
         pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
+        pc.animationAddressBuffer = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
+        pc.animationBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::AnimationData, fIdx).buffer->GetDeviceAddress();
+        pc.animationSparseMapBufferAddr = componentBufferManager->GetComponentBuffer(BufferNames::AnimationSparseMap, fIdx).buffer->GetDeviceAddress();
         pc.globalDrawCountBuffers = drawData->globalDrawCountBuffers[fIdx]->GetDeviceAddress();
         pc.globalInstanceBuffers = drawData->globalInstanceBuffers[fIdx]->GetDeviceAddress();
         pc.globalIndirectCommandBuffers = drawData->globalIndirectCommandBuffers[fIdx]->GetDeviceAddress();

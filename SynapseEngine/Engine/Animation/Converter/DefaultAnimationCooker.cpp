@@ -1,4 +1,5 @@
 #include "DefaultAnimationCooker.h"
+#include "Engine/Mesh/Data/Common/TransformNode.h"
 #include <cmath>
 
 namespace Syn
@@ -30,7 +31,7 @@ namespace Syn
         cookedAnim.frames.resize(cookedAnim.frameCount);
         for (auto& frame : cookedAnim.frames)
         {
-            frame.bakedNodeTransforms.resize(cookedAnim.nodeCount, glm::mat4(1.0f));
+            frame.bakedNodeTransforms.resize(cookedAnim.nodeCount);
         }
 
         return cookedAnim;

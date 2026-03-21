@@ -21,7 +21,7 @@ struct GpuNodeTransform {
 };
 
 struct GpuMeshCollider { 
-    vec3 center; 
+    vec3 center;
     float radius; 
     vec3 aabbMin; 
     float padding0; 
@@ -67,17 +67,17 @@ struct TransformComponent {
 
 struct CameraComponent {
     mat4 view;
-	mat4 viewInv;
-	mat4 proj;
-	mat4 projInv;
-	mat4 projVulkan;
-	mat4 projVulkanInv;
-	mat4 viewProj;
-	mat4 viewProjInv;
-	mat4 viewProjVulkan;
-	mat4 viewProjVulkanInv;
-	vec4 eye;
-	vec4 params;
+    mat4 viewInv;
+    mat4 proj;
+    mat4 projInv;
+    mat4 projVulkan;
+    mat4 projVulkanInv;
+    mat4 viewProj;
+    mat4 viewProjInv;
+    mat4 viewProjVulkan;
+    mat4 viewProjVulkanInv;
+    vec4 eye;
+    vec4 params;
     vec4 frustum[6];
 };
 
@@ -88,25 +88,62 @@ struct ModelComponent {
     uint materialOffset;  
 };
 
+struct GpuVertexSkinData {
+    uvec4 boneIndices;
+    vec4 boneWeights;
+};
+
+struct AnimationComponent {
+    uint animationIndex;
+    uint frameIndex;
+    uint padding0;
+    uint padding1;
+};
+
+struct GpuAnimationDescriptor {
+    uint frameCount;
+    uint nodeCount;
+    uint globalVertexCount;
+    uint globalMeshCount;
+    uint globalMeshletCount;
+    float durationInSeconds;
+    float sampleRate;
+    float padding;
+};
+
+struct GpuAnimationAddresses {
+    uint64_t vertexSkinData;
+    uint64_t nodeTransforms;
+    uint64_t frameGlobalColliders;
+    uint64_t frameMeshColliders;
+    uint64_t frameMeshletColliders;
+    uint64_t padding;
+    GpuAnimationDescriptor descriptor;
+};
+
 layout(buffer_reference, std430) readonly buffer PositionBuffer   { GpuVertexPosition data[]; };
 layout(buffer_reference, std430) readonly buffer AttributeBuffer  { GpuVertexAttributes data[]; };
 layout(buffer_reference, std430) readonly buffer IndexBuffer      { uint data[]; };
 layout(buffer_reference, std430) readonly buffer NodeBuffer       { GpuNodeTransform data[]; };
-
 layout(buffer_reference, std430) readonly buffer ModelAddressBuffer { GpuModelAddresses data[]; };
 layout(buffer_reference, std430) readonly buffer DescriptorBuffer   { MeshDrawDescriptor data[]; };
 layout(buffer_reference, std430) readonly buffer InstanceBuffer     { uint data[]; };
-
 layout(buffer_reference, std430) readonly buffer SparseMapBuffer    { uint data[]; };
 layout(buffer_reference, std430) readonly buffer TransformPool      { TransformComponent data[]; };
 layout(buffer_reference, std430) readonly buffer CameraPool         { CameraComponent data[]; };
-
 layout(buffer_reference, std430) readonly buffer ModelSparseMap       { uint data[]; };
 layout(buffer_reference, std430) readonly buffer MaterialLookupBuffer { uint data[]; };
 layout(buffer_reference, std430) readonly buffer ModelComponentBuffer { ModelComponent data[]; };
 
+layout(buffer_reference, std430) readonly buffer AnimationAddressBuffer { GpuAnimationAddresses data[]; };
+layout(buffer_reference, std430) readonly buffer AnimationComponentBuffer { AnimationComponent data[]; };
+layout(buffer_reference, std430) readonly buffer VertexSkinDataBuffer { GpuVertexSkinData data[]; };
+
 layout(push_constant) uniform PushConstants {
     uint64_t modelAddressBuffer; 
+    uint64_t animationAddressBuffer;
+    uint64_t animationBufferAddr;
+    uint64_t animationSparseMapBufferAddr;
     uint64_t globalDrawCountBuffers; 
     uint64_t globalInstanceBuffers; 
     uint64_t globalIndirectCommandBuffers; 
@@ -131,28 +168,28 @@ layout(location = 2) out flat uint outEntityId;
 layout(location = 3) out flat uint outMaterialId;
 
 void main() {
-    // 1. Melyik Descriptorhoz tartozik ez a draw hívás?
+    // 1. Descriptor
     DescriptorBuffer descriptors = DescriptorBuffer(pc.globalIndirectCommandDescriptorBuffers);
     MeshDrawDescriptor desc = descriptors.data[gl_DrawIDARB];
 
-    // 2. Melyik Entitást rajzoljuk éppen? (Frustum Culling eredménye)
+    // 2. Instance és Entitás
     InstanceBuffer instances = InstanceBuffer(pc.globalInstanceBuffers);
     uint rawEntityData = instances.data[desc.instanceOffset + gl_InstanceIndex];
     uint entityId = rawEntityData & ~(1u << 31);
 
-    // 2+. Material index kiszámítása
+    // 3. Modell komponens és Anyag
     ModelSparseMap sparseMap = ModelSparseMap(pc.modelSparseMapBufferAddr);
     ModelComponentBuffer modelComponents = ModelComponentBuffer(pc.modelBufferAddr);
     MaterialLookupBuffer materialLookup = MaterialLookupBuffer(pc.materialLookupBuffer);
-
+    
     uint sparseIndex = sparseMap.data[entityId];
     ModelComponent comp = modelComponents.data[sparseIndex];
 
-    // 3. Modell memóriacímeinek feloldása
+    // 4. Modell memóriacímek
     ModelAddressBuffer modelAddresses = ModelAddressBuffer(pc.modelAddressBuffer);
     GpuModelAddresses addrs = modelAddresses.data[desc.modelIndex];
 
-    // 4. Vertex adatok kinyerése pointereken keresztül
+    // 5. Nyers Vertex adatok
     IndexBuffer indices = IndexBuffer(addrs.indices);
     uint realVertexIndex = indices.data[gl_VertexIndex];
     
@@ -162,33 +199,78 @@ void main() {
     GpuVertexPosition v = positions.data[realVertexIndex];
     GpuVertexAttributes attr = attributes.data[realVertexIndex];
 
-    // 5. Entitás Transform adatainak lekérése
+    // 6. Transform és Camera adatok
     SparseMapBuffer transformMap = SparseMapBuffer(pc.transformSparseMapBufferAddr);
     TransformPool transforms = TransformPool(pc.transformBufferAddr);
     uint transformDenseIndex = transformMap.data[entityId];
     TransformComponent transform = transforms.data[transformDenseIndex];
 
-    // 6. Kamera adatainak lekérése
     SparseMapBuffer cameraMap = SparseMapBuffer(pc.cameraSparseMapBufferAddr);
     CameraPool cameras = CameraPool(pc.cameraBufferAddr);
     uint cameraDenseIndex = cameraMap.data[pc.activeCameraEntity];
     CameraComponent camera = cameras.data[cameraDenseIndex];
 
-    // 7. Modell belső hierarchia transzformáció
+    // 7. Statikus Modell belső hierarchia (Itt olvassuk ki a defaultot!)
     uint packedIndex = v.packedIndex;
     uint meshIndex = (packedIndex >> 16) & 0xFFFFu;
     uint nodeIndex = packedIndex & 0xFFFFu;
-    NodeBuffer nodes = NodeBuffer(addrs.nodeTransforms);
-    GpuNodeTransform nodeTransform = nodes.data[nodeIndex];
+    
+    NodeBuffer staticNodes = NodeBuffer(addrs.nodeTransforms);
+    GpuNodeTransform staticNodeTransform = staticNodes.data[nodeIndex];
+
+    mat4 finalModelMat = staticNodeTransform.globalTransform;
+    mat4 finalModelMatIT = staticNodeTransform.globalTransformIT;
+
+    // 8. Animáció
+    SparseMapBuffer animSparseMap = SparseMapBuffer(pc.animationSparseMapBufferAddr);
+    uint animSparseIndex = animSparseMap.data[entityId];
+
+    if (animSparseIndex != 0xFFFFFFFFu) 
+    {
+        AnimationComponentBuffer animComponents = AnimationComponentBuffer(pc.animationBufferAddr);
+        AnimationComponent animComp = animComponents.data[animSparseIndex];
+
+        if (animComp.animationIndex != 0xFFFFFFFFu) {
+            AnimationAddressBuffer animAddresses = AnimationAddressBuffer(pc.animationAddressBuffer);
+            GpuAnimationAddresses animAddrs = animAddresses.data[animComp.animationIndex];
+
+            VertexSkinDataBuffer skinBuffer = VertexSkinDataBuffer(animAddrs.vertexSkinData);
+            GpuVertexSkinData skin = skinBuffer.data[realVertexIndex];
+
+            NodeBuffer animNodes = NodeBuffer(animAddrs.nodeTransforms);
+
+            mat4 skinMat = mat4(0.0);
+            mat4 skinMatIT = mat4(0.0);
+        
+            uint frameOffset = animComp.frameIndex * animAddrs.descriptor.nodeCount;
+            bool hasValidBone = false;
+
+            for (int i = 0; i < 4; ++i) {
+                float weight = skin.boneWeights[i];
+                if (weight == 0.0) continue; 
+            
+                uint boneIdx = skin.boneIndices[i];
+                if (boneIdx != 0xFFFFFFFFu) {
+                    GpuNodeTransform boneNode = animNodes.data[frameOffset + boneIdx];
+                    skinMat += boneNode.globalTransform * weight;
+                    skinMatIT += boneNode.globalTransformIT * weight;
+                    hasValidBone = true;
+                }
+            }
+
+            if (hasValidBone) {
+                finalModelMat = skinMat;
+                finalModelMatIT = skinMatIT;
+            }  
+        }    
+    }
 
     uint flatMaterialIndex = comp.materialOffset + meshIndex;
     uint resolvedMaterialId = materialLookup.data[flatMaterialIndex];
 
-    // 8. Végső mátrixszorzások (Camera * Transform * Node * Vertex)
-    gl_Position = camera.viewProjVulkan * transform.transform * nodeTransform.globalTransform * vec4(v.position, 1.0);
-   
-    // Normálvektor transzformálása
-    outNormal = normalize(transform.transformIT * nodeTransform.globalTransformIT * vec4(attr.normal, 0)).xyz;
+    gl_Position = camera.viewProjVulkan * transform.transform * finalModelMat * vec4(v.position, 1.0);
+
+    outNormal = normalize(transform.transformIT * finalModelMatIT * vec4(attr.normal, 0)).xyz;
     outUV = vec2(attr.uv_x, 1.0 - attr.uv_y);
     outEntityId = entityId;
     outMaterialId = resolvedMaterialId;

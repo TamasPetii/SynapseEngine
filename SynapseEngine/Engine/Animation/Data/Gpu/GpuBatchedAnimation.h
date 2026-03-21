@@ -3,6 +3,7 @@
 #include "Engine/Animation/Data/Common/VertexSkinData.h"
 #include "Engine/Mesh/Data/Gpu/GpuIndexedDrawData.h"
 #include "Engine/Mesh/Data/Gpu/GpuMeshletDrawData.h"
+#include "Engine/Mesh/Data/Gpu/GpuNodeTransform.h"
 #include <vector>
 #include <glm/glm.hpp>
 
@@ -29,7 +30,7 @@ namespace Syn
         std::vector<VertexSkinData> vertexSkinData;
 
         // [Frame0_Node0... Frame0_NodeN | Frame1_Node0... Frame1_NodeN]
-        std::vector<glm::mat4> nodeTransforms;
+        std::vector<GpuNodeTransform> nodeTransforms;
 
         // [Frame0, Frame1, Frame2...]
         std::vector<GpuMeshCollider> frameGlobalColliders;

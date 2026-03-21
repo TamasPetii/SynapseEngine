@@ -2,6 +2,7 @@
 #include "Engine/SynApi.h"
 #include "Engine/Animation/Data/Common/VertexSkinData.h"
 #include "Engine/Mesh/Data/Cooked/CookedColliders.h"
+#include "Engine/Mesh/Data/Common/TransformNode.h"
 #include <vector>
 #include <glm/glm.hpp>
 
@@ -27,6 +28,6 @@ namespace Syn
     {
         CookedMeshCollisionData globalCollider;
         std::vector<CookedAnimationFrameMesh> meshes;
-        std::vector<glm::mat4> bakedNodeTransforms;
+        std::vector<TransformNode> bakedNodeTransforms;
     };
 }

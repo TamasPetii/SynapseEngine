@@ -14,5 +14,8 @@ namespace Syn
         static constexpr const char* ModelSparseMap = "ModelSparseMap";
         static constexpr const char* ModelData = "ModelData";
         static constexpr const char* ModelVisibleData = "ModelVisibleData";
+
+        static constexpr const char* AnimationSparseMap = "AnimationSparseMap";
+        static constexpr const char* AnimationData = "AnimationData";
     };
 }

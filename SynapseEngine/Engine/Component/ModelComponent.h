@@ -1,11 +1,11 @@
 #pragma once
 #include "Engine/SynApi.h"
+#include "BaseComponent/Component.h"
 #include "Engine/Mesh/Data/StaticMesh.h"
-#include "BaseComponent/RenderStateComponent.h"
 
 namespace Syn
 {
-	struct SYN_API ModelComponent : public RenderStateComponent
+	struct SYN_API ModelComponent : public Component
 	{
 		ModelComponent();
 
