@@ -7,10 +7,15 @@
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Component/ModelComponent.h"
 #include "Engine/Vk/Buffer/BufferUtils.h"
+#include "Engine/Animation/AnimationManager.h"
 
 namespace Syn {
 
     struct CullingPushConstants {
+        uint64_t animationAddressBuffer;
+        uint64_t animationBufferAddr;
+        uint64_t animationSparseMapBufferAddr;
+
         uint64_t cameraBufferAddr;            
         uint64_t cameraSparseMapBufferAddr;   
         uint64_t transformBufferAddr;         
@@ -58,9 +63,15 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
         auto modelManager = ServiceLocator::GetModelManager();
+        auto animationManager = ServiceLocator::GetAnimationManager();
+
         uint32_t fIdx = context.frameIndex;
 
         CullingPushConstants pc{};
+        pc.animationAddressBuffer = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
+        pc.animationBufferAddr = compManager->GetComponentBuffer(BufferNames::AnimationData, fIdx).buffer->GetDeviceAddress();
+        pc.animationSparseMapBufferAddr = compManager->GetComponentBuffer(BufferNames::AnimationSparseMap, fIdx).buffer->GetDeviceAddress();
+
         pc.cameraBufferAddr = compManager->GetComponentBuffer(BufferNames::CameraData, fIdx).buffer->GetDeviceAddress();
         pc.cameraSparseMapBufferAddr = compManager->GetComponentBuffer(BufferNames::CameraSparseMap, fIdx).buffer->GetDeviceAddress();
         pc.transformBufferAddr = compManager->GetComponentBuffer(BufferNames::TransformData, fIdx).buffer->GetDeviceAddress();

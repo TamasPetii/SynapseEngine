@@ -23,32 +23,32 @@
 
 namespace Syn {
     struct MeshletPushConstants {
-        VkDeviceAddress modelAddressBuffer;
+        uint64_t modelAddressBuffer;
 
-        VkDeviceAddress animationAddressBuffer;
-        VkDeviceAddress animationBufferAddr;
-        VkDeviceAddress animationSparseMapBufferAddr;
+        uint64_t animationAddressBuffer;
+        uint64_t animationBufferAddr;
+        uint64_t animationSparseMapBufferAddr;
 
-        VkDeviceAddress globalDrawCountBuffers;
-        VkDeviceAddress globalInstanceBuffers;
-        VkDeviceAddress globalIndirectCommandBuffers;
-        VkDeviceAddress globalIndirectCommandDescriptorBuffers;
-        VkDeviceAddress globalModelAllocationBuffers;
-        VkDeviceAddress globalMeshAllocationBuffers;
+        uint64_t globalDrawCountBuffers;
+        uint64_t globalInstanceBuffers;
+        uint64_t globalIndirectCommandBuffers;
+        uint64_t globalIndirectCommandDescriptorBuffers;
+        uint64_t globalModelAllocationBuffers;
+        uint64_t globalMeshAllocationBuffers;
 
-        VkDeviceAddress cameraBufferAddr;
-        VkDeviceAddress cameraSparseMapBufferAddr;
-        VkDeviceAddress transformBufferAddr;
-        VkDeviceAddress transformSparseMapBufferAddr;
+        uint64_t cameraBufferAddr;
+        uint64_t cameraSparseMapBufferAddr;
+        uint64_t transformBufferAddr;
+        uint64_t transformSparseMapBufferAddr;
 
-        VkDeviceAddress modelBufferAddr;
-        VkDeviceAddress modelSparseMapBufferAddr;
-        VkDeviceAddress materialLookupBuffer;
-        VkDeviceAddress materialBuffer;
+        uint64_t modelBufferAddr;
+        uint64_t modelSparseMapBufferAddr;
+        uint64_t materialLookupBuffer;
+        uint64_t materialBuffer;
 
-        VkDeviceAddress debugInstanceBufferAddr;
-        VkDeviceAddress debugAabbIndirectAddr;
-        VkDeviceAddress debugSphereIndirectAddr;
+        uint64_t debugInstanceBufferAddr;
+        uint64_t debugAabbIndirectAddr;
+        uint64_t debugSphereIndirectAddr;
 
         uint32_t activeCameraEntity;
         uint32_t meshletOffsetStart;

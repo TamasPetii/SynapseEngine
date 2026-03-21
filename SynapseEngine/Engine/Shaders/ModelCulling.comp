@@ -102,6 +102,34 @@ struct VkDrawMeshTasksIndirectCommandEXT {
     uint groupCountZ;
 };
 
+struct AnimationComponent {
+    uint animationIndex;
+    uint frameIndex;
+    uint padding0;
+    uint padding1;
+};
+
+struct GpuAnimationDescriptor {
+    uint frameCount;
+    uint nodeCount;
+    uint globalVertexCount;
+    uint globalMeshCount;
+    uint globalMeshletCount;
+    float durationInSeconds;
+    float sampleRate;
+    float padding;
+};
+
+struct GpuAnimationAddresses {
+    uint64_t vertexSkinData;
+    uint64_t nodeTransforms;
+    uint64_t frameGlobalColliders;
+    uint64_t frameMeshColliders;
+    uint64_t frameMeshletColliders;
+    uint64_t padding;
+    GpuAnimationDescriptor descriptor;
+};
+
 layout(buffer_reference, std430) readonly buffer ModelAddressBuffer { GpuModelAddresses data[]; };
 layout(buffer_reference, std430) readonly buffer CameraPool         { CameraComponent data[]; };
 layout(buffer_reference, std430) readonly buffer TransformPool      { TransformComponent data[]; };
@@ -116,7 +144,15 @@ layout(buffer_reference, std430) readonly buffer MeshAllocBuffer    { MeshAlloca
 layout(buffer_reference, std430) buffer TraditionalCmdBuffer        { VkDrawIndirectCommand data[]; };
 layout(buffer_reference, std430) buffer MeshletCmdBuffer            { VkDrawMeshTasksIndirectCommandEXT data[]; };
 
+layout(buffer_reference, std430) readonly buffer AnimationComponentBuffer { AnimationComponent data[]; };
+layout(buffer_reference, std430) readonly buffer AnimationAddressBuffer { GpuAnimationAddresses data[]; };
+layout(buffer_reference, std430) readonly buffer FrameGlobalColliderBuffer { GpuMeshCollider data[]; };
+
 layout(push_constant) uniform PushConstants {
+    uint64_t animationAddressBuffer;
+    uint64_t animationBufferAddr;
+    uint64_t animationSparseMapBufferAddr;
+
     uint64_t cameraBufferAddr;
     uint64_t cameraSparseMapBufferAddr;
     uint64_t transformBufferAddr;
@@ -234,7 +270,27 @@ void main() {
     // Modell adatok beolvasása (Allocation + Addresses)
     ModelAllocationInfo mAlloc = ModelAllocBuffer(pc.modelAllocBufferAddr).data[modelComp.modelIndex];
     GpuModelAddresses addrs = ModelAddressBuffer(pc.modelAddressBufferAddr).data[modelComp.modelIndex];
-    GpuMeshCollider globalWorldCollider = TransformCollider(addrs.globalCollider, transform.transform);
+   
+    //Default Static Collider
+    GpuMeshCollider localGlobalCollider = addrs.globalCollider; 
+    
+    SparseMapBuffer animSparseMap = SparseMapBuffer(pc.animationSparseMapBufferAddr);
+    uint animSparseIndex = animSparseMap.data[entityId];
+
+    if (animSparseIndex != 0xFFFFFFFFu) {
+        AnimationComponentBuffer animComponents = AnimationComponentBuffer(pc.animationBufferAddr);
+        AnimationComponent animComp = animComponents.data[animSparseIndex];
+
+        if (animComp.animationIndex != 0xFFFFFFFFu) {
+            AnimationAddressBuffer animAddresses = AnimationAddressBuffer(pc.animationAddressBuffer);
+            GpuAnimationAddresses animAddrs = animAddresses.data[animComp.animationIndex];
+
+            FrameGlobalColliderBuffer globalColliders = FrameGlobalColliderBuffer(animAddrs.frameGlobalColliders);
+            localGlobalCollider = globalColliders.data[animComp.frameIndex];
+        }
+    }
+
+    GpuMeshCollider globalWorldCollider = TransformCollider(localGlobalCollider, transform.transform);
 
     // Culling
     uint visibility = TestFrustum(globalWorldCollider, camera);
