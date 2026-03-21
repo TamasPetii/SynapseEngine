@@ -4,6 +4,8 @@
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Material/MaterialManager.h"
+#include "Engine/Animation/Builder/AnimationBuilder.h"
+#include "Engine/Animation/AnimationManager.h"
 #include <memory>
 
 namespace Syn {
@@ -20,13 +22,18 @@ namespace Syn {
         void InitModelManager();
         void InitImageManager();
         void InitMaterialManager();
+        void InitAnimationManager();
     private:
-		std::shared_ptr<StaticMeshBuilder> _staticMeshBuilder;
-        std::shared_ptr<ImageBuilder> _imageBuilder;
-
         std::unique_ptr<ShaderManager> _shaderManager;
-		std::unique_ptr<ModelManager> _modelManager;
-        std::unique_ptr<ImageManager> _imageManager;
         std::unique_ptr<MaterialManager> _materialManager;
+
+		std::shared_ptr<StaticMeshBuilder> _staticMeshBuilder;
+		std::unique_ptr<ModelManager> _modelManager;
+
+        std::shared_ptr<ImageBuilder> _imageBuilder;
+        std::unique_ptr<ImageManager> _imageManager;
+
+        std::shared_ptr<AnimationBuilder> _animationBuilder;
+        std::unique_ptr<AnimationManager> _animationManager;
     };
 }

@@ -24,6 +24,12 @@ namespace Syn {
         Failed
     };
 
+    struct ResourceSyncControl {
+        std::mutex mutex;
+        std::condition_variable cv;
+        ResourceState stateCopy = ResourceState::LoadingCPU;
+    };
+
     template <typename TResource>
     struct ResourceEntry {
         ResourceState state = ResourceState::LoadingCPU;
@@ -33,6 +39,7 @@ namespace Syn {
         std::shared_ptr<TResource> resource;
         std::unique_ptr<Vk::Buffer> stagingBuffer;
         std::future<std::shared_ptr<TResource>> cpuFuture;
+        std::shared_ptr<ResourceSyncControl> sync = std::make_shared<ResourceSyncControl>();
     };
 
     template <typename TResource>
@@ -48,22 +55,25 @@ namespace Syn {
         virtual ~BaseResourceManager() = default;
 
         void Update();
+        void WaitForResource(uint32_t id) const;
+        void SetResourceState(uint32_t id, ResourceState newState);
+
         size_t GetResourceCount() const;
         ResourceState GetEntryState(uint32_t id) const;
-        uint32_t GetResourceIndex(const std::string& name) const;
+        uint32_t GetVersion() const;
+        uint32_t GetResourceIndex(const std::string & name) const;
         std::shared_ptr<TResource> GetResource(uint32_t id) const;
-        std::shared_ptr<TResource> GetResource(const std::string& name) const;
+        std::shared_ptr<TResource> GetResource(const std::string & name) const;
         std::vector<ResourceSnapshot> GetResourceSnapshot() const;
-        uint32_t GetVersion() const { return _version.load(std::memory_order_acquire); }
     protected:
-        uint32_t InternalLoadAsync(const std::string& key, std::function<std::shared_ptr<TResource>()> task);
-        uint32_t InternalLoadSync(const std::string& key, std::function<std::shared_ptr<TResource>()> task);
-        uint32_t InternalLoad(const std::string& key, std::function<std::shared_ptr<TResource>()> task, bool isAsync);
+        uint32_t InternalLoadAsync(const std::string & key, std::function<std::shared_ptr<TResource>()> task);
+        uint32_t InternalLoadSync(const std::string & key, std::function<std::shared_ptr<TResource>()> task);
+        uint32_t InternalLoad(const std::string & key, std::function<std::shared_ptr<TResource>()> task, bool isAsync);
         std::shared_ptr<TResource> GetResource(uint32_t id, bool internalCall) const;
     protected:
-        void SubmitGpuRequest(const EntryType& entry, Vk::GpuUploadRequest&& request);
-        virtual void StartGpuUpload(EntryType& entry) = 0;
-        virtual void FinalizeResource(EntryType& entry) = 0;
+        void SubmitGpuRequest(const EntryType & entry, Vk::GpuUploadRequest && request);
+        virtual void StartGpuUpload(EntryType & entry) = 0;
+        virtual void FinalizeResource(EntryType & entry) = 0;
     protected:
         std::atomic<uint32_t> _version;
         std::vector<EntryType> _entries;
@@ -202,5 +212,42 @@ namespace Syn {
             snapshot.push_back({ entry.resource, entry.state });
         }
         return snapshot;
+    }
+
+    template <typename TResource>
+    uint32_t BaseResourceManager<TResource>::GetVersion() const {
+        return _version.load(std::memory_order_acquire);
+    }
+
+    template <typename TResource>
+    void BaseResourceManager<TResource>::WaitForResource(uint32_t id) const {
+        std::shared_ptr<ResourceSyncControl> syncBlock;
+
+        {
+            std::lock_guard<std::mutex> lock(_mutex);
+            if (id >= _entries.size()) return;
+            syncBlock = _entries[id].sync;
+        }
+
+        std::unique_lock<std::mutex> lock(syncBlock->mutex);
+        syncBlock->cv.wait(lock, [&syncBlock]() {
+            return syncBlock->stateCopy == ResourceState::Ready || syncBlock->stateCopy == ResourceState::Failed;
+            });
+    }
+
+    template <typename TResource>
+    void BaseResourceManager<TResource>::SetResourceState(uint32_t id, ResourceState newState) {
+        std::shared_ptr<ResourceSyncControl> syncBlock;
+
+        {
+            std::lock_guard<std::mutex> lock(_mutex);
+            if (id >= _entries.size()) return;
+
+            _entries[id].state = newState;
+            syncBlock = _entries[id].sync;
+            syncBlock->stateCopy = newState;
+        }
+
+        syncBlock->cv.notify_all();
     }
 }

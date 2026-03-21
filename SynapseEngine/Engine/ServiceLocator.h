@@ -19,6 +19,8 @@ namespace Syn {
     class InputManager;
     class SceneManager;
     class MaterialManager;
+    class AnimationManager;
+    class AnimationBuilder;
 }
 
 namespace Syn 
@@ -69,6 +71,12 @@ namespace Syn
 
         static void ProvideMaterialManager(MaterialManager* manager) { _materialManager = manager; }
         static MaterialManager* GetMaterialManager() { return _materialManager; }
+
+        static void ProvideAnimationBuilder(AnimationBuilder* builder) { _animationBuilder = builder; }
+        static AnimationBuilder* GetAnimationBuilder() { return _animationBuilder; }
+
+        static void ProvideAnimationManager(AnimationManager* manager) { _animationManager = manager; }
+        static AnimationManager* GetAnimationManager() { return _animationManager; }
     private:
         static Vk::Context* _vkContext;
         static Vk::GpuUploader* _gpuUploader;
@@ -83,5 +91,7 @@ namespace Syn
         static InputManager* _inputManager;
         static SceneManager* _sceneManager;
         static MaterialManager* _materialManager;
+        static AnimationBuilder* _animationBuilder;
+        static AnimationManager* _animationManager;
     };
 }

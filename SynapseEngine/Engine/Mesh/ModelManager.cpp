@@ -115,16 +115,22 @@ namespace Syn {
             }
         }
 
+        uint32_t entryId = _pathToId.at(entry.path);
+
         Vk::GpuUploadRequest request{
             .uploadCallback = [this, &entry](VkCommandBuffer cmd) {
                 auto uploadResult = _uploader->Upload(entry.resource->gpuData, cmd);
                 entry.resource->hardwareBuffers = std::move(uploadResult.hardwareBuffers);
                 entry.stagingBuffer = std::move(uploadResult.stagingBuffer);
             },
-            .onFinished = [this, &entry]() {
+            .onFinished = [this, entryId]() {
+                auto& entry = _entries[entryId];
+
                 FinalizeResource(entry);
                 entry.stagingBuffer.reset();
-                entry.state = ResourceState::Ready;
+
+                SetResourceState(entryId, ResourceState::Ready);
+
                 _version.fetch_add(1, std::memory_order_release);
             },
             .needsGraphics = false

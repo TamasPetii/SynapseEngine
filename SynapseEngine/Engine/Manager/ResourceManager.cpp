@@ -20,6 +20,16 @@
 #include "Engine/Image/Loader/GliImageLoader.h"
 #include "Engine/Image/Uploader/DefaultGpuImageUploader.h"
 
+#include "Engine/Animation/Loader/AnimationLoaderRegistry.h"
+#include "Engine/Animation/Processor/AnimationProcessorPipeline.h"
+#include "Engine/Animation/Converter/DefaultGpuAnimationConverter.h"
+#include "Engine/Animation/Converter/DefaultAnimationCooker.h"
+#include "Engine/Animation/Loader/AssimpAnimationLoader.h"
+#include "Engine/Animation/Processor/Geometry/AnimationBakeProcessor.h"
+#include "Engine/Animation/Processor/Geometry/AnimationColliderProcessor.h"
+#include "Engine/Animation/Uploader/DefaultGpuAnimationUploader.h"
+
+
 #include "Engine/Mesh/MeshSourceNames.h"
 
 namespace Syn {
@@ -79,7 +89,7 @@ namespace Syn {
 			std::make_unique<DefaultModelCooker>()
 		);
 
-		_staticMeshBuilder->RegisterLoader(std::make_shared<AssimpLoader>(), 1);
+		_staticMeshBuilder->RegisterLoader(std::make_shared<AssimpMeshLoader>(), 1);
 		_staticMeshBuilder->RegisterProcessor(std::make_unique<NormalProcessor>());
 		_staticMeshBuilder->RegisterProcessor(std::make_unique<TangentProcessor>());
 		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerLodProcessor>());
@@ -110,7 +120,29 @@ namespace Syn {
 		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::Pyramid, []() { return MeshFactory::CreatePyramid(); });
 		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::Grid, []() { return MeshFactory::CreateGrid(); });
 		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::Torus, []() { return MeshFactory::CreateTorus(); });
+	}
 
+	void ResourceManager::InitAnimationManager()
+	{
+		_animationBuilder = std::make_shared<AnimationBuilder>(
+			std::make_unique<AnimationLoaderRegistry>(),
+			std::make_unique<AnimationProcessorPipeline>(),
+			std::make_unique<DefaultGpuAnimationConverter>(),
+			std::make_unique<DefaultAnimationCooker>()
+		);
+
+		_animationBuilder->RegisterLoader(std::make_shared<AssimpAnimationLoader>(), 1);
+		_animationBuilder->RegisterProcessor(std::make_unique<AnimationBakeProcessor>());
+		_animationBuilder->RegisterProcessor(std::make_unique<AnimationColliderProcessor>());
+
+		ServiceLocator::ProvideAnimationBuilder(_animationBuilder.get());
+
+		_animationManager = std::make_unique<AnimationManager>(
+			_animationBuilder,
+			std::make_unique<DefaultGpuAnimationUploader>()
+		);
+
+		ServiceLocator::ProvideAnimationManager(_animationManager.get());
 	}
 
     ResourceManager::~ResourceManager() {

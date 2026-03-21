@@ -9,7 +9,7 @@ namespace Syn
             _loaders[ext].push_back({ priority, loader });
 
             std::sort(_loaders[ext].begin(), _loaders[ext].end(),
-                [](const LoaderEntry& a, const LoaderEntry& b) {
+                [](const MeshLoaderEntry& a, const MeshLoaderEntry& b) {
                     return a.priority > b.priority;
                 });
         }

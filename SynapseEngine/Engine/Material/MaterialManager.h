@@ -10,7 +10,7 @@ namespace Syn {
 
     class SYN_API MaterialManager : public BaseResourceManager<Material> {
     public:
-        static constexpr uint32_t MAX_MATERIALS = 1000000;
+        static constexpr uint32_t MAX_MATERIALS = 2000000; //Todo: Dynamic
 
         MaterialManager(TextureLoadCallback textureLoadCallback);
         ~MaterialManager() = default;

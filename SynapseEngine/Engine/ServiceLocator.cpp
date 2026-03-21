@@ -14,6 +14,9 @@ namespace Syn {
 	InputManager* ServiceLocator::_inputManager = nullptr;
 	SceneManager* ServiceLocator::_sceneManager = nullptr;
 	MaterialManager* ServiceLocator::_materialManager = nullptr;
+	AnimationBuilder* ServiceLocator::_animationBuilder = nullptr;
+	AnimationManager* ServiceLocator::_animationManager = nullptr;
+
 
 	void ServiceLocator::Shutdown()
 	{
@@ -30,5 +33,7 @@ namespace Syn {
 		_inputManager = nullptr;
 		_sceneManager = nullptr;
 		_materialManager = nullptr;
+		_animationBuilder = nullptr;
+		_animationManager = nullptr;
 	}
 }

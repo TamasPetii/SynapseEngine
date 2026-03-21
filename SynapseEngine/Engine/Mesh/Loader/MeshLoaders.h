@@ -1,4 +1,4 @@
 #pragma once
 #include "IMeshLoader.h"
-#include "AssimpLoader.h"
+#include "AssimpMeshLoader.h"
 #include "MeshLoaderRegistry.h"

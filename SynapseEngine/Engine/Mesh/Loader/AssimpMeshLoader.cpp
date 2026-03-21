@@ -1,4 +1,4 @@
-#include "AssimpLoader.h"
+#include "AssimpMeshLoader.h"
 #include "Engine/Utils/AssimpUtils.h"
 #include "Engine/Mesh/Utils/MeshUtils.h"
 #include <Assimp/Importer.hpp>
@@ -15,9 +15,11 @@
 #include <taskflow/taskflow.hpp>
 #include <taskflow/algorithm/for_each.hpp>
 
+#include "Engine/Logger/SynLog.h"
+
 namespace Syn
 {
-    std::optional<RawModel> AssimpLoader::LoadFile(const std::filesystem::path& path)
+    std::optional<RawModel> AssimpMeshLoader::LoadFile(const std::filesystem::path& path)
     {
         Assimp::Importer importer;
 
@@ -25,7 +27,7 @@ namespace Syn
 
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
         {
-            std::cerr << "[AssimpLoader] Failed to load model: " << path << "\n";
+            Error("Failed to load model: {}", path.string());
             return std::nullopt;
         }
 
@@ -34,17 +36,15 @@ namespace Syn
         PreProcessSceneHierarchy(scene, model);
         ProcessSceneHierarchy(scene, model);
 
-        //MeshUtils::LogRawModel(path, model);
-
         return model;
     }
 
-    std::vector<std::string> AssimpLoader::GetSupportedExtensions() const
+    std::vector<std::string> AssimpMeshLoader::GetSupportedExtensions() const
     {
         return { ".obj", ".fbx", ".gltf", ".glb", ".dae", ".blend" };
     }
 
-    void AssimpLoader::PreProcessSceneHierarchy(const aiScene* scene, RawModel& outModel)
+    void AssimpMeshLoader::PreProcessSceneHierarchy(const aiScene* scene, RawModel& outModel)
     {
         outModel.meshes.resize(scene->mNumMeshes);
 
@@ -98,7 +98,7 @@ namespace Syn
         }
     }
 
-    void AssimpLoader::ProcessSceneHierarchy(const aiScene* scene, RawModel& outModel)
+    void AssimpMeshLoader::ProcessSceneHierarchy(const aiScene* scene, RawModel& outModel)
     {
         tf::Taskflow taskflow;
 
@@ -109,7 +109,7 @@ namespace Syn
         ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
     }
 
-    void AssimpLoader::ProcessMaterials(const aiScene* scene, RawModel& outModel, tf::Taskflow& taskflow)
+    void AssimpMeshLoader::ProcessMaterials(const aiScene* scene, RawModel& outModel, tf::Taskflow& taskflow)
     {
         taskflow.for_each_index(0u, scene->mNumMaterials, 1u, 
             [&, scene](uint32_t matIndex) {
@@ -183,7 +183,7 @@ namespace Syn
         );
     }
 
-    void AssimpLoader::ProcessMeshVertices(const aiScene* scene, RawModel& outModel, tf::Taskflow& taskflow)
+    void AssimpMeshLoader::ProcessMeshVertices(const aiScene* scene, RawModel& outModel, tf::Taskflow& taskflow)
     {
         tf::GuidedPartitioner partitioner(1);
 
@@ -217,7 +217,7 @@ namespace Syn
         );
     }
 
-    void AssimpLoader::ProcessMeshIndices(const aiScene* scene, RawModel& outModel, tf::Taskflow& taskflow)
+    void AssimpMeshLoader::ProcessMeshIndices(const aiScene* scene, RawModel& outModel, tf::Taskflow& taskflow)
     {
         tf::GuidedPartitioner partitioner(1);
 

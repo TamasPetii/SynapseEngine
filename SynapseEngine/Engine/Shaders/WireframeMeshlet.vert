@@ -131,9 +131,11 @@ vec3 generateWireframeColor(uint id)
     hash = hash ^ (hash >> 4);
     hash = hash * 0x27d4eb2d;
     hash = hash ^ (hash >> 15);
+    
     float r = float((hash & 0xFF0000) >> 16) / 255.0;
     float g = float((hash & 0x00FF00) >> 8) / 255.0;
     float b = float(hash & 0x0000FF) / 255.0;
+    
     return vec3(r, g, b);
 }
 

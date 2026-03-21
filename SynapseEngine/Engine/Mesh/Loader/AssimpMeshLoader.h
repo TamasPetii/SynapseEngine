@@ -6,10 +6,10 @@
 
 namespace Syn
 {
-	class SYN_API AssimpLoader : public IMeshLoader
+	class SYN_API AssimpMeshLoader : public IMeshLoader
 	{
 	public:
-		AssimpLoader() = default;
+		AssimpMeshLoader() = default;
 		virtual std::optional<RawModel> LoadFile(const std::filesystem::path& path) override;
 		virtual std::vector<std::string> GetSupportedExtensions() const override;
 	private:

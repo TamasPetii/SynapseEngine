@@ -9,7 +9,7 @@
 
 namespace Syn
 {
-    struct SYN_API LoaderEntry
+    struct SYN_API MeshLoaderEntry
     {
         int priority;
         std::shared_ptr<IMeshLoader> loader;

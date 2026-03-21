@@ -11,6 +11,6 @@ namespace Syn
         virtual std::vector<IMeshLoader*> GetLoadersForExtension(const std::string& extension) override;
         virtual IMeshLoader* GetLoaderForExtension(const std::string& extension) override;
     private:
-        std::unordered_map<std::string, std::vector<LoaderEntry>> _loaders;
+        std::unordered_map<std::string, std::vector<MeshLoaderEntry>> _loaders;
     };
 }

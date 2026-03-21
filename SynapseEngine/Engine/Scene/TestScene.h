@@ -22,7 +22,7 @@ namespace Syn
             auto modelManager = ServiceLocator::GetModelManager();
 
             uint32_t sponzaId = modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Sponza-master/sponza.obj");
-            //uint32_t bistroId = modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
+            uint32_t bistroId = modelManager->LoadModelAsync("C:/Users/User/Desktop/Models/Bistro/BistroExterior.fbx");
 
             std::vector<uint32_t> geoIds;
             geoIds.push_back(modelManager->GetResourceIndex(MeshSourceNames::Sphere));
@@ -59,7 +59,6 @@ namespace Syn
             registry->GetPool<TransformComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
             registry->GetPool<ModelComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
 
-            /*
             // Bistro
             EntityID bistroEntity = registry->CreateEntity();
             registry->AddComponent<TransformComponent>(bistroEntity);
@@ -70,7 +69,6 @@ namespace Syn
 
             registry->GetPool<TransformComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
             registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
-            */
 
             auto materialManager = ServiceLocator::GetMaterialManager();
 
@@ -95,7 +93,6 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Static);
                 registry->GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
 
-                /*
                 float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                 float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                 float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
@@ -108,7 +105,6 @@ namespace Syn
 
                 auto& overrideComp = registry->GetComponent<MaterialOverrideComponent>(e);
                 overrideComp.materials.push_back(randomMatId);
-                */
             }
         }
     };

@@ -179,6 +179,35 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Animation\AnimationManager.cpp" />
+    <ClCompile Include="Animation\Builder\AnimationBuilder.cpp" />
+    <ClCompile Include="Animation\Data\Animation.cpp" />
+    <ClCompile Include="Animation\Processor\Geometry\AnimationBakeProcessor.cpp" />
+    <ClCompile Include="Animation\Data\Common\AnimationNode.cpp" />
+    <ClCompile Include="Animation\Data\Common\AnimationKeys.cpp" />
+    <ClCompile Include="Animation\Processor\Geometry\AnimationColliderProcessor.cpp" />
+    <ClCompile Include="Animation\Processor\AnimationProcessorPipeline.cpp" />
+    <ClCompile Include="Animation\Loader\AnimationLoaderRegistry.cpp" />
+    <ClCompile Include="Animation\Loader\IAnimationLoader.cpp" />
+    <ClCompile Include="Animation\Data\Raw\RawAnimation.cpp" />
+    <ClCompile Include="Animation\Data\Cooked\CookedAnimation.cpp" />
+    <ClCompile Include="Animation\Loader\AssimpAnimationLoader.cpp" />
+    <ClCompile Include="Animation\Loader\IAnimationLoaderRegistry.cpp" />
+    <ClCompile Include="Animation\Source\IAnimationSource.cpp" />
+    <ClCompile Include="Animation\Source\Procedural\ProceduralAnimationSource.cpp" />
+    <ClCompile Include="Animation\Source\File\FileAnimationSource.cpp" />
+    <ClCompile Include="Animation\Processor\IAnimationProcessor.cpp" />
+    <ClCompile Include="Animation\Processor\IAnimationProcessorPipeline.cpp" />
+    <ClCompile Include="Animation\Data\Common\BoneTrack.cpp" />
+    <ClCompile Include="Animation\Data\Cooked\CookedAnimationFrames.cpp" />
+    <ClCompile Include="Animation\Data\Gpu\GpuBatchedAnimation.cpp" />
+    <ClCompile Include="Animation\Converter\IGpuAnimationConverter.cpp" />
+    <ClCompile Include="Animation\Converter\DefaultGpuAnimationConverter.cpp" />
+    <ClCompile Include="Animation\Converter\IAnimationCooker.cpp" />
+    <ClCompile Include="Animation\Converter\DefaultAnimationCooker.cpp" />
+    <ClCompile Include="Animation\Data\Gpu\GpuAnimationBuffers.cpp" />
+    <ClCompile Include="Animation\Uploader\IGpuAnimationUploader.cpp" />
+    <ClCompile Include="Animation\Uploader\DefaultGpuAnimationUploader.cpp" />
     <ClCompile Include="Render\ComputePass\BloomCompositePass.cpp" />
     <ClCompile Include="Render\ComputePass\BloomUpsamplePass.cpp" />
     <ClCompile Include="Render\ComputePass\BloomDownsamplePass.cpp" />
@@ -225,6 +254,7 @@
     <ClCompile Include="Render\GraphicsPass\TraditionalRenderPass.cpp" />
     <ClCompile Include="Render\TransferPass\TransferPass.cpp" />
     <ClCompile Include="Profiler\TaskProfilerObserver.cpp" />
+    <ClCompile Include="Animation\Data\Common\VertexSkinData.cpp" />
     <ClCompile Include="Vk\Rendering\GpuUploader.cpp" />
     <ClCompile Include="Manager\BaseResourceManager.cpp" />
     <ClCompile Include="Image\Data\Texture.cpp" />
@@ -316,7 +346,7 @@
     <ClCompile Include="Mesh\Processor\Lod\ILodProcessor.cpp" />
     <ClCompile Include="Mesh\Processor\IMeshProcessor.cpp" />
     <ClCompile Include="Mesh\Loader\BezierLoader.cpp" />
-    <ClCompile Include="Mesh\Loader\AssimpLoader.cpp" />
+    <ClCompile Include="Mesh\Loader\AssimpMeshLoader.cpp" />
     <ClCompile Include="Mesh\Loader\IMeshLoader.cpp" />
     <ClCompile Include="Mesh\Source\Procedural\Shape\CubeMeshSource.cpp" />
     <ClCompile Include="Mesh\Source\Procedural\ParametricSurface\BezierSurfaceSource.cpp" />
@@ -403,7 +433,36 @@
     <ClCompile Include="Render\TransferPass\WireframeMeshletInitPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Animation\AnimationManager.h" />
+    <ClInclude Include="Animation\Builder\AnimationBuilder.h" />
+    <ClInclude Include="Animation\Data\Animation.h" />
+    <ClInclude Include="Animation\Processor\Geometry\AnimationBakeProcessor.h" />
+    <ClInclude Include="Animation\Data\Common\AnimationNode.h" />
+    <ClInclude Include="Animation\Data\Common\AnimationKeys.h" />
+    <ClInclude Include="Animation\Processor\Geometry\AnimationColliderProcessor.h" />
+    <ClInclude Include="Animation\Processor\AnimationProcessorPipeline.h" />
+    <ClInclude Include="Animation\Loader\AnimationLoaderRegistry.h" />
+    <ClInclude Include="Animation\Loader\IAnimationLoader.h" />
+    <ClInclude Include="Animation\Data\Cooked\CookedAnimation.h" />
+    <ClInclude Include="Animation\Loader\AssimpAnimationLoader.h" />
+    <ClInclude Include="Animation\Loader\IAnimationLoaderRegistry.h" />
+    <ClInclude Include="Animation\Source\IAnimationSource.h" />
+    <ClInclude Include="Animation\Source\File\FileAnimationSource.h" />
+    <ClInclude Include="Animation\Processor\IAnimationProcessor.h" />
+    <ClInclude Include="Animation\Processor\IAnimationProcessorPipeline.h" />
+    <ClInclude Include="Animation\Data\Common\BoneTrack.h" />
+    <ClInclude Include="Animation\Data\Cooked\CookedAnimationFrames.h" />
+    <ClInclude Include="Animation\Data\Gpu\GpuBatchedAnimation.h" />
+    <ClInclude Include="Animation\Converter\IGpuAnimationConverter.h" />
+    <ClInclude Include="Animation\Converter\DefaultGpuAnimationConverter.h" />
+    <ClInclude Include="Animation\Converter\IAnimationCooker.h" />
+    <ClInclude Include="Animation\Converter\DefaultAnimationCooker.h" />
+    <ClInclude Include="Animation\Data\Gpu\GpuAnimationBuffers.h" />
+    <ClInclude Include="Animation\Uploader\IGpuAnimationUploader.h" />
+    <ClInclude Include="Animation\Uploader\DefaultGpuAnimationUploader.h" />
     <ClInclude Include="Image\ImageNames.h" />
+    <ClInclude Include="Animation\Data\Raw\RawAnimation.h" />
+    <ClInclude Include="Animation\Source\Procedural\ProceduralAnimationSource.h" />
     <ClInclude Include="Render\ComputePass\BloomCompositePass.h" />
     <ClInclude Include="Render\ComputePass\BloomUpsamplePass.h" />
     <ClInclude Include="Render\ComputePass\BloomDownsamplePass.h" />
@@ -458,6 +517,7 @@
     <ClInclude Include="Render\GraphicsPass\TraditionalRenderPass.h" />
     <ClInclude Include="Render\TransferPass\TransferPass.h" />
     <ClInclude Include="Profiler\TaskProfilerObserver.h" />
+    <ClInclude Include="Animation\Data\Common\VertexSkinData.h" />
     <ClInclude Include="Vk\Image\ImageViewNames.h" />
     <ClInclude Include="Vk\Rendering\GpuUploader.h" />
     <ClInclude Include="Manager\BaseResourceManager.h" />
@@ -553,7 +613,7 @@
     <ClInclude Include="Mesh\Processor\Lod\ILodProcessor.h" />
     <ClInclude Include="Mesh\Processor\IMeshProcessor.h" />
     <ClInclude Include="Mesh\Loader\BezierLoader.h" />
-    <ClInclude Include="Mesh\Loader\AssimpLoader.h" />
+    <ClInclude Include="Mesh\Loader\AssimpMeshLoader.h" />
     <ClInclude Include="Mesh\Loader\IMeshLoader.h" />
     <ClInclude Include="Mesh\Source\Procedural\Shape\CubeMeshSource.h" />
     <ClInclude Include="Mesh\Source\Procedural\ParametricSurface\BezierSurfaceSource.h" />
