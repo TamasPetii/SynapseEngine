@@ -78,12 +78,12 @@ namespace Syn {
         std::atomic<uint32_t> _version;
         std::vector<EntryType> _entries;
         std::unordered_map<std::string, uint32_t> _pathToId;
-        mutable std::mutex _mutex;
+        mutable std::recursive_mutex _mutex;
     };
 
     template <typename TResource>
     void BaseResourceManager<TResource>::Update() {
-        std::lock_guard<std::mutex> lock(_mutex);
+        std::lock_guard lock(_mutex);
 
         for (auto& entry : _entries) {
             if (entry.state == ResourceState::LoadingCPU) {
@@ -105,27 +105,27 @@ namespace Syn {
     template <typename TResource>
     uint32_t BaseResourceManager<TResource>::GetResourceIndex(const std::string& name) const
     {
-        std::lock_guard<std::mutex> lock(_mutex);
+        std::lock_guard lock(_mutex);
         if (_pathToId.find(name) == _pathToId.end()) return UINT32_MAX;
         return _pathToId.at(name);
     }
 
     template <typename TResource>
     std::shared_ptr<TResource> BaseResourceManager<TResource>::GetResource(uint32_t id) const {
-        std::lock_guard<std::mutex> lock(_mutex);
+        std::lock_guard lock(_mutex);
         return GetResource(id, true);
     }
 
     template <typename TResource>
     std::shared_ptr<TResource> BaseResourceManager<TResource>::GetResource(const std::string& name) const {
-        std::lock_guard<std::mutex> lock(_mutex);
+        std::lock_guard lock(_mutex);
         if (_pathToId.find(name) == _pathToId.end()) return nullptr;
         return GetResource(_pathToId.at(name), true);
     }
 
     template <typename TResource>
     uint32_t BaseResourceManager<TResource>::InternalLoad(const std::string& key, std::function<std::shared_ptr<TResource>()> task, bool isAsync) {
-        std::lock_guard<std::mutex> lock(_mutex);
+        std::lock_guard lock(_mutex);
 
         if (_pathToId.contains(key)) {
             return _pathToId[key];
@@ -180,14 +180,14 @@ namespace Syn {
 
     template <typename TResource>
     size_t BaseResourceManager<TResource>::GetResourceCount() const {
-        std::lock_guard<std::mutex> lock(_mutex);
+        std::lock_guard lock(_mutex);
         return _entries.size();
     }
 
     template <typename TResource>
     ResourceState BaseResourceManager<TResource>::GetEntryState(uint32_t id) const
     {
-        std::lock_guard<std::mutex> lock(_mutex);
+        std::lock_guard lock(_mutex);
         return _entries[id].state;
     }
 
@@ -204,7 +204,7 @@ namespace Syn {
 
     template <typename TResource>
     std::vector<typename BaseResourceManager<TResource>::ResourceSnapshot> BaseResourceManager<TResource>::GetResourceSnapshot() const {
-        std::lock_guard<std::mutex> lock(_mutex);
+        std::lock_guard lock(_mutex);
         std::vector<ResourceSnapshot> snapshot;
         snapshot.reserve(_entries.size());
 
@@ -224,7 +224,7 @@ namespace Syn {
         std::shared_ptr<ResourceSyncControl> syncBlock;
 
         {
-            std::lock_guard<std::mutex> lock(_mutex);
+            std::lock_guard lock(_mutex);
             if (id >= _entries.size()) return;
             syncBlock = _entries[id].sync;
         }
@@ -240,7 +240,7 @@ namespace Syn {
         std::shared_ptr<ResourceSyncControl> syncBlock;
 
         {
-            std::lock_guard<std::mutex> lock(_mutex);
+            std::lock_guard lock(_mutex);
             if (id >= _entries.size()) return;
 
             _entries[id].state = newState;

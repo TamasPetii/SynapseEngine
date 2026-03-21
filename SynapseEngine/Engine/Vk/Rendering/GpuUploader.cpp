@@ -17,7 +17,7 @@ namespace Syn::Vk {
     }
 
     void GpuUploader::Enqueue(GpuUploadRequest request) {
-        std::lock_guard<std::mutex> lock(_mutex);
+        std::lock_guard lock(_mutex);
         if (request.needsGraphics) {
             _graphicsRequests.push_back(std::move(request));
         }
@@ -27,7 +27,7 @@ namespace Syn::Vk {
     }
 
     void GpuUploader::ProcessUploads() {
-        std::lock_guard<std::mutex> lock(_mutex);
+        std::lock_guard lock(_mutex);
 
         auto it = _activeBatches.begin();
 
@@ -76,7 +76,7 @@ namespace Syn::Vk {
     }
 
     void GpuUploader::UploadSync(GpuUploadRequest request) {
-        std::lock_guard<std::mutex> lock(_mutex);
+        std::lock_guard lock(_mutex);
 
         auto device = ServiceLocator::GetVkContext()->GetDevice();
         Vk::ThreadSafeQueue* queue = request.needsGraphics ? _graphicsQueue : _transferQueue;
