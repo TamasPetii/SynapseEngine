@@ -30,6 +30,7 @@ namespace Syn
         SYN_INLINE void Remove(EntityID entity);
         SYN_INLINE bool Contains(EntityID entity) const;
         SYN_INLINE void Clear();
+        SYN_INLINE void EnsureEntityMapping(EntityID entity);
     private:
         SYN_INLINE uint32_t CalculatePageIndex(EntityID entity) const;
         SYN_INLINE uint32_t CalculatePageOffset(EntityID entity) const;
@@ -118,5 +119,21 @@ namespace Syn
     SYN_INLINE void SparsePagedMapping::Clear()
     {
         _pages.clear();
+    }
+
+    SYN_INLINE void SparsePagedMapping::EnsureEntityMapping(EntityID entity)
+    {
+        const uint32_t pageIndex = CalculatePageIndex(entity);
+
+        if (pageIndex >= _pages.size())
+        {
+            _pages.resize(pageIndex + 1);
+        }
+
+        if (!_pages[pageIndex])
+        {
+            _pages[pageIndex] = std::make_unique<DenseIndex[]>(PAGE_SIZE);
+            std::fill_n(_pages[pageIndex].get(), PAGE_SIZE, NULL_INDEX);
+        }
     }
 }

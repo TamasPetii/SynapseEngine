@@ -19,6 +19,12 @@ namespace Syn
 		if (_freeEntities.empty())
 		{
 			entity = _entityCounter++;
+
+			std::for_each(_pools.GetDenseEntities().begin(), _pools.GetDenseEntities().end(),
+				[&](EntityID poolEntity) {
+					IPool* pool = _pools.Get(poolEntity);
+					pool->EnsureEntityMapping(entity);
+				});
 		}
 		else
 		{

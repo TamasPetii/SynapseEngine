@@ -17,6 +17,7 @@ namespace Syn
         SYN_INLINE void Remove(EntityID entity);
         SYN_INLINE bool Contains(EntityID entity) const;
         SYN_INLINE void Clear();
+        SYN_INLINE void EnsureEntityMapping(EntityID entity) {} //Todo?
     private:
         std::unordered_map<EntityID, DenseIndex> _map;
     };

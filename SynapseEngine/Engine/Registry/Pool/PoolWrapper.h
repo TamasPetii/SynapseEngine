@@ -17,6 +17,7 @@ namespace Syn
         void Clear() override;
         size_t Size() const override;
         std::span<const EntityID> GetDenseEntities() const override;
+        void EnsureEntityMapping(EntityID entity) override;
     };
 }
 
@@ -51,5 +52,12 @@ namespace Syn
     std::span<const EntityID> PoolWrapper<PoolType>::GetDenseEntities() const
     {
         return _pool.GetDenseEntities();
+    }
+
+    template<typename PoolType>
+        requires PoolConstraint<PoolType>
+    void PoolWrapper<PoolType>::EnsureEntityMapping(EntityID entity)
+    {
+        _pool.EnsureEntityMapping(entity);
     }
 }

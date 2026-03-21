@@ -32,5 +32,10 @@ namespace Syn
         {
             static_cast<Derived*>(this)->Clear();
         }
+
+        SYN_INLINE void EnsureEntityMapping(EntityID entity)
+        {
+            static_cast<Derived*>(this)->EnsureEntityMapping(entity);
+        }
     };
 }

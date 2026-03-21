@@ -80,6 +80,8 @@ namespace Syn
 
         SYN_INLINE uint32_t GetChangeVersion() const { return _changeVersion; }
         SYN_INLINE void IncrementChangeVersion() { _changeVersion++; }
+
+        SYN_INLINE void EnsureEntityMapping(EntityID entity);
     private:
         StoragePolicy _storage;
         MappingPolicy _mapping;
@@ -233,5 +235,12 @@ namespace Syn
     SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::ResetAllStateBits()
     {
         _storage.ResetAllStateBits();
+    }
+
+    template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
+    SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::EnsureEntityMapping(EntityID entity)
+    {
+        _mapping.EnsureEntityMapping(entity);
     }
 }

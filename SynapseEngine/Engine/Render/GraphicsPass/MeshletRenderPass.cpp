@@ -178,7 +178,7 @@ namespace Syn {
         
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.meshletOffsetStart = SceneDrawData::MESHLET_OFFSET_START;
-        pc.visualizeMeshlet = 1;
+        pc.visualizeMeshlet = 0;
         pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
         pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
 

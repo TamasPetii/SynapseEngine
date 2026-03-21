@@ -18,6 +18,7 @@ namespace Syn
         SYN_INLINE void Remove(EntityID entity);
         SYN_INLINE bool Contains(EntityID entity) const;
         SYN_INLINE void Clear();
+        SYN_INLINE void EnsureEntityMapping(EntityID entity);
     public:
         std::span<const DenseIndex> GetSparseIndices() const;
     private:
@@ -65,5 +66,13 @@ namespace Syn
     SYN_INLINE std::span<const DenseIndex> SparseVectorMapping::GetSparseIndices() const
     {
         return _indices;
+    }
+
+    SYN_INLINE void SparseVectorMapping::EnsureEntityMapping(EntityID entity)
+    {
+        if (entity >= _indices.size())
+        {
+            _indices.resize(entity + 1, NULL_INDEX);
+        }
     }
 }
