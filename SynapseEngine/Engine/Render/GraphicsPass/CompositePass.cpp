@@ -50,7 +50,7 @@ namespace Syn {
         auto swapChain = vkContext->GetSwapChain();
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
-        auto inputImage = group->GetImage(RenderTargetNames::Main);
+        auto inputImage = group->GetImage(RenderTargetNames::DepthPyramid);
         auto swapchainImage = swapChain->GetImage(context.swapchainImageIndex);
 
         VkExtent2D extent = { swapchainImage->GetExtent().width, swapchainImage->GetExtent().height };
@@ -91,7 +91,7 @@ namespace Syn {
         auto imageManager = ServiceLocator::GetImageManager();
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
-        auto inputImage = group->GetImage(RenderTargetNames::Main);
+        auto inputImage = group->GetImage(RenderTargetNames::DepthPyramid);
         auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge);
 
         Vk::PushDescriptorWriter pushWriter;

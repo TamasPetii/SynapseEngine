@@ -168,9 +168,6 @@ layout(push_constant) uniform PushConstants {
     uint64_t debugAabbIndirectAddr;
     uint64_t debugSphereIndirectAddr;
 
-    uint64_t prevCameraBufferAddr;
-    uint64_t prevCameraSparseMapBufferAddr;
-
     uint activeCameraEntity;
     uint meshletOffsetStart; 
     uint visualizeMeshlet; 
@@ -334,20 +331,6 @@ void main() {
     CameraPool cameras = CameraPool(pc.cameraBufferAddr);
     CameraComponent camera = cameras.data[cameraMap.data[pc.activeCameraEntity]];
 
-    bool hasPrevCamera = false;
-    CameraComponent prevCamera;
-
-    if (pc.prevCameraSparseMapBufferAddr != 0 && pc.prevCameraBufferAddr != 0) {
-        SparseMapBuffer prevCameraMap = SparseMapBuffer(pc.prevCameraSparseMapBufferAddr);
-        uint prevCamIdx = prevCameraMap.data[pc.activeCameraEntity];
-
-        if (prevCamIdx != 0xFFFFFFFFu) {
-            CameraPool prevCameras = CameraPool(pc.prevCameraBufferAddr);
-            prevCamera = prevCameras.data[prevCamIdx];
-            hasPrevCamera = true;
-        }
-    }
-
     MeshletDrawDescBuffer meshletDraws = MeshletDrawDescBuffer(addrs.meshletDrawDescriptors);
     uint flatLodIndex = (desc.meshIndex * 4) + desc.lodIndex; 
     GpuMeshletDrawDescriptor submeshData = meshletDraws.data[flatLodIndex];
@@ -407,13 +390,12 @@ void main() {
         }
 
         //Occlusion culling
-        if (isVisible && hasPrevCamera) {
-            vec3 prevViewCenter = (prevCamera.view * vec4(collider.center, 1.0)).xyz;
-            float radius = collider.radius * 1.05;
+        if (isVisible) {
+            vec3 viewCenter = (camera.view * vec4(collider.center, 1.0)).xyz;
+            float radius = collider.radius;
 
             vec2 minUV, maxUV;
-            
-            if (ProjectSphere(prevViewCenter, radius, prevCamera.proj, prevCamera.params.x, minUV, maxUV)) {
+            if (ProjectSphere(viewCenter, radius, camera.proj, camera.params.x, minUV, maxUV)) {
                 float tempY = minUV.y;
                 minUV.y = 1.0 - maxUV.y;
                 maxUV.y = 1.0 - tempY;
@@ -438,13 +420,13 @@ void main() {
                     float d4 = textureLod(depthPyramid, vec2(maxUV.x, maxUV.y), lod).r;
                     float maxBackgroundDepth = max(max(d1, d2), max(d3, d4));
 
-                    vec4 closestPointView = vec4(prevViewCenter.x, prevViewCenter.y, prevViewCenter.z + radius, 1.0);
-                    vec4 closestPointClip = prevCamera.projVulkan * closestPointView;
-                    float projectedSphereDepth = closestPointClip.z / closestPointClip.w;
-                    
-                    float depthEpsilon = 0.00005;
+                    float sphereClosestDepth = -viewCenter.z - radius;
+                    float near = camera.params.x;
+                    float far = camera.params.y;
+                    float normalizedSphereDepth = (sphereClosestDepth - near) / (far - near);
 
-                    if (projectedSphereDepth - depthEpsilon > maxBackgroundDepth) {
+                    //Occlusion Culling
+                    if (normalizedSphereDepth > maxBackgroundDepth) {
                         isVisible = false;
                     }
                 }

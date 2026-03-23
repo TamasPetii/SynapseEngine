@@ -242,5 +242,6 @@ namespace Syn
     SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::EnsureEntityMapping(EntityID entity)
     {
         _mapping.EnsureEntityMapping(entity);
+        //Todo: SetIndexChangedBit!
     }
 }

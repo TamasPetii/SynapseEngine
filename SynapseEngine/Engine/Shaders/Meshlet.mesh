@@ -188,6 +188,9 @@ layout(push_constant) uniform PushConstants {
     uint64_t debugAabbIndirectAddr;
     uint64_t debugSphereIndirectAddr;
 
+    uint64_t prevCameraBufferAddr;
+    uint64_t prevCameraSparseMapBufferAddr;
+
     uint activeCameraEntity;
     uint meshletOffsetStart; 
     uint visualizeMeshlet; 

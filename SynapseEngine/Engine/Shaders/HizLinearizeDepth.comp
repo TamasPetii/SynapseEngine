@@ -35,30 +35,10 @@ layout(push_constant) uniform PushConstants {
     uint activeCameraEntity;
 } pc;
 
-float ConvertDepthToLinear(float depth, float nearPlane, float farPlane) {
-    return (nearPlane * farPlane) / (farPlane - depth * (farPlane - nearPlane));
-}
-
-float ConvertDepthToLinearNormalized(float depth, float nearPlane, float farPlane) {
-    float linear = ConvertDepthToLinear(depth, nearPlane, farPlane);
-    return (linear - nearPlane) / (farPlane - nearPlane);
-}
-
 void main() {
     ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
     if (pos.x >= int(pc.outImageSize.x) || pos.y >= int(pc.outImageSize.y)) return;
 
-    SparseMapBuffer cameraMap = SparseMapBuffer(pc.cameraSparseMapBufferAddr);
-    CameraPool cameras = CameraPool(pc.cameraBufferAddr);   
-    uint cameraDenseIndex = cameraMap.data[pc.activeCameraEntity];
-    CameraComponent camera = cameras.data[cameraDenseIndex];
-
-    vec2 uv = (vec2(pos) + vec2(0.5)) / pc.outImageSize;
-    float depth = texture(inImage, uv).x;
-
-    float nearPlane = camera.params.x;
-    float farPlane = camera.params.y;
-    float linearDepth = ConvertDepthToLinearNormalized(depth, nearPlane, farPlane);
-
-    imageStore(outImage, pos, vec4(linearDepth));
+    float depth = texelFetch(inImage, pos, 0).x;
+    imageStore(outImage, pos, vec4(depth));
 }

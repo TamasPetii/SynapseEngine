@@ -50,6 +50,9 @@ namespace Syn {
         uint64_t debugAabbIndirectAddr;
         uint64_t debugSphereIndirectAddr;
 
+        uint64_t prevCameraBufferAddr;
+        uint64_t prevCameraSparseMapBufferAddr;
+
         uint32_t activeCameraEntity;
         uint32_t meshletOffsetStart;
         uint32_t visualizeMeshlet;
@@ -151,6 +154,7 @@ namespace Syn {
         auto animationManager = ServiceLocator::GetAnimationManager();
 
         uint32_t fIdx = context.frameIndex;
+        uint32_t prevFIdx = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
 
         MeshletPushConstants pc{};
         pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
@@ -176,6 +180,9 @@ namespace Syn {
         pc.debugAabbIndirectAddr = drawData->debugAabbIndirectBuffers[fIdx]->GetDeviceAddress();
         pc.debugSphereIndirectAddr = drawData->debugSphereIndirectBuffers[fIdx]->GetDeviceAddress();
         
+        pc.prevCameraBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::CameraData, prevFIdx);
+        pc.prevCameraSparseMapBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::CameraSparseMap, prevFIdx);
+
         //pc.activeCameraEntity = scene->GetDebugCameraEntity();
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.meshletOffsetStart = SceneDrawData::MESHLET_OFFSET_START;
@@ -203,7 +210,7 @@ namespace Syn {
 
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
-        auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);
+        auto maxSampler = imageManager->GetSampler(SamplerNames::NearestClampEdge);
 
         Vk::PushDescriptorWriter pushWriter;
 
@@ -214,7 +221,7 @@ namespace Syn {
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 
-        //pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
+        pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
     void MeshletRenderPass::Draw(const RenderContext& context)

@@ -24,6 +24,7 @@ namespace Syn
 				[&](EntityID poolEntity) {
 					IPool* pool = _pools.Get(poolEntity);
 					pool->EnsureEntityMapping(entity);
+					//Todo: Set index changed bit -> Flag mixin!!!
 				});
 		}
 		else

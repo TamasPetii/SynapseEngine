@@ -224,6 +224,7 @@ namespace Syn
 
             auto drawData = scene->GetSceneDrawData();
 
+            /*
             size_t requiredDataSize = drawData->totalMaxMeshletInstances * sizeof(DebugMeshletInstance);
             auto& currentDebugBuffer = drawData->debugInstanceBuffers[frameIndex];
 
@@ -237,6 +238,7 @@ namespace Syn
                     VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
                 );
             }
+            */
 
             size_t tradDescSize = drawData->activeTraditionalCount * sizeof(MeshDrawDescriptor);
             if (tradDescSize > 0)

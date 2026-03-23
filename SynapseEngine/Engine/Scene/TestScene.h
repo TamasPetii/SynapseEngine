@@ -23,6 +23,7 @@ namespace Syn
             auto registry = GetRegistry();
             auto modelManager = ServiceLocator::GetModelManager();
             auto animationManager = ServiceLocator::GetAnimationManager();
+            auto materialManager = ServiceLocator::GetMaterialManager();
 
             const std::string basePath = "C:/Users/User/Desktop/Models/";
 
@@ -97,30 +98,9 @@ namespace Syn
                 registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
             }
 
-            /*
-            {
-                // Character
-                EntityID characterEntity = registry->CreateEntity();
-                registry->AddComponent<TransformComponent>(characterEntity);
-                registry->AddComponent<ModelComponent>(characterEntity);
-                registry->AddComponent<AnimationComponent>(characterEntity);
-
-                registry->GetComponent<TransformComponent>(characterEntity).scale = glm::vec3(5.f);
-                registry->GetComponent<ModelComponent>(characterEntity).modelIndex = mutantId;
-
-                auto& animComp = registry->GetComponent<AnimationComponent>(characterEntity);
-                animComp.animationIndex = animationIds[1];
-                //animComp.speed = 0.5f + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * 1.5f;
-
-                registry->GetPool<TransformComponent>()->SetCategory(characterEntity, StorageCategory::Static);
-                registry->GetPool<ModelComponent>()->SetCategory(characterEntity, StorageCategory::Static);
-                registry->GetPool<AnimationComponent>()->SetCategory(characterEntity, StorageCategory::Stream);
-            }
-            */
-
+            //Random Animation
             for (int i = 0; i < 0; i++)
             {
-                // Character
                 EntityID characterEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(characterEntity);
                 registry->AddComponent<ModelComponent>(characterEntity);
@@ -144,10 +124,9 @@ namespace Syn
                 registry->GetPool<AnimationComponent>()->SetCategory(characterEntity, StorageCategory::Stream);
             }
           
-            auto materialManager = ServiceLocator::GetMaterialManager();
 
-            // Random Geometry
-            for (int i = 0; i < 100000; i++)
+            // Random Shape Geometries
+            for (int i = 0; i < 1000000; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);

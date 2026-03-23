@@ -1656,5 +1656,6 @@
     <None Include="Shaders\Wireframe.vert" />
     <None Include="Shaders\Wireframe.frag" />
     <None Include="Shaders\WireframeMeshlet.vert" />
+    <None Include="Shaders\_old_Meshlet.task" />
   </ItemGroup>
 </Project>
