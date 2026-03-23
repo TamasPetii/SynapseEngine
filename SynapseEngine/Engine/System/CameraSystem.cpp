@@ -37,14 +37,18 @@ namespace Syn
 
         auto inputManager = ServiceLocator::GetInputManager();
 
-        auto processEntity = [cameraPool, transformPool, inputManager, deltaTime](EntityID entity) {
+        auto processEntity = [cameraPool, transformPool, inputManager, scene, deltaTime](EntityID entity) {
             if (!transformPool->Has(entity)) 
                 return;
 
             if (inputManager->IsKeyHeld(KEY_W) || inputManager->IsKeyHeld(KEY_S) || inputManager->IsKeyHeld(KEY_A) || inputManager->IsKeyHeld(KEY_D) || inputManager->IsButtonHeld(BUTTON_RIGHT))
             {
-                cameraPool->SetBit<UPDATE_BIT>(entity);
-                transformPool->SetBit<UPDATE_BIT>(entity);
+                //if (entity == scene->GetDebugCameraEntity())
+                if (entity == scene->GetSceneCameraEntity())
+                {
+                    cameraPool->SetBit<UPDATE_BIT>(entity);
+                    transformPool->SetBit<UPDATE_BIT>(entity);
+                }
             }
 
             if (cameraPool->IsBitSet<UPDATE_BIT>(entity))

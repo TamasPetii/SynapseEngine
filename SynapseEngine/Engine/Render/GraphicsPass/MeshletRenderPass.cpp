@@ -176,6 +176,7 @@ namespace Syn {
         pc.debugAabbIndirectAddr = drawData->debugAabbIndirectBuffers[fIdx]->GetDeviceAddress();
         pc.debugSphereIndirectAddr = drawData->debugSphereIndirectBuffers[fIdx]->GetDeviceAddress();
         
+        //pc.activeCameraEntity = scene->GetDebugCameraEntity();
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.meshletOffsetStart = SceneDrawData::MESHLET_OFFSET_START;
         pc.visualizeMeshlet = 0;

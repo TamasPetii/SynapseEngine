@@ -38,9 +38,10 @@ namespace Syn
         void Finish();
 
         Registry* GetRegistry() const { return _registry.get(); }
-        ComponentBufferManager* GetComponentBufferManager() const { return _componentBufferManager.get(); }
         SceneDrawData* GetSceneDrawData() const { return _sceneDrawData.get(); }
         EntityID GetSceneCameraEntity() const { return _sceneCameraEntity; }
+        EntityID GetDebugCameraEntity() const { return _debugCameraEntity; }
+        ComponentBufferManager* GetComponentBufferManager() const { return _componentBufferManager.get(); }
     private:
         void InitializeSystems();
         void InitializeComponentBuffers();
@@ -57,6 +58,7 @@ namespace Syn
         void RegisterComponentSparseMapBuffer(const std::string& name);
     protected:
         EntityID _sceneCameraEntity = NULL_ENTITY;
+        EntityID _debugCameraEntity = NULL_ENTITY;
 
         std::unique_ptr<Registry> _registry;
         std::unique_ptr<SceneDrawData> _sceneDrawData;

@@ -358,14 +358,4 @@ void main() {
         outList.data[finalIndex].modelIndex = modelComp.modelIndex;
         outList.data[finalIndex].packedFlags = (visibility == 2) ? 1 : 0; 
     }
-
-    /*
-    DispatchCountBuffer counter = DispatchCountBuffer(pc.visibleModelCountAddr);
-    uint finalIndex = atomicAdd(counter.cmd.groupCountX, 1);
-
-    VisibleModelList outList = VisibleModelList(pc.visibleModelListAddr);
-    outList.data[finalIndex].entityId = entityId;
-    outList.data[finalIndex].modelIndex = modelComp.modelIndex;
-    outList.data[finalIndex].packedFlags = (visibility == 2) ? 1 : 0;
-    */
 }

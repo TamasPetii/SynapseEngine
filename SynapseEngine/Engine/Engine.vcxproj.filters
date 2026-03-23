@@ -321,9 +321,6 @@
     <ClCompile Include="Collision\Colliders\AabbCollider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Collision\Colliders\ObbCollider.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Collision\Colliders\SphereCollider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1146,9 +1143,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Collision\Colliders\AabbCollider.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Collision\Colliders\ObbCollider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Collision\Colliders\SphereCollider.h">

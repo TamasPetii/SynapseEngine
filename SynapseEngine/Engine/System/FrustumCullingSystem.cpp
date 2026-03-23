@@ -7,12 +7,14 @@
 #include "Engine/System/RenderSystem.h"
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/System/CameraSystem.h"
-#include <atomic>
+#include "Engine/Animation/AnimationManager.h"
+#include "Engine/System/AnimationSystem.h"
 
 #include "Engine/Mesh/Utils/MeshUtils.h"
 #include "Engine/Collision/Tester/CollisionTester.h"
 #include <glm/gtc/matrix_access.hpp>
 #include <span>
+#include <atomic>
 
 namespace Syn
 {
@@ -21,7 +23,8 @@ namespace Syn
             TypeInfo<ModelSystem>::ID,
             TypeInfo<TransformSystem>::ID,
             TypeInfo<RenderSystem>::ID,
-            TypeInfo<CameraSystem>::ID
+            TypeInfo<CameraSystem>::ID,
+            TypeInfo<AnimationSystem>::ID
         };
     }
 
@@ -46,18 +49,22 @@ namespace Syn
         }
 
         auto modelManager = ServiceLocator::GetModelManager();
+        auto animationManager = ServiceLocator::GetAnimationManager();
+
         auto registry = scene->GetRegistry();
         auto modelPool = registry->GetPool<ModelComponent>();
         auto transformPool = registry->GetPool<TransformComponent>();
         auto cameraPool = registry->GetPool<CameraComponent>();
+        auto animPool = registry->GetPool<AnimationComponent>();
 
         EntityID cameraEntity = scene->GetSceneCameraEntity();
         if (!modelPool || !transformPool || !cameraPool || cameraEntity == NULL_ENTITY) return;
 
         const auto& cameraComp = cameraPool->Get(cameraEntity);
         auto modelSnapshot = modelManager->GetResourceSnapshot();
+        auto animSnapshot = animationManager->GetResourceSnapshot();
 
-        auto cullFunc = [drawData, modelPool, transformPool, modelSnapshot, cameraComp](EntityID entity) {   
+        auto cullFunc = [drawData, modelPool, transformPool, modelSnapshot, cameraComp, animPool, animSnapshot](EntityID entity) {
             std::span<const FrustumFace> frustum = cameraComp.frustum;
             const auto& modelComp = modelPool->Get(entity);
             const auto& transformComp = transformPool->Get(entity);
@@ -76,11 +83,30 @@ namespace Syn
 
             uint32_t meshCount = modelAlloc.meshAllocationCount / 4;
             auto resource = snapshotEntry.resource;
-
             const glm::mat4& transform = transformComp.transform;
 
-            //Frustum culling on the full model!
-            const auto& globalLocalCollider = resource->gpuData.globalCollider;
+            bool hasAnimation = false;
+            uint32_t animFrameIndex = 0;
+            std::shared_ptr<Animation> animResource = nullptr;
+
+            if (animPool && animPool->Has(entity)) {
+                const auto& animComp = animPool->Get(entity);
+                if (animComp.isReady && animComp.animationIndex != NULL_INDEX && animComp.animationIndex < animSnapshot.size()) {
+                    const auto& aSnapshotEntry = animSnapshot[animComp.animationIndex];
+                    if (aSnapshotEntry.resource != nullptr && aSnapshotEntry.state == ResourceState::Ready) {
+                        hasAnimation = true;
+                        animFrameIndex = animComp.frameIndex;
+                        animResource = aSnapshotEntry.resource;
+                    }
+                }
+            }
+
+            GpuMeshCollider globalLocalCollider = resource->gpuData.globalCollider;
+
+            if (hasAnimation) {
+                globalLocalCollider = animResource->gpuData.frameGlobalColliders[animFrameIndex];
+            }
+
             GpuMeshCollider globalWorldCollider = MeshUtils::TransformCollider(globalLocalCollider, transform);
 
             IntersectionType visibility = CollisionTester::IsInFrustumIntersectionType(globalWorldCollider, frustum);
@@ -96,7 +122,16 @@ namespace Syn
                 float distance = glm::length(cameraComp.position - globalWorldCollider.center);
                 if (meshCount > 1)
                 {
-                    const auto& localCollider = resource->gpuData.indexedData.meshColliders[m];
+                    GpuMeshCollider localCollider;
+
+                    if (hasAnimation) {
+                        uint32_t frameOffset = animFrameIndex * animResource->gpuData.descriptor.globalMeshCount;
+                        localCollider = animResource->gpuData.frameMeshColliders[frameOffset + m];
+                    }
+                    else {
+                        localCollider = resource->gpuData.indexedData.meshColliders[m];
+                    }
+
                     GpuMeshCollider worldCollider = MeshUtils::TransformCollider(localCollider, transform);
 
                     if(!parentFullyInside)

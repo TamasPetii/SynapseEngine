@@ -332,7 +332,6 @@
     <ClCompile Include="Mesh\Source\Procedural\Shape\PyramidMeshSource.cpp" />
     <ClCompile Include="Mesh\Source\Procedural\Shape\QuadMeshSource.cpp" />
     <ClCompile Include="Mesh\Source\Procedural\Shape\ScreenQuadMeshSource.cpp" />
-    <ClCompile Include="Collision\Colliders\ObbCollider.cpp" />
     <ClCompile Include="Collision\Colliders\SphereCollider.cpp" />
     <ClCompile Include="Mesh\Builder\StaticMeshBuilder.cpp" />
     <ClCompile Include="Mesh\Data\StaticMesh.cpp" />
@@ -600,7 +599,6 @@
     <ClInclude Include="Mesh\Source\Procedural\Shape\PyramidMeshSource.h" />
     <ClInclude Include="Mesh\Source\Procedural\Shape\QuadMeshSource.h" />
     <ClInclude Include="Mesh\Source\Procedural\Shape\ScreenQuadMeshSource.h" />
-    <ClInclude Include="Collision\Colliders\ObbCollider.h" />
     <ClInclude Include="Collision\Colliders\SphereCollider.h" />
     <ClInclude Include="Mesh\Builder\StaticMeshBuilder.h" />
     <ClInclude Include="Mesh\Data\StaticMesh.h" />
