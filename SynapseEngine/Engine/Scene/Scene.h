@@ -84,18 +84,28 @@ namespace Syn
     template<typename TComponent, typename TGpuStruct>
     SYN_INLINE void Scene::RegisterComponentBuffer(const std::string& name)
     {
-        _componentBufferManager->RegisterBuffer(name, sizeof(TGpuStruct), [this]() -> uint32_t {
-            auto pool = _registry->GetPool<TComponent>();
-            return pool ? static_cast<uint32_t>(pool->Size()) : 0;
+        _componentBufferManager->RegisterBuffer(name, sizeof(TGpuStruct),
+            [this]() -> uint32_t {
+                auto pool = _registry->GetPool<TComponent>();
+                return pool ? static_cast<uint32_t>(pool->Size()) : 0;
+            },
+            [this]() -> bool {
+                auto pool = _registry->GetPool<TComponent>();
+                return pool && pool->Size() > 0;
             });
     }
 
     template<typename TComponent>
     SYN_INLINE void Scene::RegisterComponentSparseMapBuffer(const std::string& name)
     {
-        _componentBufferManager->RegisterBuffer(name, sizeof(DenseIndex), [this]() -> uint32_t {
-            auto pool = _registry->GetPool<TComponent>();
-            return pool ? static_cast<uint32_t>(pool->GetSparseIndices().size()) : 0;
+        _componentBufferManager->RegisterBuffer(name, sizeof(DenseIndex),
+            [this]() -> uint32_t {
+                auto pool = _registry->GetPool<TComponent>();
+                return pool ? static_cast<uint32_t>(pool->GetSparseIndices().size()) : 0;
+            },
+            [this]() -> bool {
+                auto pool = _registry->GetPool<TComponent>();
+                return pool && pool->Size() > 0;
             });
     }
 }

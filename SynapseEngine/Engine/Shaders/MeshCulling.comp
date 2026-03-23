@@ -262,23 +262,26 @@ void main() {
     ModelAllocationInfo mAlloc = ModelAllocBuffer(pc.modelAllocBufferAddr).data[modelData.modelIndex];
     GpuModelAddresses addrs = ModelAddressBuffer(pc.modelAddressBufferAddr).data[modelData.modelIndex];
     MeshColliderBuffer colliders = MeshColliderBuffer(addrs.meshColliders);
-
-    SparseMapBuffer animSparseMap = SparseMapBuffer(pc.animationSparseMapBufferAddr);
-    uint animSparseIndex = animSparseMap.data[modelData.entityId];
     
     uint animFrameIndex = 0;
     bool hasAnimation = false;
     GpuAnimationAddresses animAddrs;
 
-    if (animSparseIndex != 0xFFFFFFFFu) {
-        AnimationComponentBuffer animComponents = AnimationComponentBuffer(pc.animationBufferAddr);
-        AnimationComponent animComp = animComponents.data[animSparseIndex];
+    if(pc.animationSparseMapBufferAddr != 0)
+    {
+        SparseMapBuffer animSparseMap = SparseMapBuffer(pc.animationSparseMapBufferAddr);
+        uint animSparseIndex = animSparseMap.data[modelData.entityId];
 
-        if (animComp.animationIndex != 0xFFFFFFFFu) {
-            AnimationAddressBuffer animAddresses = AnimationAddressBuffer(pc.animationAddressBuffer);
-            animAddrs = animAddresses.data[animComp.animationIndex];
-            animFrameIndex = animComp.frameIndex;
-            hasAnimation = true;
+        if (animSparseIndex != 0xFFFFFFFFu) {
+            AnimationComponentBuffer animComponents = AnimationComponentBuffer(pc.animationBufferAddr);
+            AnimationComponent animComp = animComponents.data[animSparseIndex];
+
+            if (animComp.animationIndex != 0xFFFFFFFFu) {
+                AnimationAddressBuffer animAddresses = AnimationAddressBuffer(pc.animationAddressBuffer);
+                animAddrs = animAddresses.data[animComp.animationIndex];
+                animFrameIndex = animComp.frameIndex;
+                hasAnimation = true;
+            }
         }
     }
 

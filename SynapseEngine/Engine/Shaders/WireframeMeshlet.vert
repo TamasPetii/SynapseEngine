@@ -191,20 +191,23 @@ void main()
     //Static Mesh Collider
     GpuMeshletCollider collider = colliders.data[instanceData.globalMeshletIdx];
 
-    SparseMapBuffer animSparseMap = SparseMapBuffer(pc.animationSparseMapBufferAddr);
-    uint animSparseIndex = animSparseMap.data[instanceData.entityId];
+    if(pc.animationSparseMapBufferAddr != 0)
+    {
+        SparseMapBuffer animSparseMap = SparseMapBuffer(pc.animationSparseMapBufferAddr);
+        uint animSparseIndex = animSparseMap.data[instanceData.entityId];
 
-    if (animSparseIndex != 0xFFFFFFFFu) {
-        AnimationComponentBuffer animComponents = AnimationComponentBuffer(pc.animationBufferAddr);
-        AnimationComponent animComp = animComponents.data[animSparseIndex];
+        if (animSparseIndex != 0xFFFFFFFFu) {
+            AnimationComponentBuffer animComponents = AnimationComponentBuffer(pc.animationBufferAddr);
+            AnimationComponent animComp = animComponents.data[animSparseIndex];
 
-        if (animComp.animationIndex != 0xFFFFFFFFu) {
-            AnimationAddressBuffer animAddresses = AnimationAddressBuffer(pc.animationAddressBuffer);
-            GpuAnimationAddresses animAddrs = animAddresses.data[animComp.animationIndex];
+            if (animComp.animationIndex != 0xFFFFFFFFu) {
+                AnimationAddressBuffer animAddresses = AnimationAddressBuffer(pc.animationAddressBuffer);
+                GpuAnimationAddresses animAddrs = animAddresses.data[animComp.animationIndex];
 
-            FrameMeshletColliderBuffer animColliders = FrameMeshletColliderBuffer(animAddrs.frameMeshletColliders);
-            uint frameOffset = animComp.frameIndex * animAddrs.descriptor.globalMeshletCount;
-            collider = animColliders.data[frameOffset + instanceData.globalMeshletIdx];
+                FrameMeshletColliderBuffer animColliders = FrameMeshletColliderBuffer(animAddrs.frameMeshletColliders);
+                uint frameOffset = animComp.frameIndex * animAddrs.descriptor.globalMeshletCount;
+                collider = animColliders.data[frameOffset + instanceData.globalMeshletIdx];
+            }
         }
     }
 

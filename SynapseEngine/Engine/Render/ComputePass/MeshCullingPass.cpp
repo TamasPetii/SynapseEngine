@@ -69,19 +69,19 @@ namespace Syn {
 
         CullingPushConstants pc{};
         pc.animationAddressBuffer = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
-        pc.animationBufferAddr = compManager->GetComponentBuffer(BufferNames::AnimationData, fIdx).buffer->GetDeviceAddress();
-        pc.animationSparseMapBufferAddr = compManager->GetComponentBuffer(BufferNames::AnimationSparseMap, fIdx).buffer->GetDeviceAddress();
+        pc.animationBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationData, fIdx);
+        pc.animationSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationSparseMap, fIdx);
 
-        pc.cameraBufferAddr = compManager->GetComponentBuffer(BufferNames::CameraData, fIdx).buffer->GetDeviceAddress();
-        pc.cameraSparseMapBufferAddr = compManager->GetComponentBuffer(BufferNames::CameraSparseMap, fIdx).buffer->GetDeviceAddress();
-        pc.transformBufferAddr = compManager->GetComponentBuffer(BufferNames::TransformData, fIdx).buffer->GetDeviceAddress();
-        pc.transformSparseMapBufferAddr = compManager->GetComponentBuffer(BufferNames::TransformSparseMap, fIdx).buffer->GetDeviceAddress();
-        pc.modelCompBufferAddr = compManager->GetComponentBuffer(BufferNames::ModelData, fIdx).buffer->GetDeviceAddress();
+        pc.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
+        pc.cameraSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
+        pc.transformBufferAddr = compManager->GetBufferAddr(BufferNames::TransformData, fIdx);
+        pc.transformSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::TransformSparseMap, fIdx);
+        pc.modelCompBufferAddr = compManager->GetBufferAddr(BufferNames::ModelData, fIdx);
 
         pc.modelAllocBufferAddr = drawData->globalModelAllocationBuffers[fIdx]->GetDeviceAddress();
         pc.modelAddressBufferAddr = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
 
-        pc.visibleModelListAddr = compManager->GetComponentBuffer(BufferNames::ModelVisibleData, fIdx).buffer->GetDeviceAddress();
+        pc.visibleModelListAddr = compManager->GetBufferAddr(BufferNames::ModelVisibleData, fIdx);
         pc.visibleModelCountAddr = drawData->globalModelComputeCountBuffer[fIdx]->GetDeviceAddress();
 
         pc.meshAllocBufferAddr = drawData->globalMeshAllocationBuffers[fIdx]->GetDeviceAddress();

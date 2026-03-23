@@ -19,10 +19,11 @@ namespace Syn
     public:
         ComponentBufferManager(uint32_t frameCount);
 
-        void RegisterBuffer(const std::string& name, uint32_t elementSize, std::function<uint32_t()> sizeCallback);
+        void RegisterBuffer(const std::string& name, uint32_t elementSize, std::function<uint32_t()> sizeCallback, std::function<bool()> readyCallback);
         void Update(uint32_t frameIndex);
 
         ComponentBufferView GetComponentBuffer(const std::string& name, uint32_t frameIndex);
+        uint64_t GetBufferAddr(const std::string& name, uint32_t frameIndex);
     private:
         struct FrameData
         {
@@ -34,6 +35,7 @@ namespace Syn
         {
             std::vector<FrameData> frames;
             std::function<uint32_t()> sizeCallback;
+            std::function<bool()> readyCallback;
         };
 
         uint32_t _frameCount;

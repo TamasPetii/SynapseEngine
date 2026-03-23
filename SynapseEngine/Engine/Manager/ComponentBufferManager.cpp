@@ -6,7 +6,7 @@ namespace Syn
         : _frameCount(frameCount)
     {}
 
-    void ComponentBufferManager::RegisterBuffer(const std::string& name, uint32_t elementSize, std::function<uint32_t()> sizeCallback)
+    void ComponentBufferManager::RegisterBuffer(const std::string& name, uint32_t elementSize, std::function<uint32_t()> sizeCallback, std::function<bool()> readyCallback)
     {
         Vk::BufferConfig config;
         config.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
@@ -16,6 +16,7 @@ namespace Syn
 
         ComponentBufferState state;
         state.sizeCallback = std::move(sizeCallback);
+        state.readyCallback = std::move(readyCallback);
 
         for (uint32_t i = 0; i < _frameCount; ++i)
         {
@@ -52,5 +53,24 @@ namespace Syn
         }
 
         return { nullptr, std::span<uint32_t>() };
+    }
+
+    uint64_t ComponentBufferManager::GetBufferAddr(const std::string& name, uint32_t frameIndex)
+    {
+        auto it = _buffers.find(name);
+
+        if (it != _buffers.end())
+        {
+            if (it->second.readyCallback && !it->second.readyCallback()) {
+                return 0;
+            }
+
+            auto& frameData = it->second.frames[frameIndex];
+            if (frameData.gpuBuffer.GetBuffer() != nullptr) {
+                return frameData.gpuBuffer.GetBuffer()->GetDeviceAddress();
+            }
+        }
+
+        return 0;
     }
 }

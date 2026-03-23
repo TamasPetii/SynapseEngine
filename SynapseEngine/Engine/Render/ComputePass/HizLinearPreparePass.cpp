@@ -98,8 +98,8 @@ namespace Syn {
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, fIdx);
 
         HizLinearPushConstants pc{};
-        pc.cameraBufferAddr = compManager->GetComponentBuffer(BufferNames::CameraData, fIdx).buffer->GetDeviceAddress();
-        pc.cameraSparseMapBufferAddr = compManager->GetComponentBuffer(BufferNames::CameraSparseMap, fIdx).buffer->GetDeviceAddress();
+        pc.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
+        pc.cameraSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.outImageSize = glm::vec2(rtGroup->GetWidth(), rtGroup->GetHeight());
 

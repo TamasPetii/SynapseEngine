@@ -117,18 +117,18 @@ namespace Syn
 
         WireframeMeshletPushConstants pc{};
         pc.animationAddressBuffer = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
-        pc.animationBufferAddr = compManager->GetComponentBuffer(BufferNames::AnimationData, fIdx).buffer->GetDeviceAddress();
-        pc.animationSparseMapBufferAddr = compManager->GetComponentBuffer(BufferNames::AnimationSparseMap, fIdx).buffer->GetDeviceAddress();
+        pc.animationBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationData, fIdx);
+        pc.animationSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationSparseMap, fIdx);
 
         pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
         pc.globalInstanceBuffers = drawData->globalInstanceBuffers[fIdx]->GetDeviceAddress();
         pc.globalIndirectCommandDescriptorBuffers = drawData->globalIndirectCommandDescriptorBuffers[fIdx]->GetDeviceAddress();
-        pc.cameraBufferAddr = compManager->GetComponentBuffer(BufferNames::CameraData, fIdx).buffer->GetDeviceAddress();
-        pc.cameraSparseMapBufferAddr = compManager->GetComponentBuffer(BufferNames::CameraSparseMap, fIdx).buffer->GetDeviceAddress();
-        pc.transformBufferAddr = compManager->GetComponentBuffer(BufferNames::TransformData, fIdx).buffer->GetDeviceAddress();
-        pc.transformSparseMapBufferAddr = compManager->GetComponentBuffer(BufferNames::TransformSparseMap, fIdx).buffer->GetDeviceAddress();
-        pc.modelBufferAddr = compManager->GetComponentBuffer(BufferNames::ModelData, fIdx).buffer->GetDeviceAddress();
-        pc.modelSparseMapBufferAddr = compManager->GetComponentBuffer(BufferNames::ModelSparseMap, fIdx).buffer->GetDeviceAddress();
+        pc.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
+        pc.cameraSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
+        pc.transformBufferAddr = compManager->GetBufferAddr(BufferNames::TransformData, fIdx);
+        pc.transformSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::TransformSparseMap, fIdx);
+        pc.modelBufferAddr = compManager->GetBufferAddr(BufferNames::ModelData, fIdx);
+        pc.modelSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::ModelSparseMap, fIdx);
 
         pc.indexBufferAddr = sphereMesh->hardwareBuffers.indices->GetDeviceAddress();
         pc.vertexBufferAddr = sphereMesh->hardwareBuffers.vertexPositions->GetDeviceAddress();

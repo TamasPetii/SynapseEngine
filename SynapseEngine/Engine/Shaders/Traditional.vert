@@ -221,49 +221,54 @@ void main() {
     mat4 finalModelMat = staticNodeTransform.globalTransform;
     mat4 finalModelMatIT = staticNodeTransform.globalTransformIT;
 
-    // 8. Animáció
-    SparseMapBuffer animSparseMap = SparseMapBuffer(pc.animationSparseMapBufferAddr);
-    uint animSparseIndex = animSparseMap.data[entityId];
-
-    if (animSparseIndex != 0xFFFFFFFFu) 
+    if(pc.animationSparseMapBufferAddr != 0)
     {
-        AnimationComponentBuffer animComponents = AnimationComponentBuffer(pc.animationBufferAddr);
-        AnimationComponent animComp = animComponents.data[animSparseIndex];
+        // 8. Animáció
+        SparseMapBuffer animSparseMap = SparseMapBuffer(pc.animationSparseMapBufferAddr);
+        uint animSparseIndex = animSparseMap.data[entityId];
 
-        if (animComp.animationIndex != 0xFFFFFFFFu) {
-            AnimationAddressBuffer animAddresses = AnimationAddressBuffer(pc.animationAddressBuffer);
-            GpuAnimationAddresses animAddrs = animAddresses.data[animComp.animationIndex];
+        if (animSparseIndex != 0xFFFFFFFFu) 
+        {
+            AnimationComponentBuffer animComponents = AnimationComponentBuffer(pc.animationBufferAddr);
+            AnimationComponent animComp = animComponents.data[animSparseIndex];
 
-            VertexSkinDataBuffer skinBuffer = VertexSkinDataBuffer(animAddrs.vertexSkinData);
-            GpuVertexSkinData skin = skinBuffer.data[realVertexIndex];
+            if (animComp.animationIndex != 0xFFFFFFFFu) {
+                AnimationAddressBuffer animAddresses = AnimationAddressBuffer(pc.animationAddressBuffer);
+                GpuAnimationAddresses animAddrs = animAddresses.data[animComp.animationIndex];
 
-            NodeBuffer animNodes = NodeBuffer(animAddrs.nodeTransforms);
+                VertexSkinDataBuffer skinBuffer = VertexSkinDataBuffer(animAddrs.vertexSkinData);
+                GpuVertexSkinData skin = skinBuffer.data[realVertexIndex];
 
-            mat4 skinMat = mat4(0.0);
-            mat4 skinMatIT = mat4(0.0);
+                NodeBuffer animNodes = NodeBuffer(animAddrs.nodeTransforms);
+
+                mat4 skinMat = mat4(0.0);
+                mat4 skinMatIT = mat4(0.0);
         
-            uint frameOffset = animComp.frameIndex * animAddrs.descriptor.nodeCount;
-            bool hasValidBone = false;
+                uint frameOffset = animComp.frameIndex * animAddrs.descriptor.nodeCount;
+                bool hasValidBone = false;
 
-            for (int i = 0; i < 4; ++i) {
-                float weight = skin.boneWeights[i];
-                if (weight == 0.0) continue; 
+                for (int i = 0; i < 4; ++i) {
+                    float weight = skin.boneWeights[i];
+                    if (weight == 0.0) continue; 
             
-                uint boneIdx = skin.boneIndices[i];
-                if (boneIdx != 0xFFFFFFFFu) {
-                    GpuNodeTransform boneNode = animNodes.data[frameOffset + boneIdx];
-                    skinMat += boneNode.globalTransform * weight;
-                    skinMatIT += boneNode.globalTransformIT * weight;
-                    hasValidBone = true;
+                    uint boneIdx = skin.boneIndices[i];
+                    if (boneIdx != 0xFFFFFFFFu) {
+                        GpuNodeTransform boneNode = animNodes.data[frameOffset + boneIdx];
+                        skinMat += boneNode.globalTransform * weight;
+                        skinMatIT += boneNode.globalTransformIT * weight;
+                        hasValidBone = true;
+                    }
                 }
-            }
 
-            if (hasValidBone) {
-                finalModelMat = skinMat;
-                finalModelMatIT = skinMatIT;
-            }  
-        }    
-    }
+                if (hasValidBone) {
+                    finalModelMat = skinMat;
+                    finalModelMatIT = skinMatIT;
+                }  
+            }    
+        }
+     }
+
+    
 
     uint flatMaterialIndex = comp.materialOffset + meshIndex;
     uint resolvedMaterialId = materialLookup.data[flatMaterialIndex];

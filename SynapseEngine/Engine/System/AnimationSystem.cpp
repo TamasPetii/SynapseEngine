@@ -17,8 +17,6 @@ namespace Syn
         auto animationManager = ServiceLocator::GetAnimationManager();
         auto animations = animationManager->GetResourceSnapshot();
 
-
-
         ParallelForEachIf<UPDATE_BIT>(animPool, subflow, SystemPhaseNames::Update, [animPool, deltaTime, animations](EntityID entity) {
             auto& animComponent = animPool->Get(entity);
 

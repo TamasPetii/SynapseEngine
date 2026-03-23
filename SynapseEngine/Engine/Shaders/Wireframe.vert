@@ -179,20 +179,23 @@ void main()
     //Static Mesh Collider
     GpuMeshCollider collider = colliders.data[desc.meshIndex];
 
-    SparseMapBuffer animSparseMap = SparseMapBuffer(pc.animationSparseMapBufferAddr);
-    uint animSparseIndex = animSparseMap.data[entityId];
+    if(pc.animationSparseMapBufferAddr != 0)
+    {
+        SparseMapBuffer animSparseMap = SparseMapBuffer(pc.animationSparseMapBufferAddr);
+        uint animSparseIndex = animSparseMap.data[entityId];
 
-    if (animSparseIndex != 0xFFFFFFFFu) {
-        AnimationComponentBuffer animComponents = AnimationComponentBuffer(pc.animationBufferAddr);
-        AnimationComponent animComp = animComponents.data[animSparseIndex];
+        if (animSparseIndex != 0xFFFFFFFFu) {
+            AnimationComponentBuffer animComponents = AnimationComponentBuffer(pc.animationBufferAddr);
+            AnimationComponent animComp = animComponents.data[animSparseIndex];
 
-        if (animComp.animationIndex != 0xFFFFFFFFu) {
-            AnimationAddressBuffer animAddresses = AnimationAddressBuffer(pc.animationAddressBuffer);
-            GpuAnimationAddresses animAddrs = animAddresses.data[animComp.animationIndex];
+            if (animComp.animationIndex != 0xFFFFFFFFu) {
+                AnimationAddressBuffer animAddresses = AnimationAddressBuffer(pc.animationAddressBuffer);
+                GpuAnimationAddresses animAddrs = animAddresses.data[animComp.animationIndex];
 
-            FrameMeshColliderBuffer animColliders = FrameMeshColliderBuffer(animAddrs.frameMeshColliders);
-            uint frameOffset = animComp.frameIndex * animAddrs.descriptor.globalMeshCount;
-            collider = animColliders.data[frameOffset + desc.meshIndex];
+                FrameMeshColliderBuffer animColliders = FrameMeshColliderBuffer(animAddrs.frameMeshColliders);
+                uint frameOffset = animComp.frameIndex * animAddrs.descriptor.globalMeshCount;
+                collider = animColliders.data[frameOffset + desc.meshIndex];
+            }
         }
     }
 

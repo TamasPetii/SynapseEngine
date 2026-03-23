@@ -274,22 +274,25 @@ void main() {
     //Default Static Collider
     GpuMeshCollider localGlobalCollider = addrs.globalCollider; 
     
-    SparseMapBuffer animSparseMap = SparseMapBuffer(pc.animationSparseMapBufferAddr);
-    uint animSparseIndex = animSparseMap.data[entityId];
+    if(pc.animationSparseMapBufferAddr != 0)
+    {
+        SparseMapBuffer animSparseMap = SparseMapBuffer(pc.animationSparseMapBufferAddr);
+        uint animSparseIndex = animSparseMap.data[entityId];
 
-    if (animSparseIndex != 0xFFFFFFFFu) {
-        AnimationComponentBuffer animComponents = AnimationComponentBuffer(pc.animationBufferAddr);
-        AnimationComponent animComp = animComponents.data[animSparseIndex];
+        if (animSparseIndex != 0xFFFFFFFFu) {
+            AnimationComponentBuffer animComponents = AnimationComponentBuffer(pc.animationBufferAddr);
+            AnimationComponent animComp = animComponents.data[animSparseIndex];
 
-        if (animComp.animationIndex != 0xFFFFFFFFu) {
-            AnimationAddressBuffer animAddresses = AnimationAddressBuffer(pc.animationAddressBuffer);
-            GpuAnimationAddresses animAddrs = animAddresses.data[animComp.animationIndex];
+            if (animComp.animationIndex != 0xFFFFFFFFu) {
+                AnimationAddressBuffer animAddresses = AnimationAddressBuffer(pc.animationAddressBuffer);
+                GpuAnimationAddresses animAddrs = animAddresses.data[animComp.animationIndex];
 
-            FrameGlobalColliderBuffer globalColliders = FrameGlobalColliderBuffer(animAddrs.frameGlobalColliders);
-            localGlobalCollider = globalColliders.data[animComp.frameIndex];
+                FrameGlobalColliderBuffer globalColliders = FrameGlobalColliderBuffer(animAddrs.frameGlobalColliders);
+                localGlobalCollider = globalColliders.data[animComp.frameIndex];
+            }
         }
     }
-
+    
     GpuMeshCollider globalWorldCollider = TransformCollider(localGlobalCollider, transform.transform);
 
     // Culling
