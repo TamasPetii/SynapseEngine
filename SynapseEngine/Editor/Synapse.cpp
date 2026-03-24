@@ -6,6 +6,11 @@
 #include "Editor/View/Transform/TransformView.h"
 #include "EditorCore/ViewModels/Transform/TransformViewModel.h"
 
+#include "Editor/View/Viewport/ViewportView.h"
+#include "EditorCore/ViewModels/Viewport/ViewportViewModel.h"
+
+#include "Manager/GuiTextureManager.h"
+
 Synapse::Synapse(const Syn::ApplicationConfig& config)
     : Syn::Application(config)
 {
@@ -35,8 +40,12 @@ void Synapse::OnInit() {
         }
         };
 
+    params.onGuiFlushCallback = [&](uint32_t frameIndex) {
+        Syn::GuiTextureManager::Get().FlushQueue(frameIndex);
+        };
+
     _engine = std::make_unique<Syn::Engine>(params);
-    _editorApi = std::make_unique<Syn::EditorApiImpl>(_engine->GetSceneManager());
+    _editorApi = std::make_unique<Syn::EditorApiImpl>(_engine.get());
 
     auto vkContext = _engine->GetVkContext();
     GLFWwindow* nativeWindow = static_cast<GLFWwindow*>(GetWindow().GetNativePointer());
@@ -53,7 +62,6 @@ void Synapse::OnInit() {
     );
 
     using TransformWin = Syn::EditorWindow<Syn::TransformView, Syn::TransformViewModel>;
-
     _guiManager->AddWindow<TransformWin>(
         Syn::TransformView{
         },
@@ -62,17 +70,30 @@ void Synapse::OnInit() {
             _editorApi.get()
         });
 
+    using ViewportWin = Syn::EditorWindow<Syn::ViewportView, Syn::ViewportViewModel>;
+    _guiManager->AddWindow<ViewportWin>(
+        Syn::ViewportView{},
+        Syn::ViewportViewModel{
+            _editorApi.get(),
+            _editorApi.get(),
+            _editorApi.get()
+        }
+    );
+
     _inputDispatcher = std::make_unique<Syn::InputDispatcher>(_guiManager.get(), _engine.get());
 }
 
 void Synapse::OnUpdate(float dt) {
+    if (_guiManager) {
+        _guiManager->BeginFrame();
+        _guiManager->UpdateAndDraw();
+    }
+
     if (_engine) {
         _engine->Update(dt);
     }
 
     if (_guiManager) {
-        _guiManager->BeginFrame();
-        _guiManager->UpdateAndDraw();
         _guiManager->EndFrame();
     }
 }

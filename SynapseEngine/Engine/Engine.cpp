@@ -70,6 +70,9 @@ namespace Syn
 
 		_renderManager->WaitForFrame(currentFrame);
 
+		if (_onGuiFlushCallback)
+			_onGuiFlushCallback(currentFrame);
+
 		_sceneManager->UpdateGPU(currentFrame);
 
 		_renderManager->RenderFrame(currentFrame, _frameContext.framesInFlight, _sceneManager->GetActiveScene());
@@ -84,10 +87,12 @@ namespace Syn
 
 	void Engine::Init(const EngineInitParams& params)
 	{
+		_onGuiFlushCallback = params.onGuiFlushCallback;
+
 		_inputManager = std::make_unique<InputManager>();
 		ServiceLocator::ProvideInputManager(_inputManager.get());
 
-		InitFrameContext(2);
+		InitFrameContext(1);
 		InitLogger();
 		InitVulkan(params);
 		InitTaskExecutor();
@@ -208,7 +213,7 @@ namespace Syn
 
 		_isMinimized = false;
 		_vkContext->GetSwapChain()->Recreate();
-		_renderManager->OnResize(width, height);
+		//_renderManager->OnResize(width, height);
 	}
 
 	void Engine::InitTaskExecutor()

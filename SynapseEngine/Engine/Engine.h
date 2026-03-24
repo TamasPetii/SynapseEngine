@@ -29,6 +29,7 @@ namespace Syn
         std::function<std::pair<uint32_t, uint32_t>()> getWindowExtentCallback;
         std::function<std::vector<const char*>()> getSurfaceExtensionsCallback;
         std::function<void(VkCommandBuffer)> onRenderGuiCallback;
+        std::function<void(uint32_t)> onGuiFlushCallback;
     };
 
 	class SYN_API Engine
@@ -39,6 +40,7 @@ namespace Syn
 
         Vk::Context* GetVkContext() { return _vkContext.get(); }
         SceneManager* GetSceneManager() { return _sceneManager.get(); }
+        RenderManager* GetRenderManager() { return _renderManager.get(); }
 
         void Update(float deltaTime);
         void Render();
@@ -73,7 +75,8 @@ namespace Syn
 		std::unique_ptr<tf::Executor> _taskExecutor;
         std::shared_ptr<tf::TFProfObserver> _jsonTaskObserver;
         std::shared_ptr<TaskProfilerObserver> _guiTaskObserver;
-	};
+        std::function<void(uint32_t)> _onGuiFlushCallback;
+    };
 }
 
 

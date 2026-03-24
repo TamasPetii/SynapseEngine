@@ -1,6 +1,6 @@
 #pragma once
-#include "EditorCore/Types/EntityHandle.h"
 #include <glm/glm.hpp>
+#include "EditorCore/Types/EntityHandle.h"
 
 namespace Syn {
     class ITransformAPI {
@@ -14,5 +14,8 @@ namespace Syn {
         virtual void SetEntityPosition(EntityID entity, const glm::vec3& position) = 0;
         virtual void SetEntityRotation(EntityID entity, const glm::vec3& rotation) = 0;
         virtual void SetEntityScale(EntityID entity, const glm::vec3& scale) = 0;
+
+        virtual glm::mat4 GetEntityWorldMatrix(EntityID entity) const = 0;
+        virtual EntityID GetEntityParent(EntityID entity) const = 0;
     };
 }

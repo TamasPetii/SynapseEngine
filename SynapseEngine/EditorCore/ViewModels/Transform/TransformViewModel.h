@@ -10,7 +10,10 @@
 namespace Syn {
     class TransformViewModel : public IViewModel<TransformState, TransformIntent> {
     public:
-        TransformViewModel(ISelectionAPI* selectionApi, ITransformAPI* transformApi) : _selectionApi(selectionApi), _transformApi(transformApi) {}
+        TransformViewModel(ISelectionAPI* selectionApi, ITransformAPI* transformApi) 
+            : 
+            _selectionApi(selectionApi), 
+            _transformApi(transformApi) {}
 
         const TransformState& GetState() const override { return _state; }
 

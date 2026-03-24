@@ -1,15 +1,13 @@
 #include "GuiManager.h"
 #include <volk.h>
-
 #include <imgui.h>
+
 #include "Editor/Backends/imgui_impl_glfw.h"
-
-#define IMGUI_IMPL_VULKAN_USE_VOLK
 #include "Editor/Backends/imgui_impl_vulkan.h"
-
 #include "GuiTextureManager.h"
-
 #include <print>
+#include "Engine/ServiceLocator.h"
+#include "Engine/FrameContext.h"
 
 namespace Syn {
     void GuiManager::Init(GLFWwindow* window, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue graphicsQueue, uint32_t imageCount, VkFormat colorFormat) {
@@ -67,6 +65,10 @@ namespace Syn {
     }
 
     void GuiManager::BeginFrame() {
+        
+        if (auto frameCtx = ServiceLocator::GetFrameContext())
+            GuiTextureManager::Get().SetCurrentFrame(frameCtx->currentFrameIndex);
+
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();

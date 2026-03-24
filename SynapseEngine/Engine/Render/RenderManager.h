@@ -30,6 +30,13 @@ namespace Syn {
         void SetGuiRenderCallback(std::function<void(VkCommandBuffer)> callback) {
             _onRenderGuiCallback = std::move(callback);
         }
+
+        bool IsResizePending() const {
+            for (bool needsResize : _frameNeedsResize) {
+                if (needsResize) return true;
+            }
+            return false;
+        }
     private:
         std::unique_ptr<Renderer> _renderer;
         std::unique_ptr<RenderTargetManager> _renderTargetManager;

@@ -184,6 +184,7 @@
     <ClCompile Include="Api\ISelectionAPI.cpp" />
     <ClCompile Include="Api\ITransformAPI.cpp" />
     <ClCompile Include="Interaction\DragInteraction.cpp" />
+    <ClCompile Include="Api\IRenderAPI.cpp" />
     <ClCompile Include="Types\EntityHandle.cpp" />
     <ClCompile Include="ViewModels\Transform\TransformCommands.cpp" />
     <ClCompile Include="ViewModels\Transform\TransformViewModel.cpp" />
@@ -191,6 +192,9 @@
     <ClCompile Include="ViewModels\Transform\TransformState.cpp" />
     <ClCompile Include="Types\TextureHandle.cpp" />
     <ClCompile Include="ViewModels\IViewModel.cpp" />
+    <ClCompile Include="ViewModels\Viewport\ViewportState.cpp" />
+    <ClCompile Include="ViewModels\Viewport\ViewportIntent.cpp" />
+    <ClCompile Include="ViewModels\Viewport\ViewportViewModel.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Command\CommandRegistry.h" />
@@ -199,6 +203,7 @@
     <ClInclude Include="Api\ISelectionAPI.h" />
     <ClInclude Include="Api\ITransformAPI.h" />
     <ClInclude Include="Interaction\DragInteraction.h" />
+    <ClInclude Include="Api\IRenderAPI.h" />
     <ClInclude Include="Types\EntityHandle.h" />
     <ClInclude Include="ViewModels\Transform\TransformCommands.h" />
     <ClInclude Include="ViewModels\Transform\TransformViewModel.h" />
@@ -206,6 +211,9 @@
     <ClInclude Include="ViewModels\Transform\TransformState.h" />
     <ClInclude Include="Types\TextureHandle.h" />
     <ClInclude Include="ViewModels\IViewModel.h" />
+    <ClInclude Include="ViewModels\Viewport\ViewportState.h" />
+    <ClInclude Include="ViewModels\Viewport\ViewportIntent.h" />
+    <ClInclude Include="ViewModels\Viewport\ViewportViewModel.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

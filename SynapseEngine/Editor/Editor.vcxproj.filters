@@ -57,7 +57,13 @@
     <ClCompile Include="EditorApi\TransformApiImpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EditorApi\SelectApiImpl.cpp">
+    <ClCompile Include="EditorApi\SelectionApiImpl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="View\Viewport\ViewportView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorApi\RenderApiImpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -99,6 +105,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Dispatcher\InputDispatcher.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="View\Viewport\ViewportView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

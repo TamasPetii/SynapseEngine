@@ -22,6 +22,7 @@
     "gtest",
     "spirv-reflect",
     "spirv-headers",
-    "taskflow"
+    "taskflow",
+    "imguizmo"
   ]
 }

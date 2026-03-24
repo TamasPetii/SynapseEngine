@@ -36,7 +36,7 @@ namespace Syn {
             return it->second[frameIndex].get();
         }
 
-        SYN_ASSERT(false, ("RenderTargetManager: Group not found - " + name).c_str());
+        //SYN_ASSERT(false, ("RenderTargetManager: Group not found - " + name).c_str());
         return nullptr;
     }
 
