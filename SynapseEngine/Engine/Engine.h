@@ -28,7 +28,7 @@ namespace Syn
         std::function<void(VkInstance, VkSurfaceKHR*)> createSurfaceCallback;
         std::function<std::pair<uint32_t, uint32_t>()> getWindowExtentCallback;
         std::function<std::vector<const char*>()> getSurfaceExtensionsCallback;
-        std::function<void()> onRenderGuiCallback;
+        std::function<void(VkCommandBuffer)> onRenderGuiCallback;
     };
 
 	class SYN_API Engine
@@ -37,6 +37,9 @@ namespace Syn
         Engine(const EngineInitParams& params);
         ~Engine();
 
+        Vk::Context* GetVkContext() { return _vkContext.get(); }
+        SceneManager* GetSceneManager() { return _sceneManager.get(); }
+
         void Update(float deltaTime);
         void Render();
         void WindowResizeEvent(uint32_t width, uint32_t height);
@@ -44,6 +47,7 @@ namespace Syn
         void OnKey(int key, int scancode, int action, int mods);
         void OnMouseButton(int button, int action, int mods);
         void OnMouseMove(float x, float y);
+        void SetInputEnabled(bool enabled) { _inputEnabled = enabled; }
     private:
         void Init(const EngineInitParams& params);
         void InitLogger();
@@ -58,6 +62,7 @@ namespace Syn
         void AdvanceFrameIndex();
     private:
 		bool _isMinimized = false;
+        bool _inputEnabled = true;
         FrameContext _frameContext;
 		std::unique_ptr<Vk::Context> _vkContext;
         std::unique_ptr<Vk::GpuUploader> _gpuUploader;

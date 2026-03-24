@@ -22,6 +22,8 @@ namespace Syn {
 
         void CreateSurface(VkInstance instance, VkSurfaceKHR* surface) override;
         void SetCallbacks(const WindowCallbacks& callbacks) override;
+
+        void* GetNativePointer() const override { return _window; }
     private:
         void Init(const WindowConfig& config);
         void Shutdown();

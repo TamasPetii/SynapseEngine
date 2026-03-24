@@ -227,7 +227,7 @@ namespace Syn
             size_t requiredDataSize = drawData->totalMaxMeshletInstances * sizeof(DebugMeshletInstance);
             auto& currentDebugBuffer = drawData->debugInstanceBuffers[frameIndex];
 
-            if (requiredDataSize > 0 && currentDebugBuffer->GetSize() < requiredDataSize)
+            if (false && requiredDataSize > 0 && currentDebugBuffer->GetSize() < requiredDataSize)
             {
                 size_t oldSize = currentDebugBuffer->GetSize();
                 Info("RenderSystem: [BUFFER REALLOCATION] Reallocating debug instance buffer for frame {}! Old size: {} bytes, New size: {} bytes", frameIndex, oldSize, requiredDataSize);

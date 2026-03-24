@@ -7,9 +7,7 @@
     {
       "name": "imgui",
       "features": [
-        "docking-experimental",
-        "vulkan-binding",
-        "glfw-binding" 
+        "docking-experimental"
       ]
     },
     "vulkan-headers",

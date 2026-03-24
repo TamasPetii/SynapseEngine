@@ -118,7 +118,7 @@ namespace Syn
             }
             */
 
-            for (int i = 0; i < 0; i++)
+            for (int i = 0; i < 10; i++)
             {
                 // Character
                 EntityID characterEntity = registry->CreateEntity();

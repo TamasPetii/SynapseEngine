@@ -103,6 +103,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>IMGUI_IMPL_VULKAN_USE_VOLK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -116,6 +117,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>IMGUI_IMPL_VULKAN_USE_VOLK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -129,6 +131,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>IMGUI_IMPL_VULKAN_USE_VOLK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -140,6 +143,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>IMGUI_IMPL_VULKAN_USE_VOLK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -153,6 +157,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>IMGUI_IMPL_VULKAN_USE_VOLK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -166,6 +171,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>IMGUI_IMPL_VULKAN_USE_VOLK;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -173,8 +179,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Backends\imgui_impl_glfw.cpp" />
+    <ClCompile Include="Backends\imgui_impl_vulkan.cpp" />
     <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Core\Windows\GlfwWindow.cpp" />
+    <ClCompile Include="EditorApiImpl.cpp" />
+    <ClCompile Include="Dispatcher\InputDispatcher.cpp" />
+    <ClCompile Include="Manager\GuiManager.cpp" />
+    <ClCompile Include="Manager\GuiTextureManager.cpp" />
+    <ClCompile Include="View\Transform\TransformView.cpp" />
+    <ClCompile Include="View\IGuiWindow.cpp" />
+    <ClCompile Include="View\IView.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Core\Windows\Window.cpp" />
     <ClCompile Include="Synapse.cpp" />
@@ -185,9 +200,18 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Backends\imgui_impl_glfw.h" />
+    <ClInclude Include="Backends\imgui_impl_vulkan.h" />
     <ClInclude Include="Core\Application.h" />
     <ClInclude Include="Core\Windows\Window.h" />
     <ClInclude Include="Core\Windows\GlfwWindow.h" />
+    <ClInclude Include="EditorApiImpl.h" />
+    <ClInclude Include="Dispatcher\InputDispatcher.h" />
+    <ClInclude Include="Manager\GuiManager.h" />
+    <ClInclude Include="Manager\GuiTextureManager.h" />
+    <ClInclude Include="View\Transform\TransformView.h" />
+    <ClInclude Include="View\IGuiWindow.h" />
+    <ClInclude Include="View\IView.h" />
     <ClInclude Include="Synapse.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -47,6 +47,8 @@ namespace Syn
         virtual void CreateSurface(VkInstance instance, VkSurfaceKHR* surface) = 0;
         virtual void SetCallbacks(const WindowCallbacks& callbacks) = 0;
 
+        virtual void* GetNativePointer() const = 0;
+
         static std::unique_ptr<Window> Create(const WindowConfig& config);
     protected:
         WindowData _data;

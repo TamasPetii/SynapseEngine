@@ -30,6 +30,7 @@ namespace Syn::Vk {
         VkSwapchainKHR Handle() const { return _handle; }
         VkFormat GetImageFormat() const { return _imageFormat; }
         VkExtent2D GetExtent() const { return _extent; }
+        uint32_t GetImageCount() const { return static_cast<uint32_t>(_images.size()); }
 
 		Image* GetImage(uint32_t index) const { return _images[index].get(); }
 

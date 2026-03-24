@@ -228,6 +228,8 @@ namespace Syn
 
 	void Engine::OnKey(int key, int scancode, int action, int mods)
 	{
+		if (!_inputEnabled) return;
+
 		if (action == InputAction::PRESS) {
 			_inputManager->SetKeyboardKey(key, true);
 		}
@@ -238,6 +240,8 @@ namespace Syn
 
 	void Engine::OnMouseButton(int button, int action, int mods)
 	{
+		if (!_inputEnabled) return;
+
 		if (action == InputAction::PRESS)
 		{
 			_inputManager->SetMouseButton(button, true);
@@ -250,6 +254,7 @@ namespace Syn
 
 	void Engine::OnMouseMove(float x, float y)
 	{
+		if (!_inputEnabled) return;
 		_inputManager->SetMousePosition(x, y);
 	}
 

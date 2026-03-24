@@ -179,6 +179,20 @@ namespace Syn
                 if (AI_SUCCESS == matAI->Get(AI_MATKEY_ROUGHNESS_FACTOR, floatValue)) {
                     matInfo.roughnessFactor = static_cast<float>(floatValue);
                 }
+
+                int twoSided = 0;
+                if (AI_SUCCESS == matAI->Get(AI_MATKEY_TWOSIDED, twoSided)) {
+                    matInfo.doubleSided = (twoSided != 0);
+                }
+
+                ai_real opacity = 1.0f;
+                if (AI_SUCCESS == matAI->Get(AI_MATKEY_OPACITY, opacity)) {
+                    if (opacity < 1.0f) {
+                        matInfo.isTransparent = true;
+                    }
+                }
+
+                //Todo: Wrap?
             }
         );
     }

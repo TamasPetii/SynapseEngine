@@ -1,6 +1,10 @@
 #include "Synapse.h"
 #include "Engine/SynMacro.h"
-#include <print>
+#include "Engine/Vk/Context.h"
+#include <GLFW/glfw3.h>
+
+#include "Editor/View/Transform/TransformView.h"
+#include "EditorCore/ViewModels/Transform/TransformViewModel.h"
 
 Synapse::Synapse(const Syn::ApplicationConfig& config)
     : Syn::Application(config)
@@ -25,21 +29,51 @@ void Synapse::OnInit() {
         return GetWindow().GetSize();
         };
 
-    params.onRenderGuiCallback = [&]() {
-        /*
-        if (_gui) {
-            // _gui->Render(cmd, registry, resMgr, frame);
+    params.onRenderGuiCallback = [&](VkCommandBuffer cmd) {
+        if (_guiManager) {
+            _guiManager->Render(cmd);
         }
-        */
-    };
+        };
 
-    _engine = std::make_shared<Syn::Engine>(params);
-    std::println("Sandbox Initialized successfully!");
+    _engine = std::make_unique<Syn::Engine>(params);
+    _editorApi = std::make_unique<Syn::EditorApiImpl>(_engine->GetSceneManager());
+
+    auto vkContext = _engine->GetVkContext();
+    GLFWwindow* nativeWindow = static_cast<GLFWwindow*>(GetWindow().GetNativePointer());
+
+    _guiManager = std::make_unique<Syn::GuiManager>();
+    _guiManager->Init(
+        nativeWindow,
+        vkContext->GetInstance()->Handle(),
+        vkContext->GetPhysicalDevice()->Handle(),
+        vkContext->GetDevice()->Handle(),
+        vkContext->GetDevice()->GetGraphicsQueue()->Handle(),
+        vkContext->GetSwapChain()->GetImageCount(),
+        vkContext->GetSwapChain()->GetImageFormat()
+    );
+
+    using TransformWin = Syn::EditorWindow<Syn::TransformView, Syn::TransformViewModel>;
+
+    _guiManager->AddWindow<TransformWin>(
+        Syn::TransformView{
+        },
+        Syn::TransformViewModel{
+            _editorApi.get(),
+            _editorApi.get()
+        });
+
+    _inputDispatcher = std::make_unique<Syn::InputDispatcher>(_guiManager.get(), _engine.get());
 }
 
 void Synapse::OnUpdate(float dt) {
     if (_engine) {
         _engine->Update(dt);
+    }
+
+    if (_guiManager) {
+        _guiManager->BeginFrame();
+        _guiManager->UpdateAndDraw();
+        _guiManager->EndFrame();
     }
 }
 
@@ -51,24 +85,15 @@ void Synapse::OnRender()
 }
 
 void Synapse::OnKey(int key, int scancode, int action, int mods) {
-    //ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
-
-    if(_engine)
-        _engine->OnKey(key, scancode, action, mods);
+    _inputDispatcher->DispatchKey(key, scancode, action, mods);
 }
 
 void Synapse::OnMouseButton(int button, int action, int mods) {
-    //ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
-
-    if (_engine)
-        _engine->OnMouseButton(button, action, mods);
+    _inputDispatcher->DispatchMouseButton(button, action, mods);
 }
 
-void Synapse::OnMouseMove(float x, float y) {  
-    //ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos);
-
-    if (_engine)
-        _engine->OnMouseMove(x, y);
+void Synapse::OnMouseMove(float x, float y) {
+    _inputDispatcher->DispatchMouseMove(x, y);
 }
 
 void Synapse::OnResize(uint32_t width, uint32_t height) {
