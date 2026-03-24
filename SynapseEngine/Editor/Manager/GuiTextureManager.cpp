@@ -19,19 +19,6 @@ namespace Syn {
         return InvalidTextureHandle;
     }
 
-    void GuiTextureManager::MarkForDeletion(TextureHandle handle) {
-        auto it = _textures.find(handle);
-        if (it != _textures.end()) {
-            if (_deletionQueues.empty()) {
-                uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
-                _deletionQueues.resize(framesInFlight);
-            }
-
-            _deletionQueues[_currentFrameIndex].push_back(it->second);
-            _textures.erase(it);
-        }
-    }
-
     void GuiTextureManager::SetCurrentFrame(uint32_t currentFrameIndex) {
         _currentFrameIndex = currentFrameIndex;
 
@@ -41,14 +28,31 @@ namespace Syn {
         }
     }
 
+    void GuiTextureManager::MarkForDeletion(TextureHandle handle) {
+        auto it = _textures.find(handle);
+        if (it != _textures.end()) {
+            _stagingQueue.push_back(it->second);
+            _textures.erase(it);
+        }
+    }
+
     void GuiTextureManager::FlushQueue(uint32_t frameIndex) {
-        if (_deletionQueues.empty() || frameIndex >= _deletionQueues.size()) return;
+        if (_deletionQueues.empty()) {
+            auto ctx = ServiceLocator::GetFrameContext();
+            uint32_t framesInFlight = ctx ? ctx->framesInFlight : 3;
+            _deletionQueues.resize(framesInFlight);
+        }
 
         for (VkDescriptorSet ds : _deletionQueues[frameIndex]) {
             ImGui_ImplVulkan_RemoveTexture(ds);
         }
 
         _deletionQueues[frameIndex].clear();
+
+        if (!_stagingQueue.empty()) {
+            _deletionQueues[frameIndex] = _stagingQueue;
+            _stagingQueue.clear();
+        }
     }
 
     void GuiTextureManager::Cleanup() {
@@ -56,6 +60,11 @@ namespace Syn {
             ImGui_ImplVulkan_RemoveTexture(pair.second);
         }
         _textures.clear();
+
+        for (VkDescriptorSet ds : _stagingQueue) {
+            ImGui_ImplVulkan_RemoveTexture(ds);
+        }
+        _stagingQueue.clear();
 
         for (auto& queue : _deletionQueues) {
             for (VkDescriptorSet ds : queue) {

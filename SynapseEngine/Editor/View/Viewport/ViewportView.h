@@ -24,10 +24,13 @@ namespace Syn {
             ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
             uint32_t currentWidth = static_cast<uint32_t>(viewportPanelSize.x);
             uint32_t currentHeight = static_cast<uint32_t>(viewportPanelSize.y);
+
+            bool isResizing = (currentWidth > 0 && currentHeight > 0 && (currentWidth != state.width || currentHeight != state.height));
+
             vm.Dispatch(ResizeViewportIntent{ currentWidth, currentHeight });
 
             ImVec2 imageStartPos = ImGui::GetCursorScreenPos();
-            if (state.textureId) {
+            if (state.textureId && !isResizing) {
                 ImGui::Image(state.textureId, viewportPanelSize);
             }
             else {
