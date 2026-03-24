@@ -45,9 +45,6 @@
     <ClCompile Include="Manager\GuiManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="EditorApiImpl.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Backends\imgui_impl_glfw.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -55,6 +52,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Dispatcher\InputDispatcher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorApi\TransformApiImpl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorApi\SelectApiImpl.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -86,7 +89,7 @@
     <ClInclude Include="Manager\GuiManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EditorApiImpl.h">
+    <ClInclude Include="EditorApi\EditorApiImpl.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Backends\imgui_impl_glfw.h">

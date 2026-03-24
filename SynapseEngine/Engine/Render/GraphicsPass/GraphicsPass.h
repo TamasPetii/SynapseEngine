@@ -13,7 +13,7 @@ namespace Syn
     class SYN_API GraphicsPass : public IRenderPass
     {
     public:
-        void Execute(const RenderContext& context) override;
+        virtual void Execute(const RenderContext& context) override;
     protected:
         virtual void PrepareFrame(const RenderContext& context) {}
         virtual void BindDescriptors(const RenderContext& context) {}

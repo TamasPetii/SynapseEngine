@@ -33,6 +33,7 @@ namespace Syn {
     private:
         void SetStyle();
     private:
+        VkFormat _colorFormat;
         GLFWwindow* _windowHandle = nullptr;
         VkDevice _device = VK_NULL_HANDLE;
         VkDescriptorPool _imguiPool = VK_NULL_HANDLE;

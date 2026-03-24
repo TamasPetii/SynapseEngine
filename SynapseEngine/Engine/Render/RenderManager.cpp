@@ -54,7 +54,8 @@ namespace Syn {
             .framesInFlight = framesInFlight,
 			.swapchainImageIndex = _renderer->GetCurrentImageIndex(),
             .scene = scene,
-            .renderTargetManager = _renderTargetManager.get()
+            .renderTargetManager = _renderTargetManager.get(),
+            .onRenderGui = _onRenderGuiCallback
         };
 
         _activePipeline->Execute(context);

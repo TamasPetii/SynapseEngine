@@ -15,6 +15,7 @@ namespace Syn {
     void GuiManager::Init(GLFWwindow* window, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue graphicsQueue, uint32_t imageCount, VkFormat colorFormat) {
         _device = device;
         _windowHandle = window;
+        _colorFormat = colorFormat;
 
         volkInitialize();
         volkLoadInstance(instance);
@@ -24,6 +25,7 @@ namespace Syn {
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
         ImGui_ImplGlfw_InitForVulkan(window, false);
 
@@ -47,7 +49,7 @@ namespace Syn {
         init_info.UseDynamicRendering = true;
         init_info.PipelineRenderingCreateInfo = { .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO };
         init_info.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
-        init_info.PipelineRenderingCreateInfo.pColorAttachmentFormats = &colorFormat;
+        init_info.PipelineRenderingCreateInfo.pColorAttachmentFormats = &_colorFormat;
 
         ImGui_ImplVulkan_Init(&init_info);
         ImGui_ImplVulkan_CreateFontsTexture();
@@ -79,6 +81,12 @@ namespace Syn {
 
     void GuiManager::EndFrame() {
         ImGui::Render();
+
+        ImGuiIO& io = ImGui::GetIO();
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable) {
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+        }
     }
 
     void GuiManager::Render(VkCommandBuffer commandBuffer) {

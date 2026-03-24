@@ -183,8 +183,9 @@
     <ClCompile Include="Backends\imgui_impl_vulkan.cpp" />
     <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Core\Windows\GlfwWindow.cpp" />
-    <ClCompile Include="EditorApiImpl.cpp" />
     <ClCompile Include="Dispatcher\InputDispatcher.cpp" />
+    <ClCompile Include="EditorApi\SelectApiImpl.cpp" />
+    <ClCompile Include="EditorApi\TransformApiImpl.cpp" />
     <ClCompile Include="Manager\GuiManager.cpp" />
     <ClCompile Include="Manager\GuiTextureManager.cpp" />
     <ClCompile Include="View\Transform\TransformView.cpp" />
@@ -205,7 +206,7 @@
     <ClInclude Include="Core\Application.h" />
     <ClInclude Include="Core\Windows\Window.h" />
     <ClInclude Include="Core\Windows\GlfwWindow.h" />
-    <ClInclude Include="EditorApiImpl.h" />
+    <ClInclude Include="EditorApi\EditorApiImpl.h" />
     <ClInclude Include="Dispatcher\InputDispatcher.h" />
     <ClInclude Include="Manager\GuiManager.h" />
     <ClInclude Include="Manager\GuiTextureManager.h" />

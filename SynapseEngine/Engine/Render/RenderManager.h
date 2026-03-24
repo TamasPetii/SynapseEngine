@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <functional>
 
 #include "Renderer.h"
 #include "RenderPipeline.h"
@@ -25,6 +26,10 @@ namespace Syn {
         void OnResize(uint32_t width, uint32_t height);
 
         RenderTargetManager* GetRenderTargetManager() const { return _renderTargetManager.get(); }
+
+        void SetGuiRenderCallback(std::function<void(VkCommandBuffer)> callback) {
+            _onRenderGuiCallback = std::move(callback);
+        }
     private:
         std::unique_ptr<Renderer> _renderer;
         std::unique_ptr<RenderTargetManager> _renderTargetManager;
@@ -34,5 +39,7 @@ namespace Syn {
         std::vector<bool> _frameNeedsResize;
         uint32_t _newWidth = 0;
         uint32_t _newHeight = 0;
+
+        std::function<void(VkCommandBuffer)> _onRenderGuiCallback;
     };
 }

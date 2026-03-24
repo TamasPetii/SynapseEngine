@@ -771,6 +771,9 @@
     <ClCompile Include="System\AnimationSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\GuiPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1632,6 +1635,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="System\AnimationSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\GuiPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

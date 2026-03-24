@@ -179,6 +179,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Render\GraphicsPass\GuiPass.cpp" />
     <ClCompile Include="System\AnimationSystem.cpp" />
     <ClCompile Include="Component\AnimationComponent.cpp" />
     <ClCompile Include="Animation\AnimationManager.cpp" />
@@ -433,6 +434,7 @@
     <ClCompile Include="Render\TransferPass\WireframeMeshletInitPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\GraphicsPass\GuiPass.h" />
     <ClInclude Include="System\AnimationSystem.h" />
     <ClInclude Include="Component\AnimationComponent.h" />
     <ClInclude Include="Animation\AnimationManager.h" />

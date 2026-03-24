@@ -92,7 +92,7 @@ namespace Syn
 		InitVulkan(params);
 		InitTaskExecutor();
 		InitResourceManager();
-		InitRenderManager();
+		InitRenderManager(params);
 		InitSceneManager();
 	}
 
@@ -154,9 +154,10 @@ namespace Syn
 		}
 	}
 
-	void Engine::InitRenderManager()
+	void Engine::InitRenderManager(const EngineInitParams& params)
 	{
 		_renderManager = std::move(RendererFactory::CreateDeferredRenderer(_frameContext.framesInFlight));
+		_renderManager->SetGuiRenderCallback(params.onRenderGuiCallback);
 	}
 
 	void Engine::Shutdown() 

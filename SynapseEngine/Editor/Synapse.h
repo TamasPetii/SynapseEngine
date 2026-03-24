@@ -3,7 +3,7 @@
 #include "Engine/Engine.h"
 #include "Manager/GuiManager.h"
 #include "Dispatcher/InputDispatcher.h"
-#include "EditorApiImpl.h"
+#include "EditorApi/EditorApiImpl.h"
 #include <memory>
 
 class Synapse : public Syn::Application {

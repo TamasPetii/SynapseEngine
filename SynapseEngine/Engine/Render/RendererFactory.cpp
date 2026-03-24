@@ -20,6 +20,7 @@
 #include "Engine/Render/TransferPass/WireframeMeshletInitPass.h"
 #include "Engine/Render/GraphicsPass/WireframeMeshletAabbPass.h"
 #include "Engine/Render/GraphicsPass/WireframeMeshletSpherePass.h"
+#include "Engine/Render/GraphicsPass/GuiPass.h"
 
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "RenderNames.h"
@@ -48,7 +49,8 @@ namespace Syn
         pipeline->AddPass(std::make_unique<BloomDownsamplePass>());
         pipeline->AddPass(std::make_unique<BloomUpsamplePass>());
         pipeline->AddPass(std::make_unique<BloomCompositePass>());
-        pipeline->AddPass(std::make_unique<CompositePass>());
+        //pipeline->AddPass(std::make_unique<CompositePass>());
+        pipeline->AddPass(std::make_unique<GuiPass>());
         pipeline->AddPass(std::make_unique<PresentationPass>());
         pipeline->InitializeAll();
 
