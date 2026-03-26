@@ -3,6 +3,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform2.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
+#include <print>
 
 namespace Syn
 {
@@ -36,7 +37,7 @@ namespace Syn
             });
     }
 
-    void TransformSystem::UploadComponents(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic)
+    void TransformSystem::UploadComponents(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic, bool uploadStatic)
     {
         auto registry = scene->GetRegistry();
         auto componentBufferManager = scene->GetComponentBufferManager();
@@ -62,11 +63,9 @@ namespace Syn
         ForEachStream(transformPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
 
         if (uploadDynamic)
-        {
             ForEachDynamic(transformPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
 
-            //Full range needed! UpdateDynamic problematic?
+        if (uploadStatic)
             ForEachStatic(transformPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
-        }
     }
 }

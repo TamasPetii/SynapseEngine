@@ -1,6 +1,7 @@
 #include "MaterialSystem.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/ServiceLocator.h"
+#include "Engine/FrameContext.h"
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Component/MaterialOverrideComponent.h"
 
@@ -78,6 +79,7 @@ namespace Syn
                     comp.materialOffset = currentOffset;
                     comp.version++;
                     pool->SetBit<CHANGED_BIT>(entity);
+                    pool->MarkStaticDirty(entity);
                 }
 
                 //Info("MaterialSystem: Entity {} assigned offset: {}, material count: {}", (uint32_t)entity, currentOffset, materialCount);
@@ -98,14 +100,21 @@ namespace Syn
             for (auto e : pool->GetStorage().GetDynamicEntities()) processEntity(e);
             for (auto e : pool->GetStorage().GetStreamEntities()) processEntity(e);
 
-            _framesToUpload = static_cast<uint32_t>(drawData->globalMaterialIndexBuffers.size());
+            this->SetFramesToUpload(ServiceLocator::GetFrameContext()->framesInFlight);
             });
     }
 
     void MaterialSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
     {
         this->EmplaceTask(subflow, SystemPhaseNames::UploadGPU, [this, scene, frameIndex]() {
-            if (_framesToUpload == 0 || _flatMaterialIndices.empty()) return;
+            bool force = this->ShouldForceUpload();
+
+            if (force) {
+                this->DecrementFramesToUpload();
+            }
+
+            if (!force || _flatMaterialIndices.empty()) 
+                return;
 
             auto drawData = scene->GetSceneDrawData();
 
@@ -118,7 +127,7 @@ namespace Syn
             {
                 size_t oldSize = currentBuffer ? currentBuffer->GetSize() : 0;
 
-                Info("MaterialSystem: [BUFFER REALLOCATION] Reallocating global material buffer for frame {}! Old size: {} bytes, New size: {} bytes", frameIndex, oldSize, bufferSizeToAllocate);
+                //Info("MaterialSystem: [BUFFER REALLOCATION] Reallocating global material buffer for frame {}! Old size: {} bytes, New size: {} bytes", frameIndex, oldSize, bufferSizeToAllocate);
 
                 currentBuffer = Vk::BufferFactory::CreatePersistent(
                     bufferSizeToAllocate,
@@ -127,10 +136,6 @@ namespace Syn
             }
 
             currentBuffer->Write(_flatMaterialIndices.data(), actualDataSize, 0);
-
-            if (_framesToUpload > 0) {
-                _framesToUpload--;
-            }
             });
     }
 }

@@ -1,5 +1,8 @@
 #include "ModelSystem.h"
 #include "MaterialSystem.h"
+#include "Engine/ServiceLocator.h"
+#include "Engine/Mesh/ModelManager.h"
+#include "Engine/FrameContext.h"
 
 namespace Syn
 {
@@ -17,6 +20,16 @@ namespace Syn
         auto modelPool = registry->GetPool<ModelComponent>();
         if (!modelPool) return;
 
+        auto modelManager = ServiceLocator::GetModelManager();
+        uint32_t currentVersion = modelManager->GetVersion();
+
+        this->EmplaceTask(subflow, SystemPhaseNames::Update, [this, scene, currentVersion]() {
+            if (_lastModelManagerVersion != currentVersion) {
+                _lastModelManagerVersion = currentVersion;
+                this->SetFramesToUpload(ServiceLocator::GetFrameContext()->framesInFlight);
+            }
+            });
+
         ParallelForEachIf<UPDATE_BIT>(modelPool, subflow, SystemPhaseNames::Update, [modelPool](EntityID entity) {
             auto& modelComponent = modelPool->Get(entity);
 
@@ -25,7 +38,7 @@ namespace Syn
             });
     }
 
-    void ModelSystem::UploadComponents(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic)
+    void ModelSystem::UploadComponents(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic, bool uploadStatic)
     {
         auto registry = scene->GetRegistry();
         auto componentBufferManager = scene->GetComponentBufferManager();
@@ -37,11 +50,13 @@ namespace Syn
 
         auto bufferHandler = static_cast<ModelComponentGPU*>(componentBuffer.buffer->Map());
 
-        auto processUpload = [modelPool, bufferHandler, componentBuffer](EntityID entity) {
+        bool forceUpload = this->ShouldForceUpload();
+
+        auto processUpload = [modelPool, bufferHandler, componentBuffer, forceUpload](EntityID entity) {
             auto& modelComponent = modelPool->Get(entity);
             auto modelIndex = modelPool->GetMapping().Get(entity);
 
-            if (componentBuffer.versions[modelIndex] != modelComponent.version)
+            if (forceUpload || componentBuffer.versions[modelIndex] != modelComponent.version)
             {
                 componentBuffer.versions[modelIndex] = modelComponent.version;
                 bufferHandler[modelIndex] = ModelComponentGPU(entity, modelComponent);
@@ -53,6 +68,10 @@ namespace Syn
         if (uploadDynamic)
         {
             ForEachDynamic(modelPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
+        }
+
+        if (uploadStatic)
+        {
             ForEachStatic(modelPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
         }
     }

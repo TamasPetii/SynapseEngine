@@ -4,6 +4,8 @@
 #include "Engine/ServiceLocator.h"
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/System/ModelSystem.h"
+#include "Engine/ServiceLocator.h"
+#include "Engine/FrameCOntext.h"
 
 namespace Syn
 {
@@ -73,7 +75,7 @@ namespace Syn
                 RebuildGlobalBuffers(scene);
 
                 auto drawData = scene->GetSceneDrawData();
-                _framesToUpload = static_cast<uint32_t>(drawData->globalIndirectCommandBuffers.size());
+                this->SetFramesToUpload(ServiceLocator::GetFrameContext()->framesInFlight);
             }
             });
     }
@@ -220,7 +222,7 @@ namespace Syn
     void RenderSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
     {
         this->EmplaceTask(subflow, SystemPhaseNames::UploadGPU, [this, scene, frameIndex]() {
-            if (_framesToUpload == 0) return;
+            if (!this->ShouldForceUpload()) return;
 
             auto drawData = scene->GetSceneDrawData();
 
@@ -269,10 +271,7 @@ namespace Syn
     {
         this->EmplaceTask(subflow, SystemPhaseNames::Finish, [this]() {
             _needsRebuild = false;
-
-            if (_framesToUpload > 0) {
-                _framesToUpload--;
-            }
+            this->DecrementFramesToUpload();
             });
     }
 }

@@ -20,11 +20,14 @@ namespace Syn
         virtual void OnFinish(Scene* scene, tf::Subflow& subflow) override;
     protected:
         virtual void UpdateComponents(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow);
-        virtual void UploadComponents(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic);
+        virtual void UploadComponents(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic, bool uploadStatic);
         virtual std::string GetSparseBufferName() const;
     protected:
         template <typename TPool>
-        bool ShouldUploadDenseData(TPool* pool, uint32_t frameIndex);
+        bool ShouldUploadDynamicData(TPool* pool, uint32_t frameIndex);
+
+        template <typename TPool>
+        bool ShouldUploadStaticData(TPool* pool, uint32_t frameIndex);
 
         template <typename TPool, typename Func>
         std::optional<tf::Task> ForEachStream(TPool* pool, tf::Subflow& subflow, const std::string& phaseName, Func&& func);
@@ -47,7 +50,10 @@ namespace Syn
         template <uint32_t FilterBit, typename TPool, typename Func>
         std::vector<tf::Task> ParallelForEachIf(TPool* pool, tf::Subflow& subflow, const std::string& phaseName, Func&& func);
     protected:
-        std::vector<uint32_t> _gpuDenseVersions;
+        std::vector<uint32_t> _gpuDynamicVersions;
+        std::vector<uint32_t> _gpuStaticVersions;
+        uint32_t _currentStaticVersion = 0;
+        size_t _lastStaticCount = 0; 
     };
 
     template <typename TComponent>
@@ -89,10 +95,21 @@ namespace Syn
                 });
         }
 
-        bool uploadDynamic = ShouldUploadDenseData(pool, frameIndex);
+        bool uploadDynamic = ShouldUploadDynamicData(pool, frameIndex);
+        bool uploadStatic = ShouldUploadStaticData(pool, frameIndex);
         bool hasStream = !pool->GetStorage().GetStreamEntities().empty();
+        bool forceUpload = this->ShouldForceUpload();
 
-        if (hasStream || uploadDynamic) UploadComponents(scene, frameIndex, subflow, uploadDynamic);
+        if (hasStream || uploadDynamic || uploadStatic || forceUpload) {
+            //Info("{} [Frame {}] -> Uploading Components (Stream: {}, Dynamic: {}, Static: {})", GetName(), frameIndex, hasStream, uploadDynamic, uploadStatic);
+            UploadComponents(scene, frameIndex, subflow, uploadDynamic || forceUpload, uploadStatic || forceUpload);
+        }
+
+        if (forceUpload) {
+            this->EmplaceTask(subflow, "DecrementFrames", [this]() {
+                this->DecrementFramesToUpload();
+                });
+        }
     }
 
     template <typename TComponent>
@@ -104,8 +121,11 @@ namespace Syn
         bool hasChanged = pool->template IsStateBitSet<CHANGED_BIT>();
         bool hasUpdate = pool->template IsStateBitSet<UPDATE_BIT>();
         bool hasIndex = pool->template IsStateBitSet<INDEX_CHANGED_BIT>();
+        bool hasDirtyStatics = !pool->GetStorage().GetDirtyStatics().empty();
 
-        if (!hasChanged && !hasUpdate && !hasIndex) return;
+        if (!hasChanged && !hasUpdate && !hasIndex && !hasDirtyStatics) return;
+
+        //Info("{} -> OnFinish: Cleaning up frame. (Changed: {}, Update: {}, Index: {}, DirtyStatics: {})", GetName(), hasChanged, hasUpdate, hasIndex, hasDirtyStatics);
 
         ParallelForEach(pool, subflow, SystemPhaseNames::Finish, [pool](EntityID entity) {
             if (pool->template IsBitSet<CHANGED_BIT>(entity)) pool->template ResetBit<CHANGED_BIT>(entity);
@@ -123,27 +143,54 @@ namespace Syn
     SYN_INLINE void ComponentSystem<TComponent>::UpdateComponents(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) {}
 
     template <typename TComponent>
-    SYN_INLINE void ComponentSystem<TComponent>::UploadComponents(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic) {}
+    SYN_INLINE void ComponentSystem<TComponent>::UploadComponents(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic, bool uploadStatic) {}
 
     template <typename TComponent>
     SYN_INLINE std::string ComponentSystem<TComponent>::GetSparseBufferName() const { return ""; }
 
     template <typename TComponent>
     template <typename TPool>
-    SYN_INLINE bool ComponentSystem<TComponent>::ShouldUploadDenseData(TPool* pool, uint32_t frameIndex)
+    SYN_INLINE bool ComponentSystem<TComponent>::ShouldUploadDynamicData(TPool* pool, uint32_t frameIndex)
     {
-        if (_gpuDenseVersions.size() <= frameIndex) 
-            _gpuDenseVersions.resize(frameIndex + 1, 0);
+        if (_gpuDynamicVersions.size() <= frameIndex)
+            _gpuDynamicVersions.resize(frameIndex + 1, 0);
 
         if (pool->template IsStateBitSet<CHANGED_BIT>())
         {
-            _gpuDenseVersions[frameIndex] = pool->GetChangeVersion();
+            _gpuDynamicVersions[frameIndex] = pool->GetChangeVersion();
+            //Info("{} [Frame {}] -> CHANGED_BIT is set! Uploading Dynamic. (Global Version: {})", GetName(), frameIndex, pool->GetChangeVersion());
             return true;
         }
 
-        if (_gpuDenseVersions[frameIndex] != pool->GetChangeVersion())
+        if (_gpuDynamicVersions[frameIndex] != pool->GetChangeVersion())
         {
-            _gpuDenseVersions[frameIndex] = pool->GetChangeVersion();
+            //Info("{} [Frame {}] -> Dynamic Version mismatch! (GPU: {}, Global: {}) -> Uploading Dynamic.", GetName(), frameIndex, _gpuDynamicVersions[frameIndex], pool->GetChangeVersion());
+            _gpuDynamicVersions[frameIndex] = pool->GetChangeVersion();
+            return true;
+        }
+
+        return false;
+    }
+
+    template <typename TComponent>
+    template <typename TPool>
+    SYN_INLINE bool ComponentSystem<TComponent>::ShouldUploadStaticData(TPool* pool, uint32_t frameIndex)
+    {
+        if (_gpuStaticVersions.size() <= frameIndex)
+            _gpuStaticVersions.resize(frameIndex + 1, 0);
+
+        bool hasDirtyStatics = !pool->GetStorage().GetDirtyStatics().empty();
+
+        if (hasDirtyStatics)
+        {
+            _currentStaticVersion++;
+            //Info("{} -> Dirty statics found! Incrementing Global Static Version to: {}", GetName(), _currentStaticVersion);
+        }
+
+        if (_gpuStaticVersions[frameIndex] != _currentStaticVersion)
+        {
+            //Info("{} [Frame {}] -> Static Version mismatch! (GPU: {}, Global: {}) -> Uploading Static.", GetName(), frameIndex, _gpuStaticVersions[frameIndex], _currentStaticVersion);
+            _gpuStaticVersions[frameIndex] = _currentStaticVersion;
             return true;
         }
 

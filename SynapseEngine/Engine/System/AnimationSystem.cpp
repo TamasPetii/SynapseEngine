@@ -71,7 +71,7 @@ namespace Syn
             });
     }
 
-    void AnimationSystem::UploadComponents(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic)
+    void AnimationSystem::UploadComponents(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic, bool uploadStatic)
     {
         auto registry = scene->GetRegistry();
         auto componentBufferManager = scene->GetComponentBufferManager();
@@ -101,9 +101,9 @@ namespace Syn
         ForEachStream(animPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
 
         if (uploadDynamic)
-        {
             ForEachDynamic(animPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
+
+        if (uploadStatic)
             ForEachStatic(animPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
-        }
     }
 }

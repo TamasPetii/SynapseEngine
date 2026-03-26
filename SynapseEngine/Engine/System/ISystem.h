@@ -26,6 +26,11 @@ namespace Syn
         virtual std::vector<TypeID> GetReadDependencies() const { return {}; }
         virtual std::vector<TypeID> GetWriteDependencies() const { return {}; }
         virtual std::string GetName() const = 0;
+
+        SYN_INLINE void SetFramesToUpload(uint32_t frames) { _framesToUpload = frames; }
+        SYN_INLINE uint32_t GetFramesToUpload() const { return _framesToUpload; }
+        SYN_INLINE bool ShouldForceUpload() const { return _framesToUpload > 0; }
+        SYN_INLINE void DecrementFramesToUpload() { if (_framesToUpload > 0) _framesToUpload--; }
     protected:
         template <typename Func>
         tf::Task EmplaceTask(tf::Subflow& subflow, const std::string& taskName, Func&& func);
@@ -38,6 +43,8 @@ namespace Syn
 
         template <typename BegType, typename EndType, typename StepType, typename Func>
         std::optional<tf::Task> ForEachIndex(BegType first, EndType last, StepType step, tf::Subflow& subflow, const std::string& taskName, Func&& func);
+    protected:
+        uint32_t _framesToUpload = 0;
     };
 
     template <typename Func>
