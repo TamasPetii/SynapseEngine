@@ -32,10 +32,13 @@ namespace Syn {
         if (registry == nullptr || !registry->HasComponent<TransformComponent>(entity))
             return;
 
-        auto& transform = registry->GetComponent<TransformComponent>(entity);
-        transform.translation = position;
+        auto pool = registry->GetPool<TransformComponent>();
+        pool->Get(entity).translation = position;
 
-        // TODO: Mátrix frissítési flag beállítása!
+        if (pool->IsStatic(entity)) 
+            pool->MarkStaticDirty(entity);
+        else if (pool->IsDynamic(entity)) 
+            pool->SetBit<UPDATE_BIT>(entity);
     }
 
     glm::vec3 EditorApiImpl::GetEntityRotation(EntityID entity) const {
@@ -68,10 +71,13 @@ namespace Syn {
         if (registry == nullptr || !registry->HasComponent<TransformComponent>(entity))
             return;
 
-        auto& transform = registry->GetComponent<TransformComponent>(entity);
-        transform.rotation = rotation;
+        auto pool = registry->GetPool<TransformComponent>();
+        pool->Get(entity).rotation = rotation;
 
-        // TODO: Mátrix frissítési flag beállítása!
+        if (pool->IsStatic(entity)) 
+            pool->MarkStaticDirty(entity);
+        else if (pool->IsDynamic(entity)) 
+            pool->SetBit<UPDATE_BIT>(entity);
     }
 
     glm::vec3 EditorApiImpl::GetEntityScale(EntityID entity) const {
@@ -104,10 +110,13 @@ namespace Syn {
         if (registry == nullptr || !registry->HasComponent<TransformComponent>(entity))
             return;
 
-        auto& transform = registry->GetComponent<TransformComponent>(entity);
-        transform.scale = scale;
+        auto pool = registry->GetPool<TransformComponent>();
+        pool->Get(entity).scale = scale;
 
-        // TODO: Mátrix frissítési flag beállítása!
+        if (pool->IsStatic(entity)) 
+            pool->MarkStaticDirty(entity);
+        else if (pool->IsDynamic(entity)) 
+            pool->SetBit<UPDATE_BIT>(entity);
     }
 
     glm::mat4 EditorApiImpl::GetEntityWorldMatrix(EntityID entity) const {

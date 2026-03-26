@@ -135,6 +135,13 @@ namespace Syn
 
         this->EmplaceTask(subflow, SystemPhaseNames::FinishResetState, [pool]() {
             pool->ResetAllStateBits();
+
+            for (EntityID entity : pool->GetStorage().GetDirtyStatics()) {
+                if (pool->Has(entity)) {
+                    pool->template ResetBit<DIRTY_STATIC_BIT>(entity);
+                }
+            }
+
             pool->ResetStaticDirtyCounter();
             });
     }
