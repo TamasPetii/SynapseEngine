@@ -37,6 +37,18 @@ namespace Syn {
                 ImGui::Dummy(viewportPanelSize);
             }
 
+            ImVec2 vMin = ImGui::GetItemRectMin();
+            ImVec2 vMax = ImGui::GetItemRectMax();
+
+            if (ImGui::IsItemHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGuizmo::IsOver()) {
+                ImVec2 mousePos = ImGui::GetMousePos();
+
+                uint32_t x = static_cast<uint32_t>(mousePos.x - vMin.x);
+                uint32_t y = static_cast<uint32_t>(mousePos.y - vMin.y);
+
+                vm.Dispatch(PickEntityIntent{ x, y });
+            }
+
             DrawGizmo(vm, state, imageStartPos, viewportPanelSize);
             HandleShortcuts(vm);
 
@@ -145,9 +157,6 @@ namespace Syn {
 
             glm::mat4 cameraView = state.cameraView;
             glm::mat4 cameraProj = state.cameraProj;
-
-            cameraProj[1][1] *= -1.0f;
-
             glm::mat4 transform = state.entityWorldTransform;
 
             float* snapValue = nullptr;

@@ -99,7 +99,7 @@ namespace Syn {
                 .dstAlphaFactor = VK_BLEND_FACTOR_ZERO,
                 .alphaBlendOp = VK_BLEND_OP_ADD
             },
-            .colorAttachmentCount = 1,
+            .colorAttachmentCount = 2,
             .renderArea = std::nullopt
         };
     }
@@ -110,7 +110,8 @@ namespace Syn {
         _graphicsState.renderArea = extent;
 
         std::vector<std::string> targets = {
-            RenderTargetNames::Main
+            RenderTargetNames::Main,
+            RenderTargetNames::EntityIndex
         };
 
         for (const auto& name : targets) 
@@ -136,7 +137,6 @@ namespace Syn {
             .depthAttachment = &_depthAttachment.value(),
             .layerCount = 1
         };
-
     }
 
     void MeshletRenderPass::PushConstants(const RenderContext& context) {

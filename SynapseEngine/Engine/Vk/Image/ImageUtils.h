@@ -44,6 +44,7 @@ namespace Syn::Vk {
         VkBuffer dstBuffer = VK_NULL_HANDLE;
 
         VkExtent3D extent = { 0, 0, 1 };
+        VkOffset3D imageOffset = { 0, 0, 0 };
 
         uint32_t srcMipLevel = 0;
         uint32_t srcBaseLayer = 0;

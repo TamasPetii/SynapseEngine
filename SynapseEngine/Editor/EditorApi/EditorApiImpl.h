@@ -28,6 +28,7 @@ namespace Syn {
         // --- IRenderAPI ---
         void ResizeRenderTargets(uint32_t width, uint32_t height) override;
         TextureHandle GetViewportTexture(const std::string& groupName, const std::string& targetName, const std::string& viewName) override;
+        EntityID ReadEntityIdAtPixel(uint32_t x, uint32_t y) override;
         glm::mat4 GetEditorCameraView() const override;
         glm::mat4 GetEditorCameraProjection() const override;
     private:

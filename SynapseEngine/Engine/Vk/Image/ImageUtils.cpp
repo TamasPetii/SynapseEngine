@@ -109,7 +109,7 @@ namespace Syn::Vk {
         region.imageSubresource.baseArrayLayer = info.srcBaseLayer;
         region.imageSubresource.layerCount = info.layerCount;
 
-        region.imageOffset = { 0, 0, 0 };
+        region.imageOffset = info.imageOffset;
         region.imageExtent = { info.extent.width, info.extent.height, info.extent.depth };
 
         VkCopyImageToBufferInfo2 copyInfo{ VK_STRUCTURE_TYPE_COPY_IMAGE_TO_BUFFER_INFO_2 };

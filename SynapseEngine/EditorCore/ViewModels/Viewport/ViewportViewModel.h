@@ -6,6 +6,7 @@
 #include "EditorCore/API/ISelectionAPI.h"
 #include "EditorCore/API/ITransformAPI.h"
 #include <glm/gtc/type_ptr.hpp>
+#include <print>
 
 namespace Syn {
     class ViewportViewModel : public IViewModel<ViewportState, ViewportIntent> {
@@ -49,10 +50,16 @@ namespace Syn {
                 else if constexpr (std::is_same_v<T, ChangeGizmoModeIntent>)      _state.gizmoMode = arg.mode;
                 else if constexpr (std::is_same_v<T, ToggleSnapIntent>)           _state.useSnap = arg.useSnap;
                 else if constexpr (std::is_same_v<T, ApplyGizmoTransformIntent>)  HandleGizmoTransform(arg);
+                else if constexpr (std::is_same_v<T, PickEntityIntent>)           HandlePickEntity(arg);
                 }, intent);
         }
 
     private:
+        void HandlePickEntity(const PickEntityIntent& intent) {
+            EntityID clickedEntity = _renderApi->ReadEntityIdAtPixel(intent.x, intent.y);
+            _selectionApi->SetSelectedEntity(clickedEntity);
+        }
+
         void HandleResize(const ResizeViewportIntent& intent) {
             if (intent.width > 0 && intent.height > 0 &&
                 (_state.width != intent.width || _state.height != intent.height))

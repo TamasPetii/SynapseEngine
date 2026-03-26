@@ -10,6 +10,7 @@ layout(location = 3) in flat uint inMaterialId;
 layout(location = 4) in vec3 inMeshletColor;
 
 layout(location = 0) out vec4 outFragColor;
+layout(location = 1) out uint outEntityId;
 
 layout(set = 0, binding = 0) uniform sampler globalSamplers[];
 layout(set = 0, binding = 1) uniform texture2D bindlessTextures[];
@@ -86,4 +87,5 @@ void main()
     }
 
     outFragColor = vec4(inMeshletColor * baseColor.xyz * 2.0, 1.0);
+    outEntityId = inEntityId;
 }

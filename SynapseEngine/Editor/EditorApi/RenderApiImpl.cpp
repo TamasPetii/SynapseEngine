@@ -5,6 +5,10 @@
 #include "Editor/Manager/GuiTextureManager.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Component/CameraComponent.h"
+
+#include "Engine/Vk/Image/ImageUtils.h"
+#include "Engine/Vk/Rendering/GpuUploader.h"
+
 #include <format>
 
 namespace Syn 
@@ -82,5 +86,76 @@ namespace Syn
             return nullValue;
 
         return registry->GetComponent<CameraComponent>(cameraEntity).proj;
+    }
+
+    EntityID EditorApiImpl::ReadEntityIdAtPixel(uint32_t x, uint32_t y)
+    {
+        auto renderManager = _engine->GetRenderManager();
+        if (!renderManager) return NULL_ENTITY;
+
+        auto rtManager = renderManager->GetRenderTargetManager();
+        auto frameCtx = ServiceLocator::GetFrameContext();
+        uint32_t currentFrame = frameCtx ? frameCtx->currentFrameIndex : 0;
+
+        auto group = rtManager->GetGroup(RenderTargetGroupNames::Deferred, currentFrame);
+        if (!group) return NULL_ENTITY;
+
+        auto entityImage = group->GetImage(RenderTargetNames::EntityIndex);
+        if (!entityImage) return NULL_ENTITY;
+
+        auto extent = entityImage->GetExtent();
+        if (x >= extent.width || y >= extent.height) return NULL_ENTITY;
+
+        Vk::BufferConfig readbackConfig{};
+        readbackConfig.size = sizeof(uint32_t);
+        readbackConfig.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+        readbackConfig.memoryUsage = VMA_MEMORY_USAGE_AUTO;
+        readbackConfig.allocationFlags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
+        readbackConfig.useDeviceAddress = false;
+
+        auto readbackBuffer = Vk::BufferFactory::Create(readbackConfig);
+
+        Vk::GpuUploadRequest request{
+            .uploadCallback = [&](VkCommandBuffer cmd) {
+                entityImage->TransitionLayout(
+                    cmd,
+                    VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                    VK_PIPELINE_STAGE_2_TRANSFER_BIT,
+                    VK_ACCESS_2_TRANSFER_READ_BIT
+                );
+
+                Vk::ImageToBufferCopyInfo copyInfo{};
+                copyInfo.srcImage = entityImage->Handle();
+                copyInfo.dstBuffer = readbackBuffer->Handle();
+                copyInfo.extent = { 1, 1, 1 };
+                copyInfo.imageOffset = { static_cast<int32_t>(x), static_cast<int32_t>(y), 0 };
+                copyInfo.bufferOffset = 0;
+                copyInfo.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                copyInfo.srcMipLevel = 0;
+                copyInfo.srcBaseLayer = 0;
+                copyInfo.layerCount = 1;
+
+                Vk::ImageUtils::CopyImageToBuffer(cmd, copyInfo);
+
+                entityImage->TransitionLayout(
+                    cmd,
+                    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                    VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
+                    VK_ACCESS_2_SHADER_READ_BIT
+                );
+            },
+            .needsGraphics = true
+        };
+
+        ServiceLocator::GetGpuUploader()->UploadSync(std::move(request));
+
+        EntityID selectedEntity = NULL_ENTITY;
+        void* mappedData = readbackBuffer->Map();
+        if (mappedData) {
+            std::memcpy(&selectedEntity, mappedData, sizeof(uint32_t));
+            readbackBuffer->Unmap();
+        }
+
+        return selectedEntity;
     }
 }

@@ -34,12 +34,18 @@ namespace Syn {
         glm::mat4 newWorldMatrix;
     }; 
 
+    struct PickEntityIntent {
+        uint32_t x;
+        uint32_t y;
+    };
+
     using ViewportIntent = std::variant<
         ResizeViewportIntent,
         ChangeTargetIntent,
         ChangeGizmoOperationIntent,
         ChangeGizmoModeIntent,
         ToggleSnapIntent,
-        ApplyGizmoTransformIntent
+        ApplyGizmoTransformIntent,
+        PickEntityIntent
     >;
 }
