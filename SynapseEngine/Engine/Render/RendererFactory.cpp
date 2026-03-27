@@ -34,8 +34,8 @@ namespace Syn
         auto pipeline = std::make_unique<RenderPipeline>();
         pipeline->AddPass(std::make_unique<HizLinearPreparePass>());
         pipeline->AddPass(std::make_unique<HizDownsamplePass>());
-        //pipeline->AddPass(std::make_unique<ModelCullingPass>());
-       // pipeline->AddPass(std::make_unique<MeshCullingPass>());
+        pipeline->AddPass(std::make_unique<ModelCullingPass>());
+        pipeline->AddPass(std::make_unique<MeshCullingPass>());
         pipeline->AddPass(std::make_unique<GBufferInitPass>());
         pipeline->AddPass(std::make_unique<TraditionalOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<TraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));

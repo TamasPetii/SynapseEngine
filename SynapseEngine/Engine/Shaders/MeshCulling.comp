@@ -143,6 +143,14 @@ struct GpuMaterial {
     uint padding2; 
 };
 
+struct ModelComponent { 
+    uint entityIndex; 
+    uint modelIndex; 
+    uint flags; 
+    uint materialOffset;  
+};
+
+layout(buffer_reference, std430) readonly buffer ModelCompBuffer    { ModelComponent data[]; };
 layout(buffer_reference, std430) readonly buffer ModelAddressBuffer { GpuModelAddresses data[]; };
 layout(buffer_reference, std430) readonly buffer CameraPool         { CameraComponent data[]; };
 layout(buffer_reference, std430) readonly buffer TransformPool      { TransformComponent data[]; };
@@ -380,7 +388,7 @@ void main() {
 
                 GlobalInstanceBuffer instBuf = GlobalInstanceBuffer(pc.globalInstanceBufferAddr);
                 
-                uint payloadEntityId = entityId; 
+                uint payloadEntityId = modelData.entityId;
                 if (visibility == 2) payloadEntityId |= (1u << 31);
 
                 uint finalBufferIndex = meshAlloc.instanceOffsets[matType] + slotIndex;

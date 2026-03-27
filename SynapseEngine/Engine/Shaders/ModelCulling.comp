@@ -57,9 +57,9 @@ struct TransformComponent {
 
 struct ModelComponent { 
     uint entityIndex; 
-    uint modelIndex;
-    uint flags;
-    uint pad0;
+    uint modelIndex; 
+    uint flags; 
+    uint materialOffset;  
 };
 
 struct VisibleModelData { 
