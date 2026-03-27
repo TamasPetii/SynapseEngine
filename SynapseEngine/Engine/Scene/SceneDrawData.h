@@ -8,6 +8,7 @@
 #include "Engine/Mesh/MeshAllocationInfo.h"
 #include "Engine/Mesh/MeshDrawBlueprint.h"
 #include "Engine/Mesh/MeshDrawDescriptor.h"
+#include "Engine/Material/MaterialRenderType.h"
 
 namespace Syn
 {
@@ -20,11 +21,19 @@ namespace Syn
     {
         SceneDrawData(uint32_t frameCount);
 
-        bool useGpuCulling = true;
+        bool useGpuCulling = false;
 
         static constexpr uint32_t MAX_INSTANCES = 10000000;
-        static constexpr uint32_t MAX_INDIRECT_COMMANDS = 200000;
-        static constexpr uint32_t MESHLET_OFFSET_START = 100000;
+        static constexpr uint32_t MAX_INDIRECT_COMMANDS = 100000;
+
+        std::vector<uint32_t> paddedTraditionalCounts;
+        std::vector<uint32_t> paddedMeshletCounts;
+
+        uint32_t traditionalCmdOffsets[MaterialRenderType::Count] = { 0 };
+        uint32_t traditionalCmdCounts[MaterialRenderType::Count] = { 0 };
+
+        uint32_t meshletCmdOffsets[MaterialRenderType::Count] = { 0 };
+        uint32_t meshletCmdCounts[MaterialRenderType::Count] = { 0 };
 
         std::vector<std::shared_ptr<Vk::Buffer>> globalInstanceBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> globalDrawCountBuffers;

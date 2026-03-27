@@ -57,7 +57,7 @@ layout(push_constant) uniform PushConstants {
     uint64_t materialLookupBuffer; 
     uint64_t materialBuffer; 
     uint activeCameraEntity;
-    uint meshletOffsetStart; 
+    uint baseDescriptorOffset;
 } pc;
 
 vec4 sampleLoadedTexture2D(uint textureID, uint samplerID, vec2 uv) { 

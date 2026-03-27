@@ -1,8 +1,8 @@
 #include "RendererFactory.h"
 #include "Engine/Vk/Image/ImageConfig.h"
 #include "Engine/Render/GraphicsPass/GBufferInitPass.h"
-#include "Engine/Render/GraphicsPass/TraditionalRenderPass.h"
-#include "Engine/Render/GraphicsPass/MeshletRenderPass.h"
+#include "Engine/Render/GraphicsPass/TraditionalOpaquePass.h"
+#include "Engine/Render/GraphicsPass/MeshletOpaquePass.h"
 #include "Engine/Render/TransferPass/PresentationPass.h"
 #include "Engine/Render/TransferPass/CopyToSwapchainPass.h"
 #include "Engine/Render/ComputePass/ModelCullingPass.h"
@@ -34,21 +34,23 @@ namespace Syn
         auto pipeline = std::make_unique<RenderPipeline>();
         pipeline->AddPass(std::make_unique<HizLinearPreparePass>());
         pipeline->AddPass(std::make_unique<HizDownsamplePass>());
-        pipeline->AddPass(std::make_unique<ModelCullingPass>());
-        pipeline->AddPass(std::make_unique<MeshCullingPass>());
+        //pipeline->AddPass(std::make_unique<ModelCullingPass>());
+       // pipeline->AddPass(std::make_unique<MeshCullingPass>());
         pipeline->AddPass(std::make_unique<GBufferInitPass>());
-        pipeline->AddPass(std::make_unique<TraditionalRenderPass>());
-        pipeline->AddPass(std::make_unique<MeshletRenderPass>());
+        pipeline->AddPass(std::make_unique<TraditionalOpaquePass>(MaterialRenderType::Opaque1Sided));
+        pipeline->AddPass(std::make_unique<TraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
+        pipeline->AddPass(std::make_unique<MeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
+        pipeline->AddPass(std::make_unique<MeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
         //pipeline->AddPass(std::make_unique<WireframeSetupPass>());
         //pipeline->AddPass(std::make_unique<WireframeAabbPass>());
         //pipeline->AddPass(std::make_unique<WireframeSpherePass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletInitPass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletAabbPass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletSpherePass>());
-        pipeline->AddPass(std::make_unique<BloomPrefilterPass>());
-        pipeline->AddPass(std::make_unique<BloomDownsamplePass>());
-        pipeline->AddPass(std::make_unique<BloomUpsamplePass>());
-        pipeline->AddPass(std::make_unique<BloomCompositePass>());
+        //pipeline->AddPass(std::make_unique<BloomPrefilterPass>());
+        //pipeline->AddPass(std::make_unique<BloomDownsamplePass>());
+        //pipeline->AddPass(std::make_unique<BloomUpsamplePass>());
+        //pipeline->AddPass(std::make_unique<BloomCompositePass>());
         //pipeline->AddPass(std::make_unique<CompositePass>());
         pipeline->AddPass(std::make_unique<GuiPass>());
         pipeline->AddPass(std::make_unique<PresentationPass>());

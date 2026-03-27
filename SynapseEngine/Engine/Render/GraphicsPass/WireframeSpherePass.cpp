@@ -133,6 +133,7 @@ namespace Syn {
     }
 
     void WireframeSpherePass::Draw(const RenderContext& context) {
+        /*
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         if (!scene || drawData->activeDescriptorCount == 0) return;
@@ -184,5 +185,6 @@ namespace Syn {
             SceneDrawData::MAX_INDIRECT_COMMANDS - SceneDrawData::MESHLET_OFFSET_START,
             sizeof(VkDrawIndirectCommand)
         );
+        */
     }
 }

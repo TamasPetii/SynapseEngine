@@ -1,4 +1,4 @@
-#include "TraditionalRenderPass.h"
+#include "TraditionalOpaquePass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
 #include "Engine/Manager/ShaderManager.h"
@@ -16,13 +16,12 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <windows.h>
+#include <cassert>
 
 namespace Syn {
 
     struct TraditionalPushConstants {
         VkDeviceAddress modelAddressBuffer;
-
         VkDeviceAddress animationAddressBuffer;
         VkDeviceAddress animationBufferAddr;
         VkDeviceAddress animationSparseMapBufferAddr;
@@ -45,32 +44,44 @@ namespace Syn {
         VkDeviceAddress materialBuffer;
 
         uint32_t activeCameraEntity;
-        uint32_t meshletOffsetStart;
+        uint32_t baseDescriptorOffset;
     };
 
-    void TraditionalRenderPass::Initialize() {
+    TraditionalOpaquePass::TraditionalOpaquePass(MaterialRenderType renderType)
+        : _renderType(renderType)
+    {
+        assert(_renderType == MaterialRenderType::Opaque1Sided || _renderType == MaterialRenderType::Opaque2Sided);
+
+        if (_renderType == MaterialRenderType::Opaque1Sided) {
+            _passName = "Traditional_Opaque_1Sided";
+        }
+        else {
+            _passName = "Traditional_Opaque_2Sided";
+        }
+    }
+
+    void TraditionalOpaquePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
         auto imageManager = ServiceLocator::GetImageManager();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = true;
         config.layoutOverride = [imageManager](uint32_t setIndex) {
-            if (setIndex == 0) {
-                return imageManager->GetBindlessLayout();
-            }
+            if (setIndex == 0) return imageManager->GetBindlessLayout();
             return VkDescriptorSetLayout{};
             };
-        
 
-        _shaderProgram = shaderManager->CreateProgram("TraditionalProgram", {
+        _shaderProgram = shaderManager->CreateProgram("TraditionalOpaqueProgram", {
             ShaderNames::TraditionalVert,
             ShaderNames::TraditionalFrag
             }, config);
 
+        VkCullModeFlags cullMode = (_renderType == MaterialRenderType::Opaque2Sided) ? VK_CULL_MODE_NONE : VK_CULL_MODE_BACK_BIT;
+
         _graphicsState = {
             .raster = {
                 .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-                .cullMode = VK_CULL_MODE_BACK_BIT,
+                .cullMode = cullMode,
                 .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
                 .polygonMode = VK_POLYGON_MODE_FILL,
                 .lineWidth = 1.0f
@@ -94,9 +105,9 @@ namespace Syn {
         };
     }
 
-    void TraditionalRenderPass::PrepareFrame(const RenderContext& context) {
+    void TraditionalOpaquePass::PrepareFrame(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
-        
+
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
         _graphicsState.renderArea = extent;
 
@@ -105,7 +116,8 @@ namespace Syn {
             RenderTargetNames::EntityIndex
         };
 
-        for (const auto& name : targets) 
+        _colorAttachments.clear();
+        for (const auto& name : targets)
         {
             _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
                     .imageView = group->GetImage(name)->GetView(Vk::ImageViewNames::Default),
@@ -130,18 +142,16 @@ namespace Syn {
         };
     }
 
-    void TraditionalRenderPass::PushConstants(const RenderContext& context) {
+    void TraditionalOpaquePass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         if (!scene) return;
 
         auto drawData = scene->GetSceneDrawData();
         auto modelManager = ServiceLocator::GetModelManager();
-        auto registry = scene->GetRegistry();
         auto materialManager = ServiceLocator::GetMaterialManager();
         auto componentBufferManager = scene->GetComponentBufferManager();
         auto animationManager = ServiceLocator::GetAnimationManager();
 
-        
         uint32_t fIdx = context.frameIndex;
 
         TraditionalPushConstants pc{};
@@ -165,7 +175,7 @@ namespace Syn {
         pc.materialBuffer = materialManager->GetMaterialBuffer()->GetDeviceAddress();
 
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
-        pc.meshletOffsetStart = SceneDrawData::MESHLET_OFFSET_START;
+        pc.baseDescriptorOffset = drawData->traditionalCmdOffsets[_renderType];
 
         vkCmdPushConstants(
             context.cmd,
@@ -177,31 +187,37 @@ namespace Syn {
         );
     }
 
-    void TraditionalRenderPass::BindDescriptors(const RenderContext& context)
+    void TraditionalOpaquePass::BindDescriptors(const RenderContext& context)
     {
         auto imageManager = ServiceLocator::GetImageManager();
         auto bindlessBuffer = imageManager->GetBindlessBuffer();
         bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
-    void TraditionalRenderPass::Draw(const RenderContext& context)
+    void TraditionalOpaquePass::Draw(const RenderContext& context)
     {
         auto scene = context.scene;
         if (!scene) return;
 
         auto drawData = scene->GetSceneDrawData();
-
         auto indirectBuffer = drawData->globalIndirectCommandBuffers[context.frameIndex]->Handle();
         auto countBuffer = drawData->globalDrawCountBuffers[context.frameIndex]->Handle();
 
-        vkCmdDrawIndirectCount(
-            context.cmd,
-            indirectBuffer,
-            0,
-            countBuffer,
-            0,
-            SceneDrawData::SceneDrawData::MESHLET_OFFSET_START,
-            sizeof(VkDrawIndirectCommand)
-        );
+        uint32_t commandOffset = drawData->traditionalCmdOffsets[_renderType];
+        uint32_t maxCommandCount = drawData->traditionalCmdCounts[_renderType];
+
+        if (maxCommandCount > 0) {
+            VkDeviceSize countBufferOffset = _renderType * sizeof(uint32_t);
+
+            vkCmdDrawIndirectCount(
+                context.cmd,
+                indirectBuffer,
+                commandOffset * sizeof(VkDrawIndirectCommand),
+                countBuffer,
+                countBufferOffset,
+                maxCommandCount,
+                sizeof(VkDrawIndirectCommand)
+            );
+        }
     }
 }

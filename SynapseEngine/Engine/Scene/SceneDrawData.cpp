@@ -9,11 +9,15 @@ namespace Syn
     {
         auto modelManager = ServiceLocator::GetModelManager();
 
+        //Cache line!!
+        paddedTraditionalCounts.resize(MAX_INDIRECT_COMMANDS * 16, 0);
+        paddedMeshletCounts.resize(MAX_INDIRECT_COMMANDS * 16, 0);
+
         modelAllocations.resize(ModelManager::MAX_MODELS);
         meshAllocations.resize(MAX_INDIRECT_COMMANDS);
         drawDescriptors.resize(MAX_INDIRECT_COMMANDS);
-        traditionalCommands.resize(MESHLET_OFFSET_START, { 0,0,0,0 });
-        meshletCommands.resize(MAX_INDIRECT_COMMANDS - MESHLET_OFFSET_START, { 0,0,0 });
+        traditionalCommands.resize(MAX_INDIRECT_COMMANDS, { 0,0,0,0 });
+        meshletCommands.resize(MAX_INDIRECT_COMMANDS, { 0,0,0 });
         cpuInstanceBuffer.resize(MAX_INSTANCES, 0);
         aabbIndirectCommands.resize(MAX_INDIRECT_COMMANDS);
         sphereIndirectCommands.resize(MAX_INDIRECT_COMMANDS);
@@ -33,9 +37,6 @@ namespace Syn
         debugInstanceBuffers.resize(frameCount);
         debugAabbIndirectBuffers.resize(frameCount);
         debugSphereIndirectBuffers.resize(frameCount);
-
-        size_t traditionalBytes = MESHLET_OFFSET_START * sizeof(VkDrawIndirectCommand);
-        size_t meshletBytes = (MAX_INDIRECT_COMMANDS - MESHLET_OFFSET_START) * sizeof(VkDrawMeshTasksIndirectCommandEXT);
 
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
         VkDrawIndirectCommand aabbCmd{};
@@ -65,12 +66,12 @@ namespace Syn
             );
 
             globalIndirectCommandBuffers[i] = Vk::BufferFactory::CreatePersistent(
-                traditionalBytes + meshletBytes,
+                (MAX_INDIRECT_COMMANDS * sizeof(VkDrawIndirectCommand) + MAX_INDIRECT_COMMANDS * sizeof(VkDrawMeshTasksIndirectCommandEXT)) / 2,
                 VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
             );
 
             globalDrawCountBuffers[i] = Vk::BufferFactory::CreatePersistent(
-                2 * sizeof(uint32_t),
+                (MaterialRenderType::Count * 2) * sizeof(uint32_t),
                 VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT
             );
 

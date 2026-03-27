@@ -570,12 +570,6 @@
     <ClCompile Include="Mesh\MeshDrawBlueprint.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\TraditionalRenderPass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\MeshletRenderPass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Mesh\MeshAllocationInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -772,6 +766,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\GraphicsPass\GuiPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\TraditionalOpaquePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\MeshletOpaquePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1409,12 +1409,6 @@
     <ClInclude Include="Mesh\MeshDrawBlueprint.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\TraditionalRenderPass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\MeshletRenderPass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Mesh\MeshAllocationInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1638,6 +1632,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\GraphicsPass\GuiPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Material\MaterialRenderType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\TraditionalOpaquePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\MeshletOpaquePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

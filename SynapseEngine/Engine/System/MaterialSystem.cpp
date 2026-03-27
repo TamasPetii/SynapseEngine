@@ -23,6 +23,8 @@ namespace Syn
         auto modelManager = ServiceLocator::GetModelManager();
         uint32_t currentModelManagerVersion = modelManager->GetVersion();
 
+        //Todo: Override component changed -> Update??
+
         this->EmplaceTask(subflow, SystemPhaseNames::Update, [this, scene, pool, modelManager, currentModelManagerVersion, drawData, overridePool]() {
 
             bool needsRebuild = false;

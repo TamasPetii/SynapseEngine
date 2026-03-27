@@ -187,12 +187,10 @@ namespace Syn
 
                 ai_real opacity = 1.0f;
                 if (AI_SUCCESS == matAI->Get(AI_MATKEY_OPACITY, opacity)) {
-                    if (opacity < 1.0f) {
+                    if (false && opacity < 0.98f) {
                         matInfo.isTransparent = true;
                     }
                 }
-
-                //Todo: Wrap?
             }
         );
     }

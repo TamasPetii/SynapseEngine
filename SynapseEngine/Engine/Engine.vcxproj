@@ -179,6 +179,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Render\GraphicsPass\MeshletOpaquePass.cpp" />
     <ClCompile Include="Render\GraphicsPass\GuiPass.cpp" />
     <ClCompile Include="System\AnimationSystem.cpp" />
     <ClCompile Include="Component\AnimationComponent.cpp" />
@@ -236,7 +237,6 @@
     <ClCompile Include="System\FrustumCullingSystem.cpp" />
     <ClCompile Include="Mesh\MeshAllocationInfo.cpp" />
     <ClCompile Include="System\ModelSystem.cpp" />
-    <ClCompile Include="Render\GraphicsPass\MeshletRenderPass.cpp" />
     <ClCompile Include="Mesh\MeshDrawBlueprint.cpp" />
     <ClCompile Include="Mesh\MeshDrawDescriptor.cpp" />
     <ClCompile Include="Scene\SceneDrawData.cpp" />
@@ -253,10 +253,10 @@
     <ClCompile Include="System\TransformSystem.cpp" />
     <ClCompile Include="Component\TransformComponent.cpp" />
     <ClCompile Include="Scene\TestScene.cpp" />
-    <ClCompile Include="Render\GraphicsPass\TraditionalRenderPass.cpp" />
     <ClCompile Include="Render\TransferPass\TransferPass.cpp" />
     <ClCompile Include="Profiler\TaskProfilerObserver.cpp" />
     <ClCompile Include="Animation\Data\Common\VertexSkinData.cpp" />
+    <ClCompile Include="Render\GraphicsPass\TraditionalOpaquePass.cpp" />
     <ClCompile Include="Vk\Rendering\GpuUploader.cpp" />
     <ClCompile Include="Manager\BaseResourceManager.cpp" />
     <ClCompile Include="Image\Data\Texture.cpp" />
@@ -434,6 +434,8 @@
     <ClCompile Include="Render\TransferPass\WireframeMeshletInitPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Material\MaterialRenderType.h" />
+    <ClInclude Include="Render\GraphicsPass\MeshletOpaquePass.h" />
     <ClInclude Include="Render\GraphicsPass\GuiPass.h" />
     <ClInclude Include="System\AnimationSystem.h" />
     <ClInclude Include="Component\AnimationComponent.h" />
@@ -498,7 +500,6 @@
     <ClInclude Include="System\FrustumCullingSystem.h" />
     <ClInclude Include="Mesh\MeshAllocationInfo.h" />
     <ClInclude Include="System\ModelSystem.h" />
-    <ClInclude Include="Render\GraphicsPass\MeshletRenderPass.h" />
     <ClInclude Include="Mesh\MeshDrawBlueprint.h" />
     <ClInclude Include="Mesh\MeshDrawDescriptor.h" />
     <ClInclude Include="Scene\SceneDrawData.h" />
@@ -517,10 +518,10 @@
     <ClInclude Include="System\TransformSystem.h" />
     <ClInclude Include="Component\TransformComponent.h" />
     <ClInclude Include="Scene\TestScene.h" />
-    <ClInclude Include="Render\GraphicsPass\TraditionalRenderPass.h" />
     <ClInclude Include="Render\TransferPass\TransferPass.h" />
     <ClInclude Include="Profiler\TaskProfilerObserver.h" />
     <ClInclude Include="Animation\Data\Common\VertexSkinData.h" />
+    <ClInclude Include="Render\GraphicsPass\TraditionalOpaquePass.h" />
     <ClInclude Include="Vk\Image\ImageViewNames.h" />
     <ClInclude Include="Vk\Rendering\GpuUploader.h" />
     <ClInclude Include="Manager\BaseResourceManager.h" />

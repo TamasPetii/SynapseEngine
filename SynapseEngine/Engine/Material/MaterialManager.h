@@ -4,6 +4,7 @@
 #include "Engine/Vk/Buffer/Buffer.h"
 #include "Engine/Material/Material.h"
 #include "Engine/Mesh/Data/Common/MaterialInfo.h"
+#include "MaterialRenderType.h"
 
 namespace Syn {
     using TextureLoadCallback = std::function<uint32_t(const std::string& fullPath)>;
@@ -17,6 +18,8 @@ namespace Syn {
 
         uint32_t LoadMaterial(const std::string& name, const MaterialInfo& info);
         Vk::Buffer* GetMaterialBuffer() const { return _materialBuffer.get(); }
+
+        std::span<const MaterialRenderType> GetRenderTypeSnapshot() const { return _renderTypeCache; }
     protected:
         void StartGpuUpload(EntryType& entry) override;
         void FinalizeResource(EntryType& entry) override;
@@ -25,5 +28,6 @@ namespace Syn {
     private:
         TextureLoadCallback _textureLoadCallback;
         std::unique_ptr<Vk::Buffer> _materialBuffer;
+        std::vector<MaterialRenderType> _renderTypeCache;
     };
 }

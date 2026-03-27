@@ -43,7 +43,7 @@ namespace Syn {
         pc.globalIndirectCmdsAddr = drawData->globalIndirectCommandBuffers[fIdx]->GetDeviceAddress();
         pc.aabbCmdsAddr = drawData->aabbIndirectCommandBuffers[fIdx]->GetDeviceAddress();
         pc.sphereCmdsAddr = drawData->sphereIndirectCommandBuffers[fIdx]->GetDeviceAddress();
-        pc.meshletOffsetStart = SceneDrawData::MESHLET_OFFSET_START;
+        //pc.meshletOffsetStart = SceneDrawData::MESHLET_OFFSET_START;
         pc.maxCommands = SceneDrawData::MAX_INDIRECT_COMMANDS;
 
         vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(WireframeSetupPushContants), &pc);

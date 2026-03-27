@@ -64,10 +64,13 @@ layout(push_constant) uniform PushConstants {
     uint64_t debugSphereIndirectAddr;
 
     uint activeCameraEntity;
-    uint meshletOffsetStart; 
+    uint baseDescriptorOffset;
+
     uint visualizeMeshlet; 
     float screenWidth;
     float screenHeight;
+
+    uint disableConeCulling;
 } pc;
 
 vec4 sampleLoadedTexture2D(uint textureID, uint samplerID, vec2 uv) { 

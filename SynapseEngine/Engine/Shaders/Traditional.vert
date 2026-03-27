@@ -159,7 +159,7 @@ layout(push_constant) uniform PushConstants {
     uint64_t materialLookupBuffer; 
     uint64_t materialBuffer; 
     uint activeCameraEntity;
-    uint meshletOffsetStart; 
+    uint baseDescriptorOffset;
 } pc;
 
 layout(location = 0) out vec3 outNormal;
@@ -170,7 +170,7 @@ layout(location = 3) out flat uint outMaterialId;
 void main() {
     // 1. Descriptor
     DescriptorBuffer descriptors = DescriptorBuffer(pc.globalIndirectCommandDescriptorBuffers);
-    MeshDrawDescriptor desc = descriptors.data[gl_DrawIDARB];
+    MeshDrawDescriptor desc = descriptors.data[pc.baseDescriptorOffset + gl_DrawIDARB];
 
     // 2. Instance és Entitás
     InstanceBuffer instances = InstanceBuffer(pc.globalInstanceBuffers);

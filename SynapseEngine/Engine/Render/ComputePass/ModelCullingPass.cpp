@@ -9,6 +9,7 @@
 #include "Engine/Vk/Buffer/BufferUtils.h"
 #include "Engine/Render/ComputeGroupSize.h"
 #include "Engine/Animation/AnimationManager.h"
+#include "Engine/Material/MaterialManager.h"
 
 namespace Syn {
 
@@ -21,7 +22,8 @@ namespace Syn {
         uint64_t cameraSparseMapBufferAddr;   
         uint64_t transformBufferAddr;         
         uint64_t transformSparseMapBufferAddr;
-        uint64_t modelCompBufferAddr;         
+        uint64_t modelCompBufferAddr;   
+        uint64_t modelSparseMapBufferAddr;
 
         uint64_t meshAllocBufferAddr;         
         uint64_t modelAllocBufferAddr;        
@@ -30,10 +32,14 @@ namespace Syn {
         uint64_t visibleModelCountAddr;       
 
         uint64_t globalIndirectCommandBuffers;
-        uint64_t globalInstanceBufferAddr;    
+        uint64_t globalInstanceBufferAddr;   
+
+        uint64_t materialLookupBufferAddr;
+        uint64_t materialBufferAddr;
+
         uint32_t totalModelsToTest;           
         uint32_t activeCameraEntity;          
-        uint32_t meshletOffsetStart;          
+        uint32_t traditionalCommandCount;
     };
 
     void ModelCullingPass::Initialize() {
@@ -56,6 +62,7 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
         auto modelManager = ServiceLocator::GetModelManager();
+        auto materialManager = ServiceLocator::GetMaterialManager();
         auto animationManager = ServiceLocator::GetAnimationManager();
 
         uint32_t fIdx = context.frameIndex;
@@ -70,6 +77,7 @@ namespace Syn {
         pc.transformBufferAddr = compManager->GetBufferAddr(BufferNames::TransformData, fIdx);
         pc.transformSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::TransformSparseMap, fIdx);
         pc.modelCompBufferAddr = compManager->GetBufferAddr(BufferNames::ModelData, fIdx);
+        pc.modelSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::ModelSparseMap, fIdx);
 
         pc.modelAllocBufferAddr = drawData->globalModelAllocationBuffers[fIdx]->GetDeviceAddress();
         pc.modelAddressBufferAddr = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
@@ -81,9 +89,12 @@ namespace Syn {
         pc.globalIndirectCommandBuffers = drawData->globalIndirectCommandBuffers[fIdx]->GetDeviceAddress();
         pc.globalInstanceBufferAddr = drawData->globalInstanceBuffers[fIdx]->GetDeviceAddress();
 
+        pc.materialLookupBufferAddr = drawData->globalMaterialIndexBuffers[fIdx]->GetDeviceAddress();
+        pc.materialBufferAddr = materialManager->GetMaterialBuffer()->GetDeviceAddress();
+
         pc.totalModelsToTest = _totalModelsToTest;
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
-        pc.meshletOffsetStart = SceneDrawData::MESHLET_OFFSET_START;
+        pc.traditionalCommandCount = drawData->activeTraditionalCount;
 
         vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(CullingPushConstants), &pc);
     }

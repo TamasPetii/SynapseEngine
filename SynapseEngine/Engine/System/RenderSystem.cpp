@@ -3,15 +3,21 @@
 #include "Engine/Component/ModelComponent.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Mesh/ModelManager.h"
+#include "Engine/Material/MaterialManager.h"
 #include "Engine/System/ModelSystem.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/FrameCOntext.h"
+#include "MaterialSystem.h"
+#include "Engine/Component/MaterialOverrideComponent.h"
 
 namespace Syn
 {
     std::vector<TypeID> RenderSystem::GetReadDependencies() const
     {
-        return { TypeInfo<ModelSystem>::ID };
+        return { 
+            TypeInfo<ModelSystem>::ID,
+            TypeInfo<MaterialSystem>::ID
+        };
     }
 
     std::vector<TypeID> RenderSystem::GetWriteDependencies() const
@@ -23,58 +29,114 @@ namespace Syn
     {
         auto registry = scene->GetRegistry();
         auto pool = registry->GetPool<ModelComponent>();
+        auto overridePool = registry->GetPool<MaterialOverrideComponent>();
         if (!pool) return;
 
         auto modelManager = ServiceLocator::GetModelManager();
+        auto materialManager = ServiceLocator::GetMaterialManager();
+
         uint32_t totalModels = static_cast<uint32_t>(modelManager->GetResourceCount());
         uint32_t currentModelManagerVersion = modelManager->GetVersion();
+        uint32_t currentMaterialManagerVersion = materialManager->GetVersion();
 
-        this->EmplaceTask(subflow, SystemPhaseNames::Update, [this, scene, pool, totalModels, currentModelManagerVersion]() {
+        this->EmplaceTask(subflow, SystemPhaseNames::Update, [this, scene, pool, overridePool, modelManager, materialManager, totalModels, currentModelManagerVersion, currentMaterialManagerVersion]() {
+            auto modelSnapshots = modelManager->GetResourceSnapshot();
+            auto matTypeSnapshot = materialManager->GetRenderTypeSnapshot();
+            
             if (_lastModelManagerVersion != currentModelManagerVersion) {
                 _needsRebuild = true;
                 _lastModelManagerVersion = currentModelManagerVersion;
             }
 
+            if (_lastMaterialManagerVersion != currentMaterialManagerVersion) {
+                _needsRebuild = true;
+                _lastMaterialManagerVersion = currentMaterialManagerVersion;
+            }
+
             if (!pool->IsStateBitSet<CHANGED_BIT>() && !pool->IsStateBitSet<INDEX_CHANGED_BIT>() && !_needsRebuild)
                 return;
 
-            if (totalModels > _modelCapacities.size()) {
-                _modelCapacities.resize(totalModels, 0);
-            }
+            if (totalModels > _modelCapacities.size()) _modelCapacities.resize(totalModels, 0);
+            if (totalModels > _entitiesPerModel.size()) _entitiesPerModel.resize(totalModels);
+            if (totalModels > _meshMatCapacities.size()) _meshMatCapacities.resize(totalModels);
+            for (auto& vec : _entitiesPerModel) vec.clear();
 
-            if (totalModels > _currentCounts.size()) {
-                _currentCounts.resize(totalModels, 0);
-            }
-
-            std::fill(_currentCounts.begin(), _currentCounts.begin() + totalModels, 0);
-
-            auto countFunc = [this, &pool](EntityID entity) {
-                _currentCounts[pool->Get(entity).modelIndex]++;
+            auto groupFunc = [this, &pool](EntityID entity) {
+                uint32_t mId = pool->Get(entity).modelIndex;
+                if (mId < _entitiesPerModel.size()) _entitiesPerModel[mId].push_back(entity);
                 };
 
-            for (auto e : pool->GetStorage().GetStaticEntities()) countFunc(e);
-            for (auto e : pool->GetStorage().GetDynamicEntities()) countFunc(e);
-            for (auto e : pool->GetStorage().GetStreamEntities()) countFunc(e);
+            for (auto e : pool->GetStorage().GetStaticEntities()) groupFunc(e);
+            for (auto e : pool->GetStorage().GetDynamicEntities()) groupFunc(e);
+            for (auto e : pool->GetStorage().GetStreamEntities()) groupFunc(e);
 
             bool capacityExceeded = false;
+            const uint32_t windowSize = 16;
 
             for (uint32_t modelId = 0; modelId < totalModels; ++modelId)
             {
-                uint32_t count = _currentCounts[modelId];
-                if (count == 0) continue;
+                if(_entitiesPerModel[modelId].empty() || modelId >= modelSnapshots.size()) continue;
 
-                if (count > _modelCapacities[modelId])
-                {
+                auto model = modelSnapshots[modelId].resource;
+                if (!model) continue;
+
+                uint32_t meshCount = model->gpuData.globalMeshCount;
+                if (_meshMatCapacities[modelId].size() < meshCount) {
+                    _meshMatCapacities[modelId].resize(meshCount);
+                }
+
+                std::vector<MeshMatCapacity> currentCounts(meshCount);
+                const auto& defaultMatIndices = model->meshMaterialIndices;
+
+                for (EntityID e : _entitiesPerModel[modelId]) {
+                    std::span<const uint32_t> overrides;
+
+                    if (overridePool && overridePool->Has(e)) {
+                        overrides = overridePool->Get(e).materials;
+                    }
+
+                    for (uint32_t m = 0; m < meshCount; ++m) {
+                        uint32_t matIdx = defaultMatIndices[m];
+
+                        if (m < overrides.size() && overrides[m] != UINT32_MAX) {
+                            matIdx = overrides[m];
+                        }
+
+                        MaterialRenderType type = (matIdx < matTypeSnapshot.size()) ? matTypeSnapshot[matIdx] : MaterialRenderType::Opaque1Sided;
+                        currentCounts[m].capacities[type]++;
+                    }
+                }
+
+                uint32_t totalModelCapRequired = 0;
+                for (uint32_t m = 0; m < meshCount; ++m) {
+                    for (int t = 0; t < MaterialRenderType::Count; ++t) {
+                        if (currentCounts[m].capacities[t] > _meshMatCapacities[modelId][m].capacities[t]) {
+                            _meshMatCapacities[modelId][m].capacities[t] = currentCounts[m].capacities[t] + windowSize;
+                            capacityExceeded = true;
+                        }
+                    }
+                }
+
+                uint32_t maxModelInstances = 0;
+                for (uint32_t m = 0; m < meshCount; ++m) {
+                    uint32_t meshTotal = 0;
+
+                    for (int t = 0; t < MaterialRenderType::Count; ++t)
+                        meshTotal += _meshMatCapacities[modelId][m].capacities[t];
+
+                    if (meshTotal > maxModelInstances)
+                        maxModelInstances = meshTotal;
+                }
+
+                if (maxModelInstances > _modelCapacities[modelId]) {
+                    _modelCapacities[modelId] = maxModelInstances;
                     capacityExceeded = true;
-                    _modelCapacities[modelId] = count + 16;
                 }
             }
 
             if (capacityExceeded || _needsRebuild)
             {
                 RebuildGlobalBuffers(scene);
-
-                auto drawData = scene->GetSceneDrawData();
                 this->SetFramesToUpload(ServiceLocator::GetFrameContext()->framesInFlight);
             }
             });
@@ -87,31 +149,68 @@ namespace Syn
         auto modelSnapshots = modelManager->GetResourceSnapshot();
 
         drawData->activeDescriptorCount = 0;
-        drawData->activeTraditionalCount = 0;
-        drawData->activeMeshletCount = 0;
 
         uint32_t globalInstanceOffset = 0;
         uint32_t totalMaterialIndicesCapacity = 0;
         uint32_t totalMaxMeshletInstances = 0;
 
+        // --- 1. Pass: Számoljuk össze a szükséges command darabszámokat ---
+        uint32_t tradCmdCounts[MaterialRenderType::Count] = { 0 };
+        uint32_t meshletCmdCounts[MaterialRenderType::Count] = { 0 };
+
+        for (uint32_t modelId = 0; modelId < _modelCapacities.size(); ++modelId)
+        {
+            if (_modelCapacities[modelId] == 0 || modelId >= modelSnapshots.size()) continue;
+            auto model = modelSnapshots[modelId].resource;
+            if (!model) continue;
+
+            const auto& blueprints = model->baseDrawCommands;
+            for (size_t i = 0; i < blueprints.size(); ++i) {
+                uint32_t meshIndex = static_cast<uint32_t>(i / 4);
+                bool isMeshlet = (blueprints[i].isMeshletPipeline == MeshDrawBlueprint::PIPELINE_MESHLET);
+
+                for (int t = 0; t < MaterialRenderType::Count; ++t) {
+                    if (_meshMatCapacities[modelId][meshIndex].capacities[t] > 0) {
+                        if (isMeshlet) 
+                            meshletCmdCounts[t]++;
+                        else 
+                            tradCmdCounts[t]++;
+                    }
+                }
+            }
+        }
+
+        // --- 2. Pass: Osztjuk ki az offseteket ---
+        uint32_t tradOffsets[MaterialRenderType::Count];
+        uint32_t meshletOffsets[MaterialRenderType::Count];
+        drawData->activeTraditionalCount = 0;
+        drawData->activeMeshletCount = 0;
+
+        for (int t = 0; t < MaterialRenderType::Count; ++t) {
+            drawData->traditionalCmdOffsets[t] = drawData->activeTraditionalCount;
+            drawData->traditionalCmdCounts[t] = tradCmdCounts[t];
+            tradOffsets[t] = drawData->activeTraditionalCount;
+            drawData->activeTraditionalCount += tradCmdCounts[t];
+
+            drawData->meshletCmdOffsets[t] = drawData->activeMeshletCount;
+            drawData->meshletCmdCounts[t] = meshletCmdCounts[t];
+            meshletOffsets[t] = drawData->activeMeshletCount;
+            drawData->activeMeshletCount += meshletCmdCounts[t];
+        }
+
+        // --- 3. Pass: Építsük fel az Allocations és Descriptors buffereket ---
         for (uint32_t modelId = 0; modelId < _modelCapacities.size(); ++modelId)
         {
             uint32_t capacity = _modelCapacities[modelId];
-            if (capacity == 0) continue;
-
-            if (modelId >= modelSnapshots.size()) continue;
+            if (capacity == 0 || modelId >= modelSnapshots.size()) continue;
             auto model = modelSnapshots[modelId].resource;
-
             if (!model) continue;
 
             uint32_t maxMeshletsForModel = 0;
             uint32_t meshCount = model->gpuData.globalMeshCount;
-
-            for (uint32_t m = 0; m < meshCount; ++m)
-            {
+            for (uint32_t m = 0; m < meshCount; ++m) {
                 uint32_t lod0Index = m * 4;
-                if (lod0Index < model->gpuData.meshletData.drawDescriptors.size())
-                {
+                if (lod0Index < model->gpuData.meshletData.drawDescriptors.size()) {
                     maxMeshletsForModel += model->gpuData.meshletData.drawDescriptors[lod0Index].meshletCount;
                 }
             }
@@ -120,7 +219,6 @@ namespace Syn
             totalMaterialIndicesCapacity += capacity * meshCount;
 
             const auto& blueprints = model->baseDrawCommands;
-
             ModelAllocationInfo& allocationInfo = drawData->modelAllocations[modelId];
             allocationInfo.maxInstances = capacity;
             allocationInfo.meshAllocationOffset = drawData->activeDescriptorCount;
@@ -128,41 +226,59 @@ namespace Syn
 
             for (size_t i = 0; i < blueprints.size(); ++i)
             {
+                uint32_t meshIndex = static_cast<uint32_t>(i / 4);
                 const auto& blueprint = blueprints[i];
-
-                MeshDrawDescriptor desc{};
-                desc.modelIndex = modelId;
-                desc.meshIndex = static_cast<uint32_t>(i / 4);
-                desc.lodIndex = static_cast<uint32_t>(i % 4);
-                desc.instanceOffset = globalInstanceOffset;
-                desc.maxInstances = capacity;
-                desc.isMeshletPipeline = blueprint.isMeshletPipeline;
 
                 MeshAllocationInfo meshAlloc{};
                 meshAlloc.descriptorIndex = drawData->activeDescriptorCount;
-                meshAlloc.instanceOffset = globalInstanceOffset;
                 meshAlloc.isMeshletPipeline = blueprint.isMeshletPipeline;
 
-                if (blueprint.isMeshletPipeline == MeshDrawBlueprint::PIPELINE_MESHLET)
-                {
-                    desc.indirectIndex = SceneDrawData::MESHLET_OFFSET_START + drawData->activeMeshletCount;
-                    drawData->meshletCommands[drawData->activeMeshletCount] = blueprint.meshletCmd;
-                    meshAlloc.indirectIndex = desc.indirectIndex;
-                    drawData->drawDescriptors[desc.indirectIndex] = desc;
-                    drawData->activeMeshletCount++;
+                for (int t = 0; t < MaterialRenderType::Count; ++t) {
+                    meshAlloc.activeTypes[t] = 0;
+                    meshAlloc.indirectIndices[t] = UINT32_MAX;
                 }
-                else
+
+                for (int type = 0; type < MaterialRenderType::Count; ++type)
                 {
-                    desc.indirectIndex = drawData->activeTraditionalCount;
-                    drawData->traditionalCommands[drawData->activeTraditionalCount] = blueprint.traditionalCmd;
-                    meshAlloc.indirectIndex = desc.indirectIndex;
-                    drawData->drawDescriptors[desc.indirectIndex] = desc;
-                    drawData->activeTraditionalCount++;
+                    uint32_t allocatedForThisType = _meshMatCapacities[modelId][meshIndex].capacities[type];
+                    if (allocatedForThisType == 0) continue;
+
+                    meshAlloc.activeTypes[type] = 1;
+                    meshAlloc.instanceOffsets[type] = globalInstanceOffset;
+
+                    MeshDrawDescriptor desc{};
+                    desc.modelIndex = modelId;
+                    desc.meshIndex = meshIndex;
+                    desc.lodIndex = static_cast<uint32_t>(i % 4);
+                    desc.instanceOffset = globalInstanceOffset;
+                    desc.maxInstances = allocatedForThisType;
+                    desc.isMeshletPipeline = blueprint.isMeshletPipeline;
+
+                    if (blueprint.isMeshletPipeline == MeshDrawBlueprint::PIPELINE_MESHLET) {
+                        uint32_t flatIndirectIdx = meshletOffsets[type]++;
+                        meshAlloc.indirectIndices[type] = flatIndirectIdx;
+
+                        uint32_t globalDescIdx = drawData->activeTraditionalCount + flatIndirectIdx;
+                        desc.indirectIndex = globalDescIdx;
+
+                        drawData->meshletCommands[flatIndirectIdx] = blueprint.meshletCmd;
+                        drawData->drawDescriptors[desc.indirectIndex] = desc;
+                    }
+                    else {
+                        uint32_t flatIndirectIdx = tradOffsets[type]++;
+                        meshAlloc.indirectIndices[type] = flatIndirectIdx;
+
+                        uint32_t globalDescIdx = flatIndirectIdx;
+                        desc.indirectIndex = globalDescIdx;
+
+                        drawData->traditionalCommands[flatIndirectIdx] = blueprint.traditionalCmd;
+                        drawData->drawDescriptors[desc.indirectIndex] = desc;
+                    }
+                    globalInstanceOffset += allocatedForThisType;
                 }
 
                 drawData->meshAllocations[drawData->activeDescriptorCount] = meshAlloc;
                 drawData->activeDescriptorCount++;
-                globalInstanceOffset += capacity;
             }
         }
 
@@ -170,9 +286,10 @@ namespace Syn
         drawData->totalMaxMeshletInstances = totalMaxMeshletInstances;
         drawData->requiredMaterialBufferSize = totalMaterialIndicesCapacity * sizeof(uint32_t);
 
-        if (false)
+        if (true)
         {
             std::stringstream ss;
+            const char* matNames[] = { "Opaque1Sided", "Opaque2Sided", "Transparent1Sided", "Transparent2Sided" };
 
             ss << "================================================================================\n";
             ss << " RENDER SYSTEM REBUILD REPORT\n";
@@ -182,6 +299,20 @@ namespace Syn
             ss << "   - Traditional Commands:    " << drawData->activeTraditionalCount << "\n";
             ss << "   - Meshlet Commands:        " << drawData->activeMeshletCount << "\n";
             ss << "   - Total Allocated Inst:    " << drawData->totalAllocatedInstances << "\n";
+            ss << "--------------------------------------------------------------------------------\n";
+            ss << " Global Command Breakdowns (Offsets & Counts):\n";
+
+            ss << "   [Traditional Pipeline]\n";
+            for (int t = 0; t < MaterialRenderType::Count; ++t) {
+                ss << "     - " << matNames[t] << ": Offset = " << drawData->traditionalCmdOffsets[t]
+                    << " | Count = " << drawData->traditionalCmdCounts[t] << "\n";
+            }
+
+            ss << "   [Meshlet Pipeline]\n";
+            for (int t = 0; t < MaterialRenderType::Count; ++t) {
+                ss << "     - " << matNames[t] << ": Offset = " << drawData->meshletCmdOffsets[t]
+                    << " | Count = " << drawData->meshletCmdCounts[t] << "\n";
+            }
             ss << "--------------------------------------------------------------------------------\n";
 
             for (uint32_t modelId = 0; modelId < drawData->modelAllocations.size(); ++modelId)
@@ -203,14 +334,15 @@ namespace Syn
                     const auto& desc = drawData->drawDescriptors[meshAlloc.descriptorIndex];
 
                     ss << "   MeshAlloc [" << i << "] -> DescIdx: " << meshAlloc.descriptorIndex
-                        << ", IndirectIdx: " << meshAlloc.indirectIndex
-                        << ", InstOffset: " << meshAlloc.instanceOffset
-                        << ", Type: " << (meshAlloc.isMeshletPipeline ? "MESHLET" : "TRADITIONAL") << "\n";
+                        << ", Pipeline: " << (meshAlloc.isMeshletPipeline ? "MESHLET" : "TRADITIONAL") << "\n";
 
-                    ss << "     Descriptor -> SubMesh: " << desc.meshIndex
-                        << ", LOD: " << desc.lodIndex
-                        << ", MaxInst: " << desc.maxInstances
-                        << ", GlobalIndirectIdx: " << desc.indirectIndex << "\n";
+                    for (int t = 0; t < MaterialRenderType::Count; ++t) {
+                        if (meshAlloc.activeTypes[t] == 1) {
+                            ss << "     -> " << matNames[t]
+                                << " | IndirectIdx: " << meshAlloc.indirectIndices[t]
+                                << " | InstOffset: " << meshAlloc.instanceOffsets[t] << "\n";
+                        }
+                    }
                 }
             }
             ss << "================================================================================";
@@ -240,19 +372,11 @@ namespace Syn
                 );
             }
 
-            size_t tradDescSize = drawData->activeTraditionalCount * sizeof(MeshDrawDescriptor);
-            if (tradDescSize > 0)
-                drawData->globalIndirectCommandDescriptorBuffers[frameIndex]->Write(drawData->drawDescriptors.data(), tradDescSize, 0);
+            uint32_t totalDescriptors = drawData->activeTraditionalCount + drawData->activeMeshletCount;
+            size_t totalDescSize = totalDescriptors * sizeof(MeshDrawDescriptor);
 
-            size_t meshletDescSize = drawData->activeMeshletCount * sizeof(MeshDrawDescriptor);
-            if (meshletDescSize > 0) {
-                size_t meshletDescGpuOffset = SceneDrawData::MESHLET_OFFSET_START * sizeof(MeshDrawDescriptor);
-                drawData->globalIndirectCommandDescriptorBuffers[frameIndex]->Write(
-                    drawData->drawDescriptors.data() + SceneDrawData::MESHLET_OFFSET_START,
-                    meshletDescSize,
-                    meshletDescGpuOffset
-                );
-            }
+            if (totalDescSize > 0)
+                drawData->globalIndirectCommandDescriptorBuffers[frameIndex]->Write(drawData->drawDescriptors.data(), totalDescSize, 0);
 
             size_t modelAllocSize = drawData->modelAllocations.size() * sizeof(ModelAllocationInfo);
             if (modelAllocSize > 0)
@@ -262,7 +386,12 @@ namespace Syn
             if (meshAllocSize > 0)
                 drawData->globalMeshAllocationBuffers[frameIndex]->Write(drawData->meshAllocations.data(), meshAllocSize, 0);
 
-            uint32_t counts[2] = { drawData->activeTraditionalCount, drawData->activeMeshletCount };
+            uint32_t counts[8] = { 0 };
+            for (int i = 0; i < MaterialRenderType::Count; ++i) {
+                counts[i] = drawData->traditionalCmdCounts[i];
+                counts[MaterialRenderType::Count + i] = drawData->meshletCmdCounts[i];
+            }
+
             drawData->globalDrawCountBuffers[frameIndex]->Write(counts, sizeof(counts), 0);
             });
     }

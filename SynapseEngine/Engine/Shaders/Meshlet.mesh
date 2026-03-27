@@ -189,10 +189,13 @@ layout(push_constant) uniform PushConstants {
     uint64_t debugSphereIndirectAddr;
 
     uint activeCameraEntity;
-    uint meshletOffsetStart; 
+    uint baseDescriptorOffset;
+
     uint visualizeMeshlet; 
     float screenWidth;
     float screenHeight;
+
+    uint disableConeCulling;
 } pc;
 
 struct TaskPayload {
@@ -232,7 +235,7 @@ void main() {
 
     // 2. Melyik Descriptorhoz tartozik ez a draw hívás?
     DescriptorBuffer descriptors = DescriptorBuffer(pc.globalIndirectCommandDescriptorBuffers);
-    MeshDrawDescriptor desc = descriptors.data[pc.meshletOffsetStart + payload.drawId];
+    MeshDrawDescriptor desc = descriptors.data[pc.baseDescriptorOffset + payload.drawId];
 
     // 3. Entitás és globális memóriacímek lekérése
     InstanceBuffer instances = InstanceBuffer(pc.globalInstanceBuffers);

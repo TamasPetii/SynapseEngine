@@ -1,4 +1,4 @@
-#include "MeshletRenderPass.h"
+#include "MeshletOpaquePass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
 #include "Engine/Manager/ShaderManager.h"
@@ -20,11 +20,11 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <cassert>
 
 namespace Syn {
     struct MeshletPushConstants {
         uint64_t modelAddressBuffer;
-
         uint64_t animationAddressBuffer;
         uint64_t animationBufferAddr;
         uint64_t animationSparseMapBufferAddr;
@@ -51,19 +51,34 @@ namespace Syn {
         uint64_t debugSphereIndirectAddr;
 
         uint32_t activeCameraEntity;
-        uint32_t meshletOffsetStart;
-        uint32_t visualizeMeshlet;
+        uint32_t baseDescriptorOffset;
 
+        uint32_t visualizeMeshlet;
         float screenWidth;
         float screenHeight;
+
+        uint32_t disableConeCulling;
     };
 
-    void MeshletRenderPass::Initialize() {
+    MeshletOpaquePass::MeshletOpaquePass(MaterialRenderType renderType)
+        : _renderType(renderType)
+    {
+        assert(_renderType == MaterialRenderType::Opaque1Sided || _renderType == MaterialRenderType::Opaque2Sided);
+
+        if (_renderType == MaterialRenderType::Opaque1Sided) {
+            _passName = "Meshlet_Opaque_1Sided";
+        }
+        else {
+            _passName = "Meshlet_Opaque_2Sided";
+        }
+    }
+
+    void MeshletOpaquePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
         auto imageManager = ServiceLocator::GetImageManager();
 
         Vk::ShaderProgramConfig config;
-        config.useDescriptorBuffers = true; 
+        config.useDescriptorBuffers = true;
         config.layoutOverride = [imageManager](uint32_t setIndex) {
             if (setIndex == 0) {
                 return imageManager->GetBindlessLayout();
@@ -71,16 +86,18 @@ namespace Syn {
             return VkDescriptorSetLayout{};
             };
 
-        _shaderProgram = shaderManager->CreateProgram("MeshletProgram", {
+        _shaderProgram = shaderManager->CreateProgram("MeshletOpaqueProgram", {
             ShaderNames::MeshletTask,
             ShaderNames::MeshletMesh,
             ShaderNames::MeshletFrag
             }, config);
 
+        VkCullModeFlags cullMode = (_renderType == MaterialRenderType::Opaque2Sided) ? VK_CULL_MODE_NONE : VK_CULL_MODE_BACK_BIT;
+
         _graphicsState = {
             .raster = {
                 .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-                .cullMode = VK_CULL_MODE_BACK_BIT,
+                .cullMode = cullMode,
                 .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
                 .polygonMode = VK_POLYGON_MODE_FILL,
                 .lineWidth = 1.0f
@@ -104,7 +121,7 @@ namespace Syn {
         };
     }
 
-    void MeshletRenderPass::PrepareFrame(const RenderContext& context) {
+    void MeshletOpaquePass::PrepareFrame(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
         _graphicsState.renderArea = extent;
@@ -114,7 +131,8 @@ namespace Syn {
             RenderTargetNames::EntityIndex
         };
 
-        for (const auto& name : targets) 
+        _colorAttachments.clear();
+        for (const auto& name : targets)
         {
             _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
                     .imageView = group->GetImage(name)->GetView(Vk::ImageViewNames::Default),
@@ -139,13 +157,12 @@ namespace Syn {
         };
     }
 
-    void MeshletRenderPass::PushConstants(const RenderContext& context) {
+    void MeshletOpaquePass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         auto modelManager = ServiceLocator::GetModelManager();
         auto materialManager = ServiceLocator::GetMaterialManager();
 
         auto drawData = scene->GetSceneDrawData();
-        auto registry = scene->GetRegistry();
         auto componentBufferManager = scene->GetComponentBufferManager();
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         auto animationManager = ServiceLocator::GetAnimationManager();
@@ -175,13 +192,15 @@ namespace Syn {
         pc.debugInstanceBufferAddr = drawData->debugInstanceBuffers[fIdx]->GetDeviceAddress();
         pc.debugAabbIndirectAddr = drawData->debugAabbIndirectBuffers[fIdx]->GetDeviceAddress();
         pc.debugSphereIndirectAddr = drawData->debugSphereIndirectBuffers[fIdx]->GetDeviceAddress();
-        
-        //pc.activeCameraEntity = scene->GetDebugCameraEntity();
+
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
-        pc.meshletOffsetStart = SceneDrawData::MESHLET_OFFSET_START;
+        pc.baseDescriptorOffset = drawData->activeTraditionalCount + drawData->meshletCmdOffsets[_renderType];
+
         pc.visualizeMeshlet = 0;
         pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
         pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
+
+        pc.disableConeCulling = (_renderType == MaterialRenderType::Opaque2Sided) ? 1 : 0;
 
         vkCmdPushConstants(
             context.cmd,
@@ -193,7 +212,7 @@ namespace Syn {
         );
     }
 
-    void MeshletRenderPass::BindDescriptors(const RenderContext& context)
+    void MeshletOpaquePass::BindDescriptors(const RenderContext& context)
     {
         auto imageManager = ServiceLocator::GetImageManager();
         auto bindlessBuffer = imageManager->GetBindlessBuffer();
@@ -217,24 +236,30 @@ namespace Syn {
         //pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
-    void MeshletRenderPass::Draw(const RenderContext& context)
+    void MeshletOpaquePass::Draw(const RenderContext& context)
     {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         auto indirectBuffer = drawData->globalIndirectCommandBuffers[context.frameIndex]->Handle();
         auto countBuffer = drawData->globalDrawCountBuffers[context.frameIndex]->Handle();
 
-        VkDeviceSize indirectOffset = SceneDrawData::MESHLET_OFFSET_START * sizeof(VkDrawIndirectCommand);
-        VkDeviceSize countOffset = sizeof(uint32_t);
+        uint32_t commandOffsetIdx = drawData->meshletCmdOffsets[_renderType];
+        uint32_t maxCommandCount = drawData->meshletCmdCounts[_renderType];
 
-        vkCmdDrawMeshTasksIndirectCountEXT(
-            context.cmd,
-            indirectBuffer,
-            indirectOffset,
-            countBuffer,
-            countOffset,
-            SceneDrawData::MAX_INDIRECT_COMMANDS - SceneDrawData::MESHLET_OFFSET_START,
-            sizeof(VkDrawMeshTasksIndirectCommandEXT)
-        );
+        if (maxCommandCount > 0) {
+            VkDeviceSize traditionalBytes = drawData->activeTraditionalCount * sizeof(VkDrawIndirectCommand);
+            VkDeviceSize indirectOffset = traditionalBytes + (commandOffsetIdx * sizeof(VkDrawMeshTasksIndirectCommandEXT));
+            VkDeviceSize countOffset = (MaterialRenderType::Count + _renderType) * sizeof(uint32_t);
+
+            vkCmdDrawMeshTasksIndirectCountEXT(
+                context.cmd,
+                indirectBuffer,
+                indirectOffset,
+                countBuffer,
+                countOffset,
+                maxCommandCount,
+                sizeof(VkDrawMeshTasksIndirectCommandEXT)
+            );
+        }
     }
 }
