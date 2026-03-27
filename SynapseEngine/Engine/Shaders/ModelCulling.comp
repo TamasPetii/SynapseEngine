@@ -86,7 +86,6 @@ struct MeshAllocationInfo {
     uint descriptorIndex; 
     uint isMeshletPipeline; 
     uint padding[2]; 
-
     uint indirectIndices[4];
     uint instanceOffsets[4];
     uint activeTypes[4];

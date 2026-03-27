@@ -47,11 +47,10 @@ namespace Syn
         //pipeline->AddPass(std::make_unique<WireframeMeshletInitPass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletAabbPass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletSpherePass>());
-        //pipeline->AddPass(std::make_unique<BloomPrefilterPass>());
-        //pipeline->AddPass(std::make_unique<BloomDownsamplePass>());
-        //pipeline->AddPass(std::make_unique<BloomUpsamplePass>());
-        //pipeline->AddPass(std::make_unique<BloomCompositePass>());
-        //pipeline->AddPass(std::make_unique<CompositePass>());
+        pipeline->AddPass(std::make_unique<BloomPrefilterPass>());
+        pipeline->AddPass(std::make_unique<BloomDownsamplePass>());
+        pipeline->AddPass(std::make_unique<BloomUpsamplePass>());
+        pipeline->AddPass(std::make_unique<BloomCompositePass>());
         pipeline->AddPass(std::make_unique<GuiPass>());
         pipeline->AddPass(std::make_unique<PresentationPass>());
         pipeline->InitializeAll();

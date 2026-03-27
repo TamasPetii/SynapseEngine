@@ -232,9 +232,6 @@ namespace Syn
                 if (instanceSize > 0) {
                     drawData->globalInstanceBuffers[frameIndex]->Write(drawData->cpuInstanceBuffer.data(), instanceSize, 0);
                 }
-
-                uint32_t zeroDispatch[3] = { 0, 1, 1 };
-                drawData->globalModelComputeCountBuffer[frameIndex]->Write(zeroDispatch, sizeof(zeroDispatch), 0);
             }
 
             size_t tradSize = drawData->activeTraditionalCount * sizeof(VkDrawIndirectCommand);
@@ -246,6 +243,12 @@ namespace Syn
             if (meshletSize > 0) {
                 size_t meshletGpuOffset = tradSize;
                 drawData->globalIndirectCommandBuffers[frameIndex]->Write(drawData->meshletCommands.data(), meshletSize, meshletGpuOffset);
+            }
+
+            if (drawData->useGpuCulling)
+            {
+                uint32_t zeroDispatch[3] = { 0, 1, 1 };
+                drawData->globalModelComputeCountBuffer[frameIndex]->Write(zeroDispatch, sizeof(zeroDispatch), 0);
             }
 
             if (drawData->activeMeshletCount > 0) {
