@@ -70,18 +70,18 @@ namespace Syn::Vk {
         InsertBarrier(cmd, info);
     }
 
-    void ImageUtils::CopyImage(VkCommandBuffer cmd, const ImageCopyInfo& info) {
+    void ImageUtils::BlitImage(VkCommandBuffer cmd, const ImageCopyInfo& info) {
         VkImageBlit2 blit{ VK_STRUCTURE_TYPE_IMAGE_BLIT_2 };
         blit.srcOffsets[0] = { 0, 0, 0 };
         blit.srcOffsets[1] = { (int32_t)info.srcSize.width, (int32_t)info.srcSize.height, (int32_t)info.srcSize.depth };
-        blit.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        blit.srcSubresource.aspectMask = info.aspectMask;
         blit.srcSubresource.mipLevel = info.srcMipLevel;
         blit.srcSubresource.baseArrayLayer = info.srcBaseLayer;
         blit.srcSubresource.layerCount = info.layerCount;
 
         blit.dstOffsets[0] = { 0, 0, 0 };
         blit.dstOffsets[1] = { (int32_t)info.dstSize.width, (int32_t)info.dstSize.height, (int32_t)info.dstSize.depth };
-        blit.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        blit.dstSubresource.aspectMask = info.aspectMask;
         blit.dstSubresource.mipLevel = info.dstMipLevel;
         blit.dstSubresource.baseArrayLayer = info.dstBaseLayer;
         blit.dstSubresource.layerCount = info.layerCount;
@@ -96,6 +96,34 @@ namespace Syn::Vk {
         blitInfo.pRegions = &blit;
 
         vkCmdBlitImage2(cmd, &blitInfo);
+    }
+
+    void ImageUtils::CopyImage(VkCommandBuffer cmd, const ImageCopyInfo& info) {
+        VkImageCopy2 copyRegion{ VK_STRUCTURE_TYPE_IMAGE_COPY_2 };
+
+        copyRegion.srcSubresource.aspectMask = info.aspectMask;
+        copyRegion.srcSubresource.mipLevel = info.srcMipLevel;
+        copyRegion.srcSubresource.baseArrayLayer = info.srcBaseLayer;
+        copyRegion.srcSubresource.layerCount = info.layerCount;
+        copyRegion.srcOffset = { 0, 0, 0 };
+
+        copyRegion.dstSubresource.aspectMask = info.aspectMask;
+        copyRegion.dstSubresource.mipLevel = info.dstMipLevel;
+        copyRegion.dstSubresource.baseArrayLayer = info.dstBaseLayer;
+        copyRegion.dstSubresource.layerCount = info.layerCount;
+        copyRegion.dstOffset = { 0, 0, 0 };
+
+        copyRegion.extent = info.srcSize;
+
+        VkCopyImageInfo2 copyInfo{ VK_STRUCTURE_TYPE_COPY_IMAGE_INFO_2 };
+        copyInfo.srcImage = info.srcImage;
+        copyInfo.srcImageLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+        copyInfo.dstImage = info.dstImage;
+        copyInfo.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        copyInfo.regionCount = 1;
+        copyInfo.pRegions = &copyRegion;
+
+        vkCmdCopyImage2(cmd, &copyInfo);
     }
 
     void ImageUtils::CopyImageToBuffer(VkCommandBuffer cmd, const ImageToBufferCopyInfo& info) {
@@ -172,7 +200,7 @@ namespace Syn::Vk {
             copyInfo.dstBaseLayer = 0;
             copyInfo.layerCount = 1;
 
-            CopyImage(cmd, copyInfo);
+            BlitImage(cmd, copyInfo);
 
             barrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
             barrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;

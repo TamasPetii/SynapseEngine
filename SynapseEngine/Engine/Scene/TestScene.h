@@ -147,7 +147,7 @@ namespace Syn
             auto materialManager = ServiceLocator::GetMaterialManager();
 
             // Random Geometry
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 100000; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
@@ -171,8 +171,16 @@ namespace Syn
                 float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                 float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 
+                float randomFloat = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                float alpha = 0.1f + (randomFloat * 0.9f);
+
                 MaterialInfo randomMatInfo{};
-                randomMatInfo.color = glm::vec4(r, g, b, 1.0f);
+                randomMatInfo.color = glm::vec4(r, g, b, alpha);
+                randomMatInfo.doubleSided = rand() / 2;
+                randomMatInfo.isTransparent = rand() / 2;
+
+                randomMatInfo.emissiveFactor = glm::vec3(r, g, b);
+                randomMatInfo.emissiveIntensity = randomFloat * 5;
 
                 std::string matName = "RandomGeometryMat_" + std::to_string(i);
                 uint32_t randomMatId = materialManager->LoadMaterial(matName, randomMatInfo);

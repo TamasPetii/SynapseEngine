@@ -1,4 +1,4 @@
-#include "TraditionalOpaquePass.h"
+#include "TraditionalTransparentPass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
 #include "Engine/Manager/ShaderManager.h"
@@ -21,46 +21,39 @@
 namespace Syn {
 
     struct TraditionalPushConstants {
-        VkDeviceAddress modelAddressBuffer;
-        VkDeviceAddress animationAddressBuffer;
-        VkDeviceAddress animationBufferAddr;
-        VkDeviceAddress animationSparseMapBufferAddr;
+        uint64_t modelAddressBuffer;
+        uint64_t animationAddressBuffer;
+        uint64_t animationBufferAddr;
+        uint64_t animationSparseMapBufferAddr;
 
-        VkDeviceAddress globalDrawCountBuffers;
-        VkDeviceAddress globalInstanceBuffers;
-        VkDeviceAddress globalIndirectCommandBuffers;
-        VkDeviceAddress globalIndirectCommandDescriptorBuffers;
-        VkDeviceAddress globalModelAllocationBuffers;
-        VkDeviceAddress globalMeshAllocationBuffers;
+        uint64_t globalDrawCountBuffers;
+        uint64_t globalInstanceBuffers;
+        uint64_t globalIndirectCommandBuffers;
+        uint64_t globalIndirectCommandDescriptorBuffers;
+        uint64_t globalModelAllocationBuffers;
+        uint64_t globalMeshAllocationBuffers;
 
-        VkDeviceAddress cameraBufferAddr;
-        VkDeviceAddress cameraSparseMapBufferAddr;
-        VkDeviceAddress transformBufferAddr;
-        VkDeviceAddress transformSparseMapBufferAddr;
+        uint64_t cameraBufferAddr;
+        uint64_t cameraSparseMapBufferAddr;
+        uint64_t transformBufferAddr;
+        uint64_t transformSparseMapBufferAddr;
 
-        VkDeviceAddress modelBufferAddr;
-        VkDeviceAddress modelSparseMapBufferAddr;
-        VkDeviceAddress materialLookupBuffer;
-        VkDeviceAddress materialBuffer;
+        uint64_t modelBufferAddr;
+        uint64_t modelSparseMapBufferAddr;
+        uint64_t materialLookupBuffer;
+        uint64_t materialBuffer;
 
         uint32_t activeCameraEntity;
         uint32_t baseDescriptorOffset;
     };
 
-    TraditionalOpaquePass::TraditionalOpaquePass(MaterialRenderType renderType)
+    TraditionalTransparentPass::TraditionalTransparentPass(MaterialRenderType renderType)
         : _renderType(renderType)
     {
-        assert(_renderType == MaterialRenderType::Opaque1Sided || _renderType == MaterialRenderType::Opaque2Sided);
-
-        if (_renderType == MaterialRenderType::Opaque1Sided) {
-            _passName = "Traditional_Opaque_1Sided";
-        }
-        else {
-            _passName = "Traditional_Opaque_2Sided";
-        }
+        _passName = (_renderType == MaterialRenderType::Transparent1Sided) ? "Traditional_Transparent_1Sided" : "Traditional_Transparent_2Sided";
     }
 
-    void TraditionalOpaquePass::Initialize() {
+    void TraditionalTransparentPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
         auto imageManager = ServiceLocator::GetImageManager();
 
@@ -71,12 +64,12 @@ namespace Syn {
             return VkDescriptorSetLayout{};
             };
 
-        _shaderProgram = shaderManager->CreateProgram("TraditionalOpaqueProgram", {
+        _shaderProgram = shaderManager->CreateProgram("TraditionalTransparentProgram", {
             ShaderNames::TraditionalVert,
-            ShaderNames::TraditionalFrag
+            ShaderNames::TraditionalTransparentFrag
             }, config);
 
-        VkCullModeFlags cullMode = (_renderType == MaterialRenderType::Opaque2Sided) ? VK_CULL_MODE_NONE : VK_CULL_MODE_BACK_BIT;
+        VkCullModeFlags cullMode = (_renderType == MaterialRenderType::Transparent2Sided) ? VK_CULL_MODE_NONE : VK_CULL_MODE_BACK_BIT;
 
         _graphicsState = {
             .raster = {
@@ -88,18 +81,29 @@ namespace Syn {
             },
             .depth = {
                 .testEnable = VK_TRUE,
-                .writeEnable = VK_TRUE,
+                .writeEnable = VK_FALSE,
                 .compareOp = VK_COMPARE_OP_LESS
             },
             .blendStates = {
+                // 0. TransparentAccum
                 {
-                .enable = VK_FALSE,
-                .srcColorFactor = VK_BLEND_FACTOR_ONE,
-                .dstColorFactor = VK_BLEND_FACTOR_ZERO,
-                .colorBlendOp = VK_BLEND_OP_ADD,
-                .srcAlphaFactor = VK_BLEND_FACTOR_ONE,
-                .dstAlphaFactor = VK_BLEND_FACTOR_ZERO,
-                .alphaBlendOp = VK_BLEND_OP_ADD
+                    .enable = true,
+                    .srcColorFactor = VK_BLEND_FACTOR_ONE,
+                    .dstColorFactor = VK_BLEND_FACTOR_ONE,
+                    .colorBlendOp = VK_BLEND_OP_ADD,
+                    .srcAlphaFactor = VK_BLEND_FACTOR_ONE,
+                    .dstAlphaFactor = VK_BLEND_FACTOR_ONE,
+                    .alphaBlendOp = VK_BLEND_OP_ADD
+                },
+                // 1. TransparentReveal
+                {
+                    .enable = true,
+                    .srcColorFactor = VK_BLEND_FACTOR_ZERO,
+                    .dstColorFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_COLOR,
+                    .colorBlendOp = VK_BLEND_OP_ADD,
+                    .srcAlphaFactor = VK_BLEND_FACTOR_ZERO,
+                    .dstAlphaFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+                    .alphaBlendOp = VK_BLEND_OP_ADD
                 }
             },
             .colorAttachmentCount = 2,
@@ -107,18 +111,17 @@ namespace Syn {
         };
     }
 
-    void TraditionalOpaquePass::PrepareFrame(const RenderContext& context) {
+    void TraditionalTransparentPass::PrepareFrame(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
         _graphicsState.renderArea = extent;
 
         std::vector<std::string> targets = {
-            RenderTargetNames::Main,
-            RenderTargetNames::EntityIndex
+            RenderTargetNames::TransparentAccum,
+            RenderTargetNames::TransparentReveal
         };
 
-        _colorAttachments.clear();
         for (const auto& name : targets)
         {
             _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
@@ -144,7 +147,7 @@ namespace Syn {
         };
     }
 
-    void TraditionalOpaquePass::PushConstants(const RenderContext& context) {
+    void TraditionalTransparentPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         if (!scene) return;
 
@@ -189,15 +192,13 @@ namespace Syn {
         );
     }
 
-    void TraditionalOpaquePass::BindDescriptors(const RenderContext& context)
-    {
+    void TraditionalTransparentPass::BindDescriptors(const RenderContext& context) {
         auto imageManager = ServiceLocator::GetImageManager();
         auto bindlessBuffer = imageManager->GetBindlessBuffer();
         bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
-    void TraditionalOpaquePass::Draw(const RenderContext& context)
-    {
+    void TraditionalTransparentPass::Draw(const RenderContext& context) {
         auto scene = context.scene;
         if (!scene) return;
 

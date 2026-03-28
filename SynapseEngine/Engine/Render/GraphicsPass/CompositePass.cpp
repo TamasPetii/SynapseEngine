@@ -31,7 +31,8 @@ namespace Syn {
                 .writeEnable = VK_FALSE,
                 .compareOp = VK_COMPARE_OP_ALWAYS
             },
-            .blend = {
+            .blendStates = {
+                {
                 .enable = VK_FALSE,
                 .srcColorFactor = VK_BLEND_FACTOR_ONE,
                 .dstColorFactor = VK_BLEND_FACTOR_ZERO,
@@ -39,7 +40,8 @@ namespace Syn {
                 .srcAlphaFactor = VK_BLEND_FACTOR_ONE,
                 .dstAlphaFactor = VK_BLEND_FACTOR_ZERO,
                 .alphaBlendOp = VK_BLEND_OP_ADD
-            },
+                }
+            } ,
             .colorAttachmentCount = 1,
             .renderArea = std::nullopt
         };

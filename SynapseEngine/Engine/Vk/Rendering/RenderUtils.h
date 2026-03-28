@@ -35,7 +35,7 @@ namespace Syn::Vk {
     struct GraphicsPipelineConfig {
         RasterState raster;
         DepthState depth;
-        BlendState blend;
+        std::vector<BlendState> blendStates;
         uint32_t colorAttachmentCount = 1;
         std::optional<VkExtent2D> renderArea = std::nullopt;
     };

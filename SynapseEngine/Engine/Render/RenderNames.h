@@ -23,6 +23,9 @@ namespace Syn
         static constexpr const char* DepthPyramid = "DepthPyramid";
         static constexpr const char* Bloom = "Bloom";
         static constexpr const char* Depth = "Depth";
+        static constexpr const char* TransparentAccum = "TransparentAccum";
+        static constexpr const char* TransparentReveal = "TransparentReveal";
+        static constexpr const char* EditorPickingDepth = "EditorPickingDepth";
     };
 
     struct SYN_API RenderTargetViewNames

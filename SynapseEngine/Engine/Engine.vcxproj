@@ -179,6 +179,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Render\TransferPass\DepthCopyPass.cpp" />
+    <ClCompile Include="Render\GraphicsPass\MeshletTransparentPickingPass.cpp" />
+    <ClCompile Include="Render\GraphicsPass\MeshletTransparentPass.cpp" />
     <ClCompile Include="Render\GraphicsPass\MeshletOpaquePass.cpp" />
     <ClCompile Include="Render\GraphicsPass\GuiPass.cpp" />
     <ClCompile Include="System\AnimationSystem.cpp" />
@@ -257,6 +260,9 @@
     <ClCompile Include="Profiler\TaskProfilerObserver.cpp" />
     <ClCompile Include="Animation\Data\Common\VertexSkinData.cpp" />
     <ClCompile Include="Render\GraphicsPass\TraditionalOpaquePass.cpp" />
+    <ClCompile Include="Render\GraphicsPass\TraditionalTransparentPass.cpp" />
+    <ClCompile Include="Render\GraphicsPass\TransparentCompositePass.cpp" />
+    <ClCompile Include="Render\GraphicsPass\TraditionalTransparentPickingPass.cpp" />
     <ClCompile Include="Vk\Rendering\GpuUploader.cpp" />
     <ClCompile Include="Manager\BaseResourceManager.cpp" />
     <ClCompile Include="Image\Data\Texture.cpp" />
@@ -434,7 +440,10 @@
     <ClCompile Include="Render\TransferPass\WireframeMeshletInitPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\TransferPass\DepthCopyPass.h" />
+    <ClInclude Include="Render\GraphicsPass\MeshletTransparentPickingPass.h" />
     <ClInclude Include="Material\MaterialRenderType.h" />
+    <ClInclude Include="Render\GraphicsPass\MeshletTransparentPass.h" />
     <ClInclude Include="Render\GraphicsPass\MeshletOpaquePass.h" />
     <ClInclude Include="Render\GraphicsPass\GuiPass.h" />
     <ClInclude Include="System\AnimationSystem.h" />
@@ -522,6 +531,9 @@
     <ClInclude Include="Profiler\TaskProfilerObserver.h" />
     <ClInclude Include="Animation\Data\Common\VertexSkinData.h" />
     <ClInclude Include="Render\GraphicsPass\TraditionalOpaquePass.h" />
+    <ClInclude Include="Render\GraphicsPass\TraditionalTransparentPass.h" />
+    <ClInclude Include="Render\GraphicsPass\TransparentCompositePass.h" />
+    <ClInclude Include="Render\GraphicsPass\TraditionalTransparentPickingPass.h" />
     <ClInclude Include="Vk\Image\ImageViewNames.h" />
     <ClInclude Include="Vk\Rendering\GpuUploader.h" />
     <ClInclude Include="Manager\BaseResourceManager.h" />
@@ -731,6 +743,11 @@
     <None Include="Shaders\BloomUpsample.comp" />
     <None Include="Shaders\Composite.frag" />
     <None Include="Shaders\Composite.vert" />
+    <None Include="Shaders\MeshletTransparent.frag" />
+    <None Include="Shaders\MeshletTransparentPicking.frag" />
+    <None Include="Shaders\TraditionalTransparent.frag" />
+    <None Include="Shaders\TraditionalTransparentPicking.frag" />
+    <None Include="Shaders\TransparentComposite.frag" />
     <None Include="Shaders\Wireframe.frag" />
     <None Include="Shaders\Wireframe.vert" />
     <None Include="Shaders\WireframeMeshlet.vert" />

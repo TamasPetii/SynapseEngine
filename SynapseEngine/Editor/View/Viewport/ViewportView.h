@@ -1,6 +1,7 @@
 #pragma once
 #include "../IView.h"
 #include "EditorCore/ViewModels/Viewport/ViewportViewModel.h"
+#include "Engine/Vk/Image/ImageUtils.h"
 #include <imgui.h>
 #include <ImGuizmo.h>
 #include <glm/gtc/type_ptr.hpp>
@@ -119,13 +120,15 @@ namespace Syn {
         void DrawImageMenu(ViewportViewModel& vm, const ViewportState& state) {
             if (ImGui::BeginMenu("Image")) {
                 ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(5.0f, 0.0f));
-                if (ImGui::BeginChild("##ViewportImage", ImVec2(255, 210), ImGuiChildFlags_AlwaysUseWindowPadding)) {
+
+                if (ImGui::BeginChild("##ViewportImage", ImVec2(265, 380), ImGuiChildFlags_AlwaysUseWindowPadding)) {
 
                     auto RadioButton = [&](const char* label, const std::string& group, const std::string& target, const std::string& view) {
                         bool isActive = (state.currentTarget == target && state.currentView == view);
                         if (ImGui::RadioButton(label, isActive)) {
                             vm.Dispatch(ChangeTargetIntent{ group, target, view });
                         }
+                        return isActive;
                         };
 
                     RadioButton("Main", RenderTargetGroupNames::Deferred, RenderTargetNames::Main, Vk::ImageViewNames::Default);
@@ -139,6 +142,49 @@ namespace Syn {
                     RadioButton("Roughness", RenderTargetGroupNames::Deferred, RenderTargetNames::NormalRoughness, RenderTargetViewNames::Roughness);
                     RadioButton("Emissive", RenderTargetGroupNames::Deferred, RenderTargetNames::EmissiveAo, RenderTargetViewNames::Emissive);
                     RadioButton("Ambient Occlusion", RenderTargetGroupNames::Deferred, RenderTargetNames::EmissiveAo, RenderTargetViewNames::AmbientOcclusion);
+
+                    ImGui::Separator();
+
+                    RadioButton("Transparent Accum", RenderTargetGroupNames::Deferred, RenderTargetNames::TransparentAccum, Vk::ImageViewNames::Default);
+                    RadioButton("Transparent Reveal", RenderTargetGroupNames::Deferred, RenderTargetNames::TransparentReveal, Vk::ImageViewNames::Default);
+
+                    ImGui::Separator();
+
+                    int maxMipIndex = 0;
+                    if (state.width > 0 && state.height > 0) {
+                        maxMipIndex = static_cast<int>(Vk::ImageUtils::CalculateMipLevels(state.width, state.height)) - 1;
+                        maxMipIndex = std::max(0, maxMipIndex);
+                    }
+
+                    static int bloomMip = 0;
+                    bloomMip = std::min(bloomMip, maxMipIndex);
+                    std::string bloomView = std::string(Vk::ImageViewNames::Default) + Vk::ImageViewNames::Mip + std::to_string(bloomMip);
+
+                    RadioButton("Bloom", RenderTargetGroupNames::Deferred, RenderTargetNames::Bloom, bloomView);
+
+                    if (state.currentTarget == RenderTargetNames::Bloom) {
+                        ImGui::Indent();
+                        if (ImGui::SliderInt("Mip##Bloom", &bloomMip, 0, maxMipIndex)) {
+                            bloomView = std::string(Vk::ImageViewNames::Default) + Vk::ImageViewNames::Mip + std::to_string(bloomMip);
+                            vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::Bloom, bloomView });
+                        }
+                        ImGui::Unindent();
+                    }
+
+                    static int depthMip = 0;
+                    depthMip = std::min(depthMip, maxMipIndex);
+                    std::string depthView = std::string(Vk::ImageViewNames::Default) + Vk::ImageViewNames::Mip + std::to_string(depthMip);
+
+                    RadioButton("Depth Pyramid", RenderTargetGroupNames::Deferred, RenderTargetNames::DepthPyramid, depthView);
+
+                    if (state.currentTarget == RenderTargetNames::DepthPyramid) {
+                        ImGui::Indent();
+                        if (ImGui::SliderInt("Mip##Depth", &depthMip, 0, maxMipIndex)) {
+                            depthView = std::string(Vk::ImageViewNames::Default) + Vk::ImageViewNames::Mip + std::to_string(depthMip);
+                            vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::DepthPyramid, depthView });
+                        }
+                        ImGui::Unindent();
+                    }
 
                     ImGui::EndChild();
                 }

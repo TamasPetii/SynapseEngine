@@ -774,6 +774,24 @@
     <ClCompile Include="Render\GraphicsPass\MeshletOpaquePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\TraditionalTransparentPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\MeshletTransparentPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\TransparentCompositePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\TraditionalTransparentPickingPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\MeshletTransparentPickingPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\TransferPass\DepthCopyPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1643,6 +1661,24 @@
     <ClInclude Include="Render\GraphicsPass\MeshletOpaquePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\TraditionalTransparentPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\MeshletTransparentPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\TransparentCompositePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\TraditionalTransparentPickingPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\MeshletTransparentPickingPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\TransferPass\DepthCopyPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Composite.vert" />
@@ -1665,5 +1701,10 @@
     <None Include="Shaders\Wireframe.vert" />
     <None Include="Shaders\Wireframe.frag" />
     <None Include="Shaders\WireframeMeshlet.vert" />
+    <None Include="Shaders\TraditionalTransparent.frag" />
+    <None Include="Shaders\MeshletTransparent.frag" />
+    <None Include="Shaders\TransparentComposite.frag" />
+    <None Include="Shaders\TraditionalTransparentPicking.frag" />
+    <None Include="Shaders\MeshletTransparentPicking.frag" />
   </ItemGroup>
 </Project>

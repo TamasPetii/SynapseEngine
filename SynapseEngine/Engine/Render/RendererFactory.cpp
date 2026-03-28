@@ -22,6 +22,16 @@
 #include "Engine/Render/GraphicsPass/WireframeMeshletSpherePass.h"
 #include "Engine/Render/GraphicsPass/GuiPass.h"
 
+// WBOIT
+#include "Engine/Render/GraphicsPass/TraditionalTransparentPass.h"
+#include "Engine/Render/GraphicsPass/MeshletTransparentPass.h"
+#include "Engine/Render/GraphicsPass/TransparentCompositePass.h"
+
+//Editor Transparent Picking
+#include "Engine/Render/TransferPass/DepthCopyPass.h"
+#include "Engine/Render/GraphicsPass/TraditionalTransparentPickingPass.h"
+#include "Engine/Render/GraphicsPass/MeshletTransparentPickingPass.h"
+
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "RenderNames.h"
 
@@ -37,16 +47,36 @@ namespace Syn
         pipeline->AddPass(std::make_unique<ModelCullingPass>());
         pipeline->AddPass(std::make_unique<MeshCullingPass>());
         pipeline->AddPass(std::make_unique<GBufferInitPass>());
+
+        // Opaque Passok
         pipeline->AddPass(std::make_unique<TraditionalOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<TraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
         pipeline->AddPass(std::make_unique<MeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<MeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
+
+        // Editor Picking Passok
+        pipeline->AddPass(std::make_unique<DepthCopyPass>());
+        pipeline->AddPass(std::make_unique<TraditionalTransparentPickingPass>(MaterialRenderType::Transparent1Sided));
+        pipeline->AddPass(std::make_unique<TraditionalTransparentPickingPass>(MaterialRenderType::Transparent2Sided));
+        pipeline->AddPass(std::make_unique<MeshletTransparentPickingPass>(MaterialRenderType::Transparent1Sided));
+        pipeline->AddPass(std::make_unique<MeshletTransparentPickingPass>(MaterialRenderType::Transparent2Sided));
+
+        // WBOIT Transparent Passok
+        pipeline->AddPass(std::make_unique<TraditionalTransparentPass>(MaterialRenderType::Transparent1Sided));
+        pipeline->AddPass(std::make_unique<TraditionalTransparentPass>(MaterialRenderType::Transparent2Sided));
+        pipeline->AddPass(std::make_unique<MeshletTransparentPass>(MaterialRenderType::Transparent1Sided));
+        pipeline->AddPass(std::make_unique<MeshletTransparentPass>(MaterialRenderType::Transparent2Sided));
+        pipeline->AddPass(std::make_unique<TransparentCompositePass>());
+
+        // Wireframe passok
         //pipeline->AddPass(std::make_unique<WireframeSetupPass>());
         //pipeline->AddPass(std::make_unique<WireframeAabbPass>());
         //pipeline->AddPass(std::make_unique<WireframeSpherePass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletInitPass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletAabbPass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletSpherePass>());
+
+        // Post-processing & UI
         pipeline->AddPass(std::make_unique<BloomPrefilterPass>());
         pipeline->AddPass(std::make_unique<BloomDownsamplePass>());
         pipeline->AddPass(std::make_unique<BloomUpsamplePass>());
@@ -138,6 +168,24 @@ namespace Syn
 
         rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::EmissiveAo, emissiveAoImageSpec);
 
+        Vk::ImageConfig transparentAccumSpec{};
+        transparentAccumSpec.width = initWidth;
+        transparentAccumSpec.height = initHeight;
+        transparentAccumSpec.type = VK_IMAGE_TYPE_2D;
+        transparentAccumSpec.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+        transparentAccumSpec.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        transparentAccumSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::TransparentAccum, transparentAccumSpec);
+
+        // --- 2. Revealage Textúra (Felfedő) ---
+        Vk::ImageConfig transparentRevealSpec{};
+        transparentRevealSpec.width = initWidth;
+        transparentRevealSpec.height = initHeight;
+        transparentRevealSpec.type = VK_IMAGE_TYPE_2D;
+        transparentRevealSpec.format = VK_FORMAT_R8_UNORM; 
+        transparentRevealSpec.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        transparentRevealSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::TransparentReveal, transparentRevealSpec);
 
         Vk::ImageConfig entityImageSpec{};
         entityImageSpec.width = initWidth;
@@ -147,7 +195,6 @@ namespace Syn
         entityImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         entityImageSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::EntityIndex, entityImageSpec);
-
 
         Vk::ImageConfig depthPyramidImageSpec{};
         depthPyramidImageSpec.width = initWidth;
@@ -191,6 +238,15 @@ namespace Syn
         depthImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         depthImageSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
         rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::Depth, depthImageSpec);
+
+        Vk::ImageConfig pickingDepthSpec{};
+        pickingDepthSpec.width = initWidth;
+        pickingDepthSpec.height = initHeight;
+        pickingDepthSpec.type = VK_IMAGE_TYPE_2D;
+        pickingDepthSpec.format = VK_FORMAT_D32_SFLOAT;
+        pickingDepthSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        pickingDepthSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::EditorPickingDepth, pickingDepthSpec);
 
         return renderManager;
     }

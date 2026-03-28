@@ -1,4 +1,4 @@
-#include "TraditionalOpaquePass.h"
+#include "MeshletTransparentPickingPass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
 #include "Engine/Manager/ShaderManager.h"
@@ -10,57 +10,54 @@
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
-#include "Engine/Image/ImageManager.h"
 #include "Engine/Material/MaterialManager.h"
+#include "Engine/Image/ImageManager.h"
 #include "Engine/Animation/AnimationManager.h"
+#include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
+#include "Engine/Image/SamplerNames.h"
+#include "Engine/Render/RenderNames.h"
 
 #include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <cassert>
 
 namespace Syn {
-
-    struct TraditionalPushConstants {
-        VkDeviceAddress modelAddressBuffer;
-        VkDeviceAddress animationAddressBuffer;
-        VkDeviceAddress animationBufferAddr;
-        VkDeviceAddress animationSparseMapBufferAddr;
-
-        VkDeviceAddress globalDrawCountBuffers;
-        VkDeviceAddress globalInstanceBuffers;
-        VkDeviceAddress globalIndirectCommandBuffers;
-        VkDeviceAddress globalIndirectCommandDescriptorBuffers;
-        VkDeviceAddress globalModelAllocationBuffers;
-        VkDeviceAddress globalMeshAllocationBuffers;
-
-        VkDeviceAddress cameraBufferAddr;
-        VkDeviceAddress cameraSparseMapBufferAddr;
-        VkDeviceAddress transformBufferAddr;
-        VkDeviceAddress transformSparseMapBufferAddr;
-
-        VkDeviceAddress modelBufferAddr;
-        VkDeviceAddress modelSparseMapBufferAddr;
-        VkDeviceAddress materialLookupBuffer;
-        VkDeviceAddress materialBuffer;
-
+    struct MeshletPushConstants {
+        uint64_t modelAddressBuffer;
+        uint64_t animationAddressBuffer;
+        uint64_t animationBufferAddr;
+        uint64_t animationSparseMapBufferAddr;
+        uint64_t globalDrawCountBuffers;
+        uint64_t globalInstanceBuffers;
+        uint64_t globalIndirectCommandBuffers;
+        uint64_t globalIndirectCommandDescriptorBuffers;
+        uint64_t globalModelAllocationBuffers;
+        uint64_t globalMeshAllocationBuffers;
+        uint64_t cameraBufferAddr;
+        uint64_t cameraSparseMapBufferAddr;
+        uint64_t transformBufferAddr;
+        uint64_t transformSparseMapBufferAddr;
+        uint64_t modelBufferAddr;
+        uint64_t modelSparseMapBufferAddr;
+        uint64_t materialLookupBuffer;
+        uint64_t materialBuffer;
+        uint64_t debugInstanceBufferAddr;
+        uint64_t debugAabbIndirectAddr;
+        uint64_t debugSphereIndirectAddr;
         uint32_t activeCameraEntity;
         uint32_t baseDescriptorOffset;
+        uint32_t visualizeMeshlet;
+        float screenWidth;
+        float screenHeight;
+        uint32_t disableConeCulling;
     };
 
-    TraditionalOpaquePass::TraditionalOpaquePass(MaterialRenderType renderType)
+    MeshletTransparentPickingPass::MeshletTransparentPickingPass(MaterialRenderType renderType)
         : _renderType(renderType)
     {
-        assert(_renderType == MaterialRenderType::Opaque1Sided || _renderType == MaterialRenderType::Opaque2Sided);
-
-        if (_renderType == MaterialRenderType::Opaque1Sided) {
-            _passName = "Traditional_Opaque_1Sided";
-        }
-        else {
-            _passName = "Traditional_Opaque_2Sided";
-        }
+        _passName = (_renderType == MaterialRenderType::Transparent1Sided) ? "Meshlet_Picking_1Sided" : "Meshlet_Picking_2Sided";
     }
 
-    void TraditionalOpaquePass::Initialize() {
+    void MeshletTransparentPickingPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
         auto imageManager = ServiceLocator::GetImageManager();
 
@@ -71,12 +68,13 @@ namespace Syn {
             return VkDescriptorSetLayout{};
             };
 
-        _shaderProgram = shaderManager->CreateProgram("TraditionalOpaqueProgram", {
-            ShaderNames::TraditionalVert,
-            ShaderNames::TraditionalFrag
+        _shaderProgram = shaderManager->CreateProgram("MeshletTransparentPickingProgram", {
+            ShaderNames::MeshletTask,
+            ShaderNames::MeshletMesh,
+            ShaderNames::MeshletTransparentPickingFrag
             }, config);
 
-        VkCullModeFlags cullMode = (_renderType == MaterialRenderType::Opaque2Sided) ? VK_CULL_MODE_NONE : VK_CULL_MODE_BACK_BIT;
+        VkCullModeFlags cullMode = (_renderType == MaterialRenderType::Transparent2Sided) ? VK_CULL_MODE_NONE : VK_CULL_MODE_BACK_BIT;
 
         _graphicsState = {
             .raster = {
@@ -92,48 +90,30 @@ namespace Syn {
                 .compareOp = VK_COMPARE_OP_LESS
             },
             .blendStates = {
-                {
-                .enable = VK_FALSE,
-                .srcColorFactor = VK_BLEND_FACTOR_ONE,
-                .dstColorFactor = VK_BLEND_FACTOR_ZERO,
-                .colorBlendOp = VK_BLEND_OP_ADD,
-                .srcAlphaFactor = VK_BLEND_FACTOR_ONE,
-                .dstAlphaFactor = VK_BLEND_FACTOR_ZERO,
-                .alphaBlendOp = VK_BLEND_OP_ADD
-                }
+                {.enable = false }
             },
-            .colorAttachmentCount = 2,
+            .colorAttachmentCount = 1,
             .renderArea = std::nullopt
         };
     }
 
-    void TraditionalOpaquePass::PrepareFrame(const RenderContext& context) {
+    void MeshletTransparentPickingPass::PrepareFrame(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
-
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
         _graphicsState.renderArea = extent;
 
-        std::vector<std::string> targets = {
-            RenderTargetNames::Main,
-            RenderTargetNames::EntityIndex
-        };
-
-        _colorAttachments.clear();
-        for (const auto& name : targets)
-        {
-            _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
-                    .imageView = group->GetImage(name)->GetView(Vk::ImageViewNames::Default),
-                    .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                    .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-                    .storeOp = VK_ATTACHMENT_STORE_OP_STORE
-                }));
-        }
-
-        _depthAttachment = Vk::RenderUtils::CreateAttachment({
-                .imageView = group->GetImage(RenderTargetNames::Depth)->GetView(Vk::ImageViewNames::Default),
-                .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+        _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
+                .imageView = group->GetImage(RenderTargetNames::EntityIndex)->GetView(Vk::ImageViewNames::Default),
+                .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                 .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
                 .storeOp = VK_ATTACHMENT_STORE_OP_STORE
+            }));
+
+        _depthAttachment = Vk::RenderUtils::CreateAttachment({
+            .imageView = group->GetImage(RenderTargetNames::EditorPickingDepth)->GetView(Vk::ImageViewNames::Default),
+            .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+            .storeOp = VK_ATTACHMENT_STORE_OP_STORE
             });
 
         _renderInfo = Vk::RenderingInfoConfig{
@@ -144,19 +124,17 @@ namespace Syn {
         };
     }
 
-    void TraditionalOpaquePass::PushConstants(const RenderContext& context) {
+    void MeshletTransparentPickingPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
-        if (!scene) return;
-
-        auto drawData = scene->GetSceneDrawData();
         auto modelManager = ServiceLocator::GetModelManager();
         auto materialManager = ServiceLocator::GetMaterialManager();
+        auto drawData = scene->GetSceneDrawData();
         auto componentBufferManager = scene->GetComponentBufferManager();
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         auto animationManager = ServiceLocator::GetAnimationManager();
-
         uint32_t fIdx = context.frameIndex;
 
-        TraditionalPushConstants pc{};
+        MeshletPushConstants pc{};
         pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
         pc.animationAddressBuffer = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
         pc.animationBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::AnimationData, fIdx);
@@ -175,50 +153,61 @@ namespace Syn {
         pc.modelSparseMapBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::ModelSparseMap, fIdx);
         pc.materialLookupBuffer = drawData->globalMaterialIndexBuffers[fIdx]->GetDeviceAddress();
         pc.materialBuffer = materialManager->GetMaterialBuffer()->GetDeviceAddress();
-
+        pc.debugInstanceBufferAddr = drawData->debugInstanceBuffers[fIdx]->GetDeviceAddress();
+        pc.debugAabbIndirectAddr = drawData->debugAabbIndirectBuffers[fIdx]->GetDeviceAddress();
+        pc.debugSphereIndirectAddr = drawData->debugSphereIndirectBuffers[fIdx]->GetDeviceAddress();
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
-        pc.baseDescriptorOffset = drawData->traditionalCmdOffsets[_renderType];
+        pc.baseDescriptorOffset = drawData->activeTraditionalCount + drawData->meshletCmdOffsets[_renderType];
+        pc.visualizeMeshlet = 0;
+        pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
+        pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
+        pc.disableConeCulling = (_renderType == MaterialRenderType::Transparent2Sided) ? 1 : 0;
 
-        vkCmdPushConstants(
-            context.cmd,
-            _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL,
-            0,
-            sizeof(TraditionalPushConstants),
-            &pc
-        );
+        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(MeshletPushConstants), &pc);
     }
 
-    void TraditionalOpaquePass::BindDescriptors(const RenderContext& context)
-    {
+    void MeshletTransparentPickingPass::BindDescriptors(const RenderContext& context) {
         auto imageManager = ServiceLocator::GetImageManager();
         auto bindlessBuffer = imageManager->GetBindlessBuffer();
         bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
+
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
+        auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);
+
+        Vk::PushDescriptorWriter pushWriter;
+        pushWriter.AddCombinedImageSampler(
+            0,
+            depthPyramid->GetView(Vk::ImageViewNames::Default),
+            maxSampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        // pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
-    void TraditionalOpaquePass::Draw(const RenderContext& context)
-    {
+    void MeshletTransparentPickingPass::Draw(const RenderContext& context) {
         auto scene = context.scene;
-        if (!scene) return;
-
         auto drawData = scene->GetSceneDrawData();
         auto indirectBuffer = drawData->globalIndirectCommandBuffers[context.frameIndex]->Handle();
         auto countBuffer = drawData->globalDrawCountBuffers[context.frameIndex]->Handle();
 
-        uint32_t commandOffset = drawData->traditionalCmdOffsets[_renderType];
-        uint32_t maxCommandCount = drawData->traditionalCmdCounts[_renderType];
+        uint32_t commandOffsetIdx = drawData->meshletCmdOffsets[_renderType];
+        uint32_t maxCommandCount = drawData->meshletCmdCounts[_renderType];
 
         if (maxCommandCount > 0) {
-            VkDeviceSize countBufferOffset = _renderType * sizeof(uint32_t);
+            VkDeviceSize traditionalBytes = drawData->activeTraditionalCount * sizeof(VkDrawIndirectCommand);
+            VkDeviceSize indirectOffset = traditionalBytes + (commandOffsetIdx * sizeof(VkDrawMeshTasksIndirectCommandEXT));
+            VkDeviceSize countOffset = (MaterialRenderType::Count + _renderType) * sizeof(uint32_t);
 
-            vkCmdDrawIndirectCount(
+            vkCmdDrawMeshTasksIndirectCountEXT(
                 context.cmd,
                 indirectBuffer,
-                commandOffset * sizeof(VkDrawIndirectCommand),
+                indirectOffset,
                 countBuffer,
-                countBufferOffset,
+                countOffset,
                 maxCommandCount,
-                sizeof(VkDrawIndirectCommand)
+                sizeof(VkDrawMeshTasksIndirectCommandEXT)
             );
         }
     }

@@ -23,7 +23,6 @@ namespace Syn
         float metallicFactor = 0.0f;
         float roughnessFactor = 1.0f;
         float aoStrength = 1.0f;
-        bool useBloom = false;
         bool doubleSided = false;
         bool isTransparent = false;
     };

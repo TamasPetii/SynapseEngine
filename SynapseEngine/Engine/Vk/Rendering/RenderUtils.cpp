@@ -58,8 +58,12 @@ namespace Syn::Vk {
         std::vector<VkColorComponentFlags> writeMasks(config.colorAttachmentCount, writeMask);
         vkCmdSetColorWriteMaskEXT(cmd, 0, config.colorAttachmentCount, writeMasks.data());
 
-        VkBool32 blendEnable = config.blend.enable ? VK_TRUE : VK_FALSE;
-        std::vector<VkBool32> blendEnables(config.colorAttachmentCount, blendEnable);
+        std::vector<VkBool32> blendEnables(config.colorAttachmentCount, VK_FALSE);
+        for (uint32_t i = 0; i < config.colorAttachmentCount; ++i) {
+            if (i < config.blendStates.size()) {
+                blendEnables[i] = config.blendStates[i].enable ? VK_TRUE : VK_FALSE;
+            }
+        }
         vkCmdSetColorBlendEnableEXT(cmd, 0, config.colorAttachmentCount, blendEnables.data());
 
         vkCmdSetRasterizationSamplesEXT(cmd, config.raster.samples);
@@ -72,18 +76,21 @@ namespace Syn::Vk {
 
         vkCmdSetPrimitiveRestartEnable(cmd, config.raster.primitiveRestartEnable);
 
-        if (config.blend.enable) {
-            VkColorBlendEquationEXT equation{};
-            equation.srcColorBlendFactor = config.blend.srcColorFactor;
-            equation.dstColorBlendFactor = config.blend.dstColorFactor;
-            equation.colorBlendOp = config.blend.colorBlendOp;
-            equation.srcAlphaBlendFactor = config.blend.srcAlphaFactor;
-            equation.dstAlphaBlendFactor = config.blend.dstAlphaFactor;
-            equation.alphaBlendOp = config.blend.alphaBlendOp;
-
-            std::vector<VkColorBlendEquationEXT> equations(config.colorAttachmentCount, equation);
-            vkCmdSetColorBlendEquationEXT(cmd, 0, config.colorAttachmentCount, equations.data());
+        std::vector<VkColorBlendEquationEXT> equations(config.colorAttachmentCount);
+        for (uint32_t i = 0; i < config.colorAttachmentCount; ++i) {
+            if (i < config.blendStates.size() && config.blendStates[i].enable) {
+                equations[i].srcColorBlendFactor = config.blendStates[i].srcColorFactor;
+                equations[i].dstColorBlendFactor = config.blendStates[i].dstColorFactor;
+                equations[i].colorBlendOp = config.blendStates[i].colorBlendOp;
+                equations[i].srcAlphaBlendFactor = config.blendStates[i].srcAlphaFactor;
+                equations[i].dstAlphaBlendFactor = config.blendStates[i].dstAlphaFactor;
+                equations[i].alphaBlendOp = config.blendStates[i].alphaBlendOp;
+            }
+            else {
+                equations[i] = { VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD, VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD };
+            }
         }
+        vkCmdSetColorBlendEquationEXT(cmd, 0, config.colorAttachmentCount, equations.data());
 
         if (config.renderArea.has_value()) {
             VkViewport viewport{};

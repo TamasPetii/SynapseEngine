@@ -7,12 +7,17 @@ namespace Syn
     {
         static constexpr const char* TraditionalVert = "../Engine/Shaders/Traditional.vert";
         static constexpr const char* TraditionalFrag = "../Engine/Shaders/Traditional.frag";
+        static constexpr const char* TraditionalTransparentFrag = "../Engine/Shaders/TraditionalTransparent.frag";
+        static constexpr const char* TraditionalTransparentPickingFrag = "../Engine/Shaders/TraditionalTransparentPicking.frag";
+        
 
         static constexpr const char* MeshletOldMesh = "../Engine/Shaders/MeshletOld.mesh";
         static constexpr const char* MeshletMesh = "../Engine/Shaders/Meshlet.mesh";
         static constexpr const char* MeshletTask = "../Engine/Shaders/Meshlet.task";
         static constexpr const char* MeshletFrag = "../Engine/Shaders/Meshlet.frag";
-
+        static constexpr const char* MeshletTransparentFrag = "../Engine/Shaders/MeshletTransparent.frag";
+        static constexpr const char* MeshletTransparentPickingFrag = "../Engine/Shaders/MeshletTransparentPicking.frag";
+        
         static constexpr const char* MeshCulling = "../Engine/Shaders/MeshCulling.comp";
         static constexpr const char* ModelCulling = "../Engine/Shaders/ModelCulling.comp";
 
@@ -21,6 +26,9 @@ namespace Syn
 
         static constexpr const char* CompositeVert = "../Engine/Shaders/Composite.vert";
         static constexpr const char* CompositeFrag = "../Engine/Shaders/Composite.frag";
+        static constexpr const char* TransparentCompositeFrag = "../Engine/Shaders/TransparentComposite.frag";
+
+
 
         static constexpr const char* BloomPrefilter = "../Engine/Shaders/BloomPrefilter.comp";
         static constexpr const char* BloomUpsample = "../Engine/Shaders/BloomUpsample.comp";
