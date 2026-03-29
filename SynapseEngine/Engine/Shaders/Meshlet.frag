@@ -87,6 +87,13 @@ const vec3 LOD_COLORS[4] = vec3[](
     vec3(0.9, 0.1, 0.1)  // LOD 3 -> Red
 );
 
+const vec2 MAT_TYPE_COLORS[4] = vec2[](
+        vec2(1.0, 0.0), // 0: Opaque 1-Sided      -> Red
+        vec2(0.0, 1.0), // 1: Opaque 2-Sided      -> Green
+        vec2(1.0, 1.0), // 2: Transparent 1-Sided -> Yellow
+        vec2(1.0, 0.4)  // 3: Transparent 2-Sided -> Orange
+);
+
 // PCG Hash
 uint hash(uint x) {
     x ^= x >> 16;
@@ -135,32 +142,63 @@ void main()
 
     vec2 finalUV = inUV * mat.uvScale;
 
-    //Albedo
-    vec4 color = mat.color;
+    // Albedo & Alpha
+    vec4 finalColor = mat.color;
     if(mat.albedoTexture != 0xFFFFFFFFu) {
-        color *= sampleLoadedTexture2D(mat.albedoTexture, 0, finalUV);
+        finalColor *= sampleLoadedTexture2D(mat.albedoTexture, 0, finalUV);
     }
 
-    //Normals
-    vec3 normal = normalize(inNormal);
-    if(mat.normalTexture != 0xFFFFFFFFu) {
-        vec3 tangent = normalize(inTangent.xyz);
-        tangent = normalize(tangent - normal * dot(normal, tangent));
-        vec3 bitangent = cross(normal, tangent) * inTangent.w;
-        mat3 TBN = mat3(tangent, bitangent, normal);
-
-        vec3 normalMapSample = sampleLoadedTexture2D(mat.normalTexture, 0, finalUV).rgb;
-        vec3 tangentSpaceNormal = normalMapSample * 2.0 - 1.0;
-        normal = normalize(TBN * tangentSpaceNormal);
-    }
-
-    if (color.a < 0.05) {
+    if (finalColor.a < 0.05) {
         discard;
     }
 
-    outColorMetallic   = vec4(color.rgb, mat.metalness);
-    outNormalRoughness = vec4(normal, mat.roughness);
-    outEmissiveAo      = vec4(mat.emissiveColor * mat.emissiveIntensity, mat.aoStrength);
+    // Normals & TBN
+    vec3 normal = normalize(inNormal);
+    vec3 finalNormal = normal;
+    if(mat.normalTexture != 0xFFFFFFFFu) {
+        vec3 tangent = normalize(inTangent.xyz);
+        tangent = normalize(tangent - finalNormal * dot(finalNormal, tangent));
+        vec3 bitangent = cross(finalNormal, tangent) * inTangent.w;
+        mat3 TBN = mat3(tangent, bitangent, finalNormal);
+
+        vec3 normalMapSample = sampleLoadedTexture2D(mat.normalTexture, 0, finalUV).rgb;
+        vec3 tangentSpaceNormal = normalMapSample * 2.0 - 1.0;
+        finalNormal = normalize(TBN * tangentSpaceNormal);
+    }
+
+    //Metalness & Roughness
+    float finalMetalness = mat.metalness;
+    float finalRoughness = mat.roughness;
+
+    if(mat.metalnessTexture != 0xFFFFFFFFu) {
+        finalMetalness *= sampleLoadedTexture2D(mat.metalnessTexture, 0, finalUV).r;
+    }
+
+    if(mat.roughnessTexture != 0xFFFFFFFFu) {
+        finalRoughness *= sampleLoadedTexture2D(mat.roughnessTexture, 0, finalUV).r;
+    }
+
+    if(mat.metallicRoughnessTexture != 0xFFFFFFFFu) {
+        vec4 mrSample = sampleLoadedTexture2D(mat.metallicRoughnessTexture, 0, finalUV);
+        finalRoughness *= mrSample.g;
+        finalMetalness *= mrSample.b;
+    }
+
+    //Emissive
+    vec3 finalEmissive = mat.emissiveColor * mat.emissiveIntensity;
+    if(mat.emissiveTexture != 0xFFFFFFFFu) {
+        finalEmissive *= sampleLoadedTexture2D(mat.emissiveTexture, 0, finalUV).rgb;
+    }
+
+    //Ambient Occlusion
+    float finalAo = mat.aoStrength;
+    if(mat.ambientOcclusionTexture != 0xFFFFFFFFu) {
+        finalAo *= sampleLoadedTexture2D(mat.ambientOcclusionTexture, 0, finalUV).r;
+    }
+
+    outColorMetallic   = vec4(finalColor.rgb, finalMetalness);
+    outNormalRoughness = vec4(finalNormal, finalRoughness);
+    outEmissiveAo      = vec4(finalEmissive, finalAo);
     outEntityId        = entityId;
 
     
@@ -172,8 +210,9 @@ void main()
     float grayscaleLOD = 1.0 - (float(lodIndex) / 3.0);
     outDebugMeshletLod = vec4(pureMeshletColor * pureBrightness, grayscaleLOD);
 
-    float matTypeR = float(pc.materialRenderType) / 3.0;
-    float matIdG = float(hash(materialId) & 0xFF) / 255.0;
+    vec2 baseMatColor = MAT_TYPE_COLORS[pc.materialRenderType % 4];
+    float idHashModifier = (float(hash(materialId) & 0xFF) / 255.0) * 0.4 - 0.2;
+    vec2 finalMatColor = clamp(baseMatColor + idHashModifier, 0.0, 1.0);
     vec2 debugUV = fract(finalUV);
-    outDebugMaterialUv = vec4(matTypeR, matIdG, debugUV.x, debugUV.y);
+    outDebugMaterialUv = vec4(finalMatColor.x, finalMatColor.y, debugUV.x, debugUV.y);
 }

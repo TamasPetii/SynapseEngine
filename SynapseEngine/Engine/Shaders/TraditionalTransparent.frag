@@ -70,6 +70,29 @@ float calculateWboitWeight(float z, float alpha) {
     return clamp(pow(min(1.0, alpha * 10.0) + 0.01, 3.0) * 1e8 * pow(1.0 - z * 0.9, 3.0), 1e-2, 3e3);
 }
 
+vec3 simulateAmbientLight(vec3 normal, vec3 albedo, float roughness, float metallic, float ao) {
+    // TODO: Később ide jön az IBL (Image-Based Lighting) Diffuse (Irradiance) 
+    // és Specular (Prefiltered Env Map + BRDF LUT) szimulációja!
+    
+    vec3 ambient = albedo * 0.05;
+    return ambient * ao;
+}
+
+vec3 simulateDirectionalLight(vec3 normal, vec3 albedo, float roughness, float metallic) {
+    // TODO: dirlight
+    return vec3(0.0);
+}
+
+vec3 simulatePointLights(vec3 normal, vec3 albedo, float roughness, float metallic) {
+    // TODO: Forward+ point
+    return vec3(0.0);
+}
+
+vec3 simulateSpotLights(vec3 normal, vec3 albedo, float roughness, float metallic) {
+   // TODO: Forward+ spot
+    return vec3(0.0);
+}
+
 void main() 
 { 
     uint materialId = inId.y;
@@ -77,14 +100,67 @@ void main()
     MaterialBuffer globalMaterials = MaterialBuffer(pc.materialBuffer); 
     GpuMaterial mat = globalMaterials.data[materialId];
 
-    vec4 albedoTex = sampleLoadedTexture2D(mat.albedoTexture, 0, inUV * mat.uvScale);
-    vec4 baseColor = mat.color * albedoTex;
+    vec2 finalUV = inUV * mat.uvScale;
 
-    if (baseColor.a < 0.01) {
-        discard;
+    // Albedo & Alpha
+    vec4 baseColor = mat.color;
+    if(mat.albedoTexture != 0xFFFFFFFFu) {
+        baseColor *= sampleLoadedTexture2D(mat.albedoTexture, 0, finalUV);
     }
 
-    vec3 premultipliedColor = baseColor.rgb * baseColor.a;
+    // Normals & TBN
+    vec3 normal = normalize(inNormal);
+    vec3 finalNormal = normal;
+    if(mat.normalTexture != 0xFFFFFFFFu) {
+        vec3 tangent = normalize(inTangent.xyz);
+        tangent = normalize(tangent - finalNormal * dot(finalNormal, tangent));
+        vec3 bitangent = cross(finalNormal, tangent) * inTangent.w;
+        mat3 TBN = mat3(tangent, bitangent, finalNormal);
+
+        vec3 normalMapSample = sampleLoadedTexture2D(mat.normalTexture, 0, finalUV).rgb;
+        vec3 tangentSpaceNormal = normalMapSample * 2.0 - 1.0;
+        finalNormal = normalize(TBN * tangentSpaceNormal);
+    }
+
+    // Metalness & Roughness
+    float finalMetalness = mat.metalness;
+    float finalRoughness = mat.roughness;
+    
+    if(mat.metalnessTexture != 0xFFFFFFFFu) {
+        finalMetalness *= sampleLoadedTexture2D(mat.metalnessTexture, 0, finalUV).r;
+    }
+    if(mat.roughnessTexture != 0xFFFFFFFFu) {
+        finalRoughness *= sampleLoadedTexture2D(mat.roughnessTexture, 0, finalUV).r;
+    }
+    if(mat.metallicRoughnessTexture != 0xFFFFFFFFu) {
+        vec4 mrSample = sampleLoadedTexture2D(mat.metallicRoughnessTexture, 0, finalUV);
+        finalRoughness *= mrSample.g;
+        finalMetalness *= mrSample.b;
+    }
+
+    finalRoughness = clamp(finalRoughness, 0.04, 1.0);
+
+    // Emissive
+    vec3 finalEmissive = mat.emissiveColor * mat.emissiveIntensity;
+    if(mat.emissiveTexture != 0xFFFFFFFFu) {
+        finalEmissive *= sampleLoadedTexture2D(mat.emissiveTexture, 0, finalUV).rgb;
+    }
+
+    //Ambient Occlusion
+    float finalAo = mat.aoStrength;
+    if(mat.ambientOcclusionTexture != 0xFFFFFFFFu) {
+        finalAo *= sampleLoadedTexture2D(mat.ambientOcclusionTexture, 0, finalUV).r;
+    }
+
+    vec3 finalColor = vec3(0.0);
+
+    finalColor += simulateAmbientLight(normal, baseColor.rgb, finalRoughness, finalMetalness, finalAo);
+    finalColor += simulateDirectionalLight(normal, baseColor.rgb, finalRoughness, finalMetalness);
+    finalColor += simulatePointLights(normal, baseColor.rgb, finalRoughness, finalMetalness);
+    finalColor += simulateSpotLights(normal, baseColor.rgb, finalRoughness, finalMetalness);
+    finalColor += finalEmissive;
+
+    vec3 premultipliedColor = finalColor * baseColor.a;
     float weight = calculateWboitWeight(gl_FragCoord.z, baseColor.a);
 
     outAccum = vec4(premultipliedColor, baseColor.a) * weight;

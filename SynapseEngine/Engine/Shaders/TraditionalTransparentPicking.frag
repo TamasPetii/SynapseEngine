@@ -68,16 +68,19 @@ void main()
 { 
     uint entityId = inId.x;
     uint materialId = inId.y;
-    uint meshIndex = inId.z;
-    uint lodIndex = inId.w;
 
     MaterialBuffer globalMaterials = MaterialBuffer(pc.materialBuffer); 
     GpuMaterial mat = globalMaterials.data[materialId];
 
-    vec4 albedoTex = sampleLoadedTexture2D(mat.albedoTexture, 0, inUV * mat.uvScale);
-    float alpha = mat.color.a * albedoTex.a;
+    vec2 finalUV = inUV * mat.uvScale;
 
-    if (alpha < 0.05) {
+    // Albedo & Alpha
+    vec4 finalColor = mat.color;
+    if(mat.albedoTexture != 0xFFFFFFFFu) {
+        finalColor *= sampleLoadedTexture2D(mat.albedoTexture, 0, finalUV);
+    }
+
+    if (finalColor.a < 0.05) {
         discard;
     }
 

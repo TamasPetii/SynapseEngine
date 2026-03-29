@@ -118,7 +118,7 @@ namespace Syn
             }
             */
 
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 100; i++)
             {
                 // Character
                 EntityID characterEntity = registry->CreateEntity();
@@ -147,7 +147,7 @@ namespace Syn
             auto materialManager = ServiceLocator::GetMaterialManager();
 
             // Random Geometry
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 100000; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
