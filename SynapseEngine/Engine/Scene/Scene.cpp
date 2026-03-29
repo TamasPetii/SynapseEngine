@@ -16,6 +16,7 @@
 #include "Engine/System/MaterialSystem.h"
 #include "Engine/System/FrustumCullingSystem.h"
 #include "Engine/System/AnimationSystem.h"
+#include "Engine/System/PhysicsSystem.h"
 
 namespace Syn
 {
@@ -52,6 +53,7 @@ namespace Syn
         RegisterSystem<ModelSystem>();
         RegisterSystem<FrustumCullingSystem>();
         RegisterSystem<AnimationSystem>();
+        //RegisterSystem<PhysicsSystem>();
     }
 
     void Scene::InitializeComponentBuffers()

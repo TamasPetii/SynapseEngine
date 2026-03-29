@@ -31,6 +31,8 @@
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Debug'">
 		  SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
 		  VK_NO_PROTOTYPES;
+		  JPH_OBJECT_STREAM;
+		  JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;
 		  SYN_DEBUG;
 		  _DEBUG;
 		  NOMINMAX;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;
@@ -41,6 +43,8 @@
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Release'">
 		  SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
 		  VK_NO_PROTOTYPES;
+		  JPH_OBJECT_STREAM;
+		  JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;
 		  SYN_RELEASE;
 		  NDEBUG; NOMINMAX;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;
 		  %(PreprocessorDefinitions)
@@ -50,6 +54,8 @@
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Dist'">
 		  SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
 		  VK_NO_PROTOTYPES;
+		  JPH_OBJECT_STREAM;
+		  JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;
 		  SYN_DIST;
 		  NDEBUG;
 		  NOMINMAX;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;

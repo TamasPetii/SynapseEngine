@@ -179,11 +179,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Component\CapsuleColliderComponent.cpp" />
+    <ClCompile Include="Component\BoxColliderComponent.cpp" />
+    <ClCompile Include="Component\SphereColliderComponent.cpp" />
+    <ClCompile Include="System\PhysicsSystem.cpp" />
+    <ClCompile Include="Physics\JoltPhysicsEngine.cpp" />
+    <ClCompile Include="Physics\IPhysicsEngine.cpp" />
+    <ClCompile Include="Physics\PhysicsTypes.cpp" />
     <ClCompile Include="Render\TransferPass\DepthCopyPass.cpp" />
     <ClCompile Include="Render\GraphicsPass\MeshletTransparentPickingPass.cpp" />
     <ClCompile Include="Render\GraphicsPass\MeshletTransparentPass.cpp" />
     <ClCompile Include="Render\GraphicsPass\MeshletOpaquePass.cpp" />
     <ClCompile Include="Render\GraphicsPass\GuiPass.cpp" />
+    <ClCompile Include="Component\RigidBodyComponent.cpp" />
     <ClCompile Include="System\AnimationSystem.cpp" />
     <ClCompile Include="Component\AnimationComponent.cpp" />
     <ClCompile Include="Animation\AnimationManager.cpp" />
@@ -440,12 +448,20 @@
     <ClCompile Include="Render\TransferPass\WireframeMeshletInitPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Component\CapsuleColliderComponent.h" />
+    <ClInclude Include="Component\BoxColliderComponent.h" />
+    <ClInclude Include="Component\SphereColliderComponent.h" />
+    <ClInclude Include="System\PhysicsSystem.h" />
+    <ClInclude Include="Physics\JoltPhysicsEngine.h" />
+    <ClInclude Include="Physics\IPhysicsEngine.h" />
+    <ClInclude Include="Physics\PhysicsTypes.h" />
     <ClInclude Include="Render\TransferPass\DepthCopyPass.h" />
     <ClInclude Include="Render\GraphicsPass\MeshletTransparentPickingPass.h" />
     <ClInclude Include="Material\MaterialRenderType.h" />
     <ClInclude Include="Render\GraphicsPass\MeshletTransparentPass.h" />
     <ClInclude Include="Render\GraphicsPass\MeshletOpaquePass.h" />
     <ClInclude Include="Render\GraphicsPass\GuiPass.h" />
+    <ClInclude Include="Component\RigidBodyComponent.h" />
     <ClInclude Include="System\AnimationSystem.h" />
     <ClInclude Include="Component\AnimationComponent.h" />
     <ClInclude Include="Animation\AnimationManager.h" />

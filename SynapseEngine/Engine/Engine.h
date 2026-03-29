@@ -20,6 +20,7 @@ namespace Syn {
     class RenderManager;
     class InputManager;
     class SceneManager;
+    class IPhysicsEngine;
 }
 
 namespace Syn
@@ -59,6 +60,7 @@ namespace Syn
         void InitRenderManager(const EngineInitParams& params);
         void InitTaskExecutor();
         void InitSceneManager();
+        void InitPhysicsEngine();
         void Shutdown();
     private:
         void AdvanceFrameIndex();
@@ -73,6 +75,8 @@ namespace Syn
         std::unique_ptr<InputManager> _inputManager;
         std::unique_ptr<SceneManager> _sceneManager;
 		std::unique_ptr<tf::Executor> _taskExecutor;
+        std::unique_ptr<IPhysicsEngine> _physicsEngine;
+
         std::shared_ptr<tf::TFProfObserver> _jsonTaskObserver;
         std::shared_ptr<TaskProfilerObserver> _guiTaskObserver;
         std::function<void(uint32_t)> _onGuiFlushCallback;

@@ -23,6 +23,7 @@
     "spirv-reflect",
     "spirv-headers",
     "taskflow",
-    "imguizmo"
+    "imguizmo",
+    "joltphysics"
   ]
 }

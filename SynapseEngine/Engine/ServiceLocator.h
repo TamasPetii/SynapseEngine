@@ -21,6 +21,7 @@ namespace Syn {
     class MaterialManager;
     class AnimationManager;
     class AnimationBuilder;
+    class IPhysicsEngine;
 }
 
 namespace Syn 
@@ -77,6 +78,9 @@ namespace Syn
 
         static void ProvideAnimationManager(AnimationManager* manager) { _animationManager = manager; }
         static AnimationManager* GetAnimationManager() { return _animationManager; }
+
+        static void ProvidePhysicsEngine(IPhysicsEngine* engine) { _physicsEngine = engine; }
+        static IPhysicsEngine* GetPhysicsEngine() { return _physicsEngine; }
     private:
         static Vk::Context* _vkContext;
         static Vk::GpuUploader* _gpuUploader;
@@ -93,5 +97,6 @@ namespace Syn
         static MaterialManager* _materialManager;
         static AnimationBuilder* _animationBuilder;
         static AnimationManager* _animationManager;
+        static IPhysicsEngine* _physicsEngine;
     };
 }

@@ -20,8 +20,6 @@
 #include "Engine/Mesh/Factory/MeshFactory.h"
 
 #include "Engine/Render/RenderManager.h"
-
-
 #include "Engine/Render/RenderPipeline.h"
 
 #include "Engine/Manager/InputManager.h"
@@ -30,6 +28,7 @@
 #include "Engine/Scene/TestScene.h"
 
 #include "Engine/Render/RendererFactory.h"
+#include "Engine/Physics/JoltPhysicsEngine.h"
 
 #include <print>
 #include <filesystem>
@@ -99,6 +98,7 @@ namespace Syn
 		InitResourceManager();
 		InitRenderManager(params);
 		InitSceneManager();
+		InitPhysicsEngine();
 	}
 
 	void Engine::InitLogger()
@@ -191,6 +191,8 @@ namespace Syn
 				Error("Failed to open profile file for writing: {}", filename);
 			}
 		}
+		_physicsEngine->Shutdown();
+		_physicsEngine.reset();
 
 		_guiTaskObserver.reset();
 		_jsonTaskObserver.reset();
@@ -276,5 +278,12 @@ namespace Syn
 		});
 
 		_sceneManager->LoadScene("TestLevel");
+	}
+
+	void Engine::InitPhysicsEngine()
+	{
+		_physicsEngine = std::make_unique<JoltPhysicsEngine>();
+		_physicsEngine->Init();
+		ServiceLocator::ProvidePhysicsEngine(_physicsEngine.get());
 	}
 }

@@ -84,6 +84,7 @@ namespace Syn
                 registry->GetPool<ModelComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
             }
 
+            /*
             {
                 // Bistro
                 EntityID bistroEntity = registry->CreateEntity();
@@ -97,7 +98,6 @@ namespace Syn
                 registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
             }
 
-            /*
             {
                 // Character
                 EntityID characterEntity = registry->CreateEntity();
@@ -118,7 +118,7 @@ namespace Syn
             }
             */
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 10000; i++)
             {
                 // Character
                 EntityID characterEntity = registry->CreateEntity();
@@ -147,7 +147,7 @@ namespace Syn
             auto materialManager = ServiceLocator::GetMaterialManager();
 
             // Random Geometry
-            for (int i = 0; i < 100000; i++)
+            for (int i = 0; i < 250000; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
@@ -175,12 +175,12 @@ namespace Syn
                 float alpha = 0.1f + (randomFloat * 0.9f);
 
                 MaterialInfo randomMatInfo{};
-                randomMatInfo.color = glm::vec4(r, g, b, alpha);
-                randomMatInfo.doubleSided = rand() / 2;
-                randomMatInfo.isTransparent = rand() / 2;
+                randomMatInfo.color = glm::vec4(r, g, b, alpha) * glm::vec4(randomFloat * 2, randomFloat * 2, randomFloat * 2, 1);
+                randomMatInfo.doubleSided = rand() % 2;
+                randomMatInfo.isTransparent = rand() % 2;
 
                 randomMatInfo.emissiveFactor = glm::vec3(r, g, b);
-                randomMatInfo.emissiveIntensity = randomFloat * 5;
+                randomMatInfo.emissiveIntensity = randomFloat * 10;
 
                 std::string matName = "RandomGeometryMat_" + std::to_string(i);
                 uint32_t randomMatId = materialManager->LoadMaterial(matName, randomMatInfo);
