@@ -98,7 +98,7 @@ namespace Syn {
             .blendStates = {
                 {.enable = false }
             },
-            .colorAttachmentCount = 1,
+            .colorAttachmentCount = 4,
             .renderArea = std::nullopt
         };
     }
@@ -108,12 +108,22 @@ namespace Syn {
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
         _graphicsState.renderArea = extent;
 
-        _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
-                .imageView = group->GetImage(RenderTargetNames::EntityIndex)->GetView(Vk::ImageViewNames::Default),
-                .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-                .storeOp = VK_ATTACHMENT_STORE_OP_STORE
-            }));
+        std::vector<std::string> targets = {
+            RenderTargetNames::EntityIndex,
+            RenderTargetNames::DebugTopologyPipeline,
+            RenderTargetNames::DebugMeshletLod,
+            RenderTargetNames::DebugMaterialUv
+        };
+
+        for (const auto& name : targets)
+        {
+            _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
+                    .imageView = group->GetImage(name)->GetView(Vk::ImageViewNames::Default),
+                    .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                    .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+                    .storeOp = VK_ATTACHMENT_STORE_OP_STORE
+                }));
+        }
 
         _depthAttachment = Vk::RenderUtils::CreateAttachment({
             .imageView = group->GetImage(RenderTargetNames::EditorPickingDepth)->GetView(Vk::ImageViewNames::Default),
