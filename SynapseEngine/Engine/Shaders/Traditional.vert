@@ -163,9 +163,9 @@ layout(push_constant) uniform PushConstants {
 } pc;
 
 layout(location = 0) out vec3 outNormal;
-layout(location = 1) out vec2 outUV;
-layout(location = 2) out flat uint outEntityId;
-layout(location = 3) out flat uint outMaterialId;
+layout(location = 1) out vec4 outTangent;
+layout(location = 2) out vec2 outUV;
+layout(location = 3) out flat uvec4 outId; //(EntityID, MaterialID, MeshletID/MeshID, LodID) 
 
 void main() {
     // 1. Descriptor
@@ -266,17 +266,18 @@ void main() {
                 }  
             }    
         }
-     }
-
-    
+    }
 
     uint flatMaterialIndex = comp.materialOffset + meshIndex;
     uint resolvedMaterialId = materialLookup.data[flatMaterialIndex];
 
     gl_Position = camera.viewProjVulkan * transform.transform * finalModelMat * vec4(v.position, 1.0);
 
-    outNormal = normalize(transform.transformIT * finalModelMatIT * vec4(attr.normal, 0)).xyz;
+    vec3 normal = (transform.transformIT * finalModelMatIT * vec4(attr.normal, 0)).xyz;
+    vec3 tangent = (transform.transform * finalModelMat * vec4(attr.tangent, 0)).xyz;
+
+    outNormal = normal;
+    outTangent = vec4(tangent, 1.0 /*Todo: Invert Normal from model!*/);
     outUV = vec2(attr.uv_x, 1.0 - attr.uv_y);
-    outEntityId = entityId;
-    outMaterialId = resolvedMaterialId;
+    outId = uvec4(entityId, resolvedMaterialId, meshIndex, desc.lodIndex);
 }

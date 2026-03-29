@@ -4,9 +4,9 @@
 #extension GL_EXT_nonuniform_qualifier : require
 
 layout(location = 0) in vec3 inNormal;
-layout(location = 1) in vec2 inUV;
-layout(location = 2) in flat uint inEntityId;
-layout(location = 3) in flat uint inMaterialId;
+layout(location = 1) in vec4 inTangent;
+layout(location = 2) in vec2 inUV;
+layout(location = 3) in flat uvec4 inId; //(EntityID, MaterialID, MeshletID/MeshID, LodID) 
 
 layout(location = 0) out vec4 outFragColor;
 layout(location = 1) out uint outEntityId;
@@ -64,18 +64,79 @@ vec4 sampleLoadedTexture2D(uint textureID, uint samplerID, vec2 uv) {
     return texture(sampler2D(bindlessTextures[nonuniformEXT(textureID)], globalSamplers[nonuniformEXT(samplerID)]), uv); 
 }
 
+const vec3 LOD_COLORS[4] = vec3[](
+    vec3(0.1, 0.9, 0.2), // LOD 0 -> Green
+    vec3(0.9, 0.9, 0.1), // LOD 1 -> Yellow
+    vec3(0.9, 0.5, 0.1), // LOD 2 -> Orange
+    vec3(0.9, 0.1, 0.1)  // LOD 3 -> Red
+);
+
+// PCG Hash
+uint hash(uint x) {
+    x ^= x >> 16;
+    x *= 0x7feb352du;
+    x ^= x >> 15;
+    x *= 0x846ca68bu;
+    x ^= x >> 16;
+    return x;
+}
+
+vec3 idToColor(uint id) {
+    uint h = hash(id);
+    return vec3(
+        float((h >> 16) & 0xFF) / 255.0,
+        float((h >> 8) & 0xFF) / 255.0,
+        float(h & 0xFF) / 255.0
+    );
+}
+
+vec3 getDebugColor(uint entityId, uint meshIndex, uint lodIndex, vec2 fragCoord) {
+    vec3 baseLODColor = LOD_COLORS[lodIndex % 4]; 
+    vec3 instanceColor = idToColor(entityId ^ hash(meshIndex));
+    vec3 finalColor = mix(baseLODColor, instanceColor, 0.15);
+
+    if (int(fragCoord.x + fragCoord.y) % 8 < 4) {
+        finalColor *= 0.2;
+    }
+
+    return finalColor;
+}
+
 void main() 
 { 
+    uint entityId = inId.x;
+    uint materialId = inId.y;
+    uint meshIndex = inId.z;
+    uint lodIndex = inId.w;
+
     MaterialBuffer globalMaterials = MaterialBuffer(pc.materialBuffer); 
-    GpuMaterial mat = globalMaterials.data[inMaterialId]; 
+    GpuMaterial mat = globalMaterials.data[materialId];
 
-    vec4 albedoTex = sampleLoadedTexture2D(mat.albedoTexture, 0, inUV * mat.uvScale);
-    vec4 baseColor = mat.color * albedoTex;
+    vec2 finalUV = inUV * mat.uvScale;
 
-    if (baseColor.a < 0.5) {
+    //Albedo
+    vec4 color = mat.color;
+    if(mat.albedoTexture != 0xFFFFFFFFu) {
+        color *= sampleLoadedTexture2D(mat.albedoTexture, 0, finalUV);
+    }
+
+    //Normals
+    vec3 normal = normalize(inNormal);
+    if(mat.normalTexture != 0xFFFFFFFFu) {
+        vec3 tangent = normalize(inTangent.xyz);
+        tangent = normalize(tangent - normal * dot(normal, tangent));
+        vec3 bitangent = cross(normal, tangent) * inTangent.w;
+        mat3 TBN = mat3(tangent, bitangent, normal);
+
+        vec3 normalMapSample = sampleLoadedTexture2D(mat.normalTexture, 0, finalUV).rgb;
+        vec3 tangentSpaceNormal = normalMapSample * 2.0 - 1.0;
+        normal = normalize(TBN * tangentSpaceNormal);
+    }
+
+    if (color.a < 0.05) {
         discard;
     }
 
-    outFragColor = vec4(baseColor.xyz, 1.0);
-    outEntityId = inEntityId;
+    outFragColor = vec4(getDebugColor(entityId, meshIndex, lodIndex, gl_FragCoord.xy), 1.0);
+    outEntityId = entityId;
 }

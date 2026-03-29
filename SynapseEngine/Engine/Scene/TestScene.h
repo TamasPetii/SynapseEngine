@@ -84,7 +84,6 @@ namespace Syn
                 registry->GetPool<ModelComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
             }
 
-            /*
             {
                 // Bistro
                 EntityID bistroEntity = registry->CreateEntity();
@@ -98,6 +97,7 @@ namespace Syn
                 registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
             }
 
+            /*
             {
                 // Character
                 EntityID characterEntity = registry->CreateEntity();
@@ -118,7 +118,7 @@ namespace Syn
             }
             */
 
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 1; i++)
             {
                 // Character
                 EntityID characterEntity = registry->CreateEntity();
@@ -147,7 +147,7 @@ namespace Syn
             auto materialManager = ServiceLocator::GetMaterialManager();
 
             // Random Geometry
-            for (int i = 0; i < 250000; i++)
+            for (int i = 0; i < 1; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
