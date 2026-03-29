@@ -26,29 +26,35 @@ namespace Syn {
         uint64_t animationAddressBuffer;
         uint64_t animationBufferAddr;
         uint64_t animationSparseMapBufferAddr;
+
         uint64_t globalDrawCountBuffers;
         uint64_t globalInstanceBuffers;
         uint64_t globalIndirectCommandBuffers;
         uint64_t globalIndirectCommandDescriptorBuffers;
         uint64_t globalModelAllocationBuffers;
         uint64_t globalMeshAllocationBuffers;
+
         uint64_t cameraBufferAddr;
         uint64_t cameraSparseMapBufferAddr;
         uint64_t transformBufferAddr;
         uint64_t transformSparseMapBufferAddr;
+
         uint64_t modelBufferAddr;
         uint64_t modelSparseMapBufferAddr;
         uint64_t materialLookupBuffer;
         uint64_t materialBuffer;
+
         uint64_t debugInstanceBufferAddr;
         uint64_t debugAabbIndirectAddr;
         uint64_t debugSphereIndirectAddr;
+
         uint32_t activeCameraEntity;
         uint32_t baseDescriptorOffset;
-        uint32_t visualizeMeshlet;
+        uint32_t disableConeCulling;
+        uint32_t materialRenderType;
+
         float screenWidth;
         float screenHeight;
-        uint32_t disableConeCulling;
     };
 
     MeshletTransparentPickingPass::MeshletTransparentPickingPass(MaterialRenderType renderType)
@@ -156,12 +162,14 @@ namespace Syn {
         pc.debugInstanceBufferAddr = drawData->debugInstanceBuffers[fIdx]->GetDeviceAddress();
         pc.debugAabbIndirectAddr = drawData->debugAabbIndirectBuffers[fIdx]->GetDeviceAddress();
         pc.debugSphereIndirectAddr = drawData->debugSphereIndirectBuffers[fIdx]->GetDeviceAddress();
+        
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.baseDescriptorOffset = drawData->activeTraditionalCount + drawData->meshletCmdOffsets[_renderType];
-        pc.visualizeMeshlet = 0;
+        pc.disableConeCulling = (_renderType == MaterialRenderType::Transparent2Sided) ? 1 : 0;
+        pc.materialRenderType = static_cast<uint32_t>(_renderType);
+
         pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
         pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
-        pc.disableConeCulling = (_renderType == MaterialRenderType::Transparent2Sided) ? 1 : 0;
 
         vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(MeshletPushConstants), &pc);
     }

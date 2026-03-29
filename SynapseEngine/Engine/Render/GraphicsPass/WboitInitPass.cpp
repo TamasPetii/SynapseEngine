@@ -1,9 +1,9 @@
-#include "GBufferInitPass.h"
+#include "WboitInitPass.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
 
 namespace Syn {
 
-    void GBufferInitPass::PrepareFrame(const RenderContext& context) {
+    void WboitInitPass::PrepareFrame(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         if (!group) return;
 
@@ -16,11 +16,8 @@ namespace Syn {
         };
 
         std::vector<TargetClearInfo> colorTargets = {
-            { RenderTargetNames::Main, VkClearValue{.color = {.float32 = {0.0f, 0.0f, 0.0f, 0.0f}}} },
-            { RenderTargetNames::ColorMetallic, VkClearValue{.color = {.float32 = {0.0f, 0.0f, 0.0f, 0.0f}}} },
-            { RenderTargetNames::NormalRoughness, VkClearValue{.color = {.float32 = {0.0f, 0.0f, 0.0f, 0.0f}}} },
-            { RenderTargetNames::EmissiveAo, VkClearValue{.color = {.float32 = {0.0f, 0.0f, 0.0f, 0.0f}}} },
-            { RenderTargetNames::EntityIndex,      VkClearValue{.color = {.uint32 = {0xFFFFFFFF, 0, 0, 0}}} }
+            { RenderTargetNames::TransparentAccum, VkClearValue{.color = {.float32 = {0.0f, 0.0f, 0.0f, 0.0f}}} },
+            { RenderTargetNames::TransparentReveal,VkClearValue{.color = {.float32 = {1.0f, 1.0f, 1.0f, 1.0f}}} }
         };
 
         for (const auto& target : colorTargets)
@@ -43,25 +40,6 @@ namespace Syn {
                     .discardContent = true
                     });
             }
-        }
-
-        if (auto depthImg = group->GetImage(RenderTargetNames::Depth)) 
-        {
-            _depthAttachment = Vk::RenderUtils::CreateAttachment({
-                .imageView = depthImg->GetView(Vk::ImageViewNames::Default),
-                .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-                .clearValue = VkClearValue{.depthStencil = {1.0f, 0}},
-                .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-                .storeOp = VK_ATTACHMENT_STORE_OP_STORE
-                });
-
-            _imageTransitions.push_back({
-                .image = depthImg,
-                .newLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-                .dstStage = VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT,
-                .dstAccess = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-                .discardContent = true
-                });
         }
 
         _renderInfo = Vk::RenderingInfoConfig{

@@ -6,10 +6,15 @@
 layout(location = 0) in vec3 inNormal;
 layout(location = 1) in vec4 inTangent;
 layout(location = 2) in vec2 inUV;
-layout(location = 3) in flat uvec4 inId; //(EntityID, MaterialID, MeshletID/MeshID, LodID) 
+layout(location = 3) in flat uvec4 inId; //(EntityID, MaterialID, MeshIndex, LodIndex) 
 
-layout(location = 0) out vec4 outFragColor;
-layout(location = 1) out uint outEntityId;
+layout(location = 0) out vec4 outColorMetallic;
+layout(location = 1) out vec4 outNormalRoughness;
+layout(location = 2) out vec4 outEmissiveAo;
+layout(location = 3) out uint outEntityId;
+layout(location = 4) out vec4 outDebugTopologyPipeline;
+layout(location = 5) out vec4 outDebugMeshletLod;
+layout(location = 6) out vec4 outDebugMaterialUv;
 
 layout(set = 0, binding = 0) uniform sampler globalSamplers[];
 layout(set = 0, binding = 1) uniform texture2D bindlessTextures[];
@@ -58,6 +63,7 @@ layout(push_constant) uniform PushConstants {
     uint64_t materialBuffer; 
     uint activeCameraEntity;
     uint baseDescriptorOffset;
+    uint materialRenderType;
 } pc;
 
 vec4 sampleLoadedTexture2D(uint textureID, uint samplerID, vec2 uv) { 
@@ -137,6 +143,19 @@ void main()
         discard;
     }
 
-    outFragColor = vec4(getDebugColor(entityId, meshIndex, lodIndex, gl_FragCoord.xy), 1.0);
-    outEntityId = entityId;
+    outColorMetallic   = vec4(color.rgb, mat.metalness);
+    outNormalRoughness = vec4(normal, mat.roughness);
+    outEmissiveAo      = vec4(mat.emissiveColor * mat.emissiveIntensity, mat.aoStrength);
+    outEntityId        = entityId;
+
+    vec3 traditionalStructureColor = getDebugColor(entityId, meshIndex, lodIndex, gl_FragCoord.xy);
+    outDebugTopologyPipeline = vec4(traditionalStructureColor, 0.25);
+
+    float grayscaleLOD = 1.0 - (float(lodIndex) / 3.0);
+    outDebugMeshletLod = vec4(0.0, 0.0, 0.0, grayscaleLOD);
+
+    float matTypeR = float(pc.materialRenderType) / 3.0;
+    float matIdG = float(hash(materialId) & 0xFF) / 255.0;
+    vec2 debugUV = fract(finalUV);
+    outDebugMaterialUv = vec4(matTypeR, matIdG, debugUV.x, debugUV.y);
 }

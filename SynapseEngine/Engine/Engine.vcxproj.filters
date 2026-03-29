@@ -816,6 +816,12 @@
     <ClCompile Include="Component\CapsuleColliderComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\DebugInitPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\WboitInitPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1725,6 +1731,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Component\CapsuleColliderComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\DebugInitPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\WboitInitPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

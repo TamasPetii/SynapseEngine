@@ -45,6 +45,7 @@ namespace Syn {
 
         uint32_t activeCameraEntity;
         uint32_t baseDescriptorOffset;
+        uint32_t materialRenderType;
     };
 
     TraditionalTransparentPass::TraditionalTransparentPass(MaterialRenderType renderType)
@@ -181,6 +182,7 @@ namespace Syn {
 
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.baseDescriptorOffset = drawData->traditionalCmdOffsets[_renderType];
+        pc.materialRenderType = static_cast<uint32_t>(_renderType);
 
         vkCmdPushConstants(
             context.cmd,

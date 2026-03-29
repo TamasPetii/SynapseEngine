@@ -6,10 +6,15 @@
 layout(location = 0) in vec3 inNormal;
 layout(location = 1) in vec4 inTangent;
 layout(location = 2) in vec2 inUV;
-layout(location = 3) in flat uvec4 inId; //(EntityID, MaterialID, MeshletID/MeshID, LodID) 
+layout(location = 3) in flat uvec4 inId; //(EntityID, MaterialID, MeshletIndex, LodIndex) 
 
-layout(location = 0) out vec4 outFragColor;
-layout(location = 1) out uint outEntityId;
+layout(location = 0) out vec4 outColorMetallic;
+layout(location = 1) out vec4 outNormalRoughness;
+layout(location = 2) out vec4 outEmissiveAo;
+layout(location = 3) out uint outEntityId;
+layout(location = 4) out vec4 outDebugTopologyPipeline;
+layout(location = 5) out vec4 outDebugMeshletLod;
+layout(location = 6) out vec4 outDebugMaterialUv;
 
 layout(set = 0, binding = 0) uniform sampler globalSamplers[];
 layout(set = 0, binding = 1) uniform texture2D bindlessTextures[];
@@ -64,12 +69,11 @@ layout(push_constant) uniform PushConstants {
 
     uint activeCameraEntity;
     uint baseDescriptorOffset;
+    uint disableConeCulling;
+    uint materialRenderType;
 
-    uint visualizeMeshlet; 
     float screenWidth;
     float screenHeight;
-
-    uint disableConeCulling;
 } pc;
 
 vec4 sampleLoadedTexture2D(uint textureID, uint samplerID, vec2 uv) { 
@@ -102,8 +106,8 @@ vec3 idToColor(uint id) {
     );
 }
 
-vec3 getDebugColor(uint entityId, uint meshletIndex, uint lodIndex) {
-vec3 baseLODColor = LOD_COLORS[lodIndex % 4]; 
+vec3 getMeshletLodColor(uint entityId, uint meshletIndex, uint lodIndex) {
+    vec3 baseLODColor = LOD_COLORS[lodIndex % 4]; 
     
     uint combinedHash = hash(entityId ^ hash(meshletIndex));
     
@@ -154,6 +158,22 @@ void main()
         discard;
     }
 
-    outFragColor = vec4(getDebugColor(entityId, meshletIndex, lodIndex), 1.0);
-    outEntityId = entityId;
+    outColorMetallic   = vec4(color.rgb, mat.metalness);
+    outNormalRoughness = vec4(normal, mat.roughness);
+    outEmissiveAo      = vec4(mat.emissiveColor * mat.emissiveIntensity, mat.aoStrength);
+    outEntityId        = entityId;
+
+    
+    vec3 lodHeatmapColor = getMeshletLodColor(entityId, meshletIndex, lodIndex);
+    outDebugTopologyPipeline = vec4(lodHeatmapColor, 1.0);
+
+    vec3 pureMeshletColor = idToColor(entityId ^ hash(meshletIndex));
+    float pureBrightness = 0.5 + (float((hash(entityId ^ meshletIndex) >> 24) & 0xFF) / 255.0) * 0.5;
+    float grayscaleLOD = 1.0 - (float(lodIndex) / 3.0);
+    outDebugMeshletLod = vec4(pureMeshletColor * pureBrightness, grayscaleLOD);
+
+    float matTypeR = float(pc.materialRenderType) / 3.0;
+    float matIdG = float(hash(materialId) & 0xFF) / 255.0;
+    vec2 debugUV = fract(finalUV);
+    outDebugMaterialUv = vec4(matTypeR, matIdG, debugUV.x, debugUV.y);
 }

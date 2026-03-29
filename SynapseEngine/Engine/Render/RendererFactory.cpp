@@ -20,6 +20,8 @@
 #include "Engine/Render/TransferPass/WireframeMeshletInitPass.h"
 #include "Engine/Render/GraphicsPass/WireframeMeshletAabbPass.h"
 #include "Engine/Render/GraphicsPass/WireframeMeshletSpherePass.h"
+#include "Engine/Render/GraphicsPass/DebugInitPass.h"
+#include "Engine/Render/GraphicsPass/WboitInitPass.h"
 #include "Engine/Render/GraphicsPass/GuiPass.h"
 
 // WBOIT
@@ -46,29 +48,33 @@ namespace Syn
         pipeline->AddPass(std::make_unique<HizDownsamplePass>());
         pipeline->AddPass(std::make_unique<ModelCullingPass>());
         pipeline->AddPass(std::make_unique<MeshCullingPass>());
-        pipeline->AddPass(std::make_unique<GBufferInitPass>());
 
-        // Opaque Passok
+        //Texture Init Passes
+        pipeline->AddPass(std::make_unique<GBufferInitPass>());
+        pipeline->AddPass(std::make_unique<WboitInitPass>());
+        pipeline->AddPass(std::make_unique<DebugInitPass>());
+
+        // Opaque Passes
         pipeline->AddPass(std::make_unique<TraditionalOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<TraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
         pipeline->AddPass(std::make_unique<MeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<MeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
 
-        // Editor Picking Passok
+        // Editor Picking Passes
         pipeline->AddPass(std::make_unique<DepthCopyPass>());
         pipeline->AddPass(std::make_unique<TraditionalTransparentPickingPass>(MaterialRenderType::Transparent1Sided));
         pipeline->AddPass(std::make_unique<TraditionalTransparentPickingPass>(MaterialRenderType::Transparent2Sided));
         pipeline->AddPass(std::make_unique<MeshletTransparentPickingPass>(MaterialRenderType::Transparent1Sided));
         pipeline->AddPass(std::make_unique<MeshletTransparentPickingPass>(MaterialRenderType::Transparent2Sided));
 
-        // WBOIT Transparent Passok
+        // WBOIT Transparent Passes
         pipeline->AddPass(std::make_unique<TraditionalTransparentPass>(MaterialRenderType::Transparent1Sided));
         pipeline->AddPass(std::make_unique<TraditionalTransparentPass>(MaterialRenderType::Transparent2Sided));
         pipeline->AddPass(std::make_unique<MeshletTransparentPass>(MaterialRenderType::Transparent1Sided));
         pipeline->AddPass(std::make_unique<MeshletTransparentPass>(MaterialRenderType::Transparent2Sided));
         pipeline->AddPass(std::make_unique<TransparentCompositePass>());
 
-        // Wireframe passok
+        // Wireframe Passes
         //pipeline->AddPass(std::make_unique<WireframeSetupPass>());
         //pipeline->AddPass(std::make_unique<WireframeAabbPass>());
         //pipeline->AddPass(std::make_unique<WireframeSpherePass>());
@@ -247,6 +253,53 @@ namespace Syn
         pickingDepthSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
         pickingDepthSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
         rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::EditorPickingDepth, pickingDepthSpec);
+
+        Vk::ImageConfig debugImageSpec{};
+        debugImageSpec.width = initWidth;
+        debugImageSpec.height = initHeight;
+        debugImageSpec.type = VK_IMAGE_TYPE_2D;
+        debugImageSpec.format = VK_FORMAT_R8G8B8A8_UNORM;
+        debugImageSpec.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        debugImageSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+
+        Vk::ImageConfig debugGeometryPipelineSpec = debugImageSpec;
+        debugGeometryPipelineSpec.AddView(RenderTargetViewNames::DebugTopology, Vk::ImageViewConfig{
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .mipLevelCount = 1,
+            .swizzle = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_ONE }
+            });
+        debugGeometryPipelineSpec.AddView(RenderTargetViewNames::DebugPipeline, Vk::ImageViewConfig{
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .mipLevelCount = 1,
+            .swizzle = { VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_ONE }
+            });
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::DebugTopologyPipeline, debugGeometryPipelineSpec);
+
+        Vk::ImageConfig debugLodSpec = debugImageSpec;
+        debugLodSpec.AddView(RenderTargetViewNames::DebugMeshlet, Vk::ImageViewConfig{
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .mipLevelCount = 1,
+            .swizzle = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_ONE }
+            });
+        debugLodSpec.AddView(RenderTargetViewNames::DebugLodGrayscale, Vk::ImageViewConfig{
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .mipLevelCount = 1,
+            .swizzle = { VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_ONE }
+            });
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::DebugMeshletLod, debugLodSpec);
+
+        Vk::ImageConfig debugMaterialUvSpec = debugImageSpec;
+        debugMaterialUvSpec.AddView(RenderTargetViewNames::DebugMaterial, Vk::ImageViewConfig{
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .mipLevelCount = 1,
+            .swizzle = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_ZERO, VK_COMPONENT_SWIZZLE_ONE }
+            });
+        debugMaterialUvSpec.AddView(RenderTargetViewNames::DebugUv, Vk::ImageViewConfig{
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .mipLevelCount = 1,
+            .swizzle = { VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_ZERO, VK_COMPONENT_SWIZZLE_ONE }
+            });
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::DebugMaterialUv, debugMaterialUvSpec);
 
         return renderManager;
     }

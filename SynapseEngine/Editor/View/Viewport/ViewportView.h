@@ -134,7 +134,7 @@ namespace Syn {
                     RadioButton("Main", RenderTargetGroupNames::Deferred, RenderTargetNames::Main, Vk::ImageViewNames::Default);
                     RadioButton("Depth", RenderTargetGroupNames::Deferred, RenderTargetNames::Depth, Vk::ImageViewNames::Default);
 
-                    ImGui::Separator();
+                    ImGui::SeparatorText("GBuffer Textures");
 
                     RadioButton("Color", RenderTargetGroupNames::Deferred, RenderTargetNames::ColorMetallic, RenderTargetViewNames::Color);
                     RadioButton("Metallic", RenderTargetGroupNames::Deferred, RenderTargetNames::ColorMetallic, RenderTargetViewNames::Metallic);
@@ -143,10 +143,23 @@ namespace Syn {
                     RadioButton("Emissive", RenderTargetGroupNames::Deferred, RenderTargetNames::EmissiveAo, RenderTargetViewNames::Emissive);
                     RadioButton("Ambient Occlusion", RenderTargetGroupNames::Deferred, RenderTargetNames::EmissiveAo, RenderTargetViewNames::AmbientOcclusion);
 
-                    ImGui::Separator();
+                    ImGui::SeparatorText("Wboit Textures");
 
                     RadioButton("Transparent Accum", RenderTargetGroupNames::Deferred, RenderTargetNames::TransparentAccum, Vk::ImageViewNames::Default);
                     RadioButton("Transparent Reveal", RenderTargetGroupNames::Deferred, RenderTargetNames::TransparentReveal, Vk::ImageViewNames::Default);
+
+                    ImGui::SeparatorText("Debug Textures");
+
+                    RadioButton("Topology Cluster", RenderTargetGroupNames::Deferred, RenderTargetNames::DebugTopologyPipeline, RenderTargetViewNames::DebugTopology);
+                    RadioButton("Pipeline Type", RenderTargetGroupNames::Deferred, RenderTargetNames::DebugTopologyPipeline, RenderTargetViewNames::DebugPipeline);
+
+                    RadioButton("Meshlet", RenderTargetGroupNames::Deferred, RenderTargetNames::DebugMeshletLod, RenderTargetViewNames::DebugMeshlet);
+                    RadioButton("LOD", RenderTargetGroupNames::Deferred, RenderTargetNames::DebugMeshletLod, RenderTargetViewNames::DebugLodGrayscale);
+
+                    RadioButton("Material Type", RenderTargetGroupNames::Deferred, RenderTargetNames::DebugMaterialUv, RenderTargetViewNames::DebugMaterial);
+                    RadioButton("UV", RenderTargetGroupNames::Deferred, RenderTargetNames::DebugMaterialUv, RenderTargetViewNames::DebugUv);
+
+                    ImGui::SeparatorText("Mipchain Textures");
 
                     ImGui::Separator();
 

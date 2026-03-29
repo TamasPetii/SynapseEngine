@@ -160,12 +160,13 @@ layout(push_constant) uniform PushConstants {
     uint64_t materialBuffer; 
     uint activeCameraEntity;
     uint baseDescriptorOffset;
+    uint materialRenderType;
 } pc;
 
 layout(location = 0) out vec3 outNormal;
 layout(location = 1) out vec4 outTangent;
 layout(location = 2) out vec2 outUV;
-layout(location = 3) out flat uvec4 outId; //(EntityID, MaterialID, MeshletID/MeshID, LodID) 
+layout(location = 3) out flat uvec4 outId; //(EntityID, MaterialID,  MeshIndex, LodIndex) 
 
 void main() {
     // 1. Descriptor

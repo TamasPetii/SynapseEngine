@@ -40,6 +40,7 @@ namespace Syn {
         uint64_t materialBuffer;
         uint32_t activeCameraEntity;
         uint32_t baseDescriptorOffset;
+        uint32_t materialRenderType;
     };
 
     TraditionalTransparentPickingPass::TraditionalTransparentPickingPass(MaterialRenderType renderType)
@@ -146,6 +147,7 @@ namespace Syn {
         pc.materialBuffer = materialManager->GetMaterialBuffer()->GetDeviceAddress();
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.baseDescriptorOffset = drawData->traditionalCmdOffsets[_renderType];
+        pc.materialRenderType = static_cast<uint32_t>(_renderType);
 
         vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(TraditionalPushConstants), &pc);
     }

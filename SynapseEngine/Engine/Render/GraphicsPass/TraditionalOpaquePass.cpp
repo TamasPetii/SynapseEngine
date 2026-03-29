@@ -45,6 +45,7 @@ namespace Syn {
 
         uint32_t activeCameraEntity;
         uint32_t baseDescriptorOffset;
+        uint32_t materialRenderType;
     };
 
     TraditionalOpaquePass::TraditionalOpaquePass(MaterialRenderType renderType)
@@ -102,7 +103,7 @@ namespace Syn {
                 .alphaBlendOp = VK_BLEND_OP_ADD
                 }
             },
-            .colorAttachmentCount = 2,
+            .colorAttachmentCount = 7,
             .renderArea = std::nullopt
         };
     }
@@ -114,11 +115,15 @@ namespace Syn {
         _graphicsState.renderArea = extent;
 
         std::vector<std::string> targets = {
-            RenderTargetNames::Main,
-            RenderTargetNames::EntityIndex
+            RenderTargetNames::ColorMetallic,
+            RenderTargetNames::NormalRoughness,
+            RenderTargetNames::EmissiveAo,
+            RenderTargetNames::EntityIndex,
+            RenderTargetNames::DebugTopologyPipeline,
+            RenderTargetNames::DebugMeshletLod,
+            RenderTargetNames::DebugMaterialUv
         };
 
-        _colorAttachments.clear();
         for (const auto& name : targets)
         {
             _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
@@ -178,6 +183,7 @@ namespace Syn {
 
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.baseDescriptorOffset = drawData->traditionalCmdOffsets[_renderType];
+        pc.materialRenderType = static_cast<uint32_t>(_renderType);
 
         vkCmdPushConstants(
             context.cmd,

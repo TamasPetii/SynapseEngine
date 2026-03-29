@@ -170,12 +170,11 @@ layout(push_constant) uniform PushConstants {
 
     uint activeCameraEntity;
     uint baseDescriptorOffset;
+    uint disableConeCulling;
+    uint materialRenderType;
 
-    uint visualizeMeshlet; 
     float screenWidth;
     float screenHeight;
-
-    uint disableConeCulling;
 } pc;
 
 struct TaskPayload {
@@ -424,7 +423,7 @@ void main() {
             uint slot = atomicAdd(survivingMeshletCount, 1);
             payload.meshletIndices[slot] = currentMeshletIdx;
 
-            if (false && pc.visualizeMeshlet == 1) 
+            if (false) 
             {
                 DebugInstanceBuffer debugInstanceBuffer = DebugInstanceBuffer(pc.debugInstanceBufferAddr);
                 DebugIndirectCommandBuffer debugAabbCmdBuffer = DebugIndirectCommandBuffer(pc.debugAabbIndirectAddr);

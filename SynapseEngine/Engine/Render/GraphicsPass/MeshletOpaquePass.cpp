@@ -52,12 +52,11 @@ namespace Syn {
 
         uint32_t activeCameraEntity;
         uint32_t baseDescriptorOffset;
+        uint32_t disableConeCulling;
+        uint32_t materialRenderType;
 
-        uint32_t visualizeMeshlet;
         float screenWidth;
         float screenHeight;
-
-        uint32_t disableConeCulling;
     };
 
     MeshletOpaquePass::MeshletOpaquePass(MaterialRenderType renderType)
@@ -129,11 +128,15 @@ namespace Syn {
         _graphicsState.renderArea = extent;
 
         std::vector<std::string> targets = {
-            RenderTargetNames::Main,
-            RenderTargetNames::EntityIndex
+            RenderTargetNames::ColorMetallic,
+            RenderTargetNames::NormalRoughness,
+            RenderTargetNames::EmissiveAo,
+            RenderTargetNames::EntityIndex,
+            RenderTargetNames::DebugTopologyPipeline,
+            RenderTargetNames::DebugMeshletLod,
+            RenderTargetNames::DebugMaterialUv
         };
 
-        _colorAttachments.clear();
         for (const auto& name : targets)
         {
             _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
@@ -197,12 +200,11 @@ namespace Syn {
 
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.baseDescriptorOffset = drawData->activeTraditionalCount + drawData->meshletCmdOffsets[_renderType];
+        pc.disableConeCulling = (_renderType == MaterialRenderType::Opaque2Sided) ? 1 : 0;
+        pc.materialRenderType = static_cast<uint32_t>(_renderType);
 
-        pc.visualizeMeshlet = 0;
         pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
         pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
-
-        pc.disableConeCulling = (_renderType == MaterialRenderType::Opaque2Sided) ? 1 : 0;
 
         vkCmdPushConstants(
             context.cmd,

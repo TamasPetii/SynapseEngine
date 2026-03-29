@@ -190,12 +190,11 @@ layout(push_constant) uniform PushConstants {
 
     uint activeCameraEntity;
     uint baseDescriptorOffset;
+    uint disableConeCulling;
+    uint materialRenderType;
 
-    uint visualizeMeshlet; 
     float screenWidth;
     float screenHeight;
-
-    uint disableConeCulling;
 } pc;
 
 struct TaskPayload {
@@ -209,7 +208,7 @@ taskPayloadSharedEXT TaskPayload payload;
 layout(location = 0) out vec3 outNormal[];
 layout(location = 1) out vec4 outTangent[];
 layout(location = 2) out vec2 outUV[];
-layout(location = 3) out flat uvec4 outId[]; //(EntityID, MaterialID, MeshletID/MeshID, LodID) 
+layout(location = 3) out flat uvec4 outId[]; //(EntityID, MaterialID, MeshletIndex, LodIndex) 
 
 void main() {
     uint threadIdx = gl_LocalInvocationID.x;

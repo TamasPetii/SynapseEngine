@@ -29,7 +29,12 @@ namespace Syn
             RenderTargetNames::EntityIndex,
             RenderTargetNames::DepthPyramid,
             RenderTargetNames::Bloom,
-            RenderTargetNames::Depth
+            RenderTargetNames::Depth,
+            RenderTargetNames::TransparentAccum,
+            RenderTargetNames::TransparentReveal,
+            RenderTargetNames::DebugTopologyPipeline,
+            RenderTargetNames::DebugMeshletLod,
+			RenderTargetNames::DebugMaterialUv
         };
 
         for (const auto& targetName : debugTargets) {

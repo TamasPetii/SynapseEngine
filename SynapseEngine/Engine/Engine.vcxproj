@@ -182,6 +182,7 @@
     <ClCompile Include="Component\CapsuleColliderComponent.cpp" />
     <ClCompile Include="Component\BoxColliderComponent.cpp" />
     <ClCompile Include="Component\SphereColliderComponent.cpp" />
+    <ClCompile Include="Render\GraphicsPass\DebugInitPass.cpp" />
     <ClCompile Include="System\PhysicsSystem.cpp" />
     <ClCompile Include="Physics\JoltPhysicsEngine.cpp" />
     <ClCompile Include="Physics\IPhysicsEngine.cpp" />
@@ -446,11 +447,13 @@
     <ClCompile Include="Render\GraphicsPass\WireframeMeshletAabbPass.cpp" />
     <ClCompile Include="Render\GraphicsPass\WireframeMeshletSpherePass.cpp" />
     <ClCompile Include="Render\TransferPass\WireframeMeshletInitPass.cpp" />
+    <ClCompile Include="Render\GraphicsPass\WboitInitPass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Component\CapsuleColliderComponent.h" />
     <ClInclude Include="Component\BoxColliderComponent.h" />
     <ClInclude Include="Component\SphereColliderComponent.h" />
+    <ClInclude Include="Render\GraphicsPass\DebugInitPass.h" />
     <ClInclude Include="System\PhysicsSystem.h" />
     <ClInclude Include="Physics\JoltPhysicsEngine.h" />
     <ClInclude Include="Physics\IPhysicsEngine.h" />
@@ -751,6 +754,7 @@
     <ClInclude Include="Render\GraphicsPass\WireframeMeshletAabbPass.h" />
     <ClInclude Include="Render\GraphicsPass\WireframeMeshletSpherePass.h" />
     <ClInclude Include="Render\TransferPass\WireframeMeshletInitPass.h" />
+    <ClInclude Include="Render\GraphicsPass\WboitInitPass.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\BloomComposite.comp" />

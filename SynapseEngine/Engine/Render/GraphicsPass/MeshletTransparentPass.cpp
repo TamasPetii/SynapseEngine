@@ -52,12 +52,11 @@ namespace Syn {
 
         uint32_t activeCameraEntity;
         uint32_t baseDescriptorOffset;
+        uint32_t disableConeCulling;
+        uint32_t materialRenderType;
 
-        uint32_t visualizeMeshlet;
         float screenWidth;
         float screenHeight;
-
-        uint32_t disableConeCulling;
     };
 
     MeshletTransparentPass::MeshletTransparentPass(MaterialRenderType renderType)
@@ -201,12 +200,11 @@ namespace Syn {
 
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.baseDescriptorOffset = drawData->activeTraditionalCount + drawData->meshletCmdOffsets[_renderType];
+        pc.disableConeCulling = (_renderType == MaterialRenderType::Transparent2Sided) ? 1 : 0;
+        pc.materialRenderType = static_cast<uint32_t>(_renderType);
 
-        pc.visualizeMeshlet = 0;
         pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
         pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
-
-        pc.disableConeCulling = (_renderType == MaterialRenderType::Transparent2Sided) ? 1 : 0;
 
         vkCmdPushConstants(
             context.cmd,
