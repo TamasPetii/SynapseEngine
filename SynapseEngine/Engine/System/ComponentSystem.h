@@ -121,9 +121,12 @@ namespace Syn
         bool hasChanged = pool->template IsStateBitSet<CHANGED_BIT>();
         bool hasUpdate = pool->template IsStateBitSet<UPDATE_BIT>();
         bool hasIndex = pool->template IsStateBitSet<INDEX_CHANGED_BIT>();
+        bool hasCustom1 = pool->template IsStateBitSet<CUSTOM_CHANGED_BIT1>();
+        bool hasCustom2 = pool->template IsStateBitSet<CUSTOM_CHANGED_BIT2>();
+        bool hasCustom3 = pool->template IsStateBitSet<CUSTOM_CHANGED_BIT3>();
         bool hasDirtyStatics = !pool->GetStorage().GetDirtyStatics().empty();
 
-        if (!hasChanged && !hasUpdate && !hasIndex && !hasDirtyStatics) return;
+        if (!hasChanged && !hasUpdate && !hasIndex && !hasCustom1 && !hasCustom2 && !hasCustom3 && !hasDirtyStatics) return;
 
         //Info("{} -> OnFinish: Cleaning up frame. (Changed: {}, Update: {}, Index: {}, DirtyStatics: {})", GetName(), hasChanged, hasUpdate, hasIndex, hasDirtyStatics);
 
@@ -131,6 +134,10 @@ namespace Syn
             if (pool->template IsBitSet<CHANGED_BIT>(entity)) pool->template ResetBit<CHANGED_BIT>(entity);
             if (pool->template IsBitSet<UPDATE_BIT>(entity)) pool->template ResetBit<UPDATE_BIT>(entity);
             if (pool->template IsBitSet<INDEX_CHANGED_BIT>(entity)) pool->template ResetBit<INDEX_CHANGED_BIT>(entity);
+
+            if (pool->template IsBitSet<CUSTOM_CHANGED_BIT1>(entity)) pool->template ResetBit<CUSTOM_CHANGED_BIT1>(entity);
+            if (pool->template IsBitSet<CUSTOM_CHANGED_BIT2>(entity)) pool->template ResetBit<CUSTOM_CHANGED_BIT2>(entity);
+            if (pool->template IsBitSet<CUSTOM_CHANGED_BIT3>(entity)) pool->template ResetBit<CUSTOM_CHANGED_BIT3>(entity);
             });
 
         this->EmplaceTask(subflow, SystemPhaseNames::FinishResetState, [pool]() {

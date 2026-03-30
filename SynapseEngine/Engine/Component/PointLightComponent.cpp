@@ -9,7 +9,7 @@ namespace Syn
         weakenDistance(0.0f)
     {}
 
-    PointLightGPU::PointLightGPU(const PointLightComponent& component) :
+    PointLightComponentGPU::PointLightComponentGPU(const PointLightComponent& component) :
         position(component.position),
         radius(component.radius),
         color(component.color),

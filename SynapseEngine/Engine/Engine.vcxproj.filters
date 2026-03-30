@@ -579,7 +579,7 @@
     <ClCompile Include="System\ModelSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\FrustumCullingSystem.cpp">
+    <ClCompile Include="System\ModelFrustumCullingSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\RenderTargetManager.cpp">
@@ -841,6 +841,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Component\SpotLightShadowComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="System\PointLightSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="System\PointLightShadowSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="System\PointLightFrustumCullingSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1487,7 +1496,7 @@
     <ClInclude Include="System\ModelSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\FrustumCullingSystem.h">
+    <ClInclude Include="System\ModelFrustumCullingSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vk\Image\ImageViewNames.h">
@@ -1779,6 +1788,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Component\SpotLightShadowComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\PointLightSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\PointLightShadowSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\PointLightFrustumCullingSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

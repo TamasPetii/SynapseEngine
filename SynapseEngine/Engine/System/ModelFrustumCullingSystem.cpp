@@ -1,4 +1,4 @@
-#include "FrustumCullingSystem.h"
+#include "ModelFrustumCullingSystem.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Component/ModelComponent.h"
 #include "Engine/Component/TransformComponent.h"
@@ -21,7 +21,7 @@
 
 namespace Syn
 {
-    std::vector<TypeID> FrustumCullingSystem::GetReadDependencies() const {
+    std::vector<TypeID> ModelFrustumCullingSystem::GetReadDependencies() const {
         return { 
             TypeInfo<ModelSystem>::ID,
             TypeInfo<TransformSystem>::ID,
@@ -32,7 +32,7 @@ namespace Syn
         };
     }
 
-    void FrustumCullingSystem::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
+    void ModelFrustumCullingSystem::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
     {
         auto drawData = scene->GetSceneDrawData();
         auto materialManager = ServiceLocator::GetMaterialManager();
@@ -213,7 +213,7 @@ namespace Syn
         if (streamTask) initTask.precede(*streamTask);
     }
 
-    void FrustumCullingSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
+    void ModelFrustumCullingSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
     {
         this->EmplaceTask(subflow, SystemPhaseNames::UploadGPU, [scene, frameIndex]() {
             auto drawData = scene->GetSceneDrawData();

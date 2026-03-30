@@ -35,6 +35,8 @@ namespace Syn {
         auto pool = registry->GetPool<TransformComponent>();
         pool->Get(entity).translation = position;
 
+        pool->SetBit<TRANSFORM_POS_CHANGED>(entity);
+
         if (pool->IsStatic(entity)) 
             pool->MarkStaticDirty(entity);
         else if (pool->IsDynamic(entity)) 
@@ -73,6 +75,7 @@ namespace Syn {
 
         auto pool = registry->GetPool<TransformComponent>();
         pool->Get(entity).rotation = rotation;
+        pool->SetBit<TRANSFORM_ROT_CHANGED>(entity);
 
         if (pool->IsStatic(entity)) 
             pool->MarkStaticDirty(entity);
@@ -112,6 +115,7 @@ namespace Syn {
 
         auto pool = registry->GetPool<TransformComponent>();
         pool->Get(entity).scale = scale;
+        pool->SetBit<TRANSFORM_SCALE_CHANGED>(entity);
 
         if (pool->IsStatic(entity)) 
             pool->MarkStaticDirty(entity);

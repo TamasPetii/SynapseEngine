@@ -21,11 +21,12 @@ namespace Syn
     {
         SceneDrawData(uint32_t frameCount);
 
-        bool useGpuCulling = true;
+        bool useGpuCulling = false;
 
         static constexpr uint32_t MAX_INSTANCES = 10000000;
         static constexpr uint32_t MAX_INDIRECT_COMMANDS = 100000;
 
+        // --- Model Data ---
         std::vector<uint32_t> paddedTraditionalCounts;
         std::vector<uint32_t> paddedMeshletCounts;
 
@@ -57,6 +58,7 @@ namespace Syn
         std::vector<VkDrawIndirectCommand> traditionalCommands;
         std::vector<VkDrawMeshTasksIndirectCommandEXT> meshletCommands;
 
+        // --- Debug Data ---
         std::vector<std::shared_ptr<Vk::Buffer>> aabbIndirectCommandBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> sphereIndirectCommandBuffers;
         std::vector<VkDrawIndirectCommand> aabbIndirectCommands;
@@ -68,5 +70,14 @@ namespace Syn
         VkDrawIndirectCommand debugAabbCmdTemplate{};
         VkDrawIndirectCommand debugSphereCmdTemplate{};
         uint32_t totalMaxMeshletInstances = 0;
+
+        // --- Point Light Data ---
+        VkDrawIndirectCommand pointLightCmdTemplate{};
+        std::vector<uint32_t> pointLightCpuInstanceBuffer;
+        std::vector<std::shared_ptr<Vk::Buffer>> pointLightIndirectCommandBuffers;
+    private:
+        void InitModelBuffers(uint32_t frameCount);
+        void InitDebugBuffers(uint32_t frameCount);
+        void InitPointLightBuffers(uint32_t frameCount);
     };
 }

@@ -16,9 +16,9 @@ namespace Syn
         float weakenDistance;
     };
 
-    struct SYN_API PointLightGPU
+    struct SYN_API PointLightComponentGPU
     {
-        PointLightGPU(const PointLightComponent& component);
+        PointLightComponentGPU(const PointLightComponent& component);
 
         glm::vec3 position;
         float radius;

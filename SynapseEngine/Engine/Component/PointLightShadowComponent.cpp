@@ -10,7 +10,7 @@ namespace Syn
         atlasRects.fill(glm::vec4(0.0f));
     }
 
-    PointLightShadowGPU::PointLightShadowGPU(const PointLightShadowComponent& component) :
+    PointLightShadowComponentGPU::PointLightShadowComponentGPU(const PointLightShadowComponent& component) :
         planes(component.nearPlane, component.farPlane, 0.0f, 0.0f)
     {
         for (int i = 0; i < 6; ++i)

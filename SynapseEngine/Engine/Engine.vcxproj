@@ -186,6 +186,9 @@
     <ClCompile Include="Component\BaseComponent\Light.cpp" />
     <ClCompile Include="Component\PointLightComponent.cpp" />
     <ClCompile Include="Component\PointLightShadowComponent.cpp" />
+    <ClCompile Include="System\PointLightFrustumCullingSystem.cpp" />
+    <ClCompile Include="System\PointLightShadowSystem.cpp" />
+    <ClCompile Include="System\PointLightSystem.cpp" />
     <ClCompile Include="Render\GraphicsPass\DeferredEmissiveAoPass.cpp" />
     <ClCompile Include="Render\GraphicsPass\DebugInitPass.cpp" />
     <ClCompile Include="Component\SpotLightComponent.cpp" />
@@ -253,7 +256,7 @@
     <ClCompile Include="Render\GraphicsPass\GBufferInitPass.cpp" />
     <ClCompile Include="Render\RendererFactory.cpp" />
     <ClCompile Include="Render\RenderTargetManager.cpp" />
-    <ClCompile Include="System\FrustumCullingSystem.cpp" />
+    <ClCompile Include="System\ModelFrustumCullingSystem.cpp" />
     <ClCompile Include="Mesh\MeshAllocationInfo.cpp" />
     <ClCompile Include="System\ModelSystem.cpp" />
     <ClCompile Include="Mesh\MeshDrawBlueprint.cpp" />
@@ -464,6 +467,9 @@
     <ClInclude Include="Component\BaseComponent\Light.h" />
     <ClInclude Include="Component\PointLightComponent.h" />
     <ClInclude Include="Component\PointLightShadowComponent.h" />
+    <ClInclude Include="System\PointLightFrustumCullingSystem.h" />
+    <ClInclude Include="System\PointLightShadowSystem.h" />
+    <ClInclude Include="System\PointLightSystem.h" />
     <ClInclude Include="Render\GraphicsPass\DeferredEmissiveAoPass.h" />
     <ClInclude Include="Render\GraphicsPass\DebugInitPass.h" />
     <ClInclude Include="Component\SpotLightComponent.h" />
@@ -539,7 +545,7 @@
     <ClInclude Include="Render\RenderTargetManager.h" />
     <ClInclude Include="Render\RenderNames.h" />
     <ClInclude Include="Render\ShaderNames.h" />
-    <ClInclude Include="System\FrustumCullingSystem.h" />
+    <ClInclude Include="System\ModelFrustumCullingSystem.h" />
     <ClInclude Include="Mesh\MeshAllocationInfo.h" />
     <ClInclude Include="System\ModelSystem.h" />
     <ClInclude Include="Mesh\MeshDrawBlueprint.h" />

@@ -14,9 +14,12 @@
 #include "Engine/System/CameraSystem.h"
 #include "Engine/System/ModelSystem.h"
 #include "Engine/System/MaterialSystem.h"
-#include "Engine/System/FrustumCullingSystem.h"
+#include "Engine/System/ModelFrustumCullingSystem.h"
 #include "Engine/System/AnimationSystem.h"
 #include "Engine/System/PhysicsSystem.h"
+#include "Engine/System/PointLightSystem.h"
+#include "Engine/System/PointLightShadowSystem.h"
+#include "Engine/System/PointLightFrustumCullingSystem.h"
 
 namespace Syn
 {
@@ -51,8 +54,12 @@ namespace Syn
         RegisterSystem<CameraSystem>();
         RegisterSystem<RenderSystem>();
         RegisterSystem<ModelSystem>();
-        RegisterSystem<FrustumCullingSystem>();
+        RegisterSystem<ModelFrustumCullingSystem>();
         RegisterSystem<AnimationSystem>();
+        RegisterSystem<PointLightSystem>();
+        RegisterSystem<PointLightShadowSystem>();
+        RegisterSystem<PointLightFrustumCullingSystem>();
+
         //RegisterSystem<PhysicsSystem>();
     }
 
@@ -70,6 +77,15 @@ namespace Syn
 
         RegisterComponentSparseMapBuffer<AnimationComponent>(BufferNames::AnimationSparseMap);
         RegisterComponentBuffer<AnimationComponent, AnimationComponentGPU>(BufferNames::AnimationData);
+
+        RegisterComponentSparseMapBuffer<PointLightComponent>(BufferNames::PointLightSparseMap);
+        RegisterComponentBuffer<PointLightComponent, PointLightComponentGPU>(BufferNames::PointLightData);
+        RegisterComponentBuffer<PointLightComponent, PointLightColliderGPU>(BufferNames::PointLightColliderData);
+        RegisterComponentBuffer<PointLightComponent, uint32_t>(BufferNames::PointLightVisibleData);
+
+        RegisterComponentSparseMapBuffer<PointLightShadowComponent>(BufferNames::PointLightShadowSparseMap);
+        RegisterComponentBuffer<PointLightShadowComponent, PointLightShadowComponentGPU>(BufferNames::PointLightShadowData);
+
     }
 
     void Scene::BuildTaskflowGraph(tf::Taskflow& taskflow, SystemPhase phase)
