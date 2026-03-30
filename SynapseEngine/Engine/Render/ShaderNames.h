@@ -5,8 +5,8 @@ namespace Syn
 {
     struct SYN_API ShaderNames
     {
-        static constexpr const char* TraditionalVert = "../Engine/Shaders/Traditional.vert";
-        static constexpr const char* TraditionalFrag = "../Engine/Shaders/Traditional.frag";
+        static constexpr const char* TraditionalVert = "../Engine/Shaders/Passes/Geometry/Traditional.vert";
+        static constexpr const char* TraditionalFrag = "../Engine/Shaders/Passes/Geometry/Traditional.frag";
         static constexpr const char* TraditionalTransparentFrag = "../Engine/Shaders/TraditionalTransparent.frag";
         static constexpr const char* TraditionalTransparentPickingFrag = "../Engine/Shaders/TraditionalTransparentPicking.frag";
         
@@ -17,8 +17,8 @@ namespace Syn
         static constexpr const char* MeshletTransparentFrag = "../Engine/Shaders/MeshletTransparent.frag";
         static constexpr const char* MeshletTransparentPickingFrag = "../Engine/Shaders/MeshletTransparentPicking.frag";
         
-        static constexpr const char* MeshCulling = "../Engine/Shaders/MeshCulling.comp";
-        static constexpr const char* ModelCulling = "../Engine/Shaders/ModelCulling.comp";
+        static constexpr const char* MeshCulling = "../Engine/Shaders/Passes/Culling/MeshCulling.comp";
+        static constexpr const char* ModelCulling = "../Engine/Shaders/Passes/Culling/ModelCulling.comp";
 
         static constexpr const char* HizLinearizeDepth = "../Engine/Shaders/HizLinearizeDepth.comp";
         static constexpr const char* HizDownsample = "../Engine/Shaders/HizDownsample.comp";

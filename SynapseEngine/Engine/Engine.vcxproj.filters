@@ -1811,10 +1811,10 @@
     <None Include="Shaders\Composite.frag" />
     <None Include="Shaders\_old_Meshlet.mesh" />
     <None Include="Shaders\Meshlet.frag" />
-    <None Include="Shaders\Traditional.vert" />
-    <None Include="Shaders\Traditional.frag" />
-    <None Include="Shaders\ModelCulling.comp" />
-    <None Include="Shaders\MeshCulling.comp" />
+    <None Include="Shaders\Passes\Geometry\Traditional.vert" />
+    <None Include="Shaders\Passes\Geometry\Traditional.frag" />
+    <None Include="Shaders\Passes\Culling\ModelCulling.comp" />
+    <None Include="Shaders\Passes\Culling\MeshCulling.comp" />
     <None Include="Shaders\Meshlet.task" />
     <None Include="Shaders\Meshlet.mesh" />
     <None Include="Shaders\HizLinearizeDepth.comp" />
@@ -1835,5 +1835,21 @@
     <None Include="Shaders\DeferredEmissiveAo.frag" />
     <None Include="Shaders\DeferredPointLight.vert" />
     <None Include="Shaders\DeferredPointLight.frag" />
+    <None Include="Shaders\Includes\Common\Animation.glsl" />
+    <None Include="Shaders\Includes\Common\Camera.glsl" />
+    <None Include="Shaders\Includes\Common\Material.glsl" />
+    <None Include="Shaders\Includes\Common\Mesh.glsl" />
+    <None Include="Shaders\Includes\Common\Model.glsl" />
+    <None Include="Shaders\Includes\Common\PointLight.glsl" />
+    <None Include="Shaders\Includes\Common\Texture.glsl" />
+    <None Include="Shaders\Includes\Common\Transform.glsl" />
+    <None Include="Shaders\Includes\PushConstants\TraditionalPassPC.glsl" />
+    <None Include="Shaders\Includes\Utils\ColorMath.glsl" />
+    <None Include="Shaders\Includes\Core.glsl" />
+    <None Include="Shaders\Includes\Utils\CullingMath.glsl" />
+    <None Include="Shaders\Includes\PushConstants\ModelCullingPC.glsl" />
+    <None Include="Shaders\Includes\Common\IndirectCommand.glsl" />
+    <None Include="Shaders\Includes\Common\Culling.glsl" />
+    <None Include="Shaders\Includes\PushConstants\MeshCullingPC.glsl" />
   </ItemGroup>
 </Project>

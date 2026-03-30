@@ -6,6 +6,7 @@
 #include "Engine/Vk/Synchronization/Fence.h"
 #include "Engine/Vk/Synchronization/BinarySemaphore.h"
 #include "Engine/Vk/Core/ThreadSafeQueue.h"
+#include "Engine/Logger/SynLog.h"
 
 namespace Syn {
 
@@ -45,12 +46,21 @@ namespace Syn {
         auto device = ServiceLocator::GetVkContext()->GetDevice()->Handle();
 
         VkFence fences[] = { _inFlightFences[frameIndex]->Handle(), _presentFences[frameIndex]->Handle() };
-        vkWaitForFences(device, 2, fences, VK_TRUE, UINT64_MAX);
+        VkResult result = vkWaitForFences(device, 2, fences, VK_TRUE, UINT64_MAX);
+
+        if (result != VK_SUCCESS) {
+            Error("Renderer::WaitForFrame: Error while waiting for fences! FrameIndex: {}, Result: {}", frameIndex, (int)result);
+            SYN_VK_ASSERT_MSG(result, "Error while waiting for fences!");
+        }
     }
 
     Vk::CommandBuffer* Renderer::BeginFrame(uint32_t frameIndex) {
         auto device = ServiceLocator::GetVkContext()->GetDevice()->Handle();
         auto swapChain = ServiceLocator::GetVkContext()->GetSwapChain();
+
+        VkFence fences[] = { _inFlightFences[frameIndex]->Handle(), _presentFences[frameIndex]->Handle() };
+        vkResetFences(device, 2, fences);
+
         uint32_t imageIndex = swapChain->AcquireNextImage(_imageAvailableSemaphores[frameIndex]->Handle());
 
         if (imageIndex == static_cast<uint32_t>(-1)) {
@@ -58,9 +68,6 @@ namespace Syn {
         }
 
         _imageIndex = imageIndex;
-
-        VkFence fences[] = { _inFlightFences[frameIndex]->Handle(), _presentFences[frameIndex]->Handle() };
-        vkResetFences(device, 2, fences);
 
         auto cmd = _commandBuffers[frameIndex].get();
         cmd->Reset();

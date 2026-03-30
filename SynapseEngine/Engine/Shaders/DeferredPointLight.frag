@@ -4,6 +4,7 @@
 
 layout(location = 0) in flat uint inLightDenseIndex;
 layout(location = 1) in flat uint inShadowDenseIndex;
+layout(location = 2) in flat uint inCameraIndex;
 
 layout(location = 0) out vec4 outColor;
 
@@ -70,8 +71,7 @@ void main()
     vec2 uv = gl_FragCoord.xy / vec2(pc.screenWidth, pc.screenHeight);
     float depth = texture(depthTexture, uv).r;
 
-    SparseMapBuffer cameraMap = SparseMapBuffer(pc.cameraSparseMapBufferAddr);
-    CameraComponent camera = CameraPool(pc.cameraBufferAddr).data[cameraMap.data[pc.activeCameraEntity]];
+    CameraComponent camera = CameraPool(pc.cameraBufferAddr).data[inCameraIndex];
 
     vec4 ndc = vec4(uv * 2.0 - 1.0, depth, 1.0);
     vec4 worldPos = camera.viewProjVulkanInv * ndc;

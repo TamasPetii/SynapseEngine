@@ -4,6 +4,7 @@
 
 layout(location = 0) out flat uint outLightDenseIndex;
 layout(location = 1) out flat uint outShadowDenseIndex;
+layout(location = 2) out flat uint outCameraIndex;
 
 struct GpuVertexPosition {
     vec3 position;
@@ -82,10 +83,13 @@ void main()
     model[3] = vec4(light.position, 1.0);
     
     SparseMapBuffer cameraMap = SparseMapBuffer(pc.cameraSparseMapBufferAddr);
-    CameraComponent camera = CameraPool(pc.cameraBufferAddr).data[cameraMap.data[pc.activeCameraEntity]];
+
+    uint cameraIndex = cameraMap.data[pc.activeCameraEntity];
+    CameraComponent camera = CameraPool(pc.cameraBufferAddr).data[cameraIndex];
 
     gl_Position = camera.viewProjVulkan * model * vec4(localPos, 1.0);
     
     outLightDenseIndex = lightDenseIndex;
     outShadowDenseIndex = shadowDenseIndex;
+    outCameraIndex = cameraIndex;
 }

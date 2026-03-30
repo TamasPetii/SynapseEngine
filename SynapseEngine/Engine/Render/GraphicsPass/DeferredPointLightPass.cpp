@@ -80,7 +80,6 @@ namespace Syn {
 
         auto mainImg = group->GetImage(RenderTargetNames::Main);
 
-        _colorAttachments.clear();
         _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
             .imageView = mainImg->GetView(Vk::ImageViewNames::Default),
             .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
