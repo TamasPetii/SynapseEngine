@@ -13,6 +13,8 @@ namespace Syn
     }
 
     void GuiPass::PrepareFrame(const RenderContext& context) {
+        if (!context.onRenderGui || !context.scene) return;
+
         auto vkContext = ServiceLocator::GetVkContext();
         auto swapChain = vkContext->GetSwapChain();
 

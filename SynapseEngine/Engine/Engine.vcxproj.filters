@@ -822,6 +822,27 @@
     <ClCompile Include="Render\GraphicsPass\WboitInitPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Component\DirectionLightComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\BaseComponent\Light.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\DeferredEmissiveAoPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\PointLightComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\PointLightShadowComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\SpotLightComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\SpotLightShadowComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1739,9 +1760,30 @@
     <ClInclude Include="Render\GraphicsPass\WboitInitPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Component\DirectionLightComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\BaseComponent\Light.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\DeferredEmissiveAoPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\PointLightComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\PointLightShadowComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\SpotLightComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\SpotLightShadowComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Composite.vert" />
+    <None Include="Shaders\Fullscreen.vert" />
     <None Include="Shaders\Composite.frag" />
     <None Include="Shaders\_old_Meshlet.mesh" />
     <None Include="Shaders\Meshlet.frag" />
@@ -1766,5 +1808,6 @@
     <None Include="Shaders\TransparentComposite.frag" />
     <None Include="Shaders\TraditionalTransparentPicking.frag" />
     <None Include="Shaders\MeshletTransparentPicking.frag" />
+    <None Include="Shaders\DeferredEmissiveAo.frag" />
   </ItemGroup>
 </Project>

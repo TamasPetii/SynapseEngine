@@ -14,7 +14,7 @@ namespace Syn {
         auto shaderManager = ServiceLocator::GetShaderManager();
 
         _shaderProgram = shaderManager->CreateProgram("CompositeProgram", {
-            ShaderNames::CompositeVert,
+            ShaderNames::FullscreenVert,
             ShaderNames::CompositeFrag
             });
 
