@@ -38,5 +38,7 @@ namespace Syn
         static constexpr const char* WireframeMeshletVert = "../Engine/Shaders/WireframeMeshlet.vert";
 
 		static constexpr const char* DeferredEmissiveAoFrag = "../Engine/Shaders/DeferredEmissiveAo.frag";
+        static constexpr const char* DeferredPointLightVert = "../Engine/Shaders/DeferredPointLight.vert";
+        static constexpr const char* DeferredPointLightFrag = "../Engine/Shaders/DeferredPointLight.frag";
     };
 }

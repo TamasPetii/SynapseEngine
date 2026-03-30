@@ -87,14 +87,11 @@ void Synapse::OnUpdate(float dt) {
     if (_guiManager) {
         _guiManager->BeginFrame();
         _guiManager->UpdateAndDraw();
+        _guiManager->EndFrame();
     }
 
     if (_engine) {
         _engine->Update(dt);
-    }
-
-    if (_guiManager) {
-        _guiManager->EndFrame();
     }
 }
 

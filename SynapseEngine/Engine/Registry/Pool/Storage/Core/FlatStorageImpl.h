@@ -35,7 +35,6 @@ namespace Syn
         SYN_INLINE void Clear();
     };
 
-    // Aliasok frissítve a Policy rendszerhez
     template<typename T> using FlatStorage = FlatStorageImpl<T, NoFlagMixin>;
     template<typename T> using FlatStorageFlagged = FlatStorageImpl<T, SimpleFlagMixin>;
     using IndexStorage = FlatStorageImpl<void, NoFlagMixin>;

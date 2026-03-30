@@ -186,6 +186,7 @@
     <ClCompile Include="Component\BaseComponent\Light.cpp" />
     <ClCompile Include="Component\PointLightComponent.cpp" />
     <ClCompile Include="Component\PointLightShadowComponent.cpp" />
+    <ClCompile Include="Render\GraphicsPass\DeferredPointLightPass.cpp" />
     <ClCompile Include="System\PointLightFrustumCullingSystem.cpp" />
     <ClCompile Include="System\PointLightShadowSystem.cpp" />
     <ClCompile Include="System\PointLightSystem.cpp" />
@@ -467,6 +468,7 @@
     <ClInclude Include="Component\BaseComponent\Light.h" />
     <ClInclude Include="Component\PointLightComponent.h" />
     <ClInclude Include="Component\PointLightShadowComponent.h" />
+    <ClInclude Include="Render\GraphicsPass\DeferredPointLightPass.h" />
     <ClInclude Include="System\PointLightFrustumCullingSystem.h" />
     <ClInclude Include="System\PointLightShadowSystem.h" />
     <ClInclude Include="System\PointLightSystem.h" />
@@ -783,6 +785,8 @@
     <None Include="Shaders\BloomUpsample.comp" />
     <None Include="Shaders\Composite.frag" />
     <None Include="Shaders\DeferredEmissiveAo.frag" />
+    <None Include="Shaders\DeferredPointLight.frag" />
+    <None Include="Shaders\DeferredPointLight.vert" />
     <None Include="Shaders\Fullscreen.vert" />
     <None Include="Shaders\MeshletTransparent.frag" />
     <None Include="Shaders\MeshletTransparentPicking.frag" />

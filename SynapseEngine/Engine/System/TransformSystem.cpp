@@ -20,7 +20,6 @@ namespace Syn
 
         ParallelForEachIf<UPDATE_BIT>(transformPool, subflow, SystemPhaseNames::Update, [transformPool](EntityID entity) {
             auto& transformComponent = transformPool->Get(entity);
-            DenseIndex transformIndex = transformPool->GetMapping().Get(entity);
 
             transformComponent.transform = glm::mat4(1.0f);
             transformComponent.transform = glm::translate(transformComponent.transform, transformComponent.translation);
@@ -30,7 +29,7 @@ namespace Syn
             transformComponent.transform = glm::scale(transformComponent.transform, transformComponent.scale);
             transformComponent.transformIT = glm::transpose(glm::inverse(transformComponent.transform));
 
-            if (transformPool->GetStorage().IsDynamic(transformIndex))
+            if (transformPool->IsDynamic(entity))
                 transformPool->SetBit<CHANGED_BIT>(entity);
 
             transformComponent.version++;

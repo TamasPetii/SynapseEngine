@@ -80,6 +80,11 @@ namespace Syn
             if (!drawData->useGpuCulling) {
                 auto instanceBufferView = bufferManager->GetComponentBuffer(BufferNames::PointLightVisibleData, frameIndex);
                 if (count > 0 && instanceBufferView.buffer) {
+                    std::string visibleEntities = "";
+                    for (uint32_t i = 0; i < std::min(count, 10u); ++i) {
+                        visibleEntities += std::to_string(drawData->pointLightCpuInstanceBuffer[i]) + " ";
+                    }
+
                     instanceBufferView.buffer->Write(drawData->pointLightCpuInstanceBuffer.data(), count * sizeof(uint32_t), 0);
                 }
             }

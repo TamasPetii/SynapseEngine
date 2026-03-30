@@ -286,7 +286,7 @@ namespace Syn
         drawData->totalMaxMeshletInstances = totalMaxMeshletInstances;
         drawData->requiredMaterialBufferSize = totalMaterialIndicesCapacity * sizeof(uint32_t);
 
-        if (true)
+        if (false)
         {
             std::stringstream ss;
             const char* matNames[] = { "Opaque1Sided", "Opaque2Sided", "Transparent1Sided", "Transparent2Sided" };

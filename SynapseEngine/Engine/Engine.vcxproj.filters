@@ -852,6 +852,9 @@
     <ClCompile Include="System\PointLightFrustumCullingSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\DeferredPointLightPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1799,6 +1802,9 @@
     <ClInclude Include="System\PointLightFrustumCullingSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\DeferredPointLightPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Fullscreen.vert" />
@@ -1827,5 +1833,7 @@
     <None Include="Shaders\TraditionalTransparentPicking.frag" />
     <None Include="Shaders\MeshletTransparentPicking.frag" />
     <None Include="Shaders\DeferredEmissiveAo.frag" />
+    <None Include="Shaders\DeferredPointLight.vert" />
+    <None Include="Shaders\DeferredPointLight.frag" />
   </ItemGroup>
 </Project>

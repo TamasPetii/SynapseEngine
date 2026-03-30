@@ -36,7 +36,7 @@ namespace Syn
             { 0.0, -1.0,  0.0 }, { 0.0, -1.0,  0.0 }
         };
 
-        ParallelForEachIf<CHANGED_BIT>(shadowPool, subflow, SystemPhaseNames::Update,
+        ParallelForEachIf<UPDATE_BIT>(shadowPool, subflow, SystemPhaseNames::Update,
             [shadowPool, lightPool](EntityID entity) {
                 if (lightPool->Has(entity))
                 {
@@ -53,6 +53,9 @@ namespace Syn
                     for (int i = 0; i < 6; ++i) {
                         shadowComp.viewProjs[i] = shadowProj * glm::lookAt(lightComp.position, lightComp.position + directions[i], upVectors[i]);
                     }
+
+                    if(shadowPool->IsDynamic(entity))
+						shadowPool->SetBit<CHANGED_BIT>(entity);
 
                     shadowComp.version++;
                 }

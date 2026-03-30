@@ -35,17 +35,18 @@ namespace Syn
                         bool hasShadow = shadowPool ? shadowPool->Has(entity) : false;
 
                         if (lightComp.useShadow && !hasShadow) {
-                            registry->AddComponents<PointLightShadowComponent>(entity);
+                            registry->AddComponent<PointLightShadowComponent>(entity);
+                            auto currentShadowPool = registry->GetPool<PointLightShadowComponent>();
 
                             if (pointLightPool->IsStatic(entity)) {
-                                shadowPool->SetCategory(entity, StorageCategory::Static);
-                                shadowPool->MarkStaticDirty(entity);
+                                currentShadowPool->SetCategory(entity, StorageCategory::Static);
+                                currentShadowPool->MarkStaticDirty(entity);
                             }
-                            else if (pointLightPool->IsStream(entity)) {
-                                shadowPool->SetCategory(entity, StorageCategory::Stream);
+                            else if (pointLightPool->IsDynamic(entity)) {
+                                currentShadowPool->SetCategory(entity, StorageCategory::Dynamic);
                             }
                             else {
-                                shadowPool->SetCategory(entity, StorageCategory::Dynamic);
+                                currentShadowPool->SetCategory(entity, StorageCategory::Stream);
                             }
                         }
                         else if (!lightComp.useShadow && hasShadow) {
@@ -61,7 +62,7 @@ namespace Syn
             });
 
         auto mathTasks = ParallelForEachIf<UPDATE_BIT>(pointLightPool, subflow, SystemPhaseNames::Update,
-            [pointLightPool, transformPool, shadowPool](EntityID entity) {
+            [pointLightPool, transformPool, registry](EntityID entity) {
                 if (transformPool->Has(entity) && transformPool->IsBitSet<TRANSFORM_POS_CHANGED>(entity))
                 {
                     auto& transformComp = transformPool->Get(entity);
@@ -75,9 +76,12 @@ namespace Syn
 
                     lightComp.version++;
 
-                    // ??
-                    if (shadowPool && shadowPool->Has(entity)) {
-                        shadowPool->SetBit<CHANGED_BIT>(entity);
+                    auto currentShadowPool = registry->GetPool<PointLightShadowComponent>();
+                    if (currentShadowPool && currentShadowPool->Has(entity)) {
+                        if(currentShadowPool->IsStatic(entity))
+							currentShadowPool->MarkStaticDirty(entity);
+                        else if(currentShadowPool->IsDynamic(entity))
+                            currentShadowPool->SetBit<UPDATE_BIT>(entity);
                     }
                 }
             });

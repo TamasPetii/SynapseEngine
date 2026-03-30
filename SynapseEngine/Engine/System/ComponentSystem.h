@@ -130,7 +130,7 @@ namespace Syn
 
         //Info("{} -> OnFinish: Cleaning up frame. (Changed: {}, Update: {}, Index: {}, DirtyStatics: {})", GetName(), hasChanged, hasUpdate, hasIndex, hasDirtyStatics);
 
-        ParallelForEach(pool, subflow, SystemPhaseNames::Finish, [pool](EntityID entity) {
+        auto parallelTasks = ParallelForEach(pool, subflow, SystemPhaseNames::Finish, [pool](EntityID entity) {
             if (pool->template IsBitSet<CHANGED_BIT>(entity)) pool->template ResetBit<CHANGED_BIT>(entity);
             if (pool->template IsBitSet<UPDATE_BIT>(entity)) pool->template ResetBit<UPDATE_BIT>(entity);
             if (pool->template IsBitSet<INDEX_CHANGED_BIT>(entity)) pool->template ResetBit<INDEX_CHANGED_BIT>(entity);
@@ -140,17 +140,19 @@ namespace Syn
             if (pool->template IsBitSet<CUSTOM_CHANGED_BIT3>(entity)) pool->template ResetBit<CUSTOM_CHANGED_BIT3>(entity);
             });
 
-        this->EmplaceTask(subflow, SystemPhaseNames::FinishResetState, [pool]() {
+        auto resetTask = this->EmplaceTask(subflow, SystemPhaseNames::FinishResetState, [pool]() {
             pool->ResetAllStateBits();
 
             for (EntityID entity : pool->GetStorage().GetDirtyStatics()) {
-                if (pool->Has(entity)) {
                     pool->template ResetBit<DIRTY_STATIC_BIT>(entity);
-                }
             }
 
             pool->ResetStaticDirtyCounter();
             });
+
+        for (auto& task : parallelTasks) {
+            task.precede(resetTask);
+        }
     }
 
     template <typename TComponent>

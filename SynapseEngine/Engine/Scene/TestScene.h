@@ -11,6 +11,7 @@
 #include "Engine/Material/MaterialManager.h"
 #include "Engine/Animation/AnimationManager.h"
 #include "Engine/Component/AnimationComponent.h"
+#include "Engine/Component/PointLightComponent.h"
 #include <random>
 
 namespace Syn
@@ -147,7 +148,7 @@ namespace Syn
             auto materialManager = ServiceLocator::GetMaterialManager();
 
             // Random Geometry
-            for (int i = 0; i < 100000; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
@@ -187,6 +188,36 @@ namespace Syn
 
                 auto& overrideComp = registry->GetComponent<MaterialOverrideComponent>(e);
                 overrideComp.materials.push_back(randomMatId);
+            }
+
+            for (int i = 0; i < 50; i++)
+            {
+                EntityID lightEntity = registry->CreateEntity();
+                registry->AddComponent<TransformComponent>(lightEntity);
+                registry->AddComponent<PointLightComponent>(lightEntity);
+
+                auto& transform = registry->GetComponent<TransformComponent>(lightEntity);
+                transform.translation = glm::vec3(
+                    (rand() % 400) - 200.0f,
+                    (rand() % 50) - 25.0f,
+                    (rand() % 400) - 200.0f
+                );
+
+                auto& light = registry->GetComponent<PointLightComponent>(lightEntity);
+                light.position = transform.translation;
+                light.color = glm::vec3(
+                    static_cast<float>(rand()) / static_cast<float>(RAND_MAX),
+                    static_cast<float>(rand()) / static_cast<float>(RAND_MAX),
+                    static_cast<float>(rand()) / static_cast<float>(RAND_MAX)
+                );
+                light.radius = 20.0f + (rand() % 30);
+                light.strength = 1.0f + (rand() % 5);
+                light.useShadow = (i < 5);
+
+                registry->GetPool<TransformComponent>()->SetCategory(lightEntity, StorageCategory::Static);
+                registry->GetPool<PointLightComponent>()->SetCategory(lightEntity, StorageCategory::Static);
+                registry->GetPool<PointLightComponent>()->SetBit<SHADOW_TOGGLE_BIT>(lightEntity);
+                registry->GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(lightEntity);
             }
         }
     };

@@ -36,9 +36,8 @@ namespace Syn
 
         SYN_INLINE void MarkStaticDirty(EntityID entity)
         {
-            auto& pool = AsDerived();
-            const DenseIndex index = pool.GetMapping().Get(entity);
-            pool.GetStorage().MarkStaticDirty(index);
+            const DenseIndex index = AsDerived().GetMapping().Get(entity);
+            return AsDerived().GetStorage().MarkStaticDirty(index);
         }
 
         SYN_INLINE std::span<const EntityID> GetDirtyStatics() const
@@ -66,18 +65,18 @@ namespace Syn
             AsDerived().GetStorage().ResetStaticDirtyCounter();
         }
 
-        SYN_INLINE bool IsStatic(DenseIndex index) const
-        {
+        SYN_INLINE bool IsStatic(EntityID entity) const {
+            DenseIndex index = AsDerived().GetMapping().Get(entity);
             return AsDerived().GetStorage().IsStatic(index);
         }
 
-        SYN_INLINE bool IsDynamic(DenseIndex index) const
-        {
+        SYN_INLINE bool IsDynamic(EntityID entity) const {
+            DenseIndex index = AsDerived().GetMapping().Get(entity);
             return AsDerived().GetStorage().IsDynamic(index);
         }
 
-        SYN_INLINE bool IsStream(DenseIndex index) const
-        {
+        SYN_INLINE bool IsStream(EntityID entity) const {
+            DenseIndex index = AsDerived().GetMapping().Get(entity);
             return AsDerived().GetStorage().IsStream(index);
         }
     };
