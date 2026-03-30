@@ -9,28 +9,9 @@
 #include "Engine/Mesh/MeshSourceNames.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "Engine/Animation/AnimationManager.h"
-
+#include "Engine/Render/PushConstants/WireframePushConstants.h"
 
 namespace Syn {
-
-    struct WireframePushConstants {
-        VkDeviceAddress animationAddressBuffer;
-        VkDeviceAddress animationBufferAddr;
-        VkDeviceAddress animationSparseMapBufferAddr;
-        VkDeviceAddress modelAddressBuffer;
-        VkDeviceAddress globalInstanceBuffers;
-        VkDeviceAddress globalIndirectCommandDescriptorBuffers;
-        VkDeviceAddress cameraBufferAddr;
-        VkDeviceAddress cameraSparseMapBufferAddr;
-        VkDeviceAddress transformBufferAddr;
-        VkDeviceAddress transformSparseMapBufferAddr;
-        VkDeviceAddress indexBufferAddr;
-        VkDeviceAddress vertexBufferAddr;
-        uint32_t activeCameraEntity;
-        uint32_t isSphere;
-        uint32_t drawIdOffset;
-        alignas(16) glm::vec4 debugColor;
-    };
 
     void WireframeAabbPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
@@ -128,68 +109,35 @@ namespace Syn {
         pc.indexBufferAddr = cubeMesh->hardwareBuffers.indices->GetDeviceAddress();
         pc.vertexBufferAddr = cubeMesh->hardwareBuffers.vertexPositions->GetDeviceAddress();
 
+        pc.debugInstanceBufferAddr = 0;
+        pc.modelBufferAddr = compManager->GetBufferAddr(BufferNames::ModelData, fIdx);
+        pc.modelSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::ModelSparseMap, fIdx);
+
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.isSphere = 0;
+        pc.drawIdOffset = 0;
         pc.debugColor = glm::vec4(0, 1, 0, 1);
 
         vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(WireframePushConstants), &pc);
     }
 
     void WireframeAabbPass::Draw(const RenderContext& context) {
-        /*
-
         auto scene = context.scene;
+        if (!scene) return;
+
         auto drawData = scene->GetSceneDrawData();
-        if (!scene || drawData->activeDescriptorCount == 0) return;
+        uint32_t totalCommands = drawData->activeTraditionalCount + drawData->activeMeshletCount;
+
+        if (totalCommands == 0 || !drawData->aabbIndirectCommandBuffers[context.frameIndex]) return;
 
         auto indirectBuffer = drawData->aabbIndirectCommandBuffers[context.frameIndex]->Handle();
-        auto countBuffer = drawData->globalDrawCountBuffers[context.frameIndex]->Handle();
 
-        // Traditional meshek AABB 
-        uint32_t offsetTraditional = 0;
-        vkCmdPushConstants(
-            context.cmd,
-            _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL,
-            offsetof(WireframePushConstants, drawIdOffset),
-            sizeof(uint32_t),
-            &offsetTraditional
-        );
-
-        vkCmdDrawIndirectCount(
+        vkCmdDrawIndirect(
             context.cmd,
             indirectBuffer,
             0,
-            countBuffer,
-            0,
-            SceneDrawData::MESHLET_OFFSET_START,
+            totalCommands,
             sizeof(VkDrawIndirectCommand)
         );
-
-        // Meshlet meshek AABB
-        uint32_t offsetMeshlet = SceneDrawData::MESHLET_OFFSET_START;
-        vkCmdPushConstants(
-            context.cmd,
-            _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL,
-            offsetof(WireframePushConstants, drawIdOffset),
-            sizeof(uint32_t),
-            &offsetMeshlet
-        );
-
-        VkDeviceSize meshletIndirectOffset = SceneDrawData::MESHLET_OFFSET_START * sizeof(VkDrawIndirectCommand);
-        VkDeviceSize meshletCountOffset = sizeof(uint32_t);
-
-        vkCmdDrawIndirectCount(
-            context.cmd,
-            indirectBuffer,
-            meshletIndirectOffset,
-            countBuffer,
-            meshletCountOffset,
-            SceneDrawData::MAX_INDIRECT_COMMANDS - SceneDrawData::MESHLET_OFFSET_START,
-            sizeof(VkDrawIndirectCommand)
-        );
-
-        */
     }
 }

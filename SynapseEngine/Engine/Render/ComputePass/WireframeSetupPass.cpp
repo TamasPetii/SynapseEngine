@@ -12,8 +12,9 @@ namespace Syn {
         uint64_t globalIndirectCmdsAddr;
         uint64_t aabbCmdsAddr;
         uint64_t sphereCmdsAddr;
-        uint32_t meshletOffsetStart;
-        uint32_t maxCommands;
+
+        uint32_t totalTraditionalCommands;
+        uint32_t totalCommands;
     };
 
     void WireframeSetupPass::Initialize() {
@@ -31,7 +32,8 @@ namespace Syn {
         }
 
         auto drawData = scene->GetSceneDrawData();
-        if (drawData->activeDescriptorCount == 0) {
+        uint32_t totalCommands = drawData->activeTraditionalCount + drawData->activeMeshletCount;
+        if (totalCommands == 0) {
             _shouldDispatch = false;
             return;
         }
@@ -43,8 +45,8 @@ namespace Syn {
         pc.globalIndirectCmdsAddr = drawData->globalIndirectCommandBuffers[fIdx]->GetDeviceAddress();
         pc.aabbCmdsAddr = drawData->aabbIndirectCommandBuffers[fIdx]->GetDeviceAddress();
         pc.sphereCmdsAddr = drawData->sphereIndirectCommandBuffers[fIdx]->GetDeviceAddress();
-        //pc.meshletOffsetStart = SceneDrawData::MESHLET_OFFSET_START;
-        pc.maxCommands = SceneDrawData::MAX_INDIRECT_COMMANDS;
+        pc.totalTraditionalCommands = drawData->activeTraditionalCount;
+        pc.totalCommands = totalCommands;
 
         vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(WireframeSetupPushContants), &pc);
     }
@@ -54,9 +56,9 @@ namespace Syn {
 
         auto drawData = context.scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        uint32_t maxCommands = SceneDrawData::MAX_INDIRECT_COMMANDS;
 
-        uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(maxCommands, ComputeGroupSize::Buffer256D);
+        uint32_t totalCommands = drawData->activeTraditionalCount + drawData->activeMeshletCount;
+        uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(totalCommands, ComputeGroupSize::Buffer256D);
 
         vkCmdDispatch(context.cmd, groupCountX, 1, 1);
 

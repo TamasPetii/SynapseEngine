@@ -83,9 +83,9 @@ namespace Syn
         pipeline->AddPass(std::make_unique<TransparentCompositePass>());
 
         // Wireframe Passes
-        //pipeline->AddPass(std::make_unique<WireframeSetupPass>());
-        //pipeline->AddPass(std::make_unique<WireframeAabbPass>());
-        //pipeline->AddPass(std::make_unique<WireframeSpherePass>());
+        pipeline->AddPass(std::make_unique<WireframeSetupPass>());
+        pipeline->AddPass(std::make_unique<WireframeAabbPass>());
+        pipeline->AddPass(std::make_unique<WireframeSpherePass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletInitPass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletAabbPass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletSpherePass>());

@@ -9,32 +9,10 @@
 #include "Engine/Mesh/MeshSourceNames.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "Engine/Animation/AnimationManager.h"
-
+#include "Engine/Render/PushConstants/WireframePushConstants.h"
 
 namespace Syn
 {
-    struct WireframeMeshletPushConstants
-    {
-        VkDeviceAddress animationAddressBuffer;
-        VkDeviceAddress animationBufferAddr;
-        VkDeviceAddress animationSparseMapBufferAddr;
-        VkDeviceAddress modelAddressBuffer;
-        VkDeviceAddress globalInstanceBuffers;
-        VkDeviceAddress globalIndirectCommandDescriptorBuffers;
-        VkDeviceAddress cameraBufferAddr;
-        VkDeviceAddress cameraSparseMapBufferAddr;
-        VkDeviceAddress transformBufferAddr;
-        VkDeviceAddress transformSparseMapBufferAddr;
-        VkDeviceAddress indexBufferAddr;
-        VkDeviceAddress vertexBufferAddr;
-        VkDeviceAddress debugInstanceBufferAddr;
-        VkDeviceAddress modelBufferAddr;
-        VkDeviceAddress modelSparseMapBufferAddr;
-        uint32_t activeCameraEntity;
-        uint32_t isSphere;
-        alignas(16) glm::vec4 debugColor;
-    };
-
     void WireframeMeshletAabbPass::Initialize()
     {
         auto shaderManager = ServiceLocator::GetShaderManager();
@@ -119,7 +97,7 @@ namespace Syn
         auto cubeMesh = modelManager->GetResource(MeshSourceNames::Cube);
         if (!cubeMesh) return;
 
-        WireframeMeshletPushConstants pc{};
+        WireframePushConstants pc{};
         pc.animationAddressBuffer = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
         pc.animationBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationData, fIdx);
         pc.animationSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationSparseMap, fIdx);
@@ -127,10 +105,12 @@ namespace Syn
         pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
         pc.globalInstanceBuffers = drawData->globalInstanceBuffers[fIdx]->GetDeviceAddress();
         pc.globalIndirectCommandDescriptorBuffers = drawData->globalIndirectCommandDescriptorBuffers[fIdx]->GetDeviceAddress();
+
         pc.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
         pc.cameraSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
         pc.transformBufferAddr = compManager->GetBufferAddr(BufferNames::TransformData, fIdx);
         pc.transformSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::TransformSparseMap, fIdx);
+
         pc.modelBufferAddr = compManager->GetBufferAddr(BufferNames::ModelData, fIdx);
         pc.modelSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::ModelSparseMap, fIdx);
 
@@ -140,17 +120,20 @@ namespace Syn
 
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.isSphere = 0;
-        pc.debugColor = glm::vec4(0, 1, 0, 1);
+        pc.drawIdOffset = 0;
+        pc.debugColor = glm::vec4(0.0, 1.0, 0.0, 1.0);
 
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(WireframeMeshletPushConstants), &pc);
+        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(WireframePushConstants), &pc);
     }
 
     void WireframeMeshletAabbPass::Draw(const RenderContext& context)
     {
         auto scene = context.scene;
+        if (!scene) return;
+
         auto drawData = scene->GetSceneDrawData();
 
-        if (!scene || drawData->activeDescriptorCount == 0 || !drawData->debugAabbIndirectBuffers[context.frameIndex]) return;
+        if (drawData->activeDescriptorCount == 0 || !drawData->debugAabbIndirectBuffers[context.frameIndex]) return;
 
         auto indirectBuffer = drawData->debugAabbIndirectBuffers[context.frameIndex]->Handle();
 
@@ -158,7 +141,7 @@ namespace Syn
             context.cmd,
             indirectBuffer,
             0,
-            1,
+            drawData->totalMaxMeshletInstances,
             sizeof(VkDrawIndirectCommand)
         );
     }

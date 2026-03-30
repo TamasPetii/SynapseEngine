@@ -82,6 +82,11 @@ struct GpuMeshletDescriptor {
     uint triangleCount;
 };
 
+struct DebugMeshletInstance {
+    uint entityId;
+    uint globalMeshletIdx;
+};
+
 layout(buffer_reference, std430) readonly buffer PositionBuffer         { GpuVertexPosition data[]; };
 layout(buffer_reference, std430) readonly buffer AttributeBuffer        { GpuVertexAttributes data[]; };
 layout(buffer_reference, std430) readonly buffer IndexBuffer            { uint data[]; };
@@ -93,6 +98,7 @@ layout(buffer_reference, std430) readonly buffer MeshColliderBuffer     { GpuMes
 layout(buffer_reference, std430) readonly buffer MeshletColliderBuffer  { GpuMeshletCollider data[]; };
 layout(buffer_reference, std430) readonly buffer VertexIndicesBuffer    { uint data[]; };
 layout(buffer_reference, std430) readonly buffer TriangleIndicesBuffer  { uint8_t data[]; };
+layout(buffer_reference, std430) readonly buffer DebugMeshletInstanceBuffer    { DebugMeshletInstance data[]; };
 
 #define GET_VERTEX_POS(addr, idx)             PositionBuffer(addr).data[idx]
 #define GET_VERTEX_ATTR(addr, idx)            AttributeBuffer(addr).data[idx]
@@ -105,5 +111,6 @@ layout(buffer_reference, std430) readonly buffer TriangleIndicesBuffer  { uint8_
 #define GET_MESHLET_COLLIDER(addr, idx)       MeshletColliderBuffer(addr).data[idx]
 #define GET_MESHLET_VERTEX_INDEX(addr, idx)   VertexIndicesBuffer(addr).data[idx]
 #define GET_MESHLET_TRIANGLE_INDEX(addr, idx) TriangleIndicesBuffer(addr).data[idx]
+#define GET_DEBUG_MESHLET_INSTANCE_BUFFER(addr, idx)  DebugMeshletInstanceBuffer(addr).data[idx]
 
 #endif

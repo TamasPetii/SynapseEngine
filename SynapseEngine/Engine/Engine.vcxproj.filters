@@ -1805,6 +1805,9 @@
     <ClInclude Include="Render\GraphicsPass\DeferredPointLightPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\PushConstants\WireframePushConstants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Passes\Common\Fullscreen.vert" />
@@ -1822,10 +1825,10 @@
     <None Include="Shaders\Passes\PostProcess\BloomUpsample.comp" />
     <None Include="Shaders\Passes\PostProcess\BloomDownsample.comp" />
     <None Include="Shaders\Passes\PostProcess\BloomComposite.comp" />
-    <None Include="Shaders\WireframeSetup.comp" />
-    <None Include="Shaders\Wireframe.vert" />
-    <None Include="Shaders\Wireframe.frag" />
-    <None Include="Shaders\WireframeMeshlet.vert" />
+    <None Include="Shaders\Passes\Debug\WireframeSetup.comp" />
+    <None Include="Shaders\Passes\Debug\Wireframe.vert" />
+    <None Include="Shaders\Passes\Debug\Wireframe.frag" />
+    <None Include="Shaders\Passes\Debug\WireframeMeshlet.vert" />
     <None Include="Shaders\Passes\Geometry\TraditionalTransparent.frag" />
     <None Include="Shaders\Passes\Geometry\MeshletTransparent.frag" />
     <None Include="Shaders\Passes\Common\TransparentComposite.frag" />
@@ -1856,5 +1859,6 @@
     <None Include="Shaders\Includes\Utils\PbrMath.glsl" />
     <None Include="Shaders\Includes\Utils\WboitMath.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredPointLightPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\WireframePC.glsl" />
   </ItemGroup>
 </Project>

@@ -469,6 +469,7 @@
     <ClInclude Include="Component\PointLightComponent.h" />
     <ClInclude Include="Component\PointLightShadowComponent.h" />
     <ClInclude Include="Render\GraphicsPass\DeferredPointLightPass.h" />
+    <ClInclude Include="Render\PushConstants\WireframePushConstants.h" />
     <ClInclude Include="System\PointLightFrustumCullingSystem.h" />
     <ClInclude Include="System\PointLightShadowSystem.h" />
     <ClInclude Include="System\PointLightSystem.h" />
@@ -780,6 +781,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Includes\PushConstants\DeferredPointLightPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\WireframePC.glsl" />
     <None Include="Shaders\Includes\Utils\DepthMath.glsl" />
     <None Include="Shaders\Includes\Utils\PbrMath.glsl" />
     <None Include="Shaders\Includes\Utils\WboitMath.glsl" />
@@ -815,10 +817,10 @@
     <None Include="Shaders\Passes\Geometry\TraditionalTransparent.frag" />
     <None Include="Shaders\Passes\Geometry\TraditionalTransparentPicking.frag" />
     <None Include="Shaders\Passes\Common\TransparentComposite.frag" />
-    <None Include="Shaders\Wireframe.frag" />
-    <None Include="Shaders\Wireframe.vert" />
-    <None Include="Shaders\WireframeMeshlet.vert" />
-    <None Include="Shaders\WireframeSetup.comp" />
+    <None Include="Shaders\Passes\Debug\Wireframe.frag" />
+    <None Include="Shaders\Passes\Debug\Wireframe.vert" />
+    <None Include="Shaders\Passes\Debug\WireframeMeshlet.vert" />
+    <None Include="Shaders\Passes\Debug\WireframeSetup.comp" />
     <None Include="Shaders\Passes\Hiz\HizDownsample.comp" />
     <None Include="Shaders\Passes\Hiz\HizLinearizeDepth.comp" />
     <None Include="Shaders\Passes\Culling\MeshCulling.comp" />
