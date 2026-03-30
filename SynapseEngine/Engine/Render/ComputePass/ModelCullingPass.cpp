@@ -10,6 +10,11 @@
 #include "Engine/Render/ComputeGroupSize.h"
 #include "Engine/Animation/AnimationManager.h"
 #include "Engine/Material/MaterialManager.h"
+#include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
+#include "Engine/Image/SamplerNames.h"
+#include "Engine/Render/RenderNames.h"
+#include "Engine/Image/ImageManager.h"
+#include "Engine/Vk/Image/ImageViewNames.h"
 
 namespace Syn {
 
@@ -40,13 +45,20 @@ namespace Syn {
         uint32_t totalModelsToTest;           
         uint32_t activeCameraEntity;          
         uint32_t traditionalCommandCount;
+
+        float screenWidth;
+		float screenHeight;
     };
 
     void ModelCullingPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
+
+        Vk::ShaderProgramConfig config;
+        config.useDescriptorBuffers = false;
+
         _shaderProgram = shaderManager->CreateProgram("ModelCullingProgram", {
             ShaderNames::ModelCulling
-            });
+            }, config);
     }
 
     void ModelCullingPass::PushConstants(const RenderContext& context) {
@@ -64,6 +76,8 @@ namespace Syn {
         auto modelManager = ServiceLocator::GetModelManager();
         auto materialManager = ServiceLocator::GetMaterialManager();
         auto animationManager = ServiceLocator::GetAnimationManager();
+
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
         uint32_t fIdx = context.frameIndex;
 
@@ -96,7 +110,29 @@ namespace Syn {
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.traditionalCommandCount = drawData->activeTraditionalCount;
 
+        pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
+        pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
+
         vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(CullingPushConstants), &pc);
+    }
+
+    void ModelCullingPass::BindDescriptors(const RenderContext& context) {
+        auto imageManager = ServiceLocator::GetImageManager();
+
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
+        auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);
+
+        Vk::PushDescriptorWriter pushWriter;
+
+        pushWriter.AddCombinedImageSampler(
+            0,
+            depthPyramid->GetView(Vk::ImageViewNames::Default),
+            maxSampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
     }
 
     void ModelCullingPass::Dispatch(const RenderContext& context) {

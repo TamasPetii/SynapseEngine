@@ -9,6 +9,7 @@ namespace Syn {
         void Initialize() override;
     protected:
         void PushConstants(const RenderContext& context) override;
+		void BindDescriptors(const RenderContext& context) override;
         void Dispatch(const RenderContext& context) override;
     private:
         bool _shouldDispatch = false;

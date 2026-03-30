@@ -10,10 +10,9 @@ namespace Syn
         static constexpr const char* TraditionalTransparentFrag = "../Engine/Shaders/TraditionalTransparent.frag";
         static constexpr const char* TraditionalTransparentPickingFrag = "../Engine/Shaders/TraditionalTransparentPicking.frag";
         
-        static constexpr const char* MeshletOldMesh = "../Engine/Shaders/MeshletOld.mesh";
-        static constexpr const char* MeshletMesh = "../Engine/Shaders/Meshlet.mesh";
-        static constexpr const char* MeshletTask = "../Engine/Shaders/Meshlet.task";
-        static constexpr const char* MeshletFrag = "../Engine/Shaders/Meshlet.frag";
+        static constexpr const char* MeshletMesh = "../Engine/Shaders/Passes/Geometry/Meshlet.mesh";
+        static constexpr const char* MeshletTask = "../Engine/Shaders/Passes/Geometry/Meshlet.task";
+        static constexpr const char* MeshletFrag = "../Engine/Shaders/Passes/Geometry/Meshlet.frag";
         static constexpr const char* MeshletTransparentFrag = "../Engine/Shaders/MeshletTransparent.frag";
         static constexpr const char* MeshletTransparentPickingFrag = "../Engine/Shaders/MeshletTransparentPicking.frag";
         

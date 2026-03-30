@@ -8,6 +8,11 @@
 #define INTERSECTION_INTERSECT 1u
 #define INTERSECTION_INSIDE    2u
 
+bool TestConeCulling(vec3 apex, vec3 axis, float cutoff, vec3 cameraEye) {
+    vec3 view = normalize(apex - cameraEye);
+    return dot(view, axis) >= cutoff;
+}
+
 uint TestSphereFrustum(vec3 center, float radius, CameraComponent camera) {
     bool isIntersecting = false;
     for(int i = 0; i < 6; ++i) {
@@ -59,10 +64,21 @@ uint TestAABBFrustum(GpuMeshCollider collider, CameraComponent camera) {
     return TestAABBFrustum(collider.aabbMin, collider.aabbMax, camera);
 }
 
+bool TestConeCulling(GpuMeshletCollider collider, vec3 cameraEye) {
+    return TestConeCulling(collider.apex, collider.axis, collider.cutoff, cameraEye);
+}
+
 uint TestFrustum(GpuMeshCollider collider, CameraComponent camera) {
     uint sphereResult = TestSphereFrustum(collider, camera);
     if (sphereResult != INTERSECTION_INTERSECT) return sphereResult;
     return TestAABBFrustum(collider, camera);
+}
+
+uint TestFrustum(vec3 center, float radius, vec3 aabbMin, vec3 aabbMax, CameraComponent camera) {
+    uint sphereResult = TestSphereFrustum(center, radius, camera);
+    if (sphereResult != INTERSECTION_INTERSECT) return sphereResult;
+    
+    return TestAABBFrustum(aabbMin, aabbMax, camera);
 }
 
 void TransformSphere(vec3 localCenter, float localRadius, mat4 transform, out vec3 worldCenter, out float worldRadius) {

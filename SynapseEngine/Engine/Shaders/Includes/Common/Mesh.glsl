@@ -75,23 +75,35 @@ struct GpuMeshletDrawDescriptor {
     uint padding;
 };
 
-layout(buffer_reference, std430) readonly buffer PositionBuffer        { GpuVertexPosition data[]; };
-layout(buffer_reference, std430) readonly buffer AttributeBuffer       { GpuVertexAttributes data[]; };
-layout(buffer_reference, std430) readonly buffer IndexBuffer           { uint data[]; };
-layout(buffer_reference, std430) readonly buffer ModelAddressBuffer    { GpuModelAddresses data[]; };
-layout(buffer_reference, std430) readonly buffer DescriptorBuffer      { MeshDrawDescriptor data[]; };
-layout(buffer_reference, std430) readonly buffer MeshletDrawDescBuffer  { GpuMeshletDrawDescriptor data[]; };
+struct GpuMeshletDescriptor {
+    uint vertexIndicesOffset;
+    uint vertexCount;
+    uint triangleIndicesOffset;
+    uint triangleCount;
+};
 
+layout(buffer_reference, std430) readonly buffer PositionBuffer         { GpuVertexPosition data[]; };
+layout(buffer_reference, std430) readonly buffer AttributeBuffer        { GpuVertexAttributes data[]; };
+layout(buffer_reference, std430) readonly buffer IndexBuffer            { uint data[]; };
+layout(buffer_reference, std430) readonly buffer ModelAddressBuffer     { GpuModelAddresses data[]; };
+layout(buffer_reference, std430) readonly buffer DescriptorBuffer       { MeshDrawDescriptor data[]; };
+layout(buffer_reference, std430) readonly buffer MeshletDrawDescBuffer  { GpuMeshletDrawDescriptor data[]; };
+layout(buffer_reference, std430) readonly buffer MeshletDescBuffer      { GpuMeshletDescriptor data[]; };
 layout(buffer_reference, std430) readonly buffer MeshColliderBuffer     { GpuMeshCollider data[]; };
 layout(buffer_reference, std430) readonly buffer MeshletColliderBuffer  { GpuMeshletCollider data[]; };
+layout(buffer_reference, std430) readonly buffer VertexIndicesBuffer    { uint data[]; };
+layout(buffer_reference, std430) readonly buffer TriangleIndicesBuffer  { uint8_t data[]; };
 
-#define GET_VERTEX_POS(addr, idx)          PositionBuffer(addr).data[idx]
-#define GET_VERTEX_ATTR(addr, idx)         AttributeBuffer(addr).data[idx]
-#define GET_INDEX(addr, idx)               IndexBuffer(addr).data[idx]
-#define GET_MODEL_ADDRESSES(addr, idx)     ModelAddressBuffer(addr).data[idx]
-#define GET_DRAW_DESCRIPTOR(addr, idx)     DescriptorBuffer(addr).data[idx]
-#define GET_MESHLET_DRAW_DESC(addr, idx)   MeshletDrawDescBuffer(addr).data[idx]
-#define GET_MESH_COLLIDER(addr, idx)       MeshColliderBuffer(addr).data[idx]
-#define GET_MESHLET_COLLIDER(addr, idx)    MeshletColliderBuffer(addr).data[idx]
+#define GET_VERTEX_POS(addr, idx)             PositionBuffer(addr).data[idx]
+#define GET_VERTEX_ATTR(addr, idx)            AttributeBuffer(addr).data[idx]
+#define GET_INDEX(addr, idx)                  IndexBuffer(addr).data[idx]
+#define GET_MODEL_ADDRESSES(addr, idx)        ModelAddressBuffer(addr).data[idx]
+#define GET_DRAW_DESCRIPTOR(addr, idx)        DescriptorBuffer(addr).data[idx]
+#define GET_MESHLET_DRAW_DESC(addr, idx)      MeshletDrawDescBuffer(addr).data[idx]
+#define GET_MESHLET_DESC(addr, idx)           MeshletDescBuffer(addr).data[idx]
+#define GET_MESH_COLLIDER(addr, idx)          MeshColliderBuffer(addr).data[idx]
+#define GET_MESHLET_COLLIDER(addr, idx)       MeshletColliderBuffer(addr).data[idx]
+#define GET_MESHLET_VERTEX_INDEX(addr, idx)   VertexIndicesBuffer(addr).data[idx]
+#define GET_MESHLET_TRIANGLE_INDEX(addr, idx) TriangleIndicesBuffer(addr).data[idx]
 
 #endif

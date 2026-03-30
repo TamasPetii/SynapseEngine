@@ -10,10 +10,13 @@
 #include "../../Includes/Common/Material.glsl"
 #include "../../Includes/Common/Culling.glsl"
 #include "../../Includes/Utils/CullingMath.glsl"
+#include "../../Includes/Utils/Occlusion.glsl"
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
 #include "../../Includes/PushConstants/ModelCullingPC.glsl"
+
+layout(set = 2, binding = 0) uniform sampler2D depthPyramid;
 
 void main() {
     uint jobIndex = gl_WorkGroupID.x;      // Current model being processed
@@ -54,6 +57,8 @@ void main() {
         }
     }
 
+    vec2 screenRes = vec2(pc.screenWidth, pc.screenHeight);
+
     // 6. Collaborative Loop: Process all meshes of the current model
     for (uint m = localThreadId; m < addrs.meshCount; m += 32) {    
         GpuMeshCollider localMeshCollider = GET_MESH_COLLIDER(addrs.meshColliders, m);
@@ -70,6 +75,10 @@ void main() {
         if (!parentFullyInside) {
             visibility = TestFrustum(worldCollider, camera);
             if (visibility == INTERSECTION_OUTSIDE) continue;
+        }
+
+        if (IsSphereOccluded(worldCollider.center, worldCollider.radius, camera, depthPyramid, screenRes)) {
+            continue;
         }
 
         // 8. Determine LOD and fetch Material

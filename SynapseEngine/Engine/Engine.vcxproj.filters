@@ -1810,13 +1810,13 @@
     <None Include="Shaders\Fullscreen.vert" />
     <None Include="Shaders\Composite.frag" />
     <None Include="Shaders\_old_Meshlet.mesh" />
-    <None Include="Shaders\Meshlet.frag" />
+    <None Include="Shaders\Passes\Geometry\Meshlet.frag" />
     <None Include="Shaders\Passes\Geometry\Traditional.vert" />
     <None Include="Shaders\Passes\Geometry\Traditional.frag" />
     <None Include="Shaders\Passes\Culling\ModelCulling.comp" />
     <None Include="Shaders\Passes\Culling\MeshCulling.comp" />
-    <None Include="Shaders\Meshlet.task" />
-    <None Include="Shaders\Meshlet.mesh" />
+    <None Include="Shaders\Passes\Geometry\Meshlet.task" />
+    <None Include="Shaders\Passes\Geometry\Meshlet.mesh" />
     <None Include="Shaders\HizLinearizeDepth.comp" />
     <None Include="Shaders\HizDownsample.comp" />
     <None Include="Shaders\BloomPrefilter.comp" />
@@ -1851,5 +1851,7 @@
     <None Include="Shaders\Includes\Common\IndirectCommand.glsl" />
     <None Include="Shaders\Includes\Common\Culling.glsl" />
     <None Include="Shaders\Includes\PushConstants\MeshCullingPC.glsl" />
+    <None Include="Shaders\Includes\Utils\Occlusion.glsl" />
+    <None Include="Shaders\Includes\PushConstants\MeshletPassPC.glsl" />
   </ItemGroup>
 </Project>

@@ -13,10 +13,13 @@
 #include "../../Includes/Common/Material.glsl"
 #include "../../Includes/Common/Culling.glsl"
 #include "../../Includes/Utils/CullingMath.glsl"
+#include "../../Includes/Utils/Occlusion.glsl"
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
 #include "../../Includes/PushConstants/ModelCullingPC.glsl"
+
+layout(set = 2, binding = 0) uniform sampler2D depthPyramid;
 
 void main() {
     uint globalId = gl_GlobalInvocationID.x;
@@ -55,6 +58,11 @@ void main() {
     GpuMeshCollider worldCollider = TransformCollider(localGlobalCollider, transform.transform);
     uint visibility = TestFrustum(worldCollider, camera);
     if (visibility == INTERSECTION_OUTSIDE) return;
+
+    vec2 screenRes = vec2(pc.screenWidth, pc.screenHeight);
+    if (IsSphereOccluded(worldCollider.center, worldCollider.radius, camera, depthPyramid, screenRes)) {
+        return;
+    }
 
     // 5. Fast-path: Process simple/small models directly
     const uint MAX_MESH_COUNT = 16u;

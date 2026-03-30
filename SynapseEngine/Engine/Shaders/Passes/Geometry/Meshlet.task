@@ -1,0 +1,117 @@
+#version 460
+#extension GL_EXT_mesh_shader : require
+#extension GL_GOOGLE_include_directive : require
+
+#include "../../Includes/Core.glsl"
+#include "../../Includes/Common/Camera.glsl"
+#include "../../Includes/Common/Mesh.glsl"
+#include "../../Includes/Common/Model.glsl"
+#include "../../Includes/Common/Transform.glsl"
+#include "../../Includes/Common/Animation.glsl"
+#include "../../Includes/Utils/CullingMath.glsl"
+#include "../../Includes/Utils/Occlusion.glsl"
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+layout(set = 2, binding = 0) uniform sampler2D depthPyramid;
+
+struct TaskPayload {
+    uint drawId;
+    uint instanceId;
+    uint meshletIndices[32];
+};
+
+taskPayloadSharedEXT TaskPayload payload;
+shared uint survivingMeshletCount;
+
+#include "../../Includes/PushConstants/MeshletPassPC.glsl"
+
+void main() {
+    uint threadIdx = gl_LocalInvocationID.x; // Meshlet
+    uint localInstanceID = gl_WorkGroupID.x;  // Entity
+    uint meshletGroupOffset = gl_WorkGroupID.y * 32;// Meshlet Block
+
+    // 1. Initialize shared memory and payload
+    if (threadIdx == 0) {
+        survivingMeshletCount = 0;
+        payload.drawId = gl_DrawID;
+        payload.instanceId = localInstanceID;
+    }
+    barrier();
+
+    // 2. Fetch Draw Descriptor and Instance Data
+    MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(pc.globalIndirectCommandDescriptorBuffers, pc.baseDescriptorOffset + gl_DrawID);
+    uint rawEntityData = GET_INSTANCE(pc.globalInstanceBuffers, desc.instanceOffset + localInstanceID);
+    
+    bool isParentFullyInside = HAS_FLAG(rawEntityData, 31);
+    uint entityId = rawEntityData & ~(1u << 31);
+
+    // 3. Resolve Camera and Transform
+    uint transformDenseIndex = GET_SPARSE_INDEX(pc.transformSparseMapBufferAddr, entityId);
+    TransformComponent transform = GET_TRANSFORM(pc.transformBufferAddr, transformDenseIndex);
+    
+    uint cameraDenseIndex = GET_SPARSE_INDEX(pc.cameraSparseMapBufferAddr, pc.activeCameraEntity);
+    CameraComponent camera = GET_CAMERA(pc.cameraBufferAddr, cameraDenseIndex);
+
+    GpuModelAddresses addrs = GET_MODEL_ADDRESSES(pc.modelAddressBuffer, desc.modelIndex);
+
+    // 4. Resolve Meshlet range for this group
+    uint flatLodIndex = (desc.meshIndex * 4) + desc.lodIndex; 
+    GpuMeshletDrawDescriptor submeshData = GET_MESHLET_DRAW_DESC(addrs.meshletDrawDescriptors, flatLodIndex);
+
+    uint currentMeshletIdx = meshletGroupOffset + threadIdx;
+    bool isVisible = (currentMeshletIdx < submeshData.meshletCount);
+
+    if (isVisible) {
+        uint globalMeshletIdx = submeshData.meshletOffset + currentMeshletIdx;
+        GpuMeshletCollider localCollider = GET_MESHLET_COLLIDER(addrs.meshletColliders, globalMeshletIdx);
+
+        // 5. Evaluate Animation frame collider if applicable
+        if (pc.animationSparseMapBufferAddr != 0) {
+            uint animIdx = GET_SPARSE_INDEX(pc.animationSparseMapBufferAddr, entityId);
+            if (animIdx != INVALID_INDEX) {
+                AnimationComponent animComp = GET_ANIM_COMP(pc.animationBufferAddr, animIdx);
+                if (animComp.animationIndex != INVALID_INDEX) {
+                    GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(pc.animationAddressBuffer, animComp.animationIndex);
+                    uint frameOffset = animComp.frameIndex * animAddrs.descriptor.globalMeshletCount;
+                    localCollider = GET_MESHLET_COLLIDER(animAddrs.frameMeshletColliders, frameOffset + globalMeshletIdx);
+                }
+            }
+        }
+
+        GpuMeshletCollider worldCollider = TransformCollider(localCollider, transform.transform, transform.transformIT);
+
+        // 7. Backface Cone Culling
+        if (pc.disableConeCulling == 0 && TestConeCulling(worldCollider, camera.eye.xyz)) {
+            isVisible = false;
+        }
+
+        // 8. Frustum Culling (Skip if parent model is already fully inside)
+        if (isVisible && !isParentFullyInside) {
+            if (TestFrustum(worldCollider.center, worldCollider.radius, worldCollider.aabbMin, worldCollider.aabbMax, camera) == INTERSECTION_OUTSIDE) {
+                isVisible = false;
+            }
+        }
+
+        // 9. Occlusion and Sub-pixel Culling using Depth Pyramid
+        if (isVisible) {
+            vec2 screenRes = vec2(pc.screenWidth, pc.screenHeight);
+            if (IsSphereOccluded(worldCollider.center, worldCollider.radius, camera, depthPyramid, screenRes)) {
+                isVisible = false;
+            }
+        }
+
+        // 10. Append surviving meshlet index to payload
+        if (isVisible) {
+            uint slot = atomicAdd(survivingMeshletCount, 1);
+            payload.meshletIndices[slot] = currentMeshletIdx;
+        }
+    }
+
+    barrier();
+
+    // 11. Emit the count of surviving meshlets for the Mesh Stage
+    if (threadIdx == 0) {
+        EmitMeshTasksEXT(survivingMeshletCount, 1, 1);
+    }
+}

@@ -25,6 +25,8 @@ layout(push_constant) uniform PushConstants {
     uint totalModelsToTest;
     uint activeCameraEntity;
     uint traditionalCommandCount;
+    float screenWidth;
+    float screenHeight;
 } pc;
 
 #endif
