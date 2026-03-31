@@ -1,6 +1,6 @@
 #include "SpotLightComponent.h"
-#include <cmath> // std::cos miatt
-#include <glm/gtc/matrix_transform.hpp> // glm::radians miatt
+#include <cmath>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Syn
 {
@@ -14,7 +14,7 @@ namespace Syn
         outerAngle(45.0f)
     {}
 
-    SpotLightGPU::SpotLightGPU(const SpotLightComponent& component) :
+    SpotLightComponentGPU::SpotLightComponentGPU(const SpotLightComponent& component) :
         position(component.position),
         range(component.range),
         direction(component.direction),

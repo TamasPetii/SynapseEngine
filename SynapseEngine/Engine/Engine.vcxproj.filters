@@ -843,16 +843,28 @@
     <ClCompile Include="Component\SpotLightShadowComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\PointLightSystem.cpp">
+    <ClCompile Include="System\Light\PointLightSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\PointLightShadowSystem.cpp">
+    <ClCompile Include="System\Light\PointLightShadowSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\PointLightFrustumCullingSystem.cpp">
+    <ClCompile Include="System\Light\PointLightFrustumCullingSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\GraphicsPass\DeferredPointLightPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Light\SpotLightSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Light\SpotLightShadowSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Light\SpotLightFrustumCullingSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\GraphicsPass\DeferredSpotLightPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1793,19 +1805,31 @@
     <ClInclude Include="Component\SpotLightShadowComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\PointLightSystem.h">
+    <ClInclude Include="System\Light\PointLightSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\PointLightShadowSystem.h">
+    <ClInclude Include="System\Light\PointLightShadowSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\PointLightFrustumCullingSystem.h">
+    <ClInclude Include="System\Light\PointLightFrustumCullingSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\GraphicsPass\DeferredPointLightPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\PushConstants\WireframePushConstants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Light\SpotLightSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Light\SpotLightShadowSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Light\SpotLightFrustumCullingSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\GraphicsPass\DeferredSpotLightPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -1860,5 +1884,9 @@
     <None Include="Shaders\Includes\Utils\WboitMath.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredPointLightPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframePC.glsl" />
+    <None Include="Shaders\Includes\Common\SpotLight.glsl" />
+    <None Include="Shaders\Passes\Deferred\DeferredSpotLight.vert" />
+    <None Include="Shaders\Passes\Deferred\DeferredSpotLight.frag" />
+    <None Include="Shaders\Includes\PushConstants\DeferredSpotLightPC.glsl" />
   </ItemGroup>
 </Project>

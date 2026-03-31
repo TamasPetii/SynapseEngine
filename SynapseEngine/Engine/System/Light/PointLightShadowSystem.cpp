@@ -1,5 +1,5 @@
 #include "PointLightShadowSystem.h"
-#include "Engine/System/PointLightSystem.h"
+#include "PointLightSystem.h"
 #include "Engine/Component/PointLightComponent.h"
 #include "Engine/Scene/Scene.h"
 #include <glm/gtc/matrix_transform.hpp>

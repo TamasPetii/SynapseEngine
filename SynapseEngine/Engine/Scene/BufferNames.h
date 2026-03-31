@@ -29,7 +29,8 @@ namespace Syn
         static constexpr const char* SpotLightSparseMap = "SpotLightSparseMap";
         static constexpr const char* SpotLightData = "SpotLightData";
         static constexpr const char* SpotLightColliderData = "SpotLightColliderData";
-                                     
+        static constexpr const char* SpotLightVisibleData = "SpotLightVisibleData";
+
         static constexpr const char* SpotLightShadowSparseMap = "SpotLightShadowSparseMap";
         static constexpr const char* SpotLightShadowData = "SpotLightShadowData";
     };

@@ -14,7 +14,7 @@ namespace Syn
         return true;
     }
 
-    bool CollisionTester::TestAABBFrustum(const glm::vec3& aabbMin, const glm::vec3& aabbMax, std::span<const FrustumFace> frustum)
+    bool CollisionTester::TestAabbFrustum(const glm::vec3& aabbMin, const glm::vec3& aabbMax, std::span<const FrustumFace> frustum)
     {
         glm::vec3 extents = (aabbMax - aabbMin) * 0.5f;
         glm::vec3 center = (aabbMax + aabbMin) * 0.5f;
@@ -40,7 +40,7 @@ namespace Syn
         return isIntersecting ? IntersectionType::Intersect : IntersectionType::Inside;
     }
 
-    IntersectionType CollisionTester::TestAABBFrustumIntersectionType(const glm::vec3& aabbMin, const glm::vec3& aabbMax, std::span<const FrustumFace> frustum)
+    IntersectionType CollisionTester::TestAabbFrustumIntersectionType(const glm::vec3& aabbMin, const glm::vec3& aabbMax, std::span<const FrustumFace> frustum)
     {
         glm::vec3 extents = (aabbMax - aabbMin) * 0.5f;
         glm::vec3 center = (aabbMax + aabbMin) * 0.5f;
@@ -56,12 +56,32 @@ namespace Syn
         return isIntersecting ? IntersectionType::Intersect : IntersectionType::Inside;
     }
 
-    bool CollisionTester::IsInFrustum(const GpuMeshCollider& collider, std::span<const FrustumFace> frustum)
+    bool CollisionTester::IsInFrustum(const glm::vec3& center, float radius, const glm::vec3& aabbMin, const glm::vec3& aabbMax, std::span<const FrustumFace> frustum)
     {
-        if (!TestSphereFrustum(collider, frustum)) 
+        IntersectionType sphereResult = TestSphereFrustumIntersectionType(center, radius, frustum);
+
+        if (sphereResult == IntersectionType::Outside)
             return false;
 
-        return TestAABBFrustum(collider, frustum);
+        if (sphereResult == IntersectionType::Inside)
+            return true;
+
+        return TestAabbFrustum(aabbMin, aabbMax, frustum);
+    }
+
+    IntersectionType CollisionTester::IsInFrustumIntersectionType(const glm::vec3& center, float radius, const glm::vec3& aabbMin, const glm::vec3& aabbMax, std::span<const FrustumFace> frustum)
+    {
+        IntersectionType sphereResult = TestSphereFrustumIntersectionType(center, radius, frustum);
+
+        if (sphereResult != IntersectionType::Intersect)
+            return sphereResult;
+
+        return TestAabbFrustumIntersectionType(aabbMin, aabbMax, frustum);
+    }
+
+    bool CollisionTester::IsInFrustum(const GpuMeshCollider& collider, std::span<const FrustumFace> frustum)
+    {
+        return IsInFrustum(collider.center, collider.radius, collider.aabbMin, collider.aabbMax, frustum);
     }
 
     bool CollisionTester::TestSphereFrustum(const GpuMeshCollider& collider, std::span<const FrustumFace> frustum)
@@ -69,19 +89,14 @@ namespace Syn
         return TestSphereFrustum(collider.center, collider.radius, frustum);
     }
 
-    bool CollisionTester::TestAABBFrustum(const GpuMeshCollider& collider, std::span<const FrustumFace> frustum)
+    bool CollisionTester::TestAabbFrustum(const GpuMeshCollider& collider, std::span<const FrustumFace> frustum)
     {
-        return TestAABBFrustum(collider.aabbMin, collider.aabbMax, frustum);
+        return TestAabbFrustum(collider.aabbMin, collider.aabbMax, frustum);
     }
 
     IntersectionType CollisionTester::IsInFrustumIntersectionType(const GpuMeshCollider& collider, std::span<const FrustumFace> frustum)
     {
-        IntersectionType sphereResult = TestSphereFrustumIntersectionType(collider, frustum);
-
-        if (sphereResult != IntersectionType::Intersect) 
-            return sphereResult;
-
-        return TestAABBFrustumIntersectionType(collider, frustum);
+        return IsInFrustumIntersectionType(collider.center, collider.radius, collider.aabbMin, collider.aabbMax, frustum);
     }
 
     IntersectionType CollisionTester::TestSphereFrustumIntersectionType(const GpuMeshCollider& collider, std::span<const FrustumFace> frustum)
@@ -89,9 +104,9 @@ namespace Syn
         return TestSphereFrustumIntersectionType(collider.center, collider.radius, frustum);
     }
 
-    IntersectionType CollisionTester::TestAABBFrustumIntersectionType(const GpuMeshCollider& collider, std::span<const FrustumFace> frustum)
+    IntersectionType CollisionTester::TestAabbFrustumIntersectionType(const GpuMeshCollider& collider, std::span<const FrustumFace> frustum)
     {
-        return TestAABBFrustumIntersectionType(collider.aabbMin, collider.aabbMax, frustum);
+        return TestAabbFrustumIntersectionType(collider.aabbMin, collider.aabbMax, frustum);
     }
 
     float CollisionTester::GetSignedDistance(const FrustumFace& face, const glm::vec3& point)

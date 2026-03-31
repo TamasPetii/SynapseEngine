@@ -23,11 +23,13 @@ namespace Syn
 		AabbCollider aabbCollider;
         SphereCollider sphereCollider;
         friend struct SpotLightColliderGPU;
+        friend class SpotLightSystem;
+        friend class SpotLightFrustumCullingSystem;
     };
 
-    struct SYN_API SpotLightGPU
+    struct SYN_API SpotLightComponentGPU
     {
-        SpotLightGPU(const SpotLightComponent& component);
+        SpotLightComponentGPU(const SpotLightComponent& component);
 
         glm::vec3 position;
         float range; 

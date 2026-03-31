@@ -37,6 +37,7 @@
 //Deferred
 #include "Engine/Render/GraphicsPass/DeferredEmissiveAoPass.h"
 #include "Engine/Render/GraphicsPass/DeferredPointLightPass.h"
+#include "Engine/Render/GraphicsPass/DeferredSpotLightPass.h"
 
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "RenderNames.h"
@@ -67,6 +68,7 @@ namespace Syn
 		// Deferred Lighting Passes
 		pipeline->AddPass(std::make_unique<DeferredEmissiveAoPass>());
         pipeline->AddPass(std::make_unique<DeferredPointLightPass>());
+        pipeline->AddPass(std::make_unique<DeferredSpotLightPass>());
 
         // Editor Picking Passes
         pipeline->AddPass(std::make_unique<DepthCopyPass>());

@@ -10,6 +10,7 @@ namespace Syn
         InitModelBuffers(frameCount);
         InitDebugBuffers(frameCount);
         InitPointLightBuffers(frameCount);
+		InitSpotLightBuffers(frameCount);
     }
 
     void SceneDrawData::InitModelBuffers(uint32_t frameCount)
@@ -242,6 +243,36 @@ namespace Syn
             pointLightIndirectCommandBuffers[i] =
                 Vk::BufferFactory::CreatePersistent(
                     pointLightIndirectCommandSize,
+                    indirectStorageTransferUsage
+                );
+        }
+    }
+
+    void SceneDrawData::InitSpotLightBuffers(uint32_t frameCount)
+    {
+        auto modelManager = ServiceLocator::GetModelManager();
+        auto cube = modelManager->GetResource(MeshSourceNames::Cube);
+
+        spotLightIndirectCommandBuffers.resize(frameCount);
+
+        spotLightCmdTemplate.vertexCount = cube->baseDrawCommands[0].traditionalCmd.vertexCount;
+        spotLightCmdTemplate.instanceCount = 0;
+        spotLightCmdTemplate.firstVertex = cube->baseDrawCommands[0].traditionalCmd.firstVertex;
+        spotLightCmdTemplate.firstInstance = 0;
+
+        const VkDeviceSize spotLightIndirectCommandSize =
+            sizeof(VkDrawIndirectCommand);
+
+        const VkBufferUsageFlags indirectStorageTransferUsage =
+            VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT |
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+
+        for (uint32_t i = 0; i < frameCount; ++i)
+        {
+            spotLightIndirectCommandBuffers[i] =
+                Vk::BufferFactory::CreatePersistent(
+                    spotLightIndirectCommandSize,
                     indirectStorageTransferUsage
                 );
         }

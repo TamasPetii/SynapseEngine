@@ -186,10 +186,14 @@
     <ClCompile Include="Component\BaseComponent\Light.cpp" />
     <ClCompile Include="Component\PointLightComponent.cpp" />
     <ClCompile Include="Component\PointLightShadowComponent.cpp" />
+    <ClCompile Include="Render\GraphicsPass\DeferredSpotLightPass.cpp" />
     <ClCompile Include="Render\GraphicsPass\DeferredPointLightPass.cpp" />
-    <ClCompile Include="System\PointLightFrustumCullingSystem.cpp" />
-    <ClCompile Include="System\PointLightShadowSystem.cpp" />
-    <ClCompile Include="System\PointLightSystem.cpp" />
+    <ClCompile Include="System\Light\SpotLightFrustumCullingSystem.cpp" />
+    <ClCompile Include="System\Light\SpotLightShadowSystem.cpp" />
+    <ClCompile Include="System\Light\SpotLightSystem.cpp" />
+    <ClCompile Include="System\Light\PointLightFrustumCullingSystem.cpp" />
+    <ClCompile Include="System\Light\PointLightShadowSystem.cpp" />
+    <ClCompile Include="System\Light\PointLightSystem.cpp" />
     <ClCompile Include="Render\GraphicsPass\DeferredEmissiveAoPass.cpp" />
     <ClCompile Include="Render\GraphicsPass\DebugInitPass.cpp" />
     <ClCompile Include="Component\SpotLightComponent.cpp" />
@@ -468,11 +472,15 @@
     <ClInclude Include="Component\BaseComponent\Light.h" />
     <ClInclude Include="Component\PointLightComponent.h" />
     <ClInclude Include="Component\PointLightShadowComponent.h" />
+    <ClInclude Include="Render\GraphicsPass\DeferredSpotLightPass.h" />
     <ClInclude Include="Render\GraphicsPass\DeferredPointLightPass.h" />
     <ClInclude Include="Render\PushConstants\WireframePushConstants.h" />
-    <ClInclude Include="System\PointLightFrustumCullingSystem.h" />
-    <ClInclude Include="System\PointLightShadowSystem.h" />
-    <ClInclude Include="System\PointLightSystem.h" />
+    <ClInclude Include="System\Light\SpotLightFrustumCullingSystem.h" />
+    <ClInclude Include="System\Light\SpotLightShadowSystem.h" />
+    <ClInclude Include="System\Light\SpotLightSystem.h" />
+    <ClInclude Include="System\Light\PointLightFrustumCullingSystem.h" />
+    <ClInclude Include="System\Light\PointLightShadowSystem.h" />
+    <ClInclude Include="System\Light\PointLightSystem.h" />
     <ClInclude Include="Render\GraphicsPass\DeferredEmissiveAoPass.h" />
     <ClInclude Include="Render\GraphicsPass\DebugInitPass.h" />
     <ClInclude Include="Component\SpotLightComponent.h" />
@@ -780,11 +788,15 @@
     <ClInclude Include="Render\GraphicsPass\WboitInitPass.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\Includes\Common\SpotLight.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredPointLightPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\DeferredSpotLightPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframePC.glsl" />
     <None Include="Shaders\Includes\Utils\DepthMath.glsl" />
     <None Include="Shaders\Includes\Utils\PbrMath.glsl" />
     <None Include="Shaders\Includes\Utils\WboitMath.glsl" />
+    <None Include="Shaders\Passes\Deferred\DeferredSpotLight.frag" />
+    <None Include="Shaders\Passes\Deferred\DeferredSpotLight.vert" />
     <None Include="Shaders\Passes\PostProcess\BloomComposite.comp" />
     <None Include="Shaders\Passes\PostProcess\BloomDownsample.comp" />
     <None Include="Shaders\Passes\PostProcess\BloomPrefilter.comp" />

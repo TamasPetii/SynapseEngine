@@ -21,7 +21,7 @@ namespace Syn
     {
         SceneDrawData(uint32_t frameCount);
 
-        bool useGpuCulling = true;
+        bool useGpuCulling = false;
 
         static constexpr uint32_t MAX_INSTANCES = 10000000;
         static constexpr uint32_t MAX_INDIRECT_COMMANDS = 100000;
@@ -75,9 +75,15 @@ namespace Syn
         VkDrawIndirectCommand pointLightCmdTemplate{};
         std::vector<uint32_t> pointLightCpuInstanceBuffer;
         std::vector<std::shared_ptr<Vk::Buffer>> pointLightIndirectCommandBuffers;
+
+        // --- Spot Light Data ---
+        VkDrawIndirectCommand spotLightCmdTemplate{};
+        std::vector<uint32_t> spotLightCpuInstanceBuffer;
+        std::vector<std::shared_ptr<Vk::Buffer>> spotLightIndirectCommandBuffers;
     private:
         void InitModelBuffers(uint32_t frameCount);
         void InitDebugBuffers(uint32_t frameCount);
         void InitPointLightBuffers(uint32_t frameCount);
+        void InitSpotLightBuffers(uint32_t frameCount);
     };
 }

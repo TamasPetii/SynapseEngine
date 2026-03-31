@@ -9,7 +9,7 @@ namespace Syn
         atlasRect(0.0f)
     {}
 
-    SpotLightShadowGPU::SpotLightShadowGPU(const SpotLightShadowComponent& component) :
+    SpotLightShadowComponentGPU::SpotLightShadowComponentGPU(const SpotLightShadowComponent& component) :
         planes(component.nearPlane, component.farPlane, 0.0f, 0.0f),
         viewProj(component.viewProj),
         atlasRect(component.atlasRect)

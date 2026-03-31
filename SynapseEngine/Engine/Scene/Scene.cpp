@@ -17,9 +17,12 @@
 #include "Engine/System/ModelFrustumCullingSystem.h"
 #include "Engine/System/AnimationSystem.h"
 #include "Engine/System/PhysicsSystem.h"
-#include "Engine/System/PointLightSystem.h"
-#include "Engine/System/PointLightShadowSystem.h"
-#include "Engine/System/PointLightFrustumCullingSystem.h"
+#include "Engine/System/Light/PointLightSystem.h"
+#include "Engine/System/Light/PointLightShadowSystem.h"
+#include "Engine/System/Light/PointLightFrustumCullingSystem.h"
+#include "Engine/System/Light/SpotLightSystem.h"
+#include "Engine/System/Light/SpotLightShadowSystem.h"
+#include "Engine/System/Light/SpotLightFrustumCullingSystem.h"
 
 namespace Syn
 {
@@ -59,6 +62,9 @@ namespace Syn
         RegisterSystem<PointLightSystem>();
         RegisterSystem<PointLightShadowSystem>();
         RegisterSystem<PointLightFrustumCullingSystem>();
+        RegisterSystem<SpotLightSystem>();
+        RegisterSystem<SpotLightShadowSystem>();
+        RegisterSystem<SpotLightFrustumCullingSystem>();
 
         //RegisterSystem<PhysicsSystem>();
     }
@@ -86,6 +92,13 @@ namespace Syn
         RegisterComponentSparseMapBuffer<PointLightShadowComponent>(BufferNames::PointLightShadowSparseMap);
         RegisterComponentBuffer<PointLightShadowComponent, PointLightShadowComponentGPU>(BufferNames::PointLightShadowData);
 
+        RegisterComponentSparseMapBuffer<SpotLightComponent>(BufferNames::SpotLightSparseMap);
+        RegisterComponentBuffer<SpotLightComponent, SpotLightComponentGPU>(BufferNames::SpotLightData);
+        RegisterComponentBuffer<SpotLightComponent, SpotLightColliderGPU>(BufferNames::SpotLightColliderData);
+        RegisterComponentBuffer<SpotLightComponent, uint32_t>(BufferNames::SpotLightVisibleData);
+
+        RegisterComponentSparseMapBuffer<SpotLightShadowComponent>(BufferNames::SpotLightShadowSparseMap);
+        RegisterComponentBuffer<SpotLightShadowComponent, SpotLightShadowComponentGPU>(BufferNames::SpotLightShadowData);
     }
 
     void Scene::BuildTaskflowGraph(tf::Taskflow& taskflow, SystemPhase phase)

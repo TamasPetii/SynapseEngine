@@ -15,9 +15,9 @@ namespace Syn
         glm::vec4 atlasRect;
     };
 
-    struct SYN_API SpotLightShadowGPU
+    struct SYN_API SpotLightShadowComponentGPU
     {
-        SpotLightShadowGPU(const SpotLightShadowComponent& component);
+        SpotLightShadowComponentGPU(const SpotLightShadowComponent& component);
 
         glm::vec4 planes;
         glm::mat4 viewProj;

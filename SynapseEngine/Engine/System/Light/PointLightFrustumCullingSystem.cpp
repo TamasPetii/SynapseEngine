@@ -2,7 +2,7 @@
 #include "Engine/Scene/Scene.h"
 #include "Engine/Component/PointLightComponent.h"
 #include "Engine/Component/CameraComponent.h"
-#include "Engine/System/PointLightSystem.h"
+#include "PointLightSystem.h"
 #include "Engine/System/CameraSystem.h"
 #include "Engine/Collision/Tester/CollisionTester.h"
 #include "Engine/Mesh/ModelManager.h"
