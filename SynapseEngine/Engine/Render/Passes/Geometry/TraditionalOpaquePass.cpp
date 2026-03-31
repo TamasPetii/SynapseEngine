@@ -20,33 +20,7 @@
 
 namespace Syn {
 
-    struct TraditionalPushConstants {
-        VkDeviceAddress modelAddressBuffer;
-        VkDeviceAddress animationAddressBuffer;
-        VkDeviceAddress animationBufferAddr;
-        VkDeviceAddress animationSparseMapBufferAddr;
-
-        VkDeviceAddress globalDrawCountBuffers;
-        VkDeviceAddress globalInstanceBuffers;
-        VkDeviceAddress globalIndirectCommandBuffers;
-        VkDeviceAddress globalIndirectCommandDescriptorBuffers;
-        VkDeviceAddress globalModelAllocationBuffers;
-        VkDeviceAddress globalMeshAllocationBuffers;
-
-        VkDeviceAddress cameraBufferAddr;
-        VkDeviceAddress cameraSparseMapBufferAddr;
-        VkDeviceAddress transformBufferAddr;
-        VkDeviceAddress transformSparseMapBufferAddr;
-
-        VkDeviceAddress modelBufferAddr;
-        VkDeviceAddress modelSparseMapBufferAddr;
-        VkDeviceAddress materialLookupBuffer;
-        VkDeviceAddress materialBuffer;
-
-        uint32_t activeCameraEntity;
-        uint32_t baseDescriptorOffset;
-        uint32_t materialRenderType;
-    };
+    #include "Engine/Shaders/Includes/PushConstants/TraditionalPassPC.glsl"
 
     TraditionalOpaquePass::TraditionalOpaquePass(MaterialRenderType renderType)
         : _renderType(renderType)
@@ -161,7 +135,7 @@ namespace Syn {
 
         uint32_t fIdx = context.frameIndex;
 
-        TraditionalPushConstants pc{};
+        TraditionalPassPC pc{};
         pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
         pc.animationAddressBuffer = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
         pc.animationBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::AnimationData, fIdx);
@@ -180,7 +154,6 @@ namespace Syn {
         pc.modelSparseMapBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::ModelSparseMap, fIdx);
         pc.materialLookupBuffer = drawData->globalMaterialIndexBuffers[fIdx]->GetDeviceAddress();
         pc.materialBuffer = materialManager->GetMaterialBuffer()->GetDeviceAddress();
-
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.baseDescriptorOffset = drawData->traditionalCmdOffsets[_renderType];
         pc.materialRenderType = static_cast<uint32_t>(_renderType);
@@ -190,7 +163,7 @@ namespace Syn {
             _shaderProgram->GetLayout(),
             VK_SHADER_STAGE_ALL,
             0,
-            sizeof(TraditionalPushConstants),
+            sizeof(TraditionalPassPC),
             &pc
         );
     }

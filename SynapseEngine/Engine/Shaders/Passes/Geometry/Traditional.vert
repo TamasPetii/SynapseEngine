@@ -17,6 +17,10 @@ layout(location = 3) out flat uvec4 outId; //(EntityID, MaterialID,  MeshIndex, 
 
 #include "../../Includes/PushConstants/TraditionalPassPC.glsl"
 
+layout(push_constant) uniform PushConstants {
+   TraditionalPassPC pc;
+};
+
 void main() {
     // 1. Fetch Draw Descriptor
     MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(pc.globalIndirectCommandDescriptorBuffers, pc.baseDescriptorOffset + gl_DrawIDARB);

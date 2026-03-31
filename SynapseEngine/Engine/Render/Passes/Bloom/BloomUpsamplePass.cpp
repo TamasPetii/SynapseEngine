@@ -13,10 +13,7 @@
 
 namespace Syn {
 
-    struct BloomUpsamplePushConstants {
-        glm::vec2 texelSize;
-        float filterRadius;
-    };
+    #include "Engine/Shaders/Includes/PushConstants/BloomUpSamplePC.glsl"
 
     void BloomUpsamplePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
@@ -86,10 +83,10 @@ namespace Syn {
 
             pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
 
-            BloomUpsamplePushConstants pc{};
+            BloomUpSamplePC pc{};
             pc.texelSize = 1.0f / sourceSize;
             pc.filterRadius = _config.filterRadius;
-            vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(BloomUpsamplePushConstants), &pc);
+            vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(BloomUpSamplePC), &pc);
 
             uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount((uint32_t)targetSize.x, ComputeGroupSize::Image8D);
             uint32_t groupCountY = ComputeGroupSize::CalculateDispatchCount((uint32_t)targetSize.y, ComputeGroupSize::Image8D);

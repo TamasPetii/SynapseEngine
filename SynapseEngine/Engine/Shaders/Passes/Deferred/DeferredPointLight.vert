@@ -14,6 +14,10 @@ layout(location = 2) out flat uint outCameraIndex;
 
 #include "../../Includes/PushConstants/DeferredPointLightPC.glsl"
 
+layout(push_constant) uniform PushConstants {
+    DeferredPointLightPC pc;
+};
+
 void main() 
 {
     // 1. Resolve Entity ID and Sparse Indexes

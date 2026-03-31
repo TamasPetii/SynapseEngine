@@ -21,41 +21,8 @@
 #include <cassert>
 
 namespace Syn {
-    struct MeshletPushConstants {
-        uint64_t modelAddressBuffer;
-        uint64_t animationAddressBuffer;
-        uint64_t animationBufferAddr;
-        uint64_t animationSparseMapBufferAddr;
 
-        uint64_t globalDrawCountBuffers;
-        uint64_t globalInstanceBuffers;
-        uint64_t globalIndirectCommandBuffers;
-        uint64_t globalIndirectCommandDescriptorBuffers;
-        uint64_t globalModelAllocationBuffers;
-        uint64_t globalMeshAllocationBuffers;
-
-        uint64_t cameraBufferAddr;
-        uint64_t cameraSparseMapBufferAddr;
-        uint64_t transformBufferAddr;
-        uint64_t transformSparseMapBufferAddr;
-
-        uint64_t modelBufferAddr;
-        uint64_t modelSparseMapBufferAddr;
-        uint64_t materialLookupBuffer;
-        uint64_t materialBuffer;
-
-        uint64_t debugInstanceBufferAddr;
-        uint64_t debugAabbIndirectAddr;
-        uint64_t debugSphereIndirectAddr;
-
-        uint32_t activeCameraEntity;
-        uint32_t baseDescriptorOffset;
-        uint32_t disableConeCulling;
-        uint32_t materialRenderType;
-
-        float screenWidth;
-        float screenHeight;
-    };
+    #include "Engine/Shaders/Includes/PushConstants/MeshletPassPC.glsl"
 
     MeshletTransparentPickingPass::MeshletTransparentPickingPass(MaterialRenderType renderType)
         : _renderType(renderType)
@@ -150,7 +117,7 @@ namespace Syn {
         auto animationManager = ServiceLocator::GetAnimationManager();
         uint32_t fIdx = context.frameIndex;
 
-        MeshletPushConstants pc{};
+        MeshletPassPC pc{};
         pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
         pc.animationAddressBuffer = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
         pc.animationBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::AnimationData, fIdx);
@@ -181,7 +148,14 @@ namespace Syn {
         pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
         pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
 
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(MeshletPushConstants), &pc);
+        vkCmdPushConstants(
+            context.cmd,
+            _shaderProgram->GetLayout(),
+            VK_SHADER_STAGE_ALL,
+            0,
+            sizeof(MeshletPassPC),
+            &pc
+        );
     }
 
     void MeshletTransparentPickingPass::BindDescriptors(const RenderContext& context) {

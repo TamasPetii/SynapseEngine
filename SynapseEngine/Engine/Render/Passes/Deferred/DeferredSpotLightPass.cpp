@@ -16,22 +16,7 @@
 
 namespace Syn {
 
-    struct SpotLightPushConstants {
-        uint64_t cameraBufferAddr;
-        uint64_t cameraSparseMapBufferAddr;
-        uint64_t spotLightDataAddr;
-        uint64_t spotLightSparseMapAddr;
-        uint64_t spotLightColliderDataAddr;
-        uint64_t visibleLightAddr;
-        uint64_t vertexPositionsAddr;
-        uint64_t indicesAddr;
-        uint64_t spotLightShadowSparseMapAddr;
-        uint64_t spotLightShadowDataAddr;
-
-        uint32_t activeCameraEntity;
-        float screenWidth;
-        float screenHeight;
-    };
+    #include "Engine/Shaders/Includes/PushConstants/DeferredSpotLightPC.glsl"
 
     void DeferredSpotLightPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
@@ -105,7 +90,7 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
 
-        SpotLightPushConstants pc{};
+        DeferredSpotLightPC pc{};
         pc.cameraBufferAddr = bufferManager->GetBufferAddr(BufferNames::CameraData, fIdx);
         pc.cameraSparseMapBufferAddr = bufferManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
         pc.spotLightDataAddr = bufferManager->GetBufferAddr(BufferNames::SpotLightData, fIdx);
@@ -127,7 +112,7 @@ namespace Syn {
             _shaderProgram->GetLayout(),
             VK_SHADER_STAGE_ALL,
             0,
-            sizeof(SpotLightPushConstants),
+            sizeof(DeferredSpotLightPC),
             &pc
         );
     }

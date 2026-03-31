@@ -16,21 +16,7 @@
 
 namespace Syn {
 
-    struct PointLightPushConstants {
-        uint64_t cameraBufferAddr;
-        uint64_t cameraSparseMapBufferAddr;
-        uint64_t pointLightDataAddr;
-        uint64_t pointLightSparseMapAddr;
-        uint64_t visibleLightAddr;
-        uint64_t vertexPositionsAddr;
-        uint64_t indicesAddr;
-        uint64_t pointLightShadowSparseMapAddr;
-        uint64_t pointLightShadowDataAddr;
-
-        uint32_t activeCameraEntity;
-        float screenWidth;
-        float screenHeight;
-    };
+    #include "Engine/Shaders/Includes/PushConstants/DeferredPointLightPC.glsl"
 
     void DeferredPointLightPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
@@ -104,7 +90,7 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
 
-        PointLightPushConstants pc{};
+        DeferredPointLightPC pc{};
         pc.cameraBufferAddr = bufferManager->GetBufferAddr(BufferNames::CameraData, fIdx);
         pc.cameraSparseMapBufferAddr = bufferManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
         pc.pointLightDataAddr = bufferManager->GetBufferAddr(BufferNames::PointLightData, fIdx);
@@ -125,7 +111,7 @@ namespace Syn {
             _shaderProgram->GetLayout(),
             VK_SHADER_STAGE_ALL,
             0,
-            sizeof(PointLightPushConstants),
+            sizeof(DeferredPointLightPC),
             &pc
         );
     }

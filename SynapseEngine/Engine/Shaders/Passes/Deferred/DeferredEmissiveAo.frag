@@ -6,10 +6,11 @@ layout(location = 0) out vec4 outColor;
 layout(set = 2, binding = 0) uniform sampler2D colorMetallicTexture;
 layout(set = 2, binding = 1) uniform sampler2D emissiveAoTexture;
 
+#include "../../Includes/PushConstants/DeferredEmissiveAoPC.glsl"
+
 layout(push_constant) uniform PushConstants {
-    float ambientStrength;
-    float emissiveStrength;
-} pc;
+    DeferredEmissiveAoPC pc;
+};
 
 void main()
 {

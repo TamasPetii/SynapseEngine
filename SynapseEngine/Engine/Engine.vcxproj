@@ -474,7 +474,6 @@
     <ClInclude Include="Component\PointLightShadowComponent.h" />
     <ClInclude Include="Render\Passes\Deferred\DeferredSpotLightPass.h" />
     <ClInclude Include="Render\Passes\Deferred\DeferredPointLightPass.h" />
-    <ClInclude Include="Render\Passes\Debug\WireframePushConstants.h" />
     <ClInclude Include="System\Light\SpotLightFrustumCullingSystem.h" />
     <ClInclude Include="System\Light\SpotLightShadowSystem.h" />
     <ClInclude Include="System\Light\SpotLightSystem.h" />
@@ -789,9 +788,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Includes\Common\SpotLight.glsl" />
+    <None Include="Shaders\Includes\PushConstants\BloomCompositePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\BloomDownSamplePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\BloomPrefilterPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\BloomUpSamplePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\DeferredEmissiveAoPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredPointLightPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredSpotLightPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\HizDownSamplePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\HizLinearizeDepthPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\WireframeSetupPC.glsl" />
+    <None Include="Shaders\Includes\SharedGpuTypes.glsl" />
     <None Include="Shaders\Includes\Utils\DepthMath.glsl" />
     <None Include="Shaders\Includes\Utils\PbrMath.glsl" />
     <None Include="Shaders\Includes\Utils\WboitMath.glsl" />

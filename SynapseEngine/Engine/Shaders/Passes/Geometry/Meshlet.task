@@ -26,6 +26,10 @@ shared uint survivingMeshletCount;
 
 #include "../../Includes/PushConstants/MeshletPassPC.glsl"
 
+layout(push_constant) uniform PushConstants {
+   MeshletPassPC pc;
+};
+
 void main() {
     uint threadIdx = gl_LocalInvocationID.x; // Meshlet
     uint localInstanceID = gl_WorkGroupID.x;  // Entity

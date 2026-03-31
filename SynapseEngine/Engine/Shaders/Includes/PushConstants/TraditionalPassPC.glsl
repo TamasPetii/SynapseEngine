@@ -1,9 +1,9 @@
 #ifndef SYN_INCLUDES_PC_TRADITIONAL_PASS_GLSL
 #define SYN_INCLUDES_PC_TRADITIONAL_PASS_GLSL
 
-#include "../Core.glsl"
+#include "../SharedGpuTypes.glsl"
 
-layout(push_constant) uniform PushConstants {
+struct TraditionalPassPC {
     uint64_t modelAddressBuffer; 
     uint64_t animationAddressBuffer;
     uint64_t animationBufferAddr;
@@ -25,6 +25,6 @@ layout(push_constant) uniform PushConstants {
     uint activeCameraEntity;
     uint baseDescriptorOffset;
     uint materialRenderType;
-} pc;
+};
 
 #endif

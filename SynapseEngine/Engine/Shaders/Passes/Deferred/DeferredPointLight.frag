@@ -21,6 +21,10 @@ layout(set = 2, binding = 2) uniform sampler2D depthTexture;
 
 #include "../../Includes/PushConstants/DeferredPointLightPC.glsl"
 
+layout(push_constant) uniform PushConstants {
+    DeferredPointLightPC pc;
+};
+
 void main()
 {
     // 1. Reconstruct World Position from Depth

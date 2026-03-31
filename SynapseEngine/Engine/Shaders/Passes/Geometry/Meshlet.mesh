@@ -28,6 +28,10 @@ layout(location = 3) out flat uvec4 outId[]; // (Entity, Material, Meshlet, LOD)
 
 #include "../../Includes/PushConstants/MeshletPassPC.glsl"
 
+layout(push_constant) uniform PushConstants {
+   MeshletPassPC pc;
+};
+
 void main() {
     uint threadIdx = gl_LocalInvocationID.x;
     uint localInstanceID = payload.instanceId;

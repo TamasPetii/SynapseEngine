@@ -19,6 +19,10 @@ layout(location = 3) out vec4 outDebugMaterialUv;
 
 #include "../../Includes/PushConstants/MeshletPassPC.glsl"
 
+layout(push_constant) uniform PushConstants {
+   MeshletPassPC pc;
+};
+
 void main() 
 { 
     uint entityId = inId.x;

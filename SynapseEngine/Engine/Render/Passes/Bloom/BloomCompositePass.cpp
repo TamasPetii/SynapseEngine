@@ -11,10 +11,7 @@
 
 namespace Syn {
 
-    struct BloomCompositePushConstants {
-        float exposure;
-        float bloomStrength;
-    };
+    #include "Engine/Shaders/Includes/PushConstants/BloomCompositePC.glsl"
 
     void BloomCompositePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
@@ -73,11 +70,18 @@ namespace Syn {
     }
 
     void BloomCompositePass::PushConstants(const RenderContext& context) {
-        BloomCompositePushConstants pc{};
+        BloomCompositePC pc{};
         pc.exposure = _config.exposure;
         pc.bloomStrength = _config.bloomStrength;
 
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(BloomCompositePushConstants), &pc);
+        vkCmdPushConstants(
+            context.cmd,
+            _shaderProgram->GetLayout(),
+            VK_SHADER_STAGE_ALL,
+            0,
+            sizeof(BloomCompositePC),
+            &pc
+        );
     }
 
     void BloomCompositePass::Dispatch(const RenderContext& context) {

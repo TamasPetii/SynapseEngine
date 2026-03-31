@@ -11,11 +11,7 @@
 
 namespace Syn {
 
-    struct BloomPrefilterPushConstants {
-        glm::vec2 texelSize;
-        float threshold;
-        float knee;
-    };
+    #include "Engine/Shaders/Includes/PushConstants/BloomPrefilterPC.glsl"
 
     void BloomPrefilterPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
@@ -83,12 +79,12 @@ namespace Syn {
         uint32_t width = rt->GetWidth();
         uint32_t height = rt->GetHeight();
 
-        BloomPrefilterPushConstants pc{};
+        BloomPrefilterPC pc{};
         pc.knee = _config.knee;
         pc.threshold = _config.threshold;
         pc.texelSize = 1.0f / glm::vec2(width, height);
 
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(BloomPrefilterPushConstants), &pc);
+        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(BloomPrefilterPC), &pc);
     }
 
     void BloomPrefilterPass::Dispatch(const RenderContext& context) {

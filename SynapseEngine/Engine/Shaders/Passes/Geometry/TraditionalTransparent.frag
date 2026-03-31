@@ -17,6 +17,10 @@ layout(location = 1) out float outReveal;
 
 #include "../../Includes/PushConstants/TraditionalPassPC.glsl"
 
+layout(push_constant) uniform PushConstants {
+   TraditionalPassPC pc;
+};
+
 vec3 simulateAmbientLight(vec3 normal, vec3 albedo, float roughness, float metallic, float ao) {
     // TODO: Később IBL
     vec3 ambient = albedo * 0.05;

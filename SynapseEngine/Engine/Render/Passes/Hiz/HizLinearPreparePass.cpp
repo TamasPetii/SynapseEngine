@@ -13,12 +13,8 @@
 #include <glm/glm.hpp>
 
 namespace Syn {
-    struct HizLinearPushConstants {
-        uint64_t cameraBufferAddr;
-        uint64_t cameraSparseMapBufferAddr;
-        glm::vec2 outImageSize;
-        uint32_t activeCameraEntity;
-    };
+    
+    #include "Engine/Shaders/Includes/PushConstants/HizLinearizeDepthPC.glsl"
 
     void HizLinearPreparePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
@@ -97,13 +93,13 @@ namespace Syn {
         auto compManager = scene->GetComponentBufferManager();
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, fIdx);
 
-        HizLinearPushConstants pc{};
+        HizLinearizeDepthPC pc{};
         pc.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
         pc.cameraSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.outImageSize = glm::vec2(rtGroup->GetWidth(), rtGroup->GetHeight());
 
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(HizLinearPushConstants), &pc);
+        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(HizLinearizeDepthPC), &pc);
     }
 
     void HizLinearPreparePass::Dispatch(const RenderContext& context) {

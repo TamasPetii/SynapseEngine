@@ -21,6 +21,10 @@ layout(set = 2, binding = 2) uniform sampler2D depthTexture;
 
 #include "../../Includes/PushConstants/DeferredSpotLightPC.glsl"
 
+layout(push_constant) uniform PushConstants {
+    DeferredSpotLightPC pc;
+};
+
 void main()
 {
     vec2 uv = gl_FragCoord.xy / vec2(pc.screenWidth, pc.screenHeight);

@@ -13,9 +13,7 @@
 
 namespace Syn {
 
-    struct BloomDownsamplePushConstants {
-        glm::vec2 texelSize;
-    };
+    #include "Engine/Shaders/Includes/PushConstants/BloomDownSamplePC.glsl"
 
     void BloomDownsamplePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
@@ -80,9 +78,9 @@ namespace Syn {
 
             pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
 
-            BloomDownsamplePushConstants pc{};
+            BloomDownSamplePC pc{};
             pc.texelSize = 1.0f / currentInSize;
-            vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(BloomDownsamplePushConstants), &pc);
+            vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(BloomDownSamplePC), &pc);
 
             uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount((uint32_t)currentOutSize.x, ComputeGroupSize::Image8D);
             uint32_t groupCountY = ComputeGroupSize::CalculateDispatchCount((uint32_t)currentOutSize.y, ComputeGroupSize::Image8D);

@@ -191,7 +191,7 @@ namespace Syn
                 overrideComp.materials.push_back(randomMatId);
             }
 
-            for (int i = 0; i < 0; i++)
+            for (int i = 0; i < 500; i++)
             {
                 EntityID lightEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(lightEntity);

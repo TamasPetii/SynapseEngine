@@ -22,6 +22,10 @@ layout(location = 6) out vec4 outDebugMaterialUv;
 
 #include "../../Includes/PushConstants/TraditionalPassPC.glsl"
 
+layout(push_constant) uniform PushConstants {
+   TraditionalPassPC pc;
+};
+
 void main() 
 { 
     uint entityId = inId.x;

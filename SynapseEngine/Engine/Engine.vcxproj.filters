@@ -1817,9 +1817,6 @@
     <ClInclude Include="Render\Passes\Deferred\DeferredPointLightPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Debug\WireframePushConstants.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="System\Light\SpotLightSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1888,5 +1885,14 @@
     <None Include="Shaders\Passes\Deferred\DeferredSpotLight.vert" />
     <None Include="Shaders\Passes\Deferred\DeferredSpotLight.frag" />
     <None Include="Shaders\Includes\PushConstants\DeferredSpotLightPC.glsl" />
+    <None Include="Shaders\Includes\SharedGpuTypes.glsl" />
+    <None Include="Shaders\Includes\PushConstants\DeferredEmissiveAoPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\BloomCompositePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\BloomDownSamplePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\BloomPrefilterPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\BloomUpSamplePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\HizDownSamplePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\HizLinearizeDepthPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\WireframeSetupPC.glsl" />
   </ItemGroup>
 </Project>

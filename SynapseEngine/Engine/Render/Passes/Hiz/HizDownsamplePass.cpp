@@ -13,10 +13,7 @@
 
 namespace Syn {
 
-    struct HizDownsamplePushConstants {
-        glm::vec2 inImageSize;
-        glm::vec2 outImageSize;
-    };
+    #include "Engine/Shaders/Includes/PushConstants/HizDownSamplePC.glsl"
 
     void HizDownsamplePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
@@ -81,10 +78,10 @@ namespace Syn {
 
             pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
 
-            HizDownsamplePushConstants pc{};
+            HizDownSamplePC pc{};
             pc.inImageSize = currentInSize;
             pc.outImageSize = currentOutSize;
-            vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(HizDownsamplePushConstants), &pc);
+            vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(HizDownSamplePC), &pc);
 
             uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount((uint32_t)currentOutSize.x, ComputeGroupSize::Image16D);
             uint32_t groupCountY = ComputeGroupSize::CalculateDispatchCount((uint32_t)currentOutSize.y, ComputeGroupSize::Image16D);

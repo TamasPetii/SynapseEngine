@@ -1,14 +1,13 @@
-#ifndef SYN_INCLUDES_PC_TRADITIONAL_PASS_GLSL
-#define SYN_INCLUDES_PC_TRADITIONAL_PASS_GLSL
+#ifndef SYN_INCLUDES_PC_MESHLET_PASS_GLSL
+#define SYN_INCLUDES_PC_MESHLET_PASS_GLSL
 
-#include "../Core.glsl"
+#include "../SharedGpuTypes.glsl"
 
-layout(push_constant) uniform PushConstants {
+struct MeshletPassPC {
     uint64_t modelAddressBuffer; 
     uint64_t animationAddressBuffer;
     uint64_t animationBufferAddr;
     uint64_t animationSparseMapBufferAddr;
-
     uint64_t globalDrawCountBuffers; 
     uint64_t globalInstanceBuffers; 
     uint64_t globalIndirectCommandBuffers; 
@@ -23,19 +22,15 @@ layout(push_constant) uniform PushConstants {
     uint64_t modelSparseMapBufferAddr; 
     uint64_t materialLookupBuffer; 
     uint64_t materialBuffer; 
-
     uint64_t debugInstanceBufferAddr;
     uint64_t debugAabbIndirectAddr;
     uint64_t debugSphereIndirectAddr;
-
     uint activeCameraEntity;
     uint baseDescriptorOffset;
     uint disableConeCulling;
     uint materialRenderType;
-
     float screenWidth;
     float screenHeight;
-} pc;
-
+};
 
 #endif

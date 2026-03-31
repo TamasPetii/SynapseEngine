@@ -19,6 +19,10 @@ layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
 #include "../../Includes/PushConstants/ModelCullingPC.glsl"
 
+layout(push_constant) uniform PushConstants {
+    ModelCullingPC pc;
+};
+
 layout(set = 2, binding = 0) uniform sampler2D depthPyramid;
 
 void main() {

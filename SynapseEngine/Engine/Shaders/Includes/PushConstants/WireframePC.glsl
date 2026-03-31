@@ -1,9 +1,9 @@
 #ifndef SYN_INCLUDES_PUSH_CONSTANTS_WIREFRAME_PC_GLSL
 #define SYN_INCLUDES_PUSH_CONSTANTS_WIREFRAME_PC_GLSL
 
-#include "../Core.glsl"
+#include "../SharedGpuTypes.glsl"
 
-layout(push_constant) uniform PushConstants {
+struct WireframePC {
     uint64_t animationAddressBuffer;
     uint64_t animationBufferAddr;
     uint64_t animationSparseMapBufferAddr;
@@ -30,6 +30,6 @@ layout(push_constant) uniform PushConstants {
     uint padding;
     
     vec4 debugColor;
-} pc;
+};
 
 #endif

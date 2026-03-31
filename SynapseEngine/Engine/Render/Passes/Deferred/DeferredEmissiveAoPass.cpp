@@ -8,12 +8,10 @@
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/SamplerNames.h"
+
 namespace Syn {
 
-    struct EmissiveAoPushConstants {
-        float ambientStrength;
-        float emissiveStrength;
-    };
+    #include "Engine/Shaders/Includes/PushConstants/DeferredEmissiveAoPC.glsl"
 
     void DeferredEmissiveAoPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
@@ -79,7 +77,7 @@ namespace Syn {
     }
 
     void DeferredEmissiveAoPass::PushConstants(const RenderContext& context) {
-        EmissiveAoPushConstants pc{};
+        DeferredEmissiveAoPC pc{};
         pc.ambientStrength = 0.05f;
         pc.emissiveStrength = 1.0f;
 
@@ -88,7 +86,7 @@ namespace Syn {
             _shaderProgram->GetLayout(),
             VK_SHADER_STAGE_ALL,
             0,
-            sizeof(EmissiveAoPushConstants),
+            sizeof(DeferredEmissiveAoPC),
             &pc
         );
     }

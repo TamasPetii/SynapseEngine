@@ -1,9 +1,9 @@
 #ifndef SYN_INCLUDES_PC_MESH_CULLING_PASS_GLSL
 #define SYN_INCLUDES_PC_MESH_CULLING_PASS_GLSL
 
-#include "../Core.glsl"
+#include "../SharedGpuTypes.glsl"
 
-layout(push_constant) uniform PushConstants {
+struct MeshCullingPC {
     uint64_t animationAddressBuffer;
     uint64_t animationBufferAddr;
     uint64_t animationSparseMapBufferAddr;
@@ -27,6 +27,6 @@ layout(push_constant) uniform PushConstants {
     uint traditionalCommandCount;
     float screenWidth;
     float screenHeight;
-} pc;
+};
 
 #endif

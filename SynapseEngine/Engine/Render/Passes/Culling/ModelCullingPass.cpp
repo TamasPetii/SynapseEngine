@@ -18,37 +18,7 @@
 
 namespace Syn {
 
-    struct CullingPushConstants {
-        uint64_t animationAddressBuffer;
-        uint64_t animationBufferAddr;
-        uint64_t animationSparseMapBufferAddr;
-
-        uint64_t cameraBufferAddr;            
-        uint64_t cameraSparseMapBufferAddr;   
-        uint64_t transformBufferAddr;         
-        uint64_t transformSparseMapBufferAddr;
-        uint64_t modelCompBufferAddr;   
-        uint64_t modelSparseMapBufferAddr;
-
-        uint64_t meshAllocBufferAddr;         
-        uint64_t modelAllocBufferAddr;        
-        uint64_t modelAddressBufferAddr;      
-        uint64_t visibleModelListAddr;        
-        uint64_t visibleModelCountAddr;       
-
-        uint64_t globalIndirectCommandBuffers;
-        uint64_t globalInstanceBufferAddr;   
-
-        uint64_t materialLookupBufferAddr;
-        uint64_t materialBufferAddr;
-
-        uint32_t totalModelsToTest;           
-        uint32_t activeCameraEntity;          
-        uint32_t traditionalCommandCount;
-
-        float screenWidth;
-		float screenHeight;
-    };
+    #include "Engine/Shaders/Includes/PushConstants/ModelCullingPC.glsl"
 
     void ModelCullingPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
@@ -81,7 +51,7 @@ namespace Syn {
 
         uint32_t fIdx = context.frameIndex;
 
-        CullingPushConstants pc{};
+        ModelCullingPC pc{};
         pc.animationAddressBuffer = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
         pc.animationBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationData, fIdx);
         pc.animationSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationSparseMap, fIdx);
@@ -113,7 +83,7 @@ namespace Syn {
         pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
         pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
 
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(CullingPushConstants), &pc);
+        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ModelCullingPC), &pc);
     }
 
     void ModelCullingPass::BindDescriptors(const RenderContext& context) {
