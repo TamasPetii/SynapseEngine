@@ -354,10 +354,10 @@
     <ClCompile Include="Render\IRenderPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\GraphicsPass.cpp">
+    <ClCompile Include="Render\Passes\GraphicsPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\ComputePass\ComputePass.cpp">
+    <ClCompile Include="Render\Passes\ComputePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\RenderPipeline.cpp">
@@ -378,7 +378,7 @@
     <ClCompile Include="Vk\Image\ImageConfig.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\TransferPass\PresentationPass.cpp">
+    <ClCompile Include="Render\Passes\Present\PresentationPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mesh\Data\Gpu\GpuVertexData.cpp">
@@ -588,13 +588,13 @@
     <ClCompile Include="Render\RendererFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\GBufferInitPass.cpp">
+    <ClCompile Include="Render\Passes\Deferred\GBufferInitPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\TransferPass\CopyToSwapchainPass.cpp">
+    <ClCompile Include="Render\Passes\Present\CopyToSwapchainPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\TransferPass\TransferPass.cpp">
+    <ClCompile Include="Render\Passes\TransferPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Collision\Tester\CollisionTester.cpp">
@@ -603,10 +603,10 @@
     <ClCompile Include="Profiler\TaskProfilerObserver.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\ComputePass\ModelCullingPass.cpp">
+    <ClCompile Include="Render\Passes\Culling\ModelCullingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\ComputePass\MeshCullingPass.cpp">
+    <ClCompile Include="Render\Passes\Culling\MeshCullingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Material\MaterialManager.cpp">
@@ -627,46 +627,46 @@
     <ClCompile Include="Mesh\Processor\Optimizer\MeshoptimizerOptimizerProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\ComputePass\HizDownsamplePass.cpp">
+    <ClCompile Include="Render\Passes\Hiz\HizDownsamplePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\ComputePass\HizLinearPreparePass.cpp">
+    <ClCompile Include="Render\Passes\Hiz\HizLinearPreparePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\CompositePass.cpp">
+    <ClCompile Include="Render\Passes\Present\CompositePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\WireframeAabbPass.cpp">
+    <ClCompile Include="Render\Passes\Debug\WireframeAabbPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Component\MaterialOverrideComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\ComputePass\BloomPrefilterPass.cpp">
+    <ClCompile Include="Render\Passes\Bloom\BloomPrefilterPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\ComputePass\BloomDownsamplePass.cpp">
+    <ClCompile Include="Render\Passes\Bloom\BloomDownsamplePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\ComputePass\BloomUpsamplePass.cpp">
+    <ClCompile Include="Render\Passes\Bloom\BloomUpsamplePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\ComputePass\BloomCompositePass.cpp">
+    <ClCompile Include="Render\Passes\Bloom\BloomCompositePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\WireframeSpherePass.cpp">
+    <ClCompile Include="Render\Passes\Debug\WireframeSpherePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\ComputePass\WireframeSetupPass.cpp">
+    <ClCompile Include="Render\Passes\Debug\WireframeSetupPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\WireframeMeshletAabbPass.cpp">
+    <ClCompile Include="Render\Passes\Debug\WireframeMeshletAabbPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\WireframeMeshletSpherePass.cpp">
+    <ClCompile Include="Render\Passes\Debug\WireframeMeshletSpherePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\TransferPass\WireframeMeshletInitPass.cpp">
+    <ClCompile Include="Render\Passes\Debug\WireframeMeshletInitPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Animation\Loader\IAnimationLoader.cpp">
@@ -765,31 +765,31 @@
     <ClCompile Include="System\AnimationSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\GuiPass.cpp">
+    <ClCompile Include="Render\Passes\Present\GuiPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\TraditionalOpaquePass.cpp">
+    <ClCompile Include="Render\Passes\Geometry\TraditionalOpaquePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\MeshletOpaquePass.cpp">
+    <ClCompile Include="Render\Passes\Geometry\MeshletOpaquePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\TraditionalTransparentPass.cpp">
+    <ClCompile Include="Render\Passes\Geometry\TraditionalTransparentPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\MeshletTransparentPass.cpp">
+    <ClCompile Include="Render\Passes\Geometry\MeshletTransparentPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\TransparentCompositePass.cpp">
+    <ClCompile Include="Render\Passes\Wboit\TransparentCompositePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\TraditionalTransparentPickingPass.cpp">
+    <ClCompile Include="Render\Passes\Picking\TraditionalTransparentPickingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\MeshletTransparentPickingPass.cpp">
+    <ClCompile Include="Render\Passes\Picking\MeshletTransparentPickingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\TransferPass\DepthCopyPass.cpp">
+    <ClCompile Include="Render\Passes\Picking\DepthCopyPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Physics\PhysicsTypes.cpp">
@@ -816,10 +816,10 @@
     <ClCompile Include="Component\CapsuleColliderComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\DebugInitPass.cpp">
+    <ClCompile Include="Render\Passes\Debug\DebugInitPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\WboitInitPass.cpp">
+    <ClCompile Include="Render\Passes\Wboit\WboitInitPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Component\DirectionLightComponent.cpp">
@@ -828,7 +828,7 @@
     <ClCompile Include="Component\BaseComponent\Light.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\DeferredEmissiveAoPass.cpp">
+    <ClCompile Include="Render\Passes\Deferred\DeferredEmissiveAoPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Component\PointLightComponent.cpp">
@@ -852,7 +852,7 @@
     <ClCompile Include="System\Light\PointLightFrustumCullingSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\DeferredPointLightPass.cpp">
+    <ClCompile Include="Render\Passes\Deferred\DeferredPointLightPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="System\Light\SpotLightSystem.cpp">
@@ -864,7 +864,7 @@
     <ClCompile Include="System\Light\SpotLightFrustumCullingSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\GraphicsPass\DeferredSpotLightPass.cpp">
+    <ClCompile Include="Render\Passes\Deferred\DeferredSpotLightPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1283,10 +1283,10 @@
     <ClInclude Include="Render\IRenderPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\GraphicsPass.h">
+    <ClInclude Include="Render\Passes\GraphicsPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\ComputePass\ComputePass.h">
+    <ClInclude Include="Render\Passes\ComputePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\RenderPipeline.h">
@@ -1307,7 +1307,7 @@
     <ClInclude Include="Vk\Image\ImageConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\TransferPass\PresentationPass.h">
+    <ClInclude Include="Render\Passes\Present\PresentationPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mesh\Data\Gpu\GpuVertexData.h">
@@ -1529,13 +1529,13 @@
     <ClInclude Include="Render\RendererFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\GBufferInitPass.h">
+    <ClInclude Include="Render\Passes\Deferred\GBufferInitPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\TransferPass\CopyToSwapchainPass.h">
+    <ClInclude Include="Render\Passes\Present\CopyToSwapchainPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\TransferPass\TransferPass.h">
+    <ClInclude Include="Render\Passes\TransferPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Collision\Tester\CollisionTester.h">
@@ -1550,10 +1550,10 @@
     <ClInclude Include="Profiler\TaskProfilerObserver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\ComputePass\ModelCullingPass.h">
+    <ClInclude Include="Render\Passes\Culling\ModelCullingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\ComputePass\MeshCullingPass.h">
+    <ClInclude Include="Render\Passes\Culling\MeshCullingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Material\MaterialManager.h">
@@ -1580,52 +1580,52 @@
     <ClInclude Include="Mesh\Processor\Optimizer\MeshoptimizerOptimizerProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\ComputePass\HizDownsamplePass.h">
+    <ClInclude Include="Render\Passes\Hiz\HizDownsamplePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\ComputePass\HizLinearPreparePass.h">
+    <ClInclude Include="Render\Passes\Hiz\HizLinearPreparePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\ComputeGroupSize.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\CompositePass.h">
+    <ClInclude Include="Render\Passes\Present\CompositePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\WireframeAabbPass.h">
+    <ClInclude Include="Render\Passes\Debug\WireframeAabbPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Component\MaterialOverrideComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\ComputePass\BloomPrefilterPass.h">
+    <ClInclude Include="Render\Passes\Bloom\BloomPrefilterPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\ComputePass\BloomDownsamplePass.h">
+    <ClInclude Include="Render\Passes\Bloom\BloomDownsamplePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\ComputePass\BloomUpsamplePass.h">
+    <ClInclude Include="Render\Passes\Bloom\BloomUpsamplePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\ComputePass\BloomCompositePass.h">
+    <ClInclude Include="Render\Passes\Bloom\BloomCompositePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\WireframeSpherePass.h">
+    <ClInclude Include="Render\Passes\Debug\WireframeSpherePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Image\ImageNames.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\ComputePass\WireframeSetupPass.h">
+    <ClInclude Include="Render\Passes\Debug\WireframeSetupPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\WireframeMeshletAabbPass.h">
+    <ClInclude Include="Render\Passes\Debug\WireframeMeshletAabbPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\WireframeMeshletSpherePass.h">
+    <ClInclude Include="Render\Passes\Debug\WireframeMeshletSpherePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\TransferPass\WireframeMeshletInitPass.h">
+    <ClInclude Include="Render\Passes\Debug\WireframeMeshletInitPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Animation\Loader\IAnimationLoader.h">
@@ -1724,34 +1724,34 @@
     <ClInclude Include="System\AnimationSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\GuiPass.h">
+    <ClInclude Include="Render\Passes\Present\GuiPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Material\MaterialRenderType.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\TraditionalOpaquePass.h">
+    <ClInclude Include="Render\Passes\Geometry\TraditionalOpaquePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\MeshletOpaquePass.h">
+    <ClInclude Include="Render\Passes\Geometry\MeshletOpaquePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\TraditionalTransparentPass.h">
+    <ClInclude Include="Render\Passes\Geometry\TraditionalTransparentPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\MeshletTransparentPass.h">
+    <ClInclude Include="Render\Passes\Geometry\MeshletTransparentPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\TransparentCompositePass.h">
+    <ClInclude Include="Render\Passes\Wboit\TransparentCompositePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\TraditionalTransparentPickingPass.h">
+    <ClInclude Include="Render\Passes\Picking\TraditionalTransparentPickingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\MeshletTransparentPickingPass.h">
+    <ClInclude Include="Render\Passes\Picking\MeshletTransparentPickingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\TransferPass\DepthCopyPass.h">
+    <ClInclude Include="Render\Passes\Picking\DepthCopyPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Physics\PhysicsTypes.h">
@@ -1778,10 +1778,10 @@
     <ClInclude Include="Component\CapsuleColliderComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\DebugInitPass.h">
+    <ClInclude Include="Render\Passes\Debug\DebugInitPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\WboitInitPass.h">
+    <ClInclude Include="Render\Passes\Wboit\WboitInitPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Component\DirectionLightComponent.h">
@@ -1790,7 +1790,7 @@
     <ClInclude Include="Component\BaseComponent\Light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\DeferredEmissiveAoPass.h">
+    <ClInclude Include="Render\Passes\Deferred\DeferredEmissiveAoPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Component\PointLightComponent.h">
@@ -1814,10 +1814,10 @@
     <ClInclude Include="System\Light\PointLightFrustumCullingSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\DeferredPointLightPass.h">
+    <ClInclude Include="Render\Passes\Deferred\DeferredPointLightPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\PushConstants\WireframePushConstants.h">
+    <ClInclude Include="Render\Passes\Debug\WireframePushConstants.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="System\Light\SpotLightSystem.h">
@@ -1829,7 +1829,7 @@
     <ClInclude Include="System\Light\SpotLightFrustumCullingSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\GraphicsPass\DeferredSpotLightPass.h">
+    <ClInclude Include="Render\Passes\Deferred\DeferredSpotLightPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
