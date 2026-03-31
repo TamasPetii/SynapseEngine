@@ -636,7 +636,7 @@
     <ClCompile Include="Render\Passes\Present\CompositePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Debug\WireframeAabbPass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\WireframeAabbPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Component\MaterialOverrideComponent.cpp">
@@ -654,19 +654,19 @@
     <ClCompile Include="Render\Passes\Bloom\BloomCompositePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Debug\WireframeSpherePass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\WireframeSpherePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Debug\WireframeSetupPass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\WireframeSetupPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Debug\WireframeMeshletAabbPass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshletAabbPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Debug\WireframeMeshletSpherePass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshletSpherePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Debug\WireframeMeshletInitPass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshletInitPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Animation\Loader\IAnimationLoader.cpp">
@@ -816,7 +816,7 @@
     <ClCompile Include="Component\CapsuleColliderComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Debug\DebugInitPass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\DebugInitPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Wboit\WboitInitPass.cpp">
@@ -1592,7 +1592,7 @@
     <ClInclude Include="Render\Passes\Present\CompositePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Debug\WireframeAabbPass.h">
+    <ClInclude Include="Render\Passes\Wireframe\WireframeAabbPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Component\MaterialOverrideComponent.h">
@@ -1610,22 +1610,22 @@
     <ClInclude Include="Render\Passes\Bloom\BloomCompositePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Debug\WireframeSpherePass.h">
+    <ClInclude Include="Render\Passes\Wireframe\WireframeSpherePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Image\ImageNames.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Debug\WireframeSetupPass.h">
+    <ClInclude Include="Render\Passes\Wireframe\WireframeSetupPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Debug\WireframeMeshletAabbPass.h">
+    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshletAabbPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Debug\WireframeMeshletSpherePass.h">
+    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshletSpherePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Debug\WireframeMeshletInitPass.h">
+    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshletInitPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Animation\Loader\IAnimationLoader.h">
@@ -1778,7 +1778,7 @@
     <ClInclude Include="Component\CapsuleColliderComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Debug\DebugInitPass.h">
+    <ClInclude Include="Render\Passes\Wireframe\DebugInitPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Wboit\WboitInitPass.h">
@@ -1846,10 +1846,10 @@
     <None Include="Shaders\Passes\PostProcess\BloomUpsample.comp" />
     <None Include="Shaders\Passes\PostProcess\BloomDownsample.comp" />
     <None Include="Shaders\Passes\PostProcess\BloomComposite.comp" />
-    <None Include="Shaders\Passes\Debug\WireframeSetup.comp" />
-    <None Include="Shaders\Passes\Debug\Wireframe.vert" />
-    <None Include="Shaders\Passes\Debug\Wireframe.frag" />
-    <None Include="Shaders\Passes\Debug\WireframeMeshlet.vert" />
+    <None Include="Shaders\Passes\Wireframe\WireframeSetup.comp" />
+    <None Include="Shaders\Passes\Wireframe\Wireframe.vert" />
+    <None Include="Shaders\Passes\Wireframe\Wireframe.frag" />
+    <None Include="Shaders\Passes\Wireframe\WireframeMeshlet.vert" />
     <None Include="Shaders\Passes\Geometry\TraditionalTransparent.frag" />
     <None Include="Shaders\Passes\Geometry\MeshletTransparent.frag" />
     <None Include="Shaders\Passes\Common\TransparentComposite.frag" />

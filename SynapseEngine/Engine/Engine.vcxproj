@@ -195,7 +195,7 @@
     <ClCompile Include="System\Light\PointLightShadowSystem.cpp" />
     <ClCompile Include="System\Light\PointLightSystem.cpp" />
     <ClCompile Include="Render\Passes\Deferred\DeferredEmissiveAoPass.cpp" />
-    <ClCompile Include="Render\Passes\Debug\DebugInitPass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\DebugInitPass.cpp" />
     <ClCompile Include="Component\SpotLightComponent.cpp" />
     <ClCompile Include="Component\SpotLightShadowComponent.cpp" />
     <ClCompile Include="System\PhysicsSystem.cpp" />
@@ -456,12 +456,12 @@
     <ClCompile Include="Registry\Pool\Storage\Extension\SegmentedStorageImplExtension.cpp" />
     <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.cpp" />
     <ClCompile Include="Utils\WindowedBuffer.cpp" />
-    <ClCompile Include="Render\Passes\Debug\WireframeAabbPass.cpp" />
-    <ClCompile Include="Render\Passes\Debug\WireframeSpherePass.cpp" />
-    <ClCompile Include="Render\Passes\Debug\WireframeSetupPass.cpp" />
-    <ClCompile Include="Render\Passes\Debug\WireframeMeshletAabbPass.cpp" />
-    <ClCompile Include="Render\Passes\Debug\WireframeMeshletSpherePass.cpp" />
-    <ClCompile Include="Render\Passes\Debug\WireframeMeshletInitPass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\WireframeAabbPass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\WireframeSpherePass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\WireframeSetupPass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshletAabbPass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshletSpherePass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshletInitPass.cpp" />
     <ClCompile Include="Render\Passes\Wboit\WboitInitPass.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -481,7 +481,7 @@
     <ClInclude Include="System\Light\PointLightShadowSystem.h" />
     <ClInclude Include="System\Light\PointLightSystem.h" />
     <ClInclude Include="Render\Passes\Deferred\DeferredEmissiveAoPass.h" />
-    <ClInclude Include="Render\Passes\Debug\DebugInitPass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\DebugInitPass.h" />
     <ClInclude Include="Component\SpotLightComponent.h" />
     <ClInclude Include="Component\SpotLightShadowComponent.h" />
     <ClInclude Include="System\PhysicsSystem.h" />
@@ -778,12 +778,12 @@
     <ClInclude Include="SynMacro.h" />
     <ClInclude Include="Registry\Type\TypeManager.h" />
     <ClInclude Include="Utils\WindowedBuffer.h" />
-    <ClInclude Include="Render\Passes\Debug\WireframeAabbPass.h" />
-    <ClInclude Include="Render\Passes\Debug\WireframeSpherePass.h" />
-    <ClInclude Include="Render\Passes\Debug\WireframeSetupPass.h" />
-    <ClInclude Include="Render\Passes\Debug\WireframeMeshletAabbPass.h" />
-    <ClInclude Include="Render\Passes\Debug\WireframeMeshletSpherePass.h" />
-    <ClInclude Include="Render\Passes\Debug\WireframeMeshletInitPass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\WireframeAabbPass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\WireframeSpherePass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\WireframeSetupPass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshletAabbPass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshletSpherePass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshletInitPass.h" />
     <ClInclude Include="Render\Passes\Wboit\WboitInitPass.h" />
   </ItemGroup>
   <ItemGroup>
@@ -837,10 +837,10 @@
     <None Include="Shaders\Passes\Geometry\TraditionalTransparent.frag" />
     <None Include="Shaders\Passes\Geometry\TraditionalTransparentPicking.frag" />
     <None Include="Shaders\Passes\Common\TransparentComposite.frag" />
-    <None Include="Shaders\Passes\Debug\Wireframe.frag" />
-    <None Include="Shaders\Passes\Debug\Wireframe.vert" />
-    <None Include="Shaders\Passes\Debug\WireframeMeshlet.vert" />
-    <None Include="Shaders\Passes\Debug\WireframeSetup.comp" />
+    <None Include="Shaders\Passes\Wireframe\Wireframe.frag" />
+    <None Include="Shaders\Passes\Wireframe\Wireframe.vert" />
+    <None Include="Shaders\Passes\Wireframe\WireframeMeshlet.vert" />
+    <None Include="Shaders\Passes\Wireframe\WireframeSetup.comp" />
     <None Include="Shaders\Passes\Hiz\HizDownsample.comp" />
     <None Include="Shaders\Passes\Hiz\HizLinearizeDepth.comp" />
     <None Include="Shaders\Passes\Culling\MeshCulling.comp" />

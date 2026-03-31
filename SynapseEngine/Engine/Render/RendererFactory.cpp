@@ -29,13 +29,13 @@
 #include "Engine/Render/Passes/Picking/MeshletTransparentPickingPass.h"
 #include "Engine/Render/Passes/Picking/TraditionalTransparentPickingPass.h"
 
-#include "Engine/Render/Passes/Debug/DebugInitPass.h"
-#include "Engine/Render/Passes/Debug/WireframeSetupPass.h"
-#include "Engine/Render/Passes/Debug/WireframeAabbPass.h"
-#include "Engine/Render/Passes/Debug/WireframeSpherePass.h"
-#include "Engine/Render/Passes/Debug/WireframeMeshletInitPass.h"
-#include "Engine/Render/Passes/Debug/WireframeMeshletAabbPass.h"
-#include "Engine/Render/Passes/Debug/WireframeMeshletSpherePass.h"
+#include "Engine/Render/Passes/Wireframe/DebugInitPass.h"
+#include "Engine/Render/Passes/Wireframe/WireframeSetupPass.h"
+#include "Engine/Render/Passes/Wireframe/WireframeAabbPass.h"
+#include "Engine/Render/Passes/Wireframe/WireframeSpherePass.h"
+#include "Engine/Render/Passes/Wireframe/WireframeMeshletInitPass.h"
+#include "Engine/Render/Passes/Wireframe/WireframeMeshletAabbPass.h"
+#include "Engine/Render/Passes/Wireframe/WireframeMeshletSpherePass.h"
 
 #include "Engine/Render/Passes/Present/GuiPass.h"
 #include "Engine/Render/Passes/Present/CompositePass.h"
@@ -88,9 +88,9 @@ namespace Syn
         pipeline->AddPass(std::make_unique<TransparentCompositePass>());
 
         // Wireframe Passes
-        pipeline->AddPass(std::make_unique<WireframeSetupPass>());
-        pipeline->AddPass(std::make_unique<WireframeAabbPass>());
-        pipeline->AddPass(std::make_unique<WireframeSpherePass>());
+        //pipeline->AddPass(std::make_unique<WireframeSetupPass>());
+        //pipeline->AddPass(std::make_unique<WireframeAabbPass>());
+        //pipeline->AddPass(std::make_unique<WireframeSpherePass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletInitPass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletAabbPass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletSpherePass>());

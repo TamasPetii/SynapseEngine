@@ -99,28 +99,7 @@ namespace Syn
                 registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
             }
 
-            /*
-            {
-                // Character
-                EntityID characterEntity = registry->CreateEntity();
-                registry->AddComponent<TransformComponent>(characterEntity);
-                registry->AddComponent<ModelComponent>(characterEntity);
-                registry->AddComponent<AnimationComponent>(characterEntity);
-
-                registry->GetComponent<TransformComponent>(characterEntity).scale = glm::vec3(5.f);
-                registry->GetComponent<ModelComponent>(characterEntity).modelIndex = mutantId;
-
-                auto& animComp = registry->GetComponent<AnimationComponent>(characterEntity);
-                animComp.animationIndex = animationIds[1];
-                //animComp.speed = 0.5f + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * 1.5f;
-
-                registry->GetPool<TransformComponent>()->SetCategory(characterEntity, StorageCategory::Static);
-                registry->GetPool<ModelComponent>()->SetCategory(characterEntity, StorageCategory::Static);
-                registry->GetPool<AnimationComponent>()->SetCategory(characterEntity, StorageCategory::Stream);
-            }
-            */
-
-            for (int i = 0; i < 500; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 // Character
                 EntityID characterEntity = registry->CreateEntity();
@@ -149,7 +128,7 @@ namespace Syn
             auto materialManager = ServiceLocator::GetMaterialManager();
 
             // Random Geometry
-            for (int i = 0; i < 5000; i++)
+            for (int i = 0; i < 50000; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
@@ -191,7 +170,7 @@ namespace Syn
                 overrideComp.materials.push_back(randomMatId);
             }
 
-            for (int i = 0; i < 500; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 EntityID lightEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(lightEntity);
@@ -221,7 +200,7 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(lightEntity);
             }
 
-            for (int i = 0; i < 500; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 EntityID spotLightEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(spotLightEntity);

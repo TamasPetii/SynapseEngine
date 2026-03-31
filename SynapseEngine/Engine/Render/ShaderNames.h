@@ -31,10 +31,10 @@ namespace Syn
         static constexpr const char* BloomDownsample = "../Engine/Shaders/Passes/PostProcess/BloomDownsample.comp";
         static constexpr const char* BloomComposite = "../Engine/Shaders/Passes/PostProcess/BloomComposite.comp";
 
-        static constexpr const char* WireframeSetup = "../Engine/Shaders/Passes/Debug/WireframeSetup.comp";
-        static constexpr const char* WireframeVert = "../Engine/Shaders/Passes/Debug/Wireframe.vert";
-        static constexpr const char* WireframeMeshletVert = "../Engine/Shaders/Passes/Debug/WireframeMeshlet.vert";
-        static constexpr const char* WireframeFrag = "../Engine/Shaders/Passes/Debug/Wireframe.frag";
+        static constexpr const char* WireframeSetup = "../Engine/Shaders/Passes/Wireframe/WireframeSetup.comp";
+        static constexpr const char* WireframeVert = "../Engine/Shaders/Passes/Wireframe/Wireframe.vert";
+        static constexpr const char* WireframeMeshletVert = "../Engine/Shaders/Passes/Wireframe/WireframeMeshlet.vert";
+        static constexpr const char* WireframeFrag = "../Engine/Shaders/Passes/Wireframe/Wireframe.frag";
 
 		static constexpr const char* DeferredEmissiveAoFrag = "../Engine/Shaders/Passes/Deferred/DeferredEmissiveAo.frag";
         static constexpr const char* DeferredPointLightVert = "../Engine/Shaders/Passes/Deferred/DeferredPointLight.vert";
