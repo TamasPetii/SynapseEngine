@@ -189,6 +189,7 @@
     <ClCompile Include="Component\DirectionLightShadowComponent.cpp" />
     <ClCompile Include="Collision\Colliders\FrustumCollider.cpp" />
     <ClCompile Include="Render\Passes\Culling\PointLightCullingPass.cpp" />
+    <ClCompile Include="Render\Passes\Culling\SpotLightCullingPass.cpp" />
     <ClCompile Include="System\Light\DirectionLightCullingSystem.cpp" />
     <ClCompile Include="Render\Passes\Deferred\DeferredDirectionLightPass.cpp" />
     <ClCompile Include="System\Light\DirectionLightShadowSystem.cpp" />
@@ -482,6 +483,7 @@
     <ClInclude Include="Component\DirectionLightShadowComponent.h" />
     <ClInclude Include="Collision\Colliders\FrustumCollider.h" />
     <ClInclude Include="Render\Passes\Culling\PointLightCullingPass.h" />
+    <ClInclude Include="Render\Passes\Culling\SpotLightCullingPass.h" />
     <ClInclude Include="System\Light\DirectionLightCullingSystem.h" />
     <ClInclude Include="Render\Passes\Deferred\DeferredDirectionLightPass.h" />
     <ClInclude Include="System\Light\DirectionLightShadowSystem.h" />
@@ -814,6 +816,7 @@
     <None Include="Shaders\Includes\PushConstants\HizDownSamplePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\HizLinearizeDepthPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\PointLightCullingPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\SpotLightCullingPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframeSetupPC.glsl" />
     <None Include="Shaders\Includes\SharedGpuTypes.glsl" />
@@ -821,6 +824,7 @@
     <None Include="Shaders\Includes\Utils\PbrMath.glsl" />
     <None Include="Shaders\Includes\Utils\WboitMath.glsl" />
     <None Include="Shaders\Passes\Culling\PointLightCulling.comp" />
+    <None Include="Shaders\Passes\Culling\SpotLightCulling.comp" />
     <None Include="Shaders\Passes\Deferred\DeferredDirectionLight.frag" />
     <None Include="Shaders\Passes\Deferred\DeferredDirectionLight.vert" />
     <None Include="Shaders\Passes\Deferred\DeferredSpotLight.frag" />

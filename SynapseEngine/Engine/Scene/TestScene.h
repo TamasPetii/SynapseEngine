@@ -191,7 +191,7 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(dirLightEntity);
             }
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 EntityID lightEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(lightEntity);
@@ -212,7 +212,7 @@ namespace Syn
                     static_cast<float>(rand()) / static_cast<float>(RAND_MAX)
                 );
                 light.radius = 2 + (rand() % 20);
-                light.strength = 1.0f + (rand() % 10);
+                light.strength = 1.0f + (rand() % 15);
                 light.useShadow = (i < 5);
 
                 registry->GetPool<TransformComponent>()->SetCategory(lightEntity, StorageCategory::Static);
@@ -221,7 +221,7 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(lightEntity);
             }
 
-            for (int i = 0; i < 0; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 EntityID spotLightEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(spotLightEntity);
@@ -252,7 +252,7 @@ namespace Syn
                 light.range = 30.0f + (rand() % 30);
                 light.innerAngle = 15.0f + (rand() % 10);
                 light.outerAngle = light.innerAngle + 10.0f + (rand() % 15);
-                light.strength = 5.0f + (rand() % 15);
+                light.strength = 5.0f + (rand() % 25);
                 light.useShadow = (i < 5);
 
                 registry->GetPool<TransformComponent>()->SetCategory(spotLightEntity, StorageCategory::Static);

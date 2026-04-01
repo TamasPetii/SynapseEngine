@@ -888,6 +888,9 @@
     <ClCompile Include="Render\Passes\Culling\PointLightCullingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Passes\Culling\SpotLightCullingPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1871,6 +1874,9 @@
     <ClInclude Include="Render\Passes\Culling\PointLightCullingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Passes\Culling\SpotLightCullingPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Passes\Common\Fullscreen.vert" />
@@ -1942,5 +1948,7 @@
     <None Include="Shaders\Passes\Deferred\DeferredDirectionLight.vert" />
     <None Include="Shaders\Passes\Culling\PointLightCulling.comp" />
     <None Include="Shaders\Includes\PushConstants\PointLightCullingPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\SpotLightCullingPC.glsl" />
+    <None Include="Shaders\Passes\Culling\SpotLightCulling.comp" />
   </ItemGroup>
 </Project>

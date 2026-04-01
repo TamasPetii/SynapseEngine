@@ -42,9 +42,13 @@ namespace Syn
             }
             });
 
+        /*
+        * //No gpu driven light culling for direction lights!
+        * //Only enable check on cpu side!
         if (drawData->useGpuCulling) {
             return;
         }
+        */
 
         auto cullFunc = [pool, drawData](EntityID entity) {
             const auto& lightComp = pool->Get(entity);

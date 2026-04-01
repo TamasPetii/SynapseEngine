@@ -3,9 +3,9 @@
 #include "Engine/Render/Passes/ComputePass.h"
 
 namespace Syn {
-    class SYN_API PointLightCullingPass : public ComputePass {
+    class SYN_API SpotLightCullingPass : public ComputePass {
     public:
-        std::string GetName() const override { return "PointLightCullingPass"; }
+        std::string GetName() const override { return "SpotLightCullingPass"; }
         void Initialize() override;
     protected:
         void PushConstants(const RenderContext& context) override;

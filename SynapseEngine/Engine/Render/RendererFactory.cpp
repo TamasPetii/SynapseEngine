@@ -4,6 +4,7 @@
 #include "Engine/Render/Passes/Culling/ModelCullingPass.h"
 #include "Engine/Render/Passes/Culling/MeshCullingPass.h"
 #include "Engine/Render/Passes/Culling/PointLightCullingPass.h"
+#include "Engine/Render/Passes/Culling/SpotLightCullingPass.h"
 
 #include "Engine/Render/Passes/Deferred/GBufferInitPass.h"
 #include "Engine/Render/Passes/Deferred/DeferredEmissiveAoPass.h"
@@ -59,6 +60,7 @@ namespace Syn
         pipeline->AddPass(std::make_unique<ModelCullingPass>());
         pipeline->AddPass(std::make_unique<MeshCullingPass>());
         pipeline->AddPass(std::make_unique<PointLightCullingPass>());
+        pipeline->AddPass(std::make_unique<SpotLightCullingPass>());
 
         //Texture Init Passes
         pipeline->AddPass(std::make_unique<GBufferInitPass>());
