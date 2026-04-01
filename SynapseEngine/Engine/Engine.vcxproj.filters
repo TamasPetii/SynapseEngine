@@ -378,9 +378,6 @@
     <ClCompile Include="Vk\Image\ImageConfig.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Present\PresentationPass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Mesh\Data\Gpu\GpuVertexData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1344,9 +1341,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vk\Image\ImageConfig.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\Passes\Present\PresentationPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mesh\Data\Gpu\GpuVertexData.h">

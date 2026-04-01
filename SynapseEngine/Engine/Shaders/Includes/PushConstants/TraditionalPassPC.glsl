@@ -25,6 +25,7 @@ struct TraditionalPassPC {
     uint activeCameraEntity;
     uint baseDescriptorOffset;
     uint materialRenderType;
+    uint _pad;
 };
 
 #endif

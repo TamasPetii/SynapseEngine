@@ -28,6 +28,7 @@ struct MeshCullingPC {
     uint enableOcclusionCulling;
     float screenWidth;
     float screenHeight;
+    vec2 padding;
 };
 
 #endif

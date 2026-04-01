@@ -46,7 +46,6 @@
 
 #include "Engine/Render/Passes/Present/GuiPass.h"
 #include "Engine/Render/Passes/Present/CompositePass.h"
-#include "Engine/Render/Passes/Present/PresentationPass.h"
 #include "Engine/Render/Passes/Present/CopyToSwapchainPass.h"
 
 #include "Engine/Vk/Image/ImageViewNames.h"
@@ -63,8 +62,8 @@ namespace Syn
         pipeline->AddPass(std::make_unique<HizDownsamplePass>());
         pipeline->AddPass(std::make_unique<ModelCullingPass>());
         pipeline->AddPass(std::make_unique<MeshCullingPass>());
-        pipeline->AddPass(std::make_unique<PointLightCullingPass>());
-        pipeline->AddPass(std::make_unique<SpotLightCullingPass>());
+        //pipeline->AddPass(std::make_unique<PointLightCullingPass>());
+        //pipeline->AddPass(std::make_unique<SpotLightCullingPass>());
 
         //Texture Init Passes
         pipeline->AddPass(std::make_unique<GBufferInitPass>());
@@ -80,8 +79,8 @@ namespace Syn
 		// Deferred Lighting Passes
 		pipeline->AddPass(std::make_unique<DeferredEmissiveAoPass>());
         pipeline->AddPass(std::make_unique<DeferredDirectionLightPass>());
-        pipeline->AddPass(std::make_unique<DeferredPointLightPass>());
-        pipeline->AddPass(std::make_unique<DeferredSpotLightPass>());
+        //pipeline->AddPass(std::make_unique<DeferredPointLightPass>());
+        //pipeline->AddPass(std::make_unique<DeferredSpotLightPass>());
 
         // Editor Picking Passes
         pipeline->AddPass(std::make_unique<DepthCopyPass>());
@@ -98,17 +97,17 @@ namespace Syn
         pipeline->AddPass(std::make_unique<TransparentCompositePass>());
 
         // Wireframe Passes
-        pipeline->AddPass(std::make_unique<WireframeSetupPass>());
-        pipeline->AddPass(std::make_unique<WireframeAabbPass>());
-        pipeline->AddPass(std::make_unique<WireframeSpherePass>());
+        //pipeline->AddPass(std::make_unique<WireframeSetupPass>());
+        //pipeline->AddPass(std::make_unique<WireframeAabbPass>());
+        //pipeline->AddPass(std::make_unique<WireframeSpherePass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletInitPass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletAabbPass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletSpherePass>());
 
-        pipeline->AddPass(std::make_unique<PointLightAabbWireframePass>());
-        pipeline->AddPass(std::make_unique<PointLightSphereWireframePass>());
-        pipeline->AddPass(std::make_unique<SpotLightAabbWireframePass>());
-        pipeline->AddPass(std::make_unique<SpotLightSphereWireframePass>());
+        //pipeline->AddPass(std::make_unique<PointLightAabbWireframePass>());
+        //pipeline->AddPass(std::make_unique<PointLightSphereWireframePass>());
+        //pipeline->AddPass(std::make_unique<SpotLightAabbWireframePass>());
+        //pipeline->AddPass(std::make_unique<SpotLightSphereWireframePass>());
 
         // Post-processing & UI
         pipeline->AddPass(std::make_unique<BloomPrefilterPass>());
@@ -116,7 +115,6 @@ namespace Syn
         pipeline->AddPass(std::make_unique<BloomUpsamplePass>());
         pipeline->AddPass(std::make_unique<BloomCompositePass>());
         pipeline->AddPass(std::make_unique<GuiPass>());
-        pipeline->AddPass(std::make_unique<PresentationPass>());
         pipeline->InitializeAll();
 
         renderManager->RegisterPipeline(RenderPipelineNames::DeferredPipeline, std::move(pipeline));

@@ -14,7 +14,8 @@ struct WireframeLightPC {
     uint64_t indexBufferAddr;
     uint     activeCameraEntity;
     uint     lightDrawType; // 0: Point Sphere, 1: Point Aabb, 2: Spot Sphere, 3: Spot Box
-    uint     padding;
+    uint     _pad0;
+    uint     _pad1;
 };
 
 #endif

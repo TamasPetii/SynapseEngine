@@ -346,7 +346,6 @@
     <ClCompile Include="Image\Data\Raw\RawImage.cpp" />
     <ClCompile Include="Image\Source\Procedural\ProceduralImageSource.cpp" />
     <ClCompile Include="Image\Data\Common\MipLevelInfo.cpp" />
-    <ClCompile Include="Render\Passes\Present\PresentationPass.cpp" />
     <ClCompile Include="Image\Loader\StbImageLoader.cpp" />
     <ClCompile Include="Vk\Image\ImageConfig.cpp" />
     <ClCompile Include="Render\RenderContext.cpp" />
@@ -656,7 +655,6 @@
     <ClInclude Include="Image\Data\Raw\RawImage.h" />
     <ClInclude Include="Image\Source\Procedural\ProceduralImageSource.h" />
     <ClInclude Include="Image\Data\Common\MipLevelInfo.h" />
-    <ClInclude Include="Render\Passes\Present\PresentationPass.h" />
     <ClInclude Include="Image\Loader\StbImageLoader.h" />
     <ClInclude Include="Vk\Image\ImageConfig.h" />
     <ClInclude Include="Render\RenderContext.h" />

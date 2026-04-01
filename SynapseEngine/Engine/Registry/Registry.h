@@ -9,6 +9,7 @@
 #include <tuple>
 #include <algorithm>
 #include <execution>
+#include <shared_mutex>
 
 namespace Syn
 {
@@ -81,6 +82,9 @@ namespace Syn
 		template<typename... T, typename Func>
 			requires (std::invocable<Func, T&...>)
 		void ViewPar(Func&& func);
+
+		template<typename T>
+		WrapperType<T>* EnsurePool();
 	private:
 		template<typename T>
 		IPool* GetIPool();
@@ -88,9 +92,6 @@ namespace Syn
 		template<typename ExecutionPolicy, typename... T, typename Func>
 			requires (std::invocable<Func, T&...>)
 		void View(ExecutionPolicy policy, Func&& func);
-
-		template<typename T>
-		WrapperType<T>* EnsurePool();
 	private:
 		EntityID _entityCounter = 0;
 		std::vector<EntityID> _freeEntities;

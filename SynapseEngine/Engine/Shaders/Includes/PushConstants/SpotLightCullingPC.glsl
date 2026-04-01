@@ -14,6 +14,7 @@ struct SpotLightCullingPC {
     uint enableOcclusionCulling;
     float screenWidth;
     float screenHeight;
+    uint _pad;
 };
 
 #endif

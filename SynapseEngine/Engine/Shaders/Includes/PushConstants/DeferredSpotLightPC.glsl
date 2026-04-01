@@ -17,6 +17,7 @@ struct DeferredSpotLightPC {
     uint activeCameraEntity;
     float screenWidth;
     float screenHeight;
+    uint _pad;
 };
 
 #endif

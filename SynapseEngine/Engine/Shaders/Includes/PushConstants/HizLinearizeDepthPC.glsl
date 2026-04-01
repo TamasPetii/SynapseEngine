@@ -8,6 +8,7 @@ struct HizLinearizeDepthPC {
     uint64_t cameraSparseMapBufferAddr;  
     vec2 outImageSize;
     uint activeCameraEntity;
+    uint _pad;
 };
 
 #endif

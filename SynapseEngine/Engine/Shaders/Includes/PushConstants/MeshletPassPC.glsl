@@ -32,6 +32,7 @@ struct MeshletPassPC {
     uint enableOcclusionCulling;
     float screenWidth;
     float screenHeight;
+    uint _pad;
 };
 
 #endif

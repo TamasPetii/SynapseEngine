@@ -29,12 +29,25 @@
 #include "Engine/System/Light/DirectionLightSystem.h"
 #include "Engine/System/Light/DirectionLightShadowSystem.h"
 #include "Engine/System/Light/DirectionLightCullingSystem.h"
+#include "Engine/Component/MaterialOverrideComponent.h"
 
 namespace Syn
 {
     Scene::Scene(uint32_t frameCount)
     {
         _registry = std::make_unique<Registry>();
+		_registry->EnsurePool<TransformComponent>();
+        _registry->EnsurePool<AnimationComponent>();
+        _registry->EnsurePool<CameraComponent>();
+        _registry->EnsurePool<ModelComponent>();
+        _registry->EnsurePool<MaterialOverrideComponent>();
+        _registry->EnsurePool<DirectionLightComponent>();
+        _registry->EnsurePool<DirectionLightShadowComponent>();
+        _registry->EnsurePool<PointLightComponent>();
+        _registry->EnsurePool<PointLightShadowComponent>();
+        _registry->EnsurePool<SpotLightComponent>();
+        _registry->EnsurePool<SpotLightShadowComponent>();
+
         _componentBufferManager = std::make_unique<ComponentBufferManager>(frameCount);
         _sceneDrawData = std::make_unique<SceneDrawData>(frameCount);
         _sceneSettings = std::make_unique<SceneSettings>();

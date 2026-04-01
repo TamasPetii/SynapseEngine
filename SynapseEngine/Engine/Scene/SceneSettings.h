@@ -5,28 +5,28 @@ namespace Syn
 {
     struct SYN_API SceneSettings
     {
-        bool enableTransparentPicking = false;
+        SceneSettings();
 
-        bool enableGpuCulling = true;
-        bool enableBloom = false;
-        bool enableHiz = true;
-        bool enableOcclusionCulling = true;
+        bool enableTransparentPicking;
 
-		bool enablePointLightSphereWireframe = false;
-		bool enablePointLightAabbWireframe = false;
-		bool enableSpotLightSphereWireframe = false;
-		bool enableSpotLightAabbWireframe = false;
+        bool enableGpuCulling;
+        bool enableBloom;
+        bool enableHiz;
+        bool enableOcclusionCulling;
 
-        bool enableWireframeMeshAabb = false;
-        bool enableWireframeMeshSphere = false;
-        bool enableWireframeMeshletAabb = false;
-        bool enableWireframeMeshletSphere = false;
+        bool enablePointLightSphereWireframe;
+        bool enablePointLightAabbWireframe;
+        bool enableSpotLightSphereWireframe;
+        bool enableSpotLightAabbWireframe;
 
-		bool enableDeferredEmissiveAo = true;
-		bool enableDeferredPointLights = true;
-		bool enableDeferredSpotLights = true;
-		bool enableDeferredDirectionalLights = true;
-        
-        //Todo transparent settings
+        bool enableWireframeMeshAabb;
+        bool enableWireframeMeshSphere;
+        bool enableWireframeMeshletAabb;
+        bool enableWireframeMeshletSphere;
+
+        bool enableDeferredEmissiveAo;
+        bool enableDeferredPointLights;
+        bool enableDeferredSpotLights;
+        bool enableDeferredDirectionalLights;
     };
 }

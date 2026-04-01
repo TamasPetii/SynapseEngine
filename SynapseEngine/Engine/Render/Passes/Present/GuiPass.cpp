@@ -13,7 +13,7 @@ namespace Syn
     }
 
     void GuiPass::PrepareFrame(const RenderContext& context) {
-        if (!context.onRenderGui || !context.scene) return;
+        if (!context.onRenderGui) return;
 
         auto vkContext = ServiceLocator::GetVkContext();
         auto swapChain = vkContext->GetSwapChain();
@@ -79,7 +79,7 @@ namespace Syn
     }
 
     void GuiPass::Execute(const RenderContext& context) {
-        if (!context.onRenderGui || !context.scene) return;
+        if (!context.onRenderGui) return;
 
         _colorAttachments.clear();
         _imageTransitions.clear();

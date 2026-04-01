@@ -86,7 +86,7 @@ namespace Syn {
         pc.totalModelsToTest = totalModels;
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.traditionalCommandCount = drawData->activeTraditionalCount;
-		pc.enableOcclusionCulling = scene->GetSettings()->enableOcclusionCulling ? 1 : 0;
+		pc.enableOcclusionCulling = (scene->GetSettings()->enableGpuCulling && scene->GetSettings()->enableOcclusionCulling) ? 1 : 0;
 
         pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
         pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
