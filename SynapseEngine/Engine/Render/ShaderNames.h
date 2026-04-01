@@ -18,6 +18,7 @@ namespace Syn
         
         static constexpr const char* MeshCulling = "../Engine/Shaders/Passes/Culling/MeshCulling.comp";
         static constexpr const char* ModelCulling = "../Engine/Shaders/Passes/Culling/ModelCulling.comp";
+        static constexpr const char* PointLightCulling = "../Engine/Shaders/Passes/Culling/PointLightCulling.comp";
 
         static constexpr const char* HizLinearizeDepth = "../Engine/Shaders/Passes/Hiz/HizLinearizeDepth.comp";
         static constexpr const char* HizDownsample = "../Engine/Shaders/Passes/Hiz/HizDownsample.comp";

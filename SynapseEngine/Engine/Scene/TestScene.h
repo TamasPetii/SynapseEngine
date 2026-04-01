@@ -191,7 +191,7 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(dirLightEntity);
             }
 
-            for (int i = 0; i < 0; i++)
+            for (int i = 0; i < 100; i++)
             {
                 EntityID lightEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(lightEntity);

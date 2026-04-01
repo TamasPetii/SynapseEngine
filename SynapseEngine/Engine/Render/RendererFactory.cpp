@@ -3,13 +3,13 @@
 
 #include "Engine/Render/Passes/Culling/ModelCullingPass.h"
 #include "Engine/Render/Passes/Culling/MeshCullingPass.h"
+#include "Engine/Render/Passes/Culling/PointLightCullingPass.h"
 
 #include "Engine/Render/Passes/Deferred/GBufferInitPass.h"
 #include "Engine/Render/Passes/Deferred/DeferredEmissiveAoPass.h"
 #include "Engine/Render/Passes/Deferred/DeferredPointLightPass.h"
 #include "Engine/Render/Passes/Deferred/DeferredSpotLightPass.h"
 #include "Engine/Render/Passes/Deferred/DeferredDirectionLightPass.h"
-
 
 #include "Engine/Render/Passes/Geometry/TraditionalOpaquePass.h"
 #include "Engine/Render/Passes/Geometry/MeshletOpaquePass.h"
@@ -58,6 +58,7 @@ namespace Syn
         pipeline->AddPass(std::make_unique<HizDownsamplePass>());
         pipeline->AddPass(std::make_unique<ModelCullingPass>());
         pipeline->AddPass(std::make_unique<MeshCullingPass>());
+        pipeline->AddPass(std::make_unique<PointLightCullingPass>());
 
         //Texture Init Passes
         pipeline->AddPass(std::make_unique<GBufferInitPass>());
