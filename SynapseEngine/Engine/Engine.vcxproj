@@ -186,6 +186,10 @@
     <ClCompile Include="Component\BaseComponent\Light.cpp" />
     <ClCompile Include="Component\PointLightComponent.cpp" />
     <ClCompile Include="Component\PointLightShadowComponent.cpp" />
+    <ClCompile Include="Component\DirectionLightShadowComponent.cpp" />
+    <ClCompile Include="Collision\Colliders\FrustumCollider.cpp" />
+    <ClCompile Include="System\Light\DirectionLightShadowSystem.cpp" />
+    <ClCompile Include="System\Light\DirectionLightSystem.cpp" />
     <ClCompile Include="Render\Passes\Deferred\DeferredSpotLightPass.cpp" />
     <ClCompile Include="Render\Passes\Deferred\DeferredPointLightPass.cpp" />
     <ClCompile Include="System\Light\SpotLightFrustumCullingSystem.cpp" />
@@ -472,6 +476,10 @@
     <ClInclude Include="Component\BaseComponent\Light.h" />
     <ClInclude Include="Component\PointLightComponent.h" />
     <ClInclude Include="Component\PointLightShadowComponent.h" />
+    <ClInclude Include="Component\DirectionLightShadowComponent.h" />
+    <ClInclude Include="Collision\Colliders\FrustumCollider.h" />
+    <ClInclude Include="System\Light\DirectionLightShadowSystem.h" />
+    <ClInclude Include="System\Light\DirectionLightSystem.h" />
     <ClInclude Include="Render\Passes\Deferred\DeferredSpotLightPass.h" />
     <ClInclude Include="Render\Passes\Deferred\DeferredPointLightPass.h" />
     <ClInclude Include="System\Light\SpotLightFrustumCullingSystem.h" />

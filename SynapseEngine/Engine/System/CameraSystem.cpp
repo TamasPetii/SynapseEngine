@@ -98,17 +98,48 @@ namespace Syn
                 cameraComponent.viewProj = cameraComponent.proj * cameraComponent.view;
                 cameraComponent.viewProjInv = glm::inverse(cameraComponent.viewProj);
 
+                //cameraComponent.frustum.Update(cameraComponent.viewProj);
+
                 float fovY = glm::radians(cameraComponent.fov);
                 float aspectRatio = cameraComponent.width / cameraComponent.height;
                 float halfV = cameraComponent.farPlane * tanf(fovY * 0.5f);
                 float halfH = halfV * aspectRatio;
 
-                cameraComponent.frustum[0] = FrustumFace(cameraComponent.direction, cameraComponent.position + cameraComponent.direction * cameraComponent.nearPlane);
-                cameraComponent.frustum[1] = FrustumFace(-glm::cross(glm::normalize(cameraComponent.direction * cameraComponent.farPlane + cameraComponent.right * halfH), cameraComponent.up), cameraComponent.position);
-                cameraComponent.frustum[2] = FrustumFace(-glm::cross(cameraComponent.up, glm::normalize(cameraComponent.direction * cameraComponent.farPlane - cameraComponent.right * halfH)), cameraComponent.position);
-                cameraComponent.frustum[3] = FrustumFace(-glm::cross(cameraComponent.right, glm::normalize(cameraComponent.direction * cameraComponent.farPlane + cameraComponent.up * halfV)), cameraComponent.position);
-                cameraComponent.frustum[4] = FrustumFace(-glm::cross(glm::normalize(cameraComponent.direction * cameraComponent.farPlane - cameraComponent.up * halfV), cameraComponent.right), cameraComponent.position);
-                cameraComponent.frustum[5] = FrustumFace(-cameraComponent.direction, cameraComponent.position + cameraComponent.direction * cameraComponent.farPlane);
+                // Near
+                cameraComponent.frustum.planes[0] = FrustumCollider::CreatePlane(
+                    cameraComponent.direction,
+                    cameraComponent.position + cameraComponent.direction * cameraComponent.nearPlane
+                );
+
+                // Far
+                cameraComponent.frustum.planes[1] = FrustumCollider::CreatePlane(
+                    -cameraComponent.direction,
+                    cameraComponent.position + cameraComponent.direction * cameraComponent.farPlane
+                );
+
+                // Left
+                cameraComponent.frustum.planes[2] = FrustumCollider::CreatePlane(
+                    -glm::cross(cameraComponent.up, glm::normalize(cameraComponent.direction * cameraComponent.farPlane - cameraComponent.right * halfH)),
+                    cameraComponent.position
+                );
+
+                // Right
+                cameraComponent.frustum.planes[3] = FrustumCollider::CreatePlane(
+                    -glm::cross(glm::normalize(cameraComponent.direction * cameraComponent.farPlane + cameraComponent.right * halfH), cameraComponent.up),
+                    cameraComponent.position
+                );
+
+                // Top
+                cameraComponent.frustum.planes[4] = FrustumCollider::CreatePlane(
+                    -glm::cross(cameraComponent.right, glm::normalize(cameraComponent.direction * cameraComponent.farPlane + cameraComponent.up * halfV)),
+                    cameraComponent.position
+                );
+
+                // Bottom
+                cameraComponent.frustum.planes[5] = FrustumCollider::CreatePlane(
+                    -glm::cross(glm::normalize(cameraComponent.direction * cameraComponent.farPlane - cameraComponent.up * halfV), cameraComponent.right),
+                    cameraComponent.position
+                );
 
                 cameraPool->SetBit<CHANGED_BIT>(entity);
                 cameraComponent.version++;

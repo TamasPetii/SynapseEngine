@@ -1,24 +1,10 @@
 #pragma once
 #include "BaseComponent/Component.h"
+#include "Engine/Collision/Colliders/FrustumCollider.h"
 #include <glm/glm.hpp>
 
 namespace Syn
 {
-	struct SYN_API FrustumFace
-	{
-		FrustumFace() = default;
-		FrustumFace(const glm::vec3& normal, float distance);
-		FrustumFace(const glm::vec3& normal, const glm::vec3 point);
-
-		operator glm::vec4() const
-		{
-			return glm::vec4(normal, distance);
-		}
-
-		glm::vec3 normal;
-		float distance;
-	};
-
 	struct SYN_API CameraComponent : public Component
 	{
 		CameraComponent();
@@ -49,7 +35,7 @@ namespace Syn
 		glm::mat4 viewProj;
 		glm::mat4 viewProjInv;
 
-		std::vector<FrustumFace> frustum;
+		FrustumCollider frustum;
 	};
 
 	struct SYN_API CameraComponentGPU

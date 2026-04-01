@@ -74,7 +74,7 @@ namespace Syn
         auto animSnapshot = animationManager->GetResourceSnapshot();
 
         auto cullFunc = [drawData, modelPool, transformPool, modelSnapshot, cameraComp, animPool, animSnapshot, matTypeSnapshot, overridePool](EntityID entity) {
-            std::span<const FrustumFace> frustum = cameraComp.frustum;
+            const FrustumCollider& frustum = cameraComp.frustum;
             const auto& modelComp = modelPool->Get(entity);
             const auto& transformComp = transformPool->Get(entity);
 

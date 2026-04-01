@@ -2,20 +2,6 @@
 
 namespace Syn
 {
-	FrustumFace::FrustumFace(const glm::vec3& normal, float distance)
-	{
-		float length = glm::length(normal);
-
-		this->normal = normal / length;
-		this->distance = distance / length;
-	}
-
-	FrustumFace::FrustumFace(const glm::vec3& normal, const glm::vec3 point)
-	{
-		this->normal = glm::normalize(normal);
-		this->distance = glm::dot(this->normal, point);
-	}
-
 	CameraComponent::CameraComponent()
 		: speed{ 10.f }
 		, sensitivity{ 0.3f }
@@ -40,8 +26,6 @@ namespace Syn
 		projInv = glm::mat4(1.f);
 		viewProj = glm::mat4(1.f);
 		viewProjInv = glm::mat4(1.f);
-
-		frustum.resize(6);
 	}
 
 	CameraComponentGPU::CameraComponentGPU(const CameraComponent& component) :
@@ -60,8 +44,7 @@ namespace Syn
 		this->projVulkanInv = glm::inverse(this->projVulkan);
 		this->viewProjVulkan = this->projVulkan * this->view;
 		this->viewProjVulkanInv = glm::inverse(this->viewProjVulkan);
-
-		std::memcpy(frustum, component.frustum.data(), component.frustum.size() * sizeof(glm::vec4));
+		std::memcpy(frustum, component.frustum.planes, 6 * sizeof(glm::vec4));
 	}
 }
 
