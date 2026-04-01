@@ -13,6 +13,7 @@
 #include "Engine/Component/AnimationComponent.h"
 #include "Engine/Component/PointLightComponent.h"
 #include "Engine/Component/SpotLightComponent.h"
+#include "Engine/Component/DirectionLightComponent.h"
 #include <random>
 
 namespace Syn
@@ -170,7 +171,27 @@ namespace Syn
                 overrideComp.materials.push_back(randomMatId);
             }
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 1; ++i)
+            {
+                EntityID dirLightEntity = registry->CreateEntity();
+                registry->AddComponent<TransformComponent>(dirLightEntity);
+                registry->AddComponent<DirectionLightComponent>(dirLightEntity);
+
+                auto& transform = registry->GetComponent<TransformComponent>(dirLightEntity);
+                transform.rotation = glm::vec3(-45.0f, 45.0f, 0.0f);
+
+                auto& light = registry->GetComponent<DirectionLightComponent>(dirLightEntity);
+                light.color = glm::vec3(1.0f, 0.95f, 0.85f);
+                light.strength = 5.0f;
+                light.useShadow = true;
+
+                registry->GetPool<TransformComponent>()->SetCategory(dirLightEntity, StorageCategory::Static);
+                registry->GetPool<DirectionLightComponent>()->SetCategory(dirLightEntity, StorageCategory::Static);
+                registry->GetPool<DirectionLightComponent>()->SetBit<SHADOW_TOGGLE_BIT>(dirLightEntity);
+                registry->GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(dirLightEntity);
+            }
+
+            for (int i = 0; i < 0; i++)
             {
                 EntityID lightEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(lightEntity);
@@ -200,7 +221,7 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(lightEntity);
             }
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 0; i++)
             {
                 EntityID spotLightEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(spotLightEntity);

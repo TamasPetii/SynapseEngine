@@ -100,7 +100,7 @@ namespace Syn
         auto dataBufferView = bufferManager->GetComponentBuffer(BufferNames::DirectionLightData, frameIndex);
         if (!dataBufferView.buffer) return;
 
-        auto dataHandler = static_cast<DirectionLightGPU*>(dataBufferView.buffer->Map());
+        auto dataHandler = static_cast<DirectionLightComponentGPU*>(dataBufferView.buffer->Map());
 
         auto processUpload = [lightPool, dataHandler, dataBufferView](EntityID entity) mutable {
             auto& comp = lightPool->Get(entity);
@@ -109,7 +109,7 @@ namespace Syn
             if (dataBufferView.versions[denseIndex] != comp.version)
             {
                 dataBufferView.versions[denseIndex] = comp.version;
-                dataHandler[denseIndex] = DirectionLightGPU(comp);
+                dataHandler[denseIndex] = DirectionLightComponentGPU(comp);
             }
             };
 

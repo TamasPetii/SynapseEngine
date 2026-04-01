@@ -41,5 +41,7 @@ namespace Syn
         static constexpr const char* DeferredPointLightFrag = "../Engine/Shaders/Passes/Deferred/DeferredPointLight.frag";
         static constexpr const char* DeferredSpotLightVert = "../Engine/Shaders/Passes/Deferred/DeferredSpotLight.vert";
         static constexpr const char* DeferredSpotLightFrag = "../Engine/Shaders/Passes/Deferred/DeferredSpotLight.frag";
+        static constexpr const char* DeferredDirectionLightVert = "../Engine/Shaders/Passes/Deferred/DeferredDirectionLight.vert";
+        static constexpr const char* DeferredDirectionLightFrag = "../Engine/Shaders/Passes/Deferred/DeferredDirectionLight.frag";
     };
 }

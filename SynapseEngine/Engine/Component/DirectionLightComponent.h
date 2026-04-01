@@ -12,9 +12,9 @@ namespace Syn
         glm::vec3 direction;
     };
 
-    struct SYN_API DirectionLightGPU
+    struct SYN_API DirectionLightComponentGPU
     {
-        DirectionLightGPU(const DirectionLightComponent& component);
+        DirectionLightComponentGPU(const DirectionLightComponent& component);
 
         glm::vec3 direction;
         float strength;

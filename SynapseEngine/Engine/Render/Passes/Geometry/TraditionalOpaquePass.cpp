@@ -154,7 +154,9 @@ namespace Syn {
         pc.modelSparseMapBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::ModelSparseMap, fIdx);
         pc.materialLookupBuffer = drawData->globalMaterialIndexBuffers[fIdx]->GetDeviceAddress();
         pc.materialBuffer = materialManager->GetMaterialBuffer()->GetDeviceAddress();
+        
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
+        //pc.activeCameraEntity = scene->GetDebugCameraEntity();
         pc.baseDescriptorOffset = drawData->traditionalCmdOffsets[_renderType];
         pc.materialRenderType = static_cast<uint32_t>(_renderType);
 

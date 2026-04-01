@@ -80,10 +80,16 @@ namespace Syn
         VkDrawIndirectCommand spotLightCmdTemplate{};
         std::vector<uint32_t> spotLightCpuInstanceBuffer;
         std::vector<std::shared_ptr<Vk::Buffer>> spotLightIndirectCommandBuffers;
+
+		// --- Direction Light Data ---
+        VkDrawIndirectCommand directionLightCmdTemplate{};
+        std::vector<uint32_t> directionLightCpuInstanceBuffer;
+        std::vector<std::shared_ptr<Vk::Buffer>> directionLightIndirectCommandBuffers;
     private:
         void InitModelBuffers(uint32_t frameCount);
         void InitDebugBuffers(uint32_t frameCount);
         void InitPointLightBuffers(uint32_t frameCount);
         void InitSpotLightBuffers(uint32_t frameCount);
+        void InitDirectionLightBuffers(uint32_t frameCount);
     };
 }

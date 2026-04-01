@@ -8,6 +8,8 @@
 #include "Engine/Render/Passes/Deferred/DeferredEmissiveAoPass.h"
 #include "Engine/Render/Passes/Deferred/DeferredPointLightPass.h"
 #include "Engine/Render/Passes/Deferred/DeferredSpotLightPass.h"
+#include "Engine/Render/Passes/Deferred/DeferredDirectionLightPass.h"
+
 
 #include "Engine/Render/Passes/Geometry/TraditionalOpaquePass.h"
 #include "Engine/Render/Passes/Geometry/MeshletOpaquePass.h"
@@ -70,6 +72,7 @@ namespace Syn
 
 		// Deferred Lighting Passes
 		pipeline->AddPass(std::make_unique<DeferredEmissiveAoPass>());
+        pipeline->AddPass(std::make_unique<DeferredDirectionLightPass>());
         pipeline->AddPass(std::make_unique<DeferredPointLightPass>());
         pipeline->AddPass(std::make_unique<DeferredSpotLightPass>());
 

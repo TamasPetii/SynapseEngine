@@ -103,8 +103,8 @@ namespace Syn {
         pc.indicesAddr = cube->hardwareBuffers.indices->GetDeviceAddress();
 
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
-        pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
-        pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
+        pc.screenWidth = (float)_graphicsState.renderArea->width;
+        pc.screenHeight = (float)_graphicsState.renderArea->height;
 
         vkCmdPushConstants(
             context.cmd,
@@ -119,35 +119,12 @@ namespace Syn {
     void DeferredPointLightPass::BindDescriptors(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         auto imageManager = ServiceLocator::GetImageManager();
-        auto nearestSampler = imageManager->GetSampler(SamplerNames::NearestClampEdge)->Handle();
-
-        auto colorMetallicImg = group->GetImage(RenderTargetNames::ColorMetallic);
-        auto normalRoughnessImg = group->GetImage(RenderTargetNames::NormalRoughness);
-        auto depthImg = group->GetImage(RenderTargetNames::Depth);
+        auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge)->Handle();
 
         Vk::PushDescriptorWriter pushWriter;
-
-        pushWriter.AddCombinedImageSampler(
-            0,
-            colorMetallicImg->GetView(Vk::ImageViewNames::Default),
-            nearestSampler,
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-        );
-
-        pushWriter.AddCombinedImageSampler(
-            1,
-            normalRoughnessImg->GetView(Vk::ImageViewNames::Default),
-            nearestSampler,
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-        );
-
-        pushWriter.AddCombinedImageSampler(
-            2,
-            depthImg->GetView(Vk::ImageViewNames::Default),
-            nearestSampler,
-            VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
-        );
-
+        pushWriter.AddCombinedImageSampler(0, group->GetImage(RenderTargetNames::ColorMetallic)->GetView(Vk::ImageViewNames::Default), sampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        pushWriter.AddCombinedImageSampler(1, group->GetImage(RenderTargetNames::NormalRoughness)->GetView(Vk::ImageViewNames::Default), sampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        pushWriter.AddCombinedImageSampler(2, group->GetImage(RenderTargetNames::Depth)->GetView(Vk::ImageViewNames::Default), sampler, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL);
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 

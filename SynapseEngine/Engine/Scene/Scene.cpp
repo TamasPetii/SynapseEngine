@@ -8,6 +8,9 @@
 #include "Engine/Component/CameraComponent.h"
 #include "Engine/Component/ModelComponent.h"
 #include "Engine/Component/AnimationComponent.h"
+#include "Engine/Component/DirectionLightComponent.h"
+#include "Engine/Component/PointLightComponent.h"
+#include "Engine/Component/SpotLightComponent.h"
 
 #include "Engine/System/TransformSystem.h"
 #include "Engine/System/RenderSystem.h"
@@ -23,6 +26,9 @@
 #include "Engine/System/Light/SpotLightSystem.h"
 #include "Engine/System/Light/SpotLightShadowSystem.h"
 #include "Engine/System/Light/SpotLightFrustumCullingSystem.h"
+#include "Engine/System/Light/DirectionLightSystem.h"
+#include "Engine/System/Light/DirectionLightShadowSystem.h"
+#include "Engine/System/Light/DirectionLightCullingSystem.h"
 
 namespace Syn
 {
@@ -65,7 +71,9 @@ namespace Syn
         RegisterSystem<SpotLightSystem>();
         RegisterSystem<SpotLightShadowSystem>();
         RegisterSystem<SpotLightFrustumCullingSystem>();
-
+		RegisterSystem<DirectionLightSystem>();
+        RegisterSystem<DirectionLightCullingSystem>();
+        RegisterSystem<DirectionLightShadowSystem>();
         //RegisterSystem<PhysicsSystem>();
     }
 
@@ -99,6 +107,14 @@ namespace Syn
 
         RegisterComponentSparseMapBuffer<SpotLightShadowComponent>(BufferNames::SpotLightShadowSparseMap);
         RegisterComponentBuffer<SpotLightShadowComponent, SpotLightShadowComponentGPU>(BufferNames::SpotLightShadowData);
+
+        RegisterComponentSparseMapBuffer<DirectionLightComponent>(BufferNames::DirectionLightSparseMap);
+        RegisterComponentBuffer<DirectionLightComponent, DirectionLightComponentGPU>(BufferNames::DirectionLightData);
+        RegisterComponentBuffer<DirectionLightComponent, uint32_t>(BufferNames::DirectionLightVisibleData);
+
+        RegisterComponentSparseMapBuffer<DirectionLightShadowComponent>(BufferNames::DirectionLightShadowSparseMap);
+        RegisterComponentBuffer<DirectionLightShadowComponent, DirectionLightShadowGPU>(BufferNames::DirectionLightShadowData);
+        RegisterComponentBuffer<DirectionLightShadowComponent, DirectionLightShadowColliderGPU>(BufferNames::DirectionLightShadowColliderData);
     }
 
     void Scene::BuildTaskflowGraph(tf::Taskflow& taskflow, SystemPhase phase)

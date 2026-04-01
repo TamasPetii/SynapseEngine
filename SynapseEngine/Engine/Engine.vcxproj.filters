@@ -879,6 +879,12 @@
     <ClCompile Include="Collision\Colliders\FrustumCollider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Passes\Deferred\DeferredDirectionLightPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Light\DirectionLightCullingSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1853,6 +1859,12 @@
     <ClInclude Include="Collision\Colliders\FrustumCollider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Passes\Deferred\DeferredDirectionLightPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Light\DirectionLightCullingSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Passes\Common\Fullscreen.vert" />
@@ -1918,5 +1930,9 @@
     <None Include="Shaders\Includes\PushConstants\HizDownSamplePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\HizLinearizeDepthPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframeSetupPC.glsl" />
+    <None Include="Shaders\Includes\Common\DirectionLight.glsl" />
+    <None Include="Shaders\Includes\PushConstants\DeferredDirectionLightPC.glsl" />
+    <None Include="Shaders\Passes\Deferred\DeferredDirectionLight.frag" />
+    <None Include="Shaders\Passes\Deferred\DeferredDirectionLight.vert" />
   </ItemGroup>
 </Project>

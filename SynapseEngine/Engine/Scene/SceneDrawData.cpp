@@ -11,6 +11,7 @@ namespace Syn
         InitDebugBuffers(frameCount);
         InitPointLightBuffers(frameCount);
 		InitSpotLightBuffers(frameCount);
+        InitDirectionLightBuffers(frameCount);
     }
 
     void SceneDrawData::InitModelBuffers(uint32_t frameCount)
@@ -273,6 +274,32 @@ namespace Syn
             spotLightIndirectCommandBuffers[i] =
                 Vk::BufferFactory::CreatePersistent(
                     spotLightIndirectCommandSize,
+                    indirectStorageTransferUsage
+                );
+        }
+    }
+
+    void SceneDrawData::InitDirectionLightBuffers(uint32_t frameCount)
+    {
+        directionLightIndirectCommandBuffers.resize(frameCount);
+
+        directionLightCmdTemplate.vertexCount = 3;
+        directionLightCmdTemplate.instanceCount = 0;
+        directionLightCmdTemplate.firstVertex = 0;
+        directionLightCmdTemplate.firstInstance = 0;
+
+        const VkDeviceSize indirectCommandSize = sizeof(VkDrawIndirectCommand);
+
+        const VkBufferUsageFlags indirectStorageTransferUsage =
+            VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT |
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+
+        for (uint32_t i = 0; i < frameCount; ++i)
+        {
+            directionLightIndirectCommandBuffers[i] =
+                Vk::BufferFactory::CreatePersistent(
+                    indirectCommandSize,
                     indirectStorageTransferUsage
                 );
         }

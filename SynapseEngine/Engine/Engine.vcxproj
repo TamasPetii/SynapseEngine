@@ -188,6 +188,8 @@
     <ClCompile Include="Component\PointLightShadowComponent.cpp" />
     <ClCompile Include="Component\DirectionLightShadowComponent.cpp" />
     <ClCompile Include="Collision\Colliders\FrustumCollider.cpp" />
+    <ClCompile Include="System\Light\DirectionLightCullingSystem.cpp" />
+    <ClCompile Include="Render\Passes\Deferred\DeferredDirectionLightPass.cpp" />
     <ClCompile Include="System\Light\DirectionLightShadowSystem.cpp" />
     <ClCompile Include="System\Light\DirectionLightSystem.cpp" />
     <ClCompile Include="Render\Passes\Deferred\DeferredSpotLightPass.cpp" />
@@ -478,6 +480,8 @@
     <ClInclude Include="Component\PointLightShadowComponent.h" />
     <ClInclude Include="Component\DirectionLightShadowComponent.h" />
     <ClInclude Include="Collision\Colliders\FrustumCollider.h" />
+    <ClInclude Include="System\Light\DirectionLightCullingSystem.h" />
+    <ClInclude Include="Render\Passes\Deferred\DeferredDirectionLightPass.h" />
     <ClInclude Include="System\Light\DirectionLightShadowSystem.h" />
     <ClInclude Include="System\Light\DirectionLightSystem.h" />
     <ClInclude Include="Render\Passes\Deferred\DeferredSpotLightPass.h" />
@@ -795,11 +799,13 @@
     <ClInclude Include="Render\Passes\Wboit\WboitInitPass.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Shaders\Includes\Common\DirectionLight.glsl" />
     <None Include="Shaders\Includes\Common\SpotLight.glsl" />
     <None Include="Shaders\Includes\PushConstants\BloomCompositePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\BloomDownSamplePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\BloomPrefilterPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\BloomUpSamplePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\DeferredDirectionLightPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredEmissiveAoPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredPointLightPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredSpotLightPC.glsl" />
@@ -811,6 +817,8 @@
     <None Include="Shaders\Includes\Utils\DepthMath.glsl" />
     <None Include="Shaders\Includes\Utils\PbrMath.glsl" />
     <None Include="Shaders\Includes\Utils\WboitMath.glsl" />
+    <None Include="Shaders\Passes\Deferred\DeferredDirectionLight.frag" />
+    <None Include="Shaders\Passes\Deferred\DeferredDirectionLight.vert" />
     <None Include="Shaders\Passes\Deferred\DeferredSpotLight.frag" />
     <None Include="Shaders\Passes\Deferred\DeferredSpotLight.vert" />
     <None Include="Shaders\Passes\PostProcess\BloomComposite.comp" />
