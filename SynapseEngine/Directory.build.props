@@ -30,6 +30,7 @@
 
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Debug'">
 		  SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
+		  GLM_FORCE_DEPTH_ZERO_TO_ONE;
 		  VK_NO_PROTOTYPES;
 		  JPH_OBJECT_STREAM;
 		  JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;
@@ -42,6 +43,7 @@
 
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Release'">
 		  SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
+		  GLM_FORCE_DEPTH_ZERO_TO_ONE;
 		  VK_NO_PROTOTYPES;
 		  JPH_OBJECT_STREAM;
 		  JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;
@@ -53,6 +55,7 @@
 
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Dist'">
 		  SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
+		  GLM_FORCE_DEPTH_ZERO_TO_ONE;
 		  VK_NO_PROTOTYPES;
 		  JPH_OBJECT_STREAM;
 		  JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;

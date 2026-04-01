@@ -98,8 +98,9 @@ namespace Syn
                 cameraComponent.viewProj = cameraComponent.proj * cameraComponent.view;
                 cameraComponent.viewProjInv = glm::inverse(cameraComponent.viewProj);
 
-                //cameraComponent.frustum.Update(cameraComponent.viewProj);
+                cameraComponent.frustum.Update(cameraComponent.viewProj);
 
+                /*
                 float fovY = glm::radians(cameraComponent.fov);
                 float aspectRatio = cameraComponent.width / cameraComponent.height;
                 float halfV = cameraComponent.farPlane * tanf(fovY * 0.5f);
@@ -140,6 +141,7 @@ namespace Syn
                     -glm::cross(glm::normalize(cameraComponent.direction * cameraComponent.farPlane - cameraComponent.up * halfV), cameraComponent.right),
                     cameraComponent.position
                 );
+                */
 
                 cameraPool->SetBit<CHANGED_BIT>(entity);
                 cameraComponent.version++;

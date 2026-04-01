@@ -146,6 +146,6 @@ namespace Syn
 
     SYN_INLINE float CollisionTester::GetSignedDistance(const glm::vec4& plane, const glm::vec3& point)
     {
-        return glm::dot(glm::vec3(plane), point) + plane.w;
+        return glm::dot(glm::vec3(plane), point) - plane.w;
     }
 }
