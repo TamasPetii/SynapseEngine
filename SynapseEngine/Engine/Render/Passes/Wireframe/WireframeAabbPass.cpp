@@ -14,6 +14,11 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/WireframePC.glsl"
 
+    bool WireframeAabbPass::ShouldExecute(const RenderContext& context) const
+    {
+        return context.scene->GetSettings()->enableWireframeMeshAabb;
+    }
+
     void WireframeAabbPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 
@@ -81,8 +86,6 @@ namespace Syn {
 
     void WireframeAabbPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
-        if (!scene) return;
-
         auto drawData = scene->GetSceneDrawData();
         if (drawData->activeDescriptorCount == 0) return;
 
@@ -124,8 +127,6 @@ namespace Syn {
 
     void WireframeAabbPass::Draw(const RenderContext& context) {
         auto scene = context.scene;
-        if (!scene) return;
-
         auto drawData = scene->GetSceneDrawData();
         uint32_t totalCommands = drawData->activeTraditionalCount + drawData->activeMeshletCount;
 

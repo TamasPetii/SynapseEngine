@@ -98,9 +98,12 @@ void main() {
         }
 
         // 9. Occlusion and Sub-pixel Culling using Depth Pyramid
+        float screenSizePixels = 0.0;
         if (isVisible) {
             vec2 screenRes = vec2(pc.screenWidth, pc.screenHeight);
-            if (IsSphereOccluded(worldCollider.center, worldCollider.radius, camera, depthPyramid, screenRes)) {
+            bool enableDepthOcclusion = (pc.enableOcclusionCulling == 1);
+            
+            if (IsSphereOccluded(worldCollider.center, worldCollider.radius, camera, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
                 isVisible = false;
             }
         }

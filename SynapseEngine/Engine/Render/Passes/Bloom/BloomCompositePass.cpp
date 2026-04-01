@@ -13,6 +13,11 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/BloomCompositePC.glsl"
 
+    bool BloomCompositePass::ShouldExecute(const RenderContext& context) const
+    {
+        return context.scene->GetSettings()->enableBloom;
+    }
+
     void BloomCompositePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
         _shaderProgram = shaderManager->CreateProgram("BloomCompositeProgram", {

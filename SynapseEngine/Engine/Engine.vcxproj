@@ -188,8 +188,13 @@
     <ClCompile Include="Component\PointLightShadowComponent.cpp" />
     <ClCompile Include="Component\DirectionLightShadowComponent.cpp" />
     <ClCompile Include="Collision\Colliders\FrustumCollider.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\PointLightAabbWireframePass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\PointLightSphereWireframePass.cpp" />
     <ClCompile Include="Render\Passes\Culling\PointLightCullingPass.cpp" />
     <ClCompile Include="Render\Passes\Culling\SpotLightCullingPass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\SpotLightSphereWireframePass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\SpotLightAabbWireframePass.cpp" />
+    <ClCompile Include="Scene\SceneSettings.cpp" />
     <ClCompile Include="System\Light\DirectionLightCullingSystem.cpp" />
     <ClCompile Include="Render\Passes\Deferred\DeferredDirectionLightPass.cpp" />
     <ClCompile Include="System\Light\DirectionLightShadowSystem.cpp" />
@@ -482,8 +487,13 @@
     <ClInclude Include="Component\PointLightShadowComponent.h" />
     <ClInclude Include="Component\DirectionLightShadowComponent.h" />
     <ClInclude Include="Collision\Colliders\FrustumCollider.h" />
+    <ClInclude Include="Render\Passes\Wireframe\PointLightAabbWireframePass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\PointLightSphereWireframePass.h" />
     <ClInclude Include="Render\Passes\Culling\PointLightCullingPass.h" />
     <ClInclude Include="Render\Passes\Culling\SpotLightCullingPass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\SpotLightSphereWireframePass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\SpotLightAabbWireframePass.h" />
+    <ClInclude Include="Scene\SceneSettings.h" />
     <ClInclude Include="System\Light\DirectionLightCullingSystem.h" />
     <ClInclude Include="Render\Passes\Deferred\DeferredDirectionLightPass.h" />
     <ClInclude Include="System\Light\DirectionLightShadowSystem.h" />
@@ -817,6 +827,7 @@
     <None Include="Shaders\Includes\PushConstants\HizLinearizeDepthPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\PointLightCullingPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\SpotLightCullingPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\WireframeLightPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframeSetupPC.glsl" />
     <None Include="Shaders\Includes\SharedGpuTypes.glsl" />
@@ -863,6 +874,7 @@
     <None Include="Shaders\Passes\Common\TransparentComposite.frag" />
     <None Include="Shaders\Passes\Wireframe\Wireframe.frag" />
     <None Include="Shaders\Passes\Wireframe\Wireframe.vert" />
+    <None Include="Shaders\Passes\Wireframe\WireframeLight.vert" />
     <None Include="Shaders\Passes\Wireframe\WireframeMeshlet.vert" />
     <None Include="Shaders\Passes\Wireframe\WireframeSetup.comp" />
     <None Include="Shaders\Passes\Hiz\HizDownsample.comp" />

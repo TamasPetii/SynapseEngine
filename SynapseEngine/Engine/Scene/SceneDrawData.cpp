@@ -223,29 +223,43 @@ namespace Syn
     {
         auto modelManager = ServiceLocator::GetModelManager();
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
+        auto sphere = modelManager->GetResource(MeshSourceNames::Sphere);
 
         pointLightIndirectCommandBuffers.resize(frameCount);
+        debugPointLightSphereCmdBuffers.resize(frameCount);
+        debugPointLightAabbCmdBuffers.resize(frameCount);
 
-        pointLightCmdTemplate.vertexCount = cube->baseDrawCommands[0].traditionalCmd.vertexCount;
-        pointLightCmdTemplate.instanceCount = 0;
-        pointLightCmdTemplate.firstVertex = cube->baseDrawCommands[0].traditionalCmd.firstVertex;
-        pointLightCmdTemplate.firstInstance = 0;
+        VkDrawIndirectCommand sphereCmdTemplate{};
+        sphereCmdTemplate.vertexCount = sphere->baseDrawCommands[0].traditionalCmd.vertexCount;
+        sphereCmdTemplate.instanceCount = 0;
+        sphereCmdTemplate.firstVertex = sphere->baseDrawCommands[0].traditionalCmd.firstVertex;
+        sphereCmdTemplate.firstInstance = 0;
 
-        const VkDeviceSize pointLightIndirectCommandSize =
-            sizeof(VkDrawIndirectCommand);
+        VkDrawIndirectCommand aabbCmdTemplate{};
+        aabbCmdTemplate.vertexCount = cube->baseDrawCommands[0].traditionalCmd.vertexCount;
+        aabbCmdTemplate.instanceCount = 0;
+        aabbCmdTemplate.firstVertex = cube->baseDrawCommands[0].traditionalCmd.firstVertex;
+        aabbCmdTemplate.firstInstance = 0;
 
-        const VkBufferUsageFlags indirectStorageTransferUsage =
+        pointLightCmdTemplate = aabbCmdTemplate;
+
+        const VkDeviceSize cmdSize = sizeof(VkDrawIndirectCommand);
+
+        const VkBufferUsageFlags usage =
             VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT |
             VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT |
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 
         for (uint32_t i = 0; i < frameCount; ++i)
         {
-            pointLightIndirectCommandBuffers[i] =
-                Vk::BufferFactory::CreatePersistent(
-                    pointLightIndirectCommandSize,
-                    indirectStorageTransferUsage
-                );
+            pointLightIndirectCommandBuffers[i] = Vk::BufferFactory::CreatePersistent(cmdSize, usage);
+
+            debugPointLightSphereCmdBuffers[i] = Vk::BufferFactory::CreatePersistent(cmdSize, usage);
+            debugPointLightSphereCmdBuffers[i]->Write(&sphereCmdTemplate, cmdSize, 0);
+
+            debugPointLightAabbCmdBuffers[i] = Vk::BufferFactory::CreatePersistent(cmdSize, usage);
+            debugPointLightAabbCmdBuffers[i]->Write(&aabbCmdTemplate, cmdSize, 0);
         }
     }
 
@@ -253,29 +267,43 @@ namespace Syn
     {
         auto modelManager = ServiceLocator::GetModelManager();
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
+        auto sphere = modelManager->GetResource(MeshSourceNames::Sphere);
 
         spotLightIndirectCommandBuffers.resize(frameCount);
+        debugSpotLightSphereCmdBuffers.resize(frameCount);
+        debugSpotLightAabbCmdBuffers.resize(frameCount);
 
-        spotLightCmdTemplate.vertexCount = cube->baseDrawCommands[0].traditionalCmd.vertexCount;
-        spotLightCmdTemplate.instanceCount = 0;
-        spotLightCmdTemplate.firstVertex = cube->baseDrawCommands[0].traditionalCmd.firstVertex;
-        spotLightCmdTemplate.firstInstance = 0;
+        VkDrawIndirectCommand sphereCmdTemplate{};
+        sphereCmdTemplate.vertexCount = sphere->baseDrawCommands[0].traditionalCmd.vertexCount;
+        sphereCmdTemplate.instanceCount = 0;
+        sphereCmdTemplate.firstVertex = sphere->baseDrawCommands[0].traditionalCmd.firstVertex;
+        sphereCmdTemplate.firstInstance = 0;
 
-        const VkDeviceSize spotLightIndirectCommandSize =
-            sizeof(VkDrawIndirectCommand);
+        VkDrawIndirectCommand aabbCmdTemplate{};
+        aabbCmdTemplate.vertexCount = cube->baseDrawCommands[0].traditionalCmd.vertexCount;
+        aabbCmdTemplate.instanceCount = 0;
+        aabbCmdTemplate.firstVertex = cube->baseDrawCommands[0].traditionalCmd.firstVertex;
+        aabbCmdTemplate.firstInstance = 0;
 
-        const VkBufferUsageFlags indirectStorageTransferUsage =
+		spotLightCmdTemplate = aabbCmdTemplate;
+
+        const VkDeviceSize cmdSize = sizeof(VkDrawIndirectCommand);
+
+        const VkBufferUsageFlags usage =
             VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT |
             VK_BUFFER_USAGE_TRANSFER_DST_BIT |
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT |
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 
         for (uint32_t i = 0; i < frameCount; ++i)
         {
-            spotLightIndirectCommandBuffers[i] =
-                Vk::BufferFactory::CreatePersistent(
-                    spotLightIndirectCommandSize,
-                    indirectStorageTransferUsage
-                );
+            spotLightIndirectCommandBuffers[i] = Vk::BufferFactory::CreatePersistent(cmdSize, usage);
+
+            debugSpotLightSphereCmdBuffers[i] = Vk::BufferFactory::CreatePersistent(cmdSize, usage);
+            debugSpotLightSphereCmdBuffers[i]->Write(&sphereCmdTemplate, cmdSize, 0);
+
+            debugSpotLightAabbCmdBuffers[i] = Vk::BufferFactory::CreatePersistent(cmdSize, usage);
+            debugSpotLightAabbCmdBuffers[i]->Write(&aabbCmdTemplate, cmdSize, 0);
         }
     }
 

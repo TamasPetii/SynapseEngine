@@ -21,6 +21,11 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/TraditionalPassPC.glsl"
    
+    bool TraditionalTransparentPickingPass::ShouldExecute(const RenderContext& context) const
+    {
+        return context.scene->GetSettings()->enableTransparentPicking;
+    }
+
     TraditionalTransparentPickingPass::TraditionalTransparentPickingPass(MaterialRenderType renderType)
         : _renderType(renderType)
     {
@@ -106,7 +111,6 @@ namespace Syn {
 
     void TraditionalTransparentPickingPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
-        if (!scene) return;
         auto drawData = scene->GetSceneDrawData();
         auto modelManager = ServiceLocator::GetModelManager();
         auto materialManager = ServiceLocator::GetMaterialManager();
@@ -155,7 +159,6 @@ namespace Syn {
 
     void TraditionalTransparentPickingPass::Draw(const RenderContext& context) {
         auto scene = context.scene;
-        if (!scene) return;
         auto drawData = scene->GetSceneDrawData();
         auto indirectBuffer = drawData->globalIndirectCommandBuffers[context.frameIndex]->Handle();
         auto countBuffer = drawData->globalDrawCountBuffers[context.frameIndex]->Handle();

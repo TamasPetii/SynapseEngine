@@ -10,6 +10,7 @@ namespace Syn {
         std::string GetName() const override { return "DeferredSpotLightPass"; }
         void Initialize() override;
     protected:
+		bool ShouldExecute(const RenderContext& context) const override;
         void BindDescriptors(const RenderContext& context) override;
         void PrepareFrame(const RenderContext& context) override;
         void PushConstants(const RenderContext& context) override;

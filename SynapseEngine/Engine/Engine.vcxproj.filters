@@ -891,6 +891,21 @@
     <ClCompile Include="Render\Passes\Culling\SpotLightCullingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Passes\Wireframe\PointLightSphereWireframePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Wireframe\PointLightAabbWireframePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Wireframe\SpotLightSphereWireframePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Wireframe\SpotLightAabbWireframePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\SceneSettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1877,6 +1892,21 @@
     <ClInclude Include="Render\Passes\Culling\SpotLightCullingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Passes\Wireframe\PointLightSphereWireframePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Wireframe\PointLightAabbWireframePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Wireframe\SpotLightSphereWireframePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Wireframe\SpotLightAabbWireframePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\SceneSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Passes\Common\Fullscreen.vert" />
@@ -1950,5 +1980,7 @@
     <None Include="Shaders\Includes\PushConstants\PointLightCullingPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\SpotLightCullingPC.glsl" />
     <None Include="Shaders\Passes\Culling\SpotLightCulling.comp" />
+    <None Include="Shaders\Includes\PushConstants\WireframeLightPC.glsl" />
+    <None Include="Shaders\Passes\Wireframe\WireframeLight.vert" />
   </ItemGroup>
 </Project>

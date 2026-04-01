@@ -34,6 +34,7 @@ namespace Syn
 
     void ModelFrustumCullingSystem::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
     {
+        auto settings = scene->GetSettings();
         auto drawData = scene->GetSceneDrawData();
         auto materialManager = ServiceLocator::GetMaterialManager();
         auto matTypeSnapshot = materialManager->GetRenderTypeSnapshot();
@@ -53,7 +54,7 @@ namespace Syn
             drawData->debugSphereCmdTemplate.instanceCount = 0;
             });
 
-        if (drawData->useGpuCulling) {
+        if (settings->enableGpuCulling) {
             return;
         }
 
@@ -217,8 +218,9 @@ namespace Syn
     {
         this->EmplaceTask(subflow, SystemPhaseNames::UploadGPU, [scene, frameIndex]() {
             auto drawData = scene->GetSceneDrawData();
+            auto settings = scene->GetSettings();
 
-            if (!drawData->useGpuCulling) 
+            if (!settings->enableGpuCulling)
             {
                 for (uint32_t i = 0; i < drawData->activeTraditionalCount; ++i) {
                     drawData->traditionalCommands[i].instanceCount = drawData->paddedTraditionalCounts[i * 16];
@@ -245,7 +247,7 @@ namespace Syn
                 drawData->globalIndirectCommandBuffers[frameIndex]->Write(drawData->meshletCommands.data(), meshletSize, meshletGpuOffset);
             }
 
-            if (drawData->useGpuCulling)
+            if (settings->enableGpuCulling)
             {
                 uint32_t zeroDispatch[3] = { 0, 1, 1 };
                 drawData->globalModelComputeCountBuffer[frameIndex]->Write(zeroDispatch, sizeof(zeroDispatch), 0);

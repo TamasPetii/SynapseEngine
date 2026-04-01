@@ -10,9 +10,6 @@ namespace Syn
         auto scene = context.scene;
         uint32_t fIdx = context.frameIndex;
 
-        if (!scene)
-            return;
-
         auto drawData = scene->GetSceneDrawData();
 
         if (drawData->activeDescriptorCount == 0)

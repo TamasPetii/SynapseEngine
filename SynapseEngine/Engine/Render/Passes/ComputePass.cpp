@@ -3,8 +3,6 @@
 namespace Syn {
     void ComputePass::Execute(const RenderContext& context)
     {
-        if (!context.scene) return;
-
         _imageTransitions.clear();
 
         PrepareFrame(context);

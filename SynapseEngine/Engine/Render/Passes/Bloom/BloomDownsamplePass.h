@@ -8,6 +8,7 @@ namespace Syn {
         std::string GetName() const override { return "BloomDownsamplePass"; }
         void Initialize() override;
     protected:
+		bool ShouldExecute(const RenderContext& context) const override;
         void PrepareFrame(const RenderContext& context) override;
         void Dispatch(const RenderContext& context) override;
     };

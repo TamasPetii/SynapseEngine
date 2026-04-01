@@ -17,6 +17,11 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/SpotLightCullingPC.glsl"
 
+    bool SpotLightCullingPass::ShouldExecute(const RenderContext& context) const
+    {
+        return context.scene->GetSettings()->enableGpuCulling;
+    }
+
     void SpotLightCullingPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
         _shaderProgram = shaderManager->CreateProgram("SpotLightCullingProgram", {
@@ -45,6 +50,7 @@ namespace Syn {
         pc.indirectCommandAddr = drawData->spotLightIndirectCommandBuffers[fIdx]->GetDeviceAddress();
         pc.totalLightsToTest = _totalLightsToTest;
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
+        pc.enableOcclusionCulling = scene->GetSettings()->enableOcclusionCulling ? 1 : 0;
 
         pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
         pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
@@ -72,7 +78,7 @@ namespace Syn {
 
     void SpotLightCullingPass::Dispatch(const RenderContext& context) {
         auto scene = context.scene;
-        if (!scene || !scene->GetSceneDrawData()->useGpuCulling || _totalLightsToTest == 0) return;
+        if (_totalLightsToTest == 0) return;
 
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_totalLightsToTest, ComputeGroupSize::Buffer32D);
         vkCmdDispatch(context.cmd, groupCountX, 1, 1);
@@ -85,8 +91,8 @@ namespace Syn {
         cmdBarrier.buffer = drawData->spotLightIndirectCommandBuffers[fIdx]->Handle();
         cmdBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         cmdBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
-        cmdBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
-        cmdBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT;
+        cmdBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+        cmdBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT | VK_ACCESS_2_TRANSFER_READ_BIT;
         Vk::BufferUtils::InsertBarrier(context.cmd, cmdBarrier);
 
         Vk::BufferBarrierInfo visibleBarrier{};

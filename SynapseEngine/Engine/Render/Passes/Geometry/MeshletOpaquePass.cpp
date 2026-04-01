@@ -171,6 +171,7 @@ namespace Syn {
         pc.baseDescriptorOffset = drawData->activeTraditionalCount + drawData->meshletCmdOffsets[_renderType];
         pc.disableConeCulling = (_renderType == MaterialRenderType::Opaque2Sided) ? 1 : 0;
         pc.materialRenderType = static_cast<uint32_t>(_renderType);
+        pc.enableOcclusionCulling = (scene->GetSettings()->enableGpuCulling && scene->GetSettings()->enableOcclusionCulling) ? 1 : 0;
 
         pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
         pc.screenHeight = static_cast<float>(rtGroup->GetHeight());

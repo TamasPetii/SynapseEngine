@@ -24,6 +24,7 @@ namespace Syn
 
     void SpotLightFrustumCullingSystem::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
     {
+        auto settings = scene->GetSettings();
         auto drawData = scene->GetSceneDrawData();
         auto registry = scene->GetRegistry();
         auto pool = registry->GetPool<SpotLightComponent>();
@@ -42,7 +43,7 @@ namespace Syn
             }
             });
 
-        if (drawData->useGpuCulling) {
+        if (settings->enableGpuCulling) {
             return;
         }
 
@@ -74,9 +75,10 @@ namespace Syn
         this->EmplaceTask(subflow, SystemPhaseNames::UploadGPU, [this, scene, frameIndex]() {
             auto bufferManager = scene->GetComponentBufferManager();
             auto drawData = scene->GetSceneDrawData();
+            auto settings = scene->GetSettings();
             uint32_t count = drawData->spotLightCmdTemplate.instanceCount;
 
-            if (!drawData->useGpuCulling) {
+            if (!settings->enableGpuCulling) {
                 auto instanceBufferView = bufferManager->GetComponentBuffer(BufferNames::SpotLightVisibleData, frameIndex);
                 if (count > 0 && instanceBufferView.buffer) {
                     instanceBufferView.buffer->Write(drawData->spotLightCpuInstanceBuffer.data(), count * sizeof(uint32_t), 0);

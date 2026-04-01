@@ -34,8 +34,11 @@ void main() {
     if (visibility == INTERSECTION_OUTSIDE) return;
 
     // 2. Occlusion és 0-pixel Culling
+    float screenSizePixels = 0.0;
     vec2 screenRes = vec2(pc.screenWidth, pc.screenHeight);
-    if (IsSphereOccluded(collider.center, collider.radius, camera, depthPyramid, screenRes)) {
+    bool enableDepthOcclusion = (pc.enableOcclusionCulling == 1);
+
+    if (IsSphereOccluded(collider.center, collider.radius, camera, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
         return;
     }
 

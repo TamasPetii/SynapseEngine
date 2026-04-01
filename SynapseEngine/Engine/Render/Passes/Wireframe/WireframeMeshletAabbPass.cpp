@@ -14,6 +14,11 @@ namespace Syn
 {
     #include "Engine/Shaders/Includes/PushConstants/WireframePC.glsl"
 
+    bool WireframeMeshletAabbPass::ShouldExecute(const RenderContext& context) const
+    {
+        return context.scene->GetSettings()->enableWireframeMeshletAabb;
+    }
+
     void WireframeMeshletAabbPass::Initialize()
     {
         auto shaderManager = ServiceLocator::GetShaderManager();
@@ -84,8 +89,6 @@ namespace Syn
     void WireframeMeshletAabbPass::PushConstants(const RenderContext& context)
     {
         auto scene = context.scene;
-        if (!scene) return;
-
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
 
@@ -130,8 +133,6 @@ namespace Syn
     void WireframeMeshletAabbPass::Draw(const RenderContext& context)
     {
         auto scene = context.scene;
-        if (!scene) return;
-
         auto drawData = scene->GetSceneDrawData();
 
         if (drawData->activeDescriptorCount == 0 || !drawData->debugAabbIndirectBuffers[context.frameIndex]) return;

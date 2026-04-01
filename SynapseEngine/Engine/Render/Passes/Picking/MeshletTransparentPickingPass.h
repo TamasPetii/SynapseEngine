@@ -11,6 +11,7 @@ namespace Syn {
         std::string GetName() const override { return _passName; }
         void Initialize() override;
     protected:
+		bool ShouldExecute(const RenderContext& context) const override;
         void PrepareFrame(const RenderContext& context) override;
         void PushConstants(const RenderContext& context) override;
         void BindDescriptors(const RenderContext& context) override;

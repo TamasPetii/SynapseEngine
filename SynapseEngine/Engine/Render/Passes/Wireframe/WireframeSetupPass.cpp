@@ -10,6 +10,11 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/WireframeSetupPC.glsl"
 
+    bool WireframeSetupPass::ShouldExecute(const RenderContext& context) const
+    {
+        return context.scene->GetSettings()->enableWireframeMeshSphere || context.scene->GetSettings()->enableWireframeMeshAabb;
+    }
+
     void WireframeSetupPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
         _shaderProgram = shaderManager->CreateProgram("WireframeSetupProgram", {
@@ -19,12 +24,8 @@ namespace Syn {
 
     void WireframeSetupPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
-        if (!scene) {
-            _shouldDispatch = false;
-            return;
-        }
-
         auto drawData = scene->GetSceneDrawData();
+
         uint32_t totalCommands = drawData->activeTraditionalCount + drawData->activeMeshletCount;
         if (totalCommands == 0) {
             _shouldDispatch = false;

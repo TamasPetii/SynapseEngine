@@ -8,6 +8,7 @@ namespace Syn {
         std::string GetName() const override { return "WireframeSpherePass"; }
         void Initialize() override;
     protected:
+		bool ShouldExecute(const RenderContext& context) const override;
         void PrepareFrame(const RenderContext& context) override;
         void PushConstants(const RenderContext& context) override;
         void Draw(const RenderContext& context) override;

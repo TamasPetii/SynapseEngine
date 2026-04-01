@@ -45,9 +45,6 @@ namespace Syn
         /*
         * //No gpu driven light culling for direction lights!
         * //Only enable check on cpu side!
-        if (drawData->useGpuCulling) {
-            return;
-        }
         */
 
         auto cullFunc = [pool, drawData](EntityID entity) {
@@ -77,9 +74,10 @@ namespace Syn
         this->EmplaceTask(subflow, SystemPhaseNames::UploadGPU, [scene, frameIndex]() {
             auto bufferManager = scene->GetComponentBufferManager();
             auto drawData = scene->GetSceneDrawData();
+            auto settings = scene->GetSettings();
             uint32_t count = drawData->directionLightCmdTemplate.instanceCount;
 
-            if (!drawData->useGpuCulling) {
+            if (!settings->enableGpuCulling) {
                 auto instanceBufferView = bufferManager->GetComponentBuffer(BufferNames::DirectionLightVisibleData, frameIndex);
                 if (count > 0 && instanceBufferView.buffer) {
                     instanceBufferView.buffer->Write(drawData->directionLightCpuInstanceBuffer.data(), count * sizeof(uint32_t), 0);

@@ -15,6 +15,12 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/HizDownSamplePC.glsl"
 
+    bool HizDownsamplePass::ShouldExecute(const RenderContext& context) const
+    {
+		auto settings = context.scene->GetSettings();
+        return settings->enableHiz && settings->enableOcclusionCulling && settings->enableGpuCulling;
+    }
+
     void HizDownsamplePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
         _shaderProgram = shaderManager->CreateProgram("HizDownsampleProgram", {

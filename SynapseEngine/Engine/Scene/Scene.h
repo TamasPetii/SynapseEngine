@@ -11,6 +11,7 @@
 #include <string>
 
 #include "SceneDrawData.h"
+#include "SceneSettings.h"
 
 namespace Syn
 {
@@ -42,6 +43,7 @@ namespace Syn
         EntityID GetSceneCameraEntity() const { return _sceneCameraEntity; }
         EntityID GetDebugCameraEntity() const { return _debugCameraEntity; }
         ComponentBufferManager* GetComponentBufferManager() const { return _componentBufferManager.get(); }
+        SceneSettings* GetSettings() const { return _sceneSettings.get(); }
     private:
         void InitializeSystems();
         void InitializeComponentBuffers();
@@ -61,10 +63,11 @@ namespace Syn
         EntityID _debugCameraEntity = NULL_ENTITY;
 
         std::unique_ptr<Registry> _registry;
-        std::unique_ptr<SceneDrawData> _sceneDrawData;
         std::unique_ptr<ComponentBufferManager> _componentBufferManager;
-
         std::vector<std::unique_ptr<ISystem>> _systems;
+
+        std::unique_ptr<SceneDrawData> _sceneDrawData;
+        std::unique_ptr<SceneSettings> _sceneSettings;
 
         tf::Taskflow _updateTaskflow;
         tf::Taskflow _gpuTaskflow;

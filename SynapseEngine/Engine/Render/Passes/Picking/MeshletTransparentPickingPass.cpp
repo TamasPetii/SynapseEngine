@@ -24,6 +24,11 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/MeshletPassPC.glsl"
 
+    bool MeshletTransparentPickingPass::ShouldExecute(const RenderContext& context) const
+    {
+        return context.scene->GetSettings()->enableTransparentPicking;
+    }
+
     MeshletTransparentPickingPass::MeshletTransparentPickingPass(MaterialRenderType renderType)
         : _renderType(renderType)
     {
@@ -144,6 +149,7 @@ namespace Syn {
         pc.baseDescriptorOffset = drawData->activeTraditionalCount + drawData->meshletCmdOffsets[_renderType];
         pc.disableConeCulling = (_renderType == MaterialRenderType::Transparent2Sided) ? 1 : 0;
         pc.materialRenderType = static_cast<uint32_t>(_renderType);
+        pc.enableOcclusionCulling = (scene->GetSettings()->enableGpuCulling && scene->GetSettings()->enableOcclusionCulling) ? 1 : 0;
 
         pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
         pc.screenHeight = static_cast<float>(rtGroup->GetHeight());

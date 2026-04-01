@@ -29,7 +29,8 @@ namespace Syn
         virtual ~IRenderPass() = default;
         virtual void Initialize() {};
         virtual void Execute(const RenderContext& context) {};
-        virtual std::string GetName() const = 0;
+        virtual std::string GetName() const = 0;      
+        virtual bool ShouldExecute(const RenderContext& context) const { return true; }
     };
 }
 

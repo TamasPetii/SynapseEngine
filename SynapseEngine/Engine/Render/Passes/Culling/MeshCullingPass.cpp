@@ -19,6 +19,11 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/MeshCullingPC.glsl"
 
+    bool MeshCullingPass::ShouldExecute(const RenderContext& context) const
+    {
+		return context.scene->GetSettings()->enableGpuCulling;
+    }
+
     void MeshCullingPass::Initialize() {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
@@ -31,10 +36,6 @@ namespace Syn {
 
     void MeshCullingPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
-        if (!scene) {
-            _shouldDispatch = false;
-            return;
-        }
 
         auto registry = scene->GetRegistry();
         auto modelPool = registry->GetPool<ModelComponent>();
@@ -85,6 +86,7 @@ namespace Syn {
         pc.totalModelsToTest = totalModels;
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.traditionalCommandCount = drawData->activeTraditionalCount;
+		pc.enableOcclusionCulling = scene->GetSettings()->enableOcclusionCulling ? 1 : 0;
 
         pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
         pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
@@ -113,7 +115,7 @@ namespace Syn {
 
     void MeshCullingPass::Dispatch(const RenderContext& context) {
         auto scene = context.scene;
-        if (!scene || !scene->GetSceneDrawData()->useGpuCulling || !_shouldDispatch) return;
+        if (!_shouldDispatch) return;
 
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;

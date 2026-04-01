@@ -16,6 +16,12 @@ namespace Syn {
     
     #include "Engine/Shaders/Includes/PushConstants/HizLinearizeDepthPC.glsl"
 
+    bool HizLinearPreparePass::ShouldExecute(const RenderContext& context) const
+    {
+        auto settings = context.scene->GetSettings();
+        return settings->enableHiz && settings->enableOcclusionCulling && settings->enableGpuCulling;
+    }
+
     void HizLinearPreparePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
         _shaderProgram = shaderManager->CreateProgram("HizLinearizeDepthProgram", {

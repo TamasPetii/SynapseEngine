@@ -17,6 +17,11 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/PointLightCullingPC.glsl"
 
+    bool PointLightCullingPass::ShouldExecute(const RenderContext& context) const
+    {
+        return context.scene->GetSettings()->enableGpuCulling;
+    }
+
     void PointLightCullingPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 
@@ -30,7 +35,6 @@ namespace Syn {
 
     void PointLightCullingPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
-        if (!scene) return;
 
         auto registry = scene->GetRegistry();
         auto pointLightPool = registry->GetPool<PointLightComponent>();
@@ -51,6 +55,7 @@ namespace Syn {
         pc.indirectCommandAddr = drawData->pointLightIndirectCommandBuffers[fIdx]->GetDeviceAddress();
         pc.totalLightsToTest = _totalLightsToTest;
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
+        pc.enableOcclusionCulling = scene->GetSettings()->enableOcclusionCulling ? 1 : 0;
 
         pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
         pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
@@ -78,7 +83,7 @@ namespace Syn {
 
     void PointLightCullingPass::Dispatch(const RenderContext& context) {
         auto scene = context.scene;
-        if (!scene || !scene->GetSceneDrawData()->useGpuCulling || _totalLightsToTest == 0) return;
+        if (_totalLightsToTest == 0) return;
 
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
@@ -91,8 +96,8 @@ namespace Syn {
         cmdBarrier.buffer = drawData->pointLightIndirectCommandBuffers[fIdx]->Handle();
         cmdBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         cmdBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
-        cmdBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
-        cmdBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT;
+        cmdBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+        cmdBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT | VK_ACCESS_2_TRANSFER_READ_BIT;
         Vk::BufferUtils::InsertBarrier(context.cmd, cmdBarrier);
 
         Vk::BufferBarrierInfo visibleDataBarrier{};

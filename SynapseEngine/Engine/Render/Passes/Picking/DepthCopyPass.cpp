@@ -2,7 +2,13 @@
 #include "Engine/Vk/Image/ImageUtils.h"
 #include "Engine/System/RenderSystem.h"
 
-namespace Syn {
+namespace Syn 
+{
+    bool DepthCopyPass::ShouldExecute(const RenderContext& context) const
+    {
+		return context.scene->GetSettings()->enableTransparentPicking;
+    }
+
     void DepthCopyPass::PrepareFrame(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         if (!group) return;

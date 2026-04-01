@@ -14,6 +14,11 @@ namespace Syn
 {
     #include "Engine/Shaders/Includes/PushConstants/WireframePC.glsl"
 
+    bool WireframeMeshletSpherePass::ShouldExecute(const RenderContext& context) const
+    {
+        return context.scene->GetSettings()->enableWireframeMeshletSphere;
+    }
+
     void WireframeMeshletSpherePass::Initialize()
     {
         auto shaderManager = ServiceLocator::GetShaderManager();

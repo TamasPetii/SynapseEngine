@@ -14,6 +14,11 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/WireframePC.glsl"
 
+    bool WireframeSpherePass::ShouldExecute(const RenderContext& context) const
+    {
+        return context.scene->GetSettings()->enableWireframeMeshSphere;
+    }
+
     void WireframeSpherePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 
@@ -81,7 +86,6 @@ namespace Syn {
 
     void WireframeSpherePass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
-        if (!scene) return;
 
         auto drawData = scene->GetSceneDrawData();
         if (drawData->activeDescriptorCount == 0) return;
@@ -120,8 +124,6 @@ namespace Syn {
 
     void WireframeSpherePass::Draw(const RenderContext& context) {
         auto scene = context.scene;
-        if (!scene) return;
-
         auto drawData = scene->GetSceneDrawData();
         uint32_t totalCommands = drawData->activeTraditionalCount + drawData->activeMeshletCount;
 

@@ -15,6 +15,11 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/BloomUpSamplePC.glsl"
 
+    bool BloomUpsamplePass::ShouldExecute(const RenderContext& context) const
+    {
+        return context.scene->GetSettings()->enableBloom;
+    }
+
     void BloomUpsamplePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
         _shaderProgram = shaderManager->CreateProgram("BloomUpsampleProgram", {

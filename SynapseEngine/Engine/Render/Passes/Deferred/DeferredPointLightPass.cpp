@@ -18,6 +18,11 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/DeferredPointLightPC.glsl"
 
+    bool DeferredPointLightPass::ShouldExecute(const RenderContext& context) const
+    {
+        return context.scene->GetSettings()->enableDeferredPointLights;
+    }
+
     void DeferredPointLightPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 

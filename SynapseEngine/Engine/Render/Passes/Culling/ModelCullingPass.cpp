@@ -20,6 +20,11 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/ModelCullingPC.glsl"
 
+    bool ModelCullingPass::ShouldExecute(const RenderContext& context) const
+    {
+        return context.scene->GetSettings()->enableGpuCulling;
+    }
+
     void ModelCullingPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 
@@ -33,7 +38,6 @@ namespace Syn {
 
     void ModelCullingPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
-        if (!scene) return;
 
         auto registry = scene->GetRegistry();
         auto modelPool = registry->GetPool<ModelComponent>();
@@ -79,6 +83,7 @@ namespace Syn {
         pc.totalModelsToTest = _totalModelsToTest;
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.traditionalCommandCount = drawData->activeTraditionalCount;
+        pc.enableOcclusionCulling = scene->GetSettings()->enableOcclusionCulling ? 1 : 0;
 
         pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
         pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
@@ -107,7 +112,7 @@ namespace Syn {
 
     void ModelCullingPass::Dispatch(const RenderContext& context) {
         auto scene = context.scene;
-        if (!scene || !scene->GetSceneDrawData()->useGpuCulling || _totalModelsToTest == 0) return;
+        if (_totalModelsToTest == 0) return;
 
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();

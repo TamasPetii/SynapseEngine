@@ -16,8 +16,13 @@ namespace Syn
 
     void RenderPipeline::Execute(const RenderContext& context)
     {
+        if (!context.scene) return;
+
         for (auto& pass : _passes) {
-            pass->Execute(context);
+            if (pass->ShouldExecute(context))
+            {
+                pass->Execute(context);
+            }
         }
     }
 }

@@ -26,6 +26,7 @@ namespace Syn
 
     void PointLightFrustumCullingSystem::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
     {
+		auto settings = scene->GetSettings();
         auto drawData = scene->GetSceneDrawData();
         auto registry = scene->GetRegistry();
         auto pool = registry->GetPool<PointLightComponent>();
@@ -44,7 +45,7 @@ namespace Syn
             }
             });
 
-        if (drawData->useGpuCulling) {
+        if (settings->enableGpuCulling) {
             return;
         }
 
@@ -75,9 +76,10 @@ namespace Syn
         this->EmplaceTask(subflow, SystemPhaseNames::UploadGPU, [this, scene, frameIndex]() {
             auto bufferManager = scene->GetComponentBufferManager();
             auto drawData = scene->GetSceneDrawData();
+            auto settings = scene->GetSettings();
             uint32_t count = drawData->pointLightCmdTemplate.instanceCount;
 
-            if (!drawData->useGpuCulling) {
+            if (!settings->enableGpuCulling) {
                 auto instanceBufferView = bufferManager->GetComponentBuffer(BufferNames::PointLightVisibleData, frameIndex);
                 if (count > 0 && instanceBufferView.buffer) {
                     std::string visibleEntities = "";

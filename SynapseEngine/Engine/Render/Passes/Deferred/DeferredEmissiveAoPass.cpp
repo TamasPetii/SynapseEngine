@@ -13,6 +13,11 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/DeferredEmissiveAoPC.glsl"
 
+    bool DeferredEmissiveAoPass::ShouldExecute(const RenderContext& context) const
+    {
+        return context.scene->GetSettings()->enableDeferredEmissiveAo;
+    }
+
     void DeferredEmissiveAoPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 

@@ -129,7 +129,7 @@ namespace Syn
             auto materialManager = ServiceLocator::GetMaterialManager();
 
             // Random Geometry
-            for (int i = 0; i < 50000; i++)
+            for (int i = 0; i < 100000; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
@@ -181,7 +181,7 @@ namespace Syn
                 transform.rotation = glm::vec3(-45.0f, 45.0f, 0.0f);
 
                 auto& light = registry->GetComponent<DirectionLightComponent>(dirLightEntity);
-                light.color = glm::vec3(1.0f, 0.95f, 0.85f);
+                light.color = glm::vec3(1.0f, 0.95f, 0.85f) * 0.55f;
                 light.strength = 5.0f;
                 light.useShadow = true;
 
@@ -191,7 +191,7 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(dirLightEntity);
             }
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 250; i++)
             {
                 EntityID lightEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(lightEntity);
@@ -211,8 +211,8 @@ namespace Syn
                     static_cast<float>(rand()) / static_cast<float>(RAND_MAX),
                     static_cast<float>(rand()) / static_cast<float>(RAND_MAX)
                 );
-                light.radius = 2 + (rand() % 20);
-                light.strength = 1.0f + (rand() % 15);
+                light.radius = 2 + (rand() % 10);
+                light.strength = 5.0f + (rand() % 25);
                 light.useShadow = (i < 5);
 
                 registry->GetPool<TransformComponent>()->SetCategory(lightEntity, StorageCategory::Static);
@@ -221,7 +221,7 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(lightEntity);
             }
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 250; i++)
             {
                 EntityID spotLightEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(spotLightEntity);
@@ -230,7 +230,7 @@ namespace Syn
                 auto& transform = registry->GetComponent<TransformComponent>(spotLightEntity);
                 transform.translation = glm::vec3(
                     (rand() % 400) - 200.0f,
-                    50.0f + (rand() % 50),
+                    (rand() % 50) - 25.0f,
                     (rand() % 400) - 200.0f
                 );
 

@@ -11,6 +11,7 @@ struct PointLightCullingPC {
     uint64_t indirectCommandAddr;
     uint totalLightsToTest;
     uint activeCameraEntity;
+    uint enableOcclusionCulling;
     float screenWidth;
     float screenHeight;
 };

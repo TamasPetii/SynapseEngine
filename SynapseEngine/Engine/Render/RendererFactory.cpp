@@ -39,6 +39,10 @@
 #include "Engine/Render/Passes/Wireframe/WireframeMeshletInitPass.h"
 #include "Engine/Render/Passes/Wireframe/WireframeMeshletAabbPass.h"
 #include "Engine/Render/Passes/Wireframe/WireframeMeshletSpherePass.h"
+#include "Engine/Render/Passes/Wireframe/PointLightAabbWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/PointLightSphereWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/SpotLightAabbWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/SpotLightSphereWireframePass.h"
 
 #include "Engine/Render/Passes/Present/GuiPass.h"
 #include "Engine/Render/Passes/Present/CompositePass.h"
@@ -94,12 +98,17 @@ namespace Syn
         pipeline->AddPass(std::make_unique<TransparentCompositePass>());
 
         // Wireframe Passes
-        //pipeline->AddPass(std::make_unique<WireframeSetupPass>());
-        //pipeline->AddPass(std::make_unique<WireframeAabbPass>());
-        //pipeline->AddPass(std::make_unique<WireframeSpherePass>());
+        pipeline->AddPass(std::make_unique<WireframeSetupPass>());
+        pipeline->AddPass(std::make_unique<WireframeAabbPass>());
+        pipeline->AddPass(std::make_unique<WireframeSpherePass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletInitPass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletAabbPass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletSpherePass>());
+
+        pipeline->AddPass(std::make_unique<PointLightAabbWireframePass>());
+        pipeline->AddPass(std::make_unique<PointLightSphereWireframePass>());
+        pipeline->AddPass(std::make_unique<SpotLightAabbWireframePass>());
+        pipeline->AddPass(std::make_unique<SpotLightSphereWireframePass>());
 
         // Post-processing & UI
         pipeline->AddPass(std::make_unique<BloomPrefilterPass>());

@@ -14,6 +14,11 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/DeferredDirectionLightPC.glsl"
 
+    bool DeferredDirectionLightPass::ShouldExecute(const RenderContext& context) const
+    {
+        return context.scene->GetSettings()->enableDeferredDirectionalLights;
+    }
+
     void DeferredDirectionLightPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 

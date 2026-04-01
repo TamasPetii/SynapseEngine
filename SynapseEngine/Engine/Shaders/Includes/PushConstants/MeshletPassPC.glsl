@@ -29,6 +29,7 @@ struct MeshletPassPC {
     uint baseDescriptorOffset;
     uint disableConeCulling;
     uint materialRenderType;
+    uint enableOcclusionCulling;
     float screenWidth;
     float screenHeight;
 };

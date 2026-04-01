@@ -25,6 +25,7 @@ struct MeshCullingPC {
     uint totalModelsToTest; 
     uint activeCameraEntity;
     uint traditionalCommandCount;
+    uint enableOcclusionCulling;
     float screenWidth;
     float screenHeight;
 };

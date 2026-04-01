@@ -37,6 +37,7 @@ namespace Syn
         _registry = std::make_unique<Registry>();
         _componentBufferManager = std::make_unique<ComponentBufferManager>(frameCount);
         _sceneDrawData = std::make_unique<SceneDrawData>(frameCount);
+        _sceneSettings = std::make_unique<SceneSettings>();
 
         InitializeSystems();
         InitializeComponentBuffers();

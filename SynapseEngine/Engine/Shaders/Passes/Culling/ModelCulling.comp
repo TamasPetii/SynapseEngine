@@ -63,8 +63,11 @@ void main() {
     uint visibility = TestFrustum(worldCollider, camera);
     if (visibility == INTERSECTION_OUTSIDE) return;
 
+    float screenSizePixels = 0.0;
     vec2 screenRes = vec2(pc.screenWidth, pc.screenHeight);
-    if (IsSphereOccluded(worldCollider.center, worldCollider.radius, camera, depthPyramid, screenRes)) {
+    bool enableDepthOcclusion = (pc.enableOcclusionCulling == 1);
+
+    if (IsSphereOccluded(worldCollider.center, worldCollider.radius, camera, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
         return;
     }
 
@@ -74,8 +77,9 @@ void main() {
     uint safeMeshCount = mAlloc.meshAllocationCount / 4;
 
     if (safeMeshCount <= MAX_MESH_COUNT && addrs.vertexCount < MAX_VERTEX_COUNT) {
-        float dist = length(camera.eye.xyz - worldCollider.center);
-        uint lod = (dist < 25.0) ? 0 : (dist < 50.0) ? 1 : (dist < 100.0) ? 2 : 3;
+        uint lod = (screenSizePixels > 512.0) ? 0 : 
+                   (screenSizePixels > 256.0) ? 1 : 
+                   (screenSizePixels > 128.0) ? 2 : 3;
         
         for(uint m = 0; m < safeMeshCount; ++m) {
             uint matIdx = GET_MATERIAL_INDEX(pc.materialLookupBufferAddr, modelComp.materialOffset + m);
