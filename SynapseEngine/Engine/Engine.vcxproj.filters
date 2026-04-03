@@ -588,9 +588,6 @@
     <ClCompile Include="Render\Passes\Deferred\GBufferInitPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Present\CopyToSwapchainPass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Render\Passes\TransferPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -916,6 +913,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Billboard\CameraBillboardPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Performance\PerformanceInitPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Performance\PerformanceTraditionalOpaquePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Performance\PerformanceMeshletOpaquePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Performance\PerformanceTraditionalTransparentPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Performance\PerformanceMeshletTransparentPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1580,9 +1592,6 @@
     <ClInclude Include="Render\Passes\Deferred\GBufferInitPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Present\CopyToSwapchainPass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Render\Passes\TransferPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1931,6 +1940,21 @@
     <ClInclude Include="Render\Passes\Billboard\CameraBillboardPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Passes\Performance\PerformanceInitPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Performance\PerformanceTraditionalOpaquePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Performance\PerformanceMeshletOpaquePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Performance\PerformanceTraditionalTransparentPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Performance\PerformanceMeshletTransparentPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Passes\Common\Fullscreen.vert" />
@@ -2009,5 +2033,11 @@
     <None Include="Shaders\Includes\PushConstants\BillboardPC.glsl" />
     <None Include="Shaders\Passes\Billboard\Billboard.vert" />
     <None Include="Shaders\Passes\Billboard\Billboard.frag" />
+    <None Include="Shaders\Passes\Performance\PerformanceTraditional.frag" />
+    <None Include="Shaders\Passes\Performance\PerformanceMeshlet.frag" />
+    <None Include="Shaders\Passes\Performance\PerformanceTraditionalTransparent.frag" />
+    <None Include="Shaders\Passes\Performance\PerformanceMeshletTransparent.frag" />
+    <None Include="Shaders\Passes\Performance\PerformanceMeshlet.mesh" />
+    <None Include="Shaders\Passes\Performance\PerformanceTraditional.vert" />
   </ItemGroup>
 </Project>

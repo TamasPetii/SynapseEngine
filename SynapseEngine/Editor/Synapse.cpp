@@ -37,6 +37,8 @@ void Synapse::OnInit() {
         return GetWindow().GetSize();
         };
 
+#ifndef SYN_PERFORMANCE
+
     params.onRenderGuiCallback = [&](VkCommandBuffer cmd) {
         if (_guiManager) {
             _guiManager->Render(cmd);
@@ -46,8 +48,11 @@ void Synapse::OnInit() {
     params.onGuiFlushCallback = [&](uint32_t frameIndex) {
         Syn::GuiTextureManager::Get().FlushQueue(frameIndex);
         };
+#endif
 
     _engine = std::make_unique<Syn::Engine>(params);
+
+#ifndef SYN_PERFORMANCE
     _editorApi = std::make_unique<Syn::EditorApiImpl>(_engine.get());
 
     auto vkContext = _engine->GetVkContext();
@@ -89,16 +94,21 @@ void Synapse::OnInit() {
         Syn::SettingsViewModel{
             _editorApi.get()
         });
+#endif
 
     _inputDispatcher = std::make_unique<Syn::InputDispatcher>(_guiManager.get(), _engine.get());
 }
 
 void Synapse::OnUpdate(float dt) {
+#ifndef SYN_PERFORMANCE
+
     if (_guiManager) {
         _guiManager->BeginFrame();
         _guiManager->UpdateAndDraw();
         _guiManager->EndFrame();
     }
+
+#endif
 
     if (_engine) {
         _engine->Update(dt);

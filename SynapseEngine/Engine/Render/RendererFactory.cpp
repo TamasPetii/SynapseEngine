@@ -46,12 +46,18 @@
 
 #include "Engine/Render/Passes/Present/GuiPass.h"
 #include "Engine/Render/Passes/Present/CompositePass.h"
-#include "Engine/Render/Passes/Present/CopyToSwapchainPass.h"
 
 #include "Engine/Render/Passes/Billboard/CameraBillboardPass.h"
 #include "Engine/Render/Passes/Billboard/DirectionLightBillboardPass.h"
 #include "Engine/Render/Passes/Billboard/PointLightBillboardPass.h"
 #include "Engine/Render/Passes/Billboard/SpotLightBillboardPass.h"
+
+#include "Engine/Render/Passes/Performance/PerformanceInitPass.h"
+#include "Engine/Render/Passes/Performance/PerformanceTraditionalOpaquePass.h"
+#include "Engine/Render/Passes/Performance/PerformanceMeshletOpaquePass.h"
+#include "Engine/Render/Passes/Performance/PerformanceTraditionalTransparentPass.h"
+#include "Engine/Render/Passes/Performance/PerformanceMeshletTransparentPass.h"
+
 
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "RenderNames.h"
@@ -338,6 +344,97 @@ namespace Syn
             .swizzle = { VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_ZERO, VK_COMPONENT_SWIZZLE_ONE }
             });
         rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::DebugMaterialUv, debugMaterialUvSpec);
+
+        return renderManager;
+    }
+
+    std::unique_ptr<RenderManager> RendererFactory::CreatePerformanceRenderer(uint32_t framesInFlight) {
+        auto renderManager = std::make_unique<RenderManager>(framesInFlight);
+        auto rtManager = renderManager->GetRenderTargetManager();
+        auto pipeline = std::make_unique<RenderPipeline>();
+
+        // Culling és Hi-Z
+        pipeline->AddPass(std::make_unique<HizLinearPreparePass>());
+        pipeline->AddPass(std::make_unique<HizDownsamplePass>());
+        pipeline->AddPass(std::make_unique<ModelCullingPass>());
+        pipeline->AddPass(std::make_unique<MeshCullingPass>());
+
+		// Texture Init Passes
+        pipeline->AddPass(std::make_unique<PerformanceInitPass>());
+        pipeline->AddPass(std::make_unique<WboitInitPass>());
+
+		// Opaque Passes
+        pipeline->AddPass(std::make_unique<PerformanceTraditionalOpaquePass>(MaterialRenderType::Opaque1Sided));
+        pipeline->AddPass(std::make_unique<PerformanceTraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
+        pipeline->AddPass(std::make_unique<PerformanceMeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
+        pipeline->AddPass(std::make_unique<PerformanceMeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
+
+		//Transparent Passes (WBOIT)
+        pipeline->AddPass(std::make_unique<PerformanceTraditionalTransparentPass>(MaterialRenderType::Transparent1Sided));
+        pipeline->AddPass(std::make_unique<PerformanceTraditionalTransparentPass>(MaterialRenderType::Transparent2Sided));
+        pipeline->AddPass(std::make_unique<PerformanceMeshletTransparentPass>(MaterialRenderType::Transparent1Sided));
+        pipeline->AddPass(std::make_unique<PerformanceMeshletTransparentPass>(MaterialRenderType::Transparent2Sided));
+        pipeline->AddPass(std::make_unique<TransparentCompositePass>());
+
+        pipeline->AddPass(std::make_unique<CompositePass>());
+
+        pipeline->InitializeAll();
+
+        renderManager->RegisterPipeline(RenderPipelineNames::DeferredPipeline, std::move(pipeline));
+
+        rtManager->CreateGroup(RenderTargetGroupNames::Deferred);
+        uint32_t initWidth = 4;
+        uint32_t initHeight = 4;
+
+        Vk::ImageConfig mainImageSpec{};
+        mainImageSpec.width = initWidth;
+        mainImageSpec.height = initHeight;
+        mainImageSpec.type = VK_IMAGE_TYPE_2D;
+        mainImageSpec.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+        mainImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        mainImageSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::Main, mainImageSpec);
+
+        Vk::ImageConfig transparentAccumSpec{};
+        transparentAccumSpec.width = initWidth;
+        transparentAccumSpec.height = initHeight;
+        transparentAccumSpec.type = VK_IMAGE_TYPE_2D;
+        transparentAccumSpec.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+        transparentAccumSpec.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        transparentAccumSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::TransparentAccum, transparentAccumSpec);
+
+        Vk::ImageConfig transparentRevealSpec{};
+        transparentRevealSpec.width = initWidth;
+        transparentRevealSpec.height = initHeight;
+        transparentRevealSpec.type = VK_IMAGE_TYPE_2D;
+        transparentRevealSpec.format = VK_FORMAT_R8_UNORM;
+        transparentRevealSpec.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        transparentRevealSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::TransparentReveal, transparentRevealSpec);
+
+        Vk::ImageConfig depthPyramidImageSpec{};
+        depthPyramidImageSpec.width = initWidth;
+        depthPyramidImageSpec.height = initHeight;
+        depthPyramidImageSpec.type = VK_IMAGE_TYPE_2D;
+        depthPyramidImageSpec.format = VK_FORMAT_R32_SFLOAT;
+        depthPyramidImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+        depthPyramidImageSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        depthPyramidImageSpec.generateMipMaps = true;
+        depthPyramidImageSpec.AddView(Vk::ImageViewNames::Default, Vk::ImageViewConfig{
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .perMipViews = true
+            });
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::DepthPyramid, depthPyramidImageSpec);
+
+        Vk::ImageConfig depthImageSpec{};
+        depthImageSpec.width = initWidth;
+        depthImageSpec.height = initHeight;
+        depthImageSpec.type = VK_IMAGE_TYPE_2D;
+        depthImageSpec.format = VK_FORMAT_D32_SFLOAT;
+        depthImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        depthImageSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::Depth, depthImageSpec);
 
         return renderManager;
     }

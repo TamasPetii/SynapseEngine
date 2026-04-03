@@ -2,6 +2,7 @@
   <Configurations>
     <BuildType Name="Debug" />
     <BuildType Name="Dist" />
+    <BuildType Name="Performance" />
     <BuildType Name="Release" />
     <Platform Name="x64" />
     <Platform Name="x86" />

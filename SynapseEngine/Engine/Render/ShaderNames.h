@@ -49,5 +49,13 @@ namespace Syn
     
         static constexpr const char* BillboardVert = "../Engine/Shaders/Passes/Billboard/Billboard.vert";
         static constexpr const char* BillboardFrag = "../Engine/Shaders/Passes/Billboard/Billboard.frag";
+
+        
+        static constexpr const char* PerformanceTraditionalVert = "../Engine/Shaders/Passes/Performance/PerformanceTraditional.vert";
+        static constexpr const char* PerformanceTraditionalFrag = "../Engine/Shaders/Passes/Performance/PerformanceTraditional.frag";
+        static constexpr const char* PerformanceTraditionalTransparentFrag = "../Engine/Shaders/Passes/Performance/PerformanceTraditionalTransparent.frag";
+		static constexpr const char* PerformanceMeshletMesh = "../Engine/Shaders/Passes/Performance/PerformanceMeshlet.mesh";
+        static constexpr const char* PerformanceMeshletFrag = "../Engine/Shaders/Passes/Performance/PerformanceMeshlet.frag";
+        static constexpr const char* PerformanceMeshletTransparentFrag = "../Engine/Shaders/Passes/Performance/PerformanceMeshletTransparent.frag";
     };
 }

@@ -161,7 +161,11 @@ namespace Syn
 
 	void Engine::InitRenderManager(const EngineInitParams& params)
 	{
+#ifdef SYN_PERFORMANCE
+		_renderManager = std::move(RendererFactory::CreatePerformanceRenderer(_frameContext.framesInFlight));
+#else
 		_renderManager = std::move(RendererFactory::CreateDeferredRenderer(_frameContext.framesInFlight));
+#endif
 		_renderManager->SetGuiRenderCallback(params.onRenderGuiCallback);
 	}
 
@@ -215,7 +219,10 @@ namespace Syn
 
 		_isMinimized = false;
 		_vkContext->GetSwapChain()->Recreate();
-		//_renderManager->OnResize(width, height);
+
+#ifdef SYN_PERFORMANCE
+		_renderManager->OnResize(width, height);
+#endif
 	}
 
 	void Engine::InitTaskExecutor()

@@ -1,20 +1,21 @@
 <Project>
   <PropertyGroup>
-    <CppStandardVersion>stdcpplatest</CppStandardVersion> 
+    <CppStandardVersion>stdcpplatest</CppStandardVersion>
     <CStandardVersion>stdc17</CStandardVersion>
 
     <OutDir>$(SolutionDir)Binaries\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>$(SolutionDir)Intermediates\$(Platform)\$(Configuration)\$(MSBuildProjectName)\</IntDir>
-    
+
     <VcpkgRoot>$(MSBuildThisFileDirectory)..\External\vcpkg</VcpkgRoot>
     <VcpkgEnabled>true</VcpkgEnabled>
     <VcpkgEnableManifest>true</VcpkgEnableManifest>
 
     <VcpkgTriplet>x64-windows-static-md</VcpkgTriplet>
-    <VcpkgConfiguration Condition="'$(Configuration)'=='Dist'">Release</VcpkgConfiguration>
+    <VcpkgConfiguration Condition="'$(Configuration)'=='Dist' OR '$(Configuration)'=='Performance'">Release</VcpkgConfiguration>
   </PropertyGroup>
 
-  <Import Project="$(VcpkgRoot)\scripts\buildsystems\msbuild\vcpkg.props" Condition="Exists('$(VcpkgRoot)\scripts\buildsystems\msbuild\vcpkg.props')" />
+  <Import Project="$(VcpkgRoot)\scripts\buildsystems\msbuild\vcpkg.props"
+    Condition="Exists('$(VcpkgRoot)\scripts\buildsystems\msbuild\vcpkg.props')" />
 
   <ItemDefinitionGroup>
     <ClCompile>
@@ -22,56 +23,72 @@
       <LanguageStandard_C>$(CStandardVersion)</LanguageStandard_C>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      
+
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>false</TreatWarningAsError>
       <ConformanceMode>true</ConformanceMode>
       <BuildStlModules>false</BuildStlModules>
 
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Debug'">
-		  SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
-		  GLM_FORCE_DEPTH_ZERO_TO_ONE;
-		  VK_NO_PROTOTYPES;
-		  JPH_OBJECT_STREAM;
-		  JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;
-		  SYN_DEBUG;
-		  _DEBUG;
-		  NOMINMAX;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;
-		  %(PreprocessorDefinitions)
-	  </PreprocessorDefinitions>
+        SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
+        GLM_FORCE_DEPTH_ZERO_TO_ONE;
+        VK_NO_PROTOTYPES;
+        JPH_OBJECT_STREAM;
+        JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;
+        SYN_DEBUG;
+        _DEBUG;
+        NOMINMAX;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;
+        %(PreprocessorDefinitions)
+      </PreprocessorDefinitions>
       <RuntimeLibrary Condition="'$(Configuration)'=='Debug'">MultiThreadedDebugDLL</RuntimeLibrary>
 
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Release'">
-		  SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
-		  GLM_FORCE_DEPTH_ZERO_TO_ONE;
-		  VK_NO_PROTOTYPES;
-		  JPH_OBJECT_STREAM;
-		  JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;
-		  SYN_RELEASE;
-		  NDEBUG; NOMINMAX;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;
-		  %(PreprocessorDefinitions)
-	  </PreprocessorDefinitions>
+        SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
+        GLM_FORCE_DEPTH_ZERO_TO_ONE;
+        VK_NO_PROTOTYPES;
+        JPH_OBJECT_STREAM;
+        JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;
+        SYN_RELEASE;
+        NDEBUG; NOMINMAX;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;
+        %(PreprocessorDefinitions)
+      </PreprocessorDefinitions>
       <RuntimeLibrary Condition="'$(Configuration)'=='Release'">MultiThreadedDLL</RuntimeLibrary>
 
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Dist'">
-		  SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
-		  GLM_FORCE_DEPTH_ZERO_TO_ONE;
-		  VK_NO_PROTOTYPES;
-		  JPH_OBJECT_STREAM;
-		  JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;
-		  SYN_DIST;
-		  NDEBUG;
-		  NOMINMAX;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;
-		  %(PreprocessorDefinitions)
-	  </PreprocessorDefinitions>
+        SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
+        GLM_FORCE_DEPTH_ZERO_TO_ONE;
+        VK_NO_PROTOTYPES;
+        JPH_OBJECT_STREAM;
+        JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;
+        SYN_DIST;
+        NDEBUG;
+        NOMINMAX;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;
+        %(PreprocessorDefinitions)
+      </PreprocessorDefinitions>
       <RuntimeLibrary Condition="'$(Configuration)'=='Dist'">MultiThreadedDLL</RuntimeLibrary>
-
       <WholeProgramOptimization Condition="'$(Configuration)'=='Dist'">true</WholeProgramOptimization>
-      <DebugInformationFormat Condition="'$(Configuration)'=='Dist'">None</DebugInformationFormat> 
+      <DebugInformationFormat Condition="'$(Configuration)'=='Dist'">None</DebugInformationFormat>
+
+      <PreprocessorDefinitions Condition="'$(Configuration)'=='Performance'">
+        SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
+        GLM_FORCE_DEPTH_ZERO_TO_ONE;
+        VK_NO_PROTOTYPES;
+        JPH_OBJECT_STREAM;
+        JPH_FLOATING_POINT_EXCEPTIONS_ENABLED;
+        SYN_PERFORMANCE;
+        SYN_DIST;
+        NDEBUG;
+        NOMINMAX;WIN32_LEAN_AND_MEAN;_CRT_SECURE_NO_WARNINGS;
+        %(PreprocessorDefinitions)
+      </PreprocessorDefinitions>
+      <RuntimeLibrary Condition="'$(Configuration)'=='Performance'">MultiThreadedDLL</RuntimeLibrary>
+      <WholeProgramOptimization Condition="'$(Configuration)'=='Performance'">true</WholeProgramOptimization>
+      <DebugInformationFormat Condition="'$(Configuration)'=='Performance'">None</DebugInformationFormat>
+
     </ClCompile>
 
     <Link>
-      <LinkTimeCodeGeneration Condition="'$(Configuration)'=='Dist'">UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration Condition="'$(Configuration)'=='Dist' OR '$(Configuration)'=='Performance'">UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
 </Project>
