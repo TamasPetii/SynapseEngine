@@ -12,7 +12,7 @@ vcpkg_overlays/
 
 *.dae
 *.jpg
-*.png
+#*.png
 *.obj
 *.fbx
 *.mtl
