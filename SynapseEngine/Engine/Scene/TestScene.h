@@ -100,7 +100,7 @@ namespace Syn
                 registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
             }
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 5000; i++)
             {
                 // Character
                 EntityID characterEntity = registry->CreateEntity();
@@ -129,7 +129,7 @@ namespace Syn
             auto materialManager = ServiceLocator::GetMaterialManager();
 
             // Random Geometry
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 500000; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
@@ -193,7 +193,7 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(dirLightEntity);
             }
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 250; i++)
             {
                 EntityID lightEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(lightEntity);
@@ -223,7 +223,7 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(lightEntity);
             }
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 250; i++)
             {
                 EntityID spotLightEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(spotLightEntity);

@@ -30,8 +30,9 @@ namespace Syn
         bool enableDeferredSpotLights;
         bool enableDeferredDirectionalLights;
 
+        bool enableBillboardCameras;
 		bool enableBillboardPointLights;
 		bool enableBillboardSpotLights;
-		bool enableBillboardDirectionalLights;
+        bool enableBillboardDirectionalLights;
     };
 }

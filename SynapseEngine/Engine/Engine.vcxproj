@@ -179,6 +179,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Render\Passes\Billboard\CameraBillboardPass.cpp" />
     <ClCompile Include="Component\CapsuleColliderComponent.cpp" />
     <ClCompile Include="Component\BoxColliderComponent.cpp" />
     <ClCompile Include="Component\SphereColliderComponent.cpp" />
@@ -481,6 +482,7 @@
     <ClCompile Include="Render\Passes\Wboit\WboitInitPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\Passes\Billboard\CameraBillboardPass.h" />
     <ClInclude Include="Component\CapsuleColliderComponent.h" />
     <ClInclude Include="Component\BoxColliderComponent.h" />
     <ClInclude Include="Component\SphereColliderComponent.h" />

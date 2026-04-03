@@ -915,6 +915,9 @@
     <ClCompile Include="Render\Passes\Billboard\SpotLightBillboardPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Passes\Billboard\CameraBillboardPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1923,6 +1926,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Billboard\SpotLightBillboardPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Billboard\CameraBillboardPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

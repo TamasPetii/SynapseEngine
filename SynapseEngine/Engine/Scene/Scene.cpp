@@ -101,6 +101,7 @@ namespace Syn
 
         RegisterComponentSparseMapBuffer<CameraComponent>(BufferNames::CameraSparseMap);
         RegisterComponentBuffer<CameraComponent, CameraComponentGPU>(BufferNames::CameraData);
+        RegisterComponentBuffer<CameraComponent, uint32_t>(BufferNames::CameraVisibleData);
 
         RegisterComponentSparseMapBuffer<ModelComponent>(BufferNames::ModelSparseMap);
         RegisterComponentBuffer<ModelComponent, ModelComponentGPU>(BufferNames::ModelData);

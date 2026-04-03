@@ -43,6 +43,7 @@ namespace Syn {
             changed |= ImGui::Checkbox("Directional Lights", &settings.enableDeferredDirectionalLights);
 
             ImGui::SeparatorText("Billboards");
+            changed |= ImGui::Checkbox("Camera Billboards", &settings.enableBillboardCameras);
             changed |= ImGui::Checkbox("Point Light Billboards", &settings.enableBillboardPointLights);
             changed |= ImGui::Checkbox("Spot Light Billboards", &settings.enableBillboardSpotLights);
             changed |= ImGui::Checkbox("Direction Light Billboards", &settings.enableBillboardDirectionalLights);

@@ -10,6 +10,7 @@ namespace Syn
 
         static constexpr const char* CameraSparseMap = "CameraSparseMap";
         static constexpr const char* CameraData = "CameraData";
+        static constexpr const char* CameraVisibleData = "CameraVisibleData";
 
         static constexpr const char* ModelSparseMap = "ModelSparseMap";
         static constexpr const char* ModelData = "ModelData";

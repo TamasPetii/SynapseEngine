@@ -153,7 +153,11 @@ namespace Syn
         if (!componentBuffer.buffer) return;
         auto bufferHandler = static_cast<CameraComponentGPU*>(componentBuffer.buffer->Map());
 
-        auto processUpload = [cameraPool, bufferHandler, componentBuffer](EntityID entity) {
+        auto visibleBuffer = componentBufferManager->GetComponentBuffer(BufferNames::CameraVisibleData, frameIndex);
+        if (!visibleBuffer.buffer) return;
+        auto visibleBufferHandler = static_cast<uint32_t*>(visibleBuffer.buffer->Map());
+
+        auto processUpload = [cameraPool, bufferHandler, componentBuffer, visibleBuffer, visibleBufferHandler](EntityID entity) {
             auto& cameraComponent = cameraPool->Get(entity);
             auto cameraIndex = cameraPool->GetMapping().Get(entity);
 
@@ -161,6 +165,12 @@ namespace Syn
             {
                 componentBuffer.versions[cameraIndex] = cameraComponent.version;
                 bufferHandler[cameraIndex] = CameraComponentGPU(cameraComponent);
+            }
+
+            if (visibleBuffer.versions[cameraIndex] != cameraComponent.version)
+            {
+                visibleBuffer.versions[cameraIndex] = cameraComponent.version;
+                visibleBufferHandler[cameraIndex] = entity;
             }
         };
 
