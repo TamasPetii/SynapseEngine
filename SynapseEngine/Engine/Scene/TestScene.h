@@ -30,7 +30,7 @@ namespace Syn
             const std::string basePath = "C:/Users/User/Desktop/Models/";
 
             uint32_t sponzaId = modelManager->LoadModelAsync(basePath + "Sponza-master/sponza.obj");
-            //uint32_t bistroId = modelManager->LoadModelAsync(basePath + "Bistro/BistroExterior.fbx");
+            uint32_t bistroId = modelManager->LoadModelAsync(basePath + "Bistro/BistroExterior.fbx");
             uint32_t mutantId = modelManager->LoadModelAsync(basePath + "Monster/Mutant/Mutant.dae");
 
             std::vector<uint32_t> animationIds;
@@ -74,6 +74,19 @@ namespace Syn
             }
 
             {
+                // Bistro
+                EntityID bistroEntity = registry->CreateEntity();
+                registry->AddComponent<TransformComponent>(bistroEntity);
+                registry->AddComponent<ModelComponent>(bistroEntity);
+
+                registry->GetComponent<TransformComponent>(bistroEntity).translation = glm::vec3(50.0f, 0.0f, 0.0f);
+                registry->GetComponent<ModelComponent>(bistroEntity).modelIndex = bistroId;
+
+                registry->GetPool<TransformComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
+                registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
+            }
+
+            {
                 // Sponza
                 EntityID sponzaEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(sponzaEntity);
@@ -87,22 +100,8 @@ namespace Syn
                 registry->GetPool<ModelComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
             }
 
-            /*
-            {
-                // Bistro
-                EntityID bistroEntity = registry->CreateEntity();
-                registry->AddComponent<TransformComponent>(bistroEntity);
-                registry->AddComponent<ModelComponent>(bistroEntity);
 
-                registry->GetComponent<TransformComponent>(bistroEntity).translation = glm::vec3(50.0f, 0.0f, 0.0f);
-                registry->GetComponent<ModelComponent>(bistroEntity).modelIndex = bistroId;
-
-                registry->GetPool<TransformComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
-                registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
-            }
-            */
-
-            for (int i = 0; i < 5000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 // Character
                 EntityID characterEntity = registry->CreateEntity();
@@ -131,8 +130,32 @@ namespace Syn
             auto materialManager = ServiceLocator::GetMaterialManager();
 
             // Random Geometry
-            for (int i = 0; i < 100000; i++)
-            {
+            bool useUniqueMaterials = false;
+
+            std::vector<uint32_t> sharedMaterialIds;
+            if (!useUniqueMaterials) {
+                for (int j = 0; j < 25; j++) {
+                    float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float randomFloat = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float alpha = 0.1f + (randomFloat * 0.9f);
+
+                    MaterialInfo randomMatInfo{};
+                    randomMatInfo.color = glm::vec4(r, g, b, alpha);
+                    randomMatInfo.doubleSided = rand() % 2;
+                    randomMatInfo.isTransparent = rand() % 2;
+                    randomMatInfo.emissiveFactor = glm::vec3(r, g, b);
+                    randomMatInfo.emissiveIntensity = randomFloat * 2;
+
+                    std::string matName = "SharedGeometryMat_" + std::to_string(j);
+                    uint32_t randomMatId = materialManager->LoadMaterial(matName, randomMatInfo);
+
+                    sharedMaterialIds.push_back(randomMatId);
+                }
+            }
+
+            for (int i = 0; i < 500000; i++) {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
                 registry->AddComponent<ModelComponent>(e);
@@ -151,26 +174,33 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Static);
                 registry->GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
 
-                float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-                float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-                float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-
-                float randomFloat = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-                float alpha = 0.1f + (randomFloat * 0.9f);
-
-                MaterialInfo randomMatInfo{};
-                randomMatInfo.color = glm::vec4(r, g, b, alpha);
-                randomMatInfo.doubleSided = rand() % 2;
-                randomMatInfo.isTransparent = rand() % 2;
-
-                randomMatInfo.emissiveFactor = glm::vec3(r, g, b);
-                randomMatInfo.emissiveIntensity = randomFloat * 2;
-
-                std::string matName = "RandomGeometryMat_" + std::to_string(i);
-                uint32_t randomMatId = materialManager->LoadMaterial(matName, randomMatInfo);
-
                 auto& overrideComp = registry->GetComponent<MaterialOverrideComponent>(e);
-                overrideComp.materials.push_back(randomMatId);
+
+                if (useUniqueMaterials)
+                {
+                    float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float randomFloat = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float alpha = 0.1f + (randomFloat * 0.9f);
+
+                    MaterialInfo randomMatInfo{};
+                    randomMatInfo.color = glm::vec4(r, g, b, alpha);
+                    randomMatInfo.doubleSided = rand() % 2;
+                    randomMatInfo.isTransparent = rand() % 2;
+                    randomMatInfo.emissiveFactor = glm::vec3(r, g, b);
+                    randomMatInfo.emissiveIntensity = randomFloat * 2;
+
+                    std::string matName = "RandomGeometryMat_" + std::to_string(i);
+                    uint32_t randomMatId = materialManager->LoadMaterial(matName, randomMatInfo);
+
+                    overrideComp.materials.push_back(randomMatId);
+                }
+                else
+                {
+                    uint32_t selectedSharedMatId = sharedMaterialIds[rand() % sharedMaterialIds.size()];
+                    overrideComp.materials.push_back(selectedSharedMatId);
+                }
             }
 
             for (int i = 0; i < 1; ++i)
