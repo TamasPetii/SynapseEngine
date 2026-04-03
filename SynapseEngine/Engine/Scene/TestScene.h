@@ -30,7 +30,7 @@ namespace Syn
             const std::string basePath = "C:/Users/User/Desktop/Models/";
 
             uint32_t sponzaId = modelManager->LoadModelAsync(basePath + "Sponza-master/sponza.obj");
-            uint32_t bistroId = modelManager->LoadModelAsync(basePath + "Bistro/BistroExterior.fbx");
+            //uint32_t bistroId = modelManager->LoadModelAsync(basePath + "Bistro/BistroExterior.fbx");
             uint32_t mutantId = modelManager->LoadModelAsync(basePath + "Monster/Mutant/Mutant.dae");
 
             std::vector<uint32_t> animationIds;
@@ -73,6 +73,7 @@ namespace Syn
                 _debugCameraEntity = cameraEntity;
             }
 
+            /*
             {
                 // Bistro
                 EntityID bistroEntity = registry->CreateEntity();
@@ -85,6 +86,7 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
                 registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
             }
+            */
 
             {
                 // Sponza
