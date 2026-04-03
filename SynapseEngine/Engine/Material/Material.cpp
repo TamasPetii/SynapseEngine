@@ -24,8 +24,8 @@ namespace Syn {
     {
         uint32_t flags = 0;
 
-        if (material.isTransparent) flags |= (1 << 0);
-        if (material.doubleSided)   flags |= (1 << 1);
+        if (material.doubleSided)   flags |= (1 << 0);
+        if (material.isTransparent) flags |= (1 << 1);
 
         this->packedFlags = flags;
     }
