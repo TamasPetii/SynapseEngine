@@ -1,0 +1,35 @@
+#version 460
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout(set = 2, binding = 0) uniform sampler2D inImage;
+layout(set = 2, binding = 1, rgba16f) uniform writeonly image2D outImage;
+
+#include "../../Includes/PushConstants/BloomPrefilterPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    BloomPrefilterPC pc;
+};
+
+vec3 Prefilter(vec3 color) 
+{
+    float brightness = max(color.r, max(color.g, color.b));
+    float soft = brightness - pc.threshold + pc.knee;
+    soft = clamp(soft, 0.0, 2.0 * pc.knee);
+    soft = soft * soft / (4.0 * pc.knee + 0.00001);
+    float contribution = max(soft, brightness - pc.threshold);
+    contribution /= max(brightness, 0.00001);
+    return color * contribution;
+}
+
+void main()
+{
+	ivec2 imgSize = imageSize(outImage);
+	ivec2 id = ivec2(gl_GlobalInvocationID.xy);
+	if (id.x >= imgSize.x || id.y >= imgSize.y) return;
+
+	vec2 uv = (vec2(id) + vec2(0.5)) * pc.texelSize;
+	vec3 color = texture(inImage, uv).rgb;
+	color = Prefilter(color);
+
+	imageStore(outImage, id, vec4(color, 1.0));
+}

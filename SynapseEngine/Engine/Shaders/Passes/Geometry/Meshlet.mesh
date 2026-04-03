@@ -1,0 +1,128 @@
+#version 460
+#extension GL_EXT_mesh_shader : require
+#extension GL_GOOGLE_include_directive : require
+
+#include "../../Includes/Core.glsl"
+#include "../../Includes/Common/Camera.glsl"
+#include "../../Includes/Common/Mesh.glsl"
+#include "../../Includes/Common/Model.glsl"
+#include "../../Includes/Common/Transform.glsl"
+#include "../../Includes/Common/Animation.glsl"
+#include "../../Includes/Common/Material.glsl"
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+layout(triangles, max_vertices = 64, max_primitives = 64) out;
+
+struct TaskPayload {
+    uint drawId;
+    uint instanceId;
+    uint meshletIndices[32];
+};
+
+taskPayloadSharedEXT TaskPayload payload;
+
+layout(location = 0) out vec3 outNormal[];
+layout(location = 1) out vec4 outTangent[];
+layout(location = 2) out vec2 outUV[];
+layout(location = 3) out flat uvec4 outId[]; // (Entity, Material, Meshlet, LOD)
+
+#include "../../Includes/PushConstants/MeshletPassPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+   MeshletPassPC pc;
+};
+
+void main() {
+    uint threadIdx = gl_LocalInvocationID.x;
+    uint localInstanceID = payload.instanceId;
+    uint localMeshletID = payload.meshletIndices[gl_WorkGroupID.x];
+
+    // Resolve Instance and Model info
+    MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(pc.globalIndirectCommandDescriptorBuffers, pc.baseDescriptorOffset + payload.drawId);
+    
+    uint rawEntityData = GET_INSTANCE(pc.globalInstanceBuffers, desc.instanceOffset + localInstanceID);
+    uint entityId = rawEntityData & ~(1u << 31);
+    
+    uint transformDenseIndex = GET_SPARSE_INDEX(pc.transformSparseMapBufferAddr, entityId);
+    TransformComponent transform = GET_TRANSFORM(pc.transformBufferAddr, transformDenseIndex);
+
+    uint cameraDenseIndex = GET_SPARSE_INDEX(pc.cameraSparseMapBufferAddr, pc.activeCameraEntity);
+    CameraComponent camera = GET_CAMERA(pc.cameraBufferAddr, cameraDenseIndex);
+
+    GpuModelAddresses addrs = GET_MODEL_ADDRESSES(pc.modelAddressBuffer, desc.modelIndex);
+
+    // Resolve specific Meshlet
+    uint flatLodIndex = (desc.meshIndex * 4) + desc.lodIndex; 
+    GpuMeshletDrawDescriptor submeshDraw = GET_MESHLET_DRAW_DESC(addrs.meshletDrawDescriptors, flatLodIndex);
+
+    uint globalMeshletIdx = submeshDraw.meshletOffset + localMeshletID;
+    GpuMeshletDescriptor meshlet = GET_MESHLET_DESC(addrs.meshletDescriptors, globalMeshletIdx);
+
+    SetMeshOutputsEXT(uint(meshlet.vertexCount), uint(meshlet.triangleCount));
+
+    // Parallel Vertex Processing
+    for (uint i = threadIdx; i < uint(meshlet.vertexCount); i += 32) {
+        uint globalVtxIdx = GET_MESHLET_VERTEX_INDEX(addrs.meshletVertexIndices, meshlet.vertexIndicesOffset + i);
+        GpuVertexPosition v = GET_VERTEX_POS(addrs.vertexPositions, globalVtxIdx);
+        GpuVertexAttributes attr = GET_VERTEX_ATTR(addrs.vertexAttributes, globalVtxIdx);
+
+        // Static Transform
+        uint nodeIndex = UNPACK_UINT16_X(v.packedIndex);
+        GpuNodeTransform staticNode = GET_NODE_TRANSFORM(addrs.nodeTransforms, nodeIndex);
+        mat4 finalMat = staticNode.globalTransform;
+        mat4 finalMatIT = staticNode.globalTransformIT;
+
+        // Skinned Transform
+        if (pc.animationSparseMapBufferAddr != 0) {
+            uint animIdx = GET_SPARSE_INDEX(pc.animationSparseMapBufferAddr, entityId);
+            if (animIdx != INVALID_INDEX) {
+                AnimationComponent animComp = GET_ANIM_COMP(pc.animationBufferAddr, animIdx);
+                if (animComp.animationIndex != INVALID_INDEX) {
+                    GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(pc.animationAddressBuffer, animComp.animationIndex);
+                    GpuVertexSkinData skin = GET_SKIN_DATA(animAddrs.vertexSkinData, globalVtxIdx);
+                    
+                    mat4 skinMat = mat4(0.0); 
+                    mat4 skinMatIT = mat4(0.0);
+                    uint frameOffset = animComp.frameIndex * animAddrs.descriptor.nodeCount;
+                    bool hasBone = false;
+
+                    for (int b = 0; b < 4; ++b) {
+                        if (skin.boneWeights[b] > 0.0) {
+                            GpuNodeTransform bone = GET_NODE_TRANSFORM(animAddrs.nodeTransforms, frameOffset + skin.boneIndices[b]);
+                            skinMat += bone.globalTransform * skin.boneWeights[b];
+                            skinMatIT += bone.globalTransformIT * skin.boneWeights[b];
+                            hasBone = true;
+                        }
+                    }
+                    if (hasBone) { 
+                        finalMat = skinMat; 
+                        finalMatIT = skinMatIT;
+                    }
+                }
+            }
+        }
+
+        // Material Resolution
+        uint meshIndex = UNPACK_UINT16_Y(v.packedIndex);
+        ModelComponent modelComp = GET_MODEL_COMP(pc.modelBufferAddr, GET_SPARSE_INDEX(pc.modelSparseMapBufferAddr, entityId));
+        uint materialId = GET_MATERIAL_INDEX(pc.materialLookupBuffer, modelComp.materialOffset + meshIndex);
+
+        // Final Transform and Output
+        gl_MeshVerticesEXT[i].gl_Position = camera.viewProjVulkan * transform.transform * finalMat * vec4(v.position, 1.0);
+        outNormal[i] = (transform.transformIT * finalMatIT * vec4(attr.normal, 0.0)).xyz;
+        outTangent[i] = vec4((transform.transform * finalMat * vec4(attr.tangent, 0.0)).xyz, 1.0); //Todo
+        outUV[i] = vec2(attr.uv_x, 1.0 - attr.uv_y);
+        outId[i] = uvec4(entityId, materialId, globalMeshletIdx, desc.lodIndex);
+    }
+
+    // Parallel Triangle Primitive Processing
+    for (uint i = threadIdx; i < uint(meshlet.triangleCount); i += 32) {
+        uint baseOffset = meshlet.triangleIndicesOffset + (i * 3);
+        
+        gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
+            uint(GET_MESHLET_TRIANGLE_INDEX(addrs.meshletTriangleIndices, baseOffset + 0)),
+            uint(GET_MESHLET_TRIANGLE_INDEX(addrs.meshletTriangleIndices, baseOffset + 1)),
+            uint(GET_MESHLET_TRIANGLE_INDEX(addrs.meshletTriangleIndices, baseOffset + 2))
+        );
+    }
+}

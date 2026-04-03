@@ -1,0 +1,978 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Dist|Win32">
+      <Configuration>Dist</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Dist|x64">
+      <Configuration>Dist</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Performance|Win32">
+      <Configuration>Performance</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Performance|x64">
+      <Configuration>Performance</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>18.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{de125602-7639-48fb-af02-5213bccc28ad}</ProjectGuid>
+    <RootNamespace>Engine</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dist|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Performance|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Performance|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Dist|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Performance|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Performance|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>SYN_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>SYN_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>SYN_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Performance|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>SYN_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>SYN_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>SYN_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Dist|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>SYN_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Performance|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <ConformanceMode>true</ConformanceMode>
+      <PreprocessorDefinitions>SYN_BUILD_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Render\Profiler\DefaultGpuProfiler.cpp" />
+    <ClCompile Include="Render\Profiler\IGpuProfiler.cpp" />
+    <ClCompile Include="Render\Passes\Performance\PerformanceMeshletTransparentPass.cpp" />
+    <ClCompile Include="Render\Passes\Performance\PerformanceTraditionalTransparentPass.cpp" />
+    <ClCompile Include="Render\Passes\Performance\PerformanceMeshletOpaquePass.cpp" />
+    <ClCompile Include="Render\Passes\Performance\PerformanceTraditionalOpaquePass.cpp" />
+    <ClCompile Include="Render\Passes\Performance\PerformanceInitPass.cpp" />
+    <ClCompile Include="Render\Passes\Billboard\CameraBillboardPass.cpp" />
+    <ClCompile Include="Component\CapsuleColliderComponent.cpp" />
+    <ClCompile Include="Component\BoxColliderComponent.cpp" />
+    <ClCompile Include="Component\SphereColliderComponent.cpp" />
+    <ClCompile Include="Component\DirectionLightComponent.cpp" />
+    <ClCompile Include="Component\BaseComponent\Light.cpp" />
+    <ClCompile Include="Component\PointLightComponent.cpp" />
+    <ClCompile Include="Component\PointLightShadowComponent.cpp" />
+    <ClCompile Include="Component\DirectionLightShadowComponent.cpp" />
+    <ClCompile Include="Collision\Colliders\FrustumCollider.cpp" />
+    <ClCompile Include="Render\Passes\Billboard\PointLightBillboardPass.cpp" />
+    <ClCompile Include="Render\Passes\Billboard\DirectionLightBillboardPass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\PointLightAabbWireframePass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\PointLightSphereWireframePass.cpp" />
+    <ClCompile Include="Render\Passes\Culling\PointLightCullingPass.cpp" />
+    <ClCompile Include="Render\Passes\Culling\SpotLightCullingPass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\SpotLightSphereWireframePass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\SpotLightAabbWireframePass.cpp" />
+    <ClCompile Include="Scene\SceneSettings.cpp" />
+    <ClCompile Include="Render\Passes\Billboard\SpotLightBillboardPass.cpp" />
+    <ClCompile Include="System\Light\DirectionLightCullingSystem.cpp" />
+    <ClCompile Include="Render\Passes\Deferred\DeferredDirectionLightPass.cpp" />
+    <ClCompile Include="System\Light\DirectionLightShadowSystem.cpp" />
+    <ClCompile Include="System\Light\DirectionLightSystem.cpp" />
+    <ClCompile Include="Render\Passes\Deferred\DeferredSpotLightPass.cpp" />
+    <ClCompile Include="Render\Passes\Deferred\DeferredPointLightPass.cpp" />
+    <ClCompile Include="System\Light\SpotLightFrustumCullingSystem.cpp" />
+    <ClCompile Include="System\Light\SpotLightShadowSystem.cpp" />
+    <ClCompile Include="System\Light\SpotLightSystem.cpp" />
+    <ClCompile Include="System\Light\PointLightFrustumCullingSystem.cpp" />
+    <ClCompile Include="System\Light\PointLightShadowSystem.cpp" />
+    <ClCompile Include="System\Light\PointLightSystem.cpp" />
+    <ClCompile Include="Render\Passes\Deferred\DeferredEmissiveAoPass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\DebugInitPass.cpp" />
+    <ClCompile Include="Component\SpotLightComponent.cpp" />
+    <ClCompile Include="Component\SpotLightShadowComponent.cpp" />
+    <ClCompile Include="System\PhysicsSystem.cpp" />
+    <ClCompile Include="Physics\JoltPhysicsEngine.cpp" />
+    <ClCompile Include="Physics\IPhysicsEngine.cpp" />
+    <ClCompile Include="Physics\PhysicsTypes.cpp" />
+    <ClCompile Include="Render\Passes\Picking\DepthCopyPass.cpp" />
+    <ClCompile Include="Render\Passes\Picking\MeshletTransparentPickingPass.cpp" />
+    <ClCompile Include="Render\Passes\Geometry\MeshletTransparentPass.cpp" />
+    <ClCompile Include="Render\Passes\Geometry\MeshletOpaquePass.cpp" />
+    <ClCompile Include="Render\Passes\Present\GuiPass.cpp" />
+    <ClCompile Include="Component\RigidBodyComponent.cpp" />
+    <ClCompile Include="System\AnimationSystem.cpp" />
+    <ClCompile Include="Component\AnimationComponent.cpp" />
+    <ClCompile Include="Animation\AnimationManager.cpp" />
+    <ClCompile Include="Animation\Builder\AnimationBuilder.cpp" />
+    <ClCompile Include="Animation\Data\Animation.cpp" />
+    <ClCompile Include="Animation\Processor\Geometry\AnimationBakeProcessor.cpp" />
+    <ClCompile Include="Animation\Data\Common\AnimationNode.cpp" />
+    <ClCompile Include="Animation\Data\Common\AnimationKeys.cpp" />
+    <ClCompile Include="Animation\Processor\Geometry\AnimationColliderProcessor.cpp" />
+    <ClCompile Include="Animation\Processor\AnimationProcessorPipeline.cpp" />
+    <ClCompile Include="Animation\Loader\AnimationLoaderRegistry.cpp" />
+    <ClCompile Include="Animation\Loader\IAnimationLoader.cpp" />
+    <ClCompile Include="Animation\Data\Raw\RawAnimation.cpp" />
+    <ClCompile Include="Animation\Data\Cooked\CookedAnimation.cpp" />
+    <ClCompile Include="Animation\Loader\AssimpAnimationLoader.cpp" />
+    <ClCompile Include="Animation\Loader\IAnimationLoaderRegistry.cpp" />
+    <ClCompile Include="Animation\Source\IAnimationSource.cpp" />
+    <ClCompile Include="Animation\Source\Procedural\ProceduralAnimationSource.cpp" />
+    <ClCompile Include="Animation\Source\File\FileAnimationSource.cpp" />
+    <ClCompile Include="Animation\Processor\IAnimationProcessor.cpp" />
+    <ClCompile Include="Animation\Processor\IAnimationProcessorPipeline.cpp" />
+    <ClCompile Include="Animation\Data\Common\BoneTrack.cpp" />
+    <ClCompile Include="Animation\Data\Cooked\CookedAnimationFrames.cpp" />
+    <ClCompile Include="Animation\Data\Gpu\GpuBatchedAnimation.cpp" />
+    <ClCompile Include="Animation\Converter\IGpuAnimationConverter.cpp" />
+    <ClCompile Include="Animation\Converter\DefaultGpuAnimationConverter.cpp" />
+    <ClCompile Include="Animation\Converter\IAnimationCooker.cpp" />
+    <ClCompile Include="Animation\Converter\DefaultAnimationCooker.cpp" />
+    <ClCompile Include="Animation\Data\Gpu\GpuAnimationBuffers.cpp" />
+    <ClCompile Include="Animation\Uploader\IGpuAnimationUploader.cpp" />
+    <ClCompile Include="Animation\Uploader\DefaultGpuAnimationUploader.cpp" />
+    <ClCompile Include="Render\Passes\Bloom\BloomCompositePass.cpp" />
+    <ClCompile Include="Render\Passes\Bloom\BloomUpsamplePass.cpp" />
+    <ClCompile Include="Render\Passes\Bloom\BloomDownsamplePass.cpp" />
+    <ClCompile Include="Render\Passes\Bloom\BloomPrefilterPass.cpp" />
+    <ClCompile Include="Collision\Tester\CollisionTester.cpp" />
+    <ClCompile Include="Component\ModelComponent.cpp" />
+    <ClCompile Include="Component\MaterialOverrideComponent.cpp" />
+    <ClCompile Include="Render\Passes\Present\CompositePass.cpp" />
+    <ClCompile Include="Render\Passes\Hiz\HizLinearPreparePass.cpp" />
+    <ClCompile Include="Render\Passes\Hiz\HizDownsamplePass.cpp" />
+    <ClCompile Include="Image\Source\Procedural\DefaultImageSource.cpp" />
+    <ClCompile Include="Mesh\Processor\Optimizer\MeshoptimizerOptimizerProcessor.cpp" />
+    <ClCompile Include="Mesh\Processor\Optimizer\IMeshOptimizer.cpp" />
+    <ClCompile Include="Material\MaterialManager.cpp" />
+    <ClCompile Include="System\MaterialSystem.cpp" />
+    <ClCompile Include="Material\Material.cpp" />
+    <ClCompile Include="Render\Passes\Culling\MeshCullingPass.cpp" />
+    <ClCompile Include="Render\Passes\Culling\ModelCullingPass.cpp" />
+    <ClCompile Include="Render\Passes\Deferred\GBufferInitPass.cpp" />
+    <ClCompile Include="Render\RendererFactory.cpp" />
+    <ClCompile Include="Render\RenderTargetManager.cpp" />
+    <ClCompile Include="System\ModelFrustumCullingSystem.cpp" />
+    <ClCompile Include="Mesh\MeshAllocationInfo.cpp" />
+    <ClCompile Include="System\ModelSystem.cpp" />
+    <ClCompile Include="Mesh\MeshDrawBlueprint.cpp" />
+    <ClCompile Include="Mesh\MeshDrawDescriptor.cpp" />
+    <ClCompile Include="Scene\SceneDrawData.cpp" />
+    <ClCompile Include="System\RenderSystem.cpp" />
+    <ClCompile Include="Scene\SceneManager.cpp" />
+    <ClCompile Include="System\ComponentSystem.cpp" />
+    <ClCompile Include="Manager\InputManager.cpp" />
+    <ClCompile Include="System\CameraSystem.cpp" />
+    <ClCompile Include="Component\CameraComponent.cpp" />
+    <ClCompile Include="Manager\ComponentBufferManager.cpp" />
+    <ClCompile Include="Component\BaseComponent\Component.cpp" />
+    <ClCompile Include="Scene\Scene.cpp" />
+    <ClCompile Include="System\ISystem.cpp" />
+    <ClCompile Include="System\TransformSystem.cpp" />
+    <ClCompile Include="Component\TransformComponent.cpp" />
+    <ClCompile Include="Scene\TestScene.cpp" />
+    <ClCompile Include="Render\Passes\TransferPass.cpp" />
+    <ClCompile Include="Profiler\TaskProfilerObserver.cpp" />
+    <ClCompile Include="Animation\Data\Common\VertexSkinData.cpp" />
+    <ClCompile Include="Render\Passes\Geometry\TraditionalOpaquePass.cpp" />
+    <ClCompile Include="Render\Passes\Geometry\TraditionalTransparentPass.cpp" />
+    <ClCompile Include="Render\Passes\Wboit\TransparentCompositePass.cpp" />
+    <ClCompile Include="Render\Passes\Picking\TraditionalTransparentPickingPass.cpp" />
+    <ClCompile Include="Component\TagComponent.cpp" />
+    <ClCompile Include="Vk\Rendering\GpuUploader.cpp" />
+    <ClCompile Include="Manager\BaseResourceManager.cpp" />
+    <ClCompile Include="Image\Data\Texture.cpp" />
+    <ClCompile Include="Vk\Rendering\RenderTargetGroup.cpp" />
+    <ClCompile Include="Vk\Descriptor\DescriptorLayoutBuilder.cpp" />
+    <ClCompile Include="Vk\Descriptor\DescriptorWriter.cpp" />
+    <ClCompile Include="Vk\Descriptor\DescriptorPool.cpp" />
+    <ClCompile Include="Vk\Descriptor\PushDescriptorWriter.cpp" />
+    <ClCompile Include="Vk\Descriptor\DescriptorBuffer.cpp" />
+    <ClCompile Include="Image\ImageManager.cpp" />
+    <ClCompile Include="Image\Uploader\DefaultGpuImageUploader.cpp" />
+    <ClCompile Include="Image\Uploader\IGpuImageUploader.cpp" />
+    <ClCompile Include="Image\Builder\ImageBuilder.cpp" />
+    <ClCompile Include="Image\Converter\DefaultGpuImageConverter.cpp" />
+    <ClCompile Include="Image\Converter\DefaultImageCooker.cpp" />
+    <ClCompile Include="Image\Converter\IGpuImageConverter.cpp" />
+    <ClCompile Include="Image\Converter\IImageCooker.cpp" />
+    <ClCompile Include="Image\Processor\ImageProcessorPipeline.cpp" />
+    <ClCompile Include="Image\Processor\IImageProcessorPipeline.cpp" />
+    <ClCompile Include="Image\Processor\IImageProcessor.cpp" />
+    <ClCompile Include="Image\Data\Cooked\CookedImage.cpp" />
+    <ClCompile Include="Image\Data\Gpu\GpuImage.cpp" />
+    <ClCompile Include="Image\Loader\ImageLoaderRegistry.cpp" />
+    <ClCompile Include="Image\Loader\IImageLoaderRegistry.cpp" />
+    <ClCompile Include="Image\Source\File\FileImageSource.cpp" />
+    <ClCompile Include="Image\Source\IImageSource.cpp" />
+    <ClCompile Include="Image\Loader\GliImageLoader.cpp" />
+    <ClCompile Include="Image\Loader\IImageLoader.cpp" />
+    <ClCompile Include="Mesh\Data\Common\MaterialInfo.cpp" />
+    <ClCompile Include="Mesh\Converter\DefaultModelCooker.cpp" />
+    <ClCompile Include="FrameContext.cpp" />
+    <ClCompile Include="Mesh\Converter\IModelCooker.cpp" />
+    <ClCompile Include="Mesh\Converter\IGpuModelConverter.cpp" />
+    <ClCompile Include="Mesh\Uploader\IGpuModelUploader.cpp" />
+    <ClCompile Include="Mesh\Uploader\DefaultGpuModelUploader.cpp" />
+    <ClCompile Include="Mesh\Data\Gpu\GpuModelBuffers.cpp" />
+    <ClCompile Include="Mesh\Data\Gpu\GpuNodeTransform.cpp" />
+    <ClCompile Include="Mesh\Converter\DefaultGpuModelConverter.cpp" />
+    <ClCompile Include="Mesh\Data\Gpu\GpuBatchedModel.cpp" />
+    <ClCompile Include="Mesh\Data\Gpu\GpuMeshletDrawData.cpp" />
+    <ClCompile Include="Mesh\Data\Gpu\GpuIndexedDrawData.cpp" />
+    <ClCompile Include="Mesh\Data\Gpu\GpuVertexData.cpp" />
+    <ClCompile Include="Mesh\ModelManager.cpp" />
+    <ClCompile Include="Image\Data\Raw\RawImage.cpp" />
+    <ClCompile Include="Image\Source\Procedural\ProceduralImageSource.cpp" />
+    <ClCompile Include="Image\Data\Common\MipLevelInfo.cpp" />
+    <ClCompile Include="Image\Loader\StbImageLoader.cpp" />
+    <ClCompile Include="Vk\Image\ImageConfig.cpp" />
+    <ClCompile Include="Render\RenderContext.cpp" />
+    <ClCompile Include="Render\Renderer.cpp" />
+    <ClCompile Include="Render\RenderManager.cpp" />
+    <ClCompile Include="Render\RenderPipeline.cpp" />
+    <ClCompile Include="Render\Passes\ComputePass.cpp" />
+    <ClCompile Include="Render\Passes\GraphicsPass.cpp" />
+    <ClCompile Include="Collision\Colliders\AabbCollider.cpp" />
+    <ClCompile Include="Collision\Colliders\ConeCollider.cpp" />
+    <ClCompile Include="Render\IRenderPass.cpp" />
+    <ClCompile Include="Mesh\Factory\MeshFactory.cpp" />
+    <ClCompile Include="Mesh\Loader\IMeshLoaderRegistry.cpp" />
+    <ClCompile Include="Mesh\Processor\IMeshProcessorPipeline.cpp" />
+    <ClCompile Include="Mesh\Processor\MeshProcessorPipeline.cpp" />
+    <ClCompile Include="Mesh\Data\Cooked\CookedMeshlet.cpp" />
+    <ClCompile Include="Mesh\Data\Cooked\CookedColliders.cpp" />
+    <ClCompile Include="Mesh\Data\Cooked\CookedMesh.cpp" />
+    <ClCompile Include="Mesh\Data\Cooked\CookedModel.cpp" />
+    <ClCompile Include="Mesh\Source\Procedural\Shape\HemisphereMeshSource.cpp" />
+    <ClCompile Include="Mesh\Source\Procedural\Shape\GridMeshSource.cpp" />
+    <ClCompile Include="Mesh\Source\Procedural\Shape\ConeMeshSource.cpp" />
+    <ClCompile Include="Mesh\Source\Procedural\Shape\CylinderMeshSource.cpp" />
+    <ClCompile Include="Mesh\Source\Procedural\Shape\CapsuleMeshSource.cpp" />
+    <ClCompile Include="Mesh\Utils\MeshUtils.cpp" />
+    <ClCompile Include="Mesh\Source\Procedural\Shape\TorusMeshSource.cpp" />
+    <ClCompile Include="Mesh\Source\Procedural\Shape\PyramidMeshSource.cpp" />
+    <ClCompile Include="Mesh\Source\Procedural\Shape\QuadMeshSource.cpp" />
+    <ClCompile Include="Mesh\Source\Procedural\Shape\ScreenQuadMeshSource.cpp" />
+    <ClCompile Include="Collision\Colliders\SphereCollider.cpp" />
+    <ClCompile Include="Mesh\Builder\StaticMeshBuilder.cpp" />
+    <ClCompile Include="Mesh\Data\StaticMesh.cpp" />
+    <ClCompile Include="Utils\AssimpUtils.cpp" />
+    <ClCompile Include="Mesh\Loader\MeshLoaderRegistry.cpp" />
+    <ClCompile Include="Mesh\Data\Common\MeshInstanceDescriptor.cpp" />
+    <ClCompile Include="Mesh\Data\Raw\RawMesh.cpp" />
+    <ClCompile Include="Mesh\Processor\Geometry\ColliderProcessor.cpp" />
+    <ClCompile Include="Mesh\Processor\Meshlet\MeshoptimizerMeshletProcessor.cpp" />
+    <ClCompile Include="Mesh\Processor\Lod\MeshoptimizerLodProcessor.cpp" />
+    <ClCompile Include="Mesh\Processor\Meshlet\IMeshletProcessor.cpp" />
+    <ClCompile Include="Mesh\Processor\Lod\ILodProcessor.cpp" />
+    <ClCompile Include="Mesh\Processor\IMeshProcessor.cpp" />
+    <ClCompile Include="Mesh\Loader\BezierLoader.cpp" />
+    <ClCompile Include="Mesh\Loader\AssimpMeshLoader.cpp" />
+    <ClCompile Include="Mesh\Loader\IMeshLoader.cpp" />
+    <ClCompile Include="Mesh\Source\Procedural\Shape\CubeMeshSource.cpp" />
+    <ClCompile Include="Mesh\Source\Procedural\ParametricSurface\BezierSurfaceSource.cpp" />
+    <ClCompile Include="Mesh\Source\File\FileMeshSource.cpp" />
+    <ClCompile Include="Mesh\Source\IMeshSource.cpp" />
+    <ClCompile Include="Manager\ShaderManager.cpp" />
+    <ClCompile Include="Manager\ResourceManager.cpp" />
+    <ClCompile Include="Mesh\Source\Procedural\ProceduralMeshSource.cpp" />
+    <ClCompile Include="Mesh\Source\Procedural\Shape\ShapeMeshSource.cpp" />
+    <ClCompile Include="Mesh\Source\Procedural\Shape\SphereMeshSource.cpp" />
+    <ClCompile Include="Mesh\Source\Procedural\ParametricSurface\ParametricSurfaceSource.cpp" />
+    <ClCompile Include="Mesh\Processor\Geometry\NormalProcessor.cpp" />
+    <ClCompile Include="Mesh\Processor\Geometry\TangentProcessor.cpp" />
+    <ClCompile Include="Mesh\Data\Common\TransformNode.cpp" />
+    <ClCompile Include="Mesh\Data\Common\Vertex.cpp" />
+    <ClCompile Include="Mesh\Data\Raw\RawModel.cpp" />
+    <ClCompile Include="Vk\Query\OcclusionQueryPool.cpp" />
+    <ClCompile Include="Vk\Query\TimestampQueryPool.cpp" />
+    <ClCompile Include="Vk\Query\QueryPool.cpp" />
+    <ClCompile Include="Vk\Shader\ShaderUtils.cpp" />
+    <ClCompile Include="Vk\Descriptor\DescriptorUtils.cpp" />
+    <ClCompile Include="Vk\Shader\ShaderProgram.cpp" />
+    <ClCompile Include="Vk\Rendering\RenderUtils.cpp" />
+    <ClCompile Include="Vk\Image\Sampler.cpp" />
+    <ClCompile Include="Vk\Command\CommandBuffer.cpp" />
+    <ClCompile Include="Vk\Command\CommandPool.cpp" />
+    <ClCompile Include="Vk\Synchronization\Fence.cpp" />
+    <ClCompile Include="Vk\Synchronization\BinarySemaphore.cpp" />
+    <ClCompile Include="Vk\Synchronization\TimelineSemaphore.cpp" />
+    <ClCompile Include="Vk\Synchronization\Semaphore.cpp" />
+    <ClCompile Include="Vk\Image\ImageUtils.cpp" />
+    <ClCompile Include="Vk\Image\ImageFactory.cpp" />
+    <ClCompile Include="Vk\Image\Image.cpp" />
+    <ClCompile Include="Vk\Buffer\BufferUtils.cpp" />
+    <ClCompile Include="Vk\Buffer\BufferFactory.cpp" />
+    <ClCompile Include="Vk\Buffer\Buffer.cpp" />
+    <ClCompile Include="ServiceLocator.cpp" />
+    <ClCompile Include="Vk\Shader\ShaderReflector.cpp" />
+    <ClCompile Include="Vk\Shader\Shader.cpp" />
+    <ClCompile Include="Vk\Shader\ShaderIncluder.cpp" />
+    <ClCompile Include="Vk\Shader\ShaderCompiler.cpp" />
+    <ClCompile Include="SynMacro.cpp" />
+    <ClCompile Include="Vk\Core\ThreadSafeQueue.cpp" />
+    <ClCompile Include="Vk\Presentation\SwapChain.cpp" />
+    <ClCompile Include="Vk\Presentation\Surface.cpp" />
+    <ClCompile Include="Vk\Core\Device.cpp" />
+    <ClCompile Include="Vk\Core\PhysicalDevice.cpp" />
+    <ClCompile Include="Vk\Core\Instance.cpp" />
+    <ClCompile Include="Vk\Core\QueueFamily.cpp" />
+    <ClCompile Include="Vk\Context.cpp" />
+    <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\NoFlagMixin.cpp" />
+    <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\BitsetFlagMixin.cpp" />
+    <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\AtomicFlagMixin.cpp" />
+    <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Logger\LogFormat.cpp" />
+    <ClCompile Include="Registry\Pool\Mapping\Extension\SparseVectorMappingExtension.cpp" />
+    <ClCompile Include="Registry\Pool\PoolWrapper.cpp" />
+    <ClCompile Include="Registry\Pool\IPool.cpp" />
+    <ClCompile Include="Registry\Registry.cpp" />
+    <ClCompile Include="Registry\Pool\Pool.cpp" />
+    <ClCompile Include="Registry\Pool\Mapping\Core\HashMapping.cpp" />
+    <ClCompile Include="Registry\Pool\Mapping\Core\SparseVectorMapping.cpp" />
+    <ClCompile Include="Registry\Pool\Mapping\Core\SparsePagedMapping.cpp" />
+    <ClCompile Include="Registry\Pool\Storage\Core\FlatStorageImpl.cpp" />
+    <ClCompile Include="Registry\Pool\Storage\Mixin\Data\DataMixin.cpp" />
+    <ClCompile Include="Logger\Sink\FileSink.cpp" />
+    <ClCompile Include="Logger\Sink\ConsoleSink.cpp" />
+    <ClCompile Include="Logger\Sink\ISink.cpp" />
+    <ClCompile Include="Logger\Logger.cpp" />
+    <ClCompile Include="Logger\Sink\MemorySink.cpp" />
+    <ClCompile Include="Logger\LogMessage.cpp" />
+    <ClCompile Include="Logger\LogUtils.cpp" />
+    <ClCompile Include="Registry\Pool\Storage\Core\StorageBackend.cpp" />
+    <ClCompile Include="Registry\Pool\Storage\Core\SegmentedStorageImpl.cpp" />
+    <ClCompile Include="Registry\Type\TypeManager.cpp" />
+    <ClCompile Include="Registry\Pool\Storage\Extension\SegmentedStorageImplExtension.cpp" />
+    <ClCompile Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.cpp" />
+    <ClCompile Include="Utils\WindowedBuffer.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\WireframeAabbPass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\WireframeSpherePass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\WireframeSetupPass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshletAabbPass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshletSpherePass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshletInitPass.cpp" />
+    <ClCompile Include="Render\Passes\Wboit\WboitInitPass.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Render\Profiler\DefaultGpuProfiler.h" />
+    <ClInclude Include="Render\Profiler\IGpuProfiler.h" />
+    <ClInclude Include="Render\Passes\Performance\PerformanceMeshletTransparentPass.h" />
+    <ClInclude Include="Render\Passes\Performance\PerformanceTraditionalTransparentPass.h" />
+    <ClInclude Include="Render\Passes\Performance\PerformanceMeshletOpaquePass.h" />
+    <ClInclude Include="Render\Passes\Performance\PerformanceTraditionalOpaquePass.h" />
+    <ClInclude Include="Render\Passes\Performance\PerformanceInitPass.h" />
+    <ClInclude Include="Render\Passes\Billboard\CameraBillboardPass.h" />
+    <ClInclude Include="Component\CapsuleColliderComponent.h" />
+    <ClInclude Include="Component\BoxColliderComponent.h" />
+    <ClInclude Include="Component\SphereColliderComponent.h" />
+    <ClInclude Include="Component\DirectionLightComponent.h" />
+    <ClInclude Include="Component\BaseComponent\Light.h" />
+    <ClInclude Include="Component\PointLightComponent.h" />
+    <ClInclude Include="Component\PointLightShadowComponent.h" />
+    <ClInclude Include="Component\DirectionLightShadowComponent.h" />
+    <ClInclude Include="Collision\Colliders\FrustumCollider.h" />
+    <ClInclude Include="Render\Passes\Billboard\PointLightBillboardPass.h" />
+    <ClInclude Include="Render\Passes\Billboard\DirectionLightBillboardPass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\PointLightAabbWireframePass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\PointLightSphereWireframePass.h" />
+    <ClInclude Include="Render\Passes\Culling\PointLightCullingPass.h" />
+    <ClInclude Include="Render\Passes\Culling\SpotLightCullingPass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\SpotLightSphereWireframePass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\SpotLightAabbWireframePass.h" />
+    <ClInclude Include="Scene\SceneSettings.h" />
+    <ClInclude Include="Render\Passes\Billboard\SpotLightBillboardPass.h" />
+    <ClInclude Include="System\Light\DirectionLightCullingSystem.h" />
+    <ClInclude Include="Render\Passes\Deferred\DeferredDirectionLightPass.h" />
+    <ClInclude Include="System\Light\DirectionLightShadowSystem.h" />
+    <ClInclude Include="System\Light\DirectionLightSystem.h" />
+    <ClInclude Include="Render\Passes\Deferred\DeferredSpotLightPass.h" />
+    <ClInclude Include="Render\Passes\Deferred\DeferredPointLightPass.h" />
+    <ClInclude Include="System\Light\SpotLightFrustumCullingSystem.h" />
+    <ClInclude Include="System\Light\SpotLightShadowSystem.h" />
+    <ClInclude Include="System\Light\SpotLightSystem.h" />
+    <ClInclude Include="System\Light\PointLightFrustumCullingSystem.h" />
+    <ClInclude Include="System\Light\PointLightShadowSystem.h" />
+    <ClInclude Include="System\Light\PointLightSystem.h" />
+    <ClInclude Include="Render\Passes\Deferred\DeferredEmissiveAoPass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\DebugInitPass.h" />
+    <ClInclude Include="Component\SpotLightComponent.h" />
+    <ClInclude Include="Component\SpotLightShadowComponent.h" />
+    <ClInclude Include="System\PhysicsSystem.h" />
+    <ClInclude Include="Physics\JoltPhysicsEngine.h" />
+    <ClInclude Include="Physics\IPhysicsEngine.h" />
+    <ClInclude Include="Physics\PhysicsTypes.h" />
+    <ClInclude Include="Render\Passes\Picking\DepthCopyPass.h" />
+    <ClInclude Include="Render\Passes\Picking\MeshletTransparentPickingPass.h" />
+    <ClInclude Include="Material\MaterialRenderType.h" />
+    <ClInclude Include="Render\Passes\Geometry\MeshletTransparentPass.h" />
+    <ClInclude Include="Render\Passes\Geometry\MeshletOpaquePass.h" />
+    <ClInclude Include="Render\Passes\Present\GuiPass.h" />
+    <ClInclude Include="Component\RigidBodyComponent.h" />
+    <ClInclude Include="System\AnimationSystem.h" />
+    <ClInclude Include="Component\AnimationComponent.h" />
+    <ClInclude Include="Animation\AnimationManager.h" />
+    <ClInclude Include="Animation\Builder\AnimationBuilder.h" />
+    <ClInclude Include="Animation\Data\Animation.h" />
+    <ClInclude Include="Animation\Processor\Geometry\AnimationBakeProcessor.h" />
+    <ClInclude Include="Animation\Data\Common\AnimationNode.h" />
+    <ClInclude Include="Animation\Data\Common\AnimationKeys.h" />
+    <ClInclude Include="Animation\Processor\Geometry\AnimationColliderProcessor.h" />
+    <ClInclude Include="Animation\Processor\AnimationProcessorPipeline.h" />
+    <ClInclude Include="Animation\Loader\AnimationLoaderRegistry.h" />
+    <ClInclude Include="Animation\Loader\IAnimationLoader.h" />
+    <ClInclude Include="Animation\Data\Cooked\CookedAnimation.h" />
+    <ClInclude Include="Animation\Loader\AssimpAnimationLoader.h" />
+    <ClInclude Include="Animation\Loader\IAnimationLoaderRegistry.h" />
+    <ClInclude Include="Animation\Source\IAnimationSource.h" />
+    <ClInclude Include="Animation\Source\File\FileAnimationSource.h" />
+    <ClInclude Include="Animation\Processor\IAnimationProcessor.h" />
+    <ClInclude Include="Animation\Processor\IAnimationProcessorPipeline.h" />
+    <ClInclude Include="Animation\Data\Common\BoneTrack.h" />
+    <ClInclude Include="Animation\Data\Cooked\CookedAnimationFrames.h" />
+    <ClInclude Include="Animation\Data\Gpu\GpuBatchedAnimation.h" />
+    <ClInclude Include="Animation\Converter\IGpuAnimationConverter.h" />
+    <ClInclude Include="Animation\Converter\DefaultGpuAnimationConverter.h" />
+    <ClInclude Include="Animation\Converter\IAnimationCooker.h" />
+    <ClInclude Include="Animation\Converter\DefaultAnimationCooker.h" />
+    <ClInclude Include="Animation\Data\Gpu\GpuAnimationBuffers.h" />
+    <ClInclude Include="Animation\Uploader\IGpuAnimationUploader.h" />
+    <ClInclude Include="Animation\Uploader\DefaultGpuAnimationUploader.h" />
+    <ClInclude Include="Image\ImageNames.h" />
+    <ClInclude Include="Animation\Data\Raw\RawAnimation.h" />
+    <ClInclude Include="Animation\Source\Procedural\ProceduralAnimationSource.h" />
+    <ClInclude Include="Render\Passes\Bloom\BloomCompositePass.h" />
+    <ClInclude Include="Render\Passes\Bloom\BloomUpsamplePass.h" />
+    <ClInclude Include="Render\Passes\Bloom\BloomDownsamplePass.h" />
+    <ClInclude Include="Render\Passes\Bloom\BloomPrefilterPass.h" />
+    <ClInclude Include="Collision\Tester\CollisionTester.h" />
+    <ClInclude Include="Component\ModelComponent.h" />
+    <ClInclude Include="Component\MaterialOverrideComponent.h" />
+    <ClInclude Include="Render\Passes\Present\CompositePass.h" />
+    <ClInclude Include="Render\ComputeGroupSize.h" />
+    <ClInclude Include="Render\Passes\Hiz\HizLinearPreparePass.h" />
+    <ClInclude Include="Render\Passes\Hiz\HizDownsamplePass.h" />
+    <ClInclude Include="Image\Source\Procedural\DefaultImageSource.h" />
+    <ClInclude Include="Mesh\Processor\Optimizer\MeshoptimizerOptimizerProcessor.h" />
+    <ClInclude Include="Mesh\Processor\Optimizer\IMeshOptimizer.h" />
+    <ClInclude Include="Material\MaterialManager.h" />
+    <ClInclude Include="Image\SamplerNames.h" />
+    <ClInclude Include="Material\MaterialNames.h" />
+    <ClInclude Include="System\MaterialSystem.h" />
+    <ClInclude Include="Material\Material.h" />
+    <ClInclude Include="Render\Passes\Culling\MeshCullingPass.h" />
+    <ClInclude Include="Render\Passes\Culling\ModelCullingPass.h" />
+    <ClInclude Include="Mesh\MeshSourceNames.h" />
+    <ClInclude Include="Render\Passes\Deferred\GBufferInitPass.h" />
+    <ClInclude Include="Render\RendererFactory.h" />
+    <ClInclude Include="Render\RenderTargetManager.h" />
+    <ClInclude Include="Render\RenderNames.h" />
+    <ClInclude Include="Render\ShaderNames.h" />
+    <ClInclude Include="System\ModelFrustumCullingSystem.h" />
+    <ClInclude Include="Mesh\MeshAllocationInfo.h" />
+    <ClInclude Include="System\ModelSystem.h" />
+    <ClInclude Include="Mesh\MeshDrawBlueprint.h" />
+    <ClInclude Include="Mesh\MeshDrawDescriptor.h" />
+    <ClInclude Include="Scene\SceneDrawData.h" />
+    <ClInclude Include="System\RenderSystem.h" />
+    <ClInclude Include="Scene\SceneManager.h" />
+    <ClInclude Include="Scene\BufferNames.h" />
+    <ClInclude Include="System\ComponentSystem.h" />
+    <ClInclude Include="Manager\InputManager.h" />
+    <ClInclude Include="System\CameraSystem.h" />
+    <ClInclude Include="Component\CameraComponent.h" />
+    <ClInclude Include="Manager\ComponentBufferManager.h" />
+    <ClInclude Include="Component\BaseComponent\Component.h" />
+    <ClInclude Include="Scene\Scene.h" />
+    <ClInclude Include="System\ISystem.h" />
+    <ClInclude Include="System\SystemPhaseNames.h" />
+    <ClInclude Include="System\TransformSystem.h" />
+    <ClInclude Include="Component\TransformComponent.h" />
+    <ClInclude Include="Scene\TestScene.h" />
+    <ClInclude Include="Render\Passes\TransferPass.h" />
+    <ClInclude Include="Profiler\TaskProfilerObserver.h" />
+    <ClInclude Include="Animation\Data\Common\VertexSkinData.h" />
+    <ClInclude Include="Render\Passes\Geometry\TraditionalOpaquePass.h" />
+    <ClInclude Include="Render\Passes\Geometry\TraditionalTransparentPass.h" />
+    <ClInclude Include="Render\Passes\Wboit\TransparentCompositePass.h" />
+    <ClInclude Include="Render\Passes\Picking\TraditionalTransparentPickingPass.h" />
+    <ClInclude Include="Component\TagComponent.h" />
+    <ClInclude Include="Vk\Image\ImageViewNames.h" />
+    <ClInclude Include="Vk\Rendering\GpuUploader.h" />
+    <ClInclude Include="Manager\BaseResourceManager.h" />
+    <ClInclude Include="Image\Data\Texture.h" />
+    <ClInclude Include="Vk\Rendering\RenderTargetGroup.h" />
+    <ClInclude Include="Vk\Descriptor\DescriptorLayoutBuilder.h" />
+    <ClInclude Include="Vk\Descriptor\DescriptorWriter.h" />
+    <ClInclude Include="Vk\Descriptor\DescriptorPool.h" />
+    <ClInclude Include="Vk\Descriptor\PushDescriptorWriter.h" />
+    <ClInclude Include="Vk\Descriptor\DescriptorBuffer.h" />
+    <ClInclude Include="Image\ImageManager.h" />
+    <ClInclude Include="Image\Uploader\DefaultGpuImageUploader.h" />
+    <ClInclude Include="Image\Uploader\IGpuImageUploader.h" />
+    <ClInclude Include="Image\Builder\ImageBuilder.h" />
+    <ClInclude Include="Image\Converter\DefaultGpuImageConverter.h" />
+    <ClInclude Include="Image\Converter\DefaultImageCooker.h" />
+    <ClInclude Include="Image\Converter\IGpuImageConverter.h" />
+    <ClInclude Include="Image\Converter\IImageCooker.h" />
+    <ClInclude Include="Image\Processor\ImageProcessorPipeline.h" />
+    <ClInclude Include="Image\Processor\IImageProcessorPipeline.h" />
+    <ClInclude Include="Image\Processor\IImageProcessor.h" />
+    <ClInclude Include="Image\Data\Cooked\CookedImage.h" />
+    <ClInclude Include="Image\Data\Gpu\GpuImage.h" />
+    <ClInclude Include="Image\Loader\ImageLoaderRegistry.h" />
+    <ClInclude Include="Image\Loader\IImageLoaderRegistry.h" />
+    <ClInclude Include="Image\Source\File\FileImageSource.h" />
+    <ClInclude Include="Image\Source\IImageSource.h" />
+    <ClInclude Include="Image\Loader\GliImageLoader.h" />
+    <ClInclude Include="Image\Loader\IImageLoader.h" />
+    <ClInclude Include="Mesh\Data\Common\MaterialInfo.h" />
+    <ClInclude Include="Mesh\Converter\DefaultModelCooker.h" />
+    <ClInclude Include="FrameContext.h" />
+    <ClInclude Include="Mesh\Converter\IModelCooker.h" />
+    <ClInclude Include="Mesh\Converter\IGpuModelConverter.h" />
+    <ClInclude Include="Mesh\Uploader\IGpuModelUploader.h" />
+    <ClInclude Include="Mesh\Uploader\DefaultGpuModelUploader.h" />
+    <ClInclude Include="Mesh\Data\Gpu\GpuModelBuffers.h" />
+    <ClInclude Include="Mesh\Data\Gpu\GpuNodeTransform.h" />
+    <ClInclude Include="Mesh\Converter\DefaultGpuModelConverter.h" />
+    <ClInclude Include="Mesh\Data\Gpu\GpuBatchedModel.h" />
+    <ClInclude Include="Mesh\Data\Gpu\GpuMeshletDrawData.h" />
+    <ClInclude Include="Mesh\Data\Gpu\GpuIndexedDrawData.h" />
+    <ClInclude Include="Mesh\Data\Gpu\GpuVertexData.h" />
+    <ClInclude Include="Mesh\ModelManager.h" />
+    <ClInclude Include="Image\Data\Raw\RawImage.h" />
+    <ClInclude Include="Image\Source\Procedural\ProceduralImageSource.h" />
+    <ClInclude Include="Image\Data\Common\MipLevelInfo.h" />
+    <ClInclude Include="Image\Loader\StbImageLoader.h" />
+    <ClInclude Include="Vk\Image\ImageConfig.h" />
+    <ClInclude Include="Render\RenderContext.h" />
+    <ClInclude Include="Render\Renderer.h" />
+    <ClInclude Include="Render\RenderManager.h" />
+    <ClInclude Include="Render\RenderPipeline.h" />
+    <ClInclude Include="Render\Passes\ComputePass.h" />
+    <ClInclude Include="Render\Passes\GraphicsPass.h" />
+    <ClInclude Include="Collision\Colliders\AabbCollider.h" />
+    <ClInclude Include="Collision\Colliders\ConeCollider.h" />
+    <ClInclude Include="Render\IRenderPass.h" />
+    <ClInclude Include="Mesh\Factory\MeshFactory.h" />
+    <ClInclude Include="Mesh\Loader\IMeshLoaderRegistry.h" />
+    <ClInclude Include="Mesh\Processor\IMeshProcessorPipeline.h" />
+    <ClInclude Include="Mesh\Loader\MeshLoaders.h" />
+    <ClInclude Include="Mesh\Processor\MeshProcessorPipeline.h" />
+    <ClInclude Include="Mesh\Data\Cooked\CookedMeshlet.h" />
+    <ClInclude Include="Mesh\Data\Cooked\CookedColliders.h" />
+    <ClInclude Include="Mesh\Data\Cooked\CookedMesh.h" />
+    <ClInclude Include="Mesh\Data\Cooked\CookedModel.h" />
+    <ClInclude Include="Mesh\Processor\MeshProcessors.h" />
+    <ClInclude Include="Mesh\Source\MeshSources.h" />
+    <ClInclude Include="Mesh\Source\Procedural\Shape\HemisphereMeshSource.h" />
+    <ClInclude Include="Mesh\Source\Procedural\Shape\GridMeshSource.h" />
+    <ClInclude Include="Mesh\Source\Procedural\Shape\ConeMeshSource.h" />
+    <ClInclude Include="Mesh\Source\Procedural\Shape\CylinderMeshSource.h" />
+    <ClInclude Include="Mesh\Source\Procedural\Shape\CapsuleMeshSource.h" />
+    <ClInclude Include="Mesh\Utils\MeshUtils.h" />
+    <ClInclude Include="Mesh\Source\Procedural\Shape\TorusMeshSource.h" />
+    <ClInclude Include="Mesh\Source\Procedural\Shape\PyramidMeshSource.h" />
+    <ClInclude Include="Mesh\Source\Procedural\Shape\QuadMeshSource.h" />
+    <ClInclude Include="Mesh\Source\Procedural\Shape\ScreenQuadMeshSource.h" />
+    <ClInclude Include="Collision\Colliders\SphereCollider.h" />
+    <ClInclude Include="Mesh\Builder\StaticMeshBuilder.h" />
+    <ClInclude Include="Mesh\Data\StaticMesh.h" />
+    <ClInclude Include="Utils\AssimpUtils.h" />
+    <ClInclude Include="Mesh\Loader\MeshLoaderRegistry.h" />
+    <ClInclude Include="Mesh\Data\Common\MeshInstanceDescriptor.h" />
+    <ClInclude Include="Mesh\Data\Raw\RawMesh.h" />
+    <ClInclude Include="Mesh\Processor\Geometry\ColliderProcessor.h" />
+    <ClInclude Include="Mesh\Processor\Meshlet\MeshoptimizerMeshletProcessor.h" />
+    <ClInclude Include="Mesh\Processor\Lod\MeshoptimizerLodProcessor.h" />
+    <ClInclude Include="Mesh\Processor\Meshlet\IMeshletProcessor.h" />
+    <ClInclude Include="Mesh\Processor\Lod\ILodProcessor.h" />
+    <ClInclude Include="Mesh\Processor\IMeshProcessor.h" />
+    <ClInclude Include="Mesh\Loader\BezierLoader.h" />
+    <ClInclude Include="Mesh\Loader\AssimpMeshLoader.h" />
+    <ClInclude Include="Mesh\Loader\IMeshLoader.h" />
+    <ClInclude Include="Mesh\Source\Procedural\Shape\CubeMeshSource.h" />
+    <ClInclude Include="Mesh\Source\Procedural\ParametricSurface\BezierSurfaceSource.h" />
+    <ClInclude Include="Mesh\Source\File\FileMeshSource.h" />
+    <ClInclude Include="Mesh\Source\IMeshSource.h" />
+    <ClInclude Include="Manager\ShaderManager.h" />
+    <ClInclude Include="Manager\ResourceManager.h" />
+    <ClInclude Include="Mesh\Source\Procedural\ProceduralMeshSource.h" />
+    <ClInclude Include="Mesh\Source\Procedural\Shape\ShapeMeshSource.h" />
+    <ClInclude Include="Mesh\Source\Procedural\Shape\SphereMeshSource.h" />
+    <ClInclude Include="Mesh\Source\Procedural\ParametricSurface\ParametricSurfaceSource.h" />
+    <ClInclude Include="Mesh\Processor\Geometry\NormalProcessor.h" />
+    <ClInclude Include="Mesh\Processor\Geometry\TangentProcessor.h" />
+    <ClInclude Include="Mesh\Data\Common\TransformNode.h" />
+    <ClInclude Include="Mesh\Data\Common\Vertex.h" />
+    <ClInclude Include="Mesh\Data\Raw\RawModel.h" />
+    <ClInclude Include="Vk\Query\OcclusionQueryPool.h" />
+    <ClInclude Include="Vk\Query\TimestampQueryPool.h" />
+    <ClInclude Include="Vk\Query\QueryPool.h" />
+    <ClInclude Include="Vk\Shader\ShaderUtils.h" />
+    <ClInclude Include="Vk\Descriptor\DescriptorUtils.h" />
+    <ClInclude Include="Vk\Shader\ShaderProgram.h" />
+    <ClInclude Include="Vk\Rendering\RenderUtils.h" />
+    <ClInclude Include="Vk\Image\Sampler.h" />
+    <ClInclude Include="Vk\Command\CommandBuffer.h" />
+    <ClInclude Include="Vk\Command\CommandPool.h" />
+    <ClInclude Include="Vk\Synchronization\Fence.h" />
+    <ClInclude Include="Vk\Synchronization\BinarySemaphore.h" />
+    <ClInclude Include="Vk\Synchronization\TimelineSemaphore.h" />
+    <ClInclude Include="Vk\Synchronization\Semaphore.h" />
+    <ClInclude Include="Vk\Buffer\SynVkBuffer.h" />
+    <ClInclude Include="Vk\Image\ImageUtils.h" />
+    <ClInclude Include="Vk\Image\ImageFactory.h" />
+    <ClInclude Include="Vk\Image\Image.h" />
+    <ClInclude Include="Vk\Buffer\BufferUtils.h" />
+    <ClInclude Include="Vk\Buffer\BufferFactory.h" />
+    <ClInclude Include="Vk\Buffer\Buffer.h" />
+    <ClInclude Include="ServiceLocator.h" />
+    <ClInclude Include="Vk\Image\SynVkImage.h" />
+    <ClInclude Include="Vk\Shader\ShaderReflector.h" />
+    <ClInclude Include="Vk\Shader\Shader.h" />
+    <ClInclude Include="Vk\Shader\ShaderIncluder.h" />
+    <ClInclude Include="Vk\Shader\ShaderCompiler.h" />
+    <ClInclude Include="Vk\Core\ThreadSafeQueue.h" />
+    <ClInclude Include="Vk\Presentation\SwapChain.h" />
+    <ClInclude Include="Vk\Presentation\Surface.h" />
+    <ClInclude Include="Vk\VkCommon.h" />
+    <ClInclude Include="Vk\Core\Device.h" />
+    <ClInclude Include="Vk\Core\PhysicalDevice.h" />
+    <ClInclude Include="Vk\Core\Instance.h" />
+    <ClInclude Include="Vk\Core\QueueFamily.h" />
+    <ClInclude Include="Vk\Context.h" />
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Core\NoFlagMixin.h" />
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Core\BitsetFlagMixin.h" />
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Core\AtomicFlagMixin.h" />
+    <ClInclude Include="Engine.h" />
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Utils\FlagMixinConcept.h" />
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Utils\FlagMixinCRTP.h" />
+    <ClInclude Include="Logger\LogFormat.h" />
+    <ClInclude Include="Registry\Pool\Mapping\Extension\MappingExtension.h" />
+    <ClInclude Include="Registry\Pool\Mapping\Extension\SparseVectorMappingExtension.h" />
+    <ClInclude Include="Registry\Pool\PoolConcept.h" />
+    <ClInclude Include="Registry\Pool\PoolWrapper.h" />
+    <ClInclude Include="Registry\Pool\IPool.h" />
+    <ClInclude Include="Registry\Pool\PoolTypes.h" />
+    <ClInclude Include="Registry\Pool\Storage\Extension\StorageExtension.h" />
+    <ClInclude Include="Registry\Registry.h" />
+    <ClInclude Include="Registry\Type\TypeInfo.h" />
+    <ClInclude Include="Registry\Pool\Mapping\Core\HashMapping.h" />
+    <ClInclude Include="Registry\Pool\Mapping\Utils\MappingConcept.h" />
+    <ClInclude Include="Registry\Pool\Mapping\Utils\MappingCRTP.h" />
+    <ClInclude Include="Registry\Pool\Mapping\Utils\MappingUtils.h" />
+    <ClInclude Include="Registry\Pool\Mapping\Core\SparsePagedMapping.h" />
+    <ClInclude Include="Registry\Pool\Mapping\Core\SparseVectorMapping.h" />
+    <ClInclude Include="Registry\Pool\Mapping\SynMapping.h" />
+    <ClInclude Include="Registry\Pool\Pool.h" />
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Data\DataMixin.h" />
+    <ClInclude Include="Registry\BitFlag.h" />
+    <ClInclude Include="Registry\Entity.h" />
+    <ClInclude Include="Logger\Sink\FileSink.h" />
+    <ClInclude Include="Logger\Sink\ConsoleSink.h" />
+    <ClInclude Include="Logger\Sink\ISink.h" />
+    <ClInclude Include="Logger\Logger.h" />
+    <ClInclude Include="Logger\Sink\MemorySink.h" />
+    <ClInclude Include="Logger\LogMessage.h" />
+    <ClInclude Include="Logger\SynLog.h" />
+    <ClInclude Include="Logger\LogUtils.h" />
+    <ClInclude Include="Registry\Pool\Storage\Core\FlatStorageImpl.h" />
+    <ClInclude Include="Registry\Pool\Storage\Core\SegmentedStorageImpl.h" />
+    <ClInclude Include="Registry\Pool\Storage\Core\StorageBackend.h" />
+    <ClInclude Include="Registry\Pool\Storage\Utils\StorageCategory.h" />
+    <ClInclude Include="Registry\Pool\Storage\Utils\StorageConcept.h" />
+    <ClInclude Include="Registry\Pool\Storage\Utils\StorageCRTP.h" />
+    <ClInclude Include="Registry\Pool\Storage\SynStorage.h" />
+    <ClInclude Include="Registry\Pool\Storage\Extension\SegmentedStorageImplExtension.h" />
+    <ClInclude Include="Registry\Pool\Storage\Mixin\Flag\Core\SimpleFlagMixin.h" />
+    <ClInclude Include="SynApi.h" />
+    <ClInclude Include="SynMacro.h" />
+    <ClInclude Include="Registry\Type\TypeManager.h" />
+    <ClInclude Include="Utils\WindowedBuffer.h" />
+    <ClInclude Include="Render\Passes\Wireframe\WireframeAabbPass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\WireframeSpherePass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\WireframeSetupPass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshletAabbPass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshletSpherePass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshletInitPass.h" />
+    <ClInclude Include="Render\Passes\Wboit\WboitInitPass.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\Includes\Common\DirectionLight.glsl" />
+    <None Include="Shaders\Includes\Common\SpotLight.glsl" />
+    <None Include="Shaders\Includes\PushConstants\BillboardPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\BloomCompositePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\BloomDownSamplePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\BloomPrefilterPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\BloomUpSamplePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\DeferredDirectionLightPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\DeferredEmissiveAoPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\DeferredPointLightPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\DeferredSpotLightPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\HizDownSamplePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\HizLinearizeDepthPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\PointLightCullingPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\SpotLightCullingPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\WireframeLightPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\WireframePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\WireframeSetupPC.glsl" />
+    <None Include="Shaders\Includes\SharedGpuTypes.glsl" />
+    <None Include="Shaders\Includes\Utils\DepthMath.glsl" />
+    <None Include="Shaders\Includes\Utils\PbrMath.glsl" />
+    <None Include="Shaders\Includes\Utils\WboitMath.glsl" />
+    <None Include="Shaders\Passes\Billboard\Billboard.frag" />
+    <None Include="Shaders\Passes\Billboard\Billboard.vert" />
+    <None Include="Shaders\Passes\Culling\PointLightCulling.comp" />
+    <None Include="Shaders\Passes\Culling\SpotLightCulling.comp" />
+    <None Include="Shaders\Passes\Deferred\DeferredDirectionLight.frag" />
+    <None Include="Shaders\Passes\Deferred\DeferredDirectionLight.vert" />
+    <None Include="Shaders\Passes\Deferred\DeferredSpotLight.frag" />
+    <None Include="Shaders\Passes\Deferred\DeferredSpotLight.vert" />
+    <None Include="Shaders\Passes\Performance\PerformanceMeshlet.frag" />
+    <None Include="Shaders\Passes\Performance\PerformanceMeshlet.mesh" />
+    <None Include="Shaders\Passes\Performance\PerformanceMeshletTransparent.frag" />
+    <None Include="Shaders\Passes\Performance\PerformanceTraditional.frag" />
+    <None Include="Shaders\Passes\Performance\PerformanceTraditional.vert" />
+    <None Include="Shaders\Passes\Performance\PerformanceTraditionalTransparent.frag" />
+    <None Include="Shaders\Passes\PostProcess\BloomComposite.comp" />
+    <None Include="Shaders\Passes\PostProcess\BloomDownsample.comp" />
+    <None Include="Shaders\Passes\PostProcess\BloomPrefilter.comp" />
+    <None Include="Shaders\Passes\PostProcess\BloomUpsample.comp" />
+    <None Include="Shaders\Passes\Common\Composite.frag" />
+    <None Include="Shaders\Passes\Deferred\DeferredEmissiveAo.frag" />
+    <None Include="Shaders\Passes\Deferred\DeferredPointLight.frag" />
+    <None Include="Shaders\Passes\Deferred\DeferredPointLight.vert" />
+    <None Include="Shaders\Passes\Common\Fullscreen.vert" />
+    <None Include="Shaders\Includes\Common\Animation.glsl" />
+    <None Include="Shaders\Includes\Common\Camera.glsl" />
+    <None Include="Shaders\Includes\Common\Culling.glsl" />
+    <None Include="Shaders\Includes\Common\IndirectCommand.glsl" />
+    <None Include="Shaders\Includes\Common\Material.glsl" />
+    <None Include="Shaders\Includes\Common\Mesh.glsl" />
+    <None Include="Shaders\Includes\Common\Model.glsl" />
+    <None Include="Shaders\Includes\Common\PointLight.glsl" />
+    <None Include="Shaders\Includes\Common\Texture.glsl" />
+    <None Include="Shaders\Includes\Common\Transform.glsl" />
+    <None Include="Shaders\Includes\Core.glsl" />
+    <None Include="Shaders\Includes\PushConstants\MeshCullingPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\MeshletPassPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\ModelCullingPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\TraditionalPassPC.glsl" />
+    <None Include="Shaders\Includes\Utils\ColorMath.glsl" />
+    <None Include="Shaders\Includes\Utils\CullingMath.glsl" />
+    <None Include="Shaders\Includes\Utils\Occlusion.glsl" />
+    <None Include="Shaders\Passes\Geometry\MeshletTransparent.frag" />
+    <None Include="Shaders\Passes\Geometry\MeshletTransparentPicking.frag" />
+    <None Include="Shaders\Passes\Geometry\TraditionalTransparent.frag" />
+    <None Include="Shaders\Passes\Geometry\TraditionalTransparentPicking.frag" />
+    <None Include="Shaders\Passes\Common\TransparentComposite.frag" />
+    <None Include="Shaders\Passes\Wireframe\Wireframe.frag" />
+    <None Include="Shaders\Passes\Wireframe\Wireframe.vert" />
+    <None Include="Shaders\Passes\Wireframe\WireframeLight.vert" />
+    <None Include="Shaders\Passes\Wireframe\WireframeMeshlet.vert" />
+    <None Include="Shaders\Passes\Wireframe\WireframeSetup.comp" />
+    <None Include="Shaders\Passes\Hiz\HizDownsample.comp" />
+    <None Include="Shaders\Passes\Hiz\HizLinearizeDepth.comp" />
+    <None Include="Shaders\Passes\Culling\MeshCulling.comp" />
+    <None Include="Shaders\Passes\Geometry\Meshlet.frag" />
+    <None Include="Shaders\Passes\Geometry\Meshlet.task" />
+    <None Include="Shaders\Passes\Geometry\Meshlet.mesh" />
+    <None Include="Shaders\Passes\Culling\ModelCulling.comp" />
+    <None Include="Shaders\Passes\Geometry\Traditional.frag" />
+    <None Include="Shaders\Passes\Geometry\Traditional.vert" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

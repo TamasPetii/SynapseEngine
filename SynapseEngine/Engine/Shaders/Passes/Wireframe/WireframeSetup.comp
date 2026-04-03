@@ -1,0 +1,35 @@
+#version 460
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_GOOGLE_include_directive : require
+
+#include "../../Includes/Common/IndirectCommand.glsl"
+#include "../../Includes/Common/Culling.glsl"
+
+#include "../../Includes/PushConstants/WireframeSetupPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    WireframeSetupPC pc;
+};
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+void main() {
+    uint id = gl_GlobalInvocationID.x;
+    if (id >= pc.totalCommands) return;
+
+    uint activeInstances = 0;
+
+    if (id < pc.totalTraditionalCommands) {
+        activeInstances = GET_TRADITIONAL_CMD(pc.globalIndirectCmdsAddr, id).instanceCount;
+    } 
+    else {
+        uint64_t meshletBaseAddr = pc.globalIndirectCmdsAddr + (pc.totalTraditionalCommands * 16ul);
+        uint localCmdIndex = id - pc.totalTraditionalCommands;
+        
+        activeInstances = GET_MESHLET_CMD(meshletBaseAddr, localCmdIndex).groupCountX;
+    }
+
+    GET_TRADITIONAL_CMD(pc.aabbCmdsAddr, id).instanceCount = activeInstances;
+    GET_TRADITIONAL_CMD(pc.sphereCmdsAddr, id).instanceCount = activeInstances;
+}

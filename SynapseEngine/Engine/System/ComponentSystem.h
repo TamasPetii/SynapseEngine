@@ -1,0 +1,277 @@
+#pragma once
+#include "ISystem.h"
+#include <vector>
+#include <string>
+#include <optional>
+#include "Engine/Scene/BufferNames.h"
+#include "Engine/Logger/SynLog.h"
+
+namespace Syn
+{
+    template <typename TComponent>
+    class ComponentSystem : public ISystem
+    {
+    public:
+        virtual std::vector<TypeID> GetReadDependencies() const override;
+        virtual std::vector<TypeID> GetWriteDependencies() const override;
+
+        virtual void OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) override;
+        virtual void OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow) override;
+        virtual void OnFinish(Scene* scene, tf::Subflow& subflow) override;
+    protected:
+        virtual void UpdateComponents(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow);
+        virtual void UploadComponents(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic, bool uploadStatic);
+        virtual std::string GetSparseBufferName() const;
+    protected:
+        template <typename TPool>
+        bool ShouldUploadDynamicData(TPool* pool, uint32_t frameIndex);
+
+        template <typename TPool>
+        bool ShouldUploadStaticData(TPool* pool, uint32_t frameIndex);
+
+        template <typename TPool, typename Func>
+        std::optional<tf::Task> ForEachStream(TPool* pool, tf::Subflow& subflow, const std::string& phaseName, Func&& func);
+
+        template <typename TPool, typename Func>
+        std::optional<tf::Task> ForEachDynamic(TPool* pool, tf::Subflow& subflow, const std::string& phaseName, Func&& func);
+
+        template <uint32_t FilterBit, typename TPool, typename Func>
+        std::optional<tf::Task> ForEachDynamicIf(TPool* pool, tf::Subflow& subflow, const std::string& phaseName, Func&& func);
+
+        template <typename TPool, typename Func>
+        std::optional<tf::Task> ForEachStaticDirty(TPool* pool, tf::Subflow& subflow, const std::string& phaseName, Func&& func);
+
+        template <typename TPool, typename Func>
+        std::optional<tf::Task> ForEachStatic(TPool* pool, tf::Subflow& subflow, const std::string& phaseName, Func&& func);
+
+        template <typename TPool, typename Func>
+        std::vector<tf::Task> ParallelForEach(TPool* pool, tf::Subflow& subflow, const std::string& phaseName, Func&& func);
+
+        template <uint32_t FilterBit, typename TPool, typename Func>
+        std::vector<tf::Task> ParallelForEachIf(TPool* pool, tf::Subflow& subflow, const std::string& phaseName, Func&& func);
+    protected:
+        std::vector<uint32_t> _gpuDynamicVersions;
+        std::vector<uint32_t> _gpuStaticVersions;
+        uint32_t _currentStaticVersion = 0;
+        size_t _lastStaticCount = 0; 
+    };
+
+    template <typename TComponent>
+    SYN_INLINE std::vector<TypeID> ComponentSystem<TComponent>::GetReadDependencies() const { return {}; }
+
+    template <typename TComponent>
+    SYN_INLINE std::vector<TypeID> ComponentSystem<TComponent>::GetWriteDependencies() const { return {}; }
+
+    template <typename TComponent>
+    SYN_INLINE void ComponentSystem<TComponent>::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
+    {
+        auto pool = scene->GetRegistry()->template GetPool<TComponent>();
+        if (pool) UpdateComponents(scene, frameIndex, deltaTime, subflow);
+    }
+
+    template <typename TComponent>
+    SYN_INLINE void ComponentSystem<TComponent>::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
+    {
+        auto pool = scene->GetRegistry()->template GetPool<TComponent>();
+        if (!pool) return;
+
+        if (pool->template IsStateBitSet<INDEX_CHANGED_BIT>()) pool->IncrementMappingVersion();
+        if (pool->template IsStateBitSet<CHANGED_BIT>()) pool->IncrementChangeVersion();
+
+        std::string sparseName = GetSparseBufferName();
+        if (!sparseName.empty())
+        {
+            auto componentBufferManager = scene->GetComponentBufferManager();
+            this->EmplaceTask(subflow, SystemPhaseNames::UploadSparseMap, [pool, componentBufferManager, frameIndex, sparseName]() {
+                auto mappingBufferView = componentBufferManager->GetComponentBuffer(sparseName, frameIndex);
+                if (mappingBufferView.buffer && mappingBufferView.versions[0] != pool->GetMappingVersion())
+                {
+                    //Todo: Paged sparse map??
+                    auto sparseIndices = pool->GetMapping().GetSparseIndices();
+                    void* dst = mappingBufferView.buffer->Map();
+                    std::memcpy(dst, sparseIndices.data(), sparseIndices.size() * sizeof(DenseIndex));
+                    mappingBufferView.versions[0] = pool->GetMappingVersion();
+                }
+                });
+        }
+
+        bool uploadDynamic = ShouldUploadDynamicData(pool, frameIndex);
+        bool uploadStatic = ShouldUploadStaticData(pool, frameIndex);
+        bool hasStream = !pool->GetStorage().GetStreamEntities().empty();
+        bool forceUpload = this->ShouldForceUpload();
+
+        if (hasStream || uploadDynamic || uploadStatic || forceUpload) {
+            //Info("{} [Frame {}] -> Uploading Components (Stream: {}, Dynamic: {}, Static: {})", GetName(), frameIndex, hasStream, uploadDynamic, uploadStatic);
+            UploadComponents(scene, frameIndex, subflow, uploadDynamic || forceUpload, uploadStatic || forceUpload);
+        }
+
+        if (forceUpload) {
+            this->EmplaceTask(subflow, "DecrementFrames", [this]() {
+                this->DecrementFramesToUpload();
+                });
+        }
+    }
+
+    template <typename TComponent>
+    SYN_INLINE void ComponentSystem<TComponent>::OnFinish(Scene* scene, tf::Subflow& subflow)
+    {
+        auto pool = scene->GetRegistry()->template GetPool<TComponent>();
+        if (!pool) return;
+
+        bool hasChanged = pool->template IsStateBitSet<CHANGED_BIT>();
+        bool hasUpdate = pool->template IsStateBitSet<UPDATE_BIT>();
+        bool hasIndex = pool->template IsStateBitSet<INDEX_CHANGED_BIT>();
+        bool hasCustom1 = pool->template IsStateBitSet<CUSTOM_CHANGED_BIT1>();
+        bool hasCustom2 = pool->template IsStateBitSet<CUSTOM_CHANGED_BIT2>();
+        bool hasCustom3 = pool->template IsStateBitSet<CUSTOM_CHANGED_BIT3>();
+        bool hasDirtyStatics = !pool->GetStorage().GetDirtyStatics().empty();
+
+        if (!hasChanged && !hasUpdate && !hasIndex && !hasCustom1 && !hasCustom2 && !hasCustom3 && !hasDirtyStatics) return;
+
+        //Info("{} -> OnFinish: Cleaning up frame. (Changed: {}, Update: {}, Index: {}, DirtyStatics: {})", GetName(), hasChanged, hasUpdate, hasIndex, hasDirtyStatics);
+
+        auto parallelTasks = ParallelForEach(pool, subflow, SystemPhaseNames::Finish, [pool](EntityID entity) {
+            if (pool->template IsBitSet<CHANGED_BIT>(entity)) pool->template ResetBit<CHANGED_BIT>(entity);
+            if (pool->template IsBitSet<UPDATE_BIT>(entity)) pool->template ResetBit<UPDATE_BIT>(entity);
+            if (pool->template IsBitSet<INDEX_CHANGED_BIT>(entity)) pool->template ResetBit<INDEX_CHANGED_BIT>(entity);
+
+            if (pool->template IsBitSet<CUSTOM_CHANGED_BIT1>(entity)) pool->template ResetBit<CUSTOM_CHANGED_BIT1>(entity);
+            if (pool->template IsBitSet<CUSTOM_CHANGED_BIT2>(entity)) pool->template ResetBit<CUSTOM_CHANGED_BIT2>(entity);
+            if (pool->template IsBitSet<CUSTOM_CHANGED_BIT3>(entity)) pool->template ResetBit<CUSTOM_CHANGED_BIT3>(entity);
+            });
+
+        auto resetTask = this->EmplaceTask(subflow, SystemPhaseNames::FinishResetState, [pool]() {
+            pool->ResetAllStateBits();
+
+            for (EntityID entity : pool->GetStorage().GetDirtyStatics()) {
+                    pool->template ResetBit<DIRTY_STATIC_BIT>(entity);
+            }
+
+            pool->ResetStaticDirtyCounter();
+            });
+
+        for (auto& task : parallelTasks) {
+            task.precede(resetTask);
+        }
+    }
+
+    template <typename TComponent>
+    SYN_INLINE void ComponentSystem<TComponent>::UpdateComponents(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) {}
+
+    template <typename TComponent>
+    SYN_INLINE void ComponentSystem<TComponent>::UploadComponents(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic, bool uploadStatic) {}
+
+    template <typename TComponent>
+    SYN_INLINE std::string ComponentSystem<TComponent>::GetSparseBufferName() const { return ""; }
+
+    template <typename TComponent>
+    template <typename TPool>
+    SYN_INLINE bool ComponentSystem<TComponent>::ShouldUploadDynamicData(TPool* pool, uint32_t frameIndex)
+    {
+        if (_gpuDynamicVersions.size() <= frameIndex)
+            _gpuDynamicVersions.resize(frameIndex + 1, 0);
+
+        if (pool->template IsStateBitSet<CHANGED_BIT>())
+        {
+            _gpuDynamicVersions[frameIndex] = pool->GetChangeVersion();
+            //Info("{} [Frame {}] -> CHANGED_BIT is set! Uploading Dynamic. (Global Version: {})", GetName(), frameIndex, pool->GetChangeVersion());
+            return true;
+        }
+
+        if (_gpuDynamicVersions[frameIndex] != pool->GetChangeVersion())
+        {
+            //Info("{} [Frame {}] -> Dynamic Version mismatch! (GPU: {}, Global: {}) -> Uploading Dynamic.", GetName(), frameIndex, _gpuDynamicVersions[frameIndex], pool->GetChangeVersion());
+            _gpuDynamicVersions[frameIndex] = pool->GetChangeVersion();
+            return true;
+        }
+
+        return false;
+    }
+
+    template <typename TComponent>
+    template <typename TPool>
+    SYN_INLINE bool ComponentSystem<TComponent>::ShouldUploadStaticData(TPool* pool, uint32_t frameIndex)
+    {
+        if (_gpuStaticVersions.size() <= frameIndex)
+            _gpuStaticVersions.resize(frameIndex + 1, 0);
+
+        bool hasDirtyStatics = !pool->GetStorage().GetDirtyStatics().empty();
+
+        if (hasDirtyStatics)
+        {
+            _currentStaticVersion++;
+            //Info("{} -> Dirty statics found! Incrementing Global Static Version to: {}", GetName(), _currentStaticVersion);
+        }
+
+        if (_gpuStaticVersions[frameIndex] != _currentStaticVersion)
+        {
+            //Info("{} [Frame {}] -> Static Version mismatch! (GPU: {}, Global: {}) -> Uploading Static.", GetName(), frameIndex, _gpuStaticVersions[frameIndex], _currentStaticVersion);
+            _gpuStaticVersions[frameIndex] = _currentStaticVersion;
+            return true;
+        }
+
+        return false;
+    }
+
+    template <typename TComponent>
+    template <typename TPool, typename Func>
+    SYN_INLINE std::optional<tf::Task> ComponentSystem<TComponent>::ForEachStream(TPool* pool, tf::Subflow& subflow, const std::string& phaseName, Func&& func)
+    {
+        return this->ForEach(pool->GetStorage().GetStreamEntities(), subflow, phaseName + " " + SystemPhaseNames::Stream, std::forward<Func>(func));
+    }
+
+    template <typename TComponent>
+    template <typename TPool, typename Func>
+    SYN_INLINE std::optional<tf::Task> ComponentSystem<TComponent>::ForEachDynamic(TPool* pool, tf::Subflow& subflow, const std::string& phaseName, Func&& func)
+    {
+        return this->ForEach(pool->GetStorage().GetDynamicEntities(), subflow, phaseName + " " + SystemPhaseNames::Dynamic, std::forward<Func>(func));
+    }
+
+    template <typename TComponent>
+    template <uint32_t FilterBit, typename TPool, typename Func>
+    SYN_INLINE std::optional<tf::Task> ComponentSystem<TComponent>::ForEachDynamicIf(TPool* pool, tf::Subflow& subflow, const std::string& phaseName, Func&& func)
+    {
+        auto dynamicSpan = pool->GetStorage().GetDynamicEntities();
+        if (dynamicSpan.empty() || !pool->template IsStateBitSet<FilterBit>()) return std::nullopt;
+
+        return this->ForEach(dynamicSpan, subflow, phaseName + " " + SystemPhaseNames::DynamicFiltered, [pool, func](EntityID entity) {
+            if (pool->template IsBitSet<FilterBit>(entity)) func(entity);
+            });
+    }
+
+    template <typename TComponent>
+    template <typename TPool, typename Func>
+    SYN_INLINE std::optional<tf::Task> ComponentSystem<TComponent>::ForEachStaticDirty(TPool* pool, tf::Subflow& subflow, const std::string& phaseName, Func&& func)
+    {
+        return this->ForEach(pool->GetStorage().GetDirtyStatics(), subflow, phaseName + " " + SystemPhaseNames::StaticDirty, std::forward<Func>(func));
+    }
+
+    template <typename TComponent>
+    template <typename TPool, typename Func>
+    SYN_INLINE std::optional<tf::Task> ComponentSystem<TComponent>::ForEachStatic(TPool* pool, tf::Subflow& subflow, const std::string& phaseName, Func&& func)
+    {
+        return this->ForEach(pool->GetStorage().GetStaticEntities(), subflow, phaseName + " " + SystemPhaseNames::Static, std::forward<Func>(func));
+    }
+
+    template <typename TComponent>
+    template <typename TPool, typename Func>
+    SYN_INLINE std::vector<tf::Task> ComponentSystem<TComponent>::ParallelForEach(TPool* pool, tf::Subflow& subflow, const std::string& phaseName, Func&& func)
+    {
+        std::vector<tf::Task> tasks;
+        if (auto t = ForEachStream(pool, subflow, phaseName, func)) tasks.push_back(*t);
+        if (auto t = ForEachDynamic(pool, subflow, phaseName, func)) tasks.push_back(*t);
+        if (auto t = ForEachStaticDirty(pool, subflow, phaseName, func)) tasks.push_back(*t);
+        return tasks;
+    }
+
+    template <typename TComponent>
+    template <uint32_t FilterBit, typename TPool, typename Func>
+    SYN_INLINE std::vector<tf::Task> ComponentSystem<TComponent>::ParallelForEachIf(TPool* pool, tf::Subflow& subflow, const std::string& phaseName, Func&& func)
+    {
+        std::vector<tf::Task> tasks;
+        if (auto t = ForEachStream(pool, subflow, phaseName, func)) tasks.push_back(*t);
+        if (auto t = ForEachDynamicIf<FilterBit>(pool, subflow, phaseName, func)) tasks.push_back(*t);
+        if (auto t = ForEachStaticDirty(pool, subflow, phaseName, func)) tasks.push_back(*t);
+        return tasks;
+    }
+}

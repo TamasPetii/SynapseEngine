@@ -1,0 +1,125 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+
+#include "../../Includes/Core.glsl"
+#include "../../Includes/Common/Camera.glsl"
+#include "../../Includes/Common/Transform.glsl"
+#include "../../Includes/Common/Model.glsl"
+#include "../../Includes/Common/Mesh.glsl"
+#include "../../Includes/Common/Animation.glsl"
+#include "../../Includes/Common/Material.glsl"
+#include "../../Includes/Common/Culling.glsl"
+#include "../../Includes/Utils/CullingMath.glsl"
+#include "../../Includes/Utils/Occlusion.glsl"
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../Includes/PushConstants/MeshCullingPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    MeshCullingPC pc;
+};
+
+layout(set = 2, binding = 0) uniform sampler2D depthPyramid;
+
+void main() {
+    uint jobIndex = gl_WorkGroupID.x;      // Current model being processed
+    uint localThreadId = gl_LocalInvocationID.x; // Mesh index within the model
+
+    // 1. Boundary check for the dispatch command
+    if (jobIndex >= GET_DISPATCH_CMD(pc.visibleModelCountAddr).groupCountX) return;
+
+    // 2. Fetch Job Metadata from VisibleModelList
+    VisibleModelData modelData = GET_VISIBLE_MODEL(pc.visibleModelListAddr, jobIndex);
+    bool parentFullyInside = (modelData.packedFlags == 1);
+
+    // 3. Resolve Transform and Camera
+    uint transformIdx = GET_SPARSE_INDEX(pc.transformSparseMapBufferAddr, modelData.entityId);
+    TransformComponent transform = GET_TRANSFORM(pc.transformBufferAddr, transformIdx);
+
+    uint cameraIdx = GET_SPARSE_INDEX(pc.cameraSparseMapBufferAddr, pc.activeCameraEntity);
+    CameraComponent camera = GET_CAMERA(pc.cameraBufferAddr, cameraIdx);
+
+    // 4. Resolve Model allocation and addresses
+    ModelAllocationInfo mAlloc = GET_MODEL_ALLOC(pc.modelAllocBufferAddr, modelData.modelIndex);
+    GpuModelAddresses addrs = GET_MODEL_ADDRESSES(pc.modelAddressBufferAddr, modelData.modelIndex);
+    
+    // 5. Evaluate Animation state
+    uint animFrameIndex = 0;
+    bool hasAnimation = false;
+    GpuAnimationAddresses animAddrs;
+
+    if (pc.animationSparseMapBufferAddr != 0) {
+        uint animSparseIndex = GET_SPARSE_INDEX(pc.animationSparseMapBufferAddr, modelData.entityId);
+        if (animSparseIndex != INVALID_INDEX) {
+            AnimationComponent animComp = GET_ANIM_COMP(pc.animationBufferAddr, animSparseIndex);
+            if (animComp.animationIndex != INVALID_INDEX) {
+                animAddrs = GET_ANIM_ADDRESSES(pc.animationAddressBuffer, animComp.animationIndex);
+                animFrameIndex = animComp.frameIndex;
+                hasAnimation = true;
+            }
+        }
+    }
+
+    vec2 screenRes = vec2(pc.screenWidth, pc.screenHeight);
+    bool enableDepthOcclusion = (pc.enableOcclusionCulling == 1);
+
+    // 6. Collaborative Loop: Process all meshes of the current model
+    for (uint m = localThreadId; m < addrs.meshCount; m += 32) {    
+        GpuMeshCollider localMeshCollider = GET_MESH_COLLIDER(addrs.meshColliders, m);
+
+        if (hasAnimation) {
+            uint frameOffset = animFrameIndex * animAddrs.descriptor.globalMeshCount;
+            localMeshCollider = GET_MESH_COLLIDER(animAddrs.frameMeshColliders, frameOffset + m);
+        }
+
+        GpuMeshCollider worldCollider = TransformCollider(localMeshCollider, transform.transform);
+
+        // 7. Precise Frustum Test (Optimization: Skip if parent model is already fully inside)
+        uint visibility = INTERSECTION_INSIDE;
+        if (!parentFullyInside) {
+            visibility = TestFrustum(worldCollider, camera);
+            if (visibility == INTERSECTION_OUTSIDE) continue;
+        }
+
+        float screenSizePixels = 0.0;
+        if (IsSphereOccluded(worldCollider.center, worldCollider.radius, camera, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
+            continue;
+        }
+
+        // 8. Determine LOD and fetch Material
+        uint lod = (screenSizePixels > 512.0) ? 0 : 
+                   (screenSizePixels > 256.0) ? 1 : 
+                   (screenSizePixels > 128.0) ? 2 : 3;
+
+        uint sparseIdx = GET_SPARSE_INDEX(pc.modelSparseMapBufferAddr, modelData.entityId);
+        ModelComponent modelComp = GET_MODEL_COMP(pc.modelCompBufferAddr, sparseIdx);
+        uint matIdx = GET_MATERIAL_INDEX(pc.materialLookupBufferAddr, modelComp.materialOffset + m);
+        Material mat = GET_MATERIAL(pc.materialBufferAddr, matIdx);
+
+        // 9. Resolve material render type bitmask
+        uint matType = 0;
+        if (IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat))       matType = 3;
+        else if (IS_TRANSPARENT(mat) && !IS_DOUBLE_SIDED(mat)) matType = 2;
+        else if (!IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat)) matType = 1;
+
+        MeshAllocationInfo meshAlloc = GET_MESH_ALLOC(pc.meshAllocBufferAddr, mAlloc.meshAllocationOffset + (m * 4) + lod);
+
+        if (meshAlloc.activeTypes[matType] == 1) {
+            uint slotIndex = 0;
+            uint indirectIdx = meshAlloc.indirectIndices[matType];
+
+            if (meshAlloc.isMeshletPipeline == PIPELINE_MESHLET) {
+                uint64_t meshletBaseAddr = pc.globalIndirectCommandBuffers + (pc.traditionalCommandCount * 16ul);
+                slotIndex = atomicAdd(GET_MESHLET_CMD(meshletBaseAddr, indirectIdx).groupCountX, 1);
+            } else {
+                slotIndex = atomicAdd(GET_TRADITIONAL_CMD(pc.globalIndirectCommandBuffers, indirectIdx).instanceCount, 1);
+            }
+
+            // Encode visibility and write Instance Data
+            uint payload = modelData.entityId;
+            payload = SET_BIT_TO(payload, 31, visibility == INTERSECTION_INSIDE);
+            GET_INSTANCE(pc.globalInstanceBufferAddr, meshAlloc.instanceOffsets[matType] + slotIndex) = payload;
+        }
+    }
+}

@@ -1,0 +1,50 @@
+#version 460
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+layout(set = 2, binding = 0) uniform sampler2D inImage; 
+layout(set = 2, binding = 1, r32f) uniform writeonly image2D outImage;
+
+#include "../../Includes/PushConstants/HizDownSamplePC.glsl"
+
+layout(push_constant) uniform PushConstants {
+   HizDownSamplePC pc;
+};
+
+void main() {
+    ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
+    if (pos.x >= int(pc.outImageSize.x) || pos.y >= int(pc.outImageSize.y)) return;
+
+    vec2 uv = (vec2(pos * 2) + vec2(1.0)) / pc.inImageSize;
+    vec4 depths = textureGather(inImage, uv, 0);
+    float maxDepth = max(max(depths.x, depths.y), max(depths.z, depths.w));
+
+    bool isOddX = (int(pc.inImageSize.x) % 2) != 0;
+    bool isOddY = (int(pc.inImageSize.y) % 2) != 0;
+    bool isLastColumn = (pos.x == int(pc.outImageSize.x) - 1);
+    bool isLastRow = (pos.y == int(pc.outImageSize.y) - 1);
+
+    ivec2 basePos = pos * 2;
+
+    // Last column
+    if (isOddX && isLastColumn) {
+        float e0 = texelFetch(inImage, basePos + ivec2(2, 0), 0).x;
+        float e1 = texelFetch(inImage, basePos + ivec2(2, 1), 0).x;
+        maxDepth = max(maxDepth, max(e0, e1));
+    }
+
+    // Last row
+    if (isOddY && isLastRow) {
+        float e2 = texelFetch(inImage, basePos + ivec2(0, 2), 0).x;
+        float e3 = texelFetch(inImage, basePos + ivec2(1, 2), 0).x;
+        maxDepth = max(maxDepth, max(e2, e3));
+    }
+
+    // Last column/row corner
+    if (isOddX && isOddY && isLastColumn && isLastRow) {
+        float e4 = texelFetch(inImage, basePos + ivec2(2, 2), 0).x;
+        maxDepth = max(maxDepth, e4);
+    }
+
+    imageStore(outImage, pos, vec4(maxDepth));
+}

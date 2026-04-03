@@ -1,0 +1,74 @@
+name: Synapse Engine Build
+
+on:
+  push:
+    branches: [ "remake" ]
+  pull_request:
+    branches: [ "remake" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_cache
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Create Cache Directory
+      run: mkdir -p ${{ github.workspace }}/vcpkg_cache
+      shell: bash
+
+    - name: Restore vcpkg binary cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}/vcpkg_cache
+        key: ${{ runner.os }}-vcpkg-static-md-${{ hashFiles('SynapseEngine/vcpkg.json') }}
+        restore-keys: |
+          ${{ runner.os }}-vcpkg-static-md-
+
+    - name: Bootstrap vcpkg
+      run: |
+        cd External/vcpkg
+        .\bootstrap-vcpkg.bat
+      shell: cmd
+
+    - name: Setup Vulkan
+      uses: humbletim/setup-vulkan-sdk@v1
+      with:
+        vulkan-query-version: latest
+        vulkan-components: Vulkan-Headers, Vulkan-Loader, Volk, Shaderc
+        vulkan-use-cache: true
+
+
+    - name: Build Solution (Dist)
+      run: |
+        msbuild SynapseEngine/SynapseEngine.slnx `
+        /p:Configuration=Dist `
+        /p:Platform=x64 `
+        /p:PlatformToolset=v143 `
+        /p:VcpkgEnableManifest=true `
+        /p:VcpkgConfiguration=Release `
+        /m
+      shell: pwsh
+
+    - name: Run Unit Tests
+      run: |
+        vstest.console.exe "SynapseEngine/Binaries/x64/Dist/UnitTests.exe" `
+        /Settings:"SynapseEngine/UnitTests.runsettings" `
+        /Logger:console;verbosity=detailed
+      shell: pwsh
+      
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: SynapseEngine-Build
+        path: SynapseEngine/Binaries/x64/Dist/
+        if-no-files-found: error

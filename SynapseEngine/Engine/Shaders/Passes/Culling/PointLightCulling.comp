@@ -1,0 +1,47 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
+#include "../../Includes/Core.glsl"
+#include "../../Includes/Common/Camera.glsl"
+#include "../../Includes/Common/PointLight.glsl"
+#include "../../Includes/Utils/CullingMath.glsl"
+#include "../../Includes/Common/IndirectCommand.glsl"
+#include "../../Includes/Utils/Occlusion.glsl"
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../Includes/PushConstants/PointLightCullingPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    PointLightCullingPC pc;
+};
+
+layout(set = 2, binding = 0) uniform sampler2D depthPyramid;
+
+void main() {
+    uint globalId = gl_GlobalInvocationID.x;
+    if (globalId >= pc.totalLightsToTest) return;
+
+    PointLightColliderGPU collider = GET_POINT_LIGHT_COLLIDER(pc.pointLightColliderDataAddr, globalId);
+
+    uint cameraIdx = GET_SPARSE_INDEX(pc.cameraSparseMapBufferAddr, pc.activeCameraEntity);
+    CameraComponent camera = GET_CAMERA(pc.cameraBufferAddr, cameraIdx);
+
+    // 1. Frustum Culling (Sphere)
+    uint visibility = TestSphereFrustum(collider.center, collider.radius, camera);
+    if (visibility == INTERSECTION_OUTSIDE) return;
+
+    // 2. Occlusion és 0-pixel Culling
+    float screenSizePixels = 0.0;
+    vec2 screenRes = vec2(pc.screenWidth, pc.screenHeight);
+    bool enableDepthOcclusion = (pc.enableOcclusionCulling == 1);
+
+    if (IsSphereOccluded(collider.center, collider.radius, camera, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
+        return;
+    }
+
+    uint slot = atomicAdd(GET_VK_DRAW_CMD(pc.indirectCommandAddr, 0).instanceCount, 1);
+    GET_VISIBLE_POINT_LIGHT(pc.visibleLightAddr, slot) = collider.entityIndex;
+}

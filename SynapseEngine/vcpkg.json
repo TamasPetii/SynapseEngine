@@ -1,0 +1,29 @@
+{
+  "name": "synapse-engine",
+  "version-string": "1.0.0",
+  "dependencies": [
+    "glm",
+    "glfw3",
+    {
+      "name": "imgui",
+      "features": [
+        "docking-experimental"
+      ]
+    },
+    "vulkan-headers",
+    "vulkan-memory-allocator",
+    "shaderc",
+    "volk",
+    "assimp",
+    "meshoptimizer",
+    "stb",
+    "nlohmann-json",
+    "gli",
+    "gtest",
+    "spirv-reflect",
+    "spirv-headers",
+    "taskflow",
+    "imguizmo",
+    "joltphysics"
+  ]
+}

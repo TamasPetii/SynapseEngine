@@ -3,6 +3,13 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# VCPKG 
+
+vcpkg_installed/
+vcpkg_overlays/
+
+# Assets
+
 *.dae
 *.jpg
 *.png

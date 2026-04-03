@@ -1,0 +1,41 @@
+#pragma once
+#include "Engine/SynApi.h"
+#include "Engine/SynMacro.h"
+#include "Engine/Registry/Entity.h"
+
+namespace Syn
+{
+    template<typename Derived>
+    struct MappingCRTP
+    {
+        SYN_INLINE void Set(EntityID entity, DenseIndex index)
+        {
+            static_cast<Derived*>(this)->Set(entity, index);
+        }
+
+        SYN_INLINE DenseIndex Get(EntityID entity) const
+        {
+            return static_cast<const Derived*>(this)->Get(entity);
+        }
+
+        SYN_INLINE void Remove(EntityID entity)
+        {
+            static_cast<Derived*>(this)->Remove(entity);
+        }
+
+        SYN_INLINE bool Contains(EntityID entity) const
+        {
+            return static_cast<const Derived*>(this)->Contains(entity);
+        }
+
+        SYN_INLINE void Clear()
+        {
+            static_cast<Derived*>(this)->Clear();
+        }
+
+        SYN_INLINE void EnsureEntityMapping(EntityID entity)
+        {
+            static_cast<Derived*>(this)->EnsureEntityMapping(entity);
+        }
+    };
+}

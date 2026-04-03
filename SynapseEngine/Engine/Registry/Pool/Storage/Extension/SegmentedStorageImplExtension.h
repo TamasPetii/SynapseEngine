@@ -1,0 +1,90 @@
+#pragma once
+#include "Engine/SynApi.h"
+#include "Engine/SynMacro.h"
+#include "StorageExtension.h"
+#include "../../../Entity.h"
+#include "../Core/SegmentedStorageImpl.h"
+
+namespace Syn
+{
+    template<typename DerivedPool>
+    struct SegmentedStorageImplExtension
+    {
+    private:
+        SYN_INLINE DerivedPool& AsDerived() { return static_cast<DerivedPool&>(*this); }
+        SYN_INLINE const DerivedPool& AsDerived() const { return static_cast<const DerivedPool&>(*this); }
+    public:
+
+        SYN_INLINE void SetCategory(EntityID entity, StorageCategory newCat)
+        {
+            auto& pool = AsDerived();
+            SYN_ASSERT(pool.GetMapping().Contains(entity), "Entity not in pool");
+
+            const DenseIndex index = pool.GetMapping().Get(entity);
+
+            pool.GetStorage().SetCategory(index, newCat, [&pool](EntityID movedEntity, DenseIndex newIndex) {
+                pool.GetMapping().Set(movedEntity, newIndex);
+                });
+        }
+
+        SYN_INLINE StorageCategory GetCategory(EntityID entity) const
+        {
+            const auto& pool = AsDerived();
+            const DenseIndex index = pool.GetMapping().Get(entity);
+            return pool.GetStorage().GetCategory(index);
+        }
+
+        SYN_INLINE void MarkStaticDirty(EntityID entity)
+        {
+            const DenseIndex index = AsDerived().GetMapping().Get(entity);
+            return AsDerived().GetStorage().MarkStaticDirty(index);
+        }
+
+        SYN_INLINE std::span<const EntityID> GetDirtyStatics() const
+        {
+            return AsDerived().GetStorage().GetDirtyStatics();
+        }
+
+        SYN_INLINE std::span<const EntityID> GetStaticEntities() const
+        {
+            return AsDerived().GetStorage().GetStaticEntities();
+        }
+
+        SYN_INLINE std::span<const EntityID> GetDynamicEntities() const
+        {
+            return AsDerived().GetStorage().GetDynamicEntities();
+        }
+
+        SYN_INLINE std::span<const EntityID> GetStreamEntities() const
+        {
+            return AsDerived().GetStorage().GetStreamEntities();
+        }
+
+        SYN_INLINE void ResetStaticDirtyCounter()
+        {
+            AsDerived().GetStorage().ResetStaticDirtyCounter();
+        }
+
+        SYN_INLINE bool IsStatic(EntityID entity) const {
+            DenseIndex index = AsDerived().GetMapping().Get(entity);
+            return AsDerived().GetStorage().IsStatic(index);
+        }
+
+        SYN_INLINE bool IsDynamic(EntityID entity) const {
+            DenseIndex index = AsDerived().GetMapping().Get(entity);
+            return AsDerived().GetStorage().IsDynamic(index);
+        }
+
+        SYN_INLINE bool IsStream(EntityID entity) const {
+            DenseIndex index = AsDerived().GetMapping().Get(entity);
+            return AsDerived().GetStorage().IsStream(index);
+        }
+    };
+
+    template<typename T>
+    struct StorageTraits<SegmentedStorageImpl<T>>
+    {
+        template<typename PoolType>
+        using Extension = SegmentedStorageImplExtension<PoolType>;
+    };
+}

@@ -1,0 +1,29 @@
+#version 460
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout(set = 2, binding = 0) uniform sampler2D inImage;
+layout(set = 2, binding = 1, rgba16f) uniform image2D outImage;
+
+#include "../../Includes/PushConstants/BloomCompositePC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    BloomCompositePC pc;
+};
+
+void main()
+{
+	ivec2 imgSize = imageSize(outImage);
+	ivec2 id = ivec2(gl_GlobalInvocationID.xy);
+	if (id.x >= imgSize.x || id.y >= imgSize.y) return;
+
+	vec2 uv = (vec2(id) + vec2(0.5)) / vec2(imgSize);
+
+	vec3 sceneColor = imageLoad(outImage, id).rgb;
+	vec3 bloomColor = texture(inImage, uv).rgb;
+
+	vec3 finalColor = sceneColor + (bloomColor * pc.bloomStrength);
+	finalColor = vec3(1.0) - exp(-finalColor * pc.exposure);
+	finalColor = pow(finalColor, vec3(1.0 / 2.2));
+
+	imageStore(outImage, id, vec4(finalColor, 1.0));
+}
