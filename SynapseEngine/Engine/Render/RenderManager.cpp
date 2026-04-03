@@ -3,6 +3,7 @@
 #include "Engine/Vk/Command/CommandBuffer.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
+#include "Engine/FrameContext.h"
 
 namespace Syn {
 
@@ -71,5 +72,8 @@ namespace Syn {
         for (size_t i = 0; i < _frameNeedsResize.size(); ++i) {
             _frameNeedsResize[i] = true;
         }
+
+        ServiceLocator::GetFrameContext()->screenWidth = width;
+		ServiceLocator::GetFrameContext()->screenHeight = height;
     }
 }

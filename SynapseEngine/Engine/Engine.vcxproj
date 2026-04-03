@@ -300,6 +300,7 @@
     <ClCompile Include="Render\Passes\Geometry\TraditionalTransparentPass.cpp" />
     <ClCompile Include="Render\Passes\Wboit\TransparentCompositePass.cpp" />
     <ClCompile Include="Render\Passes\Picking\TraditionalTransparentPickingPass.cpp" />
+    <ClCompile Include="Component\TagComponent.cpp" />
     <ClCompile Include="Vk\Rendering\GpuUploader.cpp" />
     <ClCompile Include="Manager\BaseResourceManager.cpp" />
     <ClCompile Include="Image\Data\Texture.cpp" />
@@ -608,6 +609,7 @@
     <ClInclude Include="Render\Passes\Geometry\TraditionalTransparentPass.h" />
     <ClInclude Include="Render\Passes\Wboit\TransparentCompositePass.h" />
     <ClInclude Include="Render\Passes\Picking\TraditionalTransparentPickingPass.h" />
+    <ClInclude Include="Component\TagComponent.h" />
     <ClInclude Include="Vk\Image\ImageViewNames.h" />
     <ClInclude Include="Vk\Rendering\GpuUploader.h" />
     <ClInclude Include="Manager\BaseResourceManager.h" />

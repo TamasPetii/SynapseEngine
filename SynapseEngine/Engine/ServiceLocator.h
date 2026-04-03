@@ -47,7 +47,7 @@ namespace Syn
         static StaticMeshBuilder* GetStaticMeshBuilder() { return _staticMeshBuilder; }
 
         static void ProvideFrameContext(FrameContext* context) { _frameContext = context; }
-        static const FrameContext* GetFrameContext() { return _frameContext; }
+        static FrameContext* GetFrameContext() { return _frameContext; }
 
 		static void ProvideModelManager(ModelManager* manager) { _modelManager = manager; }
 		static ModelManager* GetModelManager() { return _modelManager; }

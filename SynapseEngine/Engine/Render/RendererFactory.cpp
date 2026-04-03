@@ -62,8 +62,8 @@ namespace Syn
         pipeline->AddPass(std::make_unique<HizDownsamplePass>());
         pipeline->AddPass(std::make_unique<ModelCullingPass>());
         pipeline->AddPass(std::make_unique<MeshCullingPass>());
-        //pipeline->AddPass(std::make_unique<PointLightCullingPass>());
-        //pipeline->AddPass(std::make_unique<SpotLightCullingPass>());
+        pipeline->AddPass(std::make_unique<PointLightCullingPass>());
+        pipeline->AddPass(std::make_unique<SpotLightCullingPass>());
 
         //Texture Init Passes
         pipeline->AddPass(std::make_unique<GBufferInitPass>());
@@ -79,8 +79,8 @@ namespace Syn
 		// Deferred Lighting Passes
 		pipeline->AddPass(std::make_unique<DeferredEmissiveAoPass>());
         pipeline->AddPass(std::make_unique<DeferredDirectionLightPass>());
-        //pipeline->AddPass(std::make_unique<DeferredPointLightPass>());
-        //pipeline->AddPass(std::make_unique<DeferredSpotLightPass>());
+        pipeline->AddPass(std::make_unique<DeferredPointLightPass>());
+        pipeline->AddPass(std::make_unique<DeferredSpotLightPass>());
 
         // Editor Picking Passes
         pipeline->AddPass(std::make_unique<DepthCopyPass>());

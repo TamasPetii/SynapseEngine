@@ -42,11 +42,6 @@ namespace Syn
             }
             });
 
-        /*
-        * //No gpu driven light culling for direction lights!
-        * //Only enable check on cpu side!
-        */
-
         auto cullFunc = [pool, drawData](EntityID entity) {
             const auto& lightComp = pool->Get(entity);
 
@@ -77,11 +72,9 @@ namespace Syn
             auto settings = scene->GetSettings();
             uint32_t count = drawData->directionLightCmdTemplate.instanceCount;
 
-            if (!settings->enableGpuCulling) {
-                auto instanceBufferView = bufferManager->GetComponentBuffer(BufferNames::DirectionLightVisibleData, frameIndex);
-                if (count > 0 && instanceBufferView.buffer) {
-                    instanceBufferView.buffer->Write(drawData->directionLightCpuInstanceBuffer.data(), count * sizeof(uint32_t), 0);
-                }
+            auto instanceBufferView = bufferManager->GetComponentBuffer(BufferNames::DirectionLightVisibleData, frameIndex);
+            if (count > 0 && instanceBufferView.buffer) {
+                instanceBufferView.buffer->Write(drawData->directionLightCpuInstanceBuffer.data(), count * sizeof(uint32_t), 0);
             }
 
             drawData->directionLightIndirectCommandBuffers[frameIndex]->Write(&drawData->directionLightCmdTemplate, sizeof(VkDrawIndirectCommand), 0);

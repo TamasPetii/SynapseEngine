@@ -185,6 +185,10 @@
     <ClCompile Include="Api\ITransformAPI.cpp" />
     <ClCompile Include="Interaction\DragInteraction.cpp" />
     <ClCompile Include="Api\IRenderAPI.cpp" />
+    <ClCompile Include="Api\ISettingsApi.cpp" />
+    <ClCompile Include="ViewModels\Settings\SettingsViewModel.cpp" />
+    <ClCompile Include="ViewModels\Settings\SettingsIntent.cpp" />
+    <ClCompile Include="ViewModels\Settings\SettingsState.cpp" />
     <ClCompile Include="Types\EntityHandle.cpp" />
     <ClCompile Include="ViewModels\Transform\TransformCommands.cpp" />
     <ClCompile Include="ViewModels\Transform\TransformViewModel.cpp" />
@@ -204,6 +208,10 @@
     <ClInclude Include="Api\ITransformAPI.h" />
     <ClInclude Include="Interaction\DragInteraction.h" />
     <ClInclude Include="Api\IRenderAPI.h" />
+    <ClInclude Include="Api\ISettingsApi.h" />
+    <ClInclude Include="ViewModels\Settings\SettingsViewModel.h" />
+    <ClInclude Include="ViewModels\Settings\SettingsIntent.h" />
+    <ClInclude Include="ViewModels\Settings\SettingsState.h" />
     <ClInclude Include="Types\EntityHandle.h" />
     <ClInclude Include="ViewModels\Transform\TransformCommands.h" />
     <ClInclude Include="ViewModels\Transform\TransformViewModel.h" />

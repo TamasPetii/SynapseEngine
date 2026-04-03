@@ -49,15 +49,25 @@ namespace Syn
             return;
         }
 
-        auto cullFunc = [this, pool, cameraComp, drawData](EntityID entity) {
+        glm::vec2 screenRes = glm::vec2(cameraComp.width, cameraComp.height);
+
+        auto cullFunc = [this, pool, cameraComp, drawData, screenRes](EntityID entity) {
             const auto& lightComp = pool->Get(entity);
+
             if (CollisionTester::TestSphereFrustum(lightComp.position, lightComp.radius, cameraComp.frustum))
             {
-                std::atomic_ref<uint32_t> countRef(drawData->pointLightCmdTemplate.instanceCount);
-                uint32_t slot = countRef.fetch_add(1, std::memory_order_relaxed);
+                float screenSize = CollisionTester::CalculateSphereScreenSize(
+                    lightComp.position, lightComp.radius,
+                    cameraComp.view, cameraComp.proj, cameraComp.nearPlane, screenRes);
 
-                if (slot < drawData->pointLightCpuInstanceBuffer.size()) {
-                    drawData->pointLightCpuInstanceBuffer[slot] = entity;
+                if (screenSize >= 1.0f)
+                {
+                    std::atomic_ref<uint32_t> countRef(drawData->pointLightCmdTemplate.instanceCount);
+                    uint32_t slot = countRef.fetch_add(1, std::memory_order_relaxed);
+
+                    if (slot < drawData->pointLightCpuInstanceBuffer.size()) {
+                        drawData->pointLightCpuInstanceBuffer[slot] = entity;
+                    }
                 }
             }
             };

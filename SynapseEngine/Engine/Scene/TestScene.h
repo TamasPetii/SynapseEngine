@@ -100,7 +100,7 @@ namespace Syn
                 registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
             }
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 // Character
                 EntityID characterEntity = registry->CreateEntity();
@@ -129,7 +129,7 @@ namespace Syn
             auto materialManager = ServiceLocator::GetMaterialManager();
 
             // Random Geometry
-            for (int i = 0; i < 100000; i++)
+            for (int i = 0; i < 500000; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
@@ -156,6 +156,7 @@ namespace Syn
                 float randomFloat = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                 float alpha = 0.1f + (randomFloat * 0.9f);
 
+                /*
                 MaterialInfo randomMatInfo{};
                 randomMatInfo.color = glm::vec4(r, g, b, alpha);
                 randomMatInfo.doubleSided = rand() % 2;
@@ -169,6 +170,7 @@ namespace Syn
 
                 auto& overrideComp = registry->GetComponent<MaterialOverrideComponent>(e);
                 overrideComp.materials.push_back(randomMatId);
+                */
             }
 
             for (int i = 0; i < 1; ++i)
@@ -191,7 +193,7 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(dirLightEntity);
             }
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 EntityID lightEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(lightEntity);
@@ -221,7 +223,7 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(lightEntity);
             }
 
-            for (int i = 0; i < 1000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 EntityID spotLightEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(spotLightEntity);

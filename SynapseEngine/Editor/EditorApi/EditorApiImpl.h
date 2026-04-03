@@ -31,6 +31,10 @@ namespace Syn {
         EntityID ReadEntityIdAtPixel(uint32_t x, uint32_t y) override;
         glm::mat4 GetEditorCameraView() const override;
         glm::mat4 GetEditorCameraProjection() const override;
+
+		// --- ISettingsAPI ---
+        SceneSettings GetSceneSettings() const override;
+        void SetSceneSettings(const SceneSettings& settings) override;
     private:
         Engine* _engine = nullptr;
         SceneManager* _sceneManager = nullptr;

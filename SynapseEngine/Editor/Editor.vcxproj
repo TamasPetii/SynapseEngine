@@ -186,9 +186,11 @@
     <ClCompile Include="Dispatcher\InputDispatcher.cpp" />
     <ClCompile Include="EditorApi\RenderApiImpl.cpp" />
     <ClCompile Include="EditorApi\SelectionApiImpl.cpp" />
+    <ClCompile Include="EditorApi\SettingsApiImpl.cpp" />
     <ClCompile Include="EditorApi\TransformApiImpl.cpp" />
     <ClCompile Include="Manager\GuiManager.cpp" />
     <ClCompile Include="Manager\GuiTextureManager.cpp" />
+    <ClCompile Include="View\Settings\SettingsView.cpp" />
     <ClCompile Include="View\Viewport\ViewportView.cpp" />
     <ClCompile Include="View\Transform\TransformView.cpp" />
     <ClCompile Include="View\IGuiWindow.cpp" />
@@ -212,6 +214,7 @@
     <ClInclude Include="Dispatcher\InputDispatcher.h" />
     <ClInclude Include="Manager\GuiManager.h" />
     <ClInclude Include="Manager\GuiTextureManager.h" />
+    <ClInclude Include="View\Settings\SettingsView.h" />
     <ClInclude Include="View\Viewport\ViewportView.h" />
     <ClInclude Include="View\Transform\TransformView.h" />
     <ClInclude Include="View\IGuiWindow.h" />

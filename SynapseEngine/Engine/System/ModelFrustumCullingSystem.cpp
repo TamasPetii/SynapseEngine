@@ -74,7 +74,9 @@ namespace Syn
         auto modelSnapshot = modelManager->GetResourceSnapshot();
         auto animSnapshot = animationManager->GetResourceSnapshot();
 
-        auto cullFunc = [drawData, modelPool, transformPool, modelSnapshot, cameraComp, animPool, animSnapshot, matTypeSnapshot, overridePool](EntityID entity) {
+        glm::vec2 screenRes = glm::vec2(cameraComp.width, cameraComp.height);
+
+        auto cullFunc = [drawData, modelPool, transformPool, modelSnapshot, cameraComp, animPool, animSnapshot, matTypeSnapshot, overridePool, screenRes](EntityID entity) {
             const FrustumCollider& frustum = cameraComp.frustum;
             const auto& modelComp = modelPool->Get(entity);
             const auto& transformComp = transformPool->Get(entity);
@@ -133,8 +135,8 @@ namespace Syn
             for (uint32_t m = 0; m < meshCount; ++m)
             {
                 bool isVisible = true;
+                GpuMeshCollider worldCollider;
 
-                float distance = glm::length(cameraComp.position - globalWorldCollider.center);
                 if (meshCount > 1)
                 {
                     GpuMeshCollider localCollider;
@@ -147,23 +149,25 @@ namespace Syn
                         localCollider = resource->gpuData.indexedData.meshColliders[m];
                     }
 
-                    GpuMeshCollider worldCollider = MeshUtils::TransformCollider(localCollider, transform);
+                    worldCollider = MeshUtils::TransformCollider(localCollider, transform);
 
                     if(!parentFullyInside)
                         isVisible = CollisionTester::IsInFrustum(worldCollider, frustum);
-
-                    distance = glm::length(cameraComp.position - worldCollider.center);
+                }
+                else {
+                    worldCollider = globalWorldCollider;
                 }
 
                 if (isVisible)
                 {
-                    //Todo: Project Sphere to screne, and lod has to calculated according to it!
+                    float screenSizePixels = CollisionTester::CalculateSphereScreenSize(
+                        worldCollider.center, worldCollider.radius,
+                        cameraComp.view, cameraComp.proj, cameraComp.nearPlane, screenRes);
 
-                    uint32_t lod;
-                    if (distance < 25.0f) lod = 0;
-                    else if (distance < 50.0f) lod = 1;
-                    else if (distance < 100.0f) lod = 2;
-                    else lod = 3;
+                    if (screenSizePixels < 1.0f) 
+                        continue;
+
+                    uint32_t lod = CollisionTester::CalculateLodFromScreenSize(screenSizePixels);
 
                     uint32_t allocIndex = modelAlloc.meshAllocationOffset + (m * 4) + lod;
                     const auto& meshAlloc = drawData->meshAllocations[allocIndex];

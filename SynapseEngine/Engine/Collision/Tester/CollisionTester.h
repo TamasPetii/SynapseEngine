@@ -3,6 +3,7 @@
 #include "Engine/Collision/Colliders/FrustumCollider.h"
 #include "Engine/Mesh/Data/Gpu/GpuIndexedDrawData.h"
 #include <glm/glm.hpp>
+#include <glm/matrix.hpp>
 #include <vector>
 
 namespace Syn
@@ -33,6 +34,9 @@ namespace Syn
         SYN_INLINE static IntersectionType IsInFrustumIntersectionType(const GpuMeshCollider& collider, const FrustumCollider& frustum);
         SYN_INLINE static IntersectionType TestSphereFrustumIntersectionType(const GpuMeshCollider& collider, const FrustumCollider& frustum);
         SYN_INLINE static IntersectionType TestAabbFrustumIntersectionType(const GpuMeshCollider& collider, const FrustumCollider& frustum);
+    
+        SYN_INLINE static float CalculateSphereScreenSize(const glm::vec3& center, float radius, const glm::mat4& view, const glm::mat4& proj, float nearZ, const glm::vec2& screenRes);
+        SYN_INLINE static uint32_t CalculateLodFromScreenSize(float screenSizePixels);
     private:
         SYN_INLINE static float GetSignedDistance(const glm::vec4& plane, const glm::vec3& point);
     };
@@ -147,5 +151,55 @@ namespace Syn
     SYN_INLINE float CollisionTester::GetSignedDistance(const glm::vec4& plane, const glm::vec3& point)
     {
         return glm::dot(glm::vec3(plane), point) - plane.w;
+    }
+
+    SYN_INLINE float CollisionTester::CalculateSphereScreenSize(const glm::vec3& center, float radius, const glm::mat4& view, const glm::mat4& proj, float nearZ, const glm::vec2& screenRes)
+    {
+        glm::vec3 viewCenter = glm::vec3(view * glm::vec4(center, 1.0f));
+
+        if (-viewCenter.z - radius < nearZ) return 99999.0f;
+
+        glm::vec2 cx(viewCenter.x, -viewCenter.z);
+        float cx2 = glm::dot(cx, cx);
+        float r2 = radius * radius;
+
+        if (cx2 < r2) return 99999.0f;
+
+        glm::vec2 vx(std::sqrt(cx2 - r2), radius);
+        glm::vec2 minx = glm::mat2(vx.x, vx.y, -vx.y, vx.x) * cx;
+        glm::vec2 maxx = glm::mat2(vx.x, -vx.y, vx.y, vx.x) * cx;
+
+        glm::vec2 cy(viewCenter.y, -viewCenter.z);
+        float cy2 = glm::dot(cy, cy);
+
+        if (cy2 < r2) return 99999.0f;
+
+        glm::vec2 vy(std::sqrt(cy2 - r2), radius);
+        glm::vec2 miny = glm::mat2(vy.x, vy.y, -vy.y, vy.x) * cy;
+        glm::vec2 maxy = glm::mat2(vy.x, -vy.y, vy.y, vy.x) * cy;
+
+        float p00 = std::abs(proj[0][0]);
+        float p11 = std::abs(proj[1][1]);
+
+        glm::vec4 uvBounds(
+            minx.x / minx.y * p00,
+            miny.x / miny.y * p11,
+            maxx.x / maxx.y * p00,
+            maxy.x / maxy.y * p11
+        );
+
+        uvBounds = uvBounds * 0.5f + 0.5f;
+
+        glm::vec2 sizeInPixels = (glm::vec2(uvBounds.z, uvBounds.w) - glm::vec2(uvBounds.x, uvBounds.y)) * screenRes;
+
+        return std::max(sizeInPixels.x, sizeInPixels.y);
+    }
+
+    SYN_INLINE uint32_t CollisionTester::CalculateLodFromScreenSize(float screenSizePixels)
+    {
+        if (screenSizePixels > 512.0f) return 0;
+        if (screenSizePixels > 256.0f) return 1;
+        if (screenSizePixels > 128.0f) return 2;
+        return 3;
     }
 }

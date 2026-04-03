@@ -31,6 +31,9 @@
 #include "Engine/System/Light/DirectionLightCullingSystem.h"
 #include "Engine/Component/MaterialOverrideComponent.h"
 
+#include "Engine/ServiceLocator.h"
+#include "Engine/FrameContext.h"
+
 namespace Syn
 {
     Scene::Scene(uint32_t frameCount)
@@ -193,6 +196,21 @@ namespace Syn
     {
         _currentFrameIndex = frameIndex;
         _currentDeltaTime = deltaTime;
+
+        auto screenWidth = ServiceLocator::GetFrameContext()->screenWidth;
+        auto screenHeight = ServiceLocator::GetFrameContext()->screenHeight;
+
+        if (_sceneCameraEntity != NULL_ENTITY && _registry->HasComponent<CameraComponent>(_sceneCameraEntity))
+        {
+            _registry->GetComponent<CameraComponent>(_sceneCameraEntity).width = screenWidth;
+            _registry->GetComponent<CameraComponent>(_sceneCameraEntity).height = screenHeight;
+        }
+
+        if (_debugCameraEntity != NULL_ENTITY && _registry->HasComponent<CameraComponent>(_debugCameraEntity))
+        {
+            _registry->GetComponent<CameraComponent>(_debugCameraEntity).width = screenWidth;
+            _registry->GetComponent<CameraComponent>(_debugCameraEntity).height = screenHeight;
+        }
 
         ServiceLocator::GetTaskExecutor()->run(_updateTaskflow).wait();
     }

@@ -3,7 +3,7 @@
 namespace Syn
 {
     SceneSettings::SceneSettings()
-        : enableTransparentPicking(true)
+        : enableTransparentPicking(false)
         , enableGpuCulling(true)
         , enableBloom(true)
         , enableHiz(true)
