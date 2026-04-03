@@ -3,7 +3,8 @@
 namespace Syn
 {
     SceneSettings::SceneSettings()
-        : enableTransparentPicking(false)
+        : useDebugCamera(false)
+        , enableTransparentPicking(false)
         , enableGpuCulling(true)
         , enableBloom(true)
         , enableHiz(true)

@@ -18,7 +18,7 @@ namespace Syn {
     bool HizDownsamplePass::ShouldExecute(const RenderContext& context) const
     {
 		auto settings = context.scene->GetSettings();
-        return settings->enableHiz && settings->enableOcclusionCulling && settings->enableGpuCulling;
+        return settings->enableHiz && settings->enableOcclusionCulling && settings->enableGpuCulling && !settings->useDebugCamera;
     }
 
     void HizDownsamplePass::Initialize() {

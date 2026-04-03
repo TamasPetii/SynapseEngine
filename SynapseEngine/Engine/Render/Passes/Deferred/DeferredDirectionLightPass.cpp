@@ -90,7 +90,7 @@ namespace Syn {
         pc.directionLightShadowSparseMapAddr = bufferManager->GetBufferAddr(BufferNames::DirectionLightShadowSparseMap, fIdx);
         pc.directionLightShadowDataAddr = bufferManager->GetBufferAddr(BufferNames::DirectionLightShadowData, fIdx);
 
-        pc.activeCameraEntity = scene->GetSceneCameraEntity();
+        pc.activeCameraEntity = scene->GetSettings()->useDebugCamera ? scene->GetDebugCameraEntity() : scene->GetSceneCameraEntity();
         pc.screenWidth = (float)_graphicsState.renderArea->width;
         pc.screenHeight = (float)_graphicsState.renderArea->height;
 

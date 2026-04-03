@@ -114,7 +114,7 @@ namespace Syn {
         pc.debugInstanceBufferAddr = 0;
         pc.modelBufferAddr = compManager->GetBufferAddr(BufferNames::ModelData, fIdx);
         pc.modelSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::ModelSparseMap, fIdx);
-        pc.activeCameraEntity = scene->GetSceneCameraEntity();
+        pc.activeCameraEntity = scene->GetSettings()->useDebugCamera ? scene->GetDebugCameraEntity() : scene->GetSceneCameraEntity();
         pc.isSphere = 1;
         pc.drawIdOffset = 0;
         pc.debugColor = glm::vec4(1, 0, 0, 1);

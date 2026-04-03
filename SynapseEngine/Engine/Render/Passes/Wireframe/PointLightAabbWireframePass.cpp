@@ -91,7 +91,7 @@ namespace Syn {
         WireframeLightPC pc{};
         pc.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
         pc.cameraSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
-        pc.activeCameraEntity = scene->GetSceneCameraEntity();
+        pc.activeCameraEntity = scene->GetSettings()->useDebugCamera ? scene->GetDebugCameraEntity() : scene->GetSceneCameraEntity();
         pc.lightDataAddr = compManager->GetBufferAddr(BufferNames::PointLightData, fIdx);
         pc.lightColliderDataAddr = compManager->GetBufferAddr(BufferNames::PointLightColliderData, fIdx);
         pc.lightSparseMapAddr = compManager->GetBufferAddr(BufferNames::PointLightSparseMap, fIdx);

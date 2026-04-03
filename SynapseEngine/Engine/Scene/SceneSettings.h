@@ -7,6 +7,7 @@ namespace Syn
     {
         SceneSettings();
 
+        bool useDebugCamera;
         bool enableTransparentPicking;
 
         bool enableGpuCulling;

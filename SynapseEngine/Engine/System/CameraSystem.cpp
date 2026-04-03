@@ -41,11 +41,8 @@ namespace Syn
             if (!transformPool->Has(entity)) 
                 return;
 
-            //if (entity == scene->GetDebugCameraEntity())
-            if (entity == scene->GetSceneCameraEntity())
-            {
-                transformPool->SetBit<UPDATE_BIT>(entity);
-            }
+            bool useDebugCam = scene->GetSettings()->useDebugCamera;
+            bool enableInput = (useDebugCam && entity == scene->GetDebugCameraEntity()) || (!useDebugCam && entity == scene->GetSceneCameraEntity());
 
             auto& cameraComponent = cameraPool->Get(entity);
             auto& transformComponent = transformPool->Get(entity);
@@ -53,12 +50,12 @@ namespace Syn
             float forward = 0;
             float sideways = 0;
 
-            if (inputManager->IsKeyHeld(KEY_W)) forward = 1;
-            if (inputManager->IsKeyHeld(KEY_S)) forward = -1;
-            if (inputManager->IsKeyHeld(KEY_D)) sideways = 1;
-            if (inputManager->IsKeyHeld(KEY_A)) sideways = -1;
+            if (enableInput && inputManager->IsKeyHeld(KEY_W)) forward = 1;
+            if (enableInput && inputManager->IsKeyHeld(KEY_S)) forward = -1;
+            if (enableInput && inputManager->IsKeyHeld(KEY_D)) sideways = 1;
+            if (enableInput && inputManager->IsKeyHeld(KEY_A)) sideways = -1;
 
-            if (inputManager->IsButtonHeld(BUTTON_RIGHT))
+            if (enableInput && inputManager->IsButtonHeld(BUTTON_RIGHT))
             {
                 auto deltaPos = inputManager->GetMouseDelta();
                 transformComponent.rotation.y += cameraComponent.sensitivity * static_cast<float>(deltaPos.first);
@@ -138,6 +135,7 @@ namespace Syn
             */
 
             cameraPool->SetBit<CHANGED_BIT>(entity);
+            transformPool->SetBit<UPDATE_BIT>(entity);
             cameraComponent.version++;
         };
 

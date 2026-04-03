@@ -122,7 +122,7 @@ namespace Syn
         pc.vertexBufferAddr = sphereMesh->hardwareBuffers.vertexPositions->GetDeviceAddress();
         pc.debugInstanceBufferAddr = drawData->debugInstanceBuffers[fIdx]->GetDeviceAddress();
 
-        pc.activeCameraEntity = scene->GetSceneCameraEntity();
+        pc.activeCameraEntity = scene->GetSettings()->useDebugCamera ? scene->GetDebugCameraEntity() : scene->GetSceneCameraEntity();
         pc.isSphere = 1;
         pc.drawIdOffset = 0;
         pc.debugColor = glm::vec4(1.0, 0.0, 0.0, 1.0);

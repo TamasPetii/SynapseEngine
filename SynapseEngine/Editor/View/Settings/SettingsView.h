@@ -15,6 +15,7 @@ namespace Syn {
             ImGui::Begin("Scene Settings");
 
             ImGui::SeparatorText("General");
+            changed |= ImGui::Checkbox("Debug Camera", &settings.useDebugCamera);
             changed |= ImGui::Checkbox("Transparent Picking", &settings.enableTransparentPicking);
 
             ImGui::SeparatorText("Rendering Features");

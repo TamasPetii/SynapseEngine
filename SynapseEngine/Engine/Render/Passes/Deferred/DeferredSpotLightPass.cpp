@@ -108,7 +108,7 @@ namespace Syn {
         pc.vertexPositionsAddr = cube->hardwareBuffers.vertexPositions->GetDeviceAddress();
         pc.indicesAddr = cube->hardwareBuffers.indices->GetDeviceAddress();
 
-        pc.activeCameraEntity = scene->GetSceneCameraEntity();
+        pc.activeCameraEntity = scene->GetSettings()->useDebugCamera ? scene->GetDebugCameraEntity() : scene->GetSceneCameraEntity();
         pc.screenWidth = (float)_graphicsState.renderArea->width;
         pc.screenHeight = (float)_graphicsState.renderArea->height;
 
