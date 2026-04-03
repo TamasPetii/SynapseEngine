@@ -214,6 +214,21 @@ namespace Syn {
             });
     }
 
+    uint32_t ImageManager::LoadImageSync(const std::string& filePath) {
+        return InternalLoadSync(filePath, [this, filePath]() {
+            return _builder->BuildFromFile(filePath);
+            });
+    }
+
+    uint32_t ImageManager::LoadImageFromSourceSync(const std::string& name, ImageSourceFactory factory) {
+        return InternalLoadSync(name, [this, factory]() {
+            if (auto source = factory()) {
+                return _builder->BuildFromSource(*source);
+            }
+            return std::shared_ptr<Texture>(nullptr);
+            });
+    }
+
     void ImageManager::StartGpuUpload(EntryType& entry) {
         bool needsGraphics = entry.resource->gpuData.autoGenerateMipmaps;
 

@@ -48,6 +48,10 @@
 #include "Engine/Render/Passes/Present/CompositePass.h"
 #include "Engine/Render/Passes/Present/CopyToSwapchainPass.h"
 
+#include "Engine/Render/Passes/Billboard/DirectionLightBillboardPass.h"
+#include "Engine/Render/Passes/Billboard/PointLightBillboardPass.h"
+#include "Engine/Render/Passes/Billboard/SpotLightBillboardPass.h"
+
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "RenderNames.h"
 
@@ -84,6 +88,9 @@ namespace Syn
 
         // Editor Picking Passes
         pipeline->AddPass(std::make_unique<DepthCopyPass>());
+        pipeline->AddPass(std::make_unique<DirectionLightBillboardPass>());
+        pipeline->AddPass(std::make_unique<PointLightBillboardPass>());
+        pipeline->AddPass(std::make_unique<SpotLightBillboardPass>());
         pipeline->AddPass(std::make_unique<TraditionalTransparentPickingPass>(MaterialRenderType::Transparent1Sided));
         pipeline->AddPass(std::make_unique<TraditionalTransparentPickingPass>(MaterialRenderType::Transparent2Sided));
         pipeline->AddPass(std::make_unique<MeshletTransparentPickingPass>(MaterialRenderType::Transparent1Sided));

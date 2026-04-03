@@ -228,6 +228,7 @@ namespace Syn
         pointLightIndirectCommandBuffers.resize(frameCount);
         debugPointLightSphereCmdBuffers.resize(frameCount);
         debugPointLightAabbCmdBuffers.resize(frameCount);
+        editorPointLightBillboardCmdBuffers.resize(frameCount);
 
         VkDrawIndirectCommand sphereCmdTemplate{};
         sphereCmdTemplate.vertexCount = sphere->baseDrawCommands[0].traditionalCmd.vertexCount;
@@ -240,6 +241,12 @@ namespace Syn
         aabbCmdTemplate.instanceCount = 0;
         aabbCmdTemplate.firstVertex = cube->baseDrawCommands[0].traditionalCmd.firstVertex;
         aabbCmdTemplate.firstInstance = 0;
+
+        VkDrawIndirectCommand billboardCmdTemplate{};
+        billboardCmdTemplate.vertexCount = 6;
+        billboardCmdTemplate.instanceCount = 0;
+        billboardCmdTemplate.firstVertex = 0;
+        billboardCmdTemplate.firstInstance = 0;
 
         pointLightCmdTemplate = aabbCmdTemplate;
 
@@ -260,6 +267,9 @@ namespace Syn
 
             debugPointLightAabbCmdBuffers[i] = Vk::BufferFactory::CreatePersistent(cmdSize, usage);
             debugPointLightAabbCmdBuffers[i]->Write(&aabbCmdTemplate, cmdSize, 0);
+
+            editorPointLightBillboardCmdBuffers[i] = Vk::BufferFactory::CreatePersistent(cmdSize, usage);
+            editorPointLightBillboardCmdBuffers[i]->Write(&billboardCmdTemplate, cmdSize, 0);
         }
     }
 
@@ -272,6 +282,7 @@ namespace Syn
         spotLightIndirectCommandBuffers.resize(frameCount);
         debugSpotLightSphereCmdBuffers.resize(frameCount);
         debugSpotLightAabbCmdBuffers.resize(frameCount);
+        editorSpotLightBillboardCmdBuffers.resize(frameCount);
 
         VkDrawIndirectCommand sphereCmdTemplate{};
         sphereCmdTemplate.vertexCount = sphere->baseDrawCommands[0].traditionalCmd.vertexCount;
@@ -284,6 +295,12 @@ namespace Syn
         aabbCmdTemplate.instanceCount = 0;
         aabbCmdTemplate.firstVertex = cube->baseDrawCommands[0].traditionalCmd.firstVertex;
         aabbCmdTemplate.firstInstance = 0;
+
+        VkDrawIndirectCommand billboardCmdTemplate{};
+        billboardCmdTemplate.vertexCount = 6;
+        billboardCmdTemplate.instanceCount = 0;
+        billboardCmdTemplate.firstVertex = 0;
+        billboardCmdTemplate.firstInstance = 0;
 
 		spotLightCmdTemplate = aabbCmdTemplate;
 
@@ -304,22 +321,33 @@ namespace Syn
 
             debugSpotLightAabbCmdBuffers[i] = Vk::BufferFactory::CreatePersistent(cmdSize, usage);
             debugSpotLightAabbCmdBuffers[i]->Write(&aabbCmdTemplate, cmdSize, 0);
+
+            editorSpotLightBillboardCmdBuffers[i] = Vk::BufferFactory::CreatePersistent(cmdSize, usage);
+            editorSpotLightBillboardCmdBuffers[i]->Write(&billboardCmdTemplate, cmdSize, 0);
         }
     }
 
     void SceneDrawData::InitDirectionLightBuffers(uint32_t frameCount)
     {
         directionLightIndirectCommandBuffers.resize(frameCount);
+        editorDirectionLightBillboardCmdBuffers.resize(frameCount);
 
         directionLightCmdTemplate.vertexCount = 3;
         directionLightCmdTemplate.instanceCount = 0;
         directionLightCmdTemplate.firstVertex = 0;
         directionLightCmdTemplate.firstInstance = 0;
 
+        VkDrawIndirectCommand billboardCmdTemplate{};
+        billboardCmdTemplate.vertexCount = 6;
+        billboardCmdTemplate.instanceCount = 0;
+        billboardCmdTemplate.firstVertex = 0;
+        billboardCmdTemplate.firstInstance = 0;
+
         const VkDeviceSize indirectCommandSize = sizeof(VkDrawIndirectCommand);
 
         const VkBufferUsageFlags indirectStorageTransferUsage =
             VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT |
+			VK_BUFFER_USAGE_TRANSFER_SRC_BIT |
             VK_BUFFER_USAGE_TRANSFER_DST_BIT |
             VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 
@@ -330,6 +358,10 @@ namespace Syn
                     indirectCommandSize,
                     indirectStorageTransferUsage
                 );
+
+            editorDirectionLightBillboardCmdBuffers[i] =
+                Vk::BufferFactory::CreatePersistent(indirectCommandSize, indirectStorageTransferUsage);
+            editorDirectionLightBillboardCmdBuffers[i]->Write(&billboardCmdTemplate, indirectCommandSize, 0);
         }
     }
 }

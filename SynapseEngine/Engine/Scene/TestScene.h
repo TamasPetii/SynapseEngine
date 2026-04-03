@@ -129,7 +129,7 @@ namespace Syn
             auto materialManager = ServiceLocator::GetMaterialManager();
 
             // Random Geometry
-            for (int i = 0; i < 5000; i++)
+            for (int i = 0; i < 1000; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
@@ -187,8 +187,8 @@ namespace Syn
                 light.strength = 5.0f;
                 light.useShadow = true;
 
-                registry->GetPool<TransformComponent>()->SetCategory(dirLightEntity, StorageCategory::Static);
-                registry->GetPool<DirectionLightComponent>()->SetCategory(dirLightEntity, StorageCategory::Static);
+                registry->GetPool<TransformComponent>()->SetCategory(dirLightEntity, StorageCategory::Stream);
+                registry->GetPool<DirectionLightComponent>()->SetCategory(dirLightEntity, StorageCategory::Stream);
                 registry->GetPool<DirectionLightComponent>()->SetBit<SHADOW_TOGGLE_BIT>(dirLightEntity);
                 registry->GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(dirLightEntity);
             }
@@ -217,8 +217,8 @@ namespace Syn
                 light.strength = 5.0f + (rand() % 25);
                 light.useShadow = (i < 5);
 
-                registry->GetPool<TransformComponent>()->SetCategory(lightEntity, StorageCategory::Static);
-                registry->GetPool<PointLightComponent>()->SetCategory(lightEntity, StorageCategory::Static);
+                registry->GetPool<TransformComponent>()->SetCategory(lightEntity, StorageCategory::Stream);
+                registry->GetPool<PointLightComponent>()->SetCategory(lightEntity, StorageCategory::Stream);
                 registry->GetPool<PointLightComponent>()->SetBit<SHADOW_TOGGLE_BIT>(lightEntity);
                 registry->GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(lightEntity);
             }
@@ -257,8 +257,8 @@ namespace Syn
                 light.strength = 5.0f + (rand() % 25);
                 light.useShadow = (i < 5);
 
-                registry->GetPool<TransformComponent>()->SetCategory(spotLightEntity, StorageCategory::Static);
-                registry->GetPool<SpotLightComponent>()->SetCategory(spotLightEntity, StorageCategory::Static);
+                registry->GetPool<TransformComponent>()->SetCategory(spotLightEntity, StorageCategory::Stream);
+                registry->GetPool<SpotLightComponent>()->SetCategory(spotLightEntity, StorageCategory::Stream);
                 registry->GetPool<SpotLightComponent>()->SetBit<SHADOW_TOGGLE_BIT>(spotLightEntity);
                 registry->GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(spotLightEntity);
             }

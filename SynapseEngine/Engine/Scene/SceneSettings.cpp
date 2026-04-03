@@ -21,5 +21,8 @@ namespace Syn
         , enableDeferredPointLights(true)
         , enableDeferredSpotLights(true)
         , enableDeferredDirectionalLights(true)
+        , enableBillboardPointLights(true)
+        , enableBillboardSpotLights(true)
+        , enableBillboardDirectionalLights(true)
     {}
 }

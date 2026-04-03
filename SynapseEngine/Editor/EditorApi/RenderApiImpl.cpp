@@ -66,7 +66,11 @@ namespace Syn
         auto registry = scene->GetRegistry();
         if (registry == nullptr) return nullValue;
 
-        auto cameraEntity = scene->GetSceneCameraEntity();
+        auto settings = scene->GetSettings();
+        EntityID cameraEntity = (settings && settings->useDebugCamera)
+            ? scene->GetDebugCameraEntity()
+            : scene->GetSceneCameraEntity();
+
         if (cameraEntity == NULL_ENTITY || !registry->HasComponent<CameraComponent>(cameraEntity))
             return nullValue;
 
@@ -81,7 +85,11 @@ namespace Syn
         auto registry = scene->GetRegistry();
         if (registry == nullptr) return nullValue;
 
-        auto cameraEntity = scene->GetSceneCameraEntity();
+        auto settings = scene->GetSettings();
+        EntityID cameraEntity = (settings && settings->useDebugCamera)
+            ? scene->GetDebugCameraEntity()
+            : scene->GetSceneCameraEntity();
+
         if (cameraEntity == NULL_ENTITY || !registry->HasComponent<CameraComponent>(cameraEntity))
             return nullValue;
 

@@ -906,6 +906,15 @@
     <ClCompile Include="Component\TagComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Passes\Billboard\DirectionLightBillboardPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Billboard\PointLightBillboardPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Billboard\SpotLightBillboardPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1907,6 +1916,15 @@
     <ClInclude Include="Component\TagComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Passes\Billboard\DirectionLightBillboardPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Billboard\PointLightBillboardPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Billboard\SpotLightBillboardPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Passes\Common\Fullscreen.vert" />
@@ -1982,5 +2000,8 @@
     <None Include="Shaders\Passes\Culling\SpotLightCulling.comp" />
     <None Include="Shaders\Includes\PushConstants\WireframeLightPC.glsl" />
     <None Include="Shaders\Passes\Wireframe\WireframeLight.vert" />
+    <None Include="Shaders\Includes\PushConstants\BillboardPC.glsl" />
+    <None Include="Shaders\Passes\Billboard\Billboard.vert" />
+    <None Include="Shaders\Passes\Billboard\Billboard.frag" />
   </ItemGroup>
 </Project>

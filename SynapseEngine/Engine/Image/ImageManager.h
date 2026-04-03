@@ -27,6 +27,9 @@ namespace Syn {
         uint32_t LoadImageAsync(const std::string& filePath);
         uint32_t LoadImageFromSourceAsync(const std::string& name, ImageSourceFactory factory);
 
+        uint32_t LoadImageSync(const std::string& filePath);
+        uint32_t LoadImageFromSourceSync(const std::string& name, ImageSourceFactory factory);
+
         Vk::DescriptorBuffer* GetBindlessBuffer() const { return _bindlessBuffer.get(); }
         VkDescriptorSetLayout GetBindlessLayout() const { return _bindlessLayout; }
         Vk::Sampler* GetSampler(const std::string& name) const;

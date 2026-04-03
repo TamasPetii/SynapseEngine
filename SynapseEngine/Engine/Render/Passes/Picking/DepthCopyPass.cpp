@@ -6,7 +6,12 @@ namespace Syn
 {
     bool DepthCopyPass::ShouldExecute(const RenderContext& context) const
     {
-		return context.scene->GetSettings()->enableTransparentPicking;
+        auto settings = context.scene->GetSettings();
+
+		return settings->enableTransparentPicking || 
+               settings->enableBillboardDirectionalLights || 
+               settings->enableBillboardPointLights ||
+               settings->enableBillboardSpotLights;
     }
 
     void DepthCopyPass::PrepareFrame(const RenderContext& context) {

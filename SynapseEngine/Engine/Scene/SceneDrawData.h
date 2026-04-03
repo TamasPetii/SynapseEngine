@@ -75,6 +75,7 @@ namespace Syn
         std::vector<std::shared_ptr<Vk::Buffer>> pointLightIndirectCommandBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> debugPointLightSphereCmdBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> debugPointLightAabbCmdBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> editorPointLightBillboardCmdBuffers;
 
         // --- Spot Light Data ---
         VkDrawIndirectCommand spotLightCmdTemplate{};
@@ -82,11 +83,13 @@ namespace Syn
         std::vector<std::shared_ptr<Vk::Buffer>> spotLightIndirectCommandBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> debugSpotLightSphereCmdBuffers;
         std::vector<std::shared_ptr<Vk::Buffer>> debugSpotLightAabbCmdBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> editorSpotLightBillboardCmdBuffers;
 
 		// --- Direction Light Data ---
         VkDrawIndirectCommand directionLightCmdTemplate{};
         std::vector<uint32_t> directionLightCpuInstanceBuffer;
         std::vector<std::shared_ptr<Vk::Buffer>> directionLightIndirectCommandBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> editorDirectionLightBillboardCmdBuffers;
     private:
         void InitModelBuffers(uint32_t frameCount);
         void InitDebugBuffers(uint32_t frameCount);

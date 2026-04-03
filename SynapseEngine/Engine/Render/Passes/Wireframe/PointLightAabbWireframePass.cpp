@@ -78,6 +78,28 @@ namespace Syn {
             .depthAttachment = &_depthAttachment.value(),
             .layerCount = 1
         };
+
+        auto scene = context.scene;
+        auto drawData = scene->GetSceneDrawData();
+        uint32_t fIdx = context.frameIndex;
+
+        Vk::BufferCopyInfo copyRegion{};
+        copyRegion.srcBuffer = drawData->pointLightIndirectCommandBuffers[fIdx]->Handle();
+        copyRegion.dstBuffer = drawData->debugPointLightAabbCmdBuffers[fIdx]->Handle();
+        copyRegion.srcOffset = offsetof(VkDrawIndirectCommand, instanceCount);
+        copyRegion.dstOffset = offsetof(VkDrawIndirectCommand, instanceCount);
+        copyRegion.size = sizeof(uint32_t);
+
+        Vk::BufferUtils::CopyBuffer(context.cmd, copyRegion);
+
+        Vk::BufferBarrierInfo memBarrier{};
+        memBarrier.buffer = drawData->debugPointLightAabbCmdBuffers[fIdx]->Handle();
+        memBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+        memBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+        memBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
+        memBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT;
+
+        Vk::BufferUtils::InsertBarrier(context.cmd, memBarrier);
     }
 
     void PointLightAabbWireframePass::PushConstants(const RenderContext& context) {
@@ -114,24 +136,6 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-
-        Vk::BufferCopyInfo copyRegion{};
-        copyRegion.srcBuffer = drawData->pointLightIndirectCommandBuffers[fIdx]->Handle();
-        copyRegion.dstBuffer = drawData->debugPointLightAabbCmdBuffers[fIdx]->Handle();
-        copyRegion.srcOffset = offsetof(VkDrawIndirectCommand, instanceCount);
-        copyRegion.dstOffset = offsetof(VkDrawIndirectCommand, instanceCount);
-        copyRegion.size = sizeof(uint32_t);
-
-        Vk::BufferUtils::CopyBuffer(context.cmd, copyRegion);
-
-        Vk::BufferBarrierInfo memBarrier{};
-        memBarrier.buffer = drawData->debugPointLightAabbCmdBuffers[fIdx]->Handle();
-        memBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
-        memBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-        memBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
-        memBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT;
-
-        Vk::BufferUtils::InsertBarrier(context.cmd, memBarrier);
 
         vkCmdDrawIndirect(
             context.cmd,
