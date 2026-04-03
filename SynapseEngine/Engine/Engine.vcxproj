@@ -235,6 +235,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Render\Profiler\DefaultGpuProfiler.cpp" />
+    <ClCompile Include="Render\Profiler\IGpuProfiler.cpp" />
     <ClCompile Include="Render\Passes\Performance\PerformanceMeshletTransparentPass.cpp" />
     <ClCompile Include="Render\Passes\Performance\PerformanceTraditionalTransparentPass.cpp" />
     <ClCompile Include="Render\Passes\Performance\PerformanceMeshletOpaquePass.cpp" />
@@ -542,6 +544,8 @@
     <ClCompile Include="Render\Passes\Wboit\WboitInitPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\Profiler\DefaultGpuProfiler.h" />
+    <ClInclude Include="Render\Profiler\IGpuProfiler.h" />
     <ClInclude Include="Render\Passes\Performance\PerformanceMeshletTransparentPass.h" />
     <ClInclude Include="Render\Passes\Performance\PerformanceTraditionalTransparentPass.h" />
     <ClInclude Include="Render\Passes\Performance\PerformanceMeshletOpaquePass.h" />

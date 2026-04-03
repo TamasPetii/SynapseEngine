@@ -4,6 +4,7 @@
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
 #include "Engine/FrameContext.h"
+#include "Engine/Render/Profiler/IGpuProfiler.h"
 
 namespace Syn {
 
@@ -48,6 +49,8 @@ namespace Syn {
 
         if (!cmd) 
             return;
+
+        ServiceLocator::GetGpuProfiler()->BeginFrame(cmd->Handle(), frameIndex);
 
         RenderContext context = {
             .cmd = cmd->Handle(),

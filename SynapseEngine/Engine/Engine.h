@@ -21,6 +21,7 @@ namespace Syn {
     class InputManager;
     class SceneManager;
     class IPhysicsEngine;
+	class IGpuProfiler;
 }
 
 namespace Syn
@@ -76,6 +77,7 @@ namespace Syn
         std::unique_ptr<SceneManager> _sceneManager;
 		std::unique_ptr<tf::Executor> _taskExecutor;
         std::unique_ptr<IPhysicsEngine> _physicsEngine;
+		std::unique_ptr<IGpuProfiler> _gpuProfiler;
 
         std::shared_ptr<tf::TFProfObserver> _jsonTaskObserver;
         std::shared_ptr<TaskProfilerObserver> _guiTaskObserver;

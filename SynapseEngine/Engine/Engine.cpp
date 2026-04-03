@@ -30,6 +30,8 @@
 #include "Engine/Render/RendererFactory.h"
 #include "Engine/Physics/JoltPhysicsEngine.h"
 
+#include "Engine/Render/Profiler/DefaultGpuProfiler.h"
+
 #include <print>
 #include <filesystem>
 
@@ -68,6 +70,8 @@ namespace Syn
 		uint32_t currentFrame = _frameContext.currentFrameIndex;
 
 		_renderManager->WaitForFrame(currentFrame);
+
+		ServiceLocator::GetGpuProfiler()->ResolveFrame(currentFrame);
 
 		if (_onGuiFlushCallback)
 			_onGuiFlushCallback(currentFrame);
@@ -141,6 +145,8 @@ namespace Syn
 	}
 
 	void Engine::AdvanceFrameIndex() {
+		uint32_t prevFrame = _frameContext.currentFrameIndex;
+
 		_frameContext.currentFrameIndex = (_frameContext.currentFrameIndex + 1) % _frameContext.framesInFlight;
 
 		static auto lastTime = std::chrono::high_resolution_clock::now();
@@ -152,7 +158,26 @@ namespace Syn
 		float timeDiff = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
 
 		if (timeDiff >= 1.0f) {
-			std::println("FPS: {} ({} ms/frame)", frameCount, 1000.0f / frameCount);
+			
+			Info("FPS: {} ({} ms/frame)", frameCount, 1000.0f / frameCount);
+
+			auto profiler = ServiceLocator::GetGpuProfiler();
+			if (profiler) {
+				const auto& timings = profiler->GetTimings(prevFrame);
+
+				std::string logReport = std::format("FPS: {} | GPU Timings:\n", frameCount);
+
+				float total = 0.0f;
+				for (const auto& [name, ms] : timings) {
+					logReport += std::format("    - {:<30} : {:>8.3f} ms\n", name, ms);
+					total += ms;
+				}
+
+				logReport += "    ------------------------------------------------\n";
+				logReport += std::format("    = {:<30} : {:>8.3f} ms", "TOTAL GPU TIME", total);
+
+				Syn::Info("{}\n", logReport);
+			}
 
 			frameCount = 0;
 			lastTime = currentTime;
@@ -167,6 +192,10 @@ namespace Syn
 		_renderManager = std::move(RendererFactory::CreateDeferredRenderer(_frameContext.framesInFlight));
 #endif
 		_renderManager->SetGuiRenderCallback(params.onRenderGuiCallback);
+
+		float timestampPeriod = _vkContext->GetPhysicalDevice()->GetProperties().limits.timestampPeriod;
+		_gpuProfiler = std::make_unique<DefaultGpuProfiler>(_frameContext.framesInFlight, timestampPeriod);
+		ServiceLocator::ProvideGpuProfiler(_gpuProfiler.get());
 	}
 
 	void Engine::Shutdown() 

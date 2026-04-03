@@ -17,6 +17,7 @@ namespace Syn {
 	AnimationBuilder* ServiceLocator::_animationBuilder = nullptr;
 	AnimationManager* ServiceLocator::_animationManager = nullptr;
 	IPhysicsEngine* ServiceLocator::_physicsEngine = nullptr;
+	IGpuProfiler* ServiceLocator::_gpuProfiler = nullptr;
 
 	void ServiceLocator::Shutdown()
 	{
@@ -36,5 +37,6 @@ namespace Syn {
 		_animationBuilder = nullptr;
 		_animationManager = nullptr;
 		_physicsEngine = nullptr;
+		_gpuProfiler = nullptr;
 	}
 }

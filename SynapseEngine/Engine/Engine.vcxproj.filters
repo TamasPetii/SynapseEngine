@@ -930,6 +930,12 @@
     <ClCompile Include="Render\Passes\Performance\PerformanceMeshletTransparentPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Profiler\IGpuProfiler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Profiler\DefaultGpuProfiler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1953,6 +1959,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Performance\PerformanceMeshletTransparentPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Profiler\IGpuProfiler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Profiler\DefaultGpuProfiler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
