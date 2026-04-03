@@ -198,7 +198,16 @@ namespace Syn
 
                         uint32_t bufferIndex = meshAlloc.instanceOffsets[matType] + slotIndex;
                         if (bufferIndex < drawData->cpuInstanceBuffer.size()) {
-                            drawData->cpuInstanceBuffer[bufferIndex] = entity;
+                            uint32_t payload = static_cast<uint32_t>(entity);
+
+                            if (parentFullyInside) {
+                                payload |= (1u << 31);
+                            }
+                            else {
+                                payload &= ~(1u << 31);
+                            }
+
+                            drawData->cpuInstanceBuffer[bufferIndex] = payload;
                         }
                     }
                 }      

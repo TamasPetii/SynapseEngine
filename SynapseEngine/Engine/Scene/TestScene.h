@@ -30,7 +30,7 @@ namespace Syn
             const std::string basePath = "C:/Users/User/Desktop/Models/";
 
             uint32_t sponzaId = modelManager->LoadModelAsync(basePath + "Sponza-master/sponza.obj");
-            uint32_t bistroId = modelManager->LoadModelAsync(basePath + "Bistro/BistroExterior.fbx");
+            //uint32_t bistroId = modelManager->LoadModelAsync(basePath + "Bistro/BistroExterior.fbx");
             uint32_t mutantId = modelManager->LoadModelAsync(basePath + "Monster/Mutant/Mutant.dae");
 
             std::vector<uint32_t> animationIds;
@@ -87,6 +87,7 @@ namespace Syn
                 registry->GetPool<ModelComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
             }
 
+            /*
             {
                 // Bistro
                 EntityID bistroEntity = registry->CreateEntity();
@@ -99,6 +100,7 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
                 registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
             }
+            */
 
             for (int i = 0; i < 5000; i++)
             {
@@ -129,7 +131,7 @@ namespace Syn
             auto materialManager = ServiceLocator::GetMaterialManager();
 
             // Random Geometry
-            for (int i = 0; i < 500000; i++)
+            for (int i = 0; i < 100000; i++)
             {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
@@ -156,7 +158,6 @@ namespace Syn
                 float randomFloat = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                 float alpha = 0.1f + (randomFloat * 0.9f);
 
-                /*
                 MaterialInfo randomMatInfo{};
                 randomMatInfo.color = glm::vec4(r, g, b, alpha);
                 randomMatInfo.doubleSided = rand() % 2;
@@ -170,7 +171,6 @@ namespace Syn
 
                 auto& overrideComp = registry->GetComponent<MaterialOverrideComponent>(e);
                 overrideComp.materials.push_back(randomMatId);
-                */
             }
 
             for (int i = 0; i < 1; ++i)
