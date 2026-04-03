@@ -176,7 +176,8 @@ namespace Syn
 				logReport += "    ------------------------------------------------\n";
 				logReport += std::format("    = {:<30} : {:>8.3f} ms", "TOTAL GPU TIME", total);
 
-				Syn::Info("{}\n", logReport);
+				//Syn::Info("{}\n", logReport);
+				std::println("{}", logReport);
 			}
 
 			frameCount = 0;
