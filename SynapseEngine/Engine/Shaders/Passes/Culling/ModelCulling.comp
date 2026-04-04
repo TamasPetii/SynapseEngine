@@ -133,4 +133,13 @@ void main() {
         outData.packedFlags = (visibility == INTERSECTION_INSIDE) ? 1 : 0; 
         GET_VISIBLE_MODEL(pc.visibleModelListAddr, finalIndex) = outData;
     }
+
+    /*
+    uint finalIndex = atomicAdd(GET_DISPATCH_CMD(pc.visibleModelCountAddr).groupCountX, 1);
+    VisibleModelData outData;
+    outData.entityId = entityId;
+    outData.modelIndex = modelComp.modelIndex;
+    outData.packedFlags = (visibility == INTERSECTION_INSIDE) ? 1 : 0;
+    GET_VISIBLE_MODEL(pc.visibleModelListAddr, finalIndex) = outData;
+    */
 }

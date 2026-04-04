@@ -3,6 +3,10 @@
 #extension GL_EXT_buffer_reference2 : require
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 
+#extension GL_KHR_shader_subgroup_basic : require
+#extension GL_KHR_shader_subgroup_arithmetic : require
+#extension GL_KHR_shader_subgroup_ballot : require
+
 #include "../../Includes/Core.glsl"
 #include "../../Includes/Common/Camera.glsl"
 #include "../../Includes/Common/PointLight.glsl"
@@ -42,6 +46,22 @@ void main() {
         return;
     }
 
+    uint needsWrite = 1;
+    uint subgroupWriteCount = subgroupAdd(needsWrite);
+    uint localOffset = subgroupExclusiveAdd(needsWrite);
+    uint baseOffset = 0;
+
+    if (subgroupElect()) {
+        baseOffset = atomicAdd(GET_VK_DRAW_CMD(pc.indirectCommandAddr, 0).instanceCount, subgroupWriteCount);
+    }
+
+    baseOffset = subgroupBroadcastFirst(baseOffset);
+
+    uint finalIndex = baseOffset + localOffset;
+    GET_VISIBLE_POINT_LIGHT(pc.visibleLightAddr, finalIndex) = collider.entityIndex;
+
+    /*
     uint slot = atomicAdd(GET_VK_DRAW_CMD(pc.indirectCommandAddr, 0).instanceCount, 1);
     GET_VISIBLE_POINT_LIGHT(pc.visibleLightAddr, slot) = collider.entityIndex;
+    */
 }
