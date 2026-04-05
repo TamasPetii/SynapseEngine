@@ -1,7 +1,7 @@
 #include "RenderPipeline.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
-#include "Engine/Render/Profiler/IGpuProfiler.h"
+#include "Engine/Profiler/IGpuProfiler.h"
 
 namespace Syn
 {

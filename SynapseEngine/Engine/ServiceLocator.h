@@ -23,6 +23,7 @@ namespace Syn {
     class AnimationBuilder;
     class IPhysicsEngine;
 	class IGpuProfiler;
+    class ICpuProfiler;
 }
 
 namespace Syn 
@@ -85,6 +86,9 @@ namespace Syn
 
 		static void ProvideGpuProfiler(IGpuProfiler* profiler) { _gpuProfiler = profiler; }
 		static IGpuProfiler* GetGpuProfiler() { return _gpuProfiler; }
+
+		static void ProvideCpuProfiler(ICpuProfiler* profiler) { _cpuProfiler = profiler; }
+		static ICpuProfiler* GetCpuProfiler() { return _cpuProfiler; }
     private:
         static Vk::Context* _vkContext;
         static Vk::GpuUploader* _gpuUploader;
@@ -103,5 +107,6 @@ namespace Syn
         static AnimationManager* _animationManager;
         static IPhysicsEngine* _physicsEngine;
 		static IGpuProfiler* _gpuProfiler;
+		static ICpuProfiler* _cpuProfiler;
     };
 }

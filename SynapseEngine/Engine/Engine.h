@@ -6,7 +6,6 @@
 #include <span>
 #include <memory>
 
-#include "Profiler/TaskProfilerObserver.h"
 #include <taskflow/taskflow.hpp>
 
 namespace Syn::Vk { 
@@ -22,6 +21,7 @@ namespace Syn {
     class SceneManager;
     class IPhysicsEngine;
 	class IGpuProfiler;
+    class ICpuProfiler;
 }
 
 namespace Syn
@@ -62,6 +62,7 @@ namespace Syn
         void InitTaskExecutor();
         void InitSceneManager();
         void InitPhysicsEngine();
+        void InitProfilers();
         void Shutdown();
     private:
         void AdvanceFrameIndex();
@@ -78,9 +79,8 @@ namespace Syn
 		std::unique_ptr<tf::Executor> _taskExecutor;
         std::unique_ptr<IPhysicsEngine> _physicsEngine;
 		std::unique_ptr<IGpuProfiler> _gpuProfiler;
+        std::unique_ptr<ICpuProfiler> _cpuProfiler;
 
-        std::shared_ptr<tf::TFProfObserver> _jsonTaskObserver;
-        std::shared_ptr<TaskProfilerObserver> _guiTaskObserver;
         std::function<void(uint32_t)> _onGuiFlushCallback;
     };
 }

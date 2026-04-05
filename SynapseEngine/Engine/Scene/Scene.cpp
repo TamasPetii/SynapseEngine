@@ -30,6 +30,7 @@
 #include "Engine/System/Light/DirectionLightShadowSystem.h"
 #include "Engine/System/Light/DirectionLightCullingSystem.h"
 #include "Engine/Component/MaterialOverrideComponent.h"
+#include "Engine/Profiler/ICpuProfiler.h"
 
 #include "Engine/ServiceLocator.h"
 #include "Engine/FrameContext.h"
@@ -145,6 +146,13 @@ namespace Syn
         for (auto& system : _systems)
         {
             tf::Task sysTask = taskflow.emplace([sys = system.get(), phase, this](tf::Subflow& subflow) {
+
+                std::string profilerName = sys->GetName();
+                if (phase == SystemPhase::Update) profilerName += " [Update]";
+                else if (phase == SystemPhase::UploadGPU) profilerName += " [Upload GPU]";
+                else profilerName += " [Finish]";
+
+                CpuProfileScope profile(ServiceLocator::GetCpuProfiler(), _currentFrameIndex, profilerName);
 
                 switch (phase)
                 {
