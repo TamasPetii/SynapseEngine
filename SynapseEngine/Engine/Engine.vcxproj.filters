@@ -594,9 +594,6 @@
     <ClCompile Include="Collision\Tester\CollisionTester.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Profiler\TaskProfilerObserver.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Render\Passes\Culling\ModelCullingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -930,13 +927,22 @@
     <ClCompile Include="Render\Passes\Performance\PerformanceMeshletTransparentPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Profiler\IGpuProfiler.cpp">
+    <ClCompile Include="Profiler\IGpuProfiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Profiler\DefaultGpuProfiler.cpp">
+    <ClCompile Include="Profiler\DefaultGpuProfiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Profiler\ICpuProfiler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Profiler\DefaultCpuProfiler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Profiler\IProfiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1613,9 +1619,6 @@
     <ClInclude Include="System\SystemPhaseNames.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Profiler\TaskProfilerObserver.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Render\Passes\Culling\ModelCullingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1964,13 +1967,22 @@
     <ClInclude Include="Render\Passes\Performance\PerformanceMeshletTransparentPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Profiler\IGpuProfiler.h">
+    <ClInclude Include="Profiler\IGpuProfiler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Profiler\DefaultGpuProfiler.h">
+    <ClInclude Include="Profiler\DefaultGpuProfiler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Culling\WorkGraphCullingPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiler\ICpuProfiler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiler\DefaultCpuProfiler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Profiler\IProfiler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -2053,5 +2065,12 @@
     <None Include="Shaders\Passes\Wireframe\WireframeLight.vert" />
     <None Include="Shaders\Passes\Wireframe\WireframeMeshlet.vert" />
     <None Include="Shaders\Passes\Wireframe\WireframeSetup.comp" />
+    <None Include="Shaders\Passes\Deferred\DeferredDirectionLight.frag" />
+    <None Include="Shaders\Passes\Deferred\DeferredDirectionLight.vert" />
+    <None Include="Shaders\Passes\Deferred\DeferredEmissiveAo.frag" />
+    <None Include="Shaders\Passes\Deferred\DeferredPointLight.frag" />
+    <None Include="Shaders\Passes\Deferred\DeferredPointLight.vert" />
+    <None Include="Shaders\Passes\Deferred\DeferredSpotLight.frag" />
+    <None Include="Shaders\Passes\Deferred\DeferredSpotLight.vert" />
   </ItemGroup>
 </Project>

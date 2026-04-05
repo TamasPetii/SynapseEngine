@@ -30,7 +30,8 @@
 #include "Engine/Render/RendererFactory.h"
 #include "Engine/Physics/JoltPhysicsEngine.h"
 
-#include "Engine/Render/Profiler/DefaultGpuProfiler.h"
+#include "Engine/Profiler/DefaultGpuProfiler.h"
+#include "Engine/Profiler/DefaultCpuProfiler.h"
 
 #include <print>
 #include <filesystem>
@@ -50,6 +51,9 @@ namespace Syn
 	void Engine::Update(float deltaTime)
 	{
 		_frameContext.deltaTime = deltaTime;
+		uint32_t currentFrame = _frameContext.currentFrameIndex;
+
+		ServiceLocator::GetCpuProfiler()->BeginFrame(currentFrame);
 
 		ServiceLocator::GetAnimationManager()->Update();
 		ServiceLocator::GetModelManager()->Update();
@@ -57,7 +61,7 @@ namespace Syn
 		ServiceLocator::GetImageManager()->Update();
 		ServiceLocator::GetGpuUploader()->ProcessUploads();
 
-		_sceneManager->Update(_frameContext.deltaTime, _frameContext.currentFrameIndex);
+		_sceneManager->Update(_frameContext.deltaTime, currentFrame);
 	
 		ServiceLocator::GetInputManager()->UpdatePrevious();
 	}
@@ -82,8 +86,7 @@ namespace Syn
 
 		_sceneManager->Finish();
 
-		if(_guiTaskObserver)
-			std::vector<TaskProfileData> frameTasks = _guiTaskObserver->ExtractFrameData();
+		ServiceLocator::GetCpuProfiler()->ResolveFrame(currentFrame);
 
 		AdvanceFrameIndex();
 	}
@@ -103,6 +106,7 @@ namespace Syn
 		InitRenderManager(params);
 		InitSceneManager();
 		InitPhysicsEngine();
+		InitProfilers();
 	}
 
 	void Engine::InitLogger()
@@ -158,31 +162,32 @@ namespace Syn
 		float timeDiff = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - lastTime).count();
 
 		if (timeDiff >= 1.0f) {
-			
-			Info("FPS: {} ({} ms/frame)", frameCount, 1000.0f / frameCount);
 
-			auto profiler = ServiceLocator::GetGpuProfiler();
-			if (profiler) {
-				const auto& timings = profiler->GetTimings(prevFrame);
+			std::string logReport = std::format("FPS: {} ({} ms/frame)\n\n", frameCount, 1000.0f / frameCount);
 
-				std::string logReport = std::format("FPS: {} | GPU Timings:\n", frameCount);
-
-				float total = 0.0f;
-				for (const auto& [name, ms] : timings) {
-					logReport += std::format("    - {:<30} : {:>8.3f} ms\n", name, ms);
-					total += ms;
-				}
-
-				logReport += "    ------------------------------------------------\n";
-				logReport += std::format("    = {:<30} : {:>8.3f} ms", "TOTAL GPU TIME", total);
-
-				//Syn::Info("{}\n", logReport);
-				std::println("{}", logReport);
+			if (auto cpuProfiler = ServiceLocator::GetCpuProfiler()) {
+				logReport += cpuProfiler->GenerateReport(prevFrame, "CPU") + "\n";
 			}
+
+			if (auto gpuProfiler = ServiceLocator::GetGpuProfiler()) {
+				logReport += gpuProfiler->GenerateReport(prevFrame, "GPU") + "\n";
+			}
+
+			std::println("{}", logReport);
 
 			frameCount = 0;
 			lastTime = currentTime;
 		}
+	}
+
+	void Engine::InitProfilers()
+	{
+		float timestampPeriod = _vkContext->GetPhysicalDevice()->GetProperties().limits.timestampPeriod;
+		_gpuProfiler = std::make_unique<DefaultGpuProfiler>(_frameContext.framesInFlight, timestampPeriod);
+		ServiceLocator::ProvideGpuProfiler(_gpuProfiler.get());
+
+		_cpuProfiler = std::make_unique<DefaultCpuProfiler>(_frameContext.framesInFlight);
+		ServiceLocator::ProvideCpuProfiler(_cpuProfiler.get());
 	}
 
 	void Engine::InitRenderManager(const EngineInitParams& params)
@@ -193,46 +198,18 @@ namespace Syn
 		_renderManager = std::move(RendererFactory::CreateDeferredRenderer(_frameContext.framesInFlight));
 #endif
 		_renderManager->SetGuiRenderCallback(params.onRenderGuiCallback);
-
-		float timestampPeriod = _vkContext->GetPhysicalDevice()->GetProperties().limits.timestampPeriod;
-		_gpuProfiler = std::make_unique<DefaultGpuProfiler>(_frameContext.framesInFlight, timestampPeriod);
-		ServiceLocator::ProvideGpuProfiler(_gpuProfiler.get());
 	}
 
 	void Engine::Shutdown() 
 	{
-		if (EnableLogging && _jsonTaskObserver) {
-			const char* appDataPath = std::getenv("APPDATA");
-
-			std::filesystem::path baseDir = appDataPath ? appDataPath : ".";
-			std::filesystem::path directory = baseDir / "Synapse" / "Profile";
-
-			if (!std::filesystem::exists(directory)) {
-				std::filesystem::create_directories(directory);
-			}
-
-			std::string filename = std::format("{}/EngineTaskFlowProfile_{}.json",
-				directory.string(),
-				Syn::LogUtils::GetCurrentTimeForFileName());
-
-			std::ofstream ofs(filename);
-			if (ofs.is_open()) {
-				_jsonTaskObserver->dump(ofs);
-				ofs.close();
-				Info("Taskflow profile successfully saved to: {}", filename);
-			}
-			else {
-				Error("Failed to open profile file for writing: {}", filename);
-			}
-		}
 		_physicsEngine->Shutdown();
 		_physicsEngine.reset();
 
-		_guiTaskObserver.reset();
-		_jsonTaskObserver.reset();
 		_taskExecutor.reset();
 		_inputManager.reset();
 
+		_cpuProfiler.reset();
+		_gpuProfiler.reset();
 		_sceneManager.reset();
 		_renderManager.reset();
 		_resourceManager.reset();
@@ -261,12 +238,6 @@ namespace Syn
 		size_t workerThreads = std::max<size_t>(1, hardwareThreads - 1);
 
 		_taskExecutor = std::make_unique<tf::Executor>(workerThreads);
-
-		if (EnableLogging)
-		{
-			//_guiTaskObserver = _taskExecutor->make_observer<TaskProfilerObserver>();
-			_jsonTaskObserver = _taskExecutor->make_observer<tf::TFProfObserver>();
-		}
 
 		ServiceLocator::ProvideTaskExecutor(_taskExecutor.get());
 	}

@@ -235,8 +235,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Render\Profiler\DefaultGpuProfiler.cpp" />
-    <ClCompile Include="Render\Profiler\IGpuProfiler.cpp" />
+    <ClCompile Include="Profiler\IProfiler.cpp" />
+    <ClCompile Include="Profiler\DefaultCpuProfiler.cpp" />
+    <ClCompile Include="Profiler\ICpuProfiler.cpp" />
+    <ClCompile Include="Profiler\DefaultGpuProfiler.cpp" />
+    <ClCompile Include="Profiler\IGpuProfiler.cpp" />
     <ClCompile Include="Render\Passes\Performance\PerformanceMeshletTransparentPass.cpp" />
     <ClCompile Include="Render\Passes\Performance\PerformanceTraditionalTransparentPass.cpp" />
     <ClCompile Include="Render\Passes\Performance\PerformanceMeshletOpaquePass.cpp" />
@@ -360,7 +363,6 @@
     <ClCompile Include="Component\TransformComponent.cpp" />
     <ClCompile Include="Scene\TestScene.cpp" />
     <ClCompile Include="Render\Passes\TransferPass.cpp" />
-    <ClCompile Include="Profiler\TaskProfilerObserver.cpp" />
     <ClCompile Include="Animation\Data\Common\VertexSkinData.cpp" />
     <ClCompile Include="Render\Passes\Geometry\TraditionalOpaquePass.cpp" />
     <ClCompile Include="Render\Passes\Geometry\TraditionalTransparentPass.cpp" />
@@ -545,8 +547,11 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Render\Profiler\DefaultGpuProfiler.h" />
-    <ClInclude Include="Render\Profiler\IGpuProfiler.h" />
+    <ClInclude Include="Profiler\IProfiler.h" />
+    <ClInclude Include="Profiler\DefaultCpuProfiler.h" />
+    <ClInclude Include="Profiler\ICpuProfiler.h" />
+    <ClInclude Include="Profiler\DefaultGpuProfiler.h" />
+    <ClInclude Include="Profiler\IGpuProfiler.h" />
     <ClInclude Include="Render\Passes\Performance\PerformanceMeshletTransparentPass.h" />
     <ClInclude Include="Render\Passes\Performance\PerformanceTraditionalTransparentPass.h" />
     <ClInclude Include="Render\Passes\Performance\PerformanceMeshletOpaquePass.h" />
@@ -680,7 +685,6 @@
     <ClInclude Include="Component\TransformComponent.h" />
     <ClInclude Include="Scene\TestScene.h" />
     <ClInclude Include="Render\Passes\TransferPass.h" />
-    <ClInclude Include="Profiler\TaskProfilerObserver.h" />
     <ClInclude Include="Animation\Data\Common\VertexSkinData.h" />
     <ClInclude Include="Render\Passes\Geometry\TraditionalOpaquePass.h" />
     <ClInclude Include="Render\Passes\Geometry\TraditionalTransparentPass.h" />
@@ -943,6 +947,13 @@
     <None Include="Shaders\Passes\Culling\SpotLightCulling.comp" />
     <None Include="Shaders\Passes\Culling\WorkGraphMeshCulling.comp" />
     <None Include="Shaders\Passes\Culling\WorkGraphModelCulling.comp" />
+    <None Include="Shaders\Passes\Deferred\DeferredDirectionLight.frag" />
+    <None Include="Shaders\Passes\Deferred\DeferredDirectionLight.vert" />
+    <None Include="Shaders\Passes\Deferred\DeferredEmissiveAo.frag" />
+    <None Include="Shaders\Passes\Deferred\DeferredPointLight.frag" />
+    <None Include="Shaders\Passes\Deferred\DeferredPointLight.vert" />
+    <None Include="Shaders\Passes\Deferred\DeferredSpotLight.frag" />
+    <None Include="Shaders\Passes\Deferred\DeferredSpotLight.vert" />
     <None Include="Shaders\Passes\Geometry\Meshlet.frag" />
     <None Include="Shaders\Passes\Geometry\Meshlet.mesh" />
     <None Include="Shaders\Passes\Geometry\Meshlet.task" />
