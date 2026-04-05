@@ -26,6 +26,7 @@ struct MeshletPassPC {
     uint64_t debugAabbIndirectAddr;
     uint64_t debugSphereIndirectAddr;
     uint activeCameraEntity;
+    uint mainCameraEntity;
     uint baseDescriptorOffset;
     uint disableConeCulling;
     uint materialRenderType;

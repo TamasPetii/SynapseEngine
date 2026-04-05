@@ -936,6 +936,9 @@
     <ClCompile Include="Render\Profiler\DefaultGpuProfiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1967,89 +1970,88 @@
     <ClInclude Include="Render\Profiler\DefaultGpuProfiler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Passes\Culling\WorkGraphCullingPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Passes\Common\Fullscreen.vert" />
-    <None Include="Shaders\Passes\Common\Composite.frag" />
-    <None Include="Shaders\Passes\Geometry\Meshlet.frag" />
-    <None Include="Shaders\Passes\Geometry\Traditional.vert" />
-    <None Include="Shaders\Passes\Geometry\Traditional.frag" />
-    <None Include="Shaders\Passes\Culling\ModelCulling.comp" />
-    <None Include="Shaders\Passes\Culling\MeshCulling.comp" />
-    <None Include="Shaders\Passes\Geometry\Meshlet.task" />
-    <None Include="Shaders\Passes\Geometry\Meshlet.mesh" />
-    <None Include="Shaders\Passes\Hiz\HizLinearizeDepth.comp" />
-    <None Include="Shaders\Passes\Hiz\HizDownsample.comp" />
-    <None Include="Shaders\Passes\PostProcess\BloomPrefilter.comp" />
-    <None Include="Shaders\Passes\PostProcess\BloomUpsample.comp" />
-    <None Include="Shaders\Passes\PostProcess\BloomDownsample.comp" />
-    <None Include="Shaders\Passes\PostProcess\BloomComposite.comp" />
-    <None Include="Shaders\Passes\Wireframe\WireframeSetup.comp" />
-    <None Include="Shaders\Passes\Wireframe\Wireframe.vert" />
-    <None Include="Shaders\Passes\Wireframe\Wireframe.frag" />
-    <None Include="Shaders\Passes\Wireframe\WireframeMeshlet.vert" />
-    <None Include="Shaders\Passes\Geometry\TraditionalTransparent.frag" />
-    <None Include="Shaders\Passes\Geometry\MeshletTransparent.frag" />
-    <None Include="Shaders\Passes\Common\TransparentComposite.frag" />
-    <None Include="Shaders\Passes\Geometry\TraditionalTransparentPicking.frag" />
-    <None Include="Shaders\Passes\Geometry\MeshletTransparentPicking.frag" />
-    <None Include="Shaders\Passes\Deferred\DeferredEmissiveAo.frag" />
-    <None Include="Shaders\Passes\Deferred\DeferredPointLight.vert" />
-    <None Include="Shaders\Passes\Deferred\DeferredPointLight.frag" />
     <None Include="Shaders\Includes\Common\Animation.glsl" />
     <None Include="Shaders\Includes\Common\Camera.glsl" />
+    <None Include="Shaders\Includes\Common\Culling.glsl" />
+    <None Include="Shaders\Includes\Common\DirectionLight.glsl" />
+    <None Include="Shaders\Includes\Common\IndirectCommand.glsl" />
     <None Include="Shaders\Includes\Common\Material.glsl" />
     <None Include="Shaders\Includes\Common\Mesh.glsl" />
     <None Include="Shaders\Includes\Common\Model.glsl" />
     <None Include="Shaders\Includes\Common\PointLight.glsl" />
+    <None Include="Shaders\Includes\Common\SpotLight.glsl" />
     <None Include="Shaders\Includes\Common\Texture.glsl" />
     <None Include="Shaders\Includes\Common\Transform.glsl" />
-    <None Include="Shaders\Includes\PushConstants\TraditionalPassPC.glsl" />
-    <None Include="Shaders\Includes\Utils\ColorMath.glsl" />
-    <None Include="Shaders\Includes\Core.glsl" />
-    <None Include="Shaders\Includes\Utils\CullingMath.glsl" />
-    <None Include="Shaders\Includes\PushConstants\ModelCullingPC.glsl" />
-    <None Include="Shaders\Includes\Common\IndirectCommand.glsl" />
-    <None Include="Shaders\Includes\Common\Culling.glsl" />
-    <None Include="Shaders\Includes\PushConstants\MeshCullingPC.glsl" />
-    <None Include="Shaders\Includes\Utils\Occlusion.glsl" />
-    <None Include="Shaders\Includes\PushConstants\MeshletPassPC.glsl" />
-    <None Include="Shaders\Includes\Utils\DepthMath.glsl" />
-    <None Include="Shaders\Includes\Utils\PbrMath.glsl" />
-    <None Include="Shaders\Includes\Utils\WboitMath.glsl" />
-    <None Include="Shaders\Includes\PushConstants\DeferredPointLightPC.glsl" />
-    <None Include="Shaders\Includes\PushConstants\WireframePC.glsl" />
-    <None Include="Shaders\Includes\Common\SpotLight.glsl" />
-    <None Include="Shaders\Passes\Deferred\DeferredSpotLight.vert" />
-    <None Include="Shaders\Passes\Deferred\DeferredSpotLight.frag" />
-    <None Include="Shaders\Includes\PushConstants\DeferredSpotLightPC.glsl" />
-    <None Include="Shaders\Includes\SharedGpuTypes.glsl" />
-    <None Include="Shaders\Includes\PushConstants\DeferredEmissiveAoPC.glsl" />
+    <None Include="Shaders\Includes\Payload\TaskPayload.glsl" />
+    <None Include="Shaders\Includes\Payload\WorkGraphCullingPayload.glsl" />
+    <None Include="Shaders\Includes\PushConstants\BillboardPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\BloomCompositePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\BloomDownSamplePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\BloomPrefilterPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\BloomUpSamplePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\DeferredDirectionLightPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\DeferredEmissiveAoPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\DeferredPointLightPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\DeferredSpotLightPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\HizDownSamplePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\HizLinearizeDepthPC.glsl" />
-    <None Include="Shaders\Includes\PushConstants\WireframeSetupPC.glsl" />
-    <None Include="Shaders\Includes\Common\DirectionLight.glsl" />
-    <None Include="Shaders\Includes\PushConstants\DeferredDirectionLightPC.glsl" />
-    <None Include="Shaders\Passes\Deferred\DeferredDirectionLight.frag" />
-    <None Include="Shaders\Passes\Deferred\DeferredDirectionLight.vert" />
-    <None Include="Shaders\Passes\Culling\PointLightCulling.comp" />
+    <None Include="Shaders\Includes\PushConstants\MeshletPassPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\ModelMeshCullingPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\PointLightCullingPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\SpotLightCullingPC.glsl" />
-    <None Include="Shaders\Passes\Culling\SpotLightCulling.comp" />
+    <None Include="Shaders\Includes\PushConstants\TraditionalPassPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframeLightPC.glsl" />
-    <None Include="Shaders\Passes\Wireframe\WireframeLight.vert" />
-    <None Include="Shaders\Includes\PushConstants\BillboardPC.glsl" />
-    <None Include="Shaders\Passes\Billboard\Billboard.vert" />
+    <None Include="Shaders\Includes\PushConstants\WireframePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\WireframeSetupPC.glsl" />
+    <None Include="Shaders\Includes\Utils\ColorMath.glsl" />
+    <None Include="Shaders\Includes\Utils\CullingMath.glsl" />
+    <None Include="Shaders\Includes\Utils\DepthMath.glsl" />
+    <None Include="Shaders\Includes\Utils\Occlusion.glsl" />
+    <None Include="Shaders\Includes\Utils\PbrMath.glsl" />
+    <None Include="Shaders\Includes\Utils\WboitMath.glsl" />
+    <None Include="Shaders\Includes\Core.glsl" />
+    <None Include="Shaders\Includes\SharedGpuTypes.glsl" />
     <None Include="Shaders\Passes\Billboard\Billboard.frag" />
-    <None Include="Shaders\Passes\Performance\PerformanceTraditional.frag" />
+    <None Include="Shaders\Passes\Billboard\Billboard.vert" />
+    <None Include="Shaders\Passes\Common\Composite.frag" />
+    <None Include="Shaders\Passes\Common\Fullscreen.vert" />
+    <None Include="Shaders\Passes\Common\TransparentComposite.frag" />
+    <None Include="Shaders\Passes\Culling\MeshCulling.comp" />
+    <None Include="Shaders\Passes\Culling\ModelCulling.comp" />
+    <None Include="Shaders\Passes\Culling\PointLightCulling.comp" />
+    <None Include="Shaders\Passes\Culling\SpotLightCulling.comp" />
+    <None Include="Shaders\Passes\Culling\WorkGraphMeshCulling.comp" />
+    <None Include="Shaders\Passes\Culling\WorkGraphModelCulling.comp" />
+    <None Include="Shaders\Passes\Geometry\Meshlet.frag" />
+    <None Include="Shaders\Passes\Geometry\Meshlet.mesh" />
+    <None Include="Shaders\Passes\Geometry\Meshlet.task" />
+    <None Include="Shaders\Passes\Geometry\MeshletTransparent.frag" />
+    <None Include="Shaders\Passes\Geometry\MeshletTransparentPicking.frag" />
+    <None Include="Shaders\Passes\Geometry\Traditional.frag" />
+    <None Include="Shaders\Passes\Geometry\Traditional.vert" />
+    <None Include="Shaders\Passes\Geometry\TraditionalTransparent.frag" />
+    <None Include="Shaders\Passes\Geometry\TraditionalTransparentPicking.frag" />
+    <None Include="Shaders\Passes\Hiz\HizDownsample.comp" />
+    <None Include="Shaders\Passes\Hiz\HizLinearizeDepth.comp" />
     <None Include="Shaders\Passes\Performance\PerformanceMeshlet.frag" />
-    <None Include="Shaders\Passes\Performance\PerformanceTraditionalTransparent.frag" />
-    <None Include="Shaders\Passes\Performance\PerformanceMeshletTransparent.frag" />
     <None Include="Shaders\Passes\Performance\PerformanceMeshlet.mesh" />
+    <None Include="Shaders\Passes\Performance\PerformanceMeshletTransparent.frag" />
+    <None Include="Shaders\Passes\Performance\PerformanceTraditional.frag" />
     <None Include="Shaders\Passes\Performance\PerformanceTraditional.vert" />
+    <None Include="Shaders\Passes\Performance\PerformanceTraditionalTransparent.frag" />
+    <None Include="Shaders\Passes\PostProcess\BloomComposite.comp" />
+    <None Include="Shaders\Passes\PostProcess\BloomDownsample.comp" />
+    <None Include="Shaders\Passes\PostProcess\BloomPrefilter.comp" />
+    <None Include="Shaders\Passes\PostProcess\BloomUpsample.comp" />
+    <None Include="Shaders\Passes\Wireframe\Wireframe.frag" />
+    <None Include="Shaders\Passes\Wireframe\Wireframe.vert" />
+    <None Include="Shaders\Passes\Wireframe\WireframeLight.vert" />
+    <None Include="Shaders\Passes\Wireframe\WireframeMeshlet.vert" />
+    <None Include="Shaders\Passes\Wireframe\WireframeSetup.comp" />
   </ItemGroup>
 </Project>
