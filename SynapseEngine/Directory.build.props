@@ -30,6 +30,7 @@
       <BuildStlModules>false</BuildStlModules>
 
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Debug'">
+        VK_ENABLE_BETA_EXTENSIONS;
         SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
         GLM_FORCE_DEPTH_ZERO_TO_ONE;
         VK_NO_PROTOTYPES;
@@ -43,6 +44,7 @@
       <RuntimeLibrary Condition="'$(Configuration)'=='Debug'">MultiThreadedDebugDLL</RuntimeLibrary>
 
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Release'">
+        VK_ENABLE_BETA_EXTENSIONS;
         SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
         GLM_FORCE_DEPTH_ZERO_TO_ONE;
         VK_NO_PROTOTYPES;
@@ -55,6 +57,7 @@
       <RuntimeLibrary Condition="'$(Configuration)'=='Release'">MultiThreadedDLL</RuntimeLibrary>
 
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Dist'">
+        VK_ENABLE_BETA_EXTENSIONS;
         SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
         GLM_FORCE_DEPTH_ZERO_TO_ONE;
         VK_NO_PROTOTYPES;
@@ -70,6 +73,7 @@
       <DebugInformationFormat Condition="'$(Configuration)'=='Dist'">None</DebugInformationFormat>
 
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Performance'">
+        VK_ENABLE_BETA_EXTENSIONS;
         SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
         GLM_FORCE_DEPTH_ZERO_TO_ONE;
         VK_NO_PROTOTYPES;

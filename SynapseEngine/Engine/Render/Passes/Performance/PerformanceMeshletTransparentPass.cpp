@@ -168,6 +168,7 @@ namespace Syn {
         pc.debugSphereIndirectAddr = drawData->debugSphereIndirectBuffers[fIdx]->GetDeviceAddress();
 
         pc.activeCameraEntity = scene->GetSettings()->useDebugCamera ? scene->GetDebugCameraEntity() : scene->GetSceneCameraEntity();
+        pc.mainCameraEntity = scene->GetSceneCameraEntity();
         pc.baseDescriptorOffset = drawData->activeTraditionalCount + drawData->meshletCmdOffsets[_renderType];
         pc.disableConeCulling = (_renderType == MaterialRenderType::Transparent2Sided) ? 1 : 0;
         pc.materialRenderType = static_cast<uint32_t>(_renderType);

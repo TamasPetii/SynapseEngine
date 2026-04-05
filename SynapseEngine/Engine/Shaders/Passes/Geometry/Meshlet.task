@@ -15,11 +15,7 @@ layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
 layout(set = 2, binding = 0) uniform sampler2D depthPyramid;
 
-struct TaskPayload {
-    uint drawId;
-    uint instanceId;
-    uint meshletIndices[32];
-};
+#include "../../Includes/Payload/TaskPayload.glsl"
 
 taskPayloadSharedEXT TaskPayload payload;
 shared uint survivingMeshletCount;
@@ -54,7 +50,7 @@ void main() {
     uint transformDenseIndex = GET_SPARSE_INDEX(pc.transformSparseMapBufferAddr, entityId);
     TransformComponent transform = GET_TRANSFORM(pc.transformBufferAddr, transformDenseIndex);
     
-    uint cameraDenseIndex = GET_SPARSE_INDEX(pc.cameraSparseMapBufferAddr, pc.activeCameraEntity);
+    uint cameraDenseIndex = GET_SPARSE_INDEX(pc.cameraSparseMapBufferAddr, pc.mainCameraEntity);
     CameraComponent camera = GET_CAMERA(pc.cameraBufferAddr, cameraDenseIndex);
 
     GpuModelAddresses addrs = GET_MODEL_ADDRESSES(pc.modelAddressBuffer, desc.modelIndex);

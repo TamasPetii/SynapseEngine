@@ -10,9 +10,7 @@
 
 struct VisibleModelData { 
     uint entityId; 
-    uint modelIndex; 
-    uint packedFlags; 
-    uint padding; 
+    uint modelIndex;
 };
 
 struct ModelAllocationInfo { 

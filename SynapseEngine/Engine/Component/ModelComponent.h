@@ -29,8 +29,6 @@ namespace Syn
 	struct SYN_API VisibleModelData {
 		uint32_t entityId;
 		uint32_t modelIndex;
-		uint32_t packedFlags;
-		uint32_t padding;
 	};
 }
 

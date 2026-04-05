@@ -18,7 +18,7 @@
 
 namespace Syn {
 
-    #include "Engine/Shaders/Includes/PushConstants/ModelCullingPC.glsl"
+    #include "Engine/Shaders/Includes/PushConstants/ModelMeshCullingPC.glsl"
 
     bool ModelCullingPass::ShouldExecute(const RenderContext& context) const
     {
@@ -55,7 +55,7 @@ namespace Syn {
 
         uint32_t fIdx = context.frameIndex;
 
-        ModelCullingPC pc{};
+        ModelMeshCullingPC pc{};
         pc.animationAddressBuffer = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
         pc.animationBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationData, fIdx);
         pc.animationSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationSparseMap, fIdx);
@@ -88,7 +88,7 @@ namespace Syn {
         pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
         pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
 
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ModelCullingPC), &pc);
+        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ModelMeshCullingPC), &pc);
     }
 
     void ModelCullingPass::BindDescriptors(const RenderContext& context) {

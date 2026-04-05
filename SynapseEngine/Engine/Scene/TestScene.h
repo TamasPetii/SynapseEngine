@@ -29,8 +29,12 @@ namespace Syn
 
             const std::string basePath = "C:/Users/User/Desktop/Models/";
 
-            uint32_t sponzaId = modelManager->LoadModelAsync(basePath + "Sponza-master/sponza.obj");
+            uint32_t sponzaId = modelManager->LoadModelAsync(basePath + "Sponza/sponza.obj");
+            //uint32_t sponzaPbrId = modelManager->LoadModelAsync(basePath + "Sponza_Pbr/NewSponza_Main_Yup_003.fbx");
+            //uint32_t sponzaPbrCurtainId = modelManager->LoadModelAsync(basePath + "Sponza_Pbr_Curtains/NewSponza_Curtains_FBX_YUp.fbx");
             //uint32_t bistroId = modelManager->LoadModelAsync(basePath + "Bistro/BistroExterior.fbx");
+            //uint32_t dragonId = modelManager->LoadModelAsync(basePath + "Dragon/dragon.obj");
+
             uint32_t mutantId = modelManager->LoadModelAsync(basePath + "Monster/Mutant/Mutant.dae");
 
             std::vector<uint32_t> animationIds;
@@ -86,8 +90,8 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
                 registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
             }
-            */
 
+            */
             {
                 // Sponza
                 EntityID sponzaEntity = registry->CreateEntity();
@@ -101,6 +105,50 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
                 registry->GetPool<ModelComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
             }
+
+            /*
+            {
+                // Sponza Pbr
+                EntityID sponzaEntity = registry->CreateEntity();
+                registry->AddComponent<TransformComponent>(sponzaEntity);
+                registry->AddComponent<ModelComponent>(sponzaEntity);
+
+                registry->GetComponent<TransformComponent>(sponzaEntity).translation = glm::vec3(0.0f, -10.0f, 0.0f);
+                registry->GetComponent<TransformComponent>(sponzaEntity).scale = glm::vec3(0.05f, 0.05f, 0.05f);
+                registry->GetComponent<ModelComponent>(sponzaEntity).modelIndex = sponzaPbrId;
+
+                registry->GetPool<TransformComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
+                registry->GetPool<ModelComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
+            }
+
+            {
+                // Sponza Pbr Curtains
+                EntityID sponzaEntity = registry->CreateEntity();
+                registry->AddComponent<TransformComponent>(sponzaEntity);
+                registry->AddComponent<ModelComponent>(sponzaEntity);
+
+                registry->GetComponent<TransformComponent>(sponzaEntity).translation = glm::vec3(0.0f, -10.0f, 0.0f);
+                registry->GetComponent<TransformComponent>(sponzaEntity).scale = glm::vec3(0.05f, 0.05f, 0.05f);
+                registry->GetComponent<ModelComponent>(sponzaEntity).modelIndex = sponzaPbrCurtainId;
+
+                registry->GetPool<TransformComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
+                registry->GetPool<ModelComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
+            }
+
+            {
+                // Dragon
+                EntityID entity = registry->CreateEntity();
+                registry->AddComponent<TransformComponent>(entity);
+                registry->AddComponent<ModelComponent>(entity);
+
+                registry->GetComponent<TransformComponent>(entity).translation = glm::vec3(0.0f, 0.0f, 0.0f);
+                registry->GetComponent<TransformComponent>(entity).scale = glm::vec3(10.f, 10.f, 10.f);
+                registry->GetComponent<ModelComponent>(entity).modelIndex = dragonId;
+
+                registry->GetPool<TransformComponent>()->SetCategory(entity, StorageCategory::Static);
+                registry->GetPool<ModelComponent>()->SetCategory(entity, StorageCategory::Static);
+            }
+            */
 
 
             for (int i = 0; i < 100; i++)

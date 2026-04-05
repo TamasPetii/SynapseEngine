@@ -3,6 +3,7 @@
 #extension GL_KHR_shader_subgroup_basic : require
 #extension GL_KHR_shader_subgroup_arithmetic : require
 #extension GL_KHR_shader_subgroup_ballot : require
+#extension GL_AMDX_shader_enqueue : require
 
 #include "../../Includes/Core.glsl"
 #include "../../Includes/Common/Camera.glsl"
@@ -14,6 +15,7 @@
 #include "../../Includes/Common/Culling.glsl"
 #include "../../Includes/Utils/CullingMath.glsl"
 #include "../../Includes/Utils/Occlusion.glsl"
+#include "../../Includes/Payload/WorkGraphCullingPayload.glsl"
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
@@ -25,28 +27,27 @@ layout(push_constant) uniform PushConstants {
 
 layout(set = 2, binding = 0) uniform sampler2D depthPyramid;
 
+layout(coalescing_node_amdx) out node_type WorkGraphMeshCullingNode;
+layout(location = 0) out MeshCullingPayload payloadOut;
+
 void main() {
     uint globalId = gl_GlobalInvocationID.x;
-    if (globalId >= pc.totalModelsToTest) return; 
-
-    // 1. Fetch Model component and Entity ID
+    if (globalId >= pc.totalModelsToTest) return;
+    
     ModelComponent modelComp = GET_MODEL_COMP(pc.modelCompBufferAddr, globalId);
     if (modelComp.modelIndex == INVALID_INDEX) return;
     uint entityId = modelComp.entityIndex;
 
-    // 2. Resolve Transform and Camera data
     uint transformIdx = GET_SPARSE_INDEX(pc.transformSparseMapBufferAddr, entityId);
     TransformComponent transform = GET_TRANSFORM(pc.transformBufferAddr, transformIdx);
 
     uint cameraIdx = GET_SPARSE_INDEX(pc.cameraSparseMapBufferAddr, pc.activeCameraEntity);
     CameraComponent camera = GET_CAMERA(pc.cameraBufferAddr, cameraIdx);
 
-    // 3. Resolve Model metadata and addresses
     ModelAllocationInfo mAlloc = GET_MODEL_ALLOC(pc.modelAllocBufferAddr, modelComp.modelIndex);
     GpuModelAddresses addrs = GET_MODEL_ADDRESSES(pc.modelAddressBufferAddr, modelComp.modelIndex);
     GpuMeshCollider localGlobalCollider = addrs.globalCollider;
     
-    // Evaluate Animation frame collider if applicable
     if(pc.animationSparseMapBufferAddr != 0) {
         uint animSparseIndex = GET_SPARSE_INDEX(pc.animationSparseMapBufferAddr, entityId);
         if (animSparseIndex != INVALID_INDEX) {
@@ -58,7 +59,6 @@ void main() {
         }
     }
     
-    // 4. Frustum Culling Test + Occlusion Culling
     GpuMeshCollider worldCollider = TransformCollider(localGlobalCollider, transform.transform);
     uint visibility = TestFrustum(worldCollider, camera);
     if (visibility == INTERSECTION_OUTSIDE) return;
@@ -71,33 +71,26 @@ void main() {
         return;
     }
 
-    // 5. Fast-path: Process simple/small models directly
     const uint MAX_MESH_COUNT = 16u;
     const uint MAX_VERTEX_COUNT = 25000u;
     uint safeMeshCount = mAlloc.meshAllocationCount / 4;
-
+    
     if (safeMeshCount <= MAX_MESH_COUNT && addrs.vertexCount < MAX_VERTEX_COUNT) {
-        uint lod = (screenSizePixels > 512.0) ? 0 : 
-                   (screenSizePixels > 256.0) ? 1 : 
-                   (screenSizePixels > 128.0) ? 2 : 3;
-        
+        uint lod = (screenSizePixels > 512.0) ? 0 : (screenSizePixels > 256.0) ? 1 : (screenSizePixels > 128.0) ? 2 : 3;
         for(uint m = 0; m < safeMeshCount; ++m) {
             uint matIdx = GET_MATERIAL_INDEX(pc.materialLookupBufferAddr, modelComp.materialOffset + m);
             Material mat = GET_MATERIAL(pc.materialBufferAddr, matIdx);
 
-            // Determine Material Render Type (Opaque/Transparent + 1/2 Sided)
-            uint matType = 0; 
+            uint matType = 0;
             if (IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat))       matType = 3;
             else if (IS_TRANSPARENT(mat) && !IS_DOUBLE_SIDED(mat)) matType = 2;
             else if (!IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat)) matType = 1;
-
             MeshAllocationInfo meshAlloc = GET_MESH_ALLOC(pc.meshAllocBufferAddr, mAlloc.meshAllocationOffset + (m * 4) + lod);
             
             if (meshAlloc.activeTypes[matType] == 1) {
                 uint slotIndex = 0;
                 uint indirectIdx = meshAlloc.indirectIndices[matType];
 
-                // Check pipeline type and atomic add to the correct command buffer
                 if (meshAlloc.isMeshletPipeline == PIPELINE_MESHLET) {
                     uint64_t meshletBaseAddr = pc.globalIndirectCommandBuffers + (pc.traditionalCommandCount * 16ul);
                     slotIndex = atomicAdd(GET_MESHLET_CMD(meshletBaseAddr, indirectIdx).groupCountX, 1);
@@ -105,7 +98,6 @@ void main() {
                     slotIndex = atomicAdd(GET_TRADITIONAL_CMD(pc.globalIndirectCommandBuffers, indirectIdx).instanceCount, 1);
                 }
 
-                // Write Instance ID (and encode full visibility flag in the MSB)
                 uint payload = SET_BIT_TO(entityId, 31, visibility == INTERSECTION_INSIDE);
                 GET_INSTANCE(pc.globalInstanceBufferAddr, meshAlloc.instanceOffsets[matType] + slotIndex) = payload;
             }
@@ -113,33 +105,11 @@ void main() {
         return;
     }
 
-    // 6. Slow-path: Push large models to VisibleModelList for the second pass
-    uint needsWrite = 1;
-    uint subgroupWriteCount = subgroupAdd(needsWrite);
-    uint localOffset = subgroupExclusiveAdd(needsWrite);
-    uint baseOffset = 0;
-
-    if (subgroupElect()) {
-        baseOffset = atomicAdd(GET_DISPATCH_CMD(pc.visibleModelCountAddr).groupCountX, subgroupWriteCount);
-    }
-
-    baseOffset = subgroupBroadcastFirst(baseOffset);
-
-    if (needsWrite == 1) {
-        uint finalIndex = baseOffset + localOffset;
-        VisibleModelData outData;
-
-        outData.entityId = SET_BIT_TO(entityId, 31, visibility == INTERSECTION_INSIDE);
-        outData.modelIndex = modelComp.modelIndex;
-
-        GET_VISIBLE_MODEL(pc.visibleModelListAddr, finalIndex) = outData;
-    }
-
-    /*
-    uint finalIndex = atomicAdd(GET_DISPATCH_CMD(pc.visibleModelCountAddr).groupCountX, 1);
-    VisibleModelData outData;
-    outData.entityId = SET_BIT_TO(entityId, 31, visibility == INTERSECTION_INSIDE);
-    outData.modelIndex = modelComp.modelIndex;
-    GET_VISIBLE_MODEL(pc.visibleModelListAddr, finalIndex) = outData;
-    */
+    // WORK GRAPH ENQUEUE 
+    allocateNodeRecordAMDX(WorkGraphMeshCullingNode, 1);
+    
+    payloadOut.entityId = SET_BIT_TO(entityId, 31, visibility == INTERSECTION_INSIDE);
+    payloadOut.modelIndex = modelComp.modelIndex;
+    
+    submitNodeRecordAMDX(WorkGraphMeshCullingNode);
 }

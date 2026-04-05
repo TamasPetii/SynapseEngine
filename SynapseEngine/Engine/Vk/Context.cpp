@@ -21,6 +21,8 @@ namespace Syn::Vk {
             VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME,
             VK_EXT_SAMPLER_FILTER_MINMAX_EXTENSION_NAME,
             VK_EXT_MUTABLE_DESCRIPTOR_TYPE_EXTENSION_NAME
+            
+            /*, VK_AMDX_SHADER_ENQUEUE_EXTENSION_NAME */
         };
     }
 
