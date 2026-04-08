@@ -2,11 +2,14 @@
 #include <print>
 
 #define GLFW_INCLUDE_VULKAN
-#define GLFW_EXPOSE_NATIVE_WIN32
 #include <glfw/glfw3.h>
+
+#ifdef _WIN32
+#define GLFW_EXPOSE_NATIVE_WIN32
 #include <glfw/glfw3native.h>
 #include <dwmapi.h>
 #pragma comment(lib, "Dwmapi.lib")
+#endif
 
 #include <volk.h>
 
@@ -105,10 +108,12 @@ namespace Syn {
             }
             });
 
+#ifdef _WIN32
         HWND hwnd = glfwGetWin32Window(_window);
         COLORREF color = RGB(0, 0, 0);
         const DWORD DWMWA_CAPTION_COLOR = 35;
         HRESULT hr = DwmSetWindowAttribute(hwnd, DWMWA_CAPTION_COLOR, &color, sizeof(color));
+#endif
 
         const int32_t windowLeft = videoMode->width / 2 - width / 2;
         const int32_t windowTop = videoMode->height / 2 - height / 2;

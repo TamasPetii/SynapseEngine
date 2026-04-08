@@ -945,6 +945,15 @@
     <ClCompile Include="Profiler\IProfiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Passes\Deferred\PreDeferredTransitionPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Deferred\PostDeferredTransitionPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Wboit\PreCompositeTransitionPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1983,6 +1992,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Profiler\IProfiler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Deferred\PreDeferredTransitionPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Deferred\PostDeferredTransitionPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Wboit\PreCompositeTransitionPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
