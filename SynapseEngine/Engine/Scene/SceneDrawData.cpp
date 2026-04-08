@@ -278,6 +278,7 @@ namespace Syn
         auto modelManager = ServiceLocator::GetModelManager();
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
         auto sphere = modelManager->GetResource(MeshSourceNames::Sphere);
+        auto pyramid = modelManager->GetResource(MeshSourceNames::Pyramid);
 
         spotLightIndirectCommandBuffers.resize(frameCount);
         debugSpotLightSphereCmdBuffers.resize(frameCount);
@@ -296,13 +297,19 @@ namespace Syn
         aabbCmdTemplate.firstVertex = cube->baseDrawCommands[0].traditionalCmd.firstVertex;
         aabbCmdTemplate.firstInstance = 0;
 
+        VkDrawIndirectCommand pyramidCmdTemplate{};
+        pyramidCmdTemplate.vertexCount = pyramid->baseDrawCommands[0].traditionalCmd.vertexCount;
+        pyramidCmdTemplate.instanceCount = 0;
+        pyramidCmdTemplate.firstVertex = pyramid->baseDrawCommands[0].traditionalCmd.firstVertex;
+        pyramidCmdTemplate.firstInstance = 0;
+
         VkDrawIndirectCommand billboardCmdTemplate{};
         billboardCmdTemplate.vertexCount = 6;
         billboardCmdTemplate.instanceCount = 0;
         billboardCmdTemplate.firstVertex = 0;
         billboardCmdTemplate.firstInstance = 0;
 
-		spotLightCmdTemplate = aabbCmdTemplate;
+		spotLightCmdTemplate = pyramidCmdTemplate;
 
         const VkDeviceSize cmdSize = sizeof(VkDrawIndirectCommand);
 

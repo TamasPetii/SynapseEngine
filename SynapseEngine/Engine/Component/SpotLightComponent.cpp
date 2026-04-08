@@ -15,6 +15,7 @@ namespace Syn
     {}
 
     SpotLightComponentGPU::SpotLightComponentGPU(const SpotLightComponent& component) :
+        transform(component.transform),
         position(component.position),
         range(component.range),
         direction(component.direction),

@@ -4,6 +4,7 @@
 #include "../Core.glsl"
 
 struct SpotLightComponent {
+    mat4 transform;
     vec3 position;
     float range;
     vec3 direction;
