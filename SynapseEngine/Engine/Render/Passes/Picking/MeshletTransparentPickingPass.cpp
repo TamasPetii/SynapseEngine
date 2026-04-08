@@ -168,9 +168,6 @@ namespace Syn {
 
     void MeshletTransparentPickingPass::BindDescriptors(const RenderContext& context) {
         auto imageManager = ServiceLocator::GetImageManager();
-        auto bindlessBuffer = imageManager->GetBindlessBuffer();
-
-        bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
 
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
@@ -185,6 +182,9 @@ namespace Syn {
         );
 
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
+
+        auto bindlessBuffer = imageManager->GetBindlessBuffer();
+        bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
     void MeshletTransparentPickingPass::Draw(const RenderContext& context) {

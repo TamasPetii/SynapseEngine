@@ -235,6 +235,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Render\Passes\Wboit\PreCompositeTransitionPass.cpp" />
+    <ClCompile Include="Render\Passes\Deferred\PostDeferredTransitionPass.cpp" />
+    <ClCompile Include="Render\Passes\Deferred\PreDeferredTransitionPass.cpp" />
     <ClCompile Include="Profiler\IProfiler.cpp" />
     <ClCompile Include="Profiler\DefaultCpuProfiler.cpp" />
     <ClCompile Include="Profiler\ICpuProfiler.cpp" />
@@ -547,6 +550,9 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\Passes\Wboit\PreCompositeTransitionPass.h" />
+    <ClInclude Include="Render\Passes\Deferred\PostDeferredTransitionPass.h" />
+    <ClInclude Include="Render\Passes\Deferred\PreDeferredTransitionPass.h" />
     <ClInclude Include="Profiler\IProfiler.h" />
     <ClInclude Include="Profiler\DefaultCpuProfiler.h" />
     <ClInclude Include="Profiler\ICpuProfiler.h" />

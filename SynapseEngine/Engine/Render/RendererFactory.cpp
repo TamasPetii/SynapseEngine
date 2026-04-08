@@ -58,6 +58,9 @@
 #include "Engine/Render/Passes/Performance/PerformanceTraditionalTransparentPass.h"
 #include "Engine/Render/Passes/Performance/PerformanceMeshletTransparentPass.h"
 
+#include "Engine/Render/Passes/Deferred/PreDeferredTransitionPass.h"
+#include "Engine/Render/Passes/Deferred/PostDeferredTransitionPass.h"
+#include "Engine/Render/Passes/Wboit/PreCompositeTransitionPass.h"
 
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "RenderNames.h"
@@ -88,10 +91,12 @@ namespace Syn
         pipeline->AddPass(std::make_unique<MeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
 
 		// Deferred Lighting Passes
+		pipeline->AddPass(std::make_unique<PreDeferredTransitionPass>());
 		pipeline->AddPass(std::make_unique<DeferredEmissiveAoPass>());
         pipeline->AddPass(std::make_unique<DeferredDirectionLightPass>());
         pipeline->AddPass(std::make_unique<DeferredPointLightPass>());
         pipeline->AddPass(std::make_unique<DeferredSpotLightPass>());
+		pipeline->AddPass(std::make_unique<PostDeferredTransitionPass>());
 
 		// Editor Depth Copy Pass (for picking and billboard)
         pipeline->AddPass(std::make_unique<DepthCopyPass>());
@@ -112,12 +117,14 @@ namespace Syn
         pipeline->AddPass(std::make_unique<TraditionalTransparentPass>(MaterialRenderType::Transparent2Sided));
         pipeline->AddPass(std::make_unique<MeshletTransparentPass>(MaterialRenderType::Transparent1Sided));
         pipeline->AddPass(std::make_unique<MeshletTransparentPass>(MaterialRenderType::Transparent2Sided));
+        pipeline->AddPass(std::make_unique<PreCompositeTransitionPass>());
         pipeline->AddPass(std::make_unique<TransparentCompositePass>());
 
         // Wireframe Passes
         pipeline->AddPass(std::make_unique<WireframeSetupPass>());
         pipeline->AddPass(std::make_unique<WireframeAabbPass>());
         pipeline->AddPass(std::make_unique<WireframeSpherePass>());
+
         //pipeline->AddPass(std::make_unique<WireframeMeshletInitPass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletAabbPass>());
         //pipeline->AddPass(std::make_unique<WireframeMeshletSpherePass>());
@@ -374,6 +381,7 @@ namespace Syn
         pipeline->AddPass(std::make_unique<PerformanceTraditionalTransparentPass>(MaterialRenderType::Transparent2Sided));
         pipeline->AddPass(std::make_unique<PerformanceMeshletTransparentPass>(MaterialRenderType::Transparent1Sided));
         pipeline->AddPass(std::make_unique<PerformanceMeshletTransparentPass>(MaterialRenderType::Transparent2Sided));
+        pipeline->AddPass(std::make_unique<PreCompositeTransitionPass>());
         pipeline->AddPass(std::make_unique<TransparentCompositePass>());
 
         pipeline->AddPass(std::make_unique<CompositePass>());
