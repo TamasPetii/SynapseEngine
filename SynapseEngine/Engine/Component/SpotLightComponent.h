@@ -20,9 +20,11 @@ namespace Syn
         float innerAngle;
         float outerAngle;
     private:
+        glm::mat4 transform;
 		AabbCollider aabbCollider;
         SphereCollider sphereCollider;
         friend struct SpotLightColliderGPU;
+        friend struct SpotLightComponentGPU;
         friend class SpotLightSystem;
         friend class SpotLightFrustumCullingSystem;
     };
@@ -30,6 +32,8 @@ namespace Syn
     struct SYN_API SpotLightComponentGPU
     {
         SpotLightComponentGPU(const SpotLightComponent& component);
+
+        glm::mat4 transform;
 
         glm::vec3 position;
         float range; 

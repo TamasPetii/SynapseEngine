@@ -43,9 +43,9 @@ namespace Syn {
                 .lineWidth = 1.0f
             },
             .depth = {
-                .testEnable = VK_FALSE,
+                .testEnable = VK_TRUE,
                 .writeEnable = VK_FALSE,
-                .compareOp = VK_COMPARE_OP_ALWAYS
+                .compareOp = VK_COMPARE_OP_GREATER_OR_EQUAL
             },
             .blendStates = {
                 {

@@ -4,6 +4,7 @@
 #include "Engine/Component/SpotLightShadowComponent.h"
 #include "Engine/Scene/Scene.h"
 #include <cmath>
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Syn
 {
@@ -99,6 +100,23 @@ namespace Syn
 
                     lightComp.aabbCollider.min = glm::min(lightComp.position, baseMin);
                     lightComp.aabbCollider.max = glm::max(lightComp.position, baseMax);
+
+                    glm::vec3 new_Y = -lightComp.direction;
+                    glm::vec3 world_up = (std::abs(new_Y.y) < 0.999f) ? glm::vec3(0.0f, 1.0f, 0.0f) : glm::vec3(1.0f, 0.0f, 0.0f);
+                    glm::vec3 new_X = glm::normalize(glm::cross(world_up, new_Y));
+                    glm::vec3 new_Z = glm::normalize(glm::cross(new_X, new_Y));
+
+                    glm::mat4 rot(1.0f);
+                    rot[0] = glm::vec4(new_X, 0.0f);
+                    rot[1] = glm::vec4(new_Y, 0.0f);
+                    rot[2] = glm::vec4(new_Z, 0.0f);
+
+                    float enclosingRadius = baseRadius * glm::sqrt(2.f);
+                    glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(enclosingRadius, lightComp.range, enclosingRadius));
+                    glm::vec3 centerPos = lightComp.position + lightComp.direction * (lightComp.range * 0.5f);
+                    glm::mat4 trans = glm::translate(glm::mat4(1.0f), centerPos);
+
+                    lightComp.transform = trans * rot * scale;
 
                     if (spotLightPool->IsDynamic(entity))
                         spotLightPool->SetBit<CHANGED_BIT>(entity);

@@ -29,27 +29,16 @@ void main()
         shadowDenseIndex = GET_SPARSE_INDEX(pc.spotLightShadowSparseMapAddr, entityId);
     }
 
-    // 2. Fetch Light, Collider and Vertex Data
-    SpotLightColliderGPU collider = GET_SPOT_LIGHT_COLLIDER(pc.spotLightColliderDataAddr, lightDenseIndex);
-    
+    // 2. Vertex Data
     uint vertexIndex = GET_INDEX(pc.indicesAddr, gl_VertexIndex);
     vec3 localPos = GET_VERTEX_POS(pc.vertexPositionsAddr, vertexIndex).position;
 
-    // 3. Build Model Matrix from AABB
-    vec3 extents = (collider.aabbMax - collider.aabbMin) * 0.5;
-    vec3 center = (collider.aabbMax + collider.aabbMin) * 0.5;
-
-    mat4 model = mat4(1.0);
-    model[0][0] = extents.x;
-    model[1][1] = extents.y;
-    model[2][2] = extents.z;
-    model[3] = vec4(center, 1.0);
-    
     // 4. Fetch Camera and Transform Vertex
     uint cameraIndex = GET_SPARSE_INDEX(pc.cameraSparseMapBufferAddr, pc.activeCameraEntity);
     CameraComponent camera = GET_CAMERA(pc.cameraBufferAddr, cameraIndex);
 
-    gl_Position = camera.viewProjVulkan * model * vec4(localPos, 1.0);
+    SpotLightComponent light = GET_SPOT_LIGHT(pc.spotLightDataAddr, lightDenseIndex);
+    gl_Position = camera.viewProjVulkan * light.transform * vec4(localPos, 1.0);
     
     outLightDenseIndex = lightDenseIndex;
     outShadowDenseIndex = shadowDenseIndex;

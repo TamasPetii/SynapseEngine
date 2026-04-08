@@ -151,7 +151,7 @@ namespace Syn
             */
 
 
-            for (int i = 0; i < 100; i++)
+            for (int i = 0; i < 1; i++)
             {
                 // Character
                 EntityID characterEntity = registry->CreateEntity();
@@ -273,7 +273,7 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(dirLightEntity);
             }
 
-            for (int i = 0; i < 250; i++)
+            for (int i = 0; i < 50; i++)
             {
                 EntityID lightEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(lightEntity);
@@ -303,7 +303,7 @@ namespace Syn
                 registry->GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(lightEntity);
             }
 
-            for (int i = 0; i < 250; i++)
+            for (int i = 0; i < 50; i++)
             {
                 EntityID spotLightEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(spotLightEntity);
