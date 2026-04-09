@@ -17,7 +17,7 @@ struct CameraComponent {
     vec4 frustum[6];
 };
 
-layout(buffer_reference, std430) readonly buffer CameraPool { 
+layout(buffer_reference, std430) readonly restrict buffer CameraPool { 
     CameraComponent data[]; 
 };
 

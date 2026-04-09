@@ -24,8 +24,8 @@ struct Material {
     uint padding2; 
 };
 
-layout(buffer_reference, std430) readonly buffer MaterialBuffer { Material data[]; };
-layout(buffer_reference, std430) readonly buffer MaterialLookupBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer MaterialBuffer { Material data[]; };
+layout(buffer_reference, std430) readonly restrict buffer MaterialLookupBuffer { uint data[]; };
 
 #define GET_MATERIAL(addr, idx)         MaterialBuffer(addr).data[idx]
 #define GET_MATERIAL_INDEX(addr, idx)   MaterialLookupBuffer(addr).data[idx]

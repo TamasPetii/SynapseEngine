@@ -22,9 +22,9 @@ struct VkDrawMeshTasksIndirectCommandEXT {
     uint groupCountZ; 
 };
 
-layout(buffer_reference, std430) buffer VkDispatchIndirectBuffer         { VkDispatchIndirectCommand data; };
-layout(buffer_reference, std430) buffer VkDrawIndirectBuffer             { VkDrawIndirectCommand data[]; };
-layout(buffer_reference, std430) buffer VkDrawMeshTasksIndirectBuffer     { VkDrawMeshTasksIndirectCommandEXT data[]; };
+layout(buffer_reference, std430) restrict buffer VkDispatchIndirectBuffer         { VkDispatchIndirectCommand data; };
+layout(buffer_reference, std430) restrict buffer VkDrawIndirectBuffer             { VkDrawIndirectCommand data[]; };
+layout(buffer_reference, std430) restrict buffer VkDrawMeshTasksIndirectBuffer     { VkDrawMeshTasksIndirectCommandEXT data[]; };
 
 #define GET_VK_DISPATCH_CMD(addr)           VkDispatchIndirectBuffer(addr).data
 #define GET_VK_DRAW_CMD(addr, idx)          VkDrawIndirectBuffer(addr).data[idx]

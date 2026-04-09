@@ -30,10 +30,10 @@ struct PointLightShadowComponent {
     vec4 atlasRects[6];
 };
 
-layout(buffer_reference, std430) readonly buffer PointLightDataBuffer { PointLightComponent data[]; };
-layout(buffer_reference, std430) readonly buffer PointLightColliderDataBuffer { PointLightColliderGPU data[]; };
-layout(buffer_reference, std430) readonly buffer PointLightShadowDataBuffer { PointLightShadowComponent data[]; };
-layout(buffer_reference, std430) readonly buffer VisiblePointLightBuffer   { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer PointLightDataBuffer { PointLightComponent data[]; };
+layout(buffer_reference, std430) readonly restrict buffer PointLightColliderDataBuffer { PointLightColliderGPU data[]; };
+layout(buffer_reference, std430) readonly restrict buffer PointLightShadowDataBuffer { PointLightShadowComponent data[]; };
+layout(buffer_reference, std430) readonly restrict buffer VisiblePointLightBuffer   { uint data[]; };
 
 #define GET_POINT_LIGHT(addr, idx)            PointLightDataBuffer(addr).data[idx]
 #define GET_POINT_LIGHT_COLLIDER(addr, idx)   PointLightColliderDataBuffer(addr).data[idx]

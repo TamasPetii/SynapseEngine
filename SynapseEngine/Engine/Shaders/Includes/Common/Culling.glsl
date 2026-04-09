@@ -29,9 +29,9 @@ struct MeshAllocationInfo {
     uint activeTypes[4];
 };
 
-layout(buffer_reference, std430) readonly buffer ModelAllocBuffer   { ModelAllocationInfo data[]; };
-layout(buffer_reference, std430) readonly buffer MeshAllocBuffer    { MeshAllocationInfo data[]; };
-layout(buffer_reference, std430) buffer VisibleModelList            { VisibleModelData data[]; };
+layout(buffer_reference, std430) readonly restrict buffer ModelAllocBuffer   { ModelAllocationInfo data[]; };
+layout(buffer_reference, std430) readonly restrict buffer MeshAllocBuffer    { MeshAllocationInfo data[]; };
+layout(buffer_reference, std430) restrict buffer VisibleModelList            { VisibleModelData data[]; };
 
 
 #define GET_MODEL_ALLOC(addr, idx)      ModelAllocBuffer(addr).data[idx]

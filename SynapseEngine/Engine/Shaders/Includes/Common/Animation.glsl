@@ -36,9 +36,9 @@ struct GpuAnimationAddresses {
     GpuAnimationDescriptor descriptor;
 };
 
-layout(buffer_reference, std430) readonly buffer VertexSkinDataBuffer     { GpuVertexSkinData data[]; };
-layout(buffer_reference, std430) readonly buffer AnimationComponentBuffer { AnimationComponent data[]; };
-layout(buffer_reference, std430) readonly buffer AnimationAddressBuffer   { GpuAnimationAddresses data[]; };
+layout(buffer_reference, std430) readonly restrict buffer VertexSkinDataBuffer     { GpuVertexSkinData data[]; };
+layout(buffer_reference, std430) readonly restrict buffer AnimationComponentBuffer { AnimationComponent data[]; };
+layout(buffer_reference, std430) readonly restrict buffer AnimationAddressBuffer   { GpuAnimationAddresses data[]; };
 
 #define GET_SKIN_DATA(addr, idx)        VertexSkinDataBuffer(addr).data[idx]
 #define GET_ANIM_COMP(addr, idx)        AnimationComponentBuffer(addr).data[idx]
