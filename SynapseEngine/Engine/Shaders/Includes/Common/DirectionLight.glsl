@@ -26,10 +26,10 @@ struct DirectionLightShadowColliderGPU {
     uint padding[3];
 };
 
-layout(buffer_reference, std430) readonly buffer DirectionLightDataBuffer { DirectionLightComponent data[]; };
-layout(buffer_reference, std430) readonly buffer DirectionLightShadowDataBuffer { DirectionLightShadowComponent data[]; };
-layout(buffer_reference, std430) readonly buffer DirectionLightShadowColliderDataBuffer { DirectionLightShadowColliderGPU data[]; };
-layout(buffer_reference, std430) readonly buffer VisibleDirectionLightBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer DirectionLightDataBuffer { DirectionLightComponent data[]; };
+layout(buffer_reference, std430) readonly restrict buffer DirectionLightShadowDataBuffer { DirectionLightShadowComponent data[]; };
+layout(buffer_reference, std430) readonly restrict buffer DirectionLightShadowColliderDataBuffer { DirectionLightShadowColliderGPU data[]; };
+layout(buffer_reference, std430) readonly restrict buffer VisibleDirectionLightBuffer { uint data[]; };
 
 #define GET_DIRECTION_LIGHT(addr, idx)                 DirectionLightDataBuffer(addr).data[idx]
 #define GET_DIRECTION_LIGHT_SHADOW(addr, idx)          DirectionLightShadowDataBuffer(addr).data[idx]

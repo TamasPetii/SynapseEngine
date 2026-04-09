@@ -13,11 +13,11 @@ struct GpuNodeTransform {
     mat4 globalTransformIT;
 };
 
-layout(buffer_reference, std430) readonly buffer TransformPool { 
+layout(buffer_reference, std430) readonly restrict buffer TransformPool { 
     TransformComponent data[]; 
 };
 
-layout(buffer_reference, std430) readonly buffer NodeBuffer { 
+layout(buffer_reference, std430) readonly restrict buffer NodeBuffer { 
     GpuNodeTransform data[];
 };
 

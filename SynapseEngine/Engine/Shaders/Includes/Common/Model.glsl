@@ -10,8 +10,8 @@ struct ModelComponent {
     uint materialOffset;  
 };
 
-layout(buffer_reference, std430) readonly buffer ModelComponentBuffer { ModelComponent data[]; };
-layout(buffer_reference, std430) readonly buffer InstanceBuffer       { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer ModelComponentBuffer { ModelComponent data[]; };
+layout(buffer_reference, std430) readonly restrict buffer InstanceBuffer       { uint data[]; };
 
 #define GET_MODEL_COMP(addr, idx)       ModelComponentBuffer(addr).data[idx]
 #define GET_INSTANCE(addr, idx)         InstanceBuffer(addr).data[idx]

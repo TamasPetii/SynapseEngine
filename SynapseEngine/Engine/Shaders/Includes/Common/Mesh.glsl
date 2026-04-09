@@ -87,18 +87,18 @@ struct DebugMeshletInstance {
     uint globalMeshletIdx;
 };
 
-layout(buffer_reference, std430) readonly buffer PositionBuffer         { GpuVertexPosition data[]; };
-layout(buffer_reference, std430) readonly buffer AttributeBuffer        { GpuVertexAttributes data[]; };
-layout(buffer_reference, std430) readonly buffer IndexBuffer            { uint data[]; };
-layout(buffer_reference, std430) readonly buffer ModelAddressBuffer     { GpuModelAddresses data[]; };
-layout(buffer_reference, std430) readonly buffer DescriptorBuffer       { MeshDrawDescriptor data[]; };
-layout(buffer_reference, std430) readonly buffer MeshletDrawDescBuffer  { GpuMeshletDrawDescriptor data[]; };
-layout(buffer_reference, std430) readonly buffer MeshletDescBuffer      { GpuMeshletDescriptor data[]; };
-layout(buffer_reference, std430) readonly buffer MeshColliderBuffer     { GpuMeshCollider data[]; };
-layout(buffer_reference, std430) readonly buffer MeshletColliderBuffer  { GpuMeshletCollider data[]; };
-layout(buffer_reference, std430) readonly buffer VertexIndicesBuffer    { uint data[]; };
-layout(buffer_reference, std430) readonly buffer TriangleIndicesBuffer  { uint8_t data[]; };
-layout(buffer_reference, std430) readonly buffer DebugMeshletInstanceBuffer    { DebugMeshletInstance data[]; };
+layout(buffer_reference, std430) readonly restrict buffer PositionBuffer         { GpuVertexPosition data[]; };
+layout(buffer_reference, std430) readonly restrict buffer AttributeBuffer        { GpuVertexAttributes data[]; };
+layout(buffer_reference, std430) readonly restrict buffer IndexBuffer            { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer ModelAddressBuffer     { GpuModelAddresses data[]; };
+layout(buffer_reference, std430) readonly restrict buffer DescriptorBuffer       { MeshDrawDescriptor data[]; };
+layout(buffer_reference, std430) readonly restrict buffer MeshletDrawDescBuffer  { GpuMeshletDrawDescriptor data[]; };
+layout(buffer_reference, std430) readonly restrict buffer MeshletDescBuffer      { GpuMeshletDescriptor data[]; };
+layout(buffer_reference, std430) readonly restrict buffer MeshColliderBuffer     { GpuMeshCollider data[]; };
+layout(buffer_reference, std430) readonly restrict buffer MeshletColliderBuffer  { GpuMeshletCollider data[]; };
+layout(buffer_reference, std430) readonly restrict buffer VertexIndicesBuffer    { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer TriangleIndicesBuffer  { uint8_t data[]; };
+layout(buffer_reference, std430) readonly restrict buffer DebugMeshletInstanceBuffer    { DebugMeshletInstance data[]; };
 
 #define GET_VERTEX_POS(addr, idx)             PositionBuffer(addr).data[idx]
 #define GET_VERTEX_ATTR(addr, idx)            AttributeBuffer(addr).data[idx]
