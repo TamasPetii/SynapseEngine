@@ -383,13 +383,16 @@ namespace Syn
             Vk::BufferUtils::CopyBuffer(cmd, copyInfo);
         }
 
-        if (requiredMaterialBufferSize > 0 && 
-            mappedMaterialIndexBuffers[frameIndex] &&
-            gpuMaterialIndexBuffers[frameIndex]) {
+        if (requiredMaterialBufferSize > 0 && mappedMaterialIndexBuffers[frameIndex] && gpuMaterialIndexBuffers[frameIndex]) {
+
+            size_t mappedSize = mappedMaterialIndexBuffers[frameIndex]->GetSize();
+            size_t gpuSize = gpuMaterialIndexBuffers[frameIndex]->GetSize();
+            size_t copySize = std::min({ (size_t)requiredMaterialBufferSize, mappedSize, gpuSize });
+
             Vk::BufferCopyInfo copyInfo{};
             copyInfo.srcBuffer = mappedMaterialIndexBuffers[frameIndex]->Handle();
             copyInfo.dstBuffer = gpuMaterialIndexBuffers[frameIndex]->Handle();
-            copyInfo.size = requiredMaterialBufferSize;
+            copyInfo.size = copySize;
             copyInfo.srcOffset = 0;
             copyInfo.dstOffset = 0;
             Vk::BufferUtils::CopyBuffer(cmd, copyInfo);
