@@ -54,7 +54,7 @@ namespace Syn
         void RegisterSystem();
 
         template<typename TComponent, typename TGpuStruct>
-        void RegisterComponentBuffer(const std::string& name);
+        void RegisterComponentBuffer(const std::string& name, ComponentMemoryType memoryType = ComponentMemoryType::Persistent);
 
         template<typename TComponent>
         void RegisterComponentSparseMapBuffer(const std::string& name);
@@ -85,7 +85,7 @@ namespace Syn
     }
 
     template<typename TComponent, typename TGpuStruct>
-    SYN_INLINE void Scene::RegisterComponentBuffer(const std::string& name)
+    SYN_INLINE void Scene::RegisterComponentBuffer(const std::string& name, ComponentMemoryType memoryType)
     {
         _componentBufferManager->RegisterBuffer(name, sizeof(TGpuStruct),
             [this]() -> uint32_t {
@@ -95,7 +95,8 @@ namespace Syn
             [this]() -> bool {
                 auto pool = _registry->GetPool<TComponent>();
                 return pool && pool->Size() > 0;
-            });
+            },
+            memoryType);
     }
 
     template<typename TComponent>

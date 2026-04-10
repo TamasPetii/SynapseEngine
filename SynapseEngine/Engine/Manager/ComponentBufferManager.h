@@ -8,6 +8,11 @@
 
 namespace Syn
 {
+    enum class SYN_API ComponentMemoryType {
+        Persistent,
+        GpuOnly
+    };
+
     struct SYN_API ComponentBufferView
     {
         Vk::Buffer* buffer;
@@ -19,7 +24,7 @@ namespace Syn
     public:
         ComponentBufferManager(uint32_t frameCount);
 
-        void RegisterBuffer(const std::string& name, uint32_t elementSize, std::function<uint32_t()> sizeCallback, std::function<bool()> readyCallback);
+        void RegisterBuffer(const std::string& name, uint32_t elementSize, std::function<uint32_t()> sizeCallback, std::function<bool()> readyCallback, ComponentMemoryType memoryType = ComponentMemoryType::Persistent);
         void Update(uint32_t frameIndex);
 
         ComponentBufferView GetComponentBuffer(const std::string& name, uint32_t frameIndex);
@@ -36,6 +41,7 @@ namespace Syn
             std::vector<FrameData> frames;
             std::function<uint32_t()> sizeCallback;
             std::function<bool()> readyCallback;
+            ComponentMemoryType memoryType;
         };
 
         uint32_t _frameCount;
