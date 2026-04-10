@@ -52,6 +52,10 @@ namespace Syn {
 
         ServiceLocator::GetGpuProfiler()->BeginFrame(cmd->Handle(), frameIndex);
 
+        if (_preRenderCallback) {
+            _preRenderCallback(cmd->Handle(), frameIndex, scene);
+        }
+
         RenderContext context = {
             .cmd = cmd->Handle(),
             .frameIndex = frameIndex,

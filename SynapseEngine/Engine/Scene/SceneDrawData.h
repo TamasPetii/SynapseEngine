@@ -9,6 +9,7 @@
 #include "Engine/Mesh/MeshDrawBlueprint.h"
 #include "Engine/Mesh/MeshDrawDescriptor.h"
 #include "Engine/Material/MaterialRenderType.h"
+#include <atomic>
 
 namespace Syn
 {
@@ -34,14 +35,33 @@ namespace Syn
         uint32_t meshletCmdOffsets[MaterialRenderType::Count] = { 0 };
         uint32_t meshletCmdCounts[MaterialRenderType::Count] = { 0 };
 
-        std::vector<std::shared_ptr<Vk::Buffer>> globalInstanceBuffers;
-        std::vector<std::shared_ptr<Vk::Buffer>> globalDrawCountBuffers;
-        std::vector<std::shared_ptr<Vk::Buffer>> globalIndirectCommandBuffers;
-        std::vector<std::shared_ptr<Vk::Buffer>> globalIndirectCommandDescriptorBuffers;
-        std::vector<std::shared_ptr<Vk::Buffer>> globalModelAllocationBuffers;
-        std::vector<std::shared_ptr<Vk::Buffer>> globalMeshAllocationBuffers;
-        std::vector<std::shared_ptr<Vk::Buffer>> globalModelComputeCountBuffer;
-        std::vector<std::shared_ptr<Vk::Buffer>> globalMaterialIndexBuffers;
+        std::atomic<uint32_t> syncFramesRemaining{ 0 };
+
+        void RecordGpuSync(VkCommandBuffer cmd, uint32_t frameIndex);
+
+        void RequestGlobalSync(uint32_t framesInFlight) {
+            uint32_t current = syncFramesRemaining.load(std::memory_order_relaxed);
+            while (current < framesInFlight &&
+                !syncFramesRemaining.compare_exchange_weak(current, framesInFlight, std::memory_order_release, std::memory_order_relaxed)) {
+            }
+        }
+
+        std::vector<std::shared_ptr<Vk::Buffer>> mappedDrawCountBuffers;
+
+        std::vector<std::shared_ptr<Vk::Buffer>> mappedInstanceBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> mappedIndirectCommandBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> mappedIndirectCommandDescriptorBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> mappedMaterialIndexBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> mappedModelAllocationBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> mappedMeshAllocationBuffers;
+
+        std::vector<std::shared_ptr<Vk::Buffer>> gpuInstanceBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> gpuIndirectCommandBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> gpuIndirectCommandDescriptorBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> gpuMaterialIndexBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> gpuModelAllocationBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> gpuMeshAllocationBuffers;
+        std::vector<std::shared_ptr<Vk::Buffer>> gpuModelComputeCountBuffers;
 
         uint32_t activeDescriptorCount = 0;
         uint32_t activeTraditionalCount = 0;
@@ -50,8 +70,8 @@ namespace Syn
         size_t requiredMaterialBufferSize = 0;
 
         std::vector<uint32_t> cpuInstanceBuffer;
-        std::vector<ModelAllocationInfo> modelAllocations;
         std::vector<MeshAllocationInfo> meshAllocations;
+        std::vector<ModelAllocationInfo> modelAllocations;
         std::vector<MeshDrawDescriptor> drawDescriptors;
         std::vector<VkDrawIndirectCommand> traditionalCommands;
         std::vector<VkDrawMeshTasksIndirectCommandEXT> meshletCommands;

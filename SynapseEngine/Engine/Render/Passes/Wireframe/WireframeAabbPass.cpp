@@ -103,8 +103,8 @@ namespace Syn {
         pc.animationSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationSparseMap, fIdx);
 
         pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
-        pc.globalInstanceBuffers = drawData->globalInstanceBuffers[fIdx]->GetDeviceAddress();
-        pc.globalIndirectCommandDescriptorBuffers = drawData->globalIndirectCommandDescriptorBuffers[fIdx]->GetDeviceAddress();
+        pc.globalInstanceBuffers = context.scene->GetSettings()->enableGpuCulling ? drawData->gpuInstanceBuffers[fIdx]->GetDeviceAddress() : drawData->mappedInstanceBuffers[fIdx]->GetDeviceAddress();
+        pc.globalIndirectCommandDescriptorBuffers = drawData->gpuIndirectCommandDescriptorBuffers[fIdx]->GetDeviceAddress();
         pc.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
         pc.cameraSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
         pc.transformBufferAddr = compManager->GetBufferAddr(BufferNames::TransformData, fIdx);

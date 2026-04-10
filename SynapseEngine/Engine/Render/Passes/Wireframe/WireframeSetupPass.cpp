@@ -36,7 +36,7 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
 
         WireframeSetupPC pc{};
-        pc.globalIndirectCmdsAddr = drawData->globalIndirectCommandBuffers[fIdx]->GetDeviceAddress();
+        pc.globalIndirectCmdsAddr = context.scene->GetSettings()->enableGpuCulling ? drawData->gpuIndirectCommandBuffers[fIdx]->GetDeviceAddress() : drawData->mappedIndirectCommandBuffers[fIdx]->GetDeviceAddress();
         pc.aabbCmdsAddr = drawData->aabbIndirectCommandBuffers[fIdx]->GetDeviceAddress();
         pc.sphereCmdsAddr = drawData->sphereIndirectCommandBuffers[fIdx]->GetDeviceAddress();
         pc.totalTraditionalCommands = drawData->activeTraditionalCount;

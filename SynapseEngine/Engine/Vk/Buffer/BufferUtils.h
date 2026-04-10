@@ -42,10 +42,18 @@ namespace Syn::Vk {
         uint32_t dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     };
 
+    struct SYN_API GlobalBarrierInfo {
+        VkPipelineStageFlags2 srcStage = VK_PIPELINE_STAGE_2_NONE;
+        VkAccessFlags2 srcAccess = VK_ACCESS_2_NONE;
+        VkPipelineStageFlags2 dstStage = VK_PIPELINE_STAGE_2_NONE;
+        VkAccessFlags2 dstAccess = VK_ACCESS_2_NONE;
+    };
+
     class SYN_API BufferUtils {
     public:
         static void CopyBuffer(VkCommandBuffer cmd, const BufferCopyInfo& info);
         static void CopyBufferToImage(VkCommandBuffer cmd, const BufferToImageCopyInfo& info);
         static void InsertBarrier(VkCommandBuffer cmd, const BufferBarrierInfo& info);
+        static void InsertGlobalBarrier(VkCommandBuffer cmd, const GlobalBarrierInfo& info);
     };
 }

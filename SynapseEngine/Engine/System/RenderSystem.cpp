@@ -137,7 +137,10 @@ namespace Syn
             if (capacityExceeded || _needsRebuild)
             {
                 RebuildGlobalBuffers(scene);
-                this->SetFramesToUpload(ServiceLocator::GetFrameContext()->framesInFlight);
+
+                uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
+                this->SetFramesToUpload(framesInFlight);
+                scene->GetSceneDrawData()->RequestGlobalSync(framesInFlight);
             }
             });
     }
@@ -376,15 +379,15 @@ namespace Syn
             size_t totalDescSize = totalDescriptors * sizeof(MeshDrawDescriptor);
 
             if (totalDescSize > 0)
-                drawData->globalIndirectCommandDescriptorBuffers[frameIndex]->Write(drawData->drawDescriptors.data(), totalDescSize, 0);
+                drawData->mappedIndirectCommandDescriptorBuffers[frameIndex]->Write(drawData->drawDescriptors.data(), totalDescSize, 0);
 
             size_t modelAllocSize = drawData->modelAllocations.size() * sizeof(ModelAllocationInfo);
             if (modelAllocSize > 0)
-                drawData->globalModelAllocationBuffers[frameIndex]->Write(drawData->modelAllocations.data(), modelAllocSize, 0);
+                drawData->mappedModelAllocationBuffers[frameIndex]->Write(drawData->modelAllocations.data(), modelAllocSize, 0);
 
             size_t meshAllocSize = drawData->activeDescriptorCount * sizeof(MeshAllocationInfo);
             if (meshAllocSize > 0)
-                drawData->globalMeshAllocationBuffers[frameIndex]->Write(drawData->meshAllocations.data(), meshAllocSize, 0);
+                drawData->mappedMeshAllocationBuffers[frameIndex]->Write(drawData->meshAllocations.data(), meshAllocSize, 0);
 
             uint32_t counts[8] = { 0 };
             for (int i = 0; i < MaterialRenderType::Count; ++i) {
@@ -392,7 +395,7 @@ namespace Syn
                 counts[MaterialRenderType::Count + i] = drawData->meshletCmdCounts[i];
             }
 
-            drawData->globalDrawCountBuffers[frameIndex]->Write(counts, sizeof(counts), 0);
+            drawData->mappedDrawCountBuffers[frameIndex]->Write(counts, sizeof(counts), 0);
             });
     }
 
