@@ -235,6 +235,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Render\Passes\Culling\CullingCommandResetPass.cpp" />
     <ClCompile Include="Render\Passes\Wboit\PreCompositeTransitionPass.cpp" />
     <ClCompile Include="Render\Passes\Deferred\PostDeferredTransitionPass.cpp" />
     <ClCompile Include="Render\Passes\Deferred\PreDeferredTransitionPass.cpp" />
@@ -550,6 +551,7 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\Passes\Culling\CullingCommandResetPass.h" />
     <ClInclude Include="Render\Passes\Wboit\PreCompositeTransitionPass.h" />
     <ClInclude Include="Render\Passes\Deferred\PostDeferredTransitionPass.h" />
     <ClInclude Include="Render\Passes\Deferred\PreDeferredTransitionPass.h" />
@@ -921,6 +923,7 @@
     <None Include="Shaders\Includes\PushConstants\BloomDownSamplePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\BloomPrefilterPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\BloomUpSamplePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\CullingCommandResetPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredDirectionLightPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredEmissiveAoPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredPointLightPC.glsl" />
@@ -947,6 +950,7 @@
     <None Include="Shaders\Passes\Common\Composite.frag" />
     <None Include="Shaders\Passes\Common\Fullscreen.vert" />
     <None Include="Shaders\Passes\Common\TransparentComposite.frag" />
+    <None Include="Shaders\Passes\Culling\CullingCommandReset.comp" />
     <None Include="Shaders\Passes\Culling\MeshCulling.comp" />
     <None Include="Shaders\Passes\Culling\ModelCulling.comp" />
     <None Include="Shaders\Passes\Culling\PointLightCulling.comp" />

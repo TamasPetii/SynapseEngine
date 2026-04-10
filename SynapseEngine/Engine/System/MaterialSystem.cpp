@@ -102,7 +102,9 @@ namespace Syn
             for (auto e : pool->GetStorage().GetDynamicEntities()) processEntity(e);
             for (auto e : pool->GetStorage().GetStreamEntities()) processEntity(e);
 
-            this->SetFramesToUpload(ServiceLocator::GetFrameContext()->framesInFlight);
+            uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
+            this->SetFramesToUpload(framesInFlight);
+            scene->GetSceneDrawData()->RequestGlobalSync(framesInFlight);
             });
     }
 
@@ -123,21 +125,25 @@ namespace Syn
             size_t actualDataSize = _flatMaterialIndices.size() * sizeof(uint32_t);
             size_t bufferSizeToAllocate = std::max(actualDataSize, drawData->requiredMaterialBufferSize);
 
-            auto& currentBuffer = drawData->globalMaterialIndexBuffers[frameIndex];
+            auto& mappedBuffer = drawData->mappedMaterialIndexBuffers[frameIndex];
+            auto& gpuBuffer = drawData->gpuMaterialIndexBuffers[frameIndex];
 
-            if (!currentBuffer || currentBuffer->GetSize() < bufferSizeToAllocate)
+            if (!mappedBuffer || mappedBuffer->GetSize() < bufferSizeToAllocate)
             {
-                size_t oldSize = currentBuffer ? currentBuffer->GetSize() : 0;
+                size_t oldSize = mappedBuffer ? mappedBuffer->GetSize() : 0;
 
-                //Info("MaterialSystem: [BUFFER REALLOCATION] Reallocating global material buffer for frame {}! Old size: {} bytes, New size: {} bytes", frameIndex, oldSize, bufferSizeToAllocate);
+                mappedBuffer = Vk::BufferFactory::CreatePersistent(
+                    bufferSizeToAllocate,
+                    VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT
+                );
 
-                currentBuffer = Vk::BufferFactory::CreatePersistent(
+                gpuBuffer = Vk::BufferFactory::CreateGpu(
                     bufferSizeToAllocate,
                     VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
                 );
             }
 
-            currentBuffer->Write(_flatMaterialIndices.data(), actualDataSize, 0);
+            mappedBuffer->Write(_flatMaterialIndices.data(), actualDataSize, 0);
             });
     }
 }

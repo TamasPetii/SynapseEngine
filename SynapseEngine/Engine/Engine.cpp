@@ -197,7 +197,18 @@ namespace Syn
 #else
 		_renderManager = std::move(RendererFactory::CreateDeferredRenderer(_frameContext.framesInFlight));
 #endif
+
 		_renderManager->SetGuiRenderCallback(params.onRenderGuiCallback);
+
+		_renderManager->SetPreRenderCallback([](VkCommandBuffer cmd, uint32_t frameIndex, Scene* scene) {
+			if (!scene) return;
+
+			auto drawData = scene->GetSceneDrawData();
+			auto settings = scene->GetSettings();
+			if (!drawData || !settings) return;
+
+			drawData->RecordGpuSync(cmd, frameIndex);
+		});
 	}
 
 	void Engine::Shutdown() 

@@ -233,6 +233,8 @@ namespace Syn
             auto drawData = scene->GetSceneDrawData();
             auto settings = scene->GetSettings();
 
+            bool needsCommandUpload = (!settings->enableGpuCulling) || (drawData->syncFramesRemaining.load(std::memory_order_relaxed) > 0);
+
             if (!settings->enableGpuCulling)
             {
                 for (uint32_t i = 0; i < drawData->activeTraditionalCount; ++i) {
@@ -245,30 +247,27 @@ namespace Syn
 
                 size_t instanceSize = drawData->totalAllocatedInstances * sizeof(uint32_t);
                 if (instanceSize > 0) {
-                    drawData->globalInstanceBuffers[frameIndex]->Write(drawData->cpuInstanceBuffer.data(), instanceSize, 0);
+                    drawData->mappedInstanceBuffers[frameIndex]->Write(drawData->cpuInstanceBuffer.data(), instanceSize, 0);
                 }
             }
 
-            size_t tradSize = drawData->activeTraditionalCount * sizeof(VkDrawIndirectCommand);
-            if (tradSize > 0) {
-                drawData->globalIndirectCommandBuffers[frameIndex]->Write(drawData->traditionalCommands.data(), tradSize, 0);
-            }
-
-            size_t meshletSize = drawData->activeMeshletCount * sizeof(VkDrawMeshTasksIndirectCommandEXT);
-            if (meshletSize > 0) {
-                size_t meshletGpuOffset = tradSize;
-                drawData->globalIndirectCommandBuffers[frameIndex]->Write(drawData->meshletCommands.data(), meshletSize, meshletGpuOffset);
-            }
-
-            if (settings->enableGpuCulling)
+            if (needsCommandUpload)
             {
-                uint32_t zeroDispatch[3] = { 0, 1, 1 };
-                drawData->globalModelComputeCountBuffer[frameIndex]->Write(zeroDispatch, sizeof(zeroDispatch), 0);
-            }
+                size_t tradSize = drawData->activeTraditionalCount * sizeof(VkDrawIndirectCommand);
+                if (tradSize > 0) {
+                    drawData->mappedIndirectCommandBuffers[frameIndex]->Write(drawData->traditionalCommands.data(), tradSize, 0);
+                }
 
-            if (drawData->activeMeshletCount > 0) {
-                drawData->debugAabbIndirectBuffers[frameIndex]->Write(&drawData->debugAabbCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
-                drawData->debugSphereIndirectBuffers[frameIndex]->Write(&drawData->debugSphereCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+                size_t meshletSize = drawData->activeMeshletCount * sizeof(VkDrawMeshTasksIndirectCommandEXT);
+                if (meshletSize > 0) {
+                    size_t meshletGpuOffset = tradSize;
+                    drawData->mappedIndirectCommandBuffers[frameIndex]->Write(drawData->meshletCommands.data(), meshletSize, meshletGpuOffset);
+                }
+
+                if (drawData->activeMeshletCount > 0) {
+                    drawData->debugAabbIndirectBuffers[frameIndex]->Write(&drawData->debugAabbCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+                    drawData->debugSphereIndirectBuffers[frameIndex]->Write(&drawData->debugSphereCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+                }
             }
             });
     }

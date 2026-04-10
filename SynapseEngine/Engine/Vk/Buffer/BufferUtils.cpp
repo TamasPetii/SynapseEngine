@@ -57,4 +57,18 @@ namespace Syn::Vk {
 
         vkCmdPipelineBarrier2(cmd, &depInfo);
     }
+
+    void BufferUtils::InsertGlobalBarrier(VkCommandBuffer cmd, const GlobalBarrierInfo& info) {
+        VkMemoryBarrier2 barrier{ VK_STRUCTURE_TYPE_MEMORY_BARRIER_2 };
+        barrier.srcStageMask = info.srcStage;
+        barrier.srcAccessMask = info.srcAccess;
+        barrier.dstStageMask = info.dstStage;
+        barrier.dstAccessMask = info.dstAccess;
+
+        VkDependencyInfo depInfo{ VK_STRUCTURE_TYPE_DEPENDENCY_INFO };
+        depInfo.memoryBarrierCount = 1;
+        depInfo.pMemoryBarriers = &barrier;
+
+        vkCmdPipelineBarrier2(cmd, &depInfo);
+    }
 }

@@ -31,6 +31,10 @@ namespace Syn {
             _onRenderGuiCallback = std::move(callback);
         }
 
+        void SetPreRenderCallback(std::function<void(VkCommandBuffer, uint32_t, Scene*)> callback) {
+            _preRenderCallback = std::move(callback);
+        }
+
         bool IsResizePending() const {
             for (bool needsResize : _frameNeedsResize) {
                 if (needsResize) return true;
@@ -48,5 +52,6 @@ namespace Syn {
         uint32_t _newHeight = 0;
 
         std::function<void(VkCommandBuffer)> _onRenderGuiCallback;
+        std::function<void(VkCommandBuffer, uint32_t, Scene*)> _preRenderCallback;
     };
 }

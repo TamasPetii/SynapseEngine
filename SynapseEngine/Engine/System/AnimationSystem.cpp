@@ -1,6 +1,6 @@
 #include "AnimationSystem.h"
 #include "Engine/ServiceLocator.h"
-#include "Engine/Animation/AnimationManager.h" // Vagy ahol az AnimationManager van
+#include "Engine/Animation/AnimationManager.h"
 
 namespace Syn
 {

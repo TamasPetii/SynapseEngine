@@ -5,6 +5,7 @@
 #include "Engine/Render/Passes/Culling/MeshCullingPass.h"
 #include "Engine/Render/Passes/Culling/PointLightCullingPass.h"
 #include "Engine/Render/Passes/Culling/SpotLightCullingPass.h"
+#include "Engine/Render/Passes/Culling/CullingCommandResetPass.h"
 
 #include "Engine/Render/Passes/Deferred/GBufferInitPass.h"
 #include "Engine/Render/Passes/Deferred/DeferredEmissiveAoPass.h"
@@ -62,6 +63,7 @@
 #include "Engine/Render/Passes/Deferred/PostDeferredTransitionPass.h"
 #include "Engine/Render/Passes/Wboit/PreCompositeTransitionPass.h"
 
+
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "RenderNames.h"
 
@@ -74,6 +76,7 @@ namespace Syn
         auto pipeline = std::make_unique<RenderPipeline>();
         pipeline->AddPass(std::make_unique<HizLinearPreparePass>());
         pipeline->AddPass(std::make_unique<HizDownsamplePass>());
+		pipeline->AddPass(std::make_unique<CullingCommandResetPass>());
         pipeline->AddPass(std::make_unique<ModelCullingPass>());
         pipeline->AddPass(std::make_unique<MeshCullingPass>());
         pipeline->AddPass(std::make_unique<PointLightCullingPass>());
@@ -363,6 +366,7 @@ namespace Syn
         // Culling és Hi-Z
         pipeline->AddPass(std::make_unique<HizLinearPreparePass>());
         pipeline->AddPass(std::make_unique<HizDownsamplePass>());
+        pipeline->AddPass(std::make_unique<CullingCommandResetPass>());
         pipeline->AddPass(std::make_unique<ModelCullingPass>());
         pipeline->AddPass(std::make_unique<MeshCullingPass>());
 

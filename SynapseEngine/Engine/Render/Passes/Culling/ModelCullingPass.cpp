@@ -67,17 +67,17 @@ namespace Syn {
         pc.modelCompBufferAddr = compManager->GetBufferAddr(BufferNames::ModelData, fIdx);
         pc.modelSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::ModelSparseMap, fIdx);
 
-        pc.modelAllocBufferAddr = drawData->globalModelAllocationBuffers[fIdx]->GetDeviceAddress();
+        pc.modelAllocBufferAddr = drawData->gpuModelAllocationBuffers[fIdx]->GetDeviceAddress();
         pc.modelAddressBufferAddr = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
 
         pc.visibleModelListAddr = compManager->GetBufferAddr(BufferNames::ModelVisibleData, fIdx);
-        pc.visibleModelCountAddr = drawData->globalModelComputeCountBuffer[fIdx]->GetDeviceAddress();
+        pc.visibleModelCountAddr = drawData->gpuModelComputeCountBuffers[fIdx]->GetDeviceAddress();
 
-        pc.meshAllocBufferAddr = drawData->globalMeshAllocationBuffers[fIdx]->GetDeviceAddress();
-        pc.globalIndirectCommandBuffers = drawData->globalIndirectCommandBuffers[fIdx]->GetDeviceAddress();
-        pc.globalInstanceBufferAddr = drawData->globalInstanceBuffers[fIdx]->GetDeviceAddress();
+        pc.meshAllocBufferAddr = drawData->gpuMeshAllocationBuffers[fIdx]->GetDeviceAddress();
+        pc.globalIndirectCommandBuffers = drawData->gpuIndirectCommandBuffers[fIdx]->GetDeviceAddress();
+        pc.globalInstanceBufferAddr = drawData->gpuInstanceBuffers[fIdx]->GetDeviceAddress();
 
-        pc.materialLookupBufferAddr = drawData->globalMaterialIndexBuffers[fIdx]->GetDeviceAddress();
+        pc.materialLookupBufferAddr = drawData->gpuMaterialIndexBuffers[fIdx]->GetDeviceAddress();
         pc.materialBufferAddr = materialManager->GetMaterialBuffer()->GetDeviceAddress();
 
         pc.totalModelsToTest = _totalModelsToTest;
@@ -122,20 +122,11 @@ namespace Syn {
 
         vkCmdDispatch(context.cmd, groupCountX, 1, 1);
 
-        Vk::BufferBarrierInfo countBarrier{};
-        countBarrier.buffer = drawData->globalModelComputeCountBuffer[fIdx]->Handle();
-        countBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        countBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
-        countBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        countBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
-        Vk::BufferUtils::InsertBarrier(context.cmd, countBarrier);
-
-        Vk::BufferBarrierInfo listBarrier{};
-        listBarrier.buffer = compManager->GetComponentBuffer(BufferNames::ModelVisibleData, fIdx).buffer->Handle();
-        listBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        listBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
-        listBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        listBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
-        Vk::BufferUtils::InsertBarrier(context.cmd, listBarrier);
+        Vk::GlobalBarrierInfo barrier{};
+        barrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        barrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        barrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        barrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
+        Vk::BufferUtils::InsertGlobalBarrier(context.cmd, barrier);
     }
 }

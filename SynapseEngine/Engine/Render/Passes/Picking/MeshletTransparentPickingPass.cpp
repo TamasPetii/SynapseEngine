@@ -127,19 +127,19 @@ namespace Syn {
         pc.animationAddressBuffer = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
         pc.animationBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::AnimationData, fIdx);
         pc.animationSparseMapBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::AnimationSparseMap, fIdx);
-        pc.globalDrawCountBuffers = drawData->globalDrawCountBuffers[fIdx]->GetDeviceAddress();
-        pc.globalInstanceBuffers = drawData->globalInstanceBuffers[fIdx]->GetDeviceAddress();
-        pc.globalIndirectCommandBuffers = drawData->globalIndirectCommandBuffers[fIdx]->GetDeviceAddress();
-        pc.globalIndirectCommandDescriptorBuffers = drawData->globalIndirectCommandDescriptorBuffers[fIdx]->GetDeviceAddress();
-        pc.globalModelAllocationBuffers = drawData->globalModelAllocationBuffers[fIdx]->GetDeviceAddress();
-        pc.globalMeshAllocationBuffers = drawData->globalMeshAllocationBuffers[fIdx]->GetDeviceAddress();
+        pc.globalDrawCountBuffers = drawData->mappedDrawCountBuffers[fIdx]->GetDeviceAddress();
+        pc.globalInstanceBuffers = context.scene->GetSettings()->enableGpuCulling ? drawData->gpuInstanceBuffers[fIdx]->GetDeviceAddress() : drawData->mappedInstanceBuffers[fIdx]->GetDeviceAddress();
+        pc.globalIndirectCommandBuffers = context.scene->GetSettings()->enableGpuCulling ? drawData->gpuIndirectCommandBuffers[fIdx]->GetDeviceAddress() : drawData->mappedIndirectCommandBuffers[fIdx]->GetDeviceAddress();;
+        pc.globalIndirectCommandDescriptorBuffers = drawData->gpuIndirectCommandDescriptorBuffers[fIdx]->GetDeviceAddress();
+        pc.globalModelAllocationBuffers = drawData->gpuModelAllocationBuffers[fIdx]->GetDeviceAddress();
+        pc.globalMeshAllocationBuffers = drawData->gpuMeshAllocationBuffers[fIdx]->GetDeviceAddress();
         pc.transformBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::TransformData, fIdx);
         pc.transformSparseMapBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::TransformSparseMap, fIdx);
         pc.cameraBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::CameraData, fIdx);
         pc.cameraSparseMapBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
         pc.modelBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::ModelData, fIdx);
         pc.modelSparseMapBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::ModelSparseMap, fIdx);
-        pc.materialLookupBuffer = drawData->globalMaterialIndexBuffers[fIdx]->GetDeviceAddress();
+        pc.materialLookupBuffer = drawData->gpuMaterialIndexBuffers[fIdx]->GetDeviceAddress();
         pc.materialBuffer = materialManager->GetMaterialBuffer()->GetDeviceAddress();
         pc.debugInstanceBufferAddr = drawData->debugInstanceBuffers[fIdx]->GetDeviceAddress();
         pc.debugAabbIndirectAddr = drawData->debugAabbIndirectBuffers[fIdx]->GetDeviceAddress();
@@ -189,9 +189,15 @@ namespace Syn {
 
     void MeshletTransparentPickingPass::Draw(const RenderContext& context) {
         auto scene = context.scene;
+        bool useGpuCulling = scene->GetSettings()->enableGpuCulling;
+
         auto drawData = scene->GetSceneDrawData();
-        auto indirectBuffer = drawData->globalIndirectCommandBuffers[context.frameIndex]->Handle();
-        auto countBuffer = drawData->globalDrawCountBuffers[context.frameIndex]->Handle();
+
+        auto indirectBuffer = useGpuCulling
+            ? drawData->gpuIndirectCommandBuffers[context.frameIndex]->Handle()
+            : drawData->mappedIndirectCommandBuffers[context.frameIndex]->Handle();
+
+        auto countBuffer = drawData->mappedDrawCountBuffers[context.frameIndex]->Handle();
 
         uint32_t commandOffsetIdx = drawData->meshletCmdOffsets[_renderType];
         uint32_t maxCommandCount = drawData->meshletCmdCounts[_renderType];

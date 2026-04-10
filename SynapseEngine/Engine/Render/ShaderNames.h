@@ -16,6 +16,8 @@ namespace Syn
         static constexpr const char* MeshletTransparentFrag = "../Engine/Shaders/Passes/Geometry/MeshletTransparent.frag";
         static constexpr const char* MeshletTransparentPickingFrag = "../Engine/Shaders/Passes/Geometry/MeshletTransparentPicking.frag";
         
+
+        static constexpr const char* CullingCommandReset = "../Engine/Shaders/Passes/Culling/CullingCommandReset.comp";
         static constexpr const char* MeshCulling = "../Engine/Shaders/Passes/Culling/MeshCulling.comp";
         static constexpr const char* ModelCulling = "../Engine/Shaders/Passes/Culling/ModelCulling.comp";
         static constexpr const char* PointLightCulling = "../Engine/Shaders/Passes/Culling/PointLightCulling.comp";

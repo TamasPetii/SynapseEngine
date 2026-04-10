@@ -954,6 +954,9 @@
     <ClCompile Include="Render\Passes\Wboit\PreCompositeTransitionPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Passes\Culling\CullingCommandResetPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2003,6 +2006,9 @@
     <ClInclude Include="Render\Passes\Wboit\PreCompositeTransitionPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Passes\Culling\CullingCommandResetPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Includes\Common\Animation.glsl" />
@@ -2090,5 +2096,7 @@
     <None Include="Shaders\Passes\Deferred\DeferredPointLight.vert" />
     <None Include="Shaders\Passes\Deferred\DeferredSpotLight.frag" />
     <None Include="Shaders\Passes\Deferred\DeferredSpotLight.vert" />
+    <None Include="Shaders\Passes\Culling\CullingCommandReset.comp" />
+    <None Include="Shaders\Includes\PushConstants\CullingCommandResetPC.glsl" />
   </ItemGroup>
 </Project>

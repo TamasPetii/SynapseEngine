@@ -147,18 +147,18 @@ namespace Syn {
         pc.modelCompBufferAddr = compManager->GetBufferAddr(BufferNames::ModelData, fIdx);
         pc.modelSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::ModelSparseMap, fIdx);
 
-        pc.modelAllocBufferAddr = drawData->globalModelAllocationBuffers[fIdx]->GetDeviceAddress();
+        pc.modelAllocBufferAddr = drawData->gpuModelAllocationBuffers[fIdx]->GetDeviceAddress();
         pc.modelAddressBufferAddr = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
 
         // Ezek a VRAM pufferek nem lesznek kiírva a shaderből, de a PC layout miatt átadjuk
         pc.visibleModelListAddr = compManager->GetBufferAddr(BufferNames::ModelVisibleData, fIdx);
-        pc.visibleModelCountAddr = drawData->globalModelComputeCountBuffer[fIdx]->GetDeviceAddress();
+        pc.visibleModelCountAddr = drawData->gpuModelComputeCountBuffers[fIdx]->GetDeviceAddress();
 
-        pc.meshAllocBufferAddr = drawData->globalMeshAllocationBuffers[fIdx]->GetDeviceAddress();
-        pc.globalIndirectCommandBuffers = drawData->globalIndirectCommandBuffers[fIdx]->GetDeviceAddress();
-        pc.globalInstanceBufferAddr = drawData->globalInstanceBuffers[fIdx]->GetDeviceAddress();
+        pc.meshAllocBufferAddr = drawData->gpuMeshAllocationBuffers[fIdx]->GetDeviceAddress();
+        pc.globalIndirectCommandBuffers = drawData->gpuIndirectCommandBuffers[fIdx]->GetDeviceAddress();
+        pc.globalInstanceBufferAddr = drawData->gpuInstanceBuffers[fIdx]->GetDeviceAddress();
 
-        pc.materialLookupBufferAddr = drawData->globalMaterialIndexBuffers[fIdx]->GetDeviceAddress();
+        pc.materialLookupBufferAddr = drawData->gpuMaterialIndexBuffers[fIdx]->GetDeviceAddress();
         pc.materialBufferAddr = materialManager->GetMaterialBuffer()->GetDeviceAddress();
 
         pc.totalModelsToTest = _totalModelsToTest;
@@ -235,7 +235,7 @@ namespace Syn {
         );
 
         Vk::BufferBarrierInfo instanceBarrier{};
-        instanceBarrier.buffer = drawData->globalInstanceBuffers[fIdx]->Handle();
+        instanceBarrier.buffer = drawData->gpuInstanceBuffers[fIdx]->Handle();
         instanceBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         instanceBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         instanceBarrier.dstStage = VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_EXT | VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_EXT;
@@ -243,7 +243,7 @@ namespace Syn {
         Vk::BufferUtils::InsertBarrier(context.cmd, instanceBarrier);
 
         Vk::BufferBarrierInfo indirectBarrier{};
-        indirectBarrier.buffer = drawData->globalIndirectCommandBuffers[fIdx]->Handle();
+        indirectBarrier.buffer = drawData->gpuIndirectCommandBuffers[fIdx]->Handle();
         indirectBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         indirectBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         indirectBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
