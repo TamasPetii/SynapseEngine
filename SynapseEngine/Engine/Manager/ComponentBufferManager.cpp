@@ -6,17 +6,26 @@ namespace Syn
         : _frameCount(frameCount)
     {}
 
-    void ComponentBufferManager::RegisterBuffer(const std::string& name, uint32_t elementSize, std::function<uint32_t()> sizeCallback, std::function<bool()> readyCallback)
+    void ComponentBufferManager::RegisterBuffer(const std::string& name, uint32_t elementSize, std::function<uint32_t()> sizeCallback, std::function<bool()> readyCallback, ComponentMemoryType memoryType)
     {
         Vk::BufferConfig config;
         config.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
-        config.memoryUsage = VMA_MEMORY_USAGE_AUTO;
-        config.allocationFlags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
         config.useDeviceAddress = true;
+
+        if (memoryType == ComponentMemoryType::Persistent) {
+            config.memoryUsage = VMA_MEMORY_USAGE_AUTO;
+            config.allocationFlags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+        }
+        else {
+            config.memoryUsage = VMA_MEMORY_USAGE_AUTO_PREFER_DEVICE;
+            config.allocationFlags = 0;
+            config.usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+        }
 
         ComponentBufferState state;
         state.sizeCallback = std::move(sizeCallback);
         state.readyCallback = std::move(readyCallback);
+        state.memoryType = memoryType;
 
         for (uint32_t i = 0; i < _frameCount; ++i)
         {

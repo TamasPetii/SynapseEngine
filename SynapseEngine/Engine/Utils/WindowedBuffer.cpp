@@ -33,14 +33,22 @@ namespace Syn
 
             if (_buffer)
             {
-                void* src = _buffer->Map();
-                void* dst = newBuffer->Map();
+                bool isMappable = (_baseConfig.allocationFlags & VMA_ALLOCATION_CREATE_MAPPED_BIT) != 0;
 
-                size_t copySize = std::min(_buffer->GetSize(), newBuffer->GetSize());
-                std::memcpy(dst, src, copySize);
+                if (isMappable)
+                {
+                    void* src = _buffer->Map();
+                    void* dst = newBuffer->Map();
 
-                _buffer->Unmap();
-                newBuffer->Unmap();
+                    if (src && dst)
+                    {
+                        size_t copySize = std::min(_buffer->GetSize(), newBuffer->GetSize());
+                        std::memcpy(dst, src, copySize);
+                    }
+
+                    _buffer->Unmap();
+                    newBuffer->Unmap();
+                }
             }
 
             _buffer = std::move(newBuffer);

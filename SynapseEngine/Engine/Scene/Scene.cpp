@@ -106,7 +106,7 @@ namespace Syn
 
         RegisterComponentSparseMapBuffer<ModelComponent>(BufferNames::ModelSparseMap);
         RegisterComponentBuffer<ModelComponent, ModelComponentGPU>(BufferNames::ModelData);
-        RegisterComponentBuffer<ModelComponent, VisibleModelData>(BufferNames::ModelVisibleData);
+        RegisterComponentBuffer<ModelComponent, VisibleModelData>(BufferNames::ModelVisibleData, ComponentMemoryType::GpuOnly);
 
         RegisterComponentSparseMapBuffer<AnimationComponent>(BufferNames::AnimationSparseMap);
         RegisterComponentBuffer<AnimationComponent, AnimationComponentGPU>(BufferNames::AnimationData);
