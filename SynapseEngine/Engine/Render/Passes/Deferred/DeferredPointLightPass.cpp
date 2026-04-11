@@ -135,7 +135,10 @@ namespace Syn {
 
     void DeferredPointLightPass::Draw(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
-        auto indirectBuffer = drawData->pointLightIndirectCommandBuffers[context.frameIndex]->Handle();
+		auto fIdx = context.frameIndex;
+		auto isGpu = context.scene->GetSettings()->enableGpuCulling;
+
+		auto indirectBuffer = drawData->PointLights.indirectBuffer.GetHandle(fIdx, isGpu);
 
         vkCmdDrawIndirect(
             context.cmd,

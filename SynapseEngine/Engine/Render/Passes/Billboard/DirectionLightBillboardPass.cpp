@@ -107,10 +107,11 @@ namespace Syn {
 
         uint32_t fIdx = context.frameIndex;
         auto drawData = context.scene->GetSceneDrawData();
+        bool isGpu = context.scene->GetSettings()->enableGpuCulling;
 
         Vk::BufferCopyInfo copyRegion{};
-        copyRegion.srcBuffer = drawData->directionLightIndirectCommandBuffers[fIdx]->Handle();
-        copyRegion.dstBuffer = drawData->editorDirectionLightBillboardCmdBuffers[fIdx]->Handle();
+        copyRegion.srcBuffer = drawData->DirectionLights.indirectBuffer.GetHandle(fIdx, isGpu);
+        copyRegion.dstBuffer = drawData->DirectionLights.billboardSingleCmdBuffer.GetHandle(fIdx, isGpu);
         copyRegion.srcOffset = offsetof(VkDrawIndirectCommand, instanceCount);
         copyRegion.dstOffset = offsetof(VkDrawIndirectCommand, instanceCount);
         copyRegion.size = sizeof(uint32_t);
@@ -118,7 +119,7 @@ namespace Syn {
         Vk::BufferUtils::CopyBuffer(context.cmd, copyRegion);
 
         Vk::BufferBarrierInfo memBarrier{};
-        memBarrier.buffer = drawData->editorDirectionLightBillboardCmdBuffers[fIdx]->Handle();
+        memBarrier.buffer = drawData->DirectionLights.billboardSingleCmdBuffer.GetHandle(fIdx, isGpu);
         memBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
         memBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
         memBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
@@ -164,10 +165,11 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
+        bool isGpu = scene->GetSettings()->enableGpuCulling;
 
         vkCmdDrawIndirect(
             context.cmd,
-            drawData->editorDirectionLightBillboardCmdBuffers[fIdx]->Handle(),
+            drawData->DirectionLights.billboardSingleCmdBuffer.GetHandle(fIdx, isGpu),
             0,
             1,
             sizeof(VkDrawIndirectCommand)

@@ -54,35 +54,33 @@ namespace Syn {
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
         uint32_t fIdx = context.frameIndex;
+        bool isGpu = scene->GetSettings()->enableGpuCulling;
 
         ModelMeshCullingPC pc{};
         pc.animationAddressBuffer = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
+        pc.materialBufferAddr = materialManager->GetMaterialBuffer()->GetDeviceAddress();
+        pc.modelAddressBufferAddr = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
+
         pc.animationBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationData, fIdx);
         pc.animationSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationSparseMap, fIdx);
-
         pc.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
         pc.cameraSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
         pc.transformBufferAddr = compManager->GetBufferAddr(BufferNames::TransformData, fIdx);
         pc.transformSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::TransformSparseMap, fIdx);
         pc.modelCompBufferAddr = compManager->GetBufferAddr(BufferNames::ModelData, fIdx);
         pc.modelSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::ModelSparseMap, fIdx);
-
-        pc.modelAllocBufferAddr = drawData->gpuModelAllocationBuffers[fIdx]->GetDeviceAddress();
-        pc.modelAddressBufferAddr = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
-
         pc.visibleModelListAddr = compManager->GetBufferAddr(BufferNames::ModelVisibleData, fIdx);
-        pc.visibleModelCountAddr = drawData->gpuModelComputeCountBuffers[fIdx]->GetDeviceAddress();
 
-        pc.meshAllocBufferAddr = drawData->gpuMeshAllocationBuffers[fIdx]->GetDeviceAddress();
-        pc.globalIndirectCommandBuffers = drawData->gpuIndirectCommandBuffers[fIdx]->GetDeviceAddress();
-        pc.globalInstanceBufferAddr = drawData->gpuInstanceBuffers[fIdx]->GetDeviceAddress();
-
-        pc.materialLookupBufferAddr = drawData->gpuMaterialIndexBuffers[fIdx]->GetDeviceAddress();
-        pc.materialBufferAddr = materialManager->GetMaterialBuffer()->GetDeviceAddress();
+        pc.modelAllocBufferAddr = drawData->Models.modelAllocBuffer.GetAddress(fIdx, isGpu);
+        pc.visibleModelCountAddr = drawData->Models.computeCountBuffer.GetAddress(fIdx, isGpu);
+        pc.meshAllocBufferAddr = drawData->Models.meshAllocBuffer.GetAddress(fIdx, isGpu);
+        pc.globalIndirectCommandBuffers = drawData->Models.indirectBuffer.GetAddress(fIdx, isGpu);
+        pc.globalInstanceBufferAddr = drawData->Models.instanceBuffer.GetAddress(fIdx, isGpu);
+        pc.materialLookupBufferAddr = drawData->Models.materialIndexBuffer.GetAddress(fIdx, isGpu);
 
         pc.totalModelsToTest = _totalModelsToTest;
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
-        pc.traditionalCommandCount = drawData->activeTraditionalCount;
+        pc.traditionalCommandCount = drawData->Models.activeTraditionalCount;
         pc.enableOcclusionCulling = (scene->GetSettings()->enableGpuCulling && scene->GetSettings()->enableOcclusionCulling) ? 1 : 0;
 
         pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
@@ -117,16 +115,26 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
         uint32_t fIdx = context.frameIndex;
+		auto isGpu = scene->GetSettings()->enableGpuCulling;
 
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_totalModelsToTest, ComputeGroupSize::Buffer32D);
 
         vkCmdDispatch(context.cmd, groupCountX, 1, 1);
 
-        Vk::GlobalBarrierInfo barrier{};
-        barrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        barrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
-        barrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        barrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
-        Vk::BufferUtils::InsertGlobalBarrier(context.cmd, barrier);
+        Vk::BufferBarrierInfo countBarrier{};
+        countBarrier.buffer = drawData->Models.computeCountBuffer.GetHandle(fIdx, isGpu);
+        countBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        countBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        countBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        countBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, countBarrier);
+
+        Vk::BufferBarrierInfo listBarrier{};
+        listBarrier.buffer = compManager->GetComponentBuffer(BufferNames::ModelVisibleData, fIdx).buffer->Handle();
+        listBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        listBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        listBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        listBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, listBarrier);
     }
 }

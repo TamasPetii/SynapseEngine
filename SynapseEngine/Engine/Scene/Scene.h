@@ -10,8 +10,8 @@
 #include <unordered_map>
 #include <string>
 
-#include "SceneDrawData.h"
 #include "SceneSettings.h"
+#include "DrawData/SceneDrawData.h"
 
 namespace Syn
 {

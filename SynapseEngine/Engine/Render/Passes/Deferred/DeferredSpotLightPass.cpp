@@ -136,7 +136,10 @@ namespace Syn {
 
     void DeferredSpotLightPass::Draw(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
-        auto indirectBuffer = drawData->spotLightIndirectCommandBuffers[context.frameIndex]->Handle();
+        auto fIdx = context.frameIndex;
+        auto isGpu = context.scene->GetSettings()->enableGpuCulling;
+
+        auto indirectBuffer = drawData->SpotLights.indirectBuffer.GetHandle(fIdx, isGpu);
 
         vkCmdDrawIndirect(
             context.cmd,

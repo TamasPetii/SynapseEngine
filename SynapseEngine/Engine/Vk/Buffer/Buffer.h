@@ -10,7 +10,6 @@ namespace Syn::Vk {
         VkBufferUsageFlags usage = 0;
         VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_AUTO;
         VmaAllocationCreateFlags allocationFlags = 0;
-
         bool useDeviceAddress = true;
     };
 

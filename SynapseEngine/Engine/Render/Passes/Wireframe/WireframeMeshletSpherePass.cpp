@@ -4,7 +4,6 @@
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Scene/Scene.h"
-#include "Engine/Scene/SceneDrawData.h"
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Mesh/MeshSourceNames.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
@@ -89,12 +88,11 @@ namespace Syn
     void WireframeMeshletSpherePass::PushConstants(const RenderContext& context)
     {
         auto scene = context.scene;
-        if (!scene) return;
-
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
+        auto isGpu = scene->GetSettings()->enableGpuCulling;
 
-        if (drawData->activeDescriptorCount == 0 || !drawData->debugInstanceBuffers[fIdx] || !drawData->debugSphereIndirectBuffers[fIdx]) return;
+        if (drawData->Models.activeDescriptorCount == 0) return;
 
         auto modelManager = ServiceLocator::GetModelManager();
         auto compManager = scene->GetComponentBufferManager();
@@ -107,8 +105,8 @@ namespace Syn
         pc.animationSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationSparseMap, fIdx);
 
         pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
-        pc.globalInstanceBuffers = context.scene->GetSettings()->enableGpuCulling ? drawData->gpuInstanceBuffers[fIdx]->GetDeviceAddress() : drawData->mappedInstanceBuffers[fIdx]->GetDeviceAddress();
-        pc.globalIndirectCommandDescriptorBuffers = drawData->gpuIndirectCommandDescriptorBuffers[fIdx]->GetDeviceAddress();
+        pc.globalInstanceBuffers = drawData->Models.instanceBuffer.GetAddress(fIdx, isGpu);
+        pc.globalIndirectCommandDescriptorBuffers = drawData->Models.descriptorBuffer.GetAddress(fIdx, isGpu);
 
         pc.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
         pc.cameraSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
@@ -120,7 +118,7 @@ namespace Syn
 
         pc.indexBufferAddr = sphereMesh->hardwareBuffers.indices->GetDeviceAddress();
         pc.vertexBufferAddr = sphereMesh->hardwareBuffers.vertexPositions->GetDeviceAddress();
-        pc.debugInstanceBufferAddr = drawData->debugInstanceBuffers[fIdx]->GetDeviceAddress();
+        pc.debugInstanceBufferAddr = drawData->Debug.instanceBuffer.GetAddress(fIdx, isGpu);
 
         pc.activeCameraEntity = scene->GetSettings()->useDebugCamera ? scene->GetDebugCameraEntity() : scene->GetSceneCameraEntity();
         pc.isSphere = 1;
@@ -133,19 +131,19 @@ namespace Syn
     void WireframeMeshletSpherePass::Draw(const RenderContext& context)
     {
         auto scene = context.scene;
-        if (!scene) return;
-
         auto drawData = scene->GetSceneDrawData();
+		auto fIdx = context.frameIndex;
+		auto isGpu = scene->GetSettings()->enableGpuCulling;
 
-        if (drawData->activeDescriptorCount == 0 || !drawData->debugSphereIndirectBuffers[context.frameIndex]) return;
+        if (drawData->Models.activeDescriptorCount == 0) return;
 
-        auto indirectBuffer = drawData->debugSphereIndirectBuffers[context.frameIndex]->Handle();
+        auto indirectBuffer = drawData->Debug.meshletSphereIndirectBuffer.GetHandle(fIdx, isGpu);
 
         vkCmdDrawIndirect(
             context.cmd,
             indirectBuffer,
             0,
-            drawData->totalMaxMeshletInstances,
+            drawData->Debug.totalMaxMeshletInstances,
             sizeof(VkDrawIndirectCommand)
         );
     }
