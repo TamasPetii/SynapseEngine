@@ -119,29 +119,32 @@ namespace Syn {
         auto animationManager = ServiceLocator::GetAnimationManager();
 
         uint32_t fIdx = context.frameIndex;
+		auto isGpu = scene->GetSettings()->enableGpuCulling;
 
         TraditionalPassPC pc{};
         pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
         pc.animationAddressBuffer = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
+        pc.materialBuffer = materialManager->GetMaterialBuffer()->GetDeviceAddress();
+
         pc.animationBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::AnimationData, fIdx);
         pc.animationSparseMapBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::AnimationSparseMap, fIdx);
-        pc.globalDrawCountBuffers = drawData->mappedDrawCountBuffers[fIdx]->GetDeviceAddress();
-        pc.globalInstanceBuffers = context.scene->GetSettings()->enableGpuCulling ? drawData->gpuInstanceBuffers[fIdx]->GetDeviceAddress() : drawData->mappedInstanceBuffers[fIdx]->GetDeviceAddress();
-        pc.globalIndirectCommandBuffers = context.scene->GetSettings()->enableGpuCulling ? drawData->gpuIndirectCommandBuffers[fIdx]->GetDeviceAddress() : drawData->mappedIndirectCommandBuffers[fIdx]->GetDeviceAddress();;
-        pc.globalIndirectCommandDescriptorBuffers = drawData->gpuIndirectCommandDescriptorBuffers[fIdx]->GetDeviceAddress();
-        pc.globalModelAllocationBuffers = drawData->gpuModelAllocationBuffers[fIdx]->GetDeviceAddress();
-        pc.globalMeshAllocationBuffers = drawData->gpuMeshAllocationBuffers[fIdx]->GetDeviceAddress();
         pc.transformBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::TransformData, fIdx);
         pc.transformSparseMapBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::TransformSparseMap, fIdx);
         pc.cameraBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::CameraData, fIdx);
         pc.cameraSparseMapBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
         pc.modelBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::ModelData, fIdx);
         pc.modelSparseMapBufferAddr = componentBufferManager->GetBufferAddr(BufferNames::ModelSparseMap, fIdx);
-        pc.materialLookupBuffer = drawData->gpuMaterialIndexBuffers[fIdx]->GetDeviceAddress();
-        pc.materialBuffer = materialManager->GetMaterialBuffer()->GetDeviceAddress();
+
+        pc.globalDrawCountBuffers = drawData->Models.drawCountBuffer.GetAddress(fIdx, isGpu);
+        pc.globalInstanceBuffers = drawData->Models.instanceBuffer.GetAddress(fIdx, isGpu);
+        pc.globalIndirectCommandBuffers = drawData->Models.indirectBuffer.GetAddress(fIdx, isGpu);
+        pc.globalIndirectCommandDescriptorBuffers = drawData->Models.descriptorBuffer.GetAddress(fIdx, isGpu);
+        pc.globalModelAllocationBuffers = drawData->Models.modelAllocBuffer.GetAddress(fIdx, isGpu);
+        pc.globalMeshAllocationBuffers = drawData->Models.meshAllocBuffer.GetAddress(fIdx, isGpu);
+        pc.materialLookupBuffer = drawData->Models.materialIndexBuffer.GetAddress(fIdx, isGpu);
 
         pc.activeCameraEntity = scene->GetSettings()->useDebugCamera ? scene->GetDebugCameraEntity() : scene->GetSceneCameraEntity();
-        pc.baseDescriptorOffset = drawData->traditionalCmdOffsets[_renderType];
+        pc.baseDescriptorOffset = drawData->Models.traditionalCmdOffsets[_renderType];
         pc.materialRenderType = static_cast<uint32_t>(_renderType);
 
         vkCmdPushConstants(
@@ -164,18 +167,14 @@ namespace Syn {
     void PerformanceTraditionalOpaquePass::Draw(const RenderContext& context)
     {
         auto scene = context.scene;
-        bool useGpuCulling = scene->GetSettings()->enableGpuCulling;
-
         auto drawData = scene->GetSceneDrawData();
+        bool isGpu = scene->GetSettings()->enableGpuCulling;
 
-        auto indirectBuffer = useGpuCulling
-            ? drawData->gpuIndirectCommandBuffers[context.frameIndex]->Handle()
-            : drawData->mappedIndirectCommandBuffers[context.frameIndex]->Handle();
+        auto indirectBuffer = drawData->Models.indirectBuffer.GetHandle(context.frameIndex, isGpu);
+        auto countBuffer = drawData->Models.drawCountBuffer.GetHandle(context.frameIndex, isGpu);
 
-        auto countBuffer = drawData->mappedDrawCountBuffers[context.frameIndex]->Handle();
-
-        uint32_t commandOffset = drawData->traditionalCmdOffsets[_renderType];
-        uint32_t maxCommandCount = drawData->traditionalCmdCounts[_renderType];
+        uint32_t commandOffset = drawData->Models.traditionalCmdOffsets[_renderType];
+        uint32_t maxCommandCount = drawData->Models.traditionalCmdCounts[_renderType];
 
         if (maxCommandCount > 0) {
             VkDeviceSize countBufferOffset = _renderType * sizeof(uint32_t);

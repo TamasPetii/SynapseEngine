@@ -4,7 +4,6 @@
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Scene/Scene.h"
-#include "Engine/Scene/SceneDrawData.h"
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Mesh/MeshSourceNames.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
@@ -92,7 +91,7 @@ namespace Syn
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
 
-        if (drawData->activeDescriptorCount == 0 || !drawData->debugInstanceBuffers[fIdx] || !drawData->debugAabbIndirectBuffers[fIdx]) return;
+        if (drawData->Models.activeDescriptorCount == 0) return;
 
         auto modelManager = ServiceLocator::GetModelManager();
         auto compManager = scene->GetComponentBufferManager();
@@ -101,14 +100,16 @@ namespace Syn
         auto cubeMesh = modelManager->GetResource(MeshSourceNames::Cube);
         if (!cubeMesh) return;
 
+		auto isGpu = scene->GetSettings()->enableGpuCulling;
+
         WireframePC pc{};
         pc.animationAddressBuffer = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
         pc.animationBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationData, fIdx);
         pc.animationSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationSparseMap, fIdx);
 
         pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
-        pc.globalInstanceBuffers = context.scene->GetSettings()->enableGpuCulling ? drawData->gpuInstanceBuffers[fIdx]->GetDeviceAddress() : drawData->mappedInstanceBuffers[fIdx]->GetDeviceAddress();
-        pc.globalIndirectCommandDescriptorBuffers = drawData->gpuIndirectCommandDescriptorBuffers[fIdx]->GetDeviceAddress();
+        pc.globalInstanceBuffers = drawData->Models.instanceBuffer.GetAddress(fIdx, isGpu);
+        pc.globalIndirectCommandDescriptorBuffers = drawData->Models.descriptorBuffer.GetAddress(fIdx, isGpu);
 
         pc.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
         pc.cameraSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
@@ -120,7 +121,7 @@ namespace Syn
 
         pc.indexBufferAddr = cubeMesh->hardwareBuffers.indices->GetDeviceAddress();
         pc.vertexBufferAddr = cubeMesh->hardwareBuffers.vertexPositions->GetDeviceAddress();
-        pc.debugInstanceBufferAddr = drawData->debugInstanceBuffers[fIdx]->GetDeviceAddress();
+        pc.debugInstanceBufferAddr = drawData->Debug.instanceBuffer.GetAddress(fIdx, isGpu);
 
         pc.activeCameraEntity = scene->GetSettings()->useDebugCamera ? scene->GetDebugCameraEntity() : scene->GetSceneCameraEntity();
         pc.isSphere = 0;
@@ -134,16 +135,18 @@ namespace Syn
     {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
+		auto fIdx = context.frameIndex;
+		auto isGpu = scene->GetSettings()->enableGpuCulling;
 
-        if (drawData->activeDescriptorCount == 0 || !drawData->debugAabbIndirectBuffers[context.frameIndex]) return;
+        if (drawData->Models.activeDescriptorCount == 0) return;
 
-        auto indirectBuffer = drawData->debugAabbIndirectBuffers[context.frameIndex]->Handle();
+        auto indirectBuffer = drawData->Debug.meshletAabbIndirectBuffer.GetHandle(fIdx, isGpu);
 
         vkCmdDrawIndirect(
             context.cmd,
             indirectBuffer,
             0,
-            drawData->totalMaxMeshletInstances,
+            drawData->Debug.totalMaxMeshletInstances,
             sizeof(VkDrawIndirectCommand)
         );
     }

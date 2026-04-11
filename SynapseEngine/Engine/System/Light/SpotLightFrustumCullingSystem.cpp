@@ -37,9 +37,9 @@ namespace Syn
         size_t maxLights = pool->Size();
 
         tf::Task initTask = this->EmplaceTask(subflow, "Init Spot Light Culling", [this, maxLights, drawData]() {
-            drawData->spotLightCmdTemplate.instanceCount = 0;
-            if (drawData->spotLightCpuInstanceBuffer.size() < maxLights) {
-                drawData->spotLightCpuInstanceBuffer.resize(maxLights);
+            drawData->SpotLights.cmdTemplate.instanceCount = 0;
+            if (drawData->SpotLights.instances.Size() < maxLights) {
+                drawData->SpotLights.instances.Resize(maxLights);
             }
             });
 
@@ -60,11 +60,11 @@ namespace Syn
 
                 if (screenSize >= 1.0f)
                 {
-                    std::atomic_ref<uint32_t> countRef(drawData->spotLightCmdTemplate.instanceCount);
+                    std::atomic_ref<uint32_t> countRef(drawData->SpotLights.cmdTemplate.instanceCount);
                     uint32_t slot = countRef.fetch_add(1, std::memory_order_relaxed);
 
-                    if (slot < drawData->spotLightCpuInstanceBuffer.size()) {
-                        drawData->spotLightCpuInstanceBuffer[slot] = entity;
+                    if (slot < drawData->SpotLights.instances.Size()) {
+                        drawData->SpotLights.instances[slot] = entity;
                     }
                 }
             }
@@ -85,16 +85,18 @@ namespace Syn
             auto bufferManager = scene->GetComponentBufferManager();
             auto drawData = scene->GetSceneDrawData();
             auto settings = scene->GetSettings();
-            uint32_t count = drawData->spotLightCmdTemplate.instanceCount;
+            uint32_t count = drawData->SpotLights.cmdTemplate.instanceCount;
 
             if (!settings->enableGpuCulling) {
                 auto instanceBufferView = bufferManager->GetComponentBuffer(BufferNames::SpotLightVisibleData, frameIndex);
                 if (count > 0 && instanceBufferView.buffer) {
-                    instanceBufferView.buffer->Write(drawData->spotLightCpuInstanceBuffer.data(), count * sizeof(uint32_t), 0);
+                    instanceBufferView.buffer->Write(drawData->SpotLights.instances.Data(), count * sizeof(uint32_t), 0);
                 }
             }
 
-            drawData->spotLightIndirectCommandBuffers[frameIndex]->Write(&drawData->spotLightCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            if (auto mapped = drawData->SpotLights.indirectBuffer.GetMapped(frameIndex)) {
+                mapped->Write(&drawData->SpotLights.cmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            }
             });
     }
 }

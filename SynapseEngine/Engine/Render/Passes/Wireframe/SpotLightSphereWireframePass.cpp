@@ -81,10 +81,11 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
+		auto isGpu = scene->GetSettings()->enableGpuCulling;
 
         Vk::BufferCopyInfo copyRegion{};
-        copyRegion.srcBuffer = drawData->spotLightIndirectCommandBuffers[fIdx]->Handle();
-        copyRegion.dstBuffer = drawData->debugSpotLightSphereCmdBuffers[fIdx]->Handle();
+        copyRegion.srcBuffer = drawData->SpotLights.indirectBuffer.GetHandle(fIdx, isGpu);
+        copyRegion.dstBuffer = drawData->SpotLights.sphereSingleCmdBuffer.GetHandle(fIdx, isGpu);
         copyRegion.srcOffset = offsetof(VkDrawIndirectCommand, instanceCount);
         copyRegion.dstOffset = offsetof(VkDrawIndirectCommand, instanceCount);
         copyRegion.size = sizeof(uint32_t);
@@ -92,7 +93,7 @@ namespace Syn {
         Vk::BufferUtils::CopyBuffer(context.cmd, copyRegion);
 
         Vk::BufferBarrierInfo memBarrier{};
-        memBarrier.buffer = drawData->debugSpotLightSphereCmdBuffers[fIdx]->Handle();
+        memBarrier.buffer = drawData->SpotLights.sphereSingleCmdBuffer.GetHandle(fIdx, isGpu);
         memBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
         memBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
         memBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
@@ -135,10 +136,13 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
+		auto isGpu = scene->GetSettings()->enableGpuCulling;
+
+		auto indirectBuffer = drawData->SpotLights.sphereSingleCmdBuffer.GetHandle(fIdx, isGpu);
 
         vkCmdDrawIndirect(
             context.cmd,
-            drawData->debugSpotLightSphereCmdBuffers[fIdx]->Handle(),
+            indirectBuffer,
             0,
             1,
             sizeof(VkDrawIndirectCommand)

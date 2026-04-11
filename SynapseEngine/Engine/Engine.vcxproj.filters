@@ -570,7 +570,7 @@
     <ClCompile Include="Mesh\MeshAllocationInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Scene\SceneDrawData.cpp">
+    <ClCompile Include="Scene\DrawData\SceneDrawData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="System\ModelSystem.cpp">
@@ -955,6 +955,24 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Culling\CullingCommandResetPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils\RenderBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\DrawData\ModelDrawGroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\DrawData\DebugDrawGroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\DrawData\PointLightDrawGroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\DrawData\SpotLightDrawGroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\DrawData\DirectionLightDrawGroup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1592,7 +1610,7 @@
     <ClInclude Include="Mesh\MeshAllocationInfo.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Scene\SceneDrawData.h">
+    <ClInclude Include="Scene\DrawData\SceneDrawData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="System\ModelSystem.h">
@@ -2007,6 +2025,30 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Culling\CullingCommandResetPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils\RenderBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\DrawData\ModelDrawGroup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\DrawData\CpuData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\DrawData\RenderConstants.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\DrawData\DebugDrawGroup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\DrawData\PointLightDrawGroup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\DrawData\SpotLightDrawGroup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\DrawData\DirectionLightDrawGroup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

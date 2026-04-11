@@ -4,7 +4,6 @@
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Scene/Scene.h"
-#include "Engine/Scene/SceneDrawData.h"
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Mesh/MeshSourceNames.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
@@ -87,7 +86,7 @@ namespace Syn {
     void WireframeAabbPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
-        if (drawData->activeDescriptorCount == 0) return;
+        if (drawData->Models.activeDescriptorCount == 0) return;
 
         auto modelManager = ServiceLocator::GetModelManager();
         auto compManager = scene->GetComponentBufferManager();
@@ -97,14 +96,16 @@ namespace Syn {
         auto cubeMesh = modelManager->GetResource(MeshSourceNames::Cube);
         if (!cubeMesh) return;
 
+		auto isGpu = scene->GetSettings()->enableGpuCulling;
+
         WireframePC pc{};
         pc.animationAddressBuffer = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
         pc.animationBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationData, fIdx);
         pc.animationSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationSparseMap, fIdx);
 
         pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
-        pc.globalInstanceBuffers = context.scene->GetSettings()->enableGpuCulling ? drawData->gpuInstanceBuffers[fIdx]->GetDeviceAddress() : drawData->mappedInstanceBuffers[fIdx]->GetDeviceAddress();
-        pc.globalIndirectCommandDescriptorBuffers = drawData->gpuIndirectCommandDescriptorBuffers[fIdx]->GetDeviceAddress();
+        pc.globalInstanceBuffers = drawData->Models.instanceBuffer.GetAddress(fIdx, isGpu);
+        pc.globalIndirectCommandDescriptorBuffers = drawData->Models.descriptorBuffer.GetAddress(fIdx, isGpu);
         pc.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
         pc.cameraSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
         pc.transformBufferAddr = compManager->GetBufferAddr(BufferNames::TransformData, fIdx);
@@ -128,11 +129,13 @@ namespace Syn {
     void WireframeAabbPass::Draw(const RenderContext& context) {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
-        uint32_t totalCommands = drawData->activeTraditionalCount + drawData->activeMeshletCount;
+        uint32_t totalCommands = drawData->Models.activeTraditionalCount + drawData->Models.activeMeshletCount;
+		auto isGpu = scene->GetSettings()->enableGpuCulling;
+		auto fIdx = context.frameIndex;
 
-        if (totalCommands == 0 || !drawData->aabbIndirectCommandBuffers[context.frameIndex]) return;
+        if (totalCommands == 0) return;
 
-        auto indirectBuffer = drawData->aabbIndirectCommandBuffers[context.frameIndex]->Handle();
+        auto indirectBuffer = drawData->Debug.modelAabbIndirectBuffer.GetHandle(fIdx, isGpu);
 
         vkCmdDrawIndirect(
             context.cmd,

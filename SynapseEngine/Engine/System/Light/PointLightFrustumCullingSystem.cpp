@@ -39,9 +39,9 @@ namespace Syn
         size_t maxLights = pool->Size();
 
         tf::Task initTask = this->EmplaceTask(subflow, "Init Light Culling", [this, maxLights, drawData]() {
-            drawData->pointLightCmdTemplate.instanceCount = 0;
-            if (drawData->pointLightCpuInstanceBuffer.size() < maxLights) {
-                drawData->pointLightCpuInstanceBuffer.resize(maxLights);
+            drawData->PointLights.cmdTemplate.instanceCount = 0;
+            if (drawData->PointLights.instances.Size() < maxLights) {
+                drawData->PointLights.instances.Resize(maxLights);
             }
             });
 
@@ -62,11 +62,11 @@ namespace Syn
 
                 if (screenSize >= 1.0f)
                 {
-                    std::atomic_ref<uint32_t> countRef(drawData->pointLightCmdTemplate.instanceCount);
+                    std::atomic_ref<uint32_t> countRef(drawData->PointLights.cmdTemplate.instanceCount);
                     uint32_t slot = countRef.fetch_add(1, std::memory_order_relaxed);
 
-                    if (slot < drawData->pointLightCpuInstanceBuffer.size()) {
-                        drawData->pointLightCpuInstanceBuffer[slot] = entity;
+                    if (slot < drawData->PointLights.instances.Size()) {
+                        drawData->PointLights.instances[slot] = entity;
                     }
                 }
             }
@@ -87,21 +87,18 @@ namespace Syn
             auto bufferManager = scene->GetComponentBufferManager();
             auto drawData = scene->GetSceneDrawData();
             auto settings = scene->GetSettings();
-            uint32_t count = drawData->pointLightCmdTemplate.instanceCount;
+            uint32_t count = drawData->PointLights.cmdTemplate.instanceCount;
 
             if (!settings->enableGpuCulling) {
                 auto instanceBufferView = bufferManager->GetComponentBuffer(BufferNames::PointLightVisibleData, frameIndex);
                 if (count > 0 && instanceBufferView.buffer) {
-                    std::string visibleEntities = "";
-                    for (uint32_t i = 0; i < std::min(count, 10u); ++i) {
-                        visibleEntities += std::to_string(drawData->pointLightCpuInstanceBuffer[i]) + " ";
-                    }
-
-                    instanceBufferView.buffer->Write(drawData->pointLightCpuInstanceBuffer.data(), count * sizeof(uint32_t), 0);
+                    instanceBufferView.buffer->Write(drawData->PointLights.instances.Data(), count * sizeof(uint32_t), 0);
                 }
             }
 
-            drawData->pointLightIndirectCommandBuffers[frameIndex]->Write(&drawData->pointLightCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            if (auto mapped = drawData->PointLights.indirectBuffer.GetMapped(frameIndex)) {
+                mapped->Write(&drawData->PointLights.cmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            }
             });
     }
 }

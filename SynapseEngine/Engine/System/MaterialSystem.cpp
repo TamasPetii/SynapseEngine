@@ -122,28 +122,13 @@ namespace Syn
 
             auto drawData = scene->GetSceneDrawData();
 
-            size_t actualDataSize = _flatMaterialIndices.size() * sizeof(uint32_t);
-            size_t bufferSizeToAllocate = std::max(actualDataSize, drawData->requiredMaterialBufferSize);
+            size_t requiredElements = std::max(_flatMaterialIndices.size(), (size_t)(drawData->Models.requiredMaterialBufferSize / sizeof(uint32_t)));
+            drawData->Models.materialIndexBuffer.UpdateCapacity(frameIndex, requiredElements);
 
-            auto& mappedBuffer = drawData->mappedMaterialIndexBuffers[frameIndex];
-            auto& gpuBuffer = drawData->gpuMaterialIndexBuffers[frameIndex];
-
-            if (!mappedBuffer || mappedBuffer->GetSize() < bufferSizeToAllocate)
-            {
-                size_t oldSize = mappedBuffer ? mappedBuffer->GetSize() : 0;
-
-                mappedBuffer = Vk::BufferFactory::CreatePersistent(
-                    bufferSizeToAllocate,
-                    VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT
-                );
-
-                gpuBuffer = Vk::BufferFactory::CreateGpu(
-                    bufferSizeToAllocate,
-                    VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
-                );
+            if (auto mappedBuffer = drawData->Models.materialIndexBuffer.GetMapped(frameIndex)) {
+                size_t actualDataSize = _flatMaterialIndices.size() * sizeof(uint32_t);
+                mappedBuffer->Write(_flatMaterialIndices.data(), actualDataSize, 0);
             }
-
-            mappedBuffer->Write(_flatMaterialIndices.data(), actualDataSize, 0);
             });
     }
 }

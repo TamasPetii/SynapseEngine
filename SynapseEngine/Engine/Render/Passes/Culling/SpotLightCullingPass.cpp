@@ -41,13 +41,14 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
         uint32_t fIdx = context.frameIndex;
+        bool isGpu = scene->GetSettings()->enableGpuCulling;
 
         SpotLightCullingPC pc{};
         pc.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
         pc.cameraSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
         pc.spotLightColliderDataAddr = compManager->GetBufferAddr(BufferNames::SpotLightColliderData, fIdx);
         pc.visibleLightAddr = compManager->GetBufferAddr(BufferNames::SpotLightVisibleData, fIdx);
-        pc.indirectCommandAddr = drawData->spotLightIndirectCommandBuffers[fIdx]->GetDeviceAddress();
+        pc.indirectCommandAddr = drawData->SpotLights.indirectBuffer.GetAddress(fIdx, isGpu);
         pc.totalLightsToTest = _totalLightsToTest;
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
         pc.enableOcclusionCulling = scene->GetSettings()->enableOcclusionCulling ? 1 : 0;
@@ -86,9 +87,10 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
         uint32_t fIdx = context.frameIndex;
+        bool isGpu = scene->GetSettings()->enableGpuCulling;
 
         Vk::BufferBarrierInfo cmdBarrier{};
-        cmdBarrier.buffer = drawData->spotLightIndirectCommandBuffers[fIdx]->Handle();
+        cmdBarrier.buffer = drawData->SpotLights.indirectBuffer.GetHandle(fIdx, isGpu);
         cmdBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         cmdBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         cmdBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_TRANSFER_BIT;

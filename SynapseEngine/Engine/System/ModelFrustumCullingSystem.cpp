@@ -41,17 +41,17 @@ namespace Syn
         auto overridePool = scene->GetRegistry()->GetPool<MaterialOverrideComponent>();
 
         tf::Task initTask = this->EmplaceTask(subflow, "Update Init", [drawData]() {
-            for (uint32_t i = 0; i < drawData->activeTraditionalCount; ++i) {
-                drawData->traditionalCommands[i].instanceCount = 0;
-                drawData->paddedTraditionalCounts[i * 16] = 0;
+            for (uint32_t i = 0; i < drawData->Models.activeTraditionalCount; ++i) {
+                drawData->Models.traditionalCmds[i].instanceCount = 0;
+                drawData->Models.paddedTraditionalCounts[i * 16] = 0;
             }
-            for (uint32_t i = 0; i < drawData->activeMeshletCount; ++i) {
-                drawData->meshletCommands[i].groupCountX = 0;
-                drawData->paddedMeshletCounts[i * 16] = 0;
+            for (uint32_t i = 0; i < drawData->Models.activeMeshletCount; ++i) {
+                drawData->Models.meshletCmds[i].groupCountX = 0;
+                drawData->Models.paddedMeshletCounts[i * 16] = 0;
             }
 
-            drawData->debugAabbCmdTemplate.instanceCount = 0;
-            drawData->debugSphereCmdTemplate.instanceCount = 0;
+            drawData->Debug.modelAabbCmdTemplate.instanceCount = 0;
+            drawData->Debug.modelSphereCmdTemplate.instanceCount = 0;
             });
 
         if (settings->enableGpuCulling) {
@@ -84,14 +84,14 @@ namespace Syn
             if (modelComp.modelIndex == NULL_INDEX)
                 return;
 
-            if (modelComp.modelIndex >= drawData->modelAllocations.size())
+            if (modelComp.modelIndex >= drawData->Models.modelAllocations.Size())
                 return;
 
             const auto& snapshotEntry = modelSnapshot[modelComp.modelIndex];
             if (snapshotEntry.resource == nullptr || snapshotEntry.state != ResourceState::Ready)
                 return;
 
-            const auto& modelAlloc = drawData->modelAllocations[modelComp.modelIndex];
+            const auto& modelAlloc = drawData->Models.modelAllocations[modelComp.modelIndex];
 
             uint32_t meshCount = modelAlloc.meshAllocationCount / 4;
             auto resource = snapshotEntry.resource;
@@ -170,7 +170,7 @@ namespace Syn
                     uint32_t lod = CollisionTester::CalculateLodFromScreenSize(screenSizePixels);
 
                     uint32_t allocIndex = modelAlloc.meshAllocationOffset + (m * 4) + lod;
-                    const auto& meshAlloc = drawData->meshAllocations[allocIndex];
+                    const auto& meshAlloc = drawData->Models.meshAllocations[allocIndex];
 
                     uint32_t matIdx = resource->meshMaterialIndices[m];
                     if (!overrides.empty() && m < overrides.size() && overrides[m] != UINT32_MAX) {
@@ -187,17 +187,17 @@ namespace Syn
                         if (meshAlloc.isMeshletPipeline == MeshDrawBlueprint::PIPELINE_MESHLET)
                         {
                             // Minden számláló 16 uint32_t-re (64 bájtra) van egymástól!
-                            std::atomic_ref<uint32_t> countRef(drawData->paddedMeshletCounts[indirectIdx * 16]);
+                            std::atomic_ref<uint32_t> countRef(drawData->Models.paddedMeshletCounts[indirectIdx * 16]);
                             slotIndex = countRef.fetch_add(1, std::memory_order_relaxed);
                         }
                         else
                         {
-                            std::atomic_ref<uint32_t> countRef(drawData->paddedTraditionalCounts[indirectIdx * 16]);
+                            std::atomic_ref<uint32_t> countRef(drawData->Models.paddedTraditionalCounts[indirectIdx * 16]);
                             slotIndex = countRef.fetch_add(1, std::memory_order_relaxed);
                         }
 
                         uint32_t bufferIndex = meshAlloc.instanceOffsets[matType] + slotIndex;
-                        if (bufferIndex < drawData->cpuInstanceBuffer.size()) {
+                        if (bufferIndex < drawData->Models.instances.Size()) {
                             uint32_t payload = static_cast<uint32_t>(entity);
 
                             if (parentFullyInside) {
@@ -207,7 +207,7 @@ namespace Syn
                                 payload &= ~(1u << 31);
                             }
 
-                            drawData->cpuInstanceBuffer[bufferIndex] = payload;
+                            drawData->Models.instances[bufferIndex] = payload;
                         }
                     }
                 }      
@@ -237,36 +237,46 @@ namespace Syn
 
             if (!settings->enableGpuCulling)
             {
-                for (uint32_t i = 0; i < drawData->activeTraditionalCount; ++i) {
-                    drawData->traditionalCommands[i].instanceCount = drawData->paddedTraditionalCounts[i * 16];
+                for (uint32_t i = 0; i < drawData->Models.activeTraditionalCount; ++i) {
+                    drawData->Models.traditionalCmds[i].instanceCount = drawData->Models.paddedTraditionalCounts[i * 16];
                 }
 
-                for (uint32_t i = 0; i < drawData->activeMeshletCount; ++i) {
-                    drawData->meshletCommands[i].groupCountX = drawData->paddedMeshletCounts[i * 16];
+                for (uint32_t i = 0; i < drawData->Models.activeMeshletCount; ++i) {
+                    drawData->Models.meshletCmds[i].groupCountX = drawData->Models.paddedMeshletCounts[i * 16];
                 }
 
-                size_t instanceSize = drawData->totalAllocatedInstances * sizeof(uint32_t);
+                size_t instanceSize = drawData->Models.totalAllocatedInstances * sizeof(uint32_t);
                 if (instanceSize > 0) {
-                    drawData->mappedInstanceBuffers[frameIndex]->Write(drawData->cpuInstanceBuffer.data(), instanceSize, 0);
+                    if (auto mappedInstance = drawData->Models.instanceBuffer.GetMapped(frameIndex)) {
+                        mappedInstance->Write(drawData->Models.instances.Data(), instanceSize, 0);
+                    }
                 }
             }
 
             if (needsCommandUpload)
             {
-                size_t tradSize = drawData->activeTraditionalCount * sizeof(VkDrawIndirectCommand);
-                if (tradSize > 0) {
-                    drawData->mappedIndirectCommandBuffers[frameIndex]->Write(drawData->traditionalCommands.data(), tradSize, 0);
+                if (auto mappedIndirect = drawData->Models.indirectBuffer.GetMapped(frameIndex)) {
+                    size_t tradSize = drawData->Models.activeTraditionalCount * sizeof(VkDrawIndirectCommand);
+                    if (tradSize > 0) {
+                        mappedIndirect->Write(drawData->Models.traditionalCmds.Data(), tradSize, 0);
+                    }
+
+                    size_t meshletSize = drawData->Models.activeMeshletCount * sizeof(VkDrawMeshTasksIndirectCommandEXT);
+                    if (meshletSize > 0) {
+                        size_t meshletGpuOffset = tradSize;
+                        mappedIndirect->Write(drawData->Models.meshletCmds.Data(), meshletSize, meshletGpuOffset);
+                    }
                 }
 
-                size_t meshletSize = drawData->activeMeshletCount * sizeof(VkDrawMeshTasksIndirectCommandEXT);
-                if (meshletSize > 0) {
-                    size_t meshletGpuOffset = tradSize;
-                    drawData->mappedIndirectCommandBuffers[frameIndex]->Write(drawData->meshletCommands.data(), meshletSize, meshletGpuOffset);
-                }
+                if (drawData->Models.activeMeshletCount > 0)
+                {
+                    if (auto mappedAabb = drawData->Debug.modelAabbIndirectBuffer.GetMapped(frameIndex)) {
+                        mappedAabb->Write(&drawData->Debug.modelAabbCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+                    }
 
-                if (drawData->activeMeshletCount > 0) {
-                    drawData->debugAabbIndirectBuffers[frameIndex]->Write(&drawData->debugAabbCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
-                    drawData->debugSphereIndirectBuffers[frameIndex]->Write(&drawData->debugSphereCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+                    if (auto mappedSphere = drawData->Debug.modelSphereIndirectBuffer.GetMapped(frameIndex)) {
+                        mappedSphere->Write(&drawData->Debug.modelSphereCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+                    }
                 }
             }
             });

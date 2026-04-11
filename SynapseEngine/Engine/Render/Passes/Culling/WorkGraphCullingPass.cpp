@@ -134,12 +134,15 @@ namespace Syn {
 
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         uint32_t fIdx = context.frameIndex;
+        bool isGpu = scene->GetSettings()->enableGpuCulling;
 
         ModelMeshCullingPC pc{};
         pc.animationAddressBuffer = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
+        pc.modelAddressBufferAddr = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
+        pc.materialBufferAddr = materialManager->GetMaterialBuffer()->GetDeviceAddress();
+
         pc.animationBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationData, fIdx);
         pc.animationSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationSparseMap, fIdx);
-
         pc.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
         pc.cameraSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
         pc.transformBufferAddr = compManager->GetBufferAddr(BufferNames::TransformData, fIdx);
@@ -147,23 +150,15 @@ namespace Syn {
         pc.modelCompBufferAddr = compManager->GetBufferAddr(BufferNames::ModelData, fIdx);
         pc.modelSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::ModelSparseMap, fIdx);
 
-        pc.modelAllocBufferAddr = drawData->gpuModelAllocationBuffers[fIdx]->GetDeviceAddress();
-        pc.modelAddressBufferAddr = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
-
-        // Ezek a VRAM pufferek nem lesznek kiírva a shaderből, de a PC layout miatt átadjuk
-        pc.visibleModelListAddr = compManager->GetBufferAddr(BufferNames::ModelVisibleData, fIdx);
-        pc.visibleModelCountAddr = drawData->gpuModelComputeCountBuffers[fIdx]->GetDeviceAddress();
-
-        pc.meshAllocBufferAddr = drawData->gpuMeshAllocationBuffers[fIdx]->GetDeviceAddress();
-        pc.globalIndirectCommandBuffers = drawData->gpuIndirectCommandBuffers[fIdx]->GetDeviceAddress();
-        pc.globalInstanceBufferAddr = drawData->gpuInstanceBuffers[fIdx]->GetDeviceAddress();
-
-        pc.materialLookupBufferAddr = drawData->gpuMaterialIndexBuffers[fIdx]->GetDeviceAddress();
-        pc.materialBufferAddr = materialManager->GetMaterialBuffer()->GetDeviceAddress();
+        pc.modelAllocBufferAddr = drawData->Models.modelAllocBuffer.GetAddress(fIdx, isGpu);
+        pc.meshAllocBufferAddr = drawData->Models.meshAllocBuffer.GetAddress(fIdx, isGpu);
+        pc.globalIndirectCommandBuffers = drawData->Models.indirectBuffer.GetAddress(fIdx, isGpu);
+        pc.globalInstanceBufferAddr = drawData->Models.instanceBuffer.GetAddress(fIdx, isGpu);
+        pc.materialLookupBufferAddr = drawData->Models.materialIndexBuffer.GetAddress(fIdx, isGpu);
 
         pc.totalModelsToTest = _totalModelsToTest;
         pc.activeCameraEntity = scene->GetSceneCameraEntity();
-        pc.traditionalCommandCount = drawData->activeTraditionalCount;
+        pc.traditionalCommandCount = drawData->Models.activeTraditionalCount;
         pc.enableOcclusionCulling = (scene->GetSettings()->enableGpuCulling && scene->GetSettings()->enableOcclusionCulling) ? 1 : 0;
 
         pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
@@ -194,8 +189,10 @@ namespace Syn {
     void WorkGraphCullingPass::Dispatch(const RenderContext& context) {
         if (_totalModelsToTest == 0 || !_scratchBuffer) return;
 
-        auto drawData = context.scene->GetSceneDrawData();
+        auto scene = context.scene;
+        auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
+        bool isGpu = scene->GetSettings()->enableGpuCulling;
 
         vkCmdBindPipeline(context.cmd, VK_PIPELINE_BIND_POINT_EXECUTION_GRAPH_AMDX, _graphPipeline);
 
@@ -235,7 +232,7 @@ namespace Syn {
         );
 
         Vk::BufferBarrierInfo instanceBarrier{};
-        instanceBarrier.buffer = drawData->gpuInstanceBuffers[fIdx]->Handle();
+        instanceBarrier.buffer = drawData->Models.instanceBuffer.GetHandle(fIdx, isGpu);
         instanceBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         instanceBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         instanceBarrier.dstStage = VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_EXT | VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_EXT;
@@ -243,7 +240,7 @@ namespace Syn {
         Vk::BufferUtils::InsertBarrier(context.cmd, instanceBarrier);
 
         Vk::BufferBarrierInfo indirectBarrier{};
-        indirectBarrier.buffer = drawData->gpuIndirectCommandBuffers[fIdx]->Handle();
+        indirectBarrier.buffer = drawData->Models.indirectBuffer.GetHandle(fIdx, isGpu);
         indirectBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         indirectBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         indirectBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;

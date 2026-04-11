@@ -111,10 +111,14 @@ namespace Syn {
 
     void DeferredDirectionLightPass::Draw(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
+		auto fIdx = context.frameIndex;
+		auto isGpu = context.scene->GetSettings()->enableGpuCulling;
+
+		auto indirectBuffer = drawData->DirectionLights.indirectBuffer.GetHandle(fIdx, isGpu);
 
         vkCmdDrawIndirect(
             context.cmd,
-            drawData->directionLightIndirectCommandBuffers[context.frameIndex]->Handle(),
+            indirectBuffer,
             0,
             1,
             sizeof(VkDrawIndirectCommand)

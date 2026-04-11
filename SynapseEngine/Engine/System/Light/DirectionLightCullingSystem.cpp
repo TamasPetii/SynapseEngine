@@ -36,9 +36,9 @@ namespace Syn
         size_t maxLights = pool->Size();
 
         tf::Task initTask = this->EmplaceTask(subflow, "Init DirLight Culling", [maxLights, drawData]() {
-            drawData->directionLightCmdTemplate.instanceCount = 0;
-            if (drawData->directionLightCpuInstanceBuffer.size() < maxLights) {
-                drawData->directionLightCpuInstanceBuffer.resize(maxLights);
+            drawData->DirectionLights.cmdTemplate.instanceCount = 0;
+            if (drawData->DirectionLights.instances.Size() < maxLights) {
+                drawData->DirectionLights.instances.Resize(maxLights);
             }
             });
 
@@ -47,11 +47,11 @@ namespace Syn
 
             // if (!lightComp.enabled) return;
 
-            std::atomic_ref<uint32_t> countRef(drawData->directionLightCmdTemplate.instanceCount);
+            std::atomic_ref<uint32_t> countRef(drawData->DirectionLights.cmdTemplate.instanceCount);
             uint32_t slot = countRef.fetch_add(1, std::memory_order_relaxed);
 
-            if (slot < drawData->directionLightCpuInstanceBuffer.size()) {
-                drawData->directionLightCpuInstanceBuffer[slot] = entity;
+            if (slot < drawData->DirectionLights.instances.Size()) {
+                drawData->DirectionLights.instances[slot] = entity;
             }
             };
 
@@ -70,14 +70,16 @@ namespace Syn
             auto bufferManager = scene->GetComponentBufferManager();
             auto drawData = scene->GetSceneDrawData();
             auto settings = scene->GetSettings();
-            uint32_t count = drawData->directionLightCmdTemplate.instanceCount;
+            uint32_t count = drawData->DirectionLights.cmdTemplate.instanceCount;
 
             auto instanceBufferView = bufferManager->GetComponentBuffer(BufferNames::DirectionLightVisibleData, frameIndex);
             if (count > 0 && instanceBufferView.buffer) {
-                instanceBufferView.buffer->Write(drawData->directionLightCpuInstanceBuffer.data(), count * sizeof(uint32_t), 0);
+                instanceBufferView.buffer->Write(drawData->DirectionLights.instances.Data(), count * sizeof(uint32_t), 0);
             }
 
-            drawData->directionLightIndirectCommandBuffers[frameIndex]->Write(&drawData->directionLightCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            if (auto mapped = drawData->DirectionLights.indirectBuffer.GetMapped(frameIndex)) {
+                mapped->Write(&drawData->DirectionLights.cmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            }
             });
     }
 }

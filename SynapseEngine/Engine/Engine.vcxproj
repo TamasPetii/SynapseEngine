@@ -235,6 +235,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Scene\DrawData\DirectionLightDrawGroup.cpp" />
+    <ClCompile Include="Scene\DrawData\PointLightDrawGroup.cpp" />
+    <ClCompile Include="Scene\DrawData\DebugDrawGroup.cpp" />
+    <ClCompile Include="Scene\DrawData\ModelDrawGroup.cpp" />
+    <ClCompile Include="Scene\DrawData\SpotLightDrawGroup.cpp" />
+    <ClCompile Include="Utils\RenderBuffer.cpp" />
     <ClCompile Include="Render\Passes\Culling\CullingCommandResetPass.cpp" />
     <ClCompile Include="Render\Passes\Wboit\PreCompositeTransitionPass.cpp" />
     <ClCompile Include="Render\Passes\Deferred\PostDeferredTransitionPass.cpp" />
@@ -352,7 +358,7 @@
     <ClCompile Include="System\ModelSystem.cpp" />
     <ClCompile Include="Mesh\MeshDrawBlueprint.cpp" />
     <ClCompile Include="Mesh\MeshDrawDescriptor.cpp" />
-    <ClCompile Include="Scene\SceneDrawData.cpp" />
+    <ClCompile Include="Scene\DrawData\SceneDrawData.cpp" />
     <ClCompile Include="System\RenderSystem.cpp" />
     <ClCompile Include="Scene\SceneManager.cpp" />
     <ClCompile Include="System\ComponentSystem.cpp" />
@@ -551,6 +557,14 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Scene\DrawData\DirectionLightDrawGroup.h" />
+    <ClInclude Include="Scene\DrawData\PointLightDrawGroup.h" />
+    <ClInclude Include="Scene\DrawData\DebugDrawGroup.h" />
+    <ClInclude Include="Scene\DrawData\CpuData.h" />
+    <ClInclude Include="Scene\DrawData\ModelDrawGroup.h" />
+    <ClInclude Include="Scene\DrawData\RenderConstants.h" />
+    <ClInclude Include="Scene\DrawData\SpotLightDrawGroup.h" />
+    <ClInclude Include="Utils\RenderBuffer.h" />
     <ClInclude Include="Render\Passes\Culling\CullingCommandResetPass.h" />
     <ClInclude Include="Render\Passes\Wboit\PreCompositeTransitionPass.h" />
     <ClInclude Include="Render\Passes\Deferred\PostDeferredTransitionPass.h" />
@@ -676,7 +690,7 @@
     <ClInclude Include="System\ModelSystem.h" />
     <ClInclude Include="Mesh\MeshDrawBlueprint.h" />
     <ClInclude Include="Mesh\MeshDrawDescriptor.h" />
-    <ClInclude Include="Scene\SceneDrawData.h" />
+    <ClInclude Include="Scene\DrawData\SceneDrawData.h" />
     <ClInclude Include="System\RenderSystem.h" />
     <ClInclude Include="Scene\SceneManager.h" />
     <ClInclude Include="Scene\BufferNames.h" />
