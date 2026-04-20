@@ -167,6 +167,8 @@ namespace Syn
                     break;
                 }
 
+                subflow.join();
+
                 }).name(system->GetName());
 
             if (phase == SystemPhase::Update)
