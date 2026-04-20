@@ -151,7 +151,7 @@ namespace Syn
             */
 
 
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < 10000; i++)
             {
                 // Character
                 EntityID characterEntity = registry->CreateEntity();
@@ -205,7 +205,7 @@ namespace Syn
                 }
             }
 
-            for (int i = 0; i < 500000; i++) {
+            for (int i = 0; i < 1000000; i++) {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
                 registry->AddComponent<ModelComponent>(e);
