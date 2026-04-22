@@ -37,11 +37,20 @@ namespace Syn {
         auto prevGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, prevFrameIndex);
         auto currGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
-        auto depthRaw = prevGroup->GetImage(RenderTargetNames::Depth);
+        auto depthOpaque = prevGroup->GetImage(RenderTargetNames::Depth);
+        auto depthOpaqueTransparent = prevGroup->GetImage(RenderTargetNames::EditorPickingDepth);
         auto depthPyramid = currGroup->GetImage(RenderTargetNames::DepthPyramid);
 
         _imageTransitions.push_back({
-            depthRaw,
+            depthOpaque,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+            VK_ACCESS_SHADER_READ_BIT,
+            false
+            });
+
+        _imageTransitions.push_back({
+            depthOpaqueTransparent,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
             VK_ACCESS_SHADER_READ_BIT,
@@ -66,7 +75,8 @@ namespace Syn {
         auto prevGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, prevFrameIndex);
         auto currGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
-        auto depthRaw = prevGroup->GetImage(RenderTargetNames::Depth);
+        auto depthOpaque = prevGroup->GetImage(RenderTargetNames::Depth);
+		auto depthOpaqueTransparent = prevGroup->GetImage(RenderTargetNames::EditorPickingDepth);
         auto depthPyramid = currGroup->GetImage(RenderTargetNames::DepthPyramid);
         auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge);
 
@@ -74,7 +84,14 @@ namespace Syn {
 
         pushWriter.AddCombinedImageSampler(
             0,
-            depthRaw->GetView(Vk::ImageViewNames::Default),
+            depthOpaque->GetView(Vk::ImageViewNames::Default),
+            sampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            1,
+            depthOpaqueTransparent->GetView(Vk::ImageViewNames::Default),
             sampler->Handle(),
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
@@ -84,7 +101,7 @@ namespace Syn {
                                    "0";
 
         pushWriter.AddStorageImage(
-            1,
+            2,
             depthPyramid->GetView(mip0ViewName),
             VK_IMAGE_LAYOUT_GENERAL
         );

@@ -9,8 +9,9 @@
 
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
-layout(set = 2, binding = 0) uniform sampler2D inImage;
-layout(set = 2, binding = 1, r32f) uniform writeonly image2D outImage;
+layout(set = 2, binding = 0) uniform sampler2D inOpaqueDepth;
+layout(set = 2, binding = 1) uniform sampler2D inOpaqueTransparentDepth;
+layout(set = 2, binding = 2, rg32f) uniform writeonly image2D outImage;
 
 #include "../../Includes/PushConstants/HizLinearizeDepthPC.glsl"
 
@@ -26,11 +27,13 @@ void main() {
     CameraComponent camera = GET_CAMERA(pc.cameraBufferAddr, cameraIdx);
 
     vec2 uv = (vec2(pos) + vec2(0.5)) / pc.outImageSize;
-    float depth = texture(inImage, uv).x;
+    float opaqueDepth = texture(inOpaqueDepth, uv).x;
+    float opaqueTransparentDepth = texture(inOpaqueTransparentDepth, uv).x;
 
     float nearPlane = camera.params.x;
     float farPlane = camera.params.y;
-    float linearDepth = ConvertDepthToLinearNormalized(depth, nearPlane, farPlane);
+    float linearOpaueDepth = ConvertDepthToLinearNormalized(opaqueDepth, nearPlane, farPlane);
+    float linearOpaueTransparentDepth = ConvertDepthToLinearNormalized(opaqueTransparentDepth, nearPlane, farPlane);
 
-    imageStore(outImage, pos, vec4(linearDepth));
+    imageStore(outImage, pos, vec4(vec2(linearOpaueDepth, linearOpaueTransparentDepth), 0.0, 0.0));
 }

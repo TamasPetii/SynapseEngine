@@ -184,17 +184,32 @@ namespace Syn {
                         ImGui::Unindent();
                     }
 
-                    static int depthMip = 0;
-                    depthMip = std::min(depthMip, maxMipIndex);
-                    std::string depthView = std::string(Vk::ImageViewNames::Default) + Vk::ImageViewNames::Mip + std::to_string(depthMip);
+                    static int depthMipMax = 0;
+                    depthMipMax = std::min(depthMipMax, maxMipIndex);
+                    std::string depthMaxView = std::string(RenderTargetViewNames::DepthOpaqueMax) + Vk::ImageViewNames::Mip + std::to_string(depthMipMax);
 
-                    RadioButton("Depth Pyramid", RenderTargetGroupNames::Deferred, RenderTargetNames::DepthPyramid, depthView);
+                    RadioButton("Depth Pyramid Max", RenderTargetGroupNames::Deferred, RenderTargetNames::DepthPyramid, depthMaxView);
 
-                    if (state.currentTarget == RenderTargetNames::DepthPyramid) {
+                    if (state.currentView.contains(RenderTargetViewNames::DepthOpaqueMax)) {
                         ImGui::Indent();
-                        if (ImGui::SliderInt("Mip##Depth", &depthMip, 0, maxMipIndex)) {
-                            depthView = std::string(Vk::ImageViewNames::Default) + Vk::ImageViewNames::Mip + std::to_string(depthMip);
-                            vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::DepthPyramid, depthView });
+                        if (ImGui::SliderInt("Mip##DepthMax", &depthMipMax, 0, maxMipIndex)) {
+                            depthMaxView = std::string(RenderTargetViewNames::DepthOpaqueMax) + Vk::ImageViewNames::Mip + std::to_string(depthMipMax);
+                            vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::DepthPyramid, depthMaxView });
+                        }
+                        ImGui::Unindent();
+                    }
+
+                    static int depthMipMin = 0;
+                    depthMipMin = std::min(depthMipMin, maxMipIndex);
+                    std::string depthMinView = std::string(RenderTargetViewNames::DepthTransparentMin) + Vk::ImageViewNames::Mip + std::to_string(depthMipMin);
+
+                    RadioButton("Depth Pyramid Min", RenderTargetGroupNames::Deferred, RenderTargetNames::DepthPyramid, depthMinView);
+
+                    if (state.currentView.contains(RenderTargetViewNames::DepthTransparentMin)) {
+                        ImGui::Indent();
+                        if (ImGui::SliderInt("Mip##DepthMin", &depthMipMin, 0, maxMipIndex)) {
+                            depthMinView = std::string(RenderTargetViewNames::DepthTransparentMin) + Vk::ImageViewNames::Mip + std::to_string(depthMipMin);
+                            vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::DepthPyramid, depthMinView });
                         }
                         ImGui::Unindent();
                     }
