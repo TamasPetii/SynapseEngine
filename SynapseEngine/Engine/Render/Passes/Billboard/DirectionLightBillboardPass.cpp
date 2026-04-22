@@ -10,7 +10,7 @@
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Vk/Buffer/BufferUtils.h"
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
-#include "Engine/Component/DirectionLightComponent.h"
+#include "Engine/Component/Light/Direction/DirectionLightComponent.h"
 
 namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/BillboardPC.glsl"

@@ -10,7 +10,7 @@
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Vk/Buffer/BufferUtils.h"
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
-#include "Engine/Component/CameraComponent.h"
+#include "Engine/Component/Core/CameraComponent.h"
 
 namespace Syn {
 

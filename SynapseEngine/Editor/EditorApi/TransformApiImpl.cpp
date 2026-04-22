@@ -1,5 +1,5 @@
 #include "EditorApiImpl.h"
-#include "Engine/Component/TransformComponent.h"
+#include "Engine/Component/Core/TransformComponent.h"
 
 namespace Syn {
     glm::vec3 EditorApiImpl::GetEntityPosition(EntityID entity) const {

@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/Physics/IPhysicsEngine.h"
 #include <memory>
+#include <span>
 
 #include <Jolt/Jolt.h>
 #include <Jolt/RegisterTypes.h>
@@ -82,6 +83,25 @@ namespace Syn
         void SetBodyTransform(PhysicsBodyID bodyId, const glm::vec3& position, const glm::quat& rotation) override;
         void GetBodyTransform(PhysicsBodyID bodyId, glm::vec3& outPosition, glm::quat& outRotation) const override;
         bool IsBodyActive(PhysicsBodyID bodyId) const override;
+
+        PhysicsBodyID CreateBoxBody(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& halfExtents, const PhysicsBodySettings& settings) override;
+        PhysicsBodyID CreateSphereBody(const glm::vec3& position, const glm::quat& rotation, float radius, const PhysicsBodySettings& settings) override;
+        PhysicsBodyID CreateCapsuleBody(const glm::vec3& position, const glm::quat& rotation, float halfHeight, float radius, const PhysicsBodySettings& settings) override;
+        PhysicsBodyID CreateConvexBody(const glm::vec3& position, const glm::quat& rotation, std::span<const glm::vec3> vertices, const PhysicsBodySettings& settings) override;
+        PhysicsBodyID CreateMeshBody(const glm::vec3& position, const glm::quat& rotation, std::span<const glm::vec3> vertices, std::span<const uint32_t> indices, const PhysicsBodySettings& settings) override;
+
+        void DestroyBody(PhysicsBodyID bodyId) override;
+
+        void SetBoxShape(PhysicsBodyID bodyId, const glm::vec3& newHalfExtents) override;
+        void SetSphereShape(PhysicsBodyID bodyId, float newRadius) override;
+        void SetCapsuleShape(PhysicsBodyID bodyId, float newHalfHeight, float newRadius) override;
+        void SetConvexShape(PhysicsBodyID bodyId, std::span<const glm::vec3> newVertices) override;
+
+        void SetBodyFriction(PhysicsBodyID bodyId, float friction) override;
+        void SetBodyRestitution(PhysicsBodyID bodyId, float restitution) override;
+        void SetBodyMotionType(PhysicsBodyID bodyId, PhysicsMotionType motionType) override;
+    private:
+        PhysicsBodyID CreateBodyFromShape(JPH::ShapeRefC shape, const glm::vec3& position, const glm::quat& rotation, const PhysicsBodySettings& settings);
     private:
         std::unique_ptr<JPH::PhysicsSystem> physicsSystem;
         std::unique_ptr<JPH::TempAllocatorImpl> tempAllocator;

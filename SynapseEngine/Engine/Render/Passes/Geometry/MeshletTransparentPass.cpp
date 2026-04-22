@@ -3,10 +3,7 @@
 #include "Engine/Vk/Context.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Vk/Image/ImageFactory.h"
-#include "Engine/System/RenderSystem.h"
 #include "Engine/Mesh/ModelManager.h"
-#include "Engine/Component/TransformComponent.h"
-#include "Engine/Component/CameraComponent.h"
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
@@ -173,7 +170,7 @@ namespace Syn {
         pc.baseDescriptorOffset = drawData->Models.activeTraditionalCount + drawData->Models.meshletCmdOffsets[_renderType];
         pc.disableConeCulling = (_renderType == MaterialRenderType::Transparent2Sided) ? 1 : 0;
         pc.materialRenderType = static_cast<uint32_t>(_renderType);
-        pc.enableOcclusionCulling = (scene->GetSettings()->enableGpuCulling && scene->GetSettings()->enableOcclusionCulling && !scene->GetSettings()->useDebugCamera) ? 1 : 0;
+        pc.enableOcclusionCulling = (scene->GetSettings()->enableOcclusionCulling) ? 1 : 0;
 
         pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
         pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
