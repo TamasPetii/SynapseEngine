@@ -47,5 +47,8 @@ namespace Syn
         static constexpr const char* DebugLodGrayscale = "DebugLodGrayscale";
         static constexpr const char* DebugMaterial = "DebugMaterial";
         static constexpr const char* DebugUv = "DebugUv";
+
+		static constexpr const char* DepthOpaqueMax = "DepthOpaqueMax";
+		static constexpr const char* DepthTransparentMin = "DepthTransparentMin";
     };
 }
