@@ -4,7 +4,7 @@
 #include "Engine/Image/SamplerNames.h"
 #include "Editor/Manager/GuiTextureManager.h"
 #include "Engine/ServiceLocator.h"
-#include "Engine/Component/CameraComponent.h"
+#include "Engine/Component/Core/CameraComponent.h"
 
 #include "Engine/Vk/Image/ImageUtils.h"
 #include "Engine/Vk/Rendering/GpuUploader.h"

@@ -522,13 +522,13 @@
     <ClCompile Include="Scene\Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\TransformSystem.cpp">
+    <ClCompile Include="System\Core\TransformSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Component\TransformComponent.cpp">
+    <ClCompile Include="Component\Core\TransformComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Component\BaseComponent\Component.cpp">
+    <ClCompile Include="Component\Core\Component.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Manager\ComponentBufferManager.cpp">
@@ -537,10 +537,10 @@
     <ClCompile Include="Utils\WindowedBuffer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Component\CameraComponent.cpp">
+    <ClCompile Include="Component\Core\CameraComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\CameraSystem.cpp">
+    <ClCompile Include="System\Core\CameraSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Manager\InputManager.cpp">
@@ -555,13 +555,13 @@
     <ClCompile Include="Scene\TestScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Component\ModelComponent.cpp">
+    <ClCompile Include="Component\Rendering\ModelComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mesh\MeshDrawDescriptor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\RenderSystem.cpp">
+    <ClCompile Include="System\Rendering\RenderSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mesh\MeshDrawBlueprint.cpp">
@@ -573,10 +573,10 @@
     <ClCompile Include="Scene\DrawData\SceneDrawData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\ModelSystem.cpp">
+    <ClCompile Include="System\Rendering\ModelSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\ModelFrustumCullingSystem.cpp">
+    <ClCompile Include="System\Rendering\ModelFrustumCullingSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\RenderTargetManager.cpp">
@@ -609,7 +609,7 @@
     <ClCompile Include="Image\Source\Procedural\DefaultImageSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\MaterialSystem.cpp">
+    <ClCompile Include="System\Rendering\MaterialSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mesh\Processor\Optimizer\IMeshOptimizer.cpp">
@@ -627,10 +627,10 @@
     <ClCompile Include="Render\Passes\Present\CompositePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Wireframe\WireframeAabbPass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshAabbPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Component\MaterialOverrideComponent.cpp">
+    <ClCompile Include="Component\Rendering\MaterialOverrideComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Bloom\BloomPrefilterPass.cpp">
@@ -645,10 +645,10 @@
     <ClCompile Include="Render\Passes\Bloom\BloomCompositePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Wireframe\WireframeSpherePass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshSpherePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Wireframe\WireframeSetupPass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshSetupPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Wireframe\WireframeMeshletAabbPass.cpp">
@@ -750,10 +750,10 @@
     <ClCompile Include="Animation\AnimationManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Component\AnimationComponent.cpp">
+    <ClCompile Include="Component\Rendering\AnimationComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\AnimationSystem.cpp">
+    <ClCompile Include="System\Rendering\AnimationSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Present\GuiPass.cpp">
@@ -786,7 +786,7 @@
     <ClCompile Include="Physics\PhysicsTypes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Component\RigidBodyComponent.cpp">
+    <ClCompile Include="Component\Physics\RigidBodyComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Physics\IPhysicsEngine.cpp">
@@ -795,16 +795,16 @@
     <ClCompile Include="Physics\JoltPhysicsEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\PhysicsSystem.cpp">
+    <ClCompile Include="System\Physics\PhysicsSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Component\BoxColliderComponent.cpp">
+    <ClCompile Include="Component\Physics\BoxColliderComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Component\SphereColliderComponent.cpp">
+    <ClCompile Include="Component\Physics\SphereColliderComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Component\CapsuleColliderComponent.cpp">
+    <ClCompile Include="Component\Physics\CapsuleColliderComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Wireframe\DebugInitPass.cpp">
@@ -813,58 +813,58 @@
     <ClCompile Include="Render\Passes\Wboit\WboitInitPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Component\DirectionLightComponent.cpp">
+    <ClCompile Include="Component\Light\Direction\DirectionLightComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Component\BaseComponent\Light.cpp">
+    <ClCompile Include="Component\Light\Light.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Deferred\DeferredEmissiveAoPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Component\PointLightComponent.cpp">
+    <ClCompile Include="Component\Light\Point\PointLightComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Component\PointLightShadowComponent.cpp">
+    <ClCompile Include="Component\Light\Point\PointLightShadowComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Component\SpotLightComponent.cpp">
+    <ClCompile Include="Component\Light\Spot\SpotLightComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Component\SpotLightShadowComponent.cpp">
+    <ClCompile Include="Component\Light\Spot\SpotLightShadowComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\Light\PointLightSystem.cpp">
+    <ClCompile Include="System\Light\Point\PointLightSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\Light\PointLightShadowSystem.cpp">
+    <ClCompile Include="System\Light\Point\PointLightShadowSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\Light\PointLightFrustumCullingSystem.cpp">
+    <ClCompile Include="System\Light\Point\PointLightFrustumCullingSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Deferred\DeferredPointLightPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\Light\SpotLightSystem.cpp">
+    <ClCompile Include="System\Light\Spot\SpotLightSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\Light\SpotLightShadowSystem.cpp">
+    <ClCompile Include="System\Light\Spot\SpotLightShadowSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\Light\SpotLightFrustumCullingSystem.cpp">
+    <ClCompile Include="System\Light\Spot\SpotLightFrustumCullingSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Deferred\DeferredSpotLightPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Component\DirectionLightShadowComponent.cpp">
+    <ClCompile Include="Component\Light\Direction\DirectionLightShadowComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\Light\DirectionLightSystem.cpp">
+    <ClCompile Include="System\Light\Direction\DirectionLightSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\Light\DirectionLightShadowSystem.cpp">
+    <ClCompile Include="System\Light\Direction\DirectionLightShadowSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Collision\Colliders\FrustumCollider.cpp">
@@ -873,7 +873,7 @@
     <ClCompile Include="Render\Passes\Deferred\DeferredDirectionLightPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="System\Light\DirectionLightCullingSystem.cpp">
+    <ClCompile Include="System\Light\Direction\DirectionLightCullingSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Culling\PointLightCullingPass.cpp">
@@ -897,7 +897,7 @@
     <ClCompile Include="Scene\SceneSettings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Component\TagComponent.cpp">
+    <ClCompile Include="Component\Core\TagComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Billboard\DirectionLightBillboardPass.cpp">
@@ -973,6 +973,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Scene\DrawData\DirectionLightDrawGroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Physics\BoxColliderSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Physics\RigidBodySystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Physics\SphereColliderSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Physics\CapsuleColliderSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1559,13 +1571,13 @@
     <ClInclude Include="Scene\Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\TransformSystem.h">
+    <ClInclude Include="System\Core\TransformSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Component\TransformComponent.h">
+    <ClInclude Include="Component\Core\TransformComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Component\BaseComponent\Component.h">
+    <ClInclude Include="Component\Core\Component.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Manager\ComponentBufferManager.h">
@@ -1574,10 +1586,10 @@
     <ClInclude Include="Utils\WindowedBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Component\CameraComponent.h">
+    <ClInclude Include="Component\Core\CameraComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\CameraSystem.h">
+    <ClInclude Include="System\Core\CameraSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Manager\InputManager.h">
@@ -1595,13 +1607,13 @@
     <ClInclude Include="Scene\TestScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Component\ModelComponent.h">
+    <ClInclude Include="Component\Rendering\ModelComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mesh\MeshDrawDescriptor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\RenderSystem.h">
+    <ClInclude Include="System\Rendering\RenderSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mesh\MeshDrawBlueprint.h">
@@ -1613,10 +1625,10 @@
     <ClInclude Include="Scene\DrawData\SceneDrawData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\ModelSystem.h">
+    <ClInclude Include="System\Rendering\ModelSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\ModelFrustumCullingSystem.h">
+    <ClInclude Include="System\Rendering\ModelFrustumCullingSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Vk\Image\ImageViewNames.h">
@@ -1664,7 +1676,7 @@
     <ClInclude Include="Image\Source\Procedural\DefaultImageSource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\MaterialSystem.h">
+    <ClInclude Include="System\Rendering\MaterialSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Material\MaterialNames.h">
@@ -1691,10 +1703,10 @@
     <ClInclude Include="Render\Passes\Present\CompositePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Wireframe\WireframeAabbPass.h">
+    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshAabbPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Component\MaterialOverrideComponent.h">
+    <ClInclude Include="Component\Rendering\MaterialOverrideComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Bloom\BloomPrefilterPass.h">
@@ -1709,13 +1721,13 @@
     <ClInclude Include="Render\Passes\Bloom\BloomCompositePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Wireframe\WireframeSpherePass.h">
+    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshSpherePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Image\ImageNames.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Wireframe\WireframeSetupPass.h">
+    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshSetupPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Wireframe\WireframeMeshletAabbPass.h">
@@ -1817,10 +1829,10 @@
     <ClInclude Include="Animation\AnimationManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Component\AnimationComponent.h">
+    <ClInclude Include="Component\Rendering\AnimationComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\AnimationSystem.h">
+    <ClInclude Include="System\Rendering\AnimationSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Present\GuiPass.h">
@@ -1856,7 +1868,7 @@
     <ClInclude Include="Physics\PhysicsTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Component\RigidBodyComponent.h">
+    <ClInclude Include="Component\Physics\RigidBodyComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Physics\IPhysicsEngine.h">
@@ -1865,16 +1877,16 @@
     <ClInclude Include="Physics\JoltPhysicsEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\PhysicsSystem.h">
+    <ClInclude Include="System\Physics\PhysicsSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Component\BoxColliderComponent.h">
+    <ClInclude Include="Component\Physics\BoxColliderComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Component\SphereColliderComponent.h">
+    <ClInclude Include="Component\Physics\SphereColliderComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Component\CapsuleColliderComponent.h">
+    <ClInclude Include="Component\Physics\CapsuleColliderComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Wireframe\DebugInitPass.h">
@@ -1883,58 +1895,58 @@
     <ClInclude Include="Render\Passes\Wboit\WboitInitPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Component\DirectionLightComponent.h">
+    <ClInclude Include="Component\Light\Direction\DirectionLightComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Component\BaseComponent\Light.h">
+    <ClInclude Include="Component\Light\Light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Deferred\DeferredEmissiveAoPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Component\PointLightComponent.h">
+    <ClInclude Include="Component\Light\Point\PointLightComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Component\PointLightShadowComponent.h">
+    <ClInclude Include="Component\Light\Point\PointLightShadowComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Component\SpotLightComponent.h">
+    <ClInclude Include="Component\Light\Spot\SpotLightComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Component\SpotLightShadowComponent.h">
+    <ClInclude Include="Component\Light\Spot\SpotLightShadowComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\Light\PointLightSystem.h">
+    <ClInclude Include="System\Light\Point\PointLightSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\Light\PointLightShadowSystem.h">
+    <ClInclude Include="System\Light\Point\PointLightShadowSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\Light\PointLightFrustumCullingSystem.h">
+    <ClInclude Include="System\Light\Point\PointLightFrustumCullingSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Deferred\DeferredPointLightPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\Light\SpotLightSystem.h">
+    <ClInclude Include="System\Light\Spot\SpotLightSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\Light\SpotLightShadowSystem.h">
+    <ClInclude Include="System\Light\Spot\SpotLightShadowSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\Light\SpotLightFrustumCullingSystem.h">
+    <ClInclude Include="System\Light\Spot\SpotLightFrustumCullingSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Deferred\DeferredSpotLightPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Component\DirectionLightShadowComponent.h">
+    <ClInclude Include="Component\Light\Direction\DirectionLightShadowComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\Light\DirectionLightSystem.h">
+    <ClInclude Include="System\Light\Direction\DirectionLightSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\Light\DirectionLightShadowSystem.h">
+    <ClInclude Include="System\Light\Direction\DirectionLightShadowSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Collision\Colliders\FrustumCollider.h">
@@ -1943,7 +1955,7 @@
     <ClInclude Include="Render\Passes\Deferred\DeferredDirectionLightPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="System\Light\DirectionLightCullingSystem.h">
+    <ClInclude Include="System\Light\Direction\DirectionLightCullingSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Culling\PointLightCullingPass.h">
@@ -1967,7 +1979,7 @@
     <ClInclude Include="Scene\SceneSettings.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Component\TagComponent.h">
+    <ClInclude Include="Component\Core\TagComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Billboard\DirectionLightBillboardPass.h">
@@ -2049,6 +2061,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scene\DrawData\DirectionLightDrawGroup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Physics\BoxColliderSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Physics\RigidBodySystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Physics\PhysicsUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Physics\SphereColliderSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Physics\CapsuleColliderSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

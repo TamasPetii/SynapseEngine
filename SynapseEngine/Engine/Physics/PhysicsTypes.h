@@ -13,7 +13,7 @@ namespace Syn
         uint32_t numBodyMutexes = 0;
         uint32_t maxBodyPairs = 100000;
         uint32_t maxContactConstraints = 100000;
-        uint32_t tempAllocatorSizeMB = 25;
+        uint32_t tempAllocatorSizeMB = 256;
     };
 
     enum class SYN_API PhysicsMotionType

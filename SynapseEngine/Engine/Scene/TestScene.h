@@ -1,19 +1,23 @@
 #pragma once
 #include "Engine/Scene/Scene.h"
-#include "Engine/Component/TransformComponent.h"
-#include "Engine/Component/CameraComponent.h"
-#include "Engine/Component/ModelComponent.h"
+#include "Engine/Component/Core/TransformComponent.h"
+#include "Engine/Component/Core/CameraComponent.h"
+#include "Engine/Component/Rendering/ModelComponent.h"
 #include "Engine/Mesh/Factory/MeshFactory.h"
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Mesh/MeshSourceNames.h"
-#include "Engine/Component/MaterialOverrideComponent.h"
+#include "Engine/Component/Rendering/MaterialOverrideComponent.h"
 #include "Engine/Material/MaterialManager.h"
 #include "Engine/Animation/AnimationManager.h"
-#include "Engine/Component/AnimationComponent.h"
-#include "Engine/Component/PointLightComponent.h"
-#include "Engine/Component/SpotLightComponent.h"
-#include "Engine/Component/DirectionLightComponent.h"
+#include "Engine/Component/Rendering/AnimationComponent.h"
+#include "Engine/Component/Light/Point/PointLightComponent.h"
+#include "Engine/Component/Light/Spot/SpotLightComponent.h"
+#include "Engine/Component/Light/Direction/DirectionLightComponent.h"
+#include "Engine/Component/Physics/BoxColliderComponent.h"
+#include "Engine/Component/Physics/SphereColliderComponent.h"
+#include "Engine/Component/Physics/CapsuleColliderComponent.h"
+#include "Engine/Component/Physics/RigidBodyComponent.h"
 #include <random>
 
 namespace Syn
@@ -45,8 +49,8 @@ namespace Syn
             animationIds.push_back(animationManager->LoadAnimationAsync(basePath + "Monster/Hip Hop Dancing_2/Hip Hop Dancing.dae", mutantId));
 
             std::vector<uint32_t> geoIds;
-            geoIds.push_back(modelManager->GetResourceIndex(MeshSourceNames::Sphere));
             geoIds.push_back(modelManager->GetResourceIndex(MeshSourceNames::Cube));
+            geoIds.push_back(modelManager->GetResourceIndex(MeshSourceNames::Sphere));
             geoIds.push_back(modelManager->GetResourceIndex(MeshSourceNames::Quad));
             geoIds.push_back(modelManager->GetResourceIndex(MeshSourceNames::ScreenQuad));
             geoIds.push_back(modelManager->GetResourceIndex(MeshSourceNames::Cylinder));
@@ -151,7 +155,7 @@ namespace Syn
             */
 
 
-            for (int i = 0; i < 10000; i++)
+            for (int i = 0; i < 100; i++)
             {
                 // Character
                 EntityID characterEntity = registry->CreateEntity();
@@ -180,7 +184,7 @@ namespace Syn
             auto materialManager = ServiceLocator::GetMaterialManager();
 
             // Random Geometry
-            bool useUniqueMaterials = false;
+            bool useUniqueMaterials = true;
 
             std::vector<uint32_t> sharedMaterialIds;
             if (!useUniqueMaterials) {
@@ -205,7 +209,213 @@ namespace Syn
                 }
             }
 
-            for (int i = 0; i < 1000000; i++) {
+            {
+                EntityID floorEntity = registry->CreateEntity();
+                registry->AddComponent<TransformComponent>(floorEntity);
+                registry->AddComponent<ModelComponent>(floorEntity);
+                registry->AddComponent<RigidBodyComponent>(floorEntity);
+                registry->AddComponent<BoxColliderComponent>(floorEntity);
+
+                auto& floorTransform = registry->GetComponent<TransformComponent>(floorEntity);
+                floorTransform.translation = glm::vec3(0.0f, 0.0f, 0.0f);
+                floorTransform.scale = glm::vec3(500.0f, 1.0f, 500.0f);
+
+                auto& floorModel = registry->GetComponent<ModelComponent>(floorEntity);
+                floorModel.modelIndex = modelManager->GetResourceIndex(MeshSourceNames::Cube);
+
+                auto& floorRb = registry->GetComponent<RigidBodyComponent>(floorEntity);
+                floorRb.motionType = PhysicsMotionType::Static;
+
+                registry->GetPool<TransformComponent>()->SetCategory(floorEntity, StorageCategory::Static);
+                registry->GetPool<ModelComponent>()->SetCategory(floorEntity, StorageCategory::Static);
+                registry->GetPool<RigidBodyComponent>()->SetCategory(floorEntity, StorageCategory::Static);
+                registry->GetPool<BoxColliderComponent>()->SetCategory(floorEntity, StorageCategory::Static);
+            }
+
+            for (int i = 0; i < 5000; i++) {
+                EntityID e = registry->CreateEntity();
+                registry->AddComponent<TransformComponent>(e);
+                registry->AddComponent<ModelComponent>(e);
+				registry->AddComponent<RigidBodyComponent>(e);
+				registry->AddComponent<BoxColliderComponent>(e);
+                registry->AddComponent<MaterialOverrideComponent>(e);
+
+                auto& transform = registry->GetComponent<TransformComponent>(e);
+                transform.translation = glm::vec3(
+                    (rand() % 400) - 200.0f,
+                    (rand() % 400) + 5,
+                    (rand() % 400) - 200.0f
+                );
+
+                transform.rotation = glm::vec3(
+                    static_cast<float>(rand() % 360),
+                    static_cast<float>(rand() % 360),
+                    static_cast<float>(rand() % 360)
+                );
+
+                auto& model = registry->GetComponent<ModelComponent>(e);
+                model.modelIndex = modelManager->GetResourceIndex(MeshSourceNames::Cube);
+
+				auto& rb = registry->GetComponent<RigidBodyComponent>(e);
+				rb.motionType = PhysicsMotionType::Dynamic;
+
+                registry->GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
+                registry->GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
+                registry->GetPool<RigidBodyComponent>()->SetCategory(e, StorageCategory::Static);
+				registry->GetPool<BoxColliderComponent>()->SetCategory(e, StorageCategory::Static);
+
+                auto& overrideComp = registry->GetComponent<MaterialOverrideComponent>(e);
+
+                if (useUniqueMaterials)
+                {
+                    float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float randomFloat = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float alpha = 0.1f + (randomFloat * 0.9f);
+
+                    MaterialInfo randomMatInfo{};
+                    randomMatInfo.color = glm::vec4(r, g, b, alpha);
+                    randomMatInfo.doubleSided = rand() % 2;
+                    randomMatInfo.isTransparent = rand() % 2;
+                    randomMatInfo.emissiveFactor = glm::vec3(r, g, b);
+                    randomMatInfo.emissiveIntensity = randomFloat * 2;
+
+                    std::string matName = "RandomGeometryMat_" + std::to_string(i);
+                    uint32_t randomMatId = materialManager->LoadMaterial(matName, randomMatInfo);
+
+                    overrideComp.materials.push_back(randomMatId);
+                }
+                else
+                {
+                    uint32_t selectedSharedMatId = sharedMaterialIds[rand() % sharedMaterialIds.size()];
+                    overrideComp.materials.push_back(selectedSharedMatId);
+                }
+            }
+
+            for (int i = 0; i < 5000; i++) {
+                EntityID e = registry->CreateEntity();
+                registry->AddComponent<TransformComponent>(e);
+                registry->AddComponent<ModelComponent>(e);
+                registry->AddComponent<RigidBodyComponent>(e);
+                registry->AddComponent<SphereColliderComponent>(e);
+                registry->AddComponent<MaterialOverrideComponent>(e);
+
+                auto& transform = registry->GetComponent<TransformComponent>(e);
+                transform.translation = glm::vec3(
+                    (rand() % 400) - 200.0f,
+                    (rand() % 400) + 5,
+                    (rand() % 400) - 200.0f
+                );
+
+                transform.rotation = glm::vec3(
+                    static_cast<float>(rand() % 360),
+                    static_cast<float>(rand() % 360),
+                    static_cast<float>(rand() % 360)
+                );
+
+                auto& model = registry->GetComponent<ModelComponent>(e);
+                model.modelIndex = modelManager->GetResourceIndex(MeshSourceNames::Sphere);
+
+                auto& rb = registry->GetComponent<RigidBodyComponent>(e);
+                rb.motionType = PhysicsMotionType::Dynamic;
+
+                registry->GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
+                registry->GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
+                registry->GetPool<RigidBodyComponent>()->SetCategory(e, StorageCategory::Static);
+                registry->GetPool<SphereColliderComponent>()->SetCategory(e, StorageCategory::Static);
+
+                auto& overrideComp = registry->GetComponent<MaterialOverrideComponent>(e);
+
+                if (useUniqueMaterials)
+                {
+                    float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float randomFloat = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float alpha = 0.1f + (randomFloat * 0.9f);
+
+                    MaterialInfo randomMatInfo{};
+                    randomMatInfo.color = glm::vec4(r, g, b, alpha);
+                    randomMatInfo.doubleSided = rand() % 2;
+                    randomMatInfo.isTransparent = rand() % 2;
+                    randomMatInfo.emissiveFactor = glm::vec3(r, g, b);
+                    randomMatInfo.emissiveIntensity = randomFloat * 2;
+
+                    std::string matName = "RandomGeometryMat_" + std::to_string(i);
+                    uint32_t randomMatId = materialManager->LoadMaterial(matName, randomMatInfo);
+
+                    overrideComp.materials.push_back(randomMatId);
+                }
+                else
+                {
+                    uint32_t selectedSharedMatId = sharedMaterialIds[rand() % sharedMaterialIds.size()];
+                    overrideComp.materials.push_back(selectedSharedMatId);
+                }
+            }
+
+            for (int i = 0; i < 5000; i++) {
+                EntityID e = registry->CreateEntity();
+                registry->AddComponent<TransformComponent>(e);
+                registry->AddComponent<ModelComponent>(e);
+                registry->AddComponent<RigidBodyComponent>(e);
+                registry->AddComponent<CapsuleColliderComponent>(e);
+                registry->AddComponent<MaterialOverrideComponent>(e);
+
+                auto& transform = registry->GetComponent<TransformComponent>(e);
+                transform.translation = glm::vec3(
+                    (rand() % 400) - 200.0f,
+                    (rand() % 400) + 5,
+                    (rand() % 400) - 200.0f
+                );
+
+                transform.rotation = glm::vec3(
+                    static_cast<float>(rand() % 360),
+                    static_cast<float>(rand() % 360),
+                    static_cast<float>(rand() % 360)
+                );
+
+                auto& model = registry->GetComponent<ModelComponent>(e);
+                model.modelIndex = modelManager->GetResourceIndex(MeshSourceNames::Capsule);
+
+                auto& rb = registry->GetComponent<RigidBodyComponent>(e);
+                rb.motionType = PhysicsMotionType::Dynamic;
+
+                registry->GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
+                registry->GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
+                registry->GetPool<RigidBodyComponent>()->SetCategory(e, StorageCategory::Static);
+                registry->GetPool<CapsuleColliderComponent>()->SetCategory(e, StorageCategory::Static);
+
+                auto& overrideComp = registry->GetComponent<MaterialOverrideComponent>(e);
+
+                if (useUniqueMaterials)
+                {
+                    float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float randomFloat = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    float alpha = 0.1f + (randomFloat * 0.9f);
+
+                    MaterialInfo randomMatInfo{};
+                    randomMatInfo.color = glm::vec4(r, g, b, alpha);
+                    randomMatInfo.doubleSided = rand() % 2;
+                    randomMatInfo.isTransparent = rand() % 2;
+                    randomMatInfo.emissiveFactor = glm::vec3(r, g, b);
+                    randomMatInfo.emissiveIntensity = randomFloat * 2;
+
+                    std::string matName = "RandomGeometryMat_" + std::to_string(i);
+                    uint32_t randomMatId = materialManager->LoadMaterial(matName, randomMatInfo);
+
+                    overrideComp.materials.push_back(randomMatId);
+                }
+                else
+                {
+                    uint32_t selectedSharedMatId = sharedMaterialIds[rand() % sharedMaterialIds.size()];
+                    overrideComp.materials.push_back(selectedSharedMatId);
+                }
+            }
+
+            for (int i = 0; i < 5000; i++) {
                 EntityID e = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(e);
                 registry->AddComponent<ModelComponent>(e);
@@ -214,8 +424,14 @@ namespace Syn
                 auto& transform = registry->GetComponent<TransformComponent>(e);
                 transform.translation = glm::vec3(
                     (rand() % 400) - 200.0f,
-                    (rand() % 400) - 200.0f,
+                    (rand() % 400) + 5,
                     (rand() % 400) - 200.0f
+                );
+
+                transform.rotation = glm::vec3(
+                    static_cast<float>(rand() % 360),
+                    static_cast<float>(rand() % 360),
+                    static_cast<float>(rand() % 360)
                 );
 
                 auto& model = registry->GetComponent<ModelComponent>(e);

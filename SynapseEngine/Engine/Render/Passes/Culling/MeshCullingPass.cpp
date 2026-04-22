@@ -5,7 +5,7 @@
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Scene/BufferNames.h"
-#include "Engine/Component/ModelComponent.h"
+#include "Engine/Component/Rendering/ModelComponent.h"
 #include "Engine/Vk/Buffer/BufferUtils.h"
 #include "Engine/Animation/AnimationManager.h"
 #include "Engine/Material/MaterialManager.h"

@@ -1,6 +1,5 @@
 #include "DepthCopyPass.h"
 #include "Engine/Vk/Image/ImageUtils.h"
-#include "Engine/System/RenderSystem.h"
 
 namespace Syn 
 {

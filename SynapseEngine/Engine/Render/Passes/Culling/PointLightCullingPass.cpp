@@ -4,7 +4,7 @@
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Scene/BufferNames.h"
-#include "Engine/Component/PointLightComponent.h"
+#include "Engine/Component/Light/Point/PointLightComponent.h"
 #include "Engine/Vk/Buffer/BufferUtils.h"
 #include "Engine/Render/ComputeGroupSize.h"
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"

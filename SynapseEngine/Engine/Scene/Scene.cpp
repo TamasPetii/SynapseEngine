@@ -4,35 +4,38 @@
 #include "Engine/Mesh/ModelManager.h"
 #include "BufferNames.h"
 
-#include "Engine/Component/TransformComponent.h"
-#include "Engine/Component/CameraComponent.h"
-#include "Engine/Component/ModelComponent.h"
-#include "Engine/Component/AnimationComponent.h"
-#include "Engine/Component/DirectionLightComponent.h"
-#include "Engine/Component/PointLightComponent.h"
-#include "Engine/Component/SpotLightComponent.h"
+#include "Engine/Component/Core/TransformComponent.h"
+#include "Engine/Component/Core/CameraComponent.h"
+#include "Engine/Component/Rendering/ModelComponent.h"
+#include "Engine/Component/Rendering/AnimationComponent.h"
+#include "Engine/Component/Light/Direction/DirectionLightComponent.h"
+#include "Engine/Component/Light/Point/PointLightComponent.h"
+#include "Engine/Component/Light/Spot/SpotLightComponent.h"
+#include "Engine/Component/Rendering/MaterialOverrideComponent.h"
 
-#include "Engine/System/TransformSystem.h"
-#include "Engine/System/RenderSystem.h"
-#include "Engine/System/CameraSystem.h"
-#include "Engine/System/ModelSystem.h"
-#include "Engine/System/MaterialSystem.h"
-#include "Engine/System/ModelFrustumCullingSystem.h"
-#include "Engine/System/AnimationSystem.h"
-#include "Engine/System/PhysicsSystem.h"
-#include "Engine/System/Light/PointLightSystem.h"
-#include "Engine/System/Light/PointLightShadowSystem.h"
-#include "Engine/System/Light/PointLightFrustumCullingSystem.h"
-#include "Engine/System/Light/SpotLightSystem.h"
-#include "Engine/System/Light/SpotLightShadowSystem.h"
-#include "Engine/System/Light/SpotLightFrustumCullingSystem.h"
-#include "Engine/System/Light/DirectionLightSystem.h"
-#include "Engine/System/Light/DirectionLightShadowSystem.h"
-#include "Engine/System/Light/DirectionLightCullingSystem.h"
-#include "Engine/Component/MaterialOverrideComponent.h"
+#include "Engine/System/Core/TransformSystem.h"
+#include "Engine/System/Rendering/RenderSystem.h"
+#include "Engine/System/Core/CameraSystem.h"
+#include "Engine/System/Rendering/ModelSystem.h"
+#include "Engine/System/Rendering/MaterialSystem.h"
+#include "Engine/System/Rendering/ModelFrustumCullingSystem.h"
+#include "Engine/System/Rendering/AnimationSystem.h"
+#include "Engine/System/Physics/PhysicsSystem.h"
+#include "Engine/System/Light/Point/PointLightSystem.h"
+#include "Engine/System/Light/Point/PointLightShadowSystem.h"
+#include "Engine/System/Light/Point/PointLightFrustumCullingSystem.h"
+#include "Engine/System/Light/Spot/SpotLightSystem.h"
+#include "Engine/System/Light/Spot/SpotLightShadowSystem.h"
+#include "Engine/System/Light/Spot/SpotLightFrustumCullingSystem.h"
+#include "Engine/System/Light/Direction/DirectionLightSystem.h"
+#include "Engine/System/Light/Direction/DirectionLightShadowSystem.h"
+#include "Engine/System/Light/Direction/DirectionLightCullingSystem.h"
+#include "Engine/System/Physics/BoxColliderSystem.h"
+#include "Engine/System/Physics/SphereColliderSystem.h"
+#include "Engine/System/Physics/CapsuleColliderSystem.h"
+#include "Engine/System/Physics/RigidBodySystem.h"
+
 #include "Engine/Profiler/ICpuProfiler.h"
-
-#include "Engine/ServiceLocator.h"
 #include "Engine/FrameContext.h"
 
 namespace Syn
@@ -51,6 +54,10 @@ namespace Syn
         _registry->EnsurePool<PointLightShadowComponent>();
         _registry->EnsurePool<SpotLightComponent>();
         _registry->EnsurePool<SpotLightShadowComponent>();
+		_registry->EnsurePool<BoxColliderComponent>();
+		_registry->EnsurePool<SphereColliderComponent>();
+		_registry->EnsurePool<CapsuleColliderComponent>();
+		_registry->EnsurePool<RigidBodyComponent>();
 
         _componentBufferManager = std::make_unique<ComponentBufferManager>(frameCount);
         _sceneDrawData = std::make_unique<SceneDrawData>(frameCount);
@@ -92,7 +99,11 @@ namespace Syn
 		RegisterSystem<DirectionLightSystem>();
         RegisterSystem<DirectionLightCullingSystem>();
         RegisterSystem<DirectionLightShadowSystem>();
-        //RegisterSystem<PhysicsSystem>();
+        RegisterSystem<PhysicsSystem>();
+		RegisterSystem<BoxColliderSystem>();
+		RegisterSystem<SphereColliderSystem>();
+		RegisterSystem<CapsuleColliderSystem>();
+		RegisterSystem<RigidBodySystem>();
     }
 
     void Scene::InitializeComponentBuffers()
@@ -134,6 +145,15 @@ namespace Syn
         RegisterComponentSparseMapBuffer<DirectionLightShadowComponent>(BufferNames::DirectionLightShadowSparseMap);
         RegisterComponentBuffer<DirectionLightShadowComponent, DirectionLightShadowGPU>(BufferNames::DirectionLightShadowData);
         RegisterComponentBuffer<DirectionLightShadowComponent, DirectionLightShadowColliderGPU>(BufferNames::DirectionLightShadowColliderData);
+
+		RegisterComponentSparseMapBuffer<BoxColliderComponent>(BufferNames::BoxColliderSparseMap);
+		RegisterComponentBuffer<BoxColliderComponent, BoxColliderComponentGPU>(BufferNames::BoxColliderData);
+
+		RegisterComponentSparseMapBuffer<SphereColliderComponent>(BufferNames::SphereColliderSparseMap);
+		RegisterComponentBuffer<SphereColliderComponent, SphereColliderComponentGPU>(BufferNames::SphereColliderData);
+
+		RegisterComponentSparseMapBuffer<CapsuleColliderComponent>(BufferNames::CapsuleColliderSparseMap);
+		RegisterComponentBuffer<CapsuleColliderComponent, CapsuleColliderComponentGPU>(BufferNames::CapsuleColliderData);
     }
 
     void Scene::BuildTaskflowGraph(tf::Taskflow& taskflow, SystemPhase phase)

@@ -42,5 +42,14 @@ namespace Syn
 
         static constexpr const char* SpotLightShadowSparseMap = "SpotLightShadowSparseMap";
         static constexpr const char* SpotLightShadowData = "SpotLightShadowData";
+
+        static constexpr const char* BoxColliderSparseMap = "BoxColliderSparseMap";
+        static constexpr const char* BoxColliderData = "BoxColliderData";
+
+        static constexpr const char* SphereColliderSparseMap = "SphereColliderSparseMap";
+        static constexpr const char* SphereColliderData = "SphereColliderData";
+
+        static constexpr const char* CapsuleColliderSparseMap = "CapsuleColliderSparseMap";
+        static constexpr const char* CapsuleColliderData = "CapsuleColliderData";
     };
 }
