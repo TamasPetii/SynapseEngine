@@ -235,6 +235,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Render\Passes\Forward+\ClusterSetupPass.cpp" />
     <ClCompile Include="System\Physics\CapsuleColliderSystem.cpp" />
     <ClCompile Include="System\Physics\SphereColliderSystem.cpp" />
     <ClCompile Include="System\Physics\RigidBodySystem.cpp" />
@@ -561,6 +562,7 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\Passes\Forward+\ClusterSetupPass.h" />
     <ClInclude Include="System\Physics\CapsuleColliderSystem.h" />
     <ClInclude Include="System\Physics\SphereColliderSystem.h" />
     <ClInclude Include="System\Physics\PhysicsUtils.h" />
@@ -926,8 +928,10 @@
     <ClInclude Include="Render\Passes\Culling\WorkGraphCullingPass.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Scene\scene_config.json" />
     <None Include="Shaders\Includes\Common\Animation.glsl" />
     <None Include="Shaders\Includes\Common\Camera.glsl" />
+    <None Include="Shaders\Includes\Common\Cluster.glsl" />
     <None Include="Shaders\Includes\Common\Culling.glsl" />
     <None Include="Shaders\Includes\Common\DirectionLight.glsl" />
     <None Include="Shaders\Includes\Common\IndirectCommand.glsl" />
@@ -946,6 +950,7 @@
     <None Include="Shaders\Includes\PushConstants\BloomDownSamplePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\BloomPrefilterPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\BloomUpSamplePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\ClusterSetupPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\CullingCommandResetPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredDirectionLightPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredEmissiveAoPC.glsl" />
@@ -987,6 +992,7 @@
     <None Include="Shaders\Passes\Deferred\DeferredPointLight.vert" />
     <None Include="Shaders\Passes\Deferred\DeferredSpotLight.frag" />
     <None Include="Shaders\Passes\Deferred\DeferredSpotLight.vert" />
+    <None Include="Shaders\Passes\Forward+\ActiveClusterSetup.comp" />
     <None Include="Shaders\Passes\Geometry\Meshlet.frag" />
     <None Include="Shaders\Passes\Geometry\Meshlet.mesh" />
     <None Include="Shaders\Passes\Geometry\Meshlet.task" />

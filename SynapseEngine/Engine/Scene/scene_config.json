@@ -1,0 +1,27 @@
+{
+  "paths": {
+    "base_model_path": "C:/Users/User/Desktop/Models/"
+  },
+  "environment": {
+    "spawn_sponza": true,
+    "spawn_floor": true
+  },
+  "materials": {
+    "use_unique_materials": true,
+    "shared_material_count": 25
+  },
+  "entities": {
+    "animated_characters": 100,
+    "static_geometry": 100000,
+    "physics_boxes": 1000,
+    "physics_spheres": 1000,
+    "physics_capsules": 1000
+  },
+  "lights": {
+    "directional_count": 1,
+    "point_count": 500,
+    "point_shadow_count": 5,
+    "spot_count": 500,
+    "spot_shadow_count": 5
+  }
+}

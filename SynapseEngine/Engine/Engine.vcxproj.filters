@@ -987,6 +987,9 @@
     <ClCompile Include="System\Physics\CapsuleColliderSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Passes\Forward+\ClusterSetupPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2078,6 +2081,9 @@
     <ClInclude Include="System\Physics\CapsuleColliderSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Passes\Forward+\ClusterSetupPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Includes\Common\Animation.glsl" />
@@ -2167,5 +2173,9 @@
     <None Include="Shaders\Passes\Deferred\DeferredSpotLight.vert" />
     <None Include="Shaders\Passes\Culling\CullingCommandReset.comp" />
     <None Include="Shaders\Includes\PushConstants\CullingCommandResetPC.glsl" />
+    <None Include="Shaders\Passes\Forward+\ActiveClusterSetup.comp" />
+    <None Include="Shaders\Includes\PushConstants\ClusterSetupPC.glsl" />
+    <None Include="Shaders\Includes\Common\Cluster.glsl" />
+    <None Include="Scene\scene_config.json" />
   </ItemGroup>
 </Project>

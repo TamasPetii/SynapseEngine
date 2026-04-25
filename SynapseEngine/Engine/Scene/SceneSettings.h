@@ -25,6 +25,7 @@ namespace Syn
         bool enableWireframeMeshletAabb;
         bool enableWireframeMeshletSphere;
 
+		bool enableForwardPlus;
         bool enableDeferredEmissiveAo;
         bool enableDeferredPointLights;
         bool enableDeferredSpotLights;

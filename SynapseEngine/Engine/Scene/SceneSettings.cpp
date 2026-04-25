@@ -25,5 +25,6 @@ namespace Syn
         , enableBillboardPointLights(true)
         , enableBillboardSpotLights(true)
         , enableBillboardDirectionalLights(true)
+        , enableForwardPlus(false)
     {}
 }
