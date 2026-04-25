@@ -439,15 +439,38 @@ namespace Syn
         depthPyramidImageSpec.width = initWidth;
         depthPyramidImageSpec.height = initHeight;
         depthPyramidImageSpec.type = VK_IMAGE_TYPE_2D;
-        depthPyramidImageSpec.format = VK_FORMAT_R32_SFLOAT;
+        depthPyramidImageSpec.format = VK_FORMAT_R32G32_SFLOAT;
         depthPyramidImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
         depthPyramidImageSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         depthPyramidImageSpec.generateMipMaps = true;
+
         depthPyramidImageSpec.AddView(Vk::ImageViewNames::Default, Vk::ImageViewConfig{
             .viewType = VK_IMAGE_VIEW_TYPE_2D,
             .perMipViews = true
             });
+
+        depthPyramidImageSpec.AddView(RenderTargetViewNames::DepthOpaqueMax, Vk::ImageViewConfig{
+                    .viewType = VK_IMAGE_VIEW_TYPE_2D,
+                    .swizzle = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_ONE },
+                    .perMipViews = true
+            });
+
+        depthPyramidImageSpec.AddView(RenderTargetViewNames::DepthTransparentMin, Vk::ImageViewConfig{
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .swizzle = { VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_ONE },
+            .perMipViews = true
+            });
+
         rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::DepthPyramid, depthPyramidImageSpec);
+
+        Vk::ImageConfig pickingDepthSpec{};
+        pickingDepthSpec.width = initWidth;
+        pickingDepthSpec.height = initHeight;
+        pickingDepthSpec.type = VK_IMAGE_TYPE_2D;
+        pickingDepthSpec.format = VK_FORMAT_D32_SFLOAT;
+        pickingDepthSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        pickingDepthSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::EditorPickingDepth, pickingDepthSpec);
 
         Vk::ImageConfig depthImageSpec{};
         depthImageSpec.width = initWidth;
