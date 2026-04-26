@@ -32,6 +32,7 @@ namespace Syn
 
         std::shared_ptr<Texture> BuildFromFile(const std::string& filePath);
         std::shared_ptr<Texture> BuildFromSource(IImageSource& source);
+        IImageLoader* GetLoaderForExtension(const std::string& ext) const { return _registry->GetLoaderForExtension(ext); }
     private:
         std::unique_ptr<IImageLoaderRegistry> _registry;
         std::unique_ptr<IImageProcessorPipeline> _pipeline;

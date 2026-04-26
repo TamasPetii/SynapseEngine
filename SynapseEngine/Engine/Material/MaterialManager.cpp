@@ -24,8 +24,11 @@ namespace Syn {
 
     uint32_t MaterialManager::LoadMaterial(const std::string& name, const MaterialInfo& info) {
         return InternalLoadSync(name, [this, info]() {
-            auto getTexId = [this](const std::string& path) -> uint32_t {
-                return path.empty() ? UINT32_MAX : _textureLoadCallback(path);
+            auto getTexId = [this](const TexturePayload& payload) -> uint32_t {
+                if (payload.path.empty() && !payload.IsEmbedded()) 
+                    return UINT32_MAX;
+
+                return _textureLoadCallback(payload);
                 };
 
             Material mat;
@@ -39,13 +42,13 @@ namespace Syn {
             mat.doubleSided = info.doubleSided;
             mat.isTransparent = info.isTransparent;
 
-            mat.albedoTexture = getTexId(info.albedoPath);
-            mat.normalTexture = getTexId(info.normalPath);
-            mat.metalnessTexture = getTexId(info.metalnessPath);
-            mat.roughnessTexture = getTexId(info.roughnessPath);
-            mat.metallicRoughnessTexture = getTexId(info.metallicRoughnessPath);
-            mat.emissiveTexture = getTexId(info.emissivePath);
-            mat.ambientOcclusionTexture = getTexId(info.ambientOcclusionPath);
+            mat.albedoTexture = getTexId(info.albedo);
+            mat.normalTexture = getTexId(info.normal);
+            mat.metalnessTexture = getTexId(info.metalness);
+            mat.roughnessTexture = getTexId(info.roughness);
+            mat.metallicRoughnessTexture = getTexId(info.metallicRoughness);
+            mat.emissiveTexture = getTexId(info.emissive);
+            mat.ambientOcclusionTexture = getTexId(info.ambientOcclusion);
 
             return std::make_shared<Material>(mat);
             });

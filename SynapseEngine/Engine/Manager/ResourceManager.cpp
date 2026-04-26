@@ -13,6 +13,7 @@
 #include "Engine/Mesh/Processor/MeshProcessors.h" 
 
 #include "Engine/Image/Loader/ImageLoaderRegistry.h"
+#include "Engine/Image/Source/Memory/MemoryImageSource.h"
 #include "Engine/Image/Processor/ImageProcessorPipeline.h"
 #include "Engine/Image/Converter/DefaultGpuImageConverter.h"
 #include "Engine/Image/Converter/DefaultImageCooker.h"
@@ -73,8 +74,27 @@ namespace Syn {
 	void ResourceManager::InitMaterialManager()
 	{
 		_materialManager = std::make_unique<MaterialManager>(
-			[this](const std::string& fullPath) -> uint32_t {
-				return _imageManager->LoadImageAsync(fullPath);
+			[this](const TexturePayload& payload) -> uint32_t {
+				if (payload.IsEmbedded()) {
+					
+					size_t hash = payload.embeddedData.size();
+
+					if (hash > 0) {
+						hash ^= (payload.embeddedData.front() << 16) | payload.embeddedData.back();
+					}
+
+					std::string uniqueName = "Embedded_" + std::to_string(hash) + "_" + payload.path;
+
+					std::string ext = payload.formatHint.empty() ? "" : "." + payload.formatHint;
+					IImageLoader* loader = _imageBuilder->GetLoaderForExtension(ext);
+
+					return _imageManager->LoadImageFromSourceAsync(uniqueName, [payload, loader]() {
+						return std::make_unique<MemoryImageSource>(payload, loader);
+						});
+				}
+				else {
+					return _imageManager->LoadImageAsync(payload.path);
+				}
 			}
 		);
 

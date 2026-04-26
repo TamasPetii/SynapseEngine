@@ -71,19 +71,21 @@ namespace Syn {
             loadedMaterialIds.reserve(entry.resource->gpuData.materials.size());
 
             for (auto& matInfo : entry.resource->gpuData.materials) {
-                auto resolvePath = [&](std::string& path) {
-                    if (!path.empty()) {
-                        path = (modelDir / path).lexically_normal().string();
+                auto resolvePath = [&](TexturePayload& payload) {
+                    if (!payload.path.empty() && !payload.IsEmbedded()) {
+                        if (payload.path.empty() || payload.path[0] != '*') {
+                            payload.path = (modelDir / payload.path).lexically_normal().string();
+                        }
                     }
                     };
 
-                resolvePath(matInfo.albedoPath);
-                resolvePath(matInfo.normalPath);
-                resolvePath(matInfo.metalnessPath);
-                resolvePath(matInfo.roughnessPath);
-                resolvePath(matInfo.metallicRoughnessPath);
-                resolvePath(matInfo.emissivePath);
-                resolvePath(matInfo.ambientOcclusionPath);
+                resolvePath(matInfo.albedo);
+                resolvePath(matInfo.normal);
+                resolvePath(matInfo.metalness);
+                resolvePath(matInfo.roughness);
+                resolvePath(matInfo.metallicRoughness);
+                resolvePath(matInfo.emissive);
+                resolvePath(matInfo.ambientOcclusion);
 
                 std::string uniqueMatName = (matInfo.name == MaterialNames::EngineDefault)
                     ? matInfo.name
@@ -173,7 +175,7 @@ namespace Syn {
             blueprint.meshletCmd.groupCountY = groupCountY;
             blueprint.meshletCmd.groupCountZ = 1;
 
-            if (rand() % 2) {
+            if (true) {
                 blueprint.isMeshletPipeline = MeshDrawBlueprint::PIPELINE_MESHLET;
             }
             else {

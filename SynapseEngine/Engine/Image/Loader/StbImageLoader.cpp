@@ -8,13 +8,29 @@ namespace Syn
 {
     std::optional<RawImage> StbImageLoader::LoadFile(const std::filesystem::path& path) {
         int width, height, originalChannels;
-
         stbi_uc* data = stbi_load(path.string().c_str(), &width, &height, &originalChannels, STBI_default);
 
         if (!data) {
             Error("Failed to load image: {} - {}", path.string(), stbi_failure_reason());
             return std::nullopt;
         }
+
+        return ProcessData(data, width, height, originalChannels);
+    }
+
+    std::optional<RawImage> StbImageLoader::LoadMemory(const std::vector<uint8_t>& data) {
+        int width, height, originalChannels;
+        stbi_uc* stbiData = stbi_load_from_memory(data.data(), static_cast<int>(data.size()), &width, &height, &originalChannels, STBI_default);
+
+        if (!stbiData) {
+            Error("StbImageLoader failed to load image from memory - {}", stbi_failure_reason());
+            return std::nullopt;
+        }
+
+        return ProcessData(stbiData, width, height, originalChannels);
+    }
+
+    std::optional<RawImage> StbImageLoader::ProcessData(stbi_uc* data, int width, int height, int originalChannels) {
 
         int desiredChannels = originalChannels;
         if (originalChannels == 3) {
@@ -54,7 +70,6 @@ namespace Syn
         }
 
         stbi_image_free(data);
-
         return rawImage;
     }
 

@@ -1,0 +1,18 @@
+{
+  "paths": {
+    "base_model_path": "C:/Users/User/Desktop/Models/"
+  },
+  "environment": {
+    "spawn_floor": true
+  },
+  "entities": {
+    "static_geometry": 10000,
+  },
+  "lights": {
+    "directional_count": 1,
+    "point_count": 5,
+    "point_shadow_count": 5,
+    "spot_count": 5,
+    "spot_shadow_count": 5
+  }
+}
