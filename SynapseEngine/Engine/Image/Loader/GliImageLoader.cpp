@@ -52,17 +52,32 @@ namespace Syn
         return VK_FORMAT_UNDEFINED;
     }
 
-    std::optional<RawImage> GliImageLoader::LoadFile(const std::filesystem::path& path)
-    {
+    std::optional<RawImage> GliImageLoader::LoadFile(const std::filesystem::path& path) {
         gli::texture texture = gli::load(path.string());
 
         if (texture.empty()) {
-			Error("Failed to load/parse DDS file: {}", path.string());
+            Error("Failed to load/parse DDS file: {}", path.string());
             return std::nullopt;
         }
 
+        return ProcessData(texture, path.string());
+    }
+
+    std::optional<RawImage> GliImageLoader::LoadMemory(const std::vector<uint8_t>& data) {
+        gli::texture texture = gli::load(reinterpret_cast<const char*>(data.data()), data.size());
+
+        if (texture.empty()) {
+            Error("Failed to load/parse DDS from memory");
+            return std::nullopt;
+        }
+
+        return ProcessData(texture, "MemoryBuffer");
+    }
+
+    std::optional<RawImage> GliImageLoader::ProcessData(const gli::texture& texture, const std::string& debugName)
+    {
         if (texture.target() != gli::target::TARGET_2D || texture.layers() != 1) {
-			Error("Only 2D textures with 1 layer are supported right now: {}", path.string());
+			Error("Only 2D textures with 1 layer are supported right now: {}", debugName);
             return std::nullopt;
         }
 
@@ -75,7 +90,7 @@ namespace Syn
         rawImage.isCompressed = gli::is_compressed(texture.format());
 
         if (rawImage.format == VK_FORMAT_UNDEFINED) {
-			Error("Unsupported GLI format for file: {}", path.string());
+			Error("Unsupported GLI format for file: {}", debugName);
             return std::nullopt;
         }
 

@@ -990,6 +990,12 @@
     <ClCompile Include="Render\Passes\Forward+\ClusterSetupPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Scene\NatureScene.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\Source\Memory\MemoryImageSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2084,6 +2090,12 @@
     <ClInclude Include="Render\Passes\Forward+\ClusterSetupPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\NatureScene.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\Source\Memory\MemoryImageSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Includes\Common\Animation.glsl" />
@@ -2177,5 +2189,6 @@
     <None Include="Shaders\Includes\PushConstants\ClusterSetupPC.glsl" />
     <None Include="Shaders\Includes\Common\Cluster.glsl" />
     <None Include="Scene\scene_config.json" />
+    <None Include="Scene\nature_config.json" />
   </ItemGroup>
 </Project>

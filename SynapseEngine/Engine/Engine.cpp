@@ -26,6 +26,7 @@
 #include "Engine/Logger/LogUtils.h"
 #include "Engine/Scene/SceneManager.h"
 #include "Engine/Scene/TestScene.h"
+#include "Engine/Scene/NatureScene.h"
 
 #include "Engine/Render/RendererFactory.h"
 #include "Engine/Physics/JoltPhysicsEngine.h"

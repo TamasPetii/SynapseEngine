@@ -118,43 +118,60 @@ namespace Syn
 
                 matInfo.name = matAI->GetName().C_Str();
 
-                aiString path;
+                auto extractTexture = [&](aiTextureType type, TexturePayload& outPayload) -> bool {
+                    if (matAI->GetTextureCount(type) > 0) {
 
-                if (matAI->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
-                    matAI->GetTexture(aiTextureType_DIFFUSE, 0, &path);
-                    matInfo.albedoPath = path.C_Str();
-                }
-                else if (matAI->GetTextureCount(aiTextureType_BASE_COLOR) > 0) {
-                    matAI->GetTexture(aiTextureType_BASE_COLOR, 0, &path);
-                    matInfo.albedoPath = path.C_Str();
+                        aiString path;
+                        matAI->GetTexture(type, 0, &path);
+                        outPayload.path = path.C_Str();
+
+                        const aiTexture* embeddedTexture = scene->GetEmbeddedTexture(path.C_Str());
+
+                        if (embeddedTexture) {
+                            if (embeddedTexture->mHeight == 0) {
+                                size_t dataSize = embeddedTexture->mWidth;
+                                outPayload.embeddedData.assign(
+                                    (uint8_t*)embeddedTexture->pcData,
+                                    (uint8_t*)embeddedTexture->pcData + dataSize
+                                );
+                                outPayload.isUncompressed = false;
+                                outPayload.formatHint = embeddedTexture->achFormatHint;
+                            }
+                            else {
+                                size_t dataSize = embeddedTexture->mWidth * embeddedTexture->mHeight * 4;
+                                outPayload.embeddedData.assign(
+                                    (uint8_t*)embeddedTexture->pcData,
+                                    (uint8_t*)embeddedTexture->pcData + dataSize
+                                );
+                                outPayload.width = embeddedTexture->mWidth;
+                                outPayload.height = embeddedTexture->mHeight;
+                                outPayload.isUncompressed = true;
+                            }
+                        }
+                        return true;
+                    }
+                    return false;
+                    };
+
+
+                if (!extractTexture(aiTextureType_DIFFUSE, matInfo.albedo)) {
+                    extractTexture(aiTextureType_BASE_COLOR, matInfo.albedo);
                 }
 
-                if (matAI->GetTextureCount(aiTextureType_NORMALS) > 0) {
-                    matAI->GetTexture(aiTextureType_NORMALS, 0, &path);
-                    matInfo.normalPath = path.C_Str();
+                if (!extractTexture(aiTextureType_NORMALS, matInfo.normal)) {
+                    //...
                 }
 
-                if (matAI->GetTextureCount(aiTextureType_METALNESS) > 0) {
-                    matAI->GetTexture(aiTextureType_METALNESS, 0, &path);
-                    matInfo.metallicRoughnessPath = path.C_Str();
-                }
-                else if (matAI->GetTextureCount(aiTextureType_UNKNOWN) > 0) {
-                    matAI->GetTexture(aiTextureType_UNKNOWN, 0, &path);
-                    matInfo.metallicRoughnessPath = path.C_Str();
+                if (!extractTexture(aiTextureType_METALNESS, matInfo.metallicRoughness)) {
+                    extractTexture(aiTextureType_UNKNOWN, matInfo.metallicRoughness);
                 }
 
-                if (matAI->GetTextureCount(aiTextureType_EMISSIVE) > 0) {
-                    matAI->GetTexture(aiTextureType_EMISSIVE, 0, &path);
-                    matInfo.emissivePath = path.C_Str();
+                if (!extractTexture(aiTextureType_EMISSIVE, matInfo.emissive)) {
+                    //...
                 }
 
-                if (matAI->GetTextureCount(aiTextureType_LIGHTMAP) > 0) {
-                    matAI->GetTexture(aiTextureType_LIGHTMAP, 0, &path);
-                    matInfo.ambientOcclusionPath = path.C_Str();
-                }
-                else if (matAI->GetTextureCount(aiTextureType_AMBIENT) > 0) {
-                    matAI->GetTexture(aiTextureType_AMBIENT, 0, &path);
-                    matInfo.ambientOcclusionPath = path.C_Str();
+                if (!extractTexture(aiTextureType_LIGHTMAP, matInfo.ambientOcclusion)) {
+                    extractTexture(aiTextureType_AMBIENT, matInfo.ambientOcclusion);
                 }
 
                 aiColor4D color;

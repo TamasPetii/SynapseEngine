@@ -7,7 +7,7 @@
 #include "MaterialRenderType.h"
 
 namespace Syn {
-    using TextureLoadCallback = std::function<uint32_t(const std::string& fullPath)>;
+    using TextureLoadCallback = std::function<uint32_t(const TexturePayload& payload)>;
 
     class SYN_API MaterialManager : public BaseResourceManager<Material> {
     public:

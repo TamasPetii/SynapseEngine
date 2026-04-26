@@ -6,15 +6,26 @@
 
 namespace Syn
 {
+    struct TexturePayload {
+        std::string path = "";
+        std::string formatHint = "";
+        std::vector<uint8_t> embeddedData;
+        bool isUncompressed = false;
+        uint32_t width = 0;
+        uint32_t height = 0;
+
+        bool IsEmbedded() const { return !embeddedData.empty(); }
+    };
+
     struct SYN_API MaterialInfo {
         std::string name = "";
-        std::string albedoPath = "";
-        std::string normalPath = "";
-        std::string metalnessPath = "";
-        std::string roughnessPath = "";
-        std::string metallicRoughnessPath = "";
-        std::string emissivePath = "";
-        std::string ambientOcclusionPath = "";
+        TexturePayload albedo;
+        TexturePayload normal;
+        TexturePayload metalness;
+        TexturePayload roughness;
+        TexturePayload metallicRoughness;
+        TexturePayload emissive;
+        TexturePayload ambientOcclusion;
 
         glm::vec4 color = glm::vec4(1.0f);
         glm::vec3 emissiveFactor = glm::vec3(0.0f);

@@ -235,6 +235,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Image\Source\Memory\MemoryImageSource.cpp" />
+    <ClCompile Include="Scene\NatureScene.cpp" />
     <ClCompile Include="Render\Passes\Forward+\ClusterSetupPass.cpp" />
     <ClCompile Include="System\Physics\CapsuleColliderSystem.cpp" />
     <ClCompile Include="System\Physics\SphereColliderSystem.cpp" />
@@ -562,6 +564,8 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Image\Source\Memory\MemoryImageSource.h" />
+    <ClInclude Include="Scene\NatureScene.h" />
     <ClInclude Include="Render\Passes\Forward+\ClusterSetupPass.h" />
     <ClInclude Include="System\Physics\CapsuleColliderSystem.h" />
     <ClInclude Include="System\Physics\SphereColliderSystem.h" />
@@ -928,6 +932,7 @@
     <ClInclude Include="Render\Passes\Culling\WorkGraphCullingPass.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Scene\nature_config.json" />
     <None Include="Scene\scene_config.json" />
     <None Include="Shaders\Includes\Common\Animation.glsl" />
     <None Include="Shaders\Includes\Common\Camera.glsl" />
