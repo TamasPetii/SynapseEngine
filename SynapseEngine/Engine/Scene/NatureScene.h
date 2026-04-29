@@ -57,15 +57,21 @@ namespace Syn
 
             std::string basePath = config.value("/paths/base_model_path"_json_pointer, "C:/Users/User/Desktop/Models/");
             bool spawnFloor = config.value("/environment/spawn_floor"_json_pointer, true);
-            int staticGeoCount = config.value("/entities/static_geometry"_json_pointer, 1000000);
+            int staticGeoCount = config.value("/entities/static_geometry"_json_pointer, 100);
 
             int dirLightCount = config.value("/lights/directional_count"_json_pointer, 1);
-            int pointLightCount = config.value("/lights/point_count"_json_pointer, 50);
+            int pointLightCount = config.value("/lights/point_count"_json_pointer, 10);
             int pointShadowCount = config.value("/lights/point_shadow_count"_json_pointer, 5);
-            int spotLightCount = config.value("/lights/spot_count"_json_pointer, 50);
+            int spotLightCount = config.value("/lights/spot_count"_json_pointer, 10);
             int spotShadowCount = config.value("/lights/spot_shadow_count"_json_pointer, 5);
 
-            uint32_t treeId = modelManager->LoadModelAsync(basePath + "Nature/Tree/CommonTree_3.fbx");
+            std::vector<uint32_t> treeIds = {
+                modelManager->LoadModelAsync(basePath + "Nature/Tree/CommonTree_3.fbx"),
+                modelManager->LoadModelAsync(basePath + "Nature/Tree-aVOxaHRPWe/CommonTree_2.fbx"),
+                modelManager->LoadModelAsync(basePath + "Nature/Tree-qZtx0AHhcy/CommonTree_1.fbx"),
+                modelManager->LoadModelAsync(basePath + "Nature/Tree-t9KbsfYdXz/CommonTree_5.fbx"),
+                modelManager->LoadModelAsync(basePath + "Nature/Tree-YWjGDJ9F7g/CommonTree_4.fbx")
+            };
 
             // Cameras (Main & Debug)
             {
@@ -123,11 +129,11 @@ namespace Syn
                 registry->AddComponent<MaterialOverrideComponent>(e);
 
                 auto& transform = registry->GetComponent<TransformComponent>(e);
-                transform.translation = glm::vec3((rand() % 400) - 200.0f, 0, (rand() % 400) - 200.0f);
+                transform.translation = glm::vec3((rand() % 1000) - 500.0f, 0, (rand() % 1000) - 500.0f);
                 transform.rotation = glm::vec3(0, rand() % 360, 0);
                 transform.scale = glm::vec3(0.01f);
 
-                registry->GetComponent<ModelComponent>(e).modelIndex = treeId;
+                registry->GetComponent<ModelComponent>(e).modelIndex = treeIds[rand() % treeIds.size()];
 
                 registry->GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Static);
                 registry->GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
@@ -158,7 +164,7 @@ namespace Syn
                 registry->AddComponent<PointLightComponent>(e);
 
                 auto& transform = registry->GetComponent<TransformComponent>(e);
-                transform.translation = glm::vec3((rand() % 400) - 200.0f, (rand() % 50) - 25.0f, (rand() % 400) - 200.0f);
+                transform.translation = glm::vec3((rand() % 1000) - 500.0f, (rand() % 10) + 5.0f, (rand() % 1000) - 500.0f);
 
                 auto& light = registry->GetComponent<PointLightComponent>(e);
                 light.position = transform.translation;
@@ -180,7 +186,7 @@ namespace Syn
                 registry->AddComponent<SpotLightComponent>(e);
 
                 auto& transform = registry->GetComponent<TransformComponent>(e);
-                transform.translation = glm::vec3((rand() % 400) - 200.0f, (rand() % 50) - 25.0f, (rand() % 400) - 200.0f);
+                transform.translation = glm::vec3((rand() % 1000) - 500.0f, (rand() % 10) + 5.0f, (rand() % 1000) - 500.0f);
                 transform.rotation = glm::vec3(-45.0f - (rand() % 45), (float)(rand() % 360), 0.0f);
 
                 auto& light = registry->GetComponent<SpotLightComponent>(e);

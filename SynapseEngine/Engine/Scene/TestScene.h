@@ -57,6 +57,7 @@ namespace Syn
 
             std::string basePath = config.value("/paths/base_model_path"_json_pointer, "C:/Users/User/Desktop/Models/");
             bool spawnSponza = config.value("/environment/spawn_sponza"_json_pointer, true);
+            bool spawnBistro = config.value("/environment/spawn_bistro"_json_pointer, false);
             bool spawnFloor = config.value("/environment/spawn_floor"_json_pointer, true);
             bool useUniqueMaterials = config.value("/materials/use_unique_materials"_json_pointer, true);
             int sharedMatCount = config.value("/materials/shared_material_count"_json_pointer, 25);
@@ -74,6 +75,7 @@ namespace Syn
             int spotShadowCount = config.value("/lights/spot_shadow_count"_json_pointer, 5);
 
             uint32_t sponzaId = modelManager->LoadModelAsync(basePath + "Sponza/sponza.obj");
+			uint32_t bistroId = modelManager->LoadModelAsync(basePath + "Bistro/BistroExterior.fbx");
             uint32_t mutantId = modelManager->LoadModelAsync(basePath + "Monster/Mutant/Mutant.dae");
 
             std::vector<uint32_t> animationIds;
@@ -127,6 +129,20 @@ namespace Syn
 
                 registry->GetPool<TransformComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
                 registry->GetPool<ModelComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
+            }
+
+            if (spawnBistro)
+            {
+                EntityID bistroEntity = registry->CreateEntity();
+                registry->AddComponent<TransformComponent>(bistroEntity);
+                registry->AddComponent<ModelComponent>(bistroEntity);
+
+                registry->GetComponent<TransformComponent>(bistroEntity).translation = glm::vec3(0.0f, 0.0f, 0.0f);
+                registry->GetComponent<TransformComponent>(bistroEntity).scale = glm::vec3(0.2f, 0.2f, 0.2f);
+                registry->GetComponent<ModelComponent>(bistroEntity).modelIndex = bistroId;
+
+                registry->GetPool<TransformComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
+                registry->GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
             }
 
             if (spawnFloor)
@@ -190,12 +206,21 @@ namespace Syn
                     float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                     float randomFloat = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 
+                    /*
                     MaterialInfo matInfo{};
                     matInfo.color = glm::vec4(r, g, b, 0.1f + (randomFloat * 0.9f));
                     matInfo.doubleSided = rand() % 2;
                     matInfo.isTransparent = rand() % 2;
                     matInfo.emissiveFactor = glm::vec3(r, g, b);
                     matInfo.emissiveIntensity = randomFloat * 2;
+                    */
+
+                    MaterialInfo matInfo{};
+                    matInfo.color = glm::vec4(r, g, b, 1);
+                    matInfo.doubleSided = false;
+                    matInfo.isTransparent = false;
+                    matInfo.emissiveFactor = glm::vec3(1);
+                    matInfo.emissiveIntensity = 1;
 
                     sharedMaterialIds.push_back(materialManager->LoadMaterial("SharedMat_" + std::to_string(j), matInfo));
                 }

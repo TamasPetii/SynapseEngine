@@ -6,13 +6,13 @@
     "spawn_floor": true
   },
   "entities": {
-    "static_geometry": 10000,
+    "static_geometry": 100000,
   },
   "lights": {
     "directional_count": 1,
-    "point_count": 5,
+    "point_count": 5000,
     "point_shadow_count": 5,
-    "spot_count": 5,
+    "spot_count": 5000,
     "spot_shadow_count": 5
   }
 }
