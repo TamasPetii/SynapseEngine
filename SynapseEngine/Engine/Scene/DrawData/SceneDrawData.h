@@ -6,6 +6,7 @@
 #include "PointLightDrawGroup.h"
 #include "SpotLightDrawGroup.h"
 #include "DirectionLightDrawGroup.h"
+#include "ForwardPlusDrawGroup.h"
 #include <atomic>
 
 namespace Syn
@@ -23,6 +24,7 @@ namespace Syn
         PointLightDrawGroup PointLights;
         SpotLightDrawGroup SpotLights;
         DirectionLightDrawGroup DirectionLights;
+        ForwardPlusDrawGroup ForwardPlus;
         std::atomic<uint32_t> syncFramesRemaining{ 0 };
     };
 }

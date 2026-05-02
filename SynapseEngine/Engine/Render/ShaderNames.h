@@ -16,6 +16,10 @@ namespace Syn
         static constexpr const char* MeshletTransparentFrag = "../Engine/Shaders/Passes/Geometry/MeshletTransparent.frag";
         static constexpr const char* MeshletTransparentPickingFrag = "../Engine/Shaders/Passes/Geometry/MeshletTransparentPicking.frag";
         
+        static constexpr const char* MeshletPreZMesh = "../Engine/Shaders/Passes/Geometry/Forward+/MeshletPreZ.mesh";
+        static constexpr const char* MeshletPreZFrag = "../Engine/Shaders/Passes/Geometry/Forward+/MeshletPreZ.frag";
+        static constexpr const char* TraditionalPreZVert = "../Engine/Shaders/Passes/Geometry/Forward+/TraditionalPreZ.vert";
+        static constexpr const char* TraditionalPreZFrag = "../Engine/Shaders/Passes/Geometry/Forward+/TraditionalPreZ.frag";
 
         static constexpr const char* CullingCommandReset = "../Engine/Shaders/Passes/Culling/CullingCommandReset.comp";
         static constexpr const char* MeshCulling = "../Engine/Shaders/Passes/Culling/MeshCulling.comp";
@@ -59,6 +63,6 @@ namespace Syn
         static constexpr const char* PerformanceMeshletFrag = "../Engine/Shaders/Passes/Performance/PerformanceMeshlet.frag";
         static constexpr const char* PerformanceMeshletTransparentFrag = "../Engine/Shaders/Passes/Performance/PerformanceMeshletTransparent.frag";
 
-		static constexpr const char* ActiveClusterSetup = "../Engine/Shaders/Passes/ForwardPlus/ActiveClusterSetup.comp";
+		static constexpr const char* ClusterSetup = "../Engine/Shaders/Passes/ForwardPlus/ClusterSetup.comp";
     };
 }

@@ -7,7 +7,8 @@ namespace Syn
         Debug(frameCount),
         PointLights(frameCount),
         SpotLights(frameCount),
-        DirectionLights(frameCount)
+        DirectionLights(frameCount),
+        ForwardPlus(frameCount)
     {}
 
     void SceneDrawData::RequestGlobalSync(uint32_t framesInFlight) {

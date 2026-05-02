@@ -40,7 +40,7 @@ void main() {
     // 2. Occlusion és 0-pixel Culling
     float screenSizePixels = 0.0;
     vec2 screenRes = vec2(pc.screenWidth, pc.screenHeight);
-    bool enableDepthOcclusion = (pc.enableOcclusionCulling == 1);;
+    bool enableDepthOcclusion = (pc.enableOcclusionCulling == 1);
 
     if (IsSphereOccluded(collider.center, collider.radius, camera, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
         return;
@@ -59,9 +59,4 @@ void main() {
 
     uint finalIndex = baseOffset + localOffset;
     GET_VISIBLE_SPOT_LIGHT(pc.visibleLightAddr, finalIndex) = collider.entityIndex;
-
-    /*
-    uint slot = atomicAdd(GET_VK_DRAW_CMD(pc.indirectCommandAddr, 0).instanceCount, 1);
-    GET_VISIBLE_SPOT_LIGHT(pc.visibleLightAddr, slot) = collider.entityIndex;
-    */
 }

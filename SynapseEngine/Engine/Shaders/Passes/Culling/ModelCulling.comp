@@ -134,12 +134,4 @@ void main() {
 
         GET_VISIBLE_MODEL(pc.visibleModelListAddr, finalIndex) = outData;
     }
-
-    /*
-    uint finalIndex = atomicAdd(GET_DISPATCH_CMD(pc.visibleModelCountAddr).groupCountX, 1);
-    VisibleModelData outData;
-    outData.entityId = SET_BIT_TO(entityId, 31, visibility == INTERSECTION_INSIDE);
-    outData.modelIndex = modelComp.modelIndex;
-    GET_VISIBLE_MODEL(pc.visibleModelListAddr, finalIndex) = outData;
-    */
 }

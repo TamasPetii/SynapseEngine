@@ -37,8 +37,8 @@ namespace Syn {
         auto prevGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, prevFrameIndex);
         auto currGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
-        auto depthOpaque = prevGroup->GetImage(RenderTargetNames::Depth);
-        auto depthOpaqueTransparent = prevGroup->GetImage(RenderTargetNames::EditorPickingDepth);
+        auto depthOpaque = prevGroup->GetImage(RenderTargetNames::OpaqueDepth);
+        auto depthOpaqueTransparent = prevGroup->GetImage(RenderTargetNames::TransparentDepth);
         auto depthPyramid = currGroup->GetImage(RenderTargetNames::DepthPyramid);
 
         _imageTransitions.push_back({
@@ -75,8 +75,8 @@ namespace Syn {
         auto prevGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, prevFrameIndex);
         auto currGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
-        auto depthOpaque = prevGroup->GetImage(RenderTargetNames::Depth);
-		auto depthOpaqueTransparent = prevGroup->GetImage(RenderTargetNames::EditorPickingDepth);
+        auto depthOpaque = prevGroup->GetImage(RenderTargetNames::OpaqueDepth);
+		auto depthOpaqueTransparent = prevGroup->GetImage(RenderTargetNames::TransparentDepth);
         auto depthPyramid = currGroup->GetImage(RenderTargetNames::DepthPyramid);
         auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge);
 

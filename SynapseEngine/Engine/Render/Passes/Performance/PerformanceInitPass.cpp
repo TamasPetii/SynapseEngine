@@ -27,7 +27,7 @@ namespace Syn {
                 });
         }
 
-        if (auto depthImg = group->GetImage(RenderTargetNames::Depth)) {
+        if (auto depthImg = group->GetImage(RenderTargetNames::OpaqueDepth)) {
             _depthAttachment = Vk::RenderUtils::CreateAttachment({
                 .imageView = depthImg->GetView(Vk::ImageViewNames::Default),
                 .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,

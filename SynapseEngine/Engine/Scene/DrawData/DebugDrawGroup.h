@@ -5,7 +5,7 @@
 
 namespace Syn
 {
-    struct DebugDrawGroup {
+    struct SYN_API DebugDrawGroup {
         DebugDrawGroup(uint32_t frameCount);
 
         RenderBuffer modelAabbIndirectBuffer;
@@ -21,5 +21,7 @@ namespace Syn
         VkDrawIndirectCommand modelSphereCmdTemplate{};
 
         uint32_t totalMaxMeshletInstances = 0;
+
+        void RecordSync(VkCommandBuffer cmd, uint32_t frameIndex);
     };
 }

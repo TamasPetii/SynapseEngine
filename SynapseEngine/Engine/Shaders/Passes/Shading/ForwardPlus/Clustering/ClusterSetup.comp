@@ -1,0 +1,106 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_KHR_shader_subgroup_basic : require
+#extension GL_KHR_shader_subgroup_arithmetic : require
+#extension GL_KHR_shader_subgroup_ballot : require
+
+#include "../../../../Includes/Core.glsl"
+#include "../../../../Includes/Common/Camera.glsl"
+#include "../../../../Includes/Common/Cluster.glsl"
+#include "../../../../Includes/Utils/ClusterMath.glsl"
+
+layout(local_size_x = 16, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../../../Includes/PushConstants/ClusterSetupPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    ClusterSetupPC pc;
+};
+
+layout(set = 2, binding = 0) uniform sampler2D hizDepth; 
+
+shared float s_minZ;
+shared float s_maxZ;
+shared uint s_sliceCount;
+
+void main() {
+    uint threadId = gl_LocalInvocationID.x;
+    ivec2 tileId = ivec2(gl_WorkGroupID.xy);
+    uint flattenTileIdx = tileId.y * pc.tileCountX + tileId.x;
+
+    if (threadId == 0) {
+        uint cameraIdx = GET_SPARSE_INDEX(pc.cameraSparseMapBufferAddr, pc.activeCameraEntity);
+        CameraComponent camera = GET_CAMERA(pc.cameraBufferAddr, cameraIdx);
+        float near = GET_CAMERA_NEAR(camera);
+        float far  = GET_CAMERA_FAR(camera);
+
+        vec2 halfTile = vec2(float(pc.tileSize) * 0.5);
+        vec2 uv = (vec2(tileId * pc.tileSize) + halfTile) / vec2(pc.screenWidth, pc.screenHeight);
+        vec2 hizValue = textureLod(hizDepth, uv, pc.hizMipLevel).xy;
+        
+        float zMax = near + hizValue.x * (far - near);
+        float zMin = near + hizValue.y * (far - near);
+
+        //Background -> Skip
+        if (hizValue.y >= 0.9999) {
+            s_sliceCount = 0;
+        } 
+        else {
+            s_minZ = max(zMin, near);
+            s_maxZ = min(zMax, far);
+            s_sliceCount = CalculateClusterSliceCount(s_minZ, s_maxZ, pc.sliceScaleFactor);
+        }
+    }
+
+    barrier();
+
+    uint needsWrite = (threadId < s_sliceCount) ? 1 : 0;
+    uint subgroupWriteCount = subgroupAdd(needsWrite);
+    uint localOffset = subgroupExclusiveAdd(needsWrite);
+    uint baseOffset = 0;
+
+    if (subgroupElect() && subgroupWriteCount > 0) {
+        baseOffset = atomicAdd(GET_CLUSTER_COUNT(pc.clusterCountAddr), subgroupWriteCount);
+    }
+
+    baseOffset = subgroupBroadcastFirst(baseOffset);
+
+    if (threadId == 0) {
+        TileData tileData;
+        tileData.minZ = s_minZ;
+        tileData.maxZ = s_maxZ;
+        tileData.sliceCount = s_sliceCount;
+        tileData.clusterBaseOffset = baseOffset;
+        GET_TILE_DATA(pc.tileGridListAddr, flattenTileIdx) = tileData;
+    }
+
+    if (needsWrite == 1) {
+        float sliceMinZ, sliceMaxZ;
+
+        if (s_sliceCount == 1) {
+            sliceMinZ = s_minZ;
+            sliceMaxZ = s_maxZ;
+        } 
+        else {
+            float ratio = s_maxZ / s_minZ;
+            sliceMinZ = s_minZ * pow(ratio, float(threadId) / float(s_sliceCount));
+            sliceMaxZ = s_minZ * pow(ratio, float(threadId + 1) / float(s_sliceCount));
+        }
+
+        uint finalIndex = baseOffset + localOffset;
+
+        ClusterData clusterData;
+        clusterData.tileIndex = flattenTileIdx;
+        clusterData.sliceIndex = threadId;
+        clusterData.minZ = sliceMinZ;
+        clusterData.maxZ = sliceMaxZ;
+        clusterData.pointLightCount = 0;
+        clusterData.pointLightOffset = 0;
+        clusterData.spotLightCount = 0;
+        clusterData.spotLightOffset = 0;
+
+        GET_CLUSTER_DATA(pc.clusterListAddr, finalIndex) = clusterData;
+    }
+}

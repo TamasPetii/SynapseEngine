@@ -8,7 +8,7 @@
 
 namespace Syn
 {
-    struct ModelDrawGroup {
+    struct SYN_API ModelDrawGroup {
         ModelDrawGroup(uint32_t frameCount);
 
         RenderBuffer instanceBuffer;

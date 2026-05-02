@@ -4,7 +4,7 @@
 
 namespace Syn
 {
-    struct PointLightDrawGroup {
+    struct SYN_API PointLightDrawGroup {
         PointLightDrawGroup(uint32_t frameCount);
 
         RenderBuffer indirectBuffer;

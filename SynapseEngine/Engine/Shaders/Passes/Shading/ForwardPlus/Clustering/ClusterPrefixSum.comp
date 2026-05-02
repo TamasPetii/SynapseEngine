@@ -1,0 +1,113 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_KHR_shader_subgroup_basic : require
+#extension GL_KHR_shader_subgroup_arithmetic : require
+
+#include "../../../../Includes/Core.glsl"
+#include "../../../../Includes/Common/Cluster.glsl"
+#include "../../../../Includes/Common/IndirectCommand.glsl"
+
+// Single workgroup loops over all clusters. Size 512 is a safe maximum for all GPU vendors.
+layout(local_size_x = 512, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../../../Includes/PushConstants/ClusterPrefixSumPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    ClusterPrefixSumPC pc;
+};
+
+shared uint s_pointSubgroupSums[64];
+shared uint s_spotSubgroupSums[64];
+
+shared uint s_pointSubgroupTotal;
+shared uint s_spotSubgroupTotal;
+
+// Carries the total sum from the previous 512-element block
+shared uint s_globalPointCarry;
+shared uint s_globalSpotCarry;
+
+void main() {
+    uint threadId = gl_LocalInvocationID.x;
+    
+    if (threadId == 0) {
+        s_globalPointCarry = 0;
+        s_globalSpotCarry = 0;
+    }
+
+    barrier();
+
+    uint totalClusters = GET_CLUSTER_COUNT(pc.clusterCountAddr);
+    
+    // Loop through all active clusters in blocks of gl_WorkGroupSize.x (512)
+    for (uint baseIdx = 0; baseIdx < totalClusters; baseIdx += gl_WorkGroupSize.x) 
+    {    
+        uint globalIdx = baseIdx + threadId;
+        uint pCount = 0;
+        uint sCount = 0;
+
+        if (globalIdx < totalClusters) {
+            ClusterData cluster = GET_CLUSTER_DATA(pc.clusterListAddr, globalIdx);
+            pCount = cluster.pointLightCount;
+            sCount = cluster.spotLightCount;
+        }
+
+        // 1. Hardware subgroup scan (Fast prefix sum within 32 threads)
+        uint pSubOffset = subgroupExclusiveAdd(pCount);
+        uint sSubOffset = subgroupExclusiveAdd(sCount);
+        
+        // 2. Total count within the subgroup
+        uint pSubTotal = subgroupAdd(pCount);
+        uint sSubTotal = subgroupAdd(sCount);
+
+        // 3. Store subgroup totals in shared memory for cross-subgroup scanning
+        if (subgroupElect()) {
+            s_pointSubgroupSums[gl_SubgroupID] = pSubTotal;
+            s_spotSubgroupSums[gl_SubgroupID]  = sSubTotal;
+        }
+
+        barrier();
+
+        // 4. Thread 0 sequentially scans the subgroup totals 
+        if (threadId == 0) 
+        {
+            uint pSum = 0;
+            uint sSum = 0;
+
+            for (uint i = 0; i < gl_NumSubgroups; ++i) {
+                uint pVal = s_pointSubgroupSums[i];
+                uint sVal = s_spotSubgroupSums[i];
+                
+                s_pointSubgroupSums[i] = pSum;
+                s_spotSubgroupSums[i]  = sSum;
+                
+                pSum += pVal;
+                sSum += sVal;
+            }
+
+            s_pointSubgroupTotal = pSum;
+            s_spotSubgroupTotal  = sSum;
+        }
+
+        barrier();
+
+        // 5. Calculate final global offsets and write directly to VRAM
+        if (globalIdx < totalClusters) 
+        {
+            uint finalPOffset = s_globalPointCarry + s_pointSubgroupSums[gl_SubgroupID] + pSubOffset;
+            uint finalSOffset = s_globalSpotCarry  + s_spotSubgroupSums[gl_SubgroupID] + sSubOffset;
+
+            GET_CLUSTER_DATA(pc.clusterListAddr, globalIdx).pointLightOffset = finalPOffset;
+            GET_CLUSTER_DATA(pc.clusterListAddr, globalIdx).spotLightOffset = finalSOffset;
+        }
+
+        // 6. Accumulate the carry for the next 512-element block
+        if (threadId == 0) {
+            s_globalPointCarry += s_pointSubgroupTotal;
+            s_globalSpotCarry  += s_spotSubgroupTotal;
+        }
+
+        barrier();
+    }
+}

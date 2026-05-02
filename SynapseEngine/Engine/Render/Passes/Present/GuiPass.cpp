@@ -31,7 +31,7 @@ namespace Syn
             RenderTargetNames::EntityIndex,
             RenderTargetNames::DepthPyramid,
             RenderTargetNames::Bloom,
-            RenderTargetNames::Depth,
+            RenderTargetNames::OpaqueDepth,
             RenderTargetNames::TransparentAccum,
             RenderTargetNames::TransparentReveal,
             RenderTargetNames::DebugTopologyPipeline,
