@@ -63,6 +63,11 @@ namespace Syn
         static constexpr const char* PerformanceMeshletFrag = "../Engine/Shaders/Passes/Performance/PerformanceMeshlet.frag";
         static constexpr const char* PerformanceMeshletTransparentFrag = "../Engine/Shaders/Passes/Performance/PerformanceMeshletTransparent.frag";
 
-		static constexpr const char* ClusterSetup = "../Engine/Shaders/Passes/ForwardPlus/ClusterSetup.comp";
+		static constexpr const char* ClusterSetup = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterSetup.comp";
+        static constexpr const char* ClusterPointLightCount = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterPointLightCount.comp";
+        static constexpr const char* ClusterSpotLightCount = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterSpotLightCount.comp";
+		static constexpr const char* ClusterPrefixSum = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterPrefixSum.comp";
+		static constexpr const char* ClusterPointLightWrite = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterPointLightWrite.comp";
+		static constexpr const char* ClusterSpotLightWrite = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterSpotLightWrite.comp";
     };
 }

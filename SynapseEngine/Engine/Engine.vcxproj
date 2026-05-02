@@ -235,6 +235,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Render\Passes\ForwardPlus\Clustering\ClusterLightWriteSyncPass.cpp" />
+    <ClCompile Include="Render\Passes\ForwardPlus\Clustering\ClusterSpotLightWritePass.cpp" />
+    <ClCompile Include="Render\Passes\ForwardPlus\Clustering\ClusterPointLightWritePass.cpp" />
+    <ClCompile Include="Render\Passes\ForwardPlus\Clustering\ClusterPrefixSumPass.cpp" />
+    <ClCompile Include="Render\Passes\ForwardPlus\Clustering\ClusterSpotLightCountPass.cpp" />
+    <ClCompile Include="Render\Passes\ForwardPlus\Clustering\ClusterPointLightCountPass.cpp" />
     <ClCompile Include="Scene\DrawData\ForwardPlusDrawGroup.cpp" />
     <ClCompile Include="Image\Source\Memory\MemoryImageSource.cpp" />
     <ClCompile Include="Render\Passes\ForwardPlus\DepthPrepass\MeshletTransparentZPrepass.cpp" />
@@ -569,6 +575,12 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\Passes\ForwardPlus\Clustering\ClusterLightWriteSyncPass.h" />
+    <ClInclude Include="Render\Passes\ForwardPlus\Clustering\ClusterSpotLightWritePass.h" />
+    <ClInclude Include="Render\Passes\ForwardPlus\Clustering\ClusterPointLightWritePass.h" />
+    <ClInclude Include="Render\Passes\ForwardPlus\Clustering\ClusterPrefixSumPass.h" />
+    <ClInclude Include="Render\Passes\ForwardPlus\Clustering\ClusterSpotLightCountPass.h" />
+    <ClInclude Include="Render\Passes\ForwardPlus\Clustering\ClusterPointLightCountPass.h" />
     <ClInclude Include="Scene\DrawData\ForwardPlusDrawGroup.h" />
     <ClInclude Include="Image\Source\Memory\MemoryImageSource.h" />
     <ClInclude Include="Render\Passes\ForwardPlus\DepthPrepass\MeshletTransparentZPrepass.h" />

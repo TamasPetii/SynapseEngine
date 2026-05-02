@@ -40,6 +40,8 @@ namespace Syn
         aabbMin(component.aabbCollider.min),
         entityIndex(entityId),
         aabbMax(component.aabbCollider.max),
-        padding(0)
+        pad0(0),
+		viewSpaceCenter(0.0f),
+        pad1(0)
     {}
 }
