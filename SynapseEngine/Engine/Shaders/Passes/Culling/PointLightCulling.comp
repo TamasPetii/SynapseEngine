@@ -59,9 +59,4 @@ void main() {
 
     uint finalIndex = baseOffset + localOffset;
     GET_VISIBLE_POINT_LIGHT(pc.visibleLightAddr, finalIndex) = collider.entityIndex;
-
-    /*
-    uint slot = atomicAdd(GET_VK_DRAW_CMD(pc.indirectCommandAddr, 0).instanceCount, 1);
-    GET_VISIBLE_POINT_LIGHT(pc.visibleLightAddr, slot) = collider.entityIndex;
-    */
 }

@@ -4,7 +4,7 @@
 
 namespace Syn
 {
-    struct DirectionLightDrawGroup {
+    struct SYN_API DirectionLightDrawGroup {
         DirectionLightDrawGroup(uint32_t frameCount);
 
         RenderBuffer indirectBuffer;

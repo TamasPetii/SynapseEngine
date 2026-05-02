@@ -4,7 +4,7 @@
 
 namespace Syn
 {
-    struct SpotLightDrawGroup {
+    struct SYN_API SpotLightDrawGroup {
         SpotLightDrawGroup(uint32_t frameCount);
 
         RenderBuffer indirectBuffer;

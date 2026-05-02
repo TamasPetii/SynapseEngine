@@ -22,10 +22,11 @@ namespace Syn
         static constexpr const char* EntityIndex = "EntityIndex";
         static constexpr const char* DepthPyramid = "DepthPyramid";
         static constexpr const char* Bloom = "Bloom";
-        static constexpr const char* Depth = "Depth";
         static constexpr const char* TransparentAccum = "TransparentAccum";
         static constexpr const char* TransparentReveal = "TransparentReveal";
-        static constexpr const char* EditorPickingDepth = "EditorPickingDepth";
+
+        static constexpr const char* OpaqueDepth = "OpaqueDepth";
+        static constexpr const char* TransparentDepth = "TransparentDepth";
 
         static constexpr const char* DebugTopologyPipeline = "DebugTopologyPipeline";
         static constexpr const char* DebugMeshletLod = "DebugMeshletLod";

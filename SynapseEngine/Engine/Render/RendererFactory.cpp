@@ -307,7 +307,7 @@ namespace Syn
         depthImageSpec.format = VK_FORMAT_D32_SFLOAT;
         depthImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         depthImageSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::Depth, depthImageSpec);
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::OpaqueDepth, depthImageSpec);
 
         Vk::ImageConfig pickingDepthSpec{};
         pickingDepthSpec.width = initWidth;
@@ -316,7 +316,7 @@ namespace Syn
         pickingDepthSpec.format = VK_FORMAT_D32_SFLOAT;
         pickingDepthSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         pickingDepthSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::EditorPickingDepth, pickingDepthSpec);
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::TransparentDepth, pickingDepthSpec);
 
         Vk::ImageConfig debugImageSpec{};
         debugImageSpec.width = initWidth;
@@ -463,23 +463,23 @@ namespace Syn
 
         rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::DepthPyramid, depthPyramidImageSpec);
 
-        Vk::ImageConfig pickingDepthSpec{};
-        pickingDepthSpec.width = initWidth;
-        pickingDepthSpec.height = initHeight;
-        pickingDepthSpec.type = VK_IMAGE_TYPE_2D;
-        pickingDepthSpec.format = VK_FORMAT_D32_SFLOAT;
-        pickingDepthSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-        pickingDepthSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::EditorPickingDepth, pickingDepthSpec);
+        Vk::ImageConfig opaqueDepthImageSpec{};
+        opaqueDepthImageSpec.width = initWidth;
+        opaqueDepthImageSpec.height = initHeight;
+        opaqueDepthImageSpec.type = VK_IMAGE_TYPE_2D;
+        opaqueDepthImageSpec.format = VK_FORMAT_D32_SFLOAT;
+        opaqueDepthImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        opaqueDepthImageSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::OpaqueDepth, opaqueDepthImageSpec);
 
-        Vk::ImageConfig depthImageSpec{};
-        depthImageSpec.width = initWidth;
-        depthImageSpec.height = initHeight;
-        depthImageSpec.type = VK_IMAGE_TYPE_2D;
-        depthImageSpec.format = VK_FORMAT_D32_SFLOAT;
-        depthImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-        depthImageSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::Depth, depthImageSpec);
+        Vk::ImageConfig transparentDepthImageSpec{};
+        transparentDepthImageSpec.width = initWidth;
+        transparentDepthImageSpec.height = initHeight;
+        transparentDepthImageSpec.type = VK_IMAGE_TYPE_2D;
+        transparentDepthImageSpec.format = VK_FORMAT_D32_SFLOAT;
+        transparentDepthImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        transparentDepthImageSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::TransparentDepth, transparentDepthImageSpec);
 
         return renderManager;
     }

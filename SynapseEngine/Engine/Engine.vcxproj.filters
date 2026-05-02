@@ -585,7 +585,7 @@
     <ClCompile Include="Render\RendererFactory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Deferred\GBufferInitPass.cpp">
+    <ClCompile Include="Render\Passes\Deferred\GBuffer\GBufferInitPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\TransferPass.cpp">
@@ -759,28 +759,28 @@
     <ClCompile Include="Render\Passes\Present\GuiPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Geometry\TraditionalOpaquePass.cpp">
+    <ClCompile Include="Render\Passes\Deferred\GBuffer\TraditionalOpaqueGBufferPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Geometry\MeshletOpaquePass.cpp">
+    <ClCompile Include="Render\Passes\Deferred\GBuffer\MeshletOpaqueGBufferPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Geometry\TraditionalTransparentPass.cpp">
+    <ClCompile Include="Render\Passes\Deferred\GBuffer\TraditionalTransparentPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Geometry\MeshletTransparentPass.cpp">
+    <ClCompile Include="Render\Passes\Deferred\GBuffer\MeshletTransparentGBufferPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Wboit\TransparentCompositePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Picking\TraditionalTransparentPickingPass.cpp">
+    <ClCompile Include="Render\Passes\Deferred\Picking\TraditionalTransparentPickingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Picking\MeshletTransparentPickingPass.cpp">
+    <ClCompile Include="Render\Passes\Deferred\Picking\MeshletTransparentPickingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Picking\DepthCopyPass.cpp">
+    <ClCompile Include="Render\Passes\Hiz\DepthCopyPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Physics\PhysicsTypes.cpp">
@@ -819,7 +819,7 @@
     <ClCompile Include="Component\Light\Light.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Deferred\DeferredEmissiveAoPass.cpp">
+    <ClCompile Include="Render\Passes\Deferred\Lighting\DeferredEmissiveAoPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Component\Light\Point\PointLightComponent.cpp">
@@ -843,7 +843,7 @@
     <ClCompile Include="System\Light\Point\PointLightFrustumCullingSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Deferred\DeferredPointLightPass.cpp">
+    <ClCompile Include="Render\Passes\Deferred\Lighting\DeferredPointLightPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="System\Light\Spot\SpotLightSystem.cpp">
@@ -855,7 +855,7 @@
     <ClCompile Include="System\Light\Spot\SpotLightFrustumCullingSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Deferred\DeferredSpotLightPass.cpp">
+    <ClCompile Include="Render\Passes\Deferred\Lighting\DeferredSpotLightPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Component\Light\Direction\DirectionLightShadowComponent.cpp">
@@ -870,7 +870,7 @@
     <ClCompile Include="Collision\Colliders\FrustumCollider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Deferred\DeferredDirectionLightPass.cpp">
+    <ClCompile Include="Render\Passes\Deferred\Lighting\DeferredDirectionLightPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="System\Light\Direction\DirectionLightCullingSystem.cpp">
@@ -945,10 +945,10 @@
     <ClCompile Include="Profiler\IProfiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Deferred\PreDeferredTransitionPass.cpp">
+    <ClCompile Include="Render\Passes\Deferred\Lighting\PreDeferredTransitionPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Deferred\PostDeferredTransitionPass.cpp">
+    <ClCompile Include="Render\Passes\Deferred\Lighting\PostDeferredTransitionPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Wboit\PreCompositeTransitionPass.cpp">
@@ -987,13 +987,28 @@
     <ClCompile Include="System\Physics\CapsuleColliderSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Forward+\ClusterSetupPass.cpp">
+    <ClCompile Include="Render\Passes\ForwardPlus\Clustering\ClusterSetupPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Scene\NatureScene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Image\Source\Memory\MemoryImageSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\ForwardPlus\DepthPrepass\MeshletOpaqueZPrepass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\ForwardPlus\DepthPrepass\TraditionalOpaqueZPrepass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\ForwardPlus\DepthPrepass\MeshletTransparentZPrepass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\ForwardPlus\DepthPrepass\TraditionalTransparentZPrepass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\DrawData\ForwardPlusDrawGroup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1655,7 +1670,7 @@
     <ClInclude Include="Render\RendererFactory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Deferred\GBufferInitPass.h">
+    <ClInclude Include="Render\Passes\Deferred\GBuffer\GBufferInitPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\TransferPass.h">
@@ -1850,28 +1865,28 @@
     <ClInclude Include="Material\MaterialRenderType.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Geometry\TraditionalOpaquePass.h">
+    <ClInclude Include="Render\Passes\Deferred\GBuffer\TraditionalOpaqueGBufferPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Geometry\MeshletOpaquePass.h">
+    <ClInclude Include="Render\Passes\Deferred\GBuffer\MeshletOpaqueGBufferPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Geometry\TraditionalTransparentPass.h">
+    <ClInclude Include="Render\Passes\Deferred\GBuffer\TraditionalTransparentPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Geometry\MeshletTransparentPass.h">
+    <ClInclude Include="Render\Passes\Deferred\GBuffer\MeshletTransparentGBufferPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Wboit\TransparentCompositePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Picking\TraditionalTransparentPickingPass.h">
+    <ClInclude Include="Render\Passes\Deferred\Picking\TraditionalTransparentPickingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Picking\MeshletTransparentPickingPass.h">
+    <ClInclude Include="Render\Passes\Deferred\Picking\MeshletTransparentPickingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Picking\DepthCopyPass.h">
+    <ClInclude Include="Render\Passes\Hiz\DepthCopyPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Physics\PhysicsTypes.h">
@@ -1910,7 +1925,7 @@
     <ClInclude Include="Component\Light\Light.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Deferred\DeferredEmissiveAoPass.h">
+    <ClInclude Include="Render\Passes\Deferred\Lighting\DeferredEmissiveAoPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Component\Light\Point\PointLightComponent.h">
@@ -1934,7 +1949,7 @@
     <ClInclude Include="System\Light\Point\PointLightFrustumCullingSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Deferred\DeferredPointLightPass.h">
+    <ClInclude Include="Render\Passes\Deferred\Lighting\DeferredPointLightPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="System\Light\Spot\SpotLightSystem.h">
@@ -1946,7 +1961,7 @@
     <ClInclude Include="System\Light\Spot\SpotLightFrustumCullingSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Deferred\DeferredSpotLightPass.h">
+    <ClInclude Include="Render\Passes\Deferred\Lighting\DeferredSpotLightPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Component\Light\Direction\DirectionLightShadowComponent.h">
@@ -1961,7 +1976,7 @@
     <ClInclude Include="Collision\Colliders\FrustumCollider.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Deferred\DeferredDirectionLightPass.h">
+    <ClInclude Include="Render\Passes\Deferred\Lighting\DeferredDirectionLightPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="System\Light\Direction\DirectionLightCullingSystem.h">
@@ -2036,10 +2051,10 @@
     <ClInclude Include="Profiler\IProfiler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Deferred\PreDeferredTransitionPass.h">
+    <ClInclude Include="Render\Passes\Deferred\Lighting\PreDeferredTransitionPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Deferred\PostDeferredTransitionPass.h">
+    <ClInclude Include="Render\Passes\Deferred\Lighting\PostDeferredTransitionPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Wboit\PreCompositeTransitionPass.h">
@@ -2087,13 +2102,28 @@
     <ClInclude Include="System\Physics\CapsuleColliderSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Forward+\ClusterSetupPass.h">
+    <ClInclude Include="Render\Passes\ForwardPlus\Clustering\ClusterSetupPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scene\NatureScene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Image\Source\Memory\MemoryImageSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\ForwardPlus\DepthPrepass\MeshletOpaqueZPrepass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\ForwardPlus\DepthPrepass\TraditionalOpaqueZPrepass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\ForwardPlus\DepthPrepass\MeshletTransparentZPrepass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\ForwardPlus\DepthPrepass\TraditionalTransparentZPrepass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\DrawData\ForwardPlusDrawGroup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -2143,22 +2173,22 @@
     <None Include="Shaders\Passes\Billboard\Billboard.vert" />
     <None Include="Shaders\Passes\Common\Composite.frag" />
     <None Include="Shaders\Passes\Common\Fullscreen.vert" />
-    <None Include="Shaders\Passes\Common\TransparentComposite.frag" />
+    <None Include="Shaders\Passes\Shading\Wboit\TransparentComposite.frag" />
     <None Include="Shaders\Passes\Culling\MeshCulling.comp" />
     <None Include="Shaders\Passes\Culling\ModelCulling.comp" />
     <None Include="Shaders\Passes\Culling\PointLightCulling.comp" />
     <None Include="Shaders\Passes\Culling\SpotLightCulling.comp" />
     <None Include="Shaders\Passes\Culling\WorkGraphMeshCulling.comp" />
     <None Include="Shaders\Passes\Culling\WorkGraphModelCulling.comp" />
-    <None Include="Shaders\Passes\Geometry\Meshlet.frag" />
-    <None Include="Shaders\Passes\Geometry\Meshlet.mesh" />
-    <None Include="Shaders\Passes\Geometry\Meshlet.task" />
-    <None Include="Shaders\Passes\Geometry\MeshletTransparent.frag" />
-    <None Include="Shaders\Passes\Geometry\MeshletTransparentPicking.frag" />
-    <None Include="Shaders\Passes\Geometry\Traditional.frag" />
-    <None Include="Shaders\Passes\Geometry\Traditional.vert" />
-    <None Include="Shaders\Passes\Geometry\TraditionalTransparent.frag" />
-    <None Include="Shaders\Passes\Geometry\TraditionalTransparentPicking.frag" />
+    <None Include="Shaders\Passes\Shading\Deferred\GBuffer\MeshletOpaqueGBuffer.frag" />
+    <None Include="Shaders\Passes\Shading\Deferred\GBuffer\MeshletOpaqueGBuffer.mesh" />
+    <None Include="Shaders\Passes\Shading\Common\Meshlet.task" />
+    <None Include="Shaders\Passes\Shading\Deferred\GBuffer\MeshletTransparent.frag" />
+    <None Include="Shaders\Passes\Shading\Deferred\GBuffer\MeshletTransparentPicking.frag" />
+    <None Include="Shaders\Passes\Shading\Deferred\GBuffer\TraditionalOpaqueGBuffer.frag" />
+    <None Include="Shaders\Passes\Shading\Deferred\GBuffer\TraditionalOpaqueGBuffer.vert" />
+    <None Include="Shaders\Passes\Shading\Deferred\GBuffer\TraditionalTransparent.frag" />
+    <None Include="Shaders\Passes\Shading\Deferred\GBuffer\TraditionalTransparentPicking.frag" />
     <None Include="Shaders\Passes\Hiz\HizDownsample.comp" />
     <None Include="Shaders\Passes\Hiz\HizLinearizeDepth.comp" />
     <None Include="Shaders\Passes\Performance\PerformanceMeshlet.frag" />
@@ -2176,19 +2206,35 @@
     <None Include="Shaders\Passes\Wireframe\WireframeLight.vert" />
     <None Include="Shaders\Passes\Wireframe\WireframeMeshlet.vert" />
     <None Include="Shaders\Passes\Wireframe\WireframeSetup.comp" />
-    <None Include="Shaders\Passes\Deferred\DeferredDirectionLight.frag" />
-    <None Include="Shaders\Passes\Deferred\DeferredDirectionLight.vert" />
-    <None Include="Shaders\Passes\Deferred\DeferredEmissiveAo.frag" />
-    <None Include="Shaders\Passes\Deferred\DeferredPointLight.frag" />
-    <None Include="Shaders\Passes\Deferred\DeferredPointLight.vert" />
-    <None Include="Shaders\Passes\Deferred\DeferredSpotLight.frag" />
-    <None Include="Shaders\Passes\Deferred\DeferredSpotLight.vert" />
+    <None Include="Shaders\Passes\Shading\Deferred\Lighting\DeferredDirectionLight.frag" />
+    <None Include="Shaders\Passes\Shading\Deferred\Lighting\DeferredDirectionLight.vert" />
+    <None Include="Shaders\Passes\Shading\Deferred\Lighting\DeferredEmissiveAo.frag" />
+    <None Include="Shaders\Passes\Shading\Deferred\Lighting\DeferredPointLight.frag" />
+    <None Include="Shaders\Passes\Shading\Deferred\Lighting\DeferredPointLight.vert" />
+    <None Include="Shaders\Passes\Shading\Deferred\Lighting\DeferredSpotLight.frag" />
+    <None Include="Shaders\Passes\Shading\Deferred\Lighting\DeferredSpotLight.vert" />
     <None Include="Shaders\Passes\Culling\CullingCommandReset.comp" />
     <None Include="Shaders\Includes\PushConstants\CullingCommandResetPC.glsl" />
-    <None Include="Shaders\Passes\Forward+\ActiveClusterSetup.comp" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSetup.comp" />
     <None Include="Shaders\Includes\PushConstants\ClusterSetupPC.glsl" />
     <None Include="Shaders\Includes\Common\Cluster.glsl" />
     <None Include="Scene\scene_config.json" />
     <None Include="Scene\nature_config.json" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\DepthPrepass\MeshletDepth.mesh" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\DepthPrepass\MeshletDepth.frag" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\DepthPrepass\TraditionalDepth.vert" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\DepthPrepass\TraditionalDepth.frag" />
+    <None Include="Shaders\Passes\Shading\Wboit\MeshletTransparent.frag" />
+    <None Include="Shaders\Passes\Shading\Wboit\MeshletTransparent.mesh" />
+    <None Include="Shaders\Passes\Shading\Wboit\TraditionalTransparent.frag" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightCount.comp" />
+    <None Include="Shaders\Includes\Utils\ClusterMath.glsl" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightCount.comp" />
+    <None Include="Shaders\Includes\PushConstants\ClusterLightCountPC.glsl" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPrefixSum.comp" />
+    <None Include="Shaders\Includes\PushConstants\ClusterPrefixSumPC.glsl" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightWrite.comp" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightWrite.comp" />
+    <None Include="Shaders\Includes\PushConstants\ClusterLightWritePC.glsl" />
   </ItemGroup>
 </Project>
