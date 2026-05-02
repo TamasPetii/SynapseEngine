@@ -18,10 +18,8 @@ struct PointLightColliderGPU
 {
     vec3 center;
     float radius;
+    vec3 viewSpaceCenter;
     uint entityIndex;
-    uint padding0;
-    uint padding1;
-    uint padding2;
 };
 
 struct PointLightShadowComponent {
@@ -31,7 +29,7 @@ struct PointLightShadowComponent {
 };
 
 layout(buffer_reference, std430) readonly restrict buffer PointLightDataBuffer { PointLightComponent data[]; };
-layout(buffer_reference, std430) readonly restrict buffer PointLightColliderDataBuffer { PointLightColliderGPU data[]; };
+layout(buffer_reference, std430) restrict buffer PointLightColliderDataBuffer { PointLightColliderGPU data[]; };
 layout(buffer_reference, std430) readonly restrict buffer PointLightShadowDataBuffer { PointLightShadowComponent data[]; };
 layout(buffer_reference, std430) readonly restrict buffer VisiblePointLightBuffer   { uint data[]; };
 

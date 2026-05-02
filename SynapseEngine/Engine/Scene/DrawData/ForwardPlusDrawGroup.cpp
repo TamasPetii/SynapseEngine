@@ -22,6 +22,6 @@ namespace Syn
     }
 
     void ForwardPlusDrawGroup::RecordSync(VkCommandBuffer cmd, uint32_t frameIndex) {
-
+        //todo update: maxClusters too
     }
 }

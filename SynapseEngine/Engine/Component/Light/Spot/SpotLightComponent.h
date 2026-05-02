@@ -62,6 +62,8 @@ namespace Syn
         glm::vec3 aabbMin;
         uint32_t entityIndex;
         glm::vec3 aabbMax;
-        uint32_t padding;
+        uint32_t pad0;
+        glm::vec3 viewSpaceCenter;
+        uint32_t pad1;
     };
 }

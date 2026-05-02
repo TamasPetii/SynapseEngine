@@ -1011,6 +1011,24 @@
     <ClCompile Include="Scene\DrawData\ForwardPlusDrawGroup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Passes\ForwardPlus\Clustering\ClusterPointLightCountPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\ForwardPlus\Clustering\ClusterSpotLightCountPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\ForwardPlus\Clustering\ClusterPrefixSumPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\ForwardPlus\Clustering\ClusterPointLightWritePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\ForwardPlus\Clustering\ClusterSpotLightWritePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\ForwardPlus\Clustering\ClusterLightWriteSyncPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2124,6 +2142,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scene\DrawData\ForwardPlusDrawGroup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\ForwardPlus\Clustering\ClusterPointLightCountPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\ForwardPlus\Clustering\ClusterSpotLightCountPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\ForwardPlus\Clustering\ClusterPrefixSumPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\ForwardPlus\Clustering\ClusterPointLightWritePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\ForwardPlus\Clustering\ClusterSpotLightWritePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\ForwardPlus\Clustering\ClusterLightWriteSyncPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

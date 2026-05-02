@@ -101,6 +101,8 @@ namespace Syn {
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(width, drawData->ForwardPlus.tileSize);
         uint32_t groupCountY = ComputeGroupSize::CalculateDispatchCount(height, drawData->ForwardPlus.tileSize);
 
+        //Todo: Fill buffer count!
+
         vkCmdDispatch(context.cmd, groupCountX, groupCountY, 1);
 
         Vk::BufferBarrierInfo tileGridBarrier{};

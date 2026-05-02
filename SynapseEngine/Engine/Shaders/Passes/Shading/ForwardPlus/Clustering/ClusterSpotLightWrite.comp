@@ -56,7 +56,7 @@ void main() {
         uint entityIdx = GET_VISIBLE_SPOT_LIGHT(pc.visibleLightAddr, i);
         SpotLightColliderGPU collider = GET_SPOT_LIGHT_COLLIDER(pc.lightColliderDataAddr, entityIdx);
         
-        vec3 viewSpaceCenter = (camera.view * vec4(collider.center, 1.0)).xyz;
+        vec3 viewSpaceCenter = collider.viewSpaceCenter;
         bool isIntersecting = TestSphereAABB(viewSpaceCenter, collider.radius, s_clusterAABBMin, s_clusterAABBMax);
         
         uvec4 ballot = subgroupBallot(isIntersecting);
@@ -70,8 +70,10 @@ void main() {
         
         baseOffset = subgroupBroadcastFirst(baseOffset);
         
+        uint isIntersectingInt = isIntersecting ? 1 : 0;
+        uint threadOffset = subgroupExclusiveAdd(isIntersectingInt);
+
         if (isIntersecting) {
-            uint threadOffset = subgroupExclusiveAdd(1);
             uint finalIdx = globalOffset + baseOffset + threadOffset;
             GET_LIGHT_INDEX(pc.lightIndexListAddr, finalIdx) = entityIdx;
         }

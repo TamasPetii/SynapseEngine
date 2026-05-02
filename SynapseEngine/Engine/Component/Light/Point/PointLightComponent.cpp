@@ -25,7 +25,7 @@ namespace Syn
     PointLightColliderGPU::PointLightColliderGPU(const PointLightComponent& component, uint32_t entityId) :
         center(component.position),
         radius(component.radius),
-        entityIndex(entityId),
-        padding0(0), padding1(0), padding2(0)
+        viewSpaceCenter(0.0f),
+        entityIndex(entityId)
     {}
 }

@@ -104,5 +104,13 @@ namespace Syn {
         visibleBarrier.dstStage = VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT;
         visibleBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
         Vk::BufferUtils::InsertBarrier(context.cmd, visibleBarrier);
+
+        Vk::BufferBarrierInfo colliderDataBarrier{};
+        colliderDataBarrier.buffer = compManager->GetComponentBuffer(BufferNames::SpotLightColliderData, fIdx).buffer->Handle();
+        colliderDataBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        colliderDataBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        colliderDataBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        colliderDataBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, colliderDataBarrier);
     }
 }

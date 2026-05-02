@@ -46,6 +46,8 @@ void main() {
         return;
     }
 
+    GET_POINT_LIGHT_COLLIDER(pc.pointLightColliderDataAddr, globalId).viewSpaceCenter = (camera.view *  vec4(collider.center, 1.0)).xyz;
+
     uint needsWrite = 1;
     uint subgroupWriteCount = subgroupAdd(needsWrite);
     uint localOffset = subgroupExclusiveAdd(needsWrite);
