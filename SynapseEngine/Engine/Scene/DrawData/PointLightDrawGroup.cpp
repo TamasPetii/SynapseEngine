@@ -51,4 +51,8 @@ namespace Syn
             billboardSingleCmdBuffer.GetMapped(i)->Write(&billboardCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
         }
     }
+
+	void PointLightDrawGroup::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) {
+    
+    }
 }

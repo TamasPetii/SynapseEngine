@@ -1029,6 +1029,12 @@
     <ClCompile Include="Render\Passes\ForwardPlus\Clustering\ClusterLightWriteSyncPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Scene\DrawData\IDrawGroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Setup\GlobalFrameSetupPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2162,6 +2168,12 @@
     <ClInclude Include="Render\Passes\ForwardPlus\Clustering\ClusterLightWriteSyncPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\DrawData\IDrawGroup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Setup\GlobalFrameSetupPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Includes\Common\Animation.glsl" />
@@ -2272,5 +2284,10 @@
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightWrite.comp" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightWrite.comp" />
     <None Include="Shaders\Includes\PushConstants\ClusterLightWritePC.glsl" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Lighting\MeshletOpaqueForward.mesh" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Lighting\MeshletOpaqueForward.frag" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Lighting\TraditionalOpaqueForward.vert" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Lighting\TraditionalOpaqueForward.frag" />
+    <None Include="Shaders\Includes\PushConstants\FrameGlobalContext.glsl" />
   </ItemGroup>
 </Project>

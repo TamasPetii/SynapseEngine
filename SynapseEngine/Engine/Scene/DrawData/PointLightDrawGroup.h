@@ -1,11 +1,11 @@
 #pragma once
-#include "Engine/Utils/RenderBuffer.h"
-#include "CpuData.h"
+#include "IDrawGroup.h"
 
 namespace Syn
 {
-    struct SYN_API PointLightDrawGroup {
+    struct SYN_API PointLightDrawGroup : public IDrawGroup {
         PointLightDrawGroup(uint32_t frameCount);
+		virtual void CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) override;
 
         RenderBuffer indirectBuffer;
         RenderBuffer sphereSingleCmdBuffer;

@@ -4,17 +4,7 @@
 #include "../SharedGpuTypes.glsl"
 
 struct DeferredDirectionLightPC {
-    uint64_t cameraBufferAddr;
-    uint64_t cameraSparseMapBufferAddr;
-    uint64_t directionLightDataAddr;
-    uint64_t directionLightSparseMapAddr;
-    uint64_t visibleLightAddr;
-    uint64_t directionLightShadowSparseMapAddr;
-    uint64_t directionLightShadowDataAddr;
-    uint activeCameraEntity;
-    float screenWidth;
-    float screenHeight;
-    uint _pad;
+    uint64_t frameGlobalContextBufferAddr;
 };
 
 #endif

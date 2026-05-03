@@ -5,11 +5,13 @@
 #include "Engine/Mesh/MeshAllocationInfo.h"
 #include "Engine/Mesh/MeshDrawDescriptor.h"
 #include "Engine/Material/MaterialRenderType.h"
+#include "IDrawGroup.h"
 
 namespace Syn
 {
-    struct SYN_API ModelDrawGroup {
+    struct SYN_API ModelDrawGroup : public IDrawGroup {
         ModelDrawGroup(uint32_t frameCount);
+		virtual void CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) override;
 
         RenderBuffer instanceBuffer;
         RenderBuffer indirectBuffer;
@@ -39,8 +41,6 @@ namespace Syn
         uint32_t traditionalCmdOffsets[MaterialRenderType::Count] = { 0 };
         uint32_t traditionalCmdCounts[MaterialRenderType::Count] = { 0 };
         uint32_t meshletCmdOffsets[MaterialRenderType::Count] = { 0 };
-        uint32_t meshletCmdCounts[MaterialRenderType::Count] = { 0 };
-
-        void RecordSync(VkCommandBuffer cmd, uint32_t frameIndex);
+        uint32_t meshletCmdCounts[MaterialRenderType::Count] = { 0 };        
     };
 }

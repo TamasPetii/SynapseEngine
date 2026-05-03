@@ -14,6 +14,8 @@ namespace Syn
         bool enableBloom;
         bool enableHiz;
         bool enableOcclusionCulling;
+        bool enableConeCulling;
+        bool enableFrustumCulling;
 
         bool enablePointLightSphereWireframe;
         bool enablePointLightAabbWireframe;
@@ -35,5 +37,8 @@ namespace Syn
 		bool enableBillboardPointLights;
 		bool enableBillboardSpotLights;
         bool enableBillboardDirectionalLights;
+
+        float ambientStrength;
+        float emissiveStrength;
     };
 }

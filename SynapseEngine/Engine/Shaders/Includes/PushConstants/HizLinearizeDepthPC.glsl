@@ -4,11 +4,9 @@
 #include "../SharedGpuTypes.glsl"
 
 struct HizLinearizeDepthPC {
-    uint64_t cameraBufferAddr; 
-    uint64_t cameraSparseMapBufferAddr;  
+    uint64_t frameGlobalContextBufferAddr;
     vec2 outImageSize;
     uint activeCameraEntity;
-    uint _pad;
 };
 
 #endif

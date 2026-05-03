@@ -43,7 +43,7 @@ namespace Syn
         computeCountBuffer.UpdateCapacityAll(1);
     }
 
-    void ModelDrawGroup::RecordSync(VkCommandBuffer cmd, uint32_t frameIndex)
+    void ModelDrawGroup::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex)
     {
         modelAllocBuffer.RecordSync(cmd, frameIndex, modelAllocations.Size());
         meshAllocBuffer.RecordSync(cmd, frameIndex, activeDescriptorCount);

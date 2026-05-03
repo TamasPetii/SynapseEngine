@@ -4,8 +4,7 @@
 #include "../SharedGpuTypes.glsl"
 
 struct ClusterPrefixSumPC {
-    uint64_t clusterListAddr;
-    uint64_t clusterCountAddr;
+    uint64_t frameGlobalContextBufferAddr;
 };
 
 #endif

@@ -9,6 +9,8 @@ namespace Syn
         , enableBloom(true)
         , enableHiz(true)
         , enableOcclusionCulling(true)
+        , enableConeCulling(true)
+        , enableFrustumCulling(true)
         , enablePointLightSphereWireframe(false)
         , enablePointLightAabbWireframe(false)
         , enableSpotLightSphereWireframe(false)
@@ -26,5 +28,7 @@ namespace Syn
         , enableBillboardSpotLights(true)
         , enableBillboardDirectionalLights(true)
         , enableForwardPlus(false)
+        , ambientStrength(0.05f)
+        , emissiveStrength(1.00f)
     {}
 }

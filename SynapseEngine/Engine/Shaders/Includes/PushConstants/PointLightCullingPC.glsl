@@ -4,17 +4,7 @@
 #include "../SharedGpuTypes.glsl"
 
 struct PointLightCullingPC {
-    uint64_t cameraBufferAddr;
-    uint64_t cameraSparseMapBufferAddr;
-    uint64_t pointLightColliderDataAddr;
-    uint64_t visibleLightAddr;
-    uint64_t indirectCommandAddr;
-    uint totalLightsToTest;
-    uint activeCameraEntity;
-    uint enableOcclusionCulling;
-    float screenWidth;
-    float screenHeight;
-    uint _pad;
+    uint64_t frameGlobalContextBufferAddr;
 };
 
 #endif

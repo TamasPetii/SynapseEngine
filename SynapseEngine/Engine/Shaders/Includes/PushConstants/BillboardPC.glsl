@@ -4,12 +4,7 @@
 #include "../SharedGpuTypes.glsl"
 
 struct BillboardPC {
-    uint64_t cameraBufferAddr;
-    uint64_t cameraSparseMapAddr;
-    uint64_t transformBufferAddr;
-    uint64_t transformSparseMapAddr;
-    uint64_t visibleEntitiesAddr;  
-    uint activeCameraEntity;
+    uint64_t frameGlobalContextBufferAddr;
     float baseScale;
 };
 #endif
