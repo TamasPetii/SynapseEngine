@@ -4,8 +4,7 @@
 #include "../SharedGpuTypes.glsl"
 
 struct DeferredEmissiveAoPC {
-    float ambientStrength;
-    float emissiveStrength;
+    uint64_t frameGlobalContextBufferAddr;
 };
 
 #endif

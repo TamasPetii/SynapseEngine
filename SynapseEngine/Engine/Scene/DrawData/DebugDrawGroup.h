@@ -1,12 +1,11 @@
 #pragma once
-#include "Engine/Utils/RenderBuffer.h"
-#include "CpuData.h"
-#include "RenderConstants.h"
+#include "IDrawGroup.h"
 
 namespace Syn
 {
-    struct SYN_API DebugDrawGroup {
+    struct SYN_API DebugDrawGroup : public IDrawGroup {
         DebugDrawGroup(uint32_t frameCount);
+        virtual void CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) override;
 
         RenderBuffer modelAabbIndirectBuffer;
         RenderBuffer modelSphereIndirectBuffer;
@@ -21,7 +20,5 @@ namespace Syn
         VkDrawIndirectCommand modelSphereCmdTemplate{};
 
         uint32_t totalMaxMeshletInstances = 0;
-
-        void RecordSync(VkCommandBuffer cmd, uint32_t frameIndex);
     };
 }

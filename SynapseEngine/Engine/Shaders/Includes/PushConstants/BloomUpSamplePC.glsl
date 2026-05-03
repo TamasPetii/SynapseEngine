@@ -6,7 +6,6 @@
 struct BloomUpSamplePC {
     vec2 texelSize;
 	float filterRadius;
-    uint _pad;
 };
 
 #endif

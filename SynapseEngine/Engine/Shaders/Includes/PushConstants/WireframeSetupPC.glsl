@@ -4,11 +4,7 @@
 #include "../SharedGpuTypes.glsl"
 
 struct WireframeSetupPC {
-    uint64_t globalIndirectCmdsAddr;
-    uint64_t aabbCmdsAddr;
-    uint64_t sphereCmdsAddr;
-    uint totalTraditionalCommands; 
-    uint totalCommands;
+    uint64_t frameGlobalContextBufferAddr;
 };
 
 #endif

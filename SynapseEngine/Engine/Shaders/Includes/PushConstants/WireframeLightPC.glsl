@@ -4,18 +4,10 @@
 #include "../SharedGpuTypes.glsl"
 
 struct WireframeLightPC {
-    uint64_t cameraBufferAddr;
-    uint64_t cameraSparseMapBufferAddr;
-    uint64_t lightDataAddr;
-    uint64_t lightColliderDataAddr;
-    uint64_t lightSparseMapAddr;
-    uint64_t visibleLightAddr;
-    uint64_t vertexBufferAddr;
+    uint64_t frameGlobalContextBufferAddr;
     uint64_t indexBufferAddr;
-    uint     activeCameraEntity;
+    uint64_t vertexPositionBufferAddr;
     uint     lightDrawType; // 0: Point Sphere, 1: Point Aabb, 2: Spot Sphere, 3: Spot Box
-    uint     _pad0;
-    uint     _pad1;
 };
 
 #endif

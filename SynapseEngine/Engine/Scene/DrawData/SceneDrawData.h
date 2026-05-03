@@ -8,17 +8,19 @@
 #include "DirectionLightDrawGroup.h"
 #include "ForwardPlusDrawGroup.h"
 #include <atomic>
+#include "IDrawGroup.h"
 
 namespace Syn
 {
-    class SYN_API SceneDrawData
+    class SYN_API SceneDrawData : public IDrawGroup
     {
     public:
         SceneDrawData(uint32_t frameCount);
 
-        void RecordGpuSync(VkCommandBuffer cmd, uint32_t frameIndex);
         void RequestGlobalSync(uint32_t framesInFlight);
+		virtual void CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) override;
 
+        RenderBuffer frameContextBuffer;
         ModelDrawGroup Models;
         DebugDrawGroup Debug;
         PointLightDrawGroup PointLights;

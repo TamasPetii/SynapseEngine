@@ -235,6 +235,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Render\Passes\Setup\GlobalFrameSetupPass.cpp" />
+    <ClCompile Include="Scene\DrawData\IDrawGroup.cpp" />
     <ClCompile Include="Render\Passes\ForwardPlus\Clustering\ClusterLightWriteSyncPass.cpp" />
     <ClCompile Include="Render\Passes\ForwardPlus\Clustering\ClusterSpotLightWritePass.cpp" />
     <ClCompile Include="Render\Passes\ForwardPlus\Clustering\ClusterPointLightWritePass.cpp" />
@@ -575,6 +577,8 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\Passes\Setup\GlobalFrameSetupPass.h" />
+    <ClInclude Include="Scene\DrawData\IDrawGroup.h" />
     <ClInclude Include="Render\Passes\ForwardPlus\Clustering\ClusterLightWriteSyncPass.h" />
     <ClInclude Include="Render\Passes\ForwardPlus\Clustering\ClusterSpotLightWritePass.h" />
     <ClInclude Include="Render\Passes\ForwardPlus\Clustering\ClusterPointLightWritePass.h" />
@@ -986,6 +990,7 @@
     <None Include="Shaders\Includes\PushConstants\DeferredEmissiveAoPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredPointLightPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredSpotLightPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\FrameGlobalContext.glsl" />
     <None Include="Shaders\Includes\PushConstants\HizDownSamplePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\HizLinearizeDepthPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\MeshletPassPC.glsl" />
@@ -1013,6 +1018,10 @@
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPrefixSum.comp" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightCount.comp" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightWrite.comp" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Lighting\MeshletOpaqueForward.frag" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Lighting\MeshletOpaqueForward.mesh" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Lighting\TraditionalOpaqueForward.frag" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Lighting\TraditionalOpaqueForward.vert" />
     <None Include="Shaders\Passes\Shading\Wboit\MeshletTransparent.frag" />
     <None Include="Shaders\Passes\Shading\Wboit\MeshletTransparent.mesh" />
     <None Include="Shaders\Passes\Shading\Wboit\TraditionalTransparent.frag" />

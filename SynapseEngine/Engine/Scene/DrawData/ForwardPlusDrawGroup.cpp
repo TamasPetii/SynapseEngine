@@ -21,7 +21,7 @@ namespace Syn
         spotLightIndexBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 100000, 200000 });
     }
 
-    void ForwardPlusDrawGroup::RecordSync(VkCommandBuffer cmd, uint32_t frameIndex) {
-        //todo update: maxClusters too
+    void ForwardPlusDrawGroup::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) {
+
     }
 }

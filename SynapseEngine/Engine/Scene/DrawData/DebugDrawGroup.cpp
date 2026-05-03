@@ -47,4 +47,8 @@ namespace Syn
             modelSphereIndirectBuffer.GetMapped(i)->Write(modelSphereCmds.Data(), modelSphereCmds.GetSizeBytes(), 0);
         }
     }
+
+    void DebugDrawGroup::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) {
+
+    }
 }

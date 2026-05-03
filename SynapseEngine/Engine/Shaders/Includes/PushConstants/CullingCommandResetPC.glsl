@@ -4,10 +4,7 @@
 #include "../SharedGpuTypes.glsl"
 
 struct CullingCommandResetPC {
-    uint64_t globalIndirectCmdsAddr;
-    uint64_t modelComputeCountAddr;
-    uint totalTraditionalCommands;
-    uint totalCommands;
+    uint64_t frameGlobalContextBufferAddr;
 };
 
 #endif

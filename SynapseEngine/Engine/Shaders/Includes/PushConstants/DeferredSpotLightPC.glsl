@@ -4,20 +4,9 @@
 #include "../SharedGpuTypes.glsl"
 
 struct DeferredSpotLightPC {
-    uint64_t cameraBufferAddr;
-    uint64_t cameraSparseMapBufferAddr;
-    uint64_t spotLightDataAddr;
-    uint64_t spotLightSparseMapAddr;
-    uint64_t spotLightColliderDataAddr;
-    uint64_t visibleLightAddr;
-    uint64_t vertexPositionsAddr;
-    uint64_t indicesAddr;
-    uint64_t spotLightShadowSparseMapAddr;
-    uint64_t spotLightShadowDataAddr;  
-    uint activeCameraEntity;
-    float screenWidth;
-    float screenHeight;
-    uint _pad;
+    uint64_t frameGlobalContextBufferAddr;
+    uint64_t vertexPositionBufferAddr;
+    uint64_t indexBufferAddr;
 };
 
 #endif
