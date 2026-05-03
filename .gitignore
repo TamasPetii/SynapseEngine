@@ -11,8 +11,8 @@ vcpkg_overlays/
 # Assets
 
 *.dae
-#*.jpg
-#*.png
+*.jpg
+*.png
 *.obj
 *.fbx
 *.mtl
