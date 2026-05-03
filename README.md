@@ -19,31 +19,46 @@ The system integrates a segmented data-oriented ECS with a hierarchical GPU cull
 
 ## Visual Demonstration
 
+### High Density Scene (1M+ Entities)
+
+The architecture is built to handle extreme entity counts without CPU bottlenecks, leveraging the segmented ECS and indirect draw calls.
+
+**Exterior Overview:** 
+A wide shot demonstrating over a million uniquely colored and scaled primitives rendered in real-time.
+![High Density Scene - Exterior](Docs/Images/IntroScene.png)
+
+**Interior Perspective:** 
+Navigating through dense geometry clusters within an architectural environment.
+![High Density Scene - Interior](Docs/Images/Bloom.png)
+
+**Performance Demonstration:** 
+Watch the engine fluidly handle 1,000,000 static objects and animations dynamic objects while maintaining exceptionally low frame times.
+<video controls src="Docs/Videos/BigScene.mp4"></video>
+
 ### Meshlet Pipeline with LOD (NVIDIA Bistro)
 
-<video controls src="Paper/bistro_meshlet_demo.mp4"></video>
+This video demonstrates the real-time generation and transition of meshlets in the highly detailed NVIDIA Bistro environment, showcasing dynamic level-of-detail scaling directly on the GPU.
 
----
+<video controls src="Docs/Videos/BistroMeshletLod.mp4"></video>
 
 ### Hierarchical Culling
 
-![Hierarchical Culling](Paper/hierarchical_culling.png)
+The engine utilizes a multi-stage culling approach to ensure minimal waste of GPU resources.
 
-### Meshlet Visualization
+**Frustum Culling:** 
+Geometry completely outside the camera's view is discarded before reaching the rasterizer.
+![Frustum Culling](Docs/Images/Frustum.png)
 
-![Meshlet Visualization](Paper/meshlet_visualization.png)
+**Occlusion Culling:** 
+Objects hidden behind other opaque structures are efficiently culled using Hi-Z occlusion tests, drastically reducing overdraw.
+![Occlusion Culling](Docs/Images/Occlusion.png)
 
-### High Density Scene (1M+ Entities)
+### Scene Composition & Culling Debug (Dragon View)
 
-![High Density Scene](Paper/high_density_scene.png)
+This scene highlights the integration of complex, high-poly geometry (such as the Stanford Dragon) alongside thousands of dynamic, emissive primitives. It demonstrates the flexibility of the bindless resource system handling various mesh types simultaneously.
 
-### Debug View / Culling Stages
-
-![Culling Debug](Paper/culling_debug.png)
-
-### LOD / Pipeline Distribution
-
-![LOD Visualization](Paper/lod_visualization.png)
+![Scene Composition with Dragon](Docs/Images/CullingBefore.png)
+![Meshlet Visualization](Docs/Images/CullingAfter.png)
 
 ## Research Paper
 
@@ -51,8 +66,7 @@ The architecture and performance characteristics of the engine are described in 
 
 High-Performance GPU-Driven Rendering and Hierarchical Culling Architecture
 
-Read the paper:
-Paper/synapse_engine_paper.pdf
+[**Read the full Research Paper (PDF)**](Docs/Papers/Grafgeo_High_Performance_Gpu_Driven_Rendering.pdf)
 
 ### Summary
 
@@ -66,10 +80,10 @@ Paper/synapse_engine_paper.pdf
 
 This project has also been presented in multiple internal and academic contexts.
 
-Note: These presentations reflect earlier iterations of the architecture.
+*Note: These presentations reflect earlier iterations of the architecture.*
 
-* Paper/presentation_1.pptx
-* Paper/presentation_2.pptx
+* [**Synapse Engine v1.0**](Docs/Presentations/SynapseEngine_v1.0.pdfPaper/presentation_1.pdf)
+* [**Synapse Engine v1.1**](Docs/Presentations/SynapseEngine_v1.1.pdfPaper/presentation_1.pdf)
 
 ## Architecture Highlights
 
