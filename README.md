@@ -33,14 +33,13 @@ Navigating through dense geometry clusters within an architectural environment.
 
 **Performance Demonstration:** 
 Watch the engine fluidly handle 1,000,000 static objects and animations dynamic objects while maintaining exceptionally low frame times.
-<video controls src="Docs/Videos/BigScene.mp4"></video>
+<video controls src="https://github.com/TamasPetii/SynapseEngine/raw/main/Docs/Videos/BigScene.mp4" width="100%"></video>
 
 ### Meshlet Pipeline with LOD (NVIDIA Bistro)
 
 This video demonstrates the real-time generation and transition of meshlets in the highly detailed NVIDIA Bistro environment, showcasing dynamic level-of-detail scaling directly on the GPU.
 
-<video controls src="Docs/Videos/BistroMeshletLod.mp4"></video>
-
+<video controls src="https://github.com/TamasPetii/SynapseEngine/raw/main/Docs/Videos/BistroMeshletLod.mp4" width="100%"></video>
 ### Hierarchical Culling
 
 The engine utilizes a multi-stage culling approach to ensure minimal waste of GPU resources.
@@ -82,8 +81,8 @@ This project has also been presented in multiple internal and academic contexts.
 
 *Note: These presentations reflect earlier iterations of the architecture.*
 
-* [**Synapse Engine v1.0**](Docs/Presentations/SynapseEngine_v1.0.pdfPaper/presentation_1.pdf)
-* [**Synapse Engine v1.1**](Docs/Presentations/SynapseEngine_v1.1.pdfPaper/presentation_1.pdf)
+* [**Synapse Engine v1.0**](Docs/Presentations/SynapseEngine_v1.0.pdf)
+* [**Synapse Engine v1.1**](Docs/Presentations/SynapseEngine_v1.1.pdf)
 
 ## Architecture Highlights
 
