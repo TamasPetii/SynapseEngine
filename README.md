@@ -1,50 +1,153 @@
-# Synapse Engine - Development Journey & Architecture
+# Synapse Engine
 
-## Dependency Management
+High-performance GPU-driven rendering engine built around a fully data-oriented architecture, designed to scale to millions of entities in real-time.
 
-We utilize **vcpkg** in **Manifest Mode** to handle third-party libraries (GLFW, GLM, etc.) strictly and efficiently.
+## Overview
 
-- **Submodule Strategy:** `vcpkg` is added as a git submodule to ensure every developer uses the exact same package manager version.
-- **Bootstrapping:** The environment is initialized by running the `bootstrap-vcpkg.bat` script, which builds the `vcpkg.exe` executable locally.
-- **Manifest Mode:** Dependencies are defined in `vcpkg.json`. When building the project, vcpkg automatically reads this manifest.
-- **Localized Artifacts:** All downloaded headers, libs, and DLLs are stored in the `vcpkg_installed` folder at the Solution root, keeping the global system clean.
+Synapse Engine is a research-oriented real-time rendering engine focusing on eliminating CPU bottlenecks and maximizing GPU utilization through a fully compute-driven pipeline.
 
-## Build System & Configuration
+The system integrates a segmented data-oriented ECS with a hierarchical GPU culling architecture and modern mesh shader support.
 
-To maintain consistency across multiple projects (Engine, Editor, Core), we use a centralized **`Directory.Build.props`** file.
+## Core Concepts
 
-- **Centralized Settings:** Defines the C++ Language Standard (e.g., C++23) and enables vcpkg integration globally.
-- **Output Paths:** Configures clean output directories to separate source code from build artifacts:
-  - **`Binaries/`**: Contains the final executables and DLLs (e.g., `Binaries/x64/Debug/`).
-  - **`Intermediates/`**: Contains temporary object files (`.obj`), speeding up re-compilation.
+* GPU-driven rendering (indirect draw, compute-based visibility)
+* Hierarchical culling (Model → Mesh → Meshlet)
+* Segmented ECS (Static / Dynamic / Stream)
+* Sparse-set O(1) component access
+* Bindless resource management
+* Mesh shader pipeline integration
 
-## Project Architecture
+## Visual Demonstration
 
-The solution is split into three distinct layers to enforce separation of concerns:
+### Meshlet Pipeline with LOD (NVIDIA Bistro)
 
-1. **Engine (`.dll`)**
-   - The core runtime library. Contains the low-level systems (Vulkan Renderer, Scene Management, etc...).
-   
-2. **EditorCore (`.lib`)**
-   - Acts as the "ViewModel" and logic layer for the tools.
-   - Handles UI abstractions (e.g., `TransformComponentUI`), Command pattern implementation (Undo/Redo), and Editor-specific logic.
+<video controls src="Paper/bistro_meshlet_demo.mp4"></video>
 
-3. **Editor (`.exe`)**
-   - The application entry point.
-   - Responsible for Window creation, ImGui context setup, ImGui abstractions and UI windows, and driving the application loop.
+---
 
-## Build Configurations
+### Hierarchical Culling
 
-We support three specific build targets to cover all stages of development:
+![Hierarchical Culling](Paper/hierarchical_culling.png)
 
-- **Debug:** No optimizations, full debug symbols, and verbose logging. Best for step-by-step debugging.
-- **Release:** Optimized for performance (O2), but retains some logging and assertions for development testing.
-- **Dist (Distribution):** Maximum optimization, all debug symbols stripped, console disabled. This is the final version shipped to the user.
+### Meshlet Visualization
 
-## CI/CD Pipeline
+![Meshlet Visualization](Paper/meshlet_visualization.png)
 
-We utilize **GitHub Actions** to ensure code stability and automate the deployment process efficiently.
+### High Density Scene (1M+ Entities)
 
-- **Clean Room Testing:** Every push and pull request triggers a full build on a clean `windows-latest` virtual machine. This eliminates "it works on my machine" issues by verifying dependencies and paths in a fresh environment.
-- **Smart Caching:** To significantly reduce build times, the pipeline caches `vcpkg` binary artifacts. Third-party libraries are only rebuilt if `vcpkg.json` is modified.
-- **Automated Distribution:** Upon a successful build, the system compiles the project using the **Dist** configuration (optimized, stripped symbols) and automatically uploads the resulting binaries as a downloadable artifact.
+![High Density Scene](Paper/high_density_scene.png)
+
+### Debug View / Culling Stages
+
+![Culling Debug](Paper/culling_debug.png)
+
+### LOD / Pipeline Distribution
+
+![LOD Visualization](Paper/lod_visualization.png)
+
+## Research Paper
+
+The architecture and performance characteristics of the engine are described in detail in the accompanying paper:
+
+High-Performance GPU-Driven Rendering and Hierarchical Culling Architecture
+
+Read the paper:
+Paper/synapse_engine_paper.pdf
+
+### Summary
+
+* Fully GPU-driven rendering pipeline with minimal CPU involvement
+* Multi-stage hierarchical visibility system
+* Data-oriented ECS with segmented storage
+* Efficient GPU memory layout and indirect draw architecture
+* Real-time performance with millions of entities
+
+## Presentations
+
+This project has also been presented in multiple internal and academic contexts.
+
+Note: These presentations reflect earlier iterations of the architecture.
+
+* Paper/presentation_1.pptx
+* Paper/presentation_2.pptx
+
+## Architecture Highlights
+
+### GPU-Driven Pipeline
+
+The engine removes per-object CPU draw submission entirely. Visibility determination, instance selection, and draw command generation are executed on the GPU using compute shaders and indirect draw buffers.
+
+### Hierarchical Culling
+
+Visibility is resolved across three levels:
+
+* Model-level (coarse filtering)
+* Mesh-level (collaborative compute pass)
+* Meshlet-level (task shader culling)
+
+Techniques used:
+
+* Frustum culling
+* Hi-Z occlusion
+* Cone culling
+* Zero-pixel triangle rejection
+
+### Segmented ECS
+
+The ECS is structured into three regions:
+
+* Static: rarely changing data
+* Dynamic: moderately changing data with change tracking
+* Stream: per-frame updated data
+
+This enables:
+
+* minimal iteration overhead
+* efficient parallel processing
+* reduced CPU-GPU synchronization
+
+### Bindless Resource System
+
+All models, materials, and animations are accessed via index-based indirection, enabling fully GPU-resolved resource access without traditional binding overhead.
+
+## Performance
+
+* Handles 1,000,000+ entities in real-time
+* GPU-driven culling reduces CPU cost to near-zero
+* Mesh shader pipeline achieves up to ~2x speedup compared to traditional pipelines
+* Near-linear scaling across modern GPU architectures
+
+## Build
+
+1. Clone the repository with submodules:
+
+```
+git clone --recursive <repo_url>
+```
+
+If already cloned:
+
+```
+git submodule update --init --recursive
+```
+
+2. Bootstrap vcpkg:
+
+```
+bootstrap-vcpkg.bat
+```
+
+3. Open the solution in Visual Studio 2026 and build.
+
+If vcpkg is integrated with Visual Studio, all dependencies will be automatically resolved and installed during the build process (manifest mode).
+
+## Notes
+
+* This is a research and architecture-focused engine
+* Not intended as a plug-and-play game engine
+* Designed to explore modern high-performance rendering techniques
+
+## License
+
+This project is licensed under the Apache License 2.0.
+See the LICENSE file for details.
