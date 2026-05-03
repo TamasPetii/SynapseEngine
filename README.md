@@ -33,13 +33,17 @@ Navigating through dense geometry clusters within an architectural environment.
 
 **Performance Demonstration:** 
 Watch the engine fluidly handle 1,000,000 static objects and animations dynamic objects while maintaining exceptionally low frame times.
-<video controls src="https://github.com/TamasPetii/SynapseEngine/raw/main/Docs/Videos/BigScene.mp4" width="100%"></video>
+
+[![Synapse Engine - High Density Scene Rendering](https://img.youtube.com/vi/btftJGd3JzA/maxresdefault.jpg)](https://www.youtube.com/watch?v=btftJGd3JzA)
+*(Click the image to watch the full performance test on YouTube)*
 
 ### Meshlet Pipeline with LOD (NVIDIA Bistro)
 
 This video demonstrates the real-time generation and transition of meshlets in the highly detailed NVIDIA Bistro environment, showcasing dynamic level-of-detail scaling directly on the GPU.
 
-<video controls src="https://github.com/TamasPetii/SynapseEngine/raw/main/Docs/Videos/BistroMeshletLod.mp4" width="100%"></video>
+[![Synapse Engine - Mesh Shader Pipeline & LOD in NVIDIA Bistro](https://img.youtube.com/vi/h64PygG19x4/maxresdefault.jpg)](https://www.youtube.com/watch?v=h64PygG19x4)
+*(Click the image to watch the meshlet demonstration on YouTube)*
+
 ### Hierarchical Culling
 
 The engine utilizes a multi-stage culling approach to ensure minimal waste of GPU resources.
