@@ -4,6 +4,7 @@
 #extension GL_GOOGLE_include_directive : require
 
 #include "../../Includes/Common/IndirectCommand.glsl"
+#include "../../Includes/Common/FrameGlobalContext.glsl"
 
 layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
 
@@ -14,22 +15,24 @@ layout(push_constant) uniform PushConstants {
 };
     
 void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
     uint id = gl_GlobalInvocationID.x;
 
     if (id == 0) {
-        GET_VK_DISPATCH_CMD(pc.modelComputeCountAddr).groupCountX = 0;
-        GET_VK_DISPATCH_CMD(pc.modelComputeCountAddr).groupCountY = 1;
-        GET_VK_DISPATCH_CMD(pc.modelComputeCountAddr).groupCountZ = 1;
+        GET_VK_DISPATCH_CMD(ctx.modelCountBufferAddr).groupCountX = 0;
+        GET_VK_DISPATCH_CMD(ctx.modelCountBufferAddr).groupCountY = 1;
+        GET_VK_DISPATCH_CMD(ctx.modelCountBufferAddr).groupCountZ = 1;
     }
 
-    if (id >= pc.totalCommands) return;
+    if (id >= ctx.globalIndirectCommandCount) return;
 
-    if (id < pc.totalTraditionalCommands) {
-        GET_VK_DRAW_CMD(pc.globalIndirectCmdsAddr, id).instanceCount = 0;
+    if (id < ctx.globalTraditionalCommandsCount) {
+        GET_VK_DRAW_CMD(ctx.globalIndirectCommandBufferAddr, id).instanceCount = 0;
     } 
     else {
-        uint64_t meshletBaseAddr = pc.globalIndirectCmdsAddr + (pc.totalTraditionalCommands * 16ul);
-        uint localCmdIndex = id - pc.totalTraditionalCommands;
+        uint64_t meshletBaseAddr = ctx.globalIndirectCommandBufferAddr + (ctx.globalTraditionalCommandsCount * 16ul);
+        uint localCmdIndex = id - ctx.globalTraditionalCommandsCount;
         
         GET_VK_MESH_TASKS_CMD(meshletBaseAddr, localCmdIndex).groupCountX = 0;
     }

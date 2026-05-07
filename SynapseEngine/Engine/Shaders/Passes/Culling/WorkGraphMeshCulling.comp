@@ -3,6 +3,7 @@
 #extension GL_AMDX_shader_enqueue : require
 
 #include "../../Includes/Core.glsl"
+#include "../../Includes/Common/FrameGlobalContext.glsl"
 #include "../../Includes/Common/Camera.glsl"
 #include "../../Includes/Common/Transform.glsl"
 #include "../../Includes/Common/Model.glsl"
@@ -28,6 +29,8 @@ layout(coalescing_node_amdx) in;
 layout(location = 0) in MeshCullingPayload payloadIn;
 
 void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
     uint localThreadId = gl_LocalInvocationID.x; 
 
     uint rawEntityId = payloadIn.entityId;
@@ -35,32 +38,32 @@ void main() {
     uint pureEntityId = rawEntityId & 0x7FFFFFFF;
     uint modelIndex = payloadIn.modelIndex;
 
-    uint transformIdx = GET_SPARSE_INDEX(pc.transformSparseMapBufferAddr, pureEntityId);
-    TransformComponent transform = GET_TRANSFORM(pc.transformBufferAddr, transformIdx);
+    uint transformIdx = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, pureEntityId);
+    TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformIdx);
 
-    uint cameraIdx = GET_SPARSE_INDEX(pc.cameraSparseMapBufferAddr, pc.activeCameraEntity);
-    CameraComponent camera = GET_CAMERA(pc.cameraBufferAddr, cameraIdx);
+    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
 
-    ModelAllocationInfo mAlloc = GET_MODEL_ALLOC(pc.modelAllocBufferAddr, modelIndex);
-    GpuModelAddresses addrs = GET_MODEL_ADDRESSES(pc.modelAddressBufferAddr, modelIndex);
+    ModelAllocationInfo mAlloc = GET_MODEL_ALLOC(ctx.globalModelAllocationBufferAddr, modelIndex);
+    GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, modelIndex);
 
     uint animFrameIndex = 0;
     bool hasAnimation = false;
     GpuAnimationAddresses animAddrs;
-    if (pc.animationSparseMapBufferAddr != 0) {
-        uint animSparseIndex = GET_SPARSE_INDEX(pc.animationSparseMapBufferAddr, pureEntityId);
+    if (ctx.animationSparseMapBufferAddr != 0) {
+        uint animSparseIndex = GET_SPARSE_INDEX(ctx.animationSparseMapBufferAddr, pureEntityId);
         if (animSparseIndex != INVALID_INDEX) {
-            AnimationComponent animComp = GET_ANIM_COMP(pc.animationBufferAddr, animSparseIndex);
+            AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animSparseIndex);
             if (animComp.animationIndex != INVALID_INDEX) {
-                animAddrs = GET_ANIM_ADDRESSES(pc.animationAddressBuffer, animComp.animationIndex);
+                animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
                 animFrameIndex = animComp.frameIndex;
                 hasAnimation = true;
             }
         }
     }
     
-    vec2 screenRes = vec2(pc.screenWidth, pc.screenHeight);
-    bool enableDepthOcclusion = (pc.enableOcclusionCulling == 1);
+    vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);
+    bool enableDepthOcclusion = (ctx.enableOcclusionCulling == 1);
 
     for (uint m = localThreadId; m < addrs.meshCount; m += 32) {    
         GpuMeshCollider localMeshCollider = GET_MESH_COLLIDER(addrs.meshColliders, m);
@@ -84,31 +87,31 @@ void main() {
 
         uint lod = (screenSizePixels > 512.0) ? 0 : (screenSizePixels > 256.0) ? 1 : (screenSizePixels > 128.0) ? 2 : 3;
 
-        uint sparseIdx = GET_SPARSE_INDEX(pc.modelSparseMapBufferAddr, pureEntityId);
-        ModelComponent modelComp = GET_MODEL_COMP(pc.modelCompBufferAddr, sparseIdx);
-        uint matIdx = GET_MATERIAL_INDEX(pc.materialLookupBufferAddr, modelComp.materialOffset + m);
-        Material mat = GET_MATERIAL(pc.materialBufferAddr, matIdx);
+        uint sparseIdx = GET_SPARSE_INDEX(ctx.modelSparseMapBufferAddr, pureEntityId);
+        ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, sparseIdx);
+        uint matIdx = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, modelComp.materialOffset + m);
+        Material mat = GET_MATERIAL(ctx.materialBufferAddr, matIdx);
 
         uint matType = 0;
         if (IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat))       matType = 3;
         else if (IS_TRANSPARENT(mat) && !IS_DOUBLE_SIDED(mat)) matType = 2;
         else if (!IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat)) matType = 1;
 
-        MeshAllocationInfo meshAlloc = GET_MESH_ALLOC(pc.meshAllocBufferAddr, mAlloc.meshAllocationOffset + (m * 4) + lod);
+        MeshAllocationInfo meshAlloc = GET_MESH_ALLOC(ctx.globalMeshAllocationBufferAddr, mAlloc.meshAllocationOffset + (m * 4) + lod);
 
         if (meshAlloc.activeTypes[matType] == 1) {
             uint slotIndex = 0;
             uint indirectIdx = meshAlloc.indirectIndices[matType];
 
             if (meshAlloc.isMeshletPipeline == PIPELINE_MESHLET) {
-                uint64_t meshletBaseAddr = pc.globalIndirectCommandBuffers + (pc.traditionalCommandCount * 16ul);
+                uint64_t meshletBaseAddr = ctx.globalIndirectCommandBufferAddr + (ctx.globalTraditionalCommandsCount * 16ul);
                 slotIndex = atomicAdd(GET_MESHLET_CMD(meshletBaseAddr, indirectIdx).groupCountX, 1);
             } else {
-                slotIndex = atomicAdd(GET_TRADITIONAL_CMD(pc.globalIndirectCommandBuffers, indirectIdx).instanceCount, 1);
+                slotIndex = atomicAdd(GET_TRADITIONAL_CMD(ctx.globalIndirectCommandBufferAddr, indirectIdx).instanceCount, 1);
             }
 
             uint finalPayload = SET_BIT_TO(pureEntityId, 31, visibility == INTERSECTION_INSIDE);
-            GET_INSTANCE(pc.globalInstanceBufferAddr, meshAlloc.instanceOffsets[matType] + slotIndex) = finalPayload;
+            GET_INSTANCE(ctx.globalInstanceIndexBufferAddr, meshAlloc.instanceOffsets[matType] + slotIndex) = finalPayload;
         }
     }
 }

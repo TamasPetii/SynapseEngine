@@ -7,6 +7,7 @@
 #extension GL_KHR_shader_subgroup_ballot : require
 
 #include "../../../../Includes/Core.glsl"
+#include "../../../../Includes/Common/FrameGlobalContext.glsl"
 #include "../../../../Includes/Common/Camera.glsl"
 #include "../../../../Includes/Common/Cluster.glsl"
 #include "../../../../Includes/Common/SpotLight.glsl"
@@ -27,21 +28,23 @@ shared vec3 s_clusterAABBMin;
 shared vec3 s_clusterAABBMax;
 
 void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
     uint threadId = gl_LocalInvocationID.x;
     uint clusterIdx = gl_WorkGroupID.x;
     
-    uint activeClusterCount = GET_CLUSTER_COUNT(pc.clusterCountAddr);
+    uint activeClusterCount = GET_CLUSTER_COUNT(ctx.forwardPlusClusterCountBufferAddr);
     if (clusterIdx >= activeClusterCount) return;
 
-    uint cameraIdx = GET_SPARSE_INDEX(pc.cameraSparseMapBufferAddr, pc.activeCameraEntity);
-    CameraComponent camera = GET_CAMERA(pc.cameraBufferAddr, cameraIdx);
-    ClusterData cluster = GET_CLUSTER_DATA(pc.clusterListAddr, clusterIdx);
+    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
+    ClusterData cluster = GET_CLUSTER_DATA(ctx.forwardPlusClusterListBufferAddr, clusterIdx);
 
     if (threadId == 0) {
         s_localSpotLightCount = 0;
         
         GetClusterViewSpaceAABB(
-            cluster.tileIndex, pc.tileCountX, pc.tileSize, pc.screenWidth, pc.screenHeight, 
+            cluster.tileIndex, ctx.tileCountX, ctx.tileSize, ctx.screenWidth, ctx.screenHeight, 
             cluster.minZ, cluster.maxZ, camera.projVulkanInv, 
             s_clusterAABBMin, s_clusterAABBMax
         );
@@ -49,12 +52,12 @@ void main() {
     
     barrier();
 
-    uint totalLights = GET_VK_DRAW_CMD(pc.lightIndirectCmdAddr, 0).instanceCount;
+    uint totalLights = GET_VK_DRAW_CMD(ctx.spotLightIndirectCommandBufferAddr, 0).instanceCount;
     uint globalOffset = cluster.spotLightOffset;
 
     for (uint i = threadId; i < totalLights; i += gl_WorkGroupSize.x) {
-        uint entityIdx = GET_VISIBLE_SPOT_LIGHT(pc.visibleLightAddr, i);
-        SpotLightColliderGPU collider = GET_SPOT_LIGHT_COLLIDER(pc.lightColliderDataAddr, entityIdx);
+        uint entityIdx = GET_VISIBLE_SPOT_LIGHT(ctx.spotLightVisibleIndexBufferAddr, i);
+        SpotLightColliderGPU collider = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, entityIdx);
         
         vec3 viewSpaceCenter = collider.viewSpaceCenter;
         bool isIntersecting = TestSphereAABB(viewSpaceCenter, collider.radius, s_clusterAABBMin, s_clusterAABBMax);
@@ -75,7 +78,7 @@ void main() {
 
         if (isIntersecting) {
             uint finalIdx = globalOffset + baseOffset + threadOffset;
-            GET_LIGHT_INDEX(pc.lightIndexListAddr, finalIdx) = entityIdx;
+            GET_LIGHT_INDEX(ctx.forwardPlusSpotLightIndexListBufferAddr, finalIdx) = entityIdx;
         }
     }
 }

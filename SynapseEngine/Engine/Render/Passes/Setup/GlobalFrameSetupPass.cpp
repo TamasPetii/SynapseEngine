@@ -96,6 +96,7 @@ namespace Syn {
         ctx.screenHeight = static_cast<float>(rtGroup->GetHeight());
         ctx.ambientStrength = scene->GetSettings()->ambientStrength;
         ctx.emissiveStrength = scene->GetSettings()->emissiveStrength;
+        ctx.alphaLimitDiscard = 0.025f;
 
         ctx.enableConeCulling = scene->GetSettings()->enableConeCulling ? 1 : 0;
         ctx.enableFrustumCulling = scene->GetSettings()->enableFrustumCulling ? 1 : 0;

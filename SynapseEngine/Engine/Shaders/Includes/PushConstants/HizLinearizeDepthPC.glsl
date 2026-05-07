@@ -6,7 +6,6 @@
 struct HizLinearizeDepthPC {
     uint64_t frameGlobalContextBufferAddr;
     vec2 outImageSize;
-    uint activeCameraEntity;
 };
 
 #endif

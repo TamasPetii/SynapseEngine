@@ -2,48 +2,51 @@
 #extension GL_GOOGLE_include_directive : require
 #extension GL_ARB_shader_draw_parameters : require
 
-#include "../../../Includes/Core.glsl"
-#include "../../../Includes/Common/Camera.glsl"
-#include "../../../Includes/Common/Mesh.glsl"
-#include "../../../Includes/Common/Model.glsl"
-#include "../../../Includes/Common/Transform.glsl"
-#include "../../../Includes/Common/Animation.glsl"
-#include "../../../Includes/Common/Material.glsl"
+#include "../../../../Includes/Core.glsl"
+#include "../../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../../Includes/Common/Camera.glsl"
+#include "../../../../Includes/Common/Mesh.glsl"
+#include "../../../../Includes/Common/Model.glsl"
+#include "../../../../Includes/Common/Transform.glsl"
+#include "../../../../Includes/Common/Animation.glsl"
+#include "../../../../Includes/Common/Material.glsl"
 
 layout(location = 0) out vec2 outUV;
 layout(location = 1) out flat uvec2 outId; //(EntityID, MaterialID) 
 
-#include "../../../Includes/PushConstants/TraditionalPassPC.glsl"
+#include "../../../../Includes/PushConstants/TraditionalMeshletPassPC.glsl"
 
 layout(push_constant) uniform PushConstants {
-   TraditionalPassPC pc;
+   TraditionalMeshletPassPC pc;
 };
 
 void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
     // 1. Fetch Draw Descriptor
-    MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(pc.globalIndirectCommandDescriptorBuffers, pc.baseDescriptorOffset + gl_DrawIDARB);
+    MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.globalIndirectCommandDescriptorBufferAddr, pc.baseDescriptorOffset + gl_DrawIDARB);
 
     // 2. Fetch Instance and Entity ID
-    uint rawEntityData = GET_INSTANCE(pc.globalInstanceBuffers, desc.instanceOffset + gl_InstanceIndex);
+    uint rawEntityData = GET_INSTANCE(ctx.globalInstanceIndexBufferAddr, desc.instanceOffset + gl_InstanceIndex);
     uint entityId = rawEntityData & ~(1u << 31); // Clear the culling bit mask
 
     // 3. Fetch Model Component & Material Lookup
-    uint modelDenseIndex = GET_SPARSE_INDEX(pc.modelSparseMapBufferAddr, entityId);
-    ModelComponent comp = GET_MODEL_COMP(pc.modelBufferAddr, modelDenseIndex);
+    uint modelDenseIndex = GET_SPARSE_INDEX(ctx.modelSparseMapBufferAddr, entityId);
+    ModelComponent comp = GET_MODEL_COMP(ctx.modelBufferAddr, modelDenseIndex);
     
     // 4. Fetch Model Addresses & Raw Vertex Data
-    GpuModelAddresses addrs = GET_MODEL_ADDRESSES(pc.modelAddressBuffer, desc.modelIndex);
+    GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, desc.modelIndex);
     
     uint realVertexIndex = GET_INDEX(addrs.indices, gl_VertexIndex);
     GpuVertexPosition v = GET_VERTEX_POS(addrs.vertexPositions, realVertexIndex);
     GpuVertexAttributes attr = GET_VERTEX_ATTR(addrs.vertexAttributes, realVertexIndex);
 
     // 5. Fetch Transform and Camera
-    uint transformDenseIndex = GET_SPARSE_INDEX(pc.transformSparseMapBufferAddr, entityId);
-    TransformComponent transform = GET_TRANSFORM(pc.transformBufferAddr, transformDenseIndex);
+    uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
+    TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
 
-    uint cameraDenseIndex = GET_SPARSE_INDEX(pc.cameraSparseMapBufferAddr, pc.activeCameraEntity);
-    CameraComponent camera = GET_CAMERA(pc.cameraBufferAddr, cameraDenseIndex);
+    uint cameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraDenseIndex);
 
     // 6. Evaluate Static Hierarchy (Default pose)
     uint nodeIndex = UNPACK_UINT16_X(v.packedIndex);
@@ -54,14 +57,14 @@ void main() {
     mat4 finalModelMatIT = staticNodeTransform.globalTransformIT;
 
     // 7. Evaluate Animation & Skinning
-    if (pc.animationSparseMapBufferAddr != 0) {
-        uint animSparseIndex = GET_SPARSE_INDEX(pc.animationSparseMapBufferAddr, entityId);
+    if (ctx.animationSparseMapBufferAddr != 0) {
+        uint animSparseIndex = GET_SPARSE_INDEX(ctx.animationSparseMapBufferAddr, entityId);
 
         if (animSparseIndex != INVALID_INDEX) {
-            AnimationComponent animComp = GET_ANIM_COMP(pc.animationBufferAddr, animSparseIndex);
+            AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animSparseIndex);
 
             if (animComp.animationIndex != INVALID_INDEX) {
-                GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(pc.animationAddressBuffer, animComp.animationIndex);
+                GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
                 GpuVertexSkinData skin = GET_SKIN_DATA(animAddrs.vertexSkinData, realVertexIndex);
 
                 mat4 skinMat = mat4(0.0);
@@ -93,7 +96,7 @@ void main() {
 
     // 8. Resolve Material Index for the current sub-mesh
     uint flatMaterialIndex = comp.materialOffset + meshIndex;
-    uint resolvedMaterialId = GET_MATERIAL_INDEX(pc.materialLookupBuffer, flatMaterialIndex);
+    uint resolvedMaterialId = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, flatMaterialIndex);
 
     // 9. Calculate Final World Position and Outputs
     gl_Position = camera.viewProjVulkan * transform.transform * finalModelMat * vec4(v.position, 1.0);

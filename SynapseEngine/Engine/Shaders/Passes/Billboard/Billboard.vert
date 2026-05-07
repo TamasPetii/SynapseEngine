@@ -4,6 +4,7 @@
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 
 #include "../../Includes/Core.glsl"
+#include "../../Includes/Common/FrameGlobalContext.glsl"
 #include "../../Includes/Common/Camera.glsl"
 #include "../../Includes/Common/Transform.glsl"
 
@@ -31,19 +32,21 @@ layout(buffer_reference, std430, buffer_reference_align = 4) readonly buffer Vis
 };
 
 void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
     uint entityId = VisibleEntityBuffer(pc.visibleEntitiesAddr).data[gl_InstanceIndex];
 
-    if (entityId == pc.activeCameraEntity) {
+    if (entityId == ctx.activeCameraEntity) {
         gl_Position = vec4(0.0);
         return;
     }
 
-    uint transformDenseIdx = GET_SPARSE_INDEX(pc.transformSparseMapAddr, entityId);
-    TransformComponent transform = GET_TRANSFORM(pc.transformBufferAddr, transformDenseIdx);
+    uint transformDenseIdx = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
+    TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIdx);
     vec3 worldCenter = transform.transform[3].xyz;
 
-    uint activeCamDenseIdx = GET_SPARSE_INDEX(pc.cameraSparseMapAddr, pc.activeCameraEntity);
-    CameraComponent activeCamera = GET_CAMERA(pc.cameraBufferAddr, activeCamDenseIdx);
+    uint activeCamDenseIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
+    CameraComponent activeCamera = GET_CAMERA(ctx.cameraBufferAddr, activeCamDenseIdx);
 
     vec3 camRight = vec3(activeCamera.view[0][0], activeCamera.view[1][0], activeCamera.view[2][0]);
     vec3 camUp    = vec3(activeCamera.view[0][1], activeCamera.view[1][1], activeCamera.view[2][1]);

@@ -8,6 +8,7 @@
 #extension GL_KHR_shader_subgroup_ballot : require
 
 #include "../../Includes/Core.glsl"
+#include "../../Includes/Common/FrameGlobalContext.glsl"
 #include "../../Includes/Common/Camera.glsl"
 #include "../../Includes/Common/PointLight.glsl"
 #include "../../Includes/Utils/CullingMath.glsl"
@@ -25,13 +26,15 @@ layout(push_constant) uniform PushConstants {
 layout(set = 2, binding = 0) uniform sampler2D depthPyramid;
 
 void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
     uint globalId = gl_GlobalInvocationID.x;
-    if (globalId >= pc.totalLightsToTest) return;
+    if (globalId >= ctx.pointLightCount) return;
 
-    PointLightColliderGPU collider = GET_POINT_LIGHT_COLLIDER(pc.pointLightColliderDataAddr, globalId);
+    PointLightColliderGPU collider = GET_POINT_LIGHT_COLLIDER(ctx.pointLightColliderBufferAddr, globalId);
 
-    uint cameraIdx = GET_SPARSE_INDEX(pc.cameraSparseMapBufferAddr, pc.activeCameraEntity);
-    CameraComponent camera = GET_CAMERA(pc.cameraBufferAddr, cameraIdx);
+    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
 
     // 1. Frustum Culling (Sphere)
     uint visibility = TestSphereFrustum(collider.center, collider.radius, camera);
@@ -39,14 +42,14 @@ void main() {
 
     // 2. Occlusion és 0-pixel Culling
     float screenSizePixels = 0.0;
-    vec2 screenRes = vec2(pc.screenWidth, pc.screenHeight);
-    bool enableDepthOcclusion = (pc.enableOcclusionCulling == 1);
+    vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);
+    bool enableDepthOcclusion = (ctx.enableOcclusionCulling == 1);
 
     if (IsSphereOccluded(collider.center, collider.radius, camera, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
         return;
     }
 
-    GET_POINT_LIGHT_COLLIDER(pc.pointLightColliderDataAddr, globalId).viewSpaceCenter = (camera.view *  vec4(collider.center, 1.0)).xyz;
+    GET_POINT_LIGHT_COLLIDER(ctx.pointLightColliderBufferAddr, globalId).viewSpaceCenter = (camera.view *  vec4(collider.center, 1.0)).xyz;
 
     uint needsWrite = 1;
     uint subgroupWriteCount = subgroupAdd(needsWrite);
@@ -54,11 +57,11 @@ void main() {
     uint baseOffset = 0;
 
     if (subgroupElect()) {
-        baseOffset = atomicAdd(GET_VK_DRAW_CMD(pc.indirectCommandAddr, 0).instanceCount, subgroupWriteCount);
+        baseOffset = atomicAdd(GET_VK_DRAW_CMD(ctx.pointLightIndirectCommandBufferAddr, 0).instanceCount, subgroupWriteCount);
     }
 
     baseOffset = subgroupBroadcastFirst(baseOffset);
 
     uint finalIndex = baseOffset + localOffset;
-    GET_VISIBLE_POINT_LIGHT(pc.visibleLightAddr, finalIndex) = collider.entityIndex;
+    GET_VISIBLE_POINT_LIGHT(ctx.pointLightVisibleIndexBufferAddr, finalIndex) = collider.entityIndex;
 }

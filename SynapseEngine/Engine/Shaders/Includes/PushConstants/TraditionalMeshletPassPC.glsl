@@ -1,9 +1,9 @@
-#ifndef SYN_INCLUDES_PC_TRADITIONAL_PASS_GLSL
-#define SYN_INCLUDES_PC_TRADITIONAL_PASS_GLSL
+#ifndef SYN_INCLUDES_PC_TRADITIONAL_MESHLET_PASS_GLSL
+#define SYN_INCLUDES_PC_TRADITIONAL_MESHLET_PASS_GLSL
 
 #include "../SharedGpuTypes.glsl"
 
-struct TraditionalPassPC {
+struct TraditionalMeshletPassPC {
     uint64_t frameGlobalContextBufferAddr;
     uint baseDescriptorOffset;
     uint materialRenderType;
