@@ -49,17 +49,7 @@ namespace Syn {
         bool isGpu = scene->GetSettings()->enableGpuCulling;
 
         PointLightCullingPC pc{};
-        pc.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
-        pc.cameraSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
-        pc.pointLightColliderDataAddr = compManager->GetBufferAddr(BufferNames::PointLightColliderData, fIdx);
-        pc.visibleLightAddr = compManager->GetBufferAddr(BufferNames::PointLightVisibleData, fIdx);
-        pc.indirectCommandAddr = drawData->PointLights.indirectBuffer.GetAddress(fIdx, isGpu);
-        pc.totalLightsToTest = _totalLightsToTest;
-        pc.activeCameraEntity = scene->GetSceneCameraEntity();
-        pc.enableOcclusionCulling = scene->GetSettings()->enableOcclusionCulling ? 1 : 0;
-
-        pc.screenWidth = static_cast<float>(rtGroup->GetWidth());
-        pc.screenHeight = static_cast<float>(rtGroup->GetHeight());
+		pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
 
         vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(PointLightCullingPC), &pc);
     }
