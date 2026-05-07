@@ -129,12 +129,8 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
 
         BillboardPC pc{};
-        pc.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
-        pc.cameraSparseMapAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
-        pc.transformBufferAddr = compManager->GetBufferAddr(BufferNames::TransformData, fIdx);
-        pc.transformSparseMapAddr = compManager->GetBufferAddr(BufferNames::TransformSparseMap, fIdx);
-        pc.visibleEntitiesAddr = compManager->GetBufferAddr(BufferNames::CameraVisibleData, fIdx);
-        pc.activeCameraEntity = scene->GetSettings()->useDebugCamera ? scene->GetDebugCameraEntity() : scene->GetSceneCameraEntity();
+		pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+		pc.visibleEntitiesAddr = compManager->GetBufferAddr(BufferNames::CameraVisibleData, fIdx);
         pc.baseScale = 1.0f;
 
         vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(BillboardPC), &pc);

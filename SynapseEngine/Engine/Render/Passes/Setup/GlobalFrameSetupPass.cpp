@@ -17,7 +17,7 @@
 
 namespace Syn {
 
-    #include "Engine/Shaders/Includes/PushConstants/FrameGlobalContext.glsl"
+    #include "Engine/Shaders/Includes/Common/FrameGlobalContext.glsl"
 
     void GlobalFrameSetupPass::Transfer(const RenderContext& context) {
         auto scene = context.scene;
@@ -78,7 +78,6 @@ namespace Syn {
         ctx.spotLightDataBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightData, fIdx);
         ctx.spotLightColliderBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightColliderData, fIdx);
         ctx.spotLightSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightSparseMap, fIdx);
-        ctx.spotLightColliderDataBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightColliderData, fIdx);
         ctx.spotLightShadowSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightShadowSparseMap, fIdx);
         ctx.spotLightShadowDataBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightShadowData, fIdx);
 

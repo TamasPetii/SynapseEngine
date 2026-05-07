@@ -34,10 +34,7 @@ namespace Syn {
         _totalCommands = drawData->Models.activeTraditionalCount + drawData->Models.activeMeshletCount;
 
         CullingCommandResetPC pc{};
-        pc.globalIndirectCmdsAddr = drawData->Models.indirectBuffer.GetAddress(fIdx, isGpu);
-        pc.modelComputeCountAddr = drawData->Models.computeCountBuffer.GetAddress(fIdx, isGpu);
-        pc.totalTraditionalCommands = drawData->Models.activeTraditionalCount;
-        pc.totalCommands = _totalCommands;
+        pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
 
         vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(),VK_SHADER_STAGE_ALL, 0, sizeof(CullingCommandResetPC), &pc);
     }
