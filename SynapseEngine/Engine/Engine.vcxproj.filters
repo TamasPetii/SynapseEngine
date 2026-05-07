@@ -2201,11 +2201,10 @@
     <None Include="Shaders\Includes\PushConstants\DeferredSpotLightPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\HizDownSamplePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\HizLinearizeDepthPC.glsl" />
-    <None Include="Shaders\Includes\PushConstants\MeshletPassPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\TraditionalMeshletPassPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\ModelMeshCullingPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\PointLightCullingPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\SpotLightCullingPC.glsl" />
-    <None Include="Shaders\Includes\PushConstants\TraditionalPassPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframeLightPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframeSetupPC.glsl" />
@@ -2228,23 +2227,12 @@
     <None Include="Shaders\Passes\Culling\SpotLightCulling.comp" />
     <None Include="Shaders\Passes\Culling\WorkGraphMeshCulling.comp" />
     <None Include="Shaders\Passes\Culling\WorkGraphModelCulling.comp" />
-    <None Include="Shaders\Passes\Shading\Deferred\GBuffer\MeshletOpaqueGBuffer.frag" />
-    <None Include="Shaders\Passes\Shading\Deferred\GBuffer\MeshletOpaqueGBuffer.mesh" />
+    <None Include="Shaders\Passes\Shading\Deferred\GBuffer\MeshletOpaqueDeferred.frag" />
     <None Include="Shaders\Passes\Shading\Common\Meshlet.task" />
-    <None Include="Shaders\Passes\Shading\Deferred\GBuffer\MeshletTransparent.frag" />
-    <None Include="Shaders\Passes\Shading\Deferred\GBuffer\MeshletTransparentPicking.frag" />
-    <None Include="Shaders\Passes\Shading\Deferred\GBuffer\TraditionalOpaqueGBuffer.frag" />
-    <None Include="Shaders\Passes\Shading\Deferred\GBuffer\TraditionalOpaqueGBuffer.vert" />
-    <None Include="Shaders\Passes\Shading\Deferred\GBuffer\TraditionalTransparent.frag" />
-    <None Include="Shaders\Passes\Shading\Deferred\GBuffer\TraditionalTransparentPicking.frag" />
+    <None Include="Shaders\Passes\Shading\Deferred\GBuffer\TraditionalOpaqueDeferred.frag" />
+    <None Include="Shaders\Passes\Shading\Common\Traditional.vert" />
     <None Include="Shaders\Passes\Hiz\HizDownsample.comp" />
     <None Include="Shaders\Passes\Hiz\HizLinearizeDepth.comp" />
-    <None Include="Shaders\Passes\Performance\PerformanceMeshlet.frag" />
-    <None Include="Shaders\Passes\Performance\PerformanceMeshlet.mesh" />
-    <None Include="Shaders\Passes\Performance\PerformanceMeshletTransparent.frag" />
-    <None Include="Shaders\Passes\Performance\PerformanceTraditional.frag" />
-    <None Include="Shaders\Passes\Performance\PerformanceTraditional.vert" />
-    <None Include="Shaders\Passes\Performance\PerformanceTraditionalTransparent.frag" />
     <None Include="Shaders\Passes\PostProcess\BloomComposite.comp" />
     <None Include="Shaders\Passes\PostProcess\BloomDownsample.comp" />
     <None Include="Shaders\Passes\PostProcess\BloomPrefilter.comp" />
@@ -2252,7 +2240,6 @@
     <None Include="Shaders\Passes\Wireframe\Wireframe.frag" />
     <None Include="Shaders\Passes\Wireframe\Wireframe.vert" />
     <None Include="Shaders\Passes\Wireframe\WireframeLight.vert" />
-    <None Include="Shaders\Passes\Wireframe\WireframeMeshlet.vert" />
     <None Include="Shaders\Passes\Wireframe\WireframeSetup.comp" />
     <None Include="Shaders\Passes\Shading\Deferred\Lighting\DeferredDirectionLight.frag" />
     <None Include="Shaders\Passes\Shading\Deferred\Lighting\DeferredDirectionLight.vert" />
@@ -2272,9 +2259,8 @@
     <None Include="Shaders\Passes\Shading\ForwardPlus\DepthPrepass\MeshletDepth.frag" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\DepthPrepass\TraditionalDepth.vert" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\DepthPrepass\TraditionalDepth.frag" />
-    <None Include="Shaders\Passes\Shading\Wboit\MeshletTransparent.frag" />
-    <None Include="Shaders\Passes\Shading\Wboit\MeshletTransparent.mesh" />
-    <None Include="Shaders\Passes\Shading\Wboit\TraditionalTransparent.frag" />
+    <None Include="Shaders\Passes\Shading\Wboit\MeshletTransparentForward.frag" />
+    <None Include="Shaders\Passes\Shading\Wboit\TraditionalTransparentForward.frag" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightCount.comp" />
     <None Include="Shaders\Includes\Utils\ClusterMath.glsl" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightCount.comp" />
@@ -2284,10 +2270,11 @@
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightWrite.comp" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightWrite.comp" />
     <None Include="Shaders\Includes\PushConstants\ClusterLightWritePC.glsl" />
-    <None Include="Shaders\Passes\Shading\ForwardPlus\Lighting\MeshletOpaqueForward.mesh" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Lighting\MeshletOpaqueForward.frag" />
-    <None Include="Shaders\Passes\Shading\ForwardPlus\Lighting\TraditionalOpaqueForward.vert" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Lighting\TraditionalOpaqueForward.frag" />
-    <None Include="Shaders\Includes\PushConstants\FrameGlobalContext.glsl" />
+    <None Include="Shaders\Includes\Common\FrameGlobalContext.glsl" />
+    <None Include="Shaders\Includes\Utils\LightMath.glsl" />
+    <None Include="Shaders\Includes\Utils\MaterialMath.glsl" />
+    <None Include="Shaders\Passes\Shading\Common\Meshlet.mesh" />
   </ItemGroup>
 </Project>

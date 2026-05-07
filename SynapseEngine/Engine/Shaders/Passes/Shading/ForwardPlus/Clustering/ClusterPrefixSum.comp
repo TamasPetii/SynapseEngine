@@ -6,6 +6,7 @@
 #extension GL_KHR_shader_subgroup_arithmetic : require
 
 #include "../../../../Includes/Core.glsl"
+#include "../../../../Includes/Common/FrameGlobalContext.glsl"
 #include "../../../../Includes/Common/Cluster.glsl"
 #include "../../../../Includes/Common/IndirectCommand.glsl"
 
@@ -29,6 +30,8 @@ shared uint s_globalPointCarry;
 shared uint s_globalSpotCarry;
 
 void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
     uint threadId = gl_LocalInvocationID.x;
     
     if (threadId == 0) {
@@ -38,7 +41,7 @@ void main() {
 
     barrier();
 
-    uint totalClusters = GET_CLUSTER_COUNT(pc.clusterCountAddr);
+    uint totalClusters = GET_CLUSTER_COUNT(ctx.forwardPlusClusterCountBufferAddr);
     
     // Loop through all active clusters in blocks of gl_WorkGroupSize.x (512)
     for (uint baseIdx = 0; baseIdx < totalClusters; baseIdx += gl_WorkGroupSize.x) 
@@ -48,7 +51,7 @@ void main() {
         uint sCount = 0;
 
         if (globalIdx < totalClusters) {
-            ClusterData cluster = GET_CLUSTER_DATA(pc.clusterListAddr, globalIdx);
+            ClusterData cluster = GET_CLUSTER_DATA(ctx.forwardPlusClusterListBufferAddr, globalIdx);
             pCount = cluster.pointLightCount;
             sCount = cluster.spotLightCount;
         }
@@ -98,8 +101,8 @@ void main() {
             uint finalPOffset = s_globalPointCarry + s_pointSubgroupSums[gl_SubgroupID] + pSubOffset;
             uint finalSOffset = s_globalSpotCarry  + s_spotSubgroupSums[gl_SubgroupID] + sSubOffset;
 
-            GET_CLUSTER_DATA(pc.clusterListAddr, globalIdx).pointLightOffset = finalPOffset;
-            GET_CLUSTER_DATA(pc.clusterListAddr, globalIdx).spotLightOffset = finalSOffset;
+            GET_CLUSTER_DATA(ctx.forwardPlusClusterListBufferAddr, globalIdx).pointLightOffset = finalPOffset;
+            GET_CLUSTER_DATA(ctx.forwardPlusClusterListBufferAddr, globalIdx).spotLightOffset = finalSOffset;
         }
 
         // 6. Accumulate the carry for the next 512-element block

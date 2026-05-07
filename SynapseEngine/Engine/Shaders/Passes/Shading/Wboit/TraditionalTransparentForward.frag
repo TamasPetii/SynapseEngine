@@ -1,44 +1,34 @@
 #version 460
 #extension GL_GOOGLE_include_directive : require
 #extension GL_EXT_nonuniform_qualifier : require
-#extension GL_EXT_buffer_reference2 : require
-#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 
-#include "../../../../Includes/Core.glsl"
+#include "../../Includes/Core.glsl"
 #include "../../../../Includes/Common/FrameGlobalContext.glsl"
-#include "../../../../Includes/Common/Camera.glsl"
-#include "../../../../Includes/Common/Material.glsl"
-#include "../../../../Includes/Common/Texture.glsl"
-#include "../../../../Includes/Common/Cluster.glsl"
-#include "../../../../Includes/Common/PointLight.glsl"
-#include "../../../../Includes/Common/SpotLight.glsl"
-#include "../../../../Includes/Common/DirectionLight.glsl"
-#include "../../../../Includes/Utils/ColorMath.glsl"
-#include "../../../../Includes/Utils/PbrMath.glsl"
-#include "../../../../Includes/Utils/DepthMath.glsl"
-#include "../../../../Includes/Utils/ClusterMath.glsl"
-#include "../../../../Includes/Utils/LightMath.glsl"
-#include "../../../../Includes/Utils/MaterialMath.glsl"
+#include "../../Includes/Common/Material.glsl"
+#include "../../Includes/Common/Texture.glsl"
+#include "../../Includes/Utils/WboitMath.glsl"
+#include "../../Includes/Utils/MaterialMath.glsl"
 
 layout(location = 0) in vec3 inNormal;
 layout(location = 1) in vec4 inTangent;
 layout(location = 2) in vec2 inUV;
-layout(location = 3) in flat uvec4 inId; // (EntityID, MaterialID, MeshIndex, LodIndex)
+layout(location = 3) in flat uvec4 inId; // (EntityID, MaterialID, MeshIndex, LodIndex) 
 
-layout(location = 0) out vec4 outColor;
+layout(location = 0) out vec4 outAccum;
+layout(location = 1) out float outReveal;
 
-#include "../../../../Includes/PushConstants/TraditionalMeshletPassPC.glsl"
+#include "../../Includes/PushConstants/TraditionalMeshletPassPC.glsl"
 
 layout(push_constant) uniform PushConstants {
    TraditionalMeshletPassPC pc;
 };
 
-void main() {
+void main() 
+{ 
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
-    uint entityId = inId.x;
     uint materialId = inId.y;
-
+    
     // 1. Fetch Material
     Material mat = GET_MATERIAL(ctx.materialBufferAddr, materialId);
     vec2 finalUV = inUV * mat.uvScale;
@@ -84,6 +74,7 @@ void main() {
     uint clusterIndex = tile.clusterBaseOffset + sliceIdx;
     ClusterData cluster = GET_CLUSTER_DATA(ctx.forwardPlusClusterListBufferAddr, clusterIndex);
 
+    //7. Simulate Lighting
     vec3 totalRadiance = vec3(0.0);
 
     for(uint i = 0; i < ctx.directionLightCount; ++i) {
@@ -113,5 +104,10 @@ void main() {
     //Bloom Radiance
     totalRadiance += SimulateBloom(finalEmissive, 1.0, ctx.emissiveStrength);
 
-    outColor = vec4(totalRadiance, 1.0);
+    // 8. Write WBOIT Accumulation
+    vec3 premultipliedColor = totalRadiance * albedoAlpha.a;
+    float weight = calculateWboitWeight(gl_FragCoord.z, albedoAlpha.a);
+
+    outAccum = vec4(premultipliedColor, albedoAlpha.a) * weight;
+    outReveal = albedoAlpha.a;
 }

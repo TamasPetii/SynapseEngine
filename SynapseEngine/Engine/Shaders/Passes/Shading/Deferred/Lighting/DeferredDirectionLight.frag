@@ -3,11 +3,13 @@
 #extension GL_EXT_buffer_reference2 : require
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 
-#include "../../Includes/Core.glsl"
-#include "../../Includes/Common/Camera.glsl"
-#include "../../Includes/Common/DirectionLight.glsl"
-#include "../../Includes/Utils/PbrMath.glsl"
-#include "../../Includes/Utils/DepthMath.glsl"
+#include "../../../../Includes/Core.glsl"
+#include "../../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../../Includes/Common/Camera.glsl"
+#include "../../../../Includes/Common/DirectionLight.glsl"
+#include "../../../../Includes/Utils/PbrMath.glsl"
+#include "../../../../Includes/Utils/DepthMath.glsl"
+#include "../../../../Includes/Utils/LightMath.glsl"
 
 layout(location = 0) in vec2 inUV;
 layout(location = 1) in flat uint inLightDenseIndex;
@@ -20,7 +22,7 @@ layout(set = 2, binding = 0) uniform sampler2D colorMetallicTexture;
 layout(set = 2, binding = 1) uniform sampler2D normalRoughnessTexture;
 layout(set = 2, binding = 2) uniform sampler2D depthTexture;
 
-#include "../../Includes/PushConstants/DeferredDirectionLightPC.glsl"
+#include "../../../../Includes/PushConstants/DeferredDirectionLightPC.glsl"
 
 layout(push_constant) uniform PushConstants {
     DeferredDirectionLightPC pc;
@@ -34,7 +36,9 @@ void main()
         discard;
     }
 
-    CameraComponent camera = GET_CAMERA(pc.cameraBufferAddr, inCameraIndex);
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, inCameraIndex);
     vec3 position = ReconstructWorldPosition(inUV, depth, camera.viewProjVulkanInv);
 
     vec4 colorMetallic  = texture(colorMetallicTexture, inUV);
@@ -45,23 +49,8 @@ void main()
     vec3 normal    = normalize(normalRoughness.xyz);
     float roughness = clamp(normalRoughness.a, 0.04, 1.0);
 
-    vec3 viewDir = normalize(camera.eye.xyz - position);
-    
-    DirectionLightComponent light = GET_DIRECTION_LIGHT(pc.directionLightDataAddr, inLightDenseIndex);
-
-    vec3 lightDir = normalize(-light.direction);
-        
-    vec3 radiance = ShadePhysicallyBased(
-        albedo, 
-        normal, 
-        viewDir, 
-        lightDir, 
-        roughness, 
-        metallic, 
-        light.color, 
-        1.0,
-        light.strength
-    );
-
+    vec3 viewDir = normalize(camera.eye.xyz - position);  
+    vec3 radiance = SimulateDirectionalLight(ctx.directionLightDataBufferAddr, inLightDenseIndex, albedo, normal, viewDir, roughness, metallic);
+ 
     outColor = vec4(radiance, 1.0);
 }

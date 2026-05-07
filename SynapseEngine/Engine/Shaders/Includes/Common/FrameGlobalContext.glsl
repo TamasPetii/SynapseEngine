@@ -1,6 +1,7 @@
 #ifndef SYN_INCLUDES_COMMON_FRAME_CONTEXT_GLSL
 #define SYN_INCLUDES_COMMON_FRAME_CONTEXT_GLSL
 
+#include "../Core.glsl"
 #include "../SharedGpuTypes.glsl"
 
 struct FrameGlobalContext {
@@ -51,7 +52,6 @@ struct FrameGlobalContext {
     uint64_t spotLightDataBufferAddr;
     uint64_t spotLightColliderBufferAddr;
     uint64_t spotLightSparseMapBufferAddr;
-    uint64_t spotLightColliderDataBufferAddr;
     uint64_t spotLightShadowSparseMapBufferAddr;
     uint64_t spotLightShadowDataBufferAddr;  
 
@@ -69,6 +69,7 @@ struct FrameGlobalContext {
     float screenHeight;
     float ambientStrength;
     float emissiveStrength;
+    float alphaLimitDiscard;
 
     uint enableConeCulling;
     uint enableFrustumCulling;

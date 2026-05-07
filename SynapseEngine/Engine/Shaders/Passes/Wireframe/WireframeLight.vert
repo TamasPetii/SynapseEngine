@@ -4,6 +4,7 @@
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 
 #include "../../Includes/Core.glsl"
+#include "../../Includes/Common/FrameGlobalContext.glsl"
 #include "../../Includes/Common/Camera.glsl"
 #include "../../Includes/Common/Mesh.glsl"
 #include "../../Includes/Common/PointLight.glsl"
@@ -18,27 +19,30 @@ layout(push_constant) uniform PushConstants {
 };
 
 void main() {
-    uint entityId = VisiblePointLightBuffer(pc.visibleLightAddr).data[gl_InstanceIndex];
-    uint denseIdx = GET_SPARSE_INDEX(pc.lightSparseMapAddr, entityId);
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
     uint realVertexIndex = GET_INDEX(pc.indexBufferAddr, gl_VertexIndex);
-    GpuVertexPosition v = GET_VERTEX_POS(pc.vertexBufferAddr, realVertexIndex);
+    GpuVertexPosition v = GET_VERTEX_POS(pc.vertexPositionBufferAddr, realVertexIndex);
 
     vec3 worldPos = vec3(0.0);
     vec3 lightColor = vec3(1.0);
 
     // 0: Point Sphere, 1: Point Aabb
     if (pc.lightDrawType <= 1) {
-        PointLightColliderGPU col = GET_POINT_LIGHT_COLLIDER(pc.lightColliderDataAddr, denseIdx);
-        PointLightComponent light = GET_POINT_LIGHT(pc.lightDataAddr, denseIdx);
+        uint entityId = VisiblePointLightBuffer(ctx.pointLightVisibleIndexBufferAddr).data[gl_InstanceIndex];
+        uint denseIdx = GET_SPARSE_INDEX(ctx.pointLightSparseMapBufferAddr, entityId);
+        PointLightColliderGPU col = GET_POINT_LIGHT_COLLIDER(ctx.pointLightColliderBufferAddr, denseIdx);
+        PointLightComponent light = GET_POINT_LIGHT(ctx.pointLightDataBufferAddr, denseIdx);
         
         worldPos = col.center + (v.position * col.radius);
         lightColor = light.color;
     } 
     // Spot Light
     else {
-        SpotLightColliderGPU col = GET_SPOT_LIGHT_COLLIDER(pc.lightColliderDataAddr, denseIdx);
-        SpotLightComponent light = GET_SPOT_LIGHT(pc.lightDataAddr, denseIdx);
+        uint entityId = VisibleSpotLightBuffer(ctx.spotLightVisibleIndexBufferAddr).data[gl_InstanceIndex];
+        uint denseIdx = GET_SPARSE_INDEX(pc.spotLightSparseMapBufferAddr, entityId);
+        SpotLightColliderGPU col = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, denseIdx);
+        SpotLightComponent light = GET_SPOT_LIGHT(ctx.spotLightDataBufferAddr, denseIdx);
         
         lightColor = light.color;
 
@@ -55,8 +59,8 @@ void main() {
         }
     }
 
-    uint cameraDenseIndex = GET_SPARSE_INDEX(pc.cameraSparseMapBufferAddr, pc.activeCameraEntity);
-    CameraComponent camera = GET_CAMERA(pc.cameraBufferAddr, cameraDenseIndex);
+    uint cameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraDenseIndex);
 
     gl_Position = camera.viewProjVulkan * vec4(worldPos, 1.0);
     outColor = vec4(lightColor, 1.0);

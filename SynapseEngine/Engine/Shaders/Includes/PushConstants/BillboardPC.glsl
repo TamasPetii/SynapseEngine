@@ -5,6 +5,7 @@
 
 struct BillboardPC {
     uint64_t frameGlobalContextBufferAddr;
+    uint64_t visibleEntitiesAddr;
     float baseScale;
 };
 #endif

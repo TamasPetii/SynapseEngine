@@ -3,11 +3,13 @@
 #extension GL_EXT_buffer_reference2 : require
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 
-#include "../../Includes/Core.glsl"
-#include "../../Includes/Common/Camera.glsl"
-#include "../../Includes/Common/PointLight.glsl"
-#include "../../Includes/Utils/PbrMath.glsl"
-#include "../../Includes/Utils/DepthMath.glsl"
+#include "../../../../Includes/Core.glsl"
+#include "../../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../../Includes/Common/Camera.glsl"
+#include "../../../../Includes/Common/PointLight.glsl"
+#include "../../../../Includes/Utils/PbrMath.glsl"
+#include "../../../../Includes/Utils/DepthMath.glsl"
+#include "../../../../Includes/Utils/LightMath.glsl"
 
 layout(location = 0) in flat uint inLightDenseIndex;
 layout(location = 1) in flat uint inShadowDenseIndex;
@@ -19,7 +21,7 @@ layout(set = 2, binding = 0) uniform sampler2D colorMetallicTexture;
 layout(set = 2, binding = 1) uniform sampler2D normalRoughnessTexture;
 layout(set = 2, binding = 2) uniform sampler2D depthTexture;
 
-#include "../../Includes/PushConstants/DeferredPointLightPC.glsl"
+#include "../../../../Includes/PushConstants/DeferredPointLightPC.glsl"
 
 layout(push_constant) uniform PushConstants {
     DeferredPointLightPC pc;
@@ -27,15 +29,17 @@ layout(push_constant) uniform PushConstants {
 
 void main()
 {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
     // 1. Reconstruct World Position from Depth
-    vec2 uv = gl_FragCoord.xy / vec2(pc.screenWidth, pc.screenHeight);
+    vec2 uv = gl_FragCoord.xy / vec2(ctx.screenWidth, ctx.screenHeight);
     float depth = texture(depthTexture, uv).r;
 
-    CameraComponent camera = GET_CAMERA(pc.cameraBufferAddr, inCameraIndex);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, inCameraIndex);
     vec3 position = ReconstructWorldPosition(uv, depth, camera.viewProjVulkanInv);
 
     // 2. Fetch Point Light Component
-    PointLightComponent light = GET_POINT_LIGHT(pc.pointLightDataAddr, inLightDenseIndex);
+    PointLightComponent light = GET_POINT_LIGHT(ctx.pointLightDataBufferAddr, inLightDenseIndex);
 
     // 3. Spherical Culling
     float distToLight = distance(position, light.position);
@@ -54,23 +58,7 @@ void main()
 
     // 5. Physically Based Rendering (PBR) Light Calculation
     vec3 viewDir = normalize(camera.eye.xyz - position);
-    vec3 lightDir = normalize(light.position - position);
-    
-    // Calculate light attenuation
-    float attenuation = clamp(1.0 - (distToLight * distToLight) / (light.radius * light.radius), 0.0, 1.0);
-    attenuation *= attenuation;
-
-    vec3 radiance = ShadePhysicallyBased(
-        albedo, 
-        normal, 
-        viewDir, 
-        lightDir, 
-        roughness, 
-        metallic, 
-        light.color, 
-        attenuation, 
-        light.strength
-    );
+    vec3 radiance = SimulatePointLight(ctx.pointLightDataBufferAddr, inLightDenseIndex, albedo, normal, viewDir, roughness, metallic);
 
     outColor = vec4(radiance, 1.0);
 }
