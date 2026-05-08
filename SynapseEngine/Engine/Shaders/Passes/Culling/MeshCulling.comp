@@ -71,7 +71,7 @@ void main() {
     bool enableDepthOcclusion = (ctx.enableOcclusionCulling == 1);
 
     // 6. Collaborative Loop: Process all meshes of the current model
-    for (uint m = localThreadId; m < addrs.meshCount; m += 32) {    
+    for (uint m = localThreadId; m < addrs.meshCount; m += gl_WorkGroupSize.x) {    
         GpuMeshCollider localMeshCollider = GET_MESH_COLLIDER(addrs.meshColliders, m);
 
         if (hasAnimation) {

@@ -136,7 +136,6 @@ namespace Syn
         pipeline->AddPass(std::make_unique<DeferredPointLightPass>());
         pipeline->AddPass(std::make_unique<DeferredSpotLightPass>());
 
-        /*
         //Forward+ Cluster Passes
 		pipeline->AddPass(std::make_unique<ClusterSetupPass>());
 		pipeline->AddPass(std::make_unique<ClusterPointLightCountPass>());
@@ -163,7 +162,6 @@ namespace Syn
 		//Transparent Composite Passes (WBOIT)
         pipeline->AddPass(std::make_unique<TransparentCompositeTransitionPass>());
         pipeline->AddPass(std::make_unique<TransparentCompositePass>());
-        */
 
 		//Billboard Passes
 		/*

@@ -16,7 +16,6 @@ namespace Syn
 
         RenderBuffer pointLightIndexBuffer;
         RenderBuffer spotLightIndexBuffer;
-        RenderBuffer lightCounterBuffer;
 
         uint32_t maxClusters = 0;     
         uint32_t tileSize = ComputeGroupSize::Image16D;

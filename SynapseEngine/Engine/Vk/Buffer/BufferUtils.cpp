@@ -71,4 +71,12 @@ namespace Syn::Vk {
 
         vkCmdPipelineBarrier2(cmd, &depInfo);
     }
+
+    void BufferUtils::FillBuffer(VkCommandBuffer cmd, const BufferFillInfo& info) {
+        vkCmdFillBuffer(cmd, info.buffer, info.offset, info.size, info.data);
+    }
+
+    void BufferUtils::UpdateBuffer(VkCommandBuffer cmd, const BufferUpdateInfo& info) {
+        vkCmdUpdateBuffer(cmd, info.buffer, info.offset, info.size, info.pData);
+    }
 }

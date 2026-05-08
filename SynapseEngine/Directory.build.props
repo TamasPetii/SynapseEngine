@@ -24,6 +24,8 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 
+      <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>false</TreatWarningAsError>
       <ConformanceMode>true</ConformanceMode>
