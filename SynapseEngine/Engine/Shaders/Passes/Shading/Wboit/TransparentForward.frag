@@ -2,12 +2,17 @@
 #extension GL_GOOGLE_include_directive : require
 #extension GL_EXT_nonuniform_qualifier : require
 
-#include "../../../../Includes/Core.glsl"
-#include "../../../../Includes/Common/FrameGlobalContext.glsl"
-#include "../../../../Includes/Common/Material.glsl"
-#include "../../../../Includes/Common/Texture.glsl"
-#include "../../../../Includes/Utils/WboitMath.glsl"
-#include "../../../../Includes/Utils/MaterialMath.glsl"
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/Cluster.glsl"
+#include "../../../Includes/Common/Camera.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Material.glsl"
+#include "../../../Includes/Common/Texture.glsl"
+#include "../../../Includes/Utils/WboitMath.glsl"
+#include "../../../Includes/Utils/DepthMath.glsl"
+#include "../../../Includes/Utils/MaterialMath.glsl"
+#include "../../../Includes/Utils/ClusterMath.glsl"
+#include "../../../Includes/Utils/LightMath.glsl"
 
 layout(location = 0) in vec3 inNormal;
 layout(location = 1) in vec4 inTangent;
@@ -17,7 +22,7 @@ layout(location = 3) in flat uvec4 inId; // (EntityID, MaterialID, MeshletIndex,
 layout(location = 0) out vec4 outAccum;
 layout(location = 1) out float outReveal;
 
-#include "../../../../Includes/PushConstants/TraditionalMeshletPassPC.glsl"
+#include "../../../Includes/PushConstants/TraditionalMeshletPassPC.glsl"
 
 layout(push_constant) uniform PushConstants {
    TraditionalMeshletPassPC pc;
@@ -87,7 +92,7 @@ void main()
         uint lightEntityIndex = GET_LIGHT_INDEX(ctx.forwardPlusPointLightIndexListBufferAddr, globalLightIndex);
         uint lightDenseIndex = GET_SPARSE_INDEX(ctx.pointLightSparseMapBufferAddr, lightEntityIndex);
         
-        totalRadiance += SimulatePointLight(ctx.pointLightDataBufferAddr, lightDenseIndex, inWorldPos, albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness);
+        totalRadiance += SimulatePointLight(ctx.pointLightDataBufferAddr, lightDenseIndex, worldPos, albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness);
     }
 
     for (uint i = 0; i < cluster.spotLightCount; ++i) {
@@ -95,7 +100,7 @@ void main()
         uint lightEntityIndex = GET_LIGHT_INDEX(ctx.forwardPlusSpotLightIndexListBufferAddr, globalLightIndex);
         uint lightDenseIndex = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, lightEntityIndex);
         
-        totalRadiance += SimulateSpotLight(ctx.spotLightDataBufferAddr, lightDenseIndex, inWorldPos, albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness);
+        totalRadiance += SimulateSpotLight(ctx.spotLightDataBufferAddr, lightDenseIndex, worldPos, albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness);
     }
 
     //Ambient

@@ -7,10 +7,7 @@ namespace Syn
     {
         auto settings = context.scene->GetSettings();
 
-		return settings->enableTransparentPicking || 
-               settings->enableBillboardDirectionalLights || 
-               settings->enableBillboardPointLights ||
-               settings->enableBillboardSpotLights;
+        return true;
     }
 
     void DepthCopyPass::PrepareFrame(const RenderContext& context) {

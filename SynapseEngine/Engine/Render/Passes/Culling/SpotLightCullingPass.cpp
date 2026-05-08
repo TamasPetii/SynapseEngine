@@ -53,6 +53,7 @@ namespace Syn {
         auto imageManager = ServiceLocator::GetImageManager();
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
+        //Using current frame's depth pyramid!!
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
         auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);
 

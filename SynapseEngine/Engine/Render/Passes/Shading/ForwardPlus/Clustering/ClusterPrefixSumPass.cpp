@@ -36,22 +36,22 @@ namespace Syn
     void ClusterPrefixSumPass::Dispatch(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
 
-        Vk::BufferBarrierInfo listBarrier{};
-        listBarrier.buffer = drawData->ForwardPlus.clusterListBuffer.GetHandle(context.frameIndex, true);
-        listBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        listBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
-        listBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        listBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
-        Vk::BufferUtils::InsertBarrier(context.cmd, listBarrier);
+        Vk::BufferBarrierInfo listBarrierPre{};
+        listBarrierPre.buffer = drawData->ForwardPlus.clusterListBuffer.GetHandle(context.frameIndex, true);
+        listBarrierPre.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        listBarrierPre.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        listBarrierPre.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        listBarrierPre.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, listBarrierPre);
 
         vkCmdDispatch(context.cmd, 1, 1, 1);
         
-        Vk::BufferBarrierInfo listBarrier{};
-        listBarrier.buffer = drawData->ForwardPlus.clusterListBuffer.GetHandle(context.frameIndex, true);
-        listBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        listBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
-        listBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        listBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
-        Vk::BufferUtils::InsertBarrier(context.cmd, listBarrier);
+        Vk::BufferBarrierInfo listBarrierPost{};
+        listBarrierPost.buffer = drawData->ForwardPlus.clusterListBuffer.GetHandle(context.frameIndex, true);
+        listBarrierPost.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        listBarrierPost.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        listBarrierPost.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        listBarrierPost.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, listBarrierPost);
     }
 }

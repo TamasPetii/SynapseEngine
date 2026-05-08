@@ -13,7 +13,7 @@ layout(early_fragment_tests) in;
 #include "../../../../Includes/PushConstants/TraditionalMeshletPassPC.glsl"
 
 layout(push_constant) uniform PushConstants {
-   TraditMeshletPassPC pc;
+   TraditionalMeshletPassPC pc;
 };
 
 layout(location = 0) in vec2 inUV;

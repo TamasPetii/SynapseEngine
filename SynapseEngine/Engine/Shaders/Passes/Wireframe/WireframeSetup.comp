@@ -25,10 +25,10 @@ void main() {
     uint activeInstances = 0;
 
     if (id < ctx.globalTraditionalCommandsCount) {
-        activeInstances = GET_TRADITIONAL_CMD(ctx.globalIndirectCommandCount, id).instanceCount;
+        activeInstances = GET_TRADITIONAL_CMD(ctx.globalIndirectCommandBufferAddr, id).instanceCount;
     } 
     else {
-        uint64_t meshletBaseAddr = ctx.globalIndirectCommandCount + (ctx.globalTraditionalCommandsCount * 16ul);
+        uint64_t meshletBaseAddr = ctx.globalIndirectCommandBufferAddr + (ctx.globalTraditionalCommandsCount * 16ul);
         uint localCmdIndex = id - ctx.globalTraditionalCommandsCount;
         
         activeInstances = GET_MESHLET_CMD(meshletBaseAddr, localCmdIndex).groupCountX;

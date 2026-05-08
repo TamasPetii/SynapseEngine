@@ -32,13 +32,10 @@ namespace Syn {
     void HizLinearPreparePass::PrepareFrame(const RenderContext& context) {
         auto scene = context.scene;
 
-        uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
-
-        auto prevGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, prevFrameIndex);
         auto currGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
-        auto depthOpaque = prevGroup->GetImage(RenderTargetNames::OpaqueDepth);
-        auto depthOpaqueTransparent = prevGroup->GetImage(RenderTargetNames::TransparentDepth);
+        auto depthOpaque = currGroup->GetImage(RenderTargetNames::OpaqueDepth);
+        auto depthOpaqueTransparent = currGroup->GetImage(RenderTargetNames::TransparentDepth);
         auto depthPyramid = currGroup->GetImage(RenderTargetNames::DepthPyramid);
 
         _imageTransitions.push_back({
@@ -72,11 +69,11 @@ namespace Syn {
         uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
 
         auto imageManager = ServiceLocator::GetImageManager();
-        auto prevGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, prevFrameIndex);
+
         auto currGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
-        auto depthOpaque = prevGroup->GetImage(RenderTargetNames::OpaqueDepth);
-		auto depthOpaqueTransparent = prevGroup->GetImage(RenderTargetNames::TransparentDepth);
+        auto depthOpaque = currGroup->GetImage(RenderTargetNames::OpaqueDepth);
+		auto depthOpaqueTransparent = currGroup->GetImage(RenderTargetNames::TransparentDepth);
         auto depthPyramid = currGroup->GetImage(RenderTargetNames::DepthPyramid);
         auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge);
 

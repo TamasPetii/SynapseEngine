@@ -1,5 +1,5 @@
 #include "SceneDrawData.h"
-#include "Engine/Shaders/Includes/PushConstants/FrameGlobalContext.glsl"
+#include "Engine/Shaders/Includes/Common/FrameGlobalContext.glsl"
 
 namespace Syn
 {

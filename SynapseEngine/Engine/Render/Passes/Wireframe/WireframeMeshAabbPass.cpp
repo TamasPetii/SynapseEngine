@@ -93,35 +93,14 @@ namespace Syn {
         auto animationManager = ServiceLocator::GetAnimationManager();
         uint32_t fIdx = context.frameIndex;
 
-        auto cubeMesh = modelManager->GetResource(MeshSourceNames::Cube);
-        if (!cubeMesh) return;
-
+        auto cube = modelManager->GetResource(MeshSourceNames::Cube);
 		auto isGpu = scene->GetSettings()->enableGpuCulling;
 
         WireframePC pc{};
-        pc.animationAddressBuffer = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
-        pc.animationBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationData, fIdx);
-        pc.animationSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationSparseMap, fIdx);
-
-        pc.modelAddressBuffer = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
-        pc.globalInstanceBuffers = drawData->Models.instanceBuffer.GetAddress(fIdx, isGpu);
-        pc.globalIndirectCommandDescriptorBuffers = drawData->Models.descriptorBuffer.GetAddress(fIdx, isGpu);
-        pc.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
-        pc.cameraSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
-        pc.transformBufferAddr = compManager->GetBufferAddr(BufferNames::TransformData, fIdx);
-        pc.transformSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::TransformSparseMap, fIdx);
-
-        pc.indexBufferAddr = cubeMesh->hardwareBuffers.indices->GetDeviceAddress();
-        pc.vertexBufferAddr = cubeMesh->hardwareBuffers.vertexPositions->GetDeviceAddress();
-
-        pc.debugInstanceBufferAddr = 0;
-        pc.modelBufferAddr = compManager->GetBufferAddr(BufferNames::ModelData, fIdx);
-        pc.modelSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::ModelSparseMap, fIdx);
-
-        pc.activeCameraEntity = scene->GetSettings()->useDebugCamera ? scene->GetDebugCameraEntity() : scene->GetSceneCameraEntity();
+		pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+		pc.vertexPositionBufferAddr = cube->hardwareBuffers.vertexPositions->GetDeviceAddress();
+		pc.indexBufferAddr = cube->hardwareBuffers.indices->GetDeviceAddress();
         pc.isSphere = 0;
-        pc.drawIdOffset = 0;
-        pc.debugColor = glm::vec4(0, 1, 0, 1);
 
         vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(WireframePC), &pc);
     }

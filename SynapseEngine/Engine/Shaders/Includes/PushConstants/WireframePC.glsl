@@ -8,7 +8,6 @@ struct WireframePC {
     uint64_t indexBufferAddr;
     uint64_t vertexPositionBufferAddr;
     uint isSphere;
-    uint drawIdOffset;
 };
 
 #endif

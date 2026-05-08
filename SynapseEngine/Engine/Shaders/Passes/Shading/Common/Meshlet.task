@@ -43,8 +43,8 @@ void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
     // 2. Fetch Draw Descriptor and Instance Data
-    MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.globalIndirectCommandDescriptorBuffers, pc.baseDescriptorOffset + gl_DrawID);
-    uint rawEntityData = GET_INSTANCE(ctx.globalInstanceBuffers, desc.instanceOffset + localInstanceID);
+    MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.globalIndirectCommandDescriptorBufferAddr, pc.baseDescriptorOffset + gl_DrawID);
+    uint rawEntityData = GET_INSTANCE(ctx.globalInstanceIndexBufferAddr, desc.instanceOffset + localInstanceID);
     
     bool isParentFullyInside = HAS_FLAG(rawEntityData, 31);
     uint entityId = rawEntityData & ~(1u << 31);
@@ -56,7 +56,7 @@ void main() {
     uint cameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraDenseIndex);
 
-    GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBuffer, desc.modelIndex);
+    GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, desc.modelIndex);
 
     // 4. Resolve Meshlet range for this group
     uint flatLodIndex = (desc.meshIndex * 4) + desc.lodIndex; 
@@ -75,7 +75,7 @@ void main() {
             if (animIdx != INVALID_INDEX) {
                 AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animIdx);
                 if (animComp.animationIndex != INVALID_INDEX) {
-                    GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBuffer, animComp.animationIndex);
+                    GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
                     uint frameOffset = animComp.frameIndex * animAddrs.descriptor.globalMeshletCount;
                     localCollider = GET_MESHLET_COLLIDER(animAddrs.frameMeshletColliders, frameOffset + globalMeshletIdx);
                 }
@@ -85,7 +85,7 @@ void main() {
         GpuMeshletCollider worldCollider = TransformCollider(localCollider, transform.transform, transform.transformIT);
 
         // 7. Backface Cone Culling
-        if (ctx.disableConeCulling == 0 && TestConeCulling(worldCollider, camera.eye.xyz)) {
+        if ((ctx.enableConeCulling == 1) && TestConeCulling(worldCollider, camera.eye.xyz)) {
             isVisible = false;
         }
 

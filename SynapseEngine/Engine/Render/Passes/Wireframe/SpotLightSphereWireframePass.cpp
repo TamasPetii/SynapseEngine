@@ -108,19 +108,13 @@ namespace Syn {
         auto modelManager = ServiceLocator::GetModelManager();
         uint32_t fIdx = context.frameIndex;
 
-        auto mesh = modelManager->GetResource(MeshSourceNames::Sphere);
+        auto sphere = modelManager->GetResource(MeshSourceNames::Sphere);
 
         WireframeLightPC pc{};
-        pc.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
-        pc.cameraSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
-        pc.activeCameraEntity = scene->GetSettings()->useDebugCamera ? scene->GetDebugCameraEntity() : scene->GetSceneCameraEntity();
-        pc.lightDataAddr = compManager->GetBufferAddr(BufferNames::SpotLightData, fIdx);
-        pc.lightColliderDataAddr = compManager->GetBufferAddr(BufferNames::SpotLightColliderData, fIdx);
-        pc.lightSparseMapAddr = compManager->GetBufferAddr(BufferNames::SpotLightSparseMap, fIdx);
-        pc.visibleLightAddr = compManager->GetBufferAddr(BufferNames::SpotLightVisibleData, fIdx);
-        pc.vertexBufferAddr = mesh->hardwareBuffers.vertexPositions->GetDeviceAddress();
-        pc.indexBufferAddr = mesh->hardwareBuffers.indices->GetDeviceAddress();
-        pc.lightDrawType = 2;
+		pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+		pc.vertexPositionBufferAddr = sphere->hardwareBuffers.vertexPositions->GetDeviceAddress();
+		pc.indexBufferAddr = sphere->hardwareBuffers.indices->GetDeviceAddress();
+		pc.lightDrawType = 2;
 
         vkCmdPushConstants(
             context.cmd,

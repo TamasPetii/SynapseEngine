@@ -4,9 +4,9 @@
 
 namespace Syn 
 {
-    class SYN_API ClusterLightSyncPass : public ComputePass {
+    class SYN_API ClusterLightWriteSyncPass : public ComputePass {
     public:
-        std::string GetName() const override { return "ClusterLightSyncPass"; }
+        std::string GetName() const override { return "ClusterLightWriteSyncPass"; }
         void Initialize() override {}
     protected:
         bool ShouldExecute(const RenderContext& context) const override;

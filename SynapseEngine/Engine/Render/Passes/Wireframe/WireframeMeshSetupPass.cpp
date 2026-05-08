@@ -36,11 +36,7 @@ namespace Syn {
 		auto isGpu = scene->GetSettings()->enableGpuCulling;
 
         WireframeSetupPC pc{};
-        pc.globalIndirectCmdsAddr = drawData->Models.indirectBuffer.GetAddress(fIdx, isGpu);
-        pc.aabbCmdsAddr = drawData->Debug.modelAabbIndirectBuffer.GetAddress(fIdx, isGpu);
-        pc.sphereCmdsAddr = drawData->Debug.modelSphereIndirectBuffer.GetAddress(fIdx, isGpu);
-        pc.totalTraditionalCommands = drawData->Models.activeTraditionalCount;
-        pc.totalCommands = totalCommands;
+		pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
 
         vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(WireframeSetupPC), &pc);
     }

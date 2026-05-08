@@ -1,11 +1,12 @@
 #ifndef SYN_INCLUDES_UTILS_LIGHT_MATH_GLSL
 #define SYN_INCLUDES_UTILS_LIGHT_MATH_GLSL
 
-#include "../Includes/Common/DirectionLight.glsl"
-#include "../Includes/Common/PointLight.glsl"
-#include "../Includes/Common/SpotLight.glsl"
+#include "PbrMath.glsl"
+#include "../Common/DirectionLight.glsl"
+#include "../Common/PointLight.glsl"
+#include "../Common/SpotLight.glsl"
 
-vec3 SimulateAmbient(vec3 albedo, float ambientIntensity, float globalAmbientIntensity) {
+vec3 SimulateAmbientLight(vec3 albedo, float ambientIntensity, float globalAmbientIntensity) {
     return albedo * ambientIntensity * globalAmbientIntensity;
 }
 

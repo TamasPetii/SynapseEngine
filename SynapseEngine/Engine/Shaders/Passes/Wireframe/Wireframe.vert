@@ -25,7 +25,7 @@ void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
     // 1. Fetch Descriptor and Entity ID
-    MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.globalIndirectCommandDescriptorBufferAddr, pc.drawIdOffset + gl_DrawIDARB);
+    MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.globalIndirectCommandDescriptorBufferAddr, gl_DrawIDARB);
     uint rawEntityData = GET_INSTANCE(ctx.globalInstanceIndexBufferAddr, desc.instanceOffset + gl_InstanceIndex);
     uint entityId = rawEntityData & ~(1u << 31);
     
@@ -47,8 +47,8 @@ void main() {
     }
 
     // 3. Fetch Vertex Data
-    uint realVertexIndex = GET_INDEX(ctx.indexBufferAddr, gl_VertexIndex);
-    GpuVertexPosition v = GET_VERTEX_POS(ctx.vertexPositionBufferAddr, realVertexIndex);
+    uint realVertexIndex = GET_INDEX(pc.indexBufferAddr, gl_VertexIndex);
+    GpuVertexPosition v = GET_VERTEX_POS(pc.vertexPositionBufferAddr, realVertexIndex);
 
     // 4. Calculate Local Position
     vec3 localPos;

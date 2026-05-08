@@ -143,7 +143,10 @@ namespace Syn {
     void MeshletTransparentDepthPrepass::BindDescriptors(const RenderContext& context)
     {
         auto imageManager = ServiceLocator::GetImageManager();
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+
+        //Using prevous frame's depth pyramid!
+        uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, prevFrameIndex);
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
         auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);
 

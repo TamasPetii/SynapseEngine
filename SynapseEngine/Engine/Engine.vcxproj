@@ -264,6 +264,7 @@
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\TraditionalTransparentDepthPrepass.cpp" />
     <ClCompile Include="Render\Passes\Shading\Common\TransparentInitPass.cpp" />
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\Lighting\TraditionalOpaqueForwardPass.cpp" />
+    <ClCompile Include="Render\Passes\TransitionPass.cpp" />
     <ClCompile Include="Utils\RenderBuffer.cpp" />
     <ClCompile Include="Render\Passes\Culling\CullingCommandResetPass.cpp" />
     <ClCompile Include="Render\Passes\Shading\Wboit\PreCompositeTransitionPass.cpp" />
@@ -307,14 +308,13 @@
     <ClCompile Include="System\Light\Point\PointLightShadowSystem.cpp" />
     <ClCompile Include="System\Light\Point\PointLightSystem.cpp" />
     <ClCompile Include="Render\Passes\Shading\Deferred\Lighting\DeferredEmissiveAoPass.cpp" />
-    <ClCompile Include="Render\Passes\Wireframe\DebugInitPass.cpp" />
     <ClCompile Include="Component\Light\Spot\SpotLightComponent.cpp" />
     <ClCompile Include="Component\Light\Spot\SpotLightShadowComponent.cpp" />
     <ClCompile Include="System\Physics\PhysicsSystem.cpp" />
     <ClCompile Include="Physics\JoltPhysicsEngine.cpp" />
     <ClCompile Include="Physics\IPhysicsEngine.cpp" />
     <ClCompile Include="Physics\PhysicsTypes.cpp" />
-    <ClCompile Include="Render\Passes\Hiz\DepthCopyPass.cpp" />
+    <ClCompile Include="Render\Passes\Shading\Common\DepthCopyPass.cpp" />
     <ClCompile Include="Render\Passes\Shading\Wboit\MeshletTransparentForwardPass.cpp" />
     <ClCompile Include="Render\Passes\Shading\Deferred\GBuffer\MeshletOpaqueDeferredPass.cpp" />
     <ClCompile Include="Render\Passes\Present\GuiPass.cpp" />
@@ -566,9 +566,6 @@
     <ClCompile Include="Render\Passes\Wireframe\WireframeMeshAabbPass.cpp" />
     <ClCompile Include="Render\Passes\Wireframe\WireframeMeshSpherePass.cpp" />
     <ClCompile Include="Render\Passes\Wireframe\WireframeMeshSetupPass.cpp" />
-    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshletAabbPass.cpp" />
-    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshletSpherePass.cpp" />
-    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshletInitPass.cpp" />
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -604,6 +601,7 @@
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\TraditionalTransparentDepthPrepass.h" />
     <ClInclude Include="Render\Passes\Shading\Common\TransparentInitPass.h" />
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\Lighting\TraditionalOpaqueForwardPass.h" />
+    <ClInclude Include="Render\Passes\TransitionPass.h" />
     <ClInclude Include="Utils\RenderBuffer.h" />
     <ClInclude Include="Render\Passes\Culling\CullingCommandResetPass.h" />
     <ClInclude Include="Render\Passes\Shading\Wboit\PreCompositeTransitionPass.h" />
@@ -647,14 +645,13 @@
     <ClInclude Include="System\Light\Point\PointLightShadowSystem.h" />
     <ClInclude Include="System\Light\Point\PointLightSystem.h" />
     <ClInclude Include="Render\Passes\Shading\Deferred\Lighting\DeferredEmissiveAoPass.h" />
-    <ClInclude Include="Render\Passes\Wireframe\DebugInitPass.h" />
     <ClInclude Include="Component\Light\Spot\SpotLightComponent.h" />
     <ClInclude Include="Component\Light\Spot\SpotLightShadowComponent.h" />
     <ClInclude Include="System\Physics\PhysicsSystem.h" />
     <ClInclude Include="Physics\JoltPhysicsEngine.h" />
     <ClInclude Include="Physics\IPhysicsEngine.h" />
     <ClInclude Include="Physics\PhysicsTypes.h" />
-    <ClInclude Include="Render\Passes\Hiz\DepthCopyPass.h" />
+    <ClInclude Include="Render\Passes\Shading\Common\DepthCopyPass.h" />
     <ClInclude Include="Material\MaterialRenderType.h" />
     <ClInclude Include="Render\Passes\Shading\Wboit\MeshletTransparentForwardPass.h" />
     <ClInclude Include="Render\Passes\Shading\Deferred\GBuffer\MeshletOpaqueDeferredPass.h" />
@@ -942,9 +939,6 @@
     <ClInclude Include="Render\Passes\Wireframe\WireframeMeshAabbPass.h" />
     <ClInclude Include="Render\Passes\Wireframe\WireframeMeshSpherePass.h" />
     <ClInclude Include="Render\Passes\Wireframe\WireframeMeshSetupPass.h" />
-    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshletAabbPass.h" />
-    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshletSpherePass.h" />
-    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshletInitPass.h" />
     <ClInclude Include="Render\Passes\Culling\WorkGraphCullingPass.h" />
   </ItemGroup>
   <ItemGroup>

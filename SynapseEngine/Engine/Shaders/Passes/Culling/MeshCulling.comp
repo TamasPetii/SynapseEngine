@@ -119,7 +119,7 @@ void main() {
                 uint64_t meshletBaseAddr = ctx.globalIndirectCommandBufferAddr + (ctx.globalTraditionalCommandsCount * 16ul);
                 slotIndex = atomicAdd(GET_MESHLET_CMD(meshletBaseAddr, indirectIdx).groupCountX, 1);
             } else {
-                slotIndex = atomicAdd(GET_TRADITIONAL_CMD(ctx.globalIndirectCommandCount, indirectIdx).instanceCount, 1);
+                slotIndex = atomicAdd(GET_TRADITIONAL_CMD(ctx.globalIndirectCommandBufferAddr, indirectIdx).instanceCount, 1);
             }
 
             // Encode visibility and write Instance Data

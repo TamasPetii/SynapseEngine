@@ -2,19 +2,19 @@
 #extension GL_EXT_mesh_shader : require
 #extension GL_GOOGLE_include_directive : require
 
-#include "../../../../Includes/Core.glsl"
-#include "../../../../Includes/Common/FrameGlobalContext.glsl"
-#include "../../../../Includes/Common/Camera.glsl"
-#include "../../../../Includes/Common/Mesh.glsl"
-#include "../../../../Includes/Common/Model.glsl"
-#include "../../../../Includes/Common/Transform.glsl"
-#include "../../../../Includes/Common/Animation.glsl"
-#include "../../../../Includes/Common/Material.glsl"
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Camera.glsl"
+#include "../../../Includes/Common/Mesh.glsl"
+#include "../../../Includes/Common/Model.glsl"
+#include "../../../Includes/Common/Transform.glsl"
+#include "../../../Includes/Common/Animation.glsl"
+#include "../../../Includes/Common/Material.glsl"
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = 64, max_primitives = 64) out;
 
-#include "../../../../Includes/Payload/TaskPayload.glsl"
+#include "../../../Includes/Payload/TaskPayload.glsl"
 
 taskPayloadSharedEXT TaskPayload payload;
 
@@ -23,7 +23,7 @@ layout(location = 1) out vec4 outTangent[];
 layout(location = 2) out vec2 outUV[];
 layout(location = 3) out flat uvec4 outId[]; // (Entity, Material, Meshlet, LOD)
 
-#include "../../../../Includes/PushConstants/TraditionalMeshletPassPC.glsl"
+#include "../../../Includes/PushConstants/TraditionalMeshletPassPC.glsl"
 
 layout(push_constant) uniform PushConstants {
    TraditionalMeshletPassPC pc;

@@ -6,7 +6,6 @@
 #include "../../../../Includes/Common/Texture.glsl"
 #include "../../../../Includes/Common/Material.glsl"
 #include "../../../../Includes/Utils/ColorMath.glsl"
-#include "../../../../Includes/Utils/LightMath.glsl"
 #include "../../../../Includes/Utils/MaterialMath.glsl"
 
 layout(location = 0) in vec3 inNormal;
@@ -22,7 +21,7 @@ layout(location = 3) out uint outEntityId;
 #include "../../../../Includes/PushConstants/TraditionalMeshletPassPC.glsl"
 
 layout(push_constant) uniform PushConstants {
-   TraditioMeshletPassPC pc;
+   TraditionalMeshletPassPC pc;
 };
 
 void main() {

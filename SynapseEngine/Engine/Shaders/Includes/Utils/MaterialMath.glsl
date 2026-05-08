@@ -1,8 +1,8 @@
 #ifndef SYN_INCLUDES_UTILS_MATERIAL_MATH_GLSL
 #define SYN_INCLUDES_UTILS_MATERIAL_MATH_GLSL
 
-#include "../Includes/Common/Texture.glsl"
-#include "../Includes/Common/Material.glsl"
+#include "../Common/Texture.glsl"
+#include "../Common/Material.glsl"
 
 vec4 EvaluateAlbedoAlpha(const Material mat, vec2 uv) {
     vec4 finalColor = mat.color;
@@ -29,9 +29,9 @@ vec3 EvaluateNormal(Material mat, vec2 uv, vec3 vertexNormal, vec4 vertexTangent
     return normalize(TBN * tangentSpaceNormal);
 }
 
-vec2 EvaluateMetallicRoughness(Material mat, vec2 uv, float metalness, float roughness) {
-    metalness = mat.metalness;
-    roughness = mat.roughness;
+vec2 EvaluateMetallicRoughness(Material mat, vec2 uv) {
+    float metalness = mat.metalness;
+    float roughness = mat.roughness;
 
     if (HAS_METALNESS_TEX(mat)) {
         metalness *= SampleTexture2D(mat.metalnessTexture, SAMPLER_LINEAR_ANISO, uv).r;

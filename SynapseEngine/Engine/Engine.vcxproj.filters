@@ -648,15 +648,6 @@
     <ClCompile Include="Render\Passes\Wireframe\WireframeMeshSetupPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshletAabbPass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshletSpherePass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshletInitPass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Animation\Loader\IAnimationLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -771,7 +762,7 @@
     <ClCompile Include="Render\Passes\Shading\Wboit\TransparentCompositePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Hiz\DepthCopyPass.cpp">
+    <ClCompile Include="Render\Passes\Shading\Common\DepthCopyPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Physics\PhysicsTypes.cpp">
@@ -796,9 +787,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Component\Physics\CapsuleColliderComponent.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\Passes\Wireframe\DebugInitPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Component\Light\Direction\DirectionLightComponent.cpp">
@@ -1018,6 +1006,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\Lighting\TraditionalOpaqueForwardPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\TransitionPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1760,15 +1751,6 @@
     <ClInclude Include="Render\Passes\Wireframe\WireframeMeshSetupPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshletAabbPass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshletSpherePass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshletInitPass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Animation\Loader\IAnimationLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -1886,7 +1868,7 @@
     <ClInclude Include="Render\Passes\Shading\Wboit\TransparentCompositePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Hiz\DepthCopyPass.h">
+    <ClInclude Include="Render\Passes\Shading\Common\DepthCopyPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Physics\PhysicsTypes.h">
@@ -1911,9 +1893,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Component\Physics\CapsuleColliderComponent.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\Passes\Wireframe\DebugInitPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Component\Light\Direction\DirectionLightComponent.h">
@@ -2142,6 +2121,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\Lighting\TraditionalOpaqueForwardPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\TransitionPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

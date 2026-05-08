@@ -58,7 +58,7 @@ void main()
 
     // 5. Physically Based Rendering (PBR) Light Calculation
     vec3 viewDir = normalize(camera.eye.xyz - position);
-    vec3 radiance = SimulatePointLight(ctx.pointLightDataBufferAddr, inLightDenseIndex, albedo, normal, viewDir, roughness, metallic);
+    vec3 radiance = SimulatePointLight(ctx.pointLightDataBufferAddr, inLightDenseIndex, position, albedo, normal, viewDir, roughness, metallic);
 
     outColor = vec4(radiance, 1.0);
 }

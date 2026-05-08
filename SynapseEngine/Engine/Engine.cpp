@@ -193,11 +193,14 @@ namespace Syn
 
 	void Engine::InitRenderManager(const EngineInitParams& params)
 	{
+		/*
 #ifdef SYN_PERFORMANCE
 		_renderManager = std::move(RendererFactory::CreatePerformanceRenderer(_frameContext.framesInFlight));
 #else
 		_renderManager = std::move(RendererFactory::CreateDeferredRenderer(_frameContext.framesInFlight));
 #endif
+		*/
+		_renderManager = std::move(RendererFactory::CreateDeferredRenderer(_frameContext.framesInFlight));
 		_renderManager->SetGuiRenderCallback(params.onRenderGuiCallback);
 	}
 

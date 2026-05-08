@@ -94,10 +94,14 @@ struct FrameGlobalContext {
     float sliceScaleFactor;
 };
 
+#ifndef __cplusplus
+
 layout(buffer_reference, std430) readonly restrict buffer FrameContextBuffer { 
     FrameGlobalContext data; 
 };
 
 #define GET_FRAME_CONTEXT(addr) FrameContextBuffer(addr).data
+
+#endif
 
 #endif
