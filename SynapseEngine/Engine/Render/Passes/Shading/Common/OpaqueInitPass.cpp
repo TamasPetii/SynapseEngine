@@ -16,7 +16,7 @@ namespace Syn {
         };
 
         std::vector<TargetClearInfo> colorTargets = {
-            { RenderTargetNames::Main, VkClearValue{.color = {.float32 = {0.0f, 0.0f, 0.0f, 0.0f}}} },
+            { RenderTargetNames::Main, VkClearValue{.color = {.float32 = {0.0f, 0.0f, 0.0f, 1.0f}}} },
             { RenderTargetNames::ColorMetallic, VkClearValue{.color = {.float32 = {0.0f, 0.0f, 0.0f, 0.0f}}} },
             { RenderTargetNames::NormalRoughness, VkClearValue{.color = {.float32 = {0.0f, 0.0f, 0.0f, 0.0f}}} },
             { RenderTargetNames::EmissiveAo, VkClearValue{.color = {.float32 = {0.0f, 0.0f, 0.0f, 0.0f}}} },

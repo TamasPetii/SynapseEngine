@@ -235,6 +235,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Render\Passes\Setup\HizInitPass.cpp" />
+    <ClCompile Include="Render\Passes\Present\PresentationTransitionPass.cpp" />
     <ClCompile Include="Render\Passes\Billboard\BillboardTransitionPass.cpp" />
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\Lighting\OpaqueForwardTransitionPass.cpp" />
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\OpaqueDepthTransitionPrepass.cpp" />
@@ -574,6 +576,8 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\Passes\Setup\HizInitPass.h" />
+    <ClInclude Include="Render\Passes\Present\PresentationTransitionPass.h" />
     <ClInclude Include="Render\Passes\Billboard\BillboardTransitionPass.h" />
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\Lighting\OpaqueForwardTransitionPass.h" />
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\OpaqueDepthTransitionPrepass.h" />

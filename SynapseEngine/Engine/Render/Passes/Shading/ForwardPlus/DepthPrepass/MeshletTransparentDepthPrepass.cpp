@@ -24,7 +24,7 @@ namespace Syn {
     MeshletTransparentDepthPrepass::MeshletTransparentDepthPrepass(MaterialRenderType renderType)
         : _renderType(renderType)
     {
-        _passName = (_renderType == MaterialRenderType::Transparent1Sided) ? "Meshlet_Transparent_Depth_Prepass_1Sided" : "Meshlet_Transparent_Depth_Prepass_2Sided";
+        _passName = (_renderType == MaterialRenderType::Transparent1Sided) ? "MeshletTransparentDepthPrepass1Sided" : "MeshletTransparentDepthPrepass2Sided";
     }
 
     void MeshletTransparentDepthPrepass::Initialize() {

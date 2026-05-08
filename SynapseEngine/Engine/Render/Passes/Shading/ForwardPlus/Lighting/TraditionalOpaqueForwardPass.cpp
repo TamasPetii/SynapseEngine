@@ -30,10 +30,10 @@ namespace Syn {
         assert(_renderType == MaterialRenderType::Opaque1Sided || _renderType == MaterialRenderType::Opaque2Sided);
 
         if (_renderType == MaterialRenderType::Opaque1Sided) {
-            _passName = "Traditional_Opaque_Forward_1Sided";
+            _passName = "TraditionalOpaqueForward1Sided";
         }
         else {
-            _passName = "Traditional_Opaque_Forward_2Sided";
+            _passName = "TraditionalOpaqueForward2Sided";
         }
     }
 

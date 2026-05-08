@@ -25,10 +25,11 @@ namespace Syn
 
     void SceneDrawData::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex)
     {
+        frameContextBuffer.RecordSync(cmd, frameIndex, 1);
+
         uint32_t currentSync = syncFramesRemaining.load(std::memory_order_relaxed);
         if (currentSync == 0) return;
 
-        frameContextBuffer.RecordSync(cmd, frameIndex, 1);
         Models.CoherentToGpuBufferSync(cmd, frameIndex);
         Debug.CoherentToGpuBufferSync(cmd, frameIndex);
         PointLights.CoherentToGpuBufferSync(cmd, frameIndex);

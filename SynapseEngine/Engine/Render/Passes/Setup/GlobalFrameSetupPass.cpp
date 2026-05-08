@@ -49,6 +49,9 @@ namespace Syn {
         ctx.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
         ctx.cameraSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
 
+        ctx.transformBufferAddr = compManager->GetBufferAddr(BufferNames::TransformData, fIdx);
+        ctx.transformSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::TransformSparseMap, fIdx);
+
         ctx.modelAddressBufferAddr = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
         ctx.modelBufferAddr = compManager->GetBufferAddr(BufferNames::ModelData, fIdx);
         ctx.modelSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::ModelSparseMap, fIdx);

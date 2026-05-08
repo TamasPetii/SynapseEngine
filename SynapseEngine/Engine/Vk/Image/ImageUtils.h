@@ -55,6 +55,18 @@ namespace Syn::Vk {
         VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
     };
 
+    struct SYN_API ImageClearColorInfo {
+        VkImage image = VK_NULL_HANDLE;
+        VkImageLayout imageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        VkClearColorValue clearColor = { {0.0f, 0.0f, 0.0f, 0.0f} };
+
+        VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        uint32_t baseMipLevel = 0;
+        uint32_t levelCount = VK_REMAINING_MIP_LEVELS;
+        uint32_t baseArrayLayer = 0;
+        uint32_t layerCount = VK_REMAINING_ARRAY_LAYERS;
+    };
+
     class SYN_API ImageUtils {
     public:
         static void InferSrcState(VkImageLayout layout, VkPipelineStageFlags2& outStage, VkAccessFlags2& outAccess);
@@ -64,6 +76,7 @@ namespace Syn::Vk {
         static void CopyImage(VkCommandBuffer cmd, const ImageCopyInfo& info);
         static void CopyImageToBuffer(VkCommandBuffer cmd, const ImageToBufferCopyInfo& info);
         static void GenerateMipMaps(VkCommandBuffer cmd, VkImage image, VkFormat format, uint32_t width, uint32_t height, uint32_t mipLevels);
+        static void ClearColorImage(VkCommandBuffer cmd, const ImageClearColorInfo& info);
         static uint32_t CalculateMipLevels(uint32_t width, uint32_t height);
     };
 }

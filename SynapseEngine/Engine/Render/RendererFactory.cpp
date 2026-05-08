@@ -18,11 +18,13 @@
 #include "Engine/Render/Passes/Culling/SpotLightCullingPass.h"
 #include "Engine/Render/Passes/Culling/CullingCommandResetPass.h"
 
+#include "Engine/Render/Passes/Setup/HizInitPass.h"
 #include "Engine/Render/Passes/Hiz/HizLinearPreparePass.h"
 #include "Engine/Render/Passes/Hiz/HizDownsamplePass.h"
 
 #include "Engine/Render/Passes/Present/GuiPass.h"
 #include "Engine/Render/Passes/Present/CompositePass.h"
+#include "Engine/Render/Passes/Present/PresentationTransitionPass.h"
 
 #include "Engine/Render/Passes/Setup/GLobalFrameSetupPass.h"
 
@@ -88,6 +90,7 @@ namespace Syn
 		pipeline->AddPass(std::make_unique<GlobalFrameSetupPass>());
 		pipeline->AddPass(std::make_unique<OpaqueInitPass>());
 		pipeline->AddPass(std::make_unique<TransparentInitPass>());
+		pipeline->AddPass(std::make_unique<HizInitPass>());
 
 		//Geometry Culling Passes
 		pipeline->AddPass(std::make_unique<CullingCommandResetPass>());
@@ -189,6 +192,7 @@ namespace Syn
         pipeline->AddPass(std::make_unique<BloomCompositePass>());
 
 		//Gui and Present Passes
+		pipeline->AddPass(std::make_unique<PresentationTransitionPass>());
         pipeline->AddPass(std::make_unique<GuiPass>());
 
         pipeline->InitializeAll();
@@ -346,7 +350,6 @@ namespace Syn
             });
 
         rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::Bloom, bloomImageSpec);
-
 
         Vk::ImageConfig opaqueDepthSpec{};
         opaqueDepthSpec.width = initWidth;
