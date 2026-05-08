@@ -21,7 +21,7 @@ namespace Syn {
     TraditionalTransparentDepthPrepass::TraditionalTransparentDepthPrepass(MaterialRenderType renderType)
         : _renderType(renderType)
     {
-        _passName = (_renderType == MaterialRenderType::Transparent1Sided) ? "Traditional_Transparent_DepthPrepass_1Sided" : "Traditional_Transparent_DepthPrepass_2Sided";
+        _passName = (_renderType == MaterialRenderType::Transparent1Sided) ? "TraditionalTransparentDepthPrepass1Sided" : "TraditionalTransparentDepthPrepass2Sided";
     }
 
     void TraditionalTransparentDepthPrepass::Initialize() {

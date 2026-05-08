@@ -30,10 +30,10 @@ namespace Syn {
         assert(_renderType == MaterialRenderType::Opaque1Sided || _renderType == MaterialRenderType::Opaque2Sided);
 
         if (_renderType == MaterialRenderType::Opaque1Sided) {
-            _passName = "Traditional_Opaque_1Sided";
+            _passName = "TraditionalOpaqueDeferred1Sided";
         }
         else {
-            _passName = "Traditional_Opaque_2Sided";
+            _passName = "TraditionalOpaqueDeferred2Sided";
         }
     }
 
@@ -48,7 +48,7 @@ namespace Syn {
             return VkDescriptorSetLayout{};
             };
 
-        _shaderProgram = shaderManager->CreateProgram("TraditionalOpaqueProgram", {
+        _shaderProgram = shaderManager->CreateProgram("TraditionalOpaqueDeferredProgram", {
             ShaderNames::TraditionalVert,
             ShaderNames::OpaqueDeferredFrag
             }, config);

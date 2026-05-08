@@ -34,10 +34,10 @@ namespace Syn {
         assert(_renderType == MaterialRenderType::Opaque1Sided || _renderType == MaterialRenderType::Opaque2Sided);
 
         if (_renderType == MaterialRenderType::Opaque1Sided) {
-            _passName = "Meshlet_Opaque_1Sided";
+            _passName = "MeshletOpaqueDeferred1Sided";
         }
         else {
-            _passName = "Meshlet_Opaque_2Sided";
+            _passName = "MeshletOpaqueDeferred2Sided";
         }
     }
 
@@ -54,7 +54,7 @@ namespace Syn {
             return VkDescriptorSetLayout{};
             };
 
-        _shaderProgram = shaderManager->CreateProgram("MeshletOpaqueProgram", {
+        _shaderProgram = shaderManager->CreateProgram("MeshletOpaqueDeferredProgram", {
             ShaderNames::MeshletTask,
             ShaderNames::MeshletMesh,
             ShaderNames::OpaqueDeferredFrag

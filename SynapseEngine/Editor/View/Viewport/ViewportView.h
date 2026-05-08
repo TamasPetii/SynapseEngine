@@ -132,8 +132,7 @@ namespace Syn {
                         };
 
                     RadioButton("Main", RenderTargetGroupNames::Deferred, RenderTargetNames::Main, Vk::ImageViewNames::Default);
-                    RadioButton("Depth", RenderTargetGroupNames::Deferred, RenderTargetNames::OpaqueDepth, Vk::ImageViewNames::Default);
-
+                    
                     ImGui::SeparatorText("GBuffer Textures");
 
                     RadioButton("Color", RenderTargetGroupNames::Deferred, RenderTargetNames::ColorMetallic, RenderTargetViewNames::Color);

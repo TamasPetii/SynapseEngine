@@ -23,8 +23,8 @@ namespace Syn::Vk {
             outStage = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
             outAccess = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
             break;
-        case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL:
-		case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
+		case VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL:
+        case VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL:
             outStage = VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT;
             outAccess = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
             break;
@@ -229,6 +229,17 @@ namespace Syn::Vk {
         finalBarrier.dstAccess = VK_ACCESS_2_SHADER_READ_BIT;
 
         InsertBarrier(cmd, finalBarrier);
+    }
+
+    void ImageUtils::ClearColorImage(VkCommandBuffer cmd, const ImageClearColorInfo& info) {
+        VkImageSubresourceRange range{};
+        range.aspectMask = info.aspectMask;
+        range.baseMipLevel = info.baseMipLevel;
+        range.levelCount = info.levelCount;
+        range.baseArrayLayer = info.baseArrayLayer;
+        range.layerCount = info.layerCount;
+
+        vkCmdClearColorImage(cmd, info.image, info.imageLayout, &info.clearColor, 1, &range);
     }
 
     uint32_t ImageUtils::CalculateMipLevels(uint32_t width, uint32_t height) {

@@ -32,10 +32,10 @@ namespace Syn {
         assert(_renderType == MaterialRenderType::Opaque1Sided || _renderType == MaterialRenderType::Opaque2Sided);
 
         if (_renderType == MaterialRenderType::Opaque1Sided) {
-            _passName = "Meshlet_Opaque_Forward_1Sided";
+            _passName = "MeshletOpaqueForward1Sided";
         }
         else {
-            _passName = "Meshlet_Opaque_Forward_2Sided";
+            _passName = "MeshletOpaqueForward2Sided";
         }
     }
 
