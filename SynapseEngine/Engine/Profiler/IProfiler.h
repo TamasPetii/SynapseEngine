@@ -38,6 +38,17 @@ namespace Syn {
                     "MeshletOpaqueDepthPrepass2Sided", "TraditionalOpaqueZPrepass1Sided",
                     "TraditionalOpaqueZPrepass2Sided", "Depth_Copy_Pass"
                 }},
+                {"Deferred G-Buffer (Opaque)", {
+                    "OpaqueDeferredTransitionPass",
+                    "MeshletOpaqueDeferredPass1Sided", "MeshletOpaqueDeferredPass2Sided",
+                    "TraditionalOpaqueDeferredPass1Sided", "TraditionalOpaqueDeferredPass2Sided",
+                    "MeshletOpaqueDeferred1Sided", "MeshletOpaqueDeferred2Sided",
+                    "TraditionalOpaqueDeferred1Sided", "TraditionalOpaqueDeferred2Sided"
+                }},
+                {"Deferred Lighting", {
+                    "DeferredLightTransitionPass", "DeferredEmissiveAoPass",
+                    "DeferredDirectionLightPass", "DeferredPointLightPass", "DeferredSpotLightPass"
+                }},
                 {"Depth Prepass (Transparent)", {
                     "TransparentDepthTransitionPrepass", "MeshletTransparentDepthPrepass1Sided",
                     "MeshletTransparentDepthPrepass2Sided", "TraditionalTransparentDepthPrepass1Sided",
@@ -54,7 +65,7 @@ namespace Syn {
                     "ClusterPrefixSumPass", "ClusterPointLightWritePass", "ClusterSpotLightWritePass",
                     "ClusterLightWriteSyncPass"
                 }},
-                {"Lighting (Opaque)", {
+                {"Lighting (Opaque Forward+)", {
                     "OpaqueForwardTransitionPass", "MeshletOpaqueForward1Sided",
                     "MeshletOpaqueForward2Sided", "TraditionalOpaqueForward1Sided",
                     "TraditionalOpaqueForward2Sided"
