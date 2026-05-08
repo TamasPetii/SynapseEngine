@@ -56,6 +56,8 @@ namespace Syn {
 
     void PointLightCullingPass::BindDescriptors(const RenderContext& context) {
         auto imageManager = ServiceLocator::GetImageManager();
+        
+        //Using current frame's depth pyramid!!
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);

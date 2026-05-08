@@ -9,6 +9,7 @@
 #include "../../../../Includes/Common/SpotLight.glsl"
 #include "../../../../Includes/Utils/PbrMath.glsl"
 #include "../../../../Includes/Utils/DepthMath.glsl"
+#include "../../../../Includes/Utils/LightMath.glsl"
 
 layout(location = 0) in flat uint inLightDenseIndex;
 layout(location = 1) in flat uint inShadowDenseIndex;
@@ -64,7 +65,7 @@ void main()
 
     // 3. Final Attenuation and Physically Based Rendering (PBR)
     vec3 viewDir = normalize(camera.eye.xyz - position); 
-    vec3 radiance = SimulateSpotLight(ctx.spotLightDataBufferAddr, inLightDenseIndex, albedo, normal, viewDir, roughness, metallic);
+    vec3 radiance = SimulateSpotLight(ctx.spotLightDataBufferAddr, inLightDenseIndex, position, albedo, normal, viewDir, roughness, metallic);
 
     outColor = vec4(radiance, 1.0);
 }

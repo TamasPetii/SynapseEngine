@@ -12,6 +12,7 @@
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "Engine/Component/Core/CameraComponent.h"
 #include "Engine/Render/ComputeGroupSize.h"
+#include "Engine/Scene/DrawData/ForwardPlusDrawGroup.h"
 
 namespace Syn {
 
@@ -57,6 +58,7 @@ namespace Syn {
         auto imageManager = ServiceLocator::GetImageManager();
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
+        //Using current frame's depth pyramid!
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
         auto defaultSampler = imageManager->GetSampler(SamplerNames::NearestClampEdge);
 

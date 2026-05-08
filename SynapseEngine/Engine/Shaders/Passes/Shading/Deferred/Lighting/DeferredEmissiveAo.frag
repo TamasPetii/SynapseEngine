@@ -26,7 +26,7 @@ void main()
     vec3 emissive = emissiveAo.rgb;
     float ao = emissiveAo.a;
 
-    vec3 ambientResult = SimulateAmbientLight(albedoAlpha.rgb, ao, ctx.ambientStrength);
+    vec3 ambientResult = SimulateAmbientLight(albedo, ao, ctx.ambientStrength);
     vec3 emissiveResult = SimulateBloom(emissive, 1.0, ctx.emissiveStrength);
 
     outColor = vec4(ambientResult + emissiveResult, 1.0);

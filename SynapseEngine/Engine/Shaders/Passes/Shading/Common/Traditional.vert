@@ -2,21 +2,21 @@
 #extension GL_GOOGLE_include_directive : require
 #extension GL_ARB_shader_draw_parameters : require
 
-#include "../../../../Includes/Core.glsl"
-#include "../../../../Includes/Common/FrameGlobalContext.glsl"
-#include "../../../../Includes/Common/Camera.glsl"
-#include "../../../../Includes/Common/Mesh.glsl"
-#include "../../../../Includes/Common/Model.glsl"
-#include "../../../../Includes/Common/Transform.glsl"
-#include "../../../../Includes/Common/Animation.glsl"
-#include "../../../../Includes/Common/Material.glsl"
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Camera.glsl"
+#include "../../../Includes/Common/Mesh.glsl"
+#include "../../../Includes/Common/Model.glsl"
+#include "../../../Includes/Common/Transform.glsl"
+#include "../../../Includes/Common/Animation.glsl"
+#include "../../../Includes/Common/Material.glsl"
 
 layout(location = 0) out vec3 outNormal;
 layout(location = 1) out vec4 outTangent;
 layout(location = 2) out vec2 outUV;
 layout(location = 3) out flat uvec4 outId; //(EntityID, MaterialID,  MeshIndex, LodIndex) 
 
-#include "../../../../Includes/PushConstants/TraditionalMeshletPassPC.glsl"
+#include "../../../Includes/PushConstants/TraditionalMeshletPassPC.glsl"
 
 layout(push_constant) uniform PushConstants {
    TraditionalMeshletPassPC pc;

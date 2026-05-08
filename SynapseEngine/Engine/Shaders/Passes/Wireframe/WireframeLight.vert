@@ -40,7 +40,7 @@ void main() {
     // Spot Light
     else {
         uint entityId = VisibleSpotLightBuffer(ctx.spotLightVisibleIndexBufferAddr).data[gl_InstanceIndex];
-        uint denseIdx = GET_SPARSE_INDEX(pc.spotLightSparseMapBufferAddr, entityId);
+        uint denseIdx = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, entityId);
         SpotLightColliderGPU col = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, denseIdx);
         SpotLightComponent light = GET_SPOT_LIGHT(ctx.spotLightDataBufferAddr, denseIdx);
         

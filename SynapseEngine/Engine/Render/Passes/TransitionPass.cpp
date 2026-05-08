@@ -1,0 +1,23 @@
+#include "TransitionPass.h"
+
+namespace Syn 
+{
+    void TransitionPass::Execute(const RenderContext& context)
+    {
+        _imageTransitions.clear();
+
+        PrepareFrame(context);
+
+        for (const auto& transition : _imageTransitions) {
+            transition.image->TransitionLayout(
+                context.cmd,
+                transition.newLayout,
+                transition.dstStage,
+                transition.dstAccess,
+                transition.discardContent
+            );
+        }
+
+        Barrier(context);
+    }
+}

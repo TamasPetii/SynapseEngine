@@ -24,4 +24,8 @@ namespace Syn
     void ForwardPlusDrawGroup::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) {
 
     }
+
+    void ForwardPlusDrawGroup::CheckResize(uint32_t width, uint32_t height, uint32_t frameIndex)
+    {
+    }
 }

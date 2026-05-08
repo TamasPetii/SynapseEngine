@@ -97,7 +97,7 @@ void main() {
         uint lightEntityIndex = GET_LIGHT_INDEX(ctx.forwardPlusPointLightIndexListBufferAddr, globalLightIndex);
         uint lightDenseIndex = GET_SPARSE_INDEX(ctx.pointLightSparseMapBufferAddr, lightEntityIndex);
         
-        totalRadiance += SimulatePointLight(ctx.pointLightDataBufferAddr, lightDenseIndex, inWorldPos, albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness);
+        totalRadiance += SimulatePointLight(ctx.pointLightDataBufferAddr, lightDenseIndex, worldPos, albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness);
     }
 
     for (uint i = 0; i < cluster.spotLightCount; ++i) {
@@ -105,7 +105,7 @@ void main() {
         uint lightEntityIndex = GET_LIGHT_INDEX(ctx.forwardPlusSpotLightIndexListBufferAddr, globalLightIndex);
         uint lightDenseIndex = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, lightEntityIndex);
         
-        totalRadiance += SimulateSpotLight(ctx.spotLightDataBufferAddr, lightDenseIndex, inWorldPos, albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness);
+        totalRadiance += SimulateSpotLight(ctx.spotLightDataBufferAddr, lightDenseIndex, worldPos, albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness);
     }
 
     //Ambient
