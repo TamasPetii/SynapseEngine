@@ -11,7 +11,8 @@ namespace Syn {
 
     bool WireframeMeshSetupPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableWireframeMeshSphere || context.scene->GetSettings()->enableWireframeMeshAabb;
+        return context.scene->GetSettings()->enableWireframeMeshSphere 
+            || context.scene->GetSettings()->enableWireframeMeshAabb;
     }
 
     void WireframeMeshSetupPass::Initialize() {

@@ -906,13 +906,10 @@
     <ClCompile Include="Profiler\IProfiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Shading\Deferred\Lighting\PreDeferredTransitionPass.cpp">
+    <ClCompile Include="Render\Passes\Shading\Deferred\Lighting\DeferredLightTransitionPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Shading\Deferred\Lighting\PostDeferredTransitionPass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Render\Passes\Shading\Wboit\PreCompositeTransitionPass.cpp">
+    <ClCompile Include="Render\Passes\Shading\Wboit\TransparentCompositeTransitionPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Culling\CullingCommandResetPass.cpp">
@@ -1009,6 +1006,24 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\TransitionPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Shading\Deferred\GBuffer\OpaqueDeferredTransitionPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\OpaqueDepthTransitionPrepass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\TransparentDepthTransitionPrepass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Shading\ForwardPlus\Lighting\OpaqueForwardTransitionPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Shading\Wboit\TransparentForwardTransitionPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Billboard\BillboardTransitionPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -2012,13 +2027,10 @@
     <ClInclude Include="Profiler\IProfiler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Shading\Deferred\Lighting\PreDeferredTransitionPass.h">
+    <ClInclude Include="Render\Passes\Shading\Deferred\Lighting\DeferredLightTransitionPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Shading\Deferred\Lighting\PostDeferredTransitionPass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Render\Passes\Shading\Wboit\PreCompositeTransitionPass.h">
+    <ClInclude Include="Render\Passes\Shading\Wboit\TransparentCompositeTransitionPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Culling\CullingCommandResetPass.h">
@@ -2124,6 +2136,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\TransitionPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Shading\Deferred\GBuffer\OpaqueDeferredTransitionPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\OpaqueDepthTransitionPrepass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\TransparentDepthTransitionPrepass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Shading\ForwardPlus\Lighting\OpaqueForwardTransitionPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Shading\Wboit\TransparentForwardTransitionPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Billboard\BillboardTransitionPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

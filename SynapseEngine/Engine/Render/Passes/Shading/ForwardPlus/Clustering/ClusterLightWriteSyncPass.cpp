@@ -4,10 +4,6 @@
 
 namespace Syn {
 
-    bool ClusterLightWriteSyncPass::ShouldExecute(const RenderContext& context) const {
-        return context.scene->GetSettings()->enableForwardPlus;
-    }
-
     void ClusterLightWriteSyncPass::Dispatch(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;

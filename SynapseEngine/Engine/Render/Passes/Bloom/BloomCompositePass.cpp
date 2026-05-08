@@ -76,8 +76,8 @@ namespace Syn {
 
     void BloomCompositePass::PushConstants(const RenderContext& context) {
         BloomCompositePC pc{};
-        pc.exposure = _config.exposure;
-        pc.bloomStrength = _config.bloomStrength;
+        pc.exposure = context.scene->GetSettings()->bloomExposure;
+        pc.bloomStrength = context.scene->GetSettings()->bloomStrength;
 
         vkCmdPushConstants(
             context.cmd,

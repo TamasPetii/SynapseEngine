@@ -3,8 +3,8 @@
 namespace Syn
 {
     SceneSettings::SceneSettings()
-        : useDebugCamera(false)
-        , enableTransparentPicking(false)
+		: pipelineType(PipelineType::Deferred)
+        , useDebugCamera(false)
         , enableGpuCulling(true)
         , enableBloom(true)
         , enableHiz(true)
@@ -17,8 +17,6 @@ namespace Syn
         , enableSpotLightAabbWireframe(false)
         , enableWireframeMeshAabb(false)
         , enableWireframeMeshSphere(false)
-        , enableWireframeMeshletAabb(false)
-        , enableWireframeMeshletSphere(false)
         , enableDeferredEmissiveAo(true)
         , enableDeferredPointLights(true)
         , enableDeferredSpotLights(true)
@@ -27,8 +25,12 @@ namespace Syn
         , enableBillboardPointLights(true)
         , enableBillboardSpotLights(true)
         , enableBillboardDirectionalLights(true)
-        , enableForwardPlus(false)
         , ambientStrength(0.05f)
         , emissiveStrength(1.00f)
+		, bloomThreshold(1.0f)
+		, bloomKnee(0.1f)
+        , bloomFilterRadius(0.005f)
+        , bloomExposure(1.0f)
+        , bloomStrength(1.0f)
     {}
 }

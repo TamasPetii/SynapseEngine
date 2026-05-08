@@ -19,7 +19,7 @@ namespace Syn {
     bool HizLinearPreparePass::ShouldExecute(const RenderContext& context) const
     {
         auto settings = context.scene->GetSettings();
-        return settings->enableHiz && settings->enableOcclusionCulling && !settings->useDebugCamera;
+        return !settings->useDebugCamera;
     }
 
     void HizLinearPreparePass::Initialize() {

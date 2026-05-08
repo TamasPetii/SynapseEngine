@@ -26,7 +26,11 @@ namespace Syn {
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
         uint32_t fIdx = context.frameIndex;
+        uint32_t width = rtGroup->GetWidth();
+        uint32_t height = rtGroup->GetHeight();
         bool isGpu = scene->GetSettings()->enableGpuCulling;
+
+        drawData->ForwardPlus.CheckResize(width, height, fIdx);
 
         auto modelManager = ServiceLocator::GetModelManager();
         auto materialManager = ServiceLocator::GetMaterialManager();

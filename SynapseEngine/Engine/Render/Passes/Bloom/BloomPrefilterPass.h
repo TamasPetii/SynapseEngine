@@ -6,11 +6,6 @@
 namespace Syn {
     class SYN_API BloomPrefilterPass : public ComputePass {
     public:
-        struct Config {
-            float threshold = 1.0f;
-            float knee = 0.1f;
-        };
-    public:
         std::string GetName() const override { return "BloomPrefilterPass"; }
         void Initialize() override;
     protected:
@@ -19,7 +14,5 @@ namespace Syn {
         void BindDescriptors(const RenderContext& context) override;
         void PushConstants(const RenderContext& context) override;
         void Dispatch(const RenderContext& context) override;
-    private:
-        Config _config;
     };
 }

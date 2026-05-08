@@ -3,12 +3,19 @@
 
 namespace Syn
 {
+	enum SYN_API PipelineType
+	{
+		Deferred,
+		ForwardPlus
+	};
+
     struct SYN_API SceneSettings
     {
         SceneSettings();
 
+		PipelineType pipelineType;
+
         bool useDebugCamera;
-        bool enableTransparentPicking;
 
         bool enableGpuCulling;
         bool enableBloom;
@@ -17,21 +24,18 @@ namespace Syn
         bool enableConeCulling;
         bool enableFrustumCulling;
 
-        bool enablePointLightSphereWireframe;
-        bool enablePointLightAabbWireframe;
-        bool enableSpotLightSphereWireframe;
-        bool enableSpotLightAabbWireframe;
-
-        bool enableWireframeMeshAabb;
-        bool enableWireframeMeshSphere;
-        bool enableWireframeMeshletAabb;
-        bool enableWireframeMeshletSphere;
-
-		bool enableForwardPlus;
         bool enableDeferredEmissiveAo;
         bool enableDeferredPointLights;
         bool enableDeferredSpotLights;
         bool enableDeferredDirectionalLights;
+
+        bool enableWireframeMeshAabb;
+        bool enableWireframeMeshSphere;
+
+        bool enablePointLightSphereWireframe;
+        bool enablePointLightAabbWireframe;
+        bool enableSpotLightSphereWireframe;
+        bool enableSpotLightAabbWireframe;
 
         bool enableBillboardCameras;
 		bool enableBillboardPointLights;
@@ -40,5 +44,11 @@ namespace Syn
 
         float ambientStrength;
         float emissiveStrength;
+
+		float bloomThreshold;
+		float bloomKnee;
+        float bloomFilterRadius;
+        float bloomExposure;
+        float bloomStrength;
     };
 }

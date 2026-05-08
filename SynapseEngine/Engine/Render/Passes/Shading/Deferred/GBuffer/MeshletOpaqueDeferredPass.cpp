@@ -23,6 +23,11 @@ namespace Syn {
     
     #include "Engine/Shaders/Includes/PushConstants/TraditionalMeshletPassPC.glsl"
 
+    bool MeshletOpaqueDeferredPass::ShouldExecute(const RenderContext& context) const
+    {
+        return context.scene->GetSettings()->pipelineType == PipelineType::Deferred;
+    }
+
     MeshletOpaqueDeferredPass::MeshletOpaqueDeferredPass(MaterialRenderType renderType)
         : _renderType(renderType)
     {
@@ -81,7 +86,7 @@ namespace Syn {
                 .alphaBlendOp = VK_BLEND_OP_ADD
                 }
             } ,
-            .colorAttachmentCount = 2,
+            .colorAttachmentCount = 4,
             .renderArea = std::nullopt
         };
     }

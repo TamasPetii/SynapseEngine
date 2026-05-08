@@ -3,13 +3,6 @@
 
 namespace Syn 
 {
-    bool DepthCopyPass::ShouldExecute(const RenderContext& context) const
-    {
-        auto settings = context.scene->GetSettings();
-
-        return true;
-    }
-
     void DepthCopyPass::PrepareFrame(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         if (!group) return;

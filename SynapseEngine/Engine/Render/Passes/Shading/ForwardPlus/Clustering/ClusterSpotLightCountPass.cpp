@@ -12,10 +12,6 @@ namespace Syn
 {
     #include "Engine/Shaders/Includes/PushConstants/ClusterLightCountPC.glsl"
 
-    bool ClusterSpotLightCountPass::ShouldExecute(const RenderContext& context) const {
-        return context.scene->GetSettings()->enableForwardPlus;
-    }
-
     void ClusterSpotLightCountPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 

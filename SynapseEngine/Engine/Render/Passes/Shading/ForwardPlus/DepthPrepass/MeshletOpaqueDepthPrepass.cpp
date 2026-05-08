@@ -21,6 +21,11 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/TraditionalMeshletPassPC.glsl"
 
+    bool MeshletOpaqueDepthPrepass::ShouldExecute(const RenderContext& context) const
+    {
+        return context.scene->GetSettings()->pipelineType == PipelineType::ForwardPlus;
+    }
+
     MeshletOpaqueDepthPrepass::MeshletOpaqueDepthPrepass(MaterialRenderType renderType)
         : _renderType(renderType)
     {

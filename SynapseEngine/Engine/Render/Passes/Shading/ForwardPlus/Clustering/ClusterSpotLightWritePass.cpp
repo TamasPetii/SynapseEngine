@@ -11,10 +11,6 @@
 namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/ClusterLightWritePC.glsl"
 
-    bool ClusterSpotLightWritePass::ShouldExecute(const RenderContext& context) const {
-        return context.scene->GetSettings()->enableForwardPlus;
-    }
-
     void ClusterSpotLightWritePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 
