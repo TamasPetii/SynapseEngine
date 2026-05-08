@@ -59,7 +59,8 @@ void main() {
     // Collaborative Culling & Writing
     for (uint i = threadId; i < totalLights; i += gl_WorkGroupSize.x) {
         uint entityIdx = GET_VISIBLE_POINT_LIGHT(ctx.pointLightVisibleIndexBufferAddr, i);
-        PointLightColliderGPU collider = GET_POINT_LIGHT_COLLIDER(ctx.pointLightColliderBufferAddr, entityIdx);
+        uint denseIdx = GET_SPARSE_INDEX(ctx.pointLightSparseMapBufferAddr, entityIdx);
+        PointLightColliderGPU collider = GET_POINT_LIGHT_COLLIDER(ctx.pointLightColliderBufferAddr, denseIdx);
         
         vec3 viewSpaceCenter = collider.viewSpaceCenter;
         bool isIntersecting = TestSphereAABB(viewSpaceCenter, collider.radius, s_clusterAABBMin, s_clusterAABBMax);

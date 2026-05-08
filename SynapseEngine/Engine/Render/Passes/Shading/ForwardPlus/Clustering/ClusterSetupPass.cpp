@@ -78,7 +78,22 @@ namespace Syn {
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(width, drawData->ForwardPlus.tileSize);
         uint32_t groupCountY = ComputeGroupSize::CalculateDispatchCount(height, drawData->ForwardPlus.tileSize);
 
-        //Todo: Fill buffer count!
+        VkDispatchIndirectCommand resetCmd{ 0, 1, 1 };
+
+        Vk::BufferUpdateInfo updateInfo{};
+        updateInfo.buffer = drawData->ForwardPlus.clusterCountBuffer.GetHandle(fIdx, true);
+        updateInfo.offset = 0;
+        updateInfo.size = sizeof(VkDispatchIndirectCommand);
+        updateInfo.pData = &resetCmd;
+        Vk::BufferUtils::UpdateBuffer(context.cmd, updateInfo);
+
+        Vk::BufferBarrierInfo updateBarrier{};
+        updateBarrier.buffer = updateInfo.buffer;
+        updateBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+        updateBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+        updateBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        updateBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, updateBarrier);
 
         vkCmdDispatch(context.cmd, groupCountX, groupCountY, 1);
 

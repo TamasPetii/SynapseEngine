@@ -57,7 +57,8 @@ void main() {
 
     for (uint i = threadId; i < totalLights; i += gl_WorkGroupSize.x) {
         uint entityIdx = GET_VISIBLE_SPOT_LIGHT(ctx.spotLightVisibleIndexBufferAddr, i);
-        SpotLightColliderGPU collider = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, entityIdx);
+        uint denseIdx = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, entityIdx);
+        SpotLightColliderGPU collider = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, denseIdx);
         
         vec3 viewSpaceCenter = collider.viewSpaceCenter;
         bool isIntersecting = TestSphereAABB(viewSpaceCenter, collider.radius, s_clusterAABBMin, s_clusterAABBMax);

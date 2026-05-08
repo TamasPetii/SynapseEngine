@@ -53,6 +53,7 @@ uint CalculateClusterSliceCount(float tileMinZ, float tileMaxZ, float sliceScale
 }
 
 uint GetClusterSliceIndex(float viewSpaceDepth, float tileMinZ, float tileMaxZ, uint sliceCount) {
+    if (sliceCount == 0) return 0;
     if (viewSpaceDepth <= tileMinZ) return 0;
     if (viewSpaceDepth >= tileMaxZ) return sliceCount - 1;
     if (sliceCount <= 1) return 0;

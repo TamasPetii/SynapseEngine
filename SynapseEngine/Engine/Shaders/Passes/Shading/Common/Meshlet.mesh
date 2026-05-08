@@ -60,7 +60,7 @@ void main() {
     SetMeshOutputsEXT(uint(meshlet.vertexCount), uint(meshlet.triangleCount));
 
     // Parallel Vertex Processing
-    for (uint i = threadIdx; i < uint(meshlet.vertexCount); i += 32) {
+    for (uint i = threadIdx; i < uint(meshlet.vertexCount); i += gl_WorkGroupSize.x) {
         uint globalVtxIdx = GET_MESHLET_VERTEX_INDEX(addrs.meshletVertexIndices, meshlet.vertexIndicesOffset + i);
         GpuVertexPosition v = GET_VERTEX_POS(addrs.vertexPositions, globalVtxIdx);
         GpuVertexAttributes attr = GET_VERTEX_ATTR(addrs.vertexAttributes, globalVtxIdx);
@@ -115,7 +115,7 @@ void main() {
     }
 
     // Parallel Triangle Primitive Processing
-    for (uint i = threadIdx; i < uint(meshlet.triangleCount); i += 32) {
+    for (uint i = threadIdx; i < uint(meshlet.triangleCount); i += gl_WorkGroupSize.x) {
         uint baseOffset = meshlet.triangleIndicesOffset + (i * 3);
         
         gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
