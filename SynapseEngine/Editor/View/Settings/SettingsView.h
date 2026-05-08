@@ -16,7 +16,6 @@ namespace Syn {
 
             ImGui::SeparatorText("General");
             changed |= ImGui::Checkbox("Debug Camera", &settings.useDebugCamera);
-            changed |= ImGui::Checkbox("Transparent Picking", &settings.enableTransparentPicking);
 
             ImGui::SeparatorText("Rendering Features");
             changed |= ImGui::Checkbox("GPU Culling", &settings.enableGpuCulling);
@@ -33,8 +32,6 @@ namespace Syn {
             ImGui::SeparatorText("Mesh Debug (Wireframe)");
             changed |= ImGui::Checkbox("Mesh AABB", &settings.enableWireframeMeshAabb);
             changed |= ImGui::Checkbox("Mesh Sphere", &settings.enableWireframeMeshSphere);
-            changed |= ImGui::Checkbox("Meshlet AABB", &settings.enableWireframeMeshletAabb);
-            changed |= ImGui::Checkbox("Meshlet Sphere", &settings.enableWireframeMeshletSphere);
 
             ImGui::SeparatorText("Deferred Shading");
             changed |= ImGui::Checkbox("Emissive AO", &settings.enableDeferredEmissiveAo);

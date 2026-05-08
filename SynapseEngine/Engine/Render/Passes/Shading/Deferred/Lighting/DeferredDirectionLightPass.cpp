@@ -16,7 +16,8 @@ namespace Syn {
 
     bool DeferredDirectionLightPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableDeferredDirectionalLights;
+        return context.scene->GetSettings()->pipelineType == PipelineType::Deferred 
+            && context.scene->GetSettings()->enableDeferredDirectionalLights;
     }
 
     void DeferredDirectionLightPass::Initialize() {

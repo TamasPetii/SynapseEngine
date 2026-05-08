@@ -5,7 +5,6 @@ namespace Syn {
 
     void TransparentInitPass::PrepareFrame(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
-        if (!group) return;
 
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
         _graphicsState.renderArea = extent;
@@ -42,7 +41,6 @@ namespace Syn {
             }
         }
 
-        //Todo: No need?
         if (auto depthImg = group->GetImage(RenderTargetNames::TransparentDepth))
         {
             _depthAttachment = Vk::RenderUtils::CreateAttachment({

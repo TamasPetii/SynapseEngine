@@ -16,11 +16,10 @@ namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/BillboardPC.glsl"
 
     bool DirectionLightBillboardPass::ShouldExecute(const RenderContext& context) const {
-        auto registry = context.scene->GetRegistry();
-        if (!registry) return false;
+        auto pool = context.scene->GetRegistry()->GetPool<DirectionLightComponent>();
 
-        auto pool = registry->GetPool<DirectionLightComponent>();
-        if (!pool || pool->Size() == 0) return false;
+        if (!pool || pool->Size() == 0) 
+            return false;
 
         return context.scene->GetSettings()->enableBillboardDirectionalLights;
     }
@@ -93,7 +92,7 @@ namespace Syn {
 
         _depthAttachment = Vk::RenderUtils::CreateAttachment({
             .imageView = group->GetImage(RenderTargetNames::TransparentDepth)->GetView(Vk::ImageViewNames::Default),
-            .layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+            .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
             .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
             .storeOp = VK_ATTACHMENT_STORE_OP_STORE
             });

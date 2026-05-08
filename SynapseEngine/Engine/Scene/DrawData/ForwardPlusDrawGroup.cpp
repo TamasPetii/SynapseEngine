@@ -8,8 +8,10 @@ namespace Syn
         VkBufferUsageFlags indirectUsage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 
         tileGridBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, 16, storageUsage, 3000, 6000 });
-        
+		tileGridBuffer.UpdateCapacityAll(1); 
+
         clusterListBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, 32, storageUsage, 48000, 96000 });
+        clusterListBuffer.UpdateCapacityAll(1);
 
         clusterCountBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t) * 4, indirectUsage, 1, 1 });
         clusterCountBuffer.UpdateCapacityAll(1);
@@ -18,7 +20,10 @@ namespace Syn
         lightCounterBuffer.UpdateCapacityAll(1);
 
         pointLightIndexBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 100000, 200000 });
+        pointLightIndexBuffer.UpdateCapacityAll(1);
+        
         spotLightIndexBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 100000, 200000 });
+        spotLightIndexBuffer.UpdateCapacityAll(1);
     }
 
     void ForwardPlusDrawGroup::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) {

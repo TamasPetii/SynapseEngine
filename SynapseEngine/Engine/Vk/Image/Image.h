@@ -22,9 +22,7 @@ namespace Syn::Vk
         VkExtent3D GetExtent() const { return { _config.width, _config.height, _config.depth }; }
         const ImageConfig& GetConfig() const { return _config; }
         VkImageView GetView(const std::string& name = "") const;
-
-
-
+		VkImageLayout GetLayout() const { return _currentLayout; }
         void TransitionLayout(VkCommandBuffer cmd, VkImageLayout newLayout, VkPipelineStageFlags2 dstStage, VkAccessFlags2 dstAccess, bool discardContent = false);
     
         void OverrideInternalState(VkImageLayout layout, VkPipelineStageFlags2 stage, VkAccessFlags2 access) {

@@ -19,6 +19,11 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/TraditionalMeshletPassPC.glsl"
 
+    bool TraditionalOpaqueForwardPass::ShouldExecute(const RenderContext& context) const
+    {
+        return context.scene->GetSettings()->pipelineType == PipelineType::ForwardPlus;
+    }
+
     TraditionalOpaqueForwardPass::TraditionalOpaqueForwardPass(MaterialRenderType renderType)
         : _renderType(renderType)
     {

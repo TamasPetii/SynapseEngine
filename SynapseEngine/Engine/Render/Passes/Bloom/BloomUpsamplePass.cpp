@@ -90,7 +90,7 @@ namespace Syn {
 
             BloomUpSamplePC pc{};
             pc.texelSize = 1.0f / sourceSize;
-            pc.filterRadius = _config.filterRadius;
+            pc.filterRadius = context.scene->GetSettings()->bloomFilterRadius;
             vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(BloomUpSamplePC), &pc);
 
             uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount((uint32_t)targetSize.x, ComputeGroupSize::Image8D);

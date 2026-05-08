@@ -1,6 +1,7 @@
 #include "RendererFactory.h"
 #include "Engine/Vk/Image/ImageConfig.h"
 
+#include "Engine/Render/Passes/Billboard/BillboardTransitionPass.h"
 #include "Engine/Render/Passes/Billboard/CameraBillboardPass.h"
 #include "Engine/Render/Passes/Billboard/DirectionLightBillboardPass.h"
 #include "Engine/Render/Passes/Billboard/PointLightBillboardPass.h"
@@ -29,15 +30,15 @@
 #include "Engine/Render/Passes/Shading/Common/OpaqueInitPass.h"
 #include "Engine/Render/Passes/Shading/Common/TransparentInitPass.h"
 
+#include "Engine/Render/Passes/Shading/Deferred/GBuffer/OpaqueDeferredTransitionPass.h"
 #include "Engine/Render/Passes/Shading/Deferred/GBuffer/MeshletOpaqueDeferredPass.h"
 #include "Engine/Render/Passes/Shading/Deferred/GBuffer/TraditionalOpaqueDeferredPass.h"
 
-#include "Engine/Render/Passes/Shading/Deferred/Lighting/PreDeferredTransitionPass.h"
+#include "Engine/Render/Passes/Shading/Deferred/Lighting/DeferredLightTransitionPass.h"
 #include "Engine/Render/Passes/Shading/Deferred/Lighting/DeferredEmissiveAoPass.h"
 #include "Engine/Render/Passes/Shading/Deferred/Lighting/DeferredPointLightPass.h"
 #include "Engine/Render/Passes/Shading/Deferred/Lighting/DeferredSpotLightPass.h"
 #include "Engine/Render/Passes/Shading/Deferred/Lighting/DeferredDirectionLightPass.h"
-#include "Engine/Render/Passes/Shading/Deferred/Lighting/PostDeferredTransitionPass.h"
 
 #include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterSetupPass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterPointLightCountPass.h"
@@ -47,17 +48,21 @@
 #include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterSpotLightWritePass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterLightWriteSyncPass.h"
 
+#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/OpaqueDepthTransitionPrepass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/MeshletOpaqueDepthPrepass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/MeshletTransparentDepthPrepass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/TraditionalOpaqueDepthPrepass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/TransparentDepthTransitionPrepass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/MeshletTransparentDepthPrepass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/TraditionalTransparentDepthPrepass.h"
 
+#include "Engine/Render/Passes/Shading/ForwardPlus/Lighting/OpaqueForwardTransitionPass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/Lighting/MeshletOpaqueForwardPass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/Lighting/TraditionalOpaqueForwardPass.h"
 
+#include "Engine/Render/Passes/Shading/Wboit/TransparentForwardTransitionPass.h"
 #include "Engine/Render/Passes/Shading/Wboit/MeshletTransparentForwardPass.h"
 #include "Engine/Render/Passes/Shading/Wboit/TraditionalTransparentForwardPass.h"
-#include "Engine/Render/Passes/Shading/Wboit/PreCompositeTransitionPass.h"
+#include "Engine/Render/Passes/Shading/Wboit/TransparentCompositeTransitionPass.h"
 #include "Engine/Render/Passes/Shading/Wboit/TransparentCompositePass.h"
 
 #include "Engine/Render/Passes/Wireframe/WireframeMeshSetupPass.h"
@@ -90,12 +95,14 @@ namespace Syn
         pipeline->AddPass(std::make_unique<MeshCullingPass>());
 
 		//Forward+ Depth Opaque Prepasses
+		pipeline->AddPass(std::make_unique<OpaqueDepthTransitionPrepass>());
 		pipeline->AddPass(std::make_unique<MeshletOpaqueDepthPrepass>(MaterialRenderType::Opaque1Sided));
 		pipeline->AddPass(std::make_unique<MeshletOpaqueDepthPrepass>(MaterialRenderType::Opaque2Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueDepthPrepass>(MaterialRenderType::Opaque1Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueDepthPrepass>(MaterialRenderType::Opaque2Sided));
 
         //Deferred Depth Opaque Prepasses
+		pipeline->AddPass(std::make_unique<OpaqueDeferredTransitionPass>());
 		pipeline->AddPass(std::make_unique<MeshletOpaqueDeferredPass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<MeshletOpaqueDeferredPass>(MaterialRenderType::Opaque2Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueDeferredPass>(MaterialRenderType::Opaque1Sided));
@@ -105,6 +112,7 @@ namespace Syn
 		pipeline->AddPass(std::make_unique<DepthCopyPass>());
 
         //Forward+ Depth Transparent Prepasses
+		pipeline->AddPass(std::make_unique<TransparentDepthTransitionPrepass>());
         pipeline->AddPass(std::make_unique<MeshletTransparentDepthPrepass>(MaterialRenderType::Transparent1Sided));
         pipeline->AddPass(std::make_unique<MeshletTransparentDepthPrepass>(MaterialRenderType::Transparent2Sided));
         pipeline->AddPass(std::make_unique<TraditionalTransparentDepthPrepass>(MaterialRenderType::Transparent1Sided));
@@ -118,6 +126,14 @@ namespace Syn
         pipeline->AddPass(std::make_unique<PointLightCullingPass>());
         pipeline->AddPass(std::make_unique<SpotLightCullingPass>());
 
+        // Deferred Opaque Lighting Passes
+        pipeline->AddPass(std::make_unique<DeferredLightTransitionPass>());
+        pipeline->AddPass(std::make_unique<DeferredEmissiveAoPass>());
+        pipeline->AddPass(std::make_unique<DeferredDirectionLightPass>());
+        pipeline->AddPass(std::make_unique<DeferredPointLightPass>());
+        pipeline->AddPass(std::make_unique<DeferredSpotLightPass>());
+
+        /*
         //Forward+ Cluster Passes
 		pipeline->AddPass(std::make_unique<ClusterSetupPass>());
 		pipeline->AddPass(std::make_unique<ClusterPointLightCountPass>());
@@ -127,35 +143,36 @@ namespace Syn
 		pipeline->AddPass(std::make_unique<ClusterSpotLightWritePass>());
 		pipeline->AddPass(std::make_unique<ClusterLightWriteSyncPass>());
 
-		// Deferred Opaque Lighting Passes
-		pipeline->AddPass(std::make_unique<PreDeferredTransitionPass>());
-		pipeline->AddPass(std::make_unique<DeferredEmissiveAoPass>());
-        pipeline->AddPass(std::make_unique<DeferredDirectionLightPass>());
-        pipeline->AddPass(std::make_unique<DeferredPointLightPass>());
-        pipeline->AddPass(std::make_unique<DeferredSpotLightPass>());
-		pipeline->AddPass(std::make_unique<PostDeferredTransitionPass>());
-
 		//Forward+ Opaque Lighting Passes
+        pipeline->AddPass(std::make_unique<OpaqueForwardTransitionPass>());
 		pipeline->AddPass(std::make_unique<MeshletOpaqueForwardPass>(MaterialRenderType::Opaque1Sided));
 		pipeline->AddPass(std::make_unique<MeshletOpaqueForwardPass>(MaterialRenderType::Opaque2Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueForwardPass>(MaterialRenderType::Opaque1Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueForwardPass>(MaterialRenderType::Opaque2Sided));
 
 		//Forward+ Transparent Lighting Passes (WBOIT)
-		pipeline->AddPass(std::make_unique<MeshletTransparentForwardPass>(MaterialRenderType::Transparent1Sided));
+		pipeline->AddPass(std::make_unique<TransparentForwardTransitionPass>());
+        pipeline->AddPass(std::make_unique<MeshletTransparentForwardPass>(MaterialRenderType::Transparent1Sided));
 		pipeline->AddPass(std::make_unique<MeshletTransparentForwardPass>(MaterialRenderType::Transparent2Sided));
 		pipeline->AddPass(std::make_unique<TraditionalTransparentForwardPass>(MaterialRenderType::Transparent1Sided));
 		pipeline->AddPass(std::make_unique<TraditionalTransparentForwardPass>(MaterialRenderType::Transparent2Sided));
-        pipeline->AddPass(std::make_unique<PreCompositeTransitionPass>());
+
+		//Transparent Composite Passes (WBOIT)
+        pipeline->AddPass(std::make_unique<TransparentCompositeTransitionPass>());
         pipeline->AddPass(std::make_unique<TransparentCompositePass>());
+        */
 
 		//Billboard Passes
+		/*
+        pipeline->AddPass(std::make_unique<BillboardTransitionPass>());
         pipeline->AddPass(std::make_unique<CameraBillboardPass>());
         pipeline->AddPass(std::make_unique<DirectionLightBillboardPass>());
         pipeline->AddPass(std::make_unique<PointLightBillboardPass>());
         pipeline->AddPass(std::make_unique<SpotLightBillboardPass>());
+        */
 
         // Wireframe Passes
+        /*
         pipeline->AddPass(std::make_unique<WireframeMeshSetupPass>());
         pipeline->AddPass(std::make_unique<WireframeMeshAabbPass>());
         pipeline->AddPass(std::make_unique<WireframeMeshSpherePass>());
@@ -163,6 +180,7 @@ namespace Syn
         pipeline->AddPass(std::make_unique<PointLightSphereWireframePass>());
         pipeline->AddPass(std::make_unique<SpotLightAabbWireframePass>());
         pipeline->AddPass(std::make_unique<SpotLightSphereWireframePass>());
+        */
 
         // Bloom Post-processing passes
         pipeline->AddPass(std::make_unique<BloomPrefilterPass>());
@@ -330,23 +348,23 @@ namespace Syn
         rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::Bloom, bloomImageSpec);
 
 
-        Vk::ImageConfig depthImageSpec{};
-        depthImageSpec.width = initWidth;
-        depthImageSpec.height = initHeight;
-        depthImageSpec.type = VK_IMAGE_TYPE_2D;
-        depthImageSpec.format = VK_FORMAT_D32_SFLOAT;
-        depthImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-        depthImageSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::OpaqueDepth, depthImageSpec);
+        Vk::ImageConfig opaqueDepthSpec{};
+        opaqueDepthSpec.width = initWidth;
+        opaqueDepthSpec.height = initHeight;
+        opaqueDepthSpec.type = VK_IMAGE_TYPE_2D;
+        opaqueDepthSpec.format = VK_FORMAT_D32_SFLOAT;
+        opaqueDepthSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        opaqueDepthSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::OpaqueDepth, opaqueDepthSpec);
 
-        Vk::ImageConfig pickingDepthSpec{};
-        pickingDepthSpec.width = initWidth;
-        pickingDepthSpec.height = initHeight;
-        pickingDepthSpec.type = VK_IMAGE_TYPE_2D;
-        pickingDepthSpec.format = VK_FORMAT_D32_SFLOAT;
-        pickingDepthSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-        pickingDepthSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::TransparentDepth, pickingDepthSpec);
+        Vk::ImageConfig transparentDepthSpec{};
+        transparentDepthSpec.width = initWidth;
+        transparentDepthSpec.height = initHeight;
+        transparentDepthSpec.type = VK_IMAGE_TYPE_2D;
+        transparentDepthSpec.format = VK_FORMAT_D32_SFLOAT;
+        transparentDepthSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        transparentDepthSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::TransparentDepth, transparentDepthSpec);
 
         Vk::ImageConfig debugImageSpec{};
         debugImageSpec.width = initWidth;

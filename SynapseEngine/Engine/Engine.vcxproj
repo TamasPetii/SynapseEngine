@@ -235,6 +235,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Render\Passes\Billboard\BillboardTransitionPass.cpp" />
+    <ClCompile Include="Render\Passes\Shading\ForwardPlus\Lighting\OpaqueForwardTransitionPass.cpp" />
+    <ClCompile Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\OpaqueDepthTransitionPrepass.cpp" />
+    <ClCompile Include="Render\Passes\Shading\Deferred\GBuffer\OpaqueDeferredTransitionPass.cpp" />
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\Lighting\MeshletOpaqueForwardPass.cpp" />
     <ClCompile Include="Render\Passes\Shading\Common\OpaqueInitPass.cpp" />
     <ClCompile Include="Render\Passes\Setup\GlobalFrameSetupPass.cpp" />
@@ -265,11 +269,12 @@
     <ClCompile Include="Render\Passes\Shading\Common\TransparentInitPass.cpp" />
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\Lighting\TraditionalOpaqueForwardPass.cpp" />
     <ClCompile Include="Render\Passes\TransitionPass.cpp" />
+    <ClCompile Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\TransparentDepthTransitionPrepass.cpp" />
+    <ClCompile Include="Render\Passes\Shading\Wboit\TransparentForwardTransitionPass.cpp" />
     <ClCompile Include="Utils\RenderBuffer.cpp" />
     <ClCompile Include="Render\Passes\Culling\CullingCommandResetPass.cpp" />
-    <ClCompile Include="Render\Passes\Shading\Wboit\PreCompositeTransitionPass.cpp" />
-    <ClCompile Include="Render\Passes\Shading\Deferred\Lighting\PostDeferredTransitionPass.cpp" />
-    <ClCompile Include="Render\Passes\Shading\Deferred\Lighting\PreDeferredTransitionPass.cpp" />
+    <ClCompile Include="Render\Passes\Shading\Wboit\TransparentCompositeTransitionPass.cpp" />
+    <ClCompile Include="Render\Passes\Shading\Deferred\Lighting\DeferredLightTransitionPass.cpp" />
     <ClCompile Include="Profiler\IProfiler.cpp" />
     <ClCompile Include="Profiler\DefaultCpuProfiler.cpp" />
     <ClCompile Include="Profiler\ICpuProfiler.cpp" />
@@ -569,6 +574,10 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\Passes\Billboard\BillboardTransitionPass.h" />
+    <ClInclude Include="Render\Passes\Shading\ForwardPlus\Lighting\OpaqueForwardTransitionPass.h" />
+    <ClInclude Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\OpaqueDepthTransitionPrepass.h" />
+    <ClInclude Include="Render\Passes\Shading\Deferred\GBuffer\OpaqueDeferredTransitionPass.h" />
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\Lighting\MeshletOpaqueForwardPass.h" />
     <ClInclude Include="Render\Passes\Shading\Common\OpaqueInitPass.h" />
     <ClInclude Include="Render\Passes\Setup\GlobalFrameSetupPass.h" />
@@ -602,11 +611,12 @@
     <ClInclude Include="Render\Passes\Shading\Common\TransparentInitPass.h" />
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\Lighting\TraditionalOpaqueForwardPass.h" />
     <ClInclude Include="Render\Passes\TransitionPass.h" />
+    <ClInclude Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\TransparentDepthTransitionPrepass.h" />
+    <ClInclude Include="Render\Passes\Shading\Wboit\TransparentForwardTransitionPass.h" />
     <ClInclude Include="Utils\RenderBuffer.h" />
     <ClInclude Include="Render\Passes\Culling\CullingCommandResetPass.h" />
-    <ClInclude Include="Render\Passes\Shading\Wboit\PreCompositeTransitionPass.h" />
-    <ClInclude Include="Render\Passes\Shading\Deferred\Lighting\PostDeferredTransitionPass.h" />
-    <ClInclude Include="Render\Passes\Shading\Deferred\Lighting\PreDeferredTransitionPass.h" />
+    <ClInclude Include="Render\Passes\Shading\Wboit\TransparentCompositeTransitionPass.h" />
+    <ClInclude Include="Render\Passes\Shading\Deferred\Lighting\DeferredLightTransitionPass.h" />
     <ClInclude Include="Profiler\IProfiler.h" />
     <ClInclude Include="Profiler\DefaultCpuProfiler.h" />
     <ClInclude Include="Profiler\ICpuProfiler.h" />

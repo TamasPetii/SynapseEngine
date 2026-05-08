@@ -8,10 +8,6 @@ namespace Syn
 {
     #include "Engine/Shaders/Includes/PushConstants/ClusterPrefixSumPC.glsl"
 
-    bool ClusterPrefixSumPass::ShouldExecute(const RenderContext& context) const {
-        return context.scene->GetSettings()->enableForwardPlus;
-    }
-
     void ClusterPrefixSumPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 
