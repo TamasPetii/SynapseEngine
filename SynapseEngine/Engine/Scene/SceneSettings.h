@@ -17,7 +17,8 @@ namespace Syn
         LodLevel = 2,
         MeshIndex = 3,
         MeshletIndex = 4,
-        TriangleIndex = 5
+        TriangleIndex = 5,
+        AllCombined = 6
     };
 
     struct SYN_API SceneSettings

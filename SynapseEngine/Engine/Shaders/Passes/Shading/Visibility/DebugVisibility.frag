@@ -59,7 +59,8 @@ void main() {
         case DEBUG_MODE_MESHLET_INDEX:
             if (pipeFlag == VIS_PIPELINE_MESH_SHADER) {
                 uint msIdx = UNPACK_VISIBILITY_MS_MESHLET(payload);
-                outColor = vec4(getMeshletLodColor(entityId, msIdx, lodIdx), 1.0);
+                uint combinedHash = entityId ^ hash(meshIdx ^ hash(msIdx));
+                outColor = vec4(idToColor(combinedHash), 1.0);
             } else {
                 outColor = vec4(0.1, 0.1, 0.1, 1.0);
             }
@@ -70,5 +71,14 @@ void main() {
             outColor = vec4(idToColor(entityId ^ hash(triIdx)), 1.0);
             break;
         }
+
+        case DEBUG_MODE_ALL_COMBINED:
+            if (pipeFlag == VIS_PIPELINE_TRADITIONAL) {
+                outColor = vec4(getDebugColor(entityId, meshIdx, lodIdx, gl_FragCoord.xy), 1.0);
+            } else {
+                uint msIdx = UNPACK_VISIBILITY_MS_MESHLET(payload);
+                outColor = vec4(getMeshletLodColor(entityId, msIdx, lodIdx), 1.0);
+            }
+            break;
     }
 }

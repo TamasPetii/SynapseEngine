@@ -84,6 +84,7 @@ void Synapse::OnInit() {
         Syn::ViewportViewModel{
             _editorApi.get(),
             _editorApi.get(),
+            _editorApi.get(),
             _editorApi.get()
         }
     );

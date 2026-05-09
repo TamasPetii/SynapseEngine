@@ -5,14 +5,15 @@
 #include "EditorCore/API/IRenderAPI.h"
 #include "EditorCore/API/ISelectionAPI.h"
 #include "EditorCore/API/ITransformAPI.h"
+#include "EditorCore/API/ISettingsAPI.h"
 #include <glm/gtc/type_ptr.hpp>
 #include <print>
 
 namespace Syn {
     class ViewportViewModel : public IViewModel<ViewportState, ViewportIntent> {
     public:
-        ViewportViewModel(IRenderAPI* renderApi, ISelectionAPI* selectionApi, ITransformAPI* transformApi)
-            : _renderApi(renderApi), _selectionApi(selectionApi), _transformApi(transformApi) {}
+        ViewportViewModel(IRenderAPI* renderApi, ISelectionAPI* selectionApi, ITransformAPI* transformApi, ISettingsAPI* settingsApi)
+            : _renderApi(renderApi), _selectionApi(selectionApi), _transformApi(transformApi), _settingsApi(settingsApi) {}
 
         const ViewportState& GetState() const override { return _state; }
 
@@ -39,6 +40,12 @@ namespace Syn {
                     _state.parentWorldTransform = glm::mat4(1.0f);
                 }
             }
+
+            if (_settingsApi) {
+                SceneSettings settings = _settingsApi->GetSceneSettings();
+                _state.enableDebugVisibility = settings.enableDebugVisibility;
+                _state.debugVisibilityMode = static_cast<uint32_t>(settings.debugVisibilityMode);
+            }
         }
 
         void Dispatch(const ViewportIntent& intent) override {
@@ -51,6 +58,8 @@ namespace Syn {
                 else if constexpr (std::is_same_v<T, ToggleSnapIntent>)           _state.useSnap = arg.useSnap;
                 else if constexpr (std::is_same_v<T, ApplyGizmoTransformIntent>)  HandleGizmoTransform(arg);
                 else if constexpr (std::is_same_v<T, PickEntityIntent>)           HandlePickEntity(arg);
+                else if constexpr (std::is_same_v<T, ToggleDebugVisibilityIntent>)     HandleToggleDebugVisibility(arg);
+                else if constexpr (std::is_same_v<T, ChangeDebugVisibilityModeIntent>) HandleChangeDebugVisibilityMode(arg);
                 }, intent);
         }
 
@@ -93,10 +102,30 @@ namespace Syn {
             _transformApi->SetEntityRotation(_state.activeEntity, rotation);
             _transformApi->SetEntityScale(_state.activeEntity, scale);
         }
+
+        void HandleToggleDebugVisibility(const ToggleDebugVisibilityIntent& intent) {
+            _state.enableDebugVisibility = intent.enabled;
+            if (_settingsApi) {
+                SceneSettings settings = _settingsApi->GetSceneSettings();
+                settings.enableDebugVisibility = intent.enabled;
+                _settingsApi->SetSceneSettings(settings);
+            }
+        }
+
+        void HandleChangeDebugVisibilityMode(const ChangeDebugVisibilityModeIntent& intent) {
+            _state.debugVisibilityMode = intent.mode;
+            if (_settingsApi) {
+                SceneSettings settings = _settingsApi->GetSceneSettings();
+                settings.debugVisibilityMode = static_cast<DebugVisibilityMode>(intent.mode);
+                _settingsApi->SetSceneSettings(settings);
+            }
+        }
+
     private:
         IRenderAPI* _renderApi = nullptr;
         ISelectionAPI* _selectionApi = nullptr;
         ITransformAPI* _transformApi = nullptr;
+		ISettingsAPI* _settingsApi = nullptr;
         ViewportState _state;
     };
 }

@@ -9,6 +9,8 @@
 #define DEBUG_MODE_MESH_INDEX       3
 #define DEBUG_MODE_MESHLET_INDEX    4
 #define DEBUG_MODE_TRIANGLE_INDEX   5
+#define DEBUG_MODE_TRIANGLE_INDEX   5
+#define DEBUG_MODE_ALL_COMBINED     6
 
 struct DebugVisibilityPC {
     uint64_t frameGlobalContextBufferAddr;

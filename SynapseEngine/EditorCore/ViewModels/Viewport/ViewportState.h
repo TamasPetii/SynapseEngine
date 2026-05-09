@@ -34,5 +34,8 @@ namespace Syn {
         glm::mat4 entityWorldTransform{ 1.0f };
         glm::mat4 parentWorldTransform{ 1.0f };
         bool hasParent = false;
+
+        bool enableDebugVisibility = false;
+        uint32_t debugVisibilityMode = 0;
     };
 }

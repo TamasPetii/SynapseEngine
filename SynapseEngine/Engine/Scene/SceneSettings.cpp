@@ -33,6 +33,6 @@ namespace Syn
         , bloomExposure(1.0f)
         , bloomStrength(1.0f)
         , enableDebugVisibility(false)
-        , debugVisibilityMode(DebugVisibilityMode::EntityId)
+        , debugVisibilityMode(DebugVisibilityMode::AllCombined)
     {}
 }
