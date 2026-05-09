@@ -127,5 +127,7 @@ void main() {
             uint(GET_MESHLET_TRIANGLE_INDEX(addrs.meshletTriangleIndices, baseOffset + 1)),
             uint(GET_MESHLET_TRIANGLE_INDEX(addrs.meshletTriangleIndices, baseOffset + 2))
         );
+
+        gl_MeshPrimitivesEXT[i].gl_PrimitiveID = int(i);
     }
 }
