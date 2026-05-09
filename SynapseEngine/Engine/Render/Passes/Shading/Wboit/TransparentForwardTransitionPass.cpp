@@ -2,6 +2,10 @@
 #include "Engine/Render/RenderNames.h"
 
 namespace Syn {
+    bool TransparentForwardTransitionPass::ShouldExecute(const RenderContext& context) const
+    {
+        return !context.scene->GetSettings()->enableDebugVisibility;
+    }
 
     void TransparentForwardTransitionPass::PrepareFrame(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);

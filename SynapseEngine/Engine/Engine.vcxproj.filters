@@ -1032,6 +1032,9 @@
     <ClCompile Include="Render\Passes\Setup\HizInitPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Passes\Shading\Visibility\DebugVisibilityPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2168,6 +2171,9 @@
     <ClInclude Include="Render\Passes\Setup\HizInitPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Passes\Shading\Visibility\DebugVisibilityPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Includes\Common\Animation.glsl" />
@@ -2266,5 +2272,8 @@
     <None Include="Shaders\Includes\Utils\LightMath.glsl" />
     <None Include="Shaders\Includes\Utils\MaterialMath.glsl" />
     <None Include="Shaders\Passes\Shading\Common\Meshlet.mesh" />
+    <None Include="Shaders\Includes\Common\Visibility.glsl" />
+    <None Include="Shaders\Passes\Shading\Visibility\DebugVisibility.frag" />
+    <None Include="Shaders\Includes\PushConstants\DebugVisibilityPC.glsl" />
   </ItemGroup>
 </Project>

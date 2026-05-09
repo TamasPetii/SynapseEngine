@@ -23,7 +23,7 @@
 layout(location = 0) in vec3 inNormal;
 layout(location = 1) in vec4 inTangent;
 layout(location = 2) in vec2 inUV;
-layout(location = 3) in flat uvec4 inId; // (EntityID, MaterialID, MeshletIndex, LodIndex) 
+layout(location = 3) in flat uvec3 inId; // (PackedEntity, Material, PartialPayload)
 
 layout(location = 0) out vec4 outColor;
 
@@ -36,7 +36,6 @@ layout(push_constant) uniform PushConstants {
 void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
-    uint entityId = inId.x;
     uint materialId = inId.y;
 
     // 1. Fetch Material

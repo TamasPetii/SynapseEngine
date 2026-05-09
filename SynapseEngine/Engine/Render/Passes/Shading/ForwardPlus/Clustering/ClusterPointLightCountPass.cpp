@@ -22,6 +22,11 @@ namespace Syn {
             }, config);
     }
 
+    bool ClusterPointLightCountPass::ShouldExecute(const RenderContext& context) const
+    {
+        return !context.scene->GetSettings()->enableDebugVisibility;
+    }
+
     void ClusterPointLightCountPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();

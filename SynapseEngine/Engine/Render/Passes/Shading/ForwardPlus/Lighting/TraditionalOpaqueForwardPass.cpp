@@ -21,7 +21,8 @@ namespace Syn {
 
     bool TraditionalOpaqueForwardPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->pipelineType == PipelineType::ForwardPlus;
+        return context.scene->GetSettings()->pipelineType == PipelineType::ForwardPlus 
+            && !context.scene->GetSettings()->enableDebugVisibility;;
     }
 
     TraditionalOpaqueForwardPass::TraditionalOpaqueForwardPass(MaterialRenderType renderType)

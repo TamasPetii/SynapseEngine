@@ -2,6 +2,7 @@
 #extension GL_GOOGLE_include_directive : require
 
 #include "../../../../Includes/Core.glsl"
+#include "../../../../Includes/Common/Visibility.glsl"
 #include "../../../../Includes/Common/FrameGlobalContext.glsl"
 #include "../../../../Includes/Common/Texture.glsl"
 #include "../../../../Includes/Common/Material.glsl"
@@ -11,12 +12,12 @@
 layout(location = 0) in vec3 inNormal;
 layout(location = 1) in vec4 inTangent;
 layout(location = 2) in vec2 inUV;
-layout(location = 3) in flat uvec4 inId; // (EntityID, MaterialID, Mesh/MeshletIndex, LodIndex) 
+layout(location = 3) in flat uvec3 inId; // (PackedEntity, Material, PartialPayload)
 
 layout(location = 0) out vec4 outColorMetallic;
 layout(location = 1) out vec4 outNormalRoughness;
 layout(location = 2) out vec4 outEmissiveAo;
-layout(location = 3) out uint outEntityId;
+layout(location = 3) out uvec2 outId;
 
 #include "../../../../Includes/PushConstants/TraditionalMeshletPassPC.glsl"
 
@@ -25,12 +26,16 @@ layout(push_constant) uniform PushConstants {
 };
 
 void main() {
-    uint entityId = inId.x;
-    uint materialId = inId.y;
-    uint meshletIndex = inId.z;
-    uint lodIndex = inId.w;
-
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+    
+    uint packedEntity = inId.x;
+    uint materialId   = inId.y;
+    uint partial      = inId.z;
+
+    uint pipelineFlag = UNPACK_VISIBILITY_PIPELINE(packedEntity);
+    uint finalPayload = pipelineFlag == VIS_PIPELINE_MESH_SHADER 
+                                      ? FINALIZE_VIS_MS(partial, gl_PrimitiveID)
+                                      : FINALIZE_VIS_TRADITIONAL(partial, gl_PrimitiveID);
 
     // 1. Fetch Material
     Material mat = GET_MATERIAL(ctx.materialBufferAddr, materialId);
@@ -60,5 +65,5 @@ void main() {
     outColorMetallic   = vec4(albedoAlpha.rgb, finalMetalness);
     outNormalRoughness = vec4(finalNormal, finalRoughness);
     outEmissiveAo      = vec4(finalEmissive, finalAo);
-    outEntityId        = entityId;
+    outId              = uvec2(packedEntity, finalPayload);
 }

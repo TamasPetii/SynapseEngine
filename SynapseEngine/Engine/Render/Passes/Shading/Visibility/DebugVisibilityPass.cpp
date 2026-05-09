@@ -1,34 +1,41 @@
-#include "DeferredEmissiveAoPass.h"
+#include "DebugVisibilityPass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Vk/Image/ImageFactory.h"
+#include "Engine/Scene/BufferNames.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "Engine/Image/ImageManager.h"
+#include "Engine/Image/SamplerNames.h"
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
 #include "Engine/Render/RenderNames.h"
-#include "Engine/Image/SamplerNames.h"
 
-namespace Syn {
+namespace Syn
+{
+    #include "Engine/Shaders/Includes/PushConstants/DebugVisibilityPC.glsl"
 
-    #include "Engine/Shaders/Includes/PushConstants/DeferredEmissiveAoPC.glsl"
-
-    bool DeferredEmissiveAoPass::ShouldExecute(const RenderContext& context) const
+    bool DebugVisibilityPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->pipelineType == PipelineType::Deferred 
-            && context.scene->GetSettings()->enableDeferredEmissiveAo
-            && !context.scene->GetSettings()->enableDebugVisibility;
+        return context.scene->GetSettings()->enableDebugVisibility;
     }
 
-    void DeferredEmissiveAoPass::Initialize() {
+    void DebugVisibilityPass::Initialize()
+    {
         auto shaderManager = ServiceLocator::GetShaderManager();
+        auto imageManager = ServiceLocator::GetImageManager();
 
         Vk::ShaderProgramConfig config;
-        config.useDescriptorBuffers = false;
+        config.useDescriptorBuffers = true;
+        config.layoutOverride = [imageManager](uint32_t setIndex) {
+            if (setIndex == 0) {
+                return imageManager->GetBindlessLayout();
+            }
+            return VkDescriptorSetLayout{};
+            };
 
-        _shaderProgram = shaderManager->CreateProgram("DeferredEmissiveAoProgram", {
+        _shaderProgram = shaderManager->CreateProgram("DebugVisibilityProgram", {
             ShaderNames::FullscreenVert,
-            ShaderNames::DeferredEmissiveAoFrag
+            ShaderNames::DebugVisibilityFrag
             }, config);
 
         _graphicsState = {
@@ -60,20 +67,37 @@ namespace Syn {
         };
     }
 
-    void DeferredEmissiveAoPass::PrepareFrame(const RenderContext& context) {
+    void DebugVisibilityPass::PrepareFrame(const RenderContext& context)
+    {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
-
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
         _graphicsState.renderArea = extent;
 
-        auto mainImg = group->GetImage(RenderTargetNames::Main);
+        auto mainImage = group->GetImage(RenderTargetNames::Main);
+        auto entityImage = group->GetImage(RenderTargetNames::EntityIndex);
+
+        _imageTransitions.push_back({
+            .image = mainImage,
+            .newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .dstStage = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+            .dstAccess = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+            .discardContent = true
+            });
+
+        _imageTransitions.push_back({
+            .image = entityImage,
+            .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            .dstStage = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
+            .dstAccess = VK_ACCESS_2_SHADER_READ_BIT,
+            .discardContent = false
+            });
 
         _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
-            .imageView = mainImg->GetView(Vk::ImageViewNames::Default),
+            .imageView = group->GetImage(RenderTargetNames::Main)->GetView(Vk::ImageViewNames::Default),
             .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+            .loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE,
             .storeOp = VK_ATTACHMENT_STORE_OP_STORE
-			}));
+            }));
 
         _renderInfo = Vk::RenderingInfoConfig{
             .renderArea = extent,
@@ -83,51 +107,50 @@ namespace Syn {
         };
     }
 
-    void DeferredEmissiveAoPass::PushConstants(const RenderContext& context) {
+    void DebugVisibilityPass::PushConstants(const RenderContext& context)
+    {
         auto scene = context.scene;
         uint32_t fIdx = context.frameIndex;
 
-        DeferredEmissiveAoPC pc{};
+        DebugVisibilityPC pc{};
         pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc.debugMode = scene->GetSettings()->debugVisibilityMode;
 
         vkCmdPushConstants(
             context.cmd,
             _shaderProgram->GetLayout(),
             VK_SHADER_STAGE_ALL,
             0,
-            sizeof(DeferredEmissiveAoPC),
+            sizeof(DebugVisibilityPC),
             &pc
         );
     }
 
-    void DeferredEmissiveAoPass::BindDescriptors(const RenderContext& context) {
-        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+    void DebugVisibilityPass::BindDescriptors(const RenderContext& context)
+    {
         auto imageManager = ServiceLocator::GetImageManager();
-        auto nearestSampler = imageManager->GetSampler(SamplerNames::NearestClampEdge)->Handle();
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
-        auto colorImg = group->GetImage(RenderTargetNames::ColorMetallic);
-        auto emissiveAoImg = group->GetImage(RenderTargetNames::EmissiveAo);
+        auto visibilityTexture = rtGroup->GetImage(RenderTargetNames::EntityIndex);
+        auto nearestSampler = imageManager->GetSampler(SamplerNames::NearestClampEdge);
 
         Vk::PushDescriptorWriter pushWriter;
 
         pushWriter.AddCombinedImageSampler(
             0,
-            colorImg->GetView(Vk::ImageViewNames::Default),
-            nearestSampler,
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-        );
-
-        pushWriter.AddCombinedImageSampler(
-            1,
-            emissiveAoImg->GetView(Vk::ImageViewNames::Default),
-            nearestSampler,
+            visibilityTexture->GetView(Vk::ImageViewNames::Default),
+            nearestSampler->Handle(),
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
+
+        auto bindlessBuffer = imageManager->GetBindlessBuffer();
+        bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
-    void DeferredEmissiveAoPass::Draw(const RenderContext& context) {
+    void DebugVisibilityPass::Draw(const RenderContext& context)
+    {
         vkCmdDraw(context.cmd, 3, 1, 0, 0);
     }
 }

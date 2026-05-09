@@ -32,5 +32,7 @@ namespace Syn
         , bloomFilterRadius(0.005f)
         , bloomExposure(1.0f)
         , bloomStrength(1.0f)
+        , enableDebugVisibility(false)
+        , debugVisibilityMode(DebugVisibilityMode::EntityId)
     {}
 }

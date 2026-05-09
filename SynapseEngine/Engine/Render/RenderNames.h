@@ -27,10 +27,6 @@ namespace Syn
 
         static constexpr const char* OpaqueDepth = "OpaqueDepth";
         static constexpr const char* TransparentDepth = "TransparentDepth";
-
-        static constexpr const char* DebugTopologyPipeline = "DebugTopologyPipeline";
-        static constexpr const char* DebugMeshletLod = "DebugMeshletLod";
-        static constexpr const char* DebugMaterialUv = "DebugMaterialUv";
     };
 
     struct SYN_API RenderTargetViewNames
@@ -41,13 +37,6 @@ namespace Syn
         static constexpr const char* Roughness = "Roughness";
         static constexpr const char* Emissive = "Emissive";
         static constexpr const char* AmbientOcclusion = "AmbientOcclusion";
-
-        static constexpr const char* DebugTopology = "DebugTopology";
-        static constexpr const char* DebugPipeline = "DebugPipeline";
-        static constexpr const char* DebugMeshlet = "DebugMeshlet";
-        static constexpr const char* DebugLodGrayscale = "DebugLodGrayscale";
-        static constexpr const char* DebugMaterial = "DebugMaterial";
-        static constexpr const char* DebugUv = "DebugUv";
 
 		static constexpr const char* DepthOpaqueMax = "DepthOpaqueMax";
 		static constexpr const char* DepthTransparentMin = "DepthTransparentMin";

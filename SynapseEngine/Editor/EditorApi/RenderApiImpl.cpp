@@ -115,7 +115,7 @@ namespace Syn
         if (x >= extent.width || y >= extent.height) return NULL_ENTITY;
 
         Vk::BufferConfig readbackConfig{};
-        readbackConfig.size = sizeof(uint32_t);
+        readbackConfig.size = sizeof(uint32_t) * 2;
         readbackConfig.usage = VK_BUFFER_USAGE_TRANSFER_DST_BIT;
         readbackConfig.memoryUsage = VMA_MEMORY_USAGE_AUTO;
         readbackConfig.allocationFlags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_RANDOM_BIT;
@@ -160,8 +160,12 @@ namespace Syn
         EntityID selectedEntity = NULL_ENTITY;
         void* mappedData = readbackBuffer->Map();
         if (mappedData) {
-            std::memcpy(&selectedEntity, mappedData, sizeof(uint32_t));
+            uint32_t pixelData[2] = { 0, 0 };
+            std::memcpy(pixelData, mappedData, sizeof(uint32_t) * 2);
             readbackBuffer->Unmap();
+
+            uint32_t packedEntity = pixelData[0];
+            selectedEntity = packedEntity & ~(1u << 31);
         }
 
         return selectedEntity;

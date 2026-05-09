@@ -19,7 +19,7 @@ namespace Syn {
 
     bool PointLightCullingPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableGpuCulling;
+        return context.scene->GetSettings()->enableGpuCulling && !context.scene->GetSettings()->enableDebugVisibility;
     }
 
     void PointLightCullingPass::Initialize() {

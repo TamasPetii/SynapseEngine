@@ -4,7 +4,7 @@
 namespace Syn {
     bool DeferredLightTransitionPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->pipelineType == PipelineType::Deferred;
+        return context.scene->GetSettings()->pipelineType == PipelineType::Deferred && !context.scene->GetSettings()->enableDebugVisibility;
     }
 
     void DeferredLightTransitionPass::PrepareFrame(const RenderContext& context) {

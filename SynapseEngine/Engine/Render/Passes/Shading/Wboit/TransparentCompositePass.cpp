@@ -49,6 +49,11 @@ namespace Syn {
         };
     }
 
+    bool TransparentCompositePass::ShouldExecute(const RenderContext& context) const
+    {
+        return !context.scene->GetSettings()->enableDebugVisibility;
+    }
+
     void TransparentCompositePass::PrepareFrame(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };

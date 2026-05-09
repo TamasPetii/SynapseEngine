@@ -3,6 +3,7 @@
 #extension GL_ARB_shader_draw_parameters : require
 
 #include "../../../../Includes/Core.glsl"
+#include "../../../../Includes/Common/Visibility.glsl"
 #include "../../../../Includes/Common/FrameGlobalContext.glsl"
 #include "../../../../Includes/Common/Camera.glsl"
 #include "../../../../Includes/Common/Mesh.glsl"
@@ -12,7 +13,7 @@
 #include "../../../../Includes/Common/Material.glsl"
 
 layout(location = 0) out vec2 outUV;
-layout(location = 1) out flat uvec2 outId; //(EntityID, MaterialID) 
+layout(location = 1) out flat uvec3 outId; //(PackedEntity, MaterialID, PartialPayload)
 
 #include "../../../../Includes/PushConstants/TraditionalMeshletPassPC.glsl"
 
@@ -102,5 +103,8 @@ void main() {
     gl_Position = camera.viewProjVulkan * transform.transform * finalModelMat * vec4(v.position, 1.0);
 
     outUV = vec2(attr.uv_x, 1.0 - attr.uv_y);
-    outId = uvec2(entityId, resolvedMaterialId);
+
+    uint packedEntity = PACK_VISIBILITY_ENTITY(entityId, VIS_PIPELINE_TRADITIONAL);
+    uint partialPayload = PACK_PARTIAL_TRADITIONAL(desc.lodIndex, meshIndex);
+    outId = uvec3(packedEntity, resolvedMaterialId, partialPayload);
 }

@@ -149,6 +149,7 @@ namespace Syn {
 
                     ImGui::SeparatorText("Debug Textures");
 
+                    /*
                     RadioButton("Topology Cluster", RenderTargetGroupNames::Deferred, RenderTargetNames::DebugTopologyPipeline, RenderTargetViewNames::DebugTopology);
                     RadioButton("Pipeline Type", RenderTargetGroupNames::Deferred, RenderTargetNames::DebugTopologyPipeline, RenderTargetViewNames::DebugPipeline);
 
@@ -157,6 +158,7 @@ namespace Syn {
 
                     RadioButton("Material Type", RenderTargetGroupNames::Deferred, RenderTargetNames::DebugMaterialUv, RenderTargetViewNames::DebugMaterial);
                     RadioButton("UV", RenderTargetGroupNames::Deferred, RenderTargetNames::DebugMaterialUv, RenderTargetViewNames::DebugUv);
+                    */
 
                     ImGui::SeparatorText("Mipchain Textures");
 
