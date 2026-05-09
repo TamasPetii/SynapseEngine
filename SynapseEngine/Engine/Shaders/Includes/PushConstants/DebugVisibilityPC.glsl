@@ -11,6 +11,9 @@
 #define DEBUG_MODE_TRIANGLE_INDEX   5
 #define DEBUG_MODE_TRIANGLE_INDEX   5
 #define DEBUG_MODE_ALL_COMBINED     6
+#define DEBUG_MODE_MATERIAL_TYPE    7
+#define DEBUG_MODE_CLUSTER_SLICES   8
+#define DEBUG_MODE_CLUSTER_LIGHTS   9
 
 struct DebugVisibilityPC {
     uint64_t frameGlobalContextBufferAddr;

@@ -18,6 +18,6 @@ namespace Syn
         RenderBuffer spotLightIndexBuffer;
 
         uint32_t maxClusters = 0;     
-        uint32_t tileSize = ComputeGroupSize::Image32D;
+        uint32_t tileSize = ComputeGroupSize::Image128D;
     };
 }

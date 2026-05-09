@@ -62,4 +62,18 @@ vec3 getMeshletLodColor(uint entityId, uint meshletIndex, uint lodIndex) {
     return finalColor * brightnessScale;
 }
 
+vec3 GetHeatmapColor(float value) {
+    vec3 colors[5] = vec3[](
+        vec3(0.0, 0.0, 0.5),
+        vec3(0.0, 1.0, 1.0),
+        vec3(0.0, 1.0, 0.0),
+        vec3(1.0, 1.0, 0.0),
+        vec3(1.0, 0.0, 0.0) 
+    );
+    value = clamp(value, 0.0, 1.0) * 4.0;
+    int idx1 = int(floor(value));
+    int idx2 = min(idx1 + 1, 4);
+    return mix(colors[idx1], colors[idx2], fract(value));
+}
+
 #endif

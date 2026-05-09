@@ -3,10 +3,6 @@
 #include "Engine/Vk/Buffer/BufferUtils.h"
 
 namespace Syn {
-    bool ClusterLightWriteSyncPass::ShouldExecute(const RenderContext& context) const
-    {
-        return !context.scene->GetSettings()->enableDebugVisibility;
-    }
 
     void ClusterLightWriteSyncPass::Dispatch(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();

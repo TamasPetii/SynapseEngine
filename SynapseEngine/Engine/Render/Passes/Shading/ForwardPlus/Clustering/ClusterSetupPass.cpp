@@ -29,11 +29,6 @@ namespace Syn {
             }, config);
     }
 
-    bool ClusterSetupPass::ShouldExecute(const RenderContext& context) const
-    {
-        return !context.scene->GetSettings()->enableDebugVisibility;
-    }
-
     void ClusterSetupPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();

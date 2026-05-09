@@ -9,7 +9,6 @@ namespace Syn
         std::string GetName() const override { return "ClusterSpotLightWritePass"; }
         void Initialize() override;
     protected:
-		bool ShouldExecute(const RenderContext& context) const override;
         void PushConstants(const RenderContext& context) override;
         void Dispatch(const RenderContext& context) override;
     };

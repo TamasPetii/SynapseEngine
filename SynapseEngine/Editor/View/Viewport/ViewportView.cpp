@@ -230,6 +230,7 @@ namespace Syn {
                     }
                     };
 
+
                 RadioButton("Entity ID", 0);
                 RadioButton("Pipeline Type", 1);
                 RadioButton("LOD Level", 2);
@@ -237,6 +238,9 @@ namespace Syn {
                 RadioButton("Meshlet Index", 4);
                 RadioButton("Triangle Index", 5);
                 RadioButton("All Combined", 6);
+                RadioButton("Material Type", 7);
+                RadioButton("Tile Slice Count", 8);
+                RadioButton("Tile Light Count", 9);
 
                 ImGui::EndDisabled();
 
@@ -290,4 +294,4 @@ namespace Syn {
         }
     }
 
-} // namespace Syn
+}

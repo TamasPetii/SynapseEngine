@@ -18,7 +18,10 @@ namespace Syn
         MeshIndex = 3,
         MeshletIndex = 4,
         TriangleIndex = 5,
-        AllCombined = 6
+        AllCombined = 6,
+        MaterialType = 7,
+        ForwardPlusSlices = 8,
+        ForwardPlusLightCount = 9
     };
 
     struct SYN_API SceneSettings

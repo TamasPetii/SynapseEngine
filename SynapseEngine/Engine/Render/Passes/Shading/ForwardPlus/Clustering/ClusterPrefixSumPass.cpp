@@ -19,11 +19,6 @@ namespace Syn
             }, config);
     }
 
-    bool ClusterPrefixSumPass::ShouldExecute(const RenderContext& context) const
-    {
-        return !context.scene->GetSettings()->enableDebugVisibility;
-    }
-
     void ClusterPrefixSumPass::PushConstants(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;

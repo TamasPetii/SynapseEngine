@@ -23,11 +23,6 @@ namespace Syn {
             }, config);
     }
 
-    bool ClusterPointLightWritePass::ShouldExecute(const RenderContext& context) const
-    {
-        return !context.scene->GetSettings()->enableDebugVisibility;
-    }
-
     void ClusterPointLightWritePass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
