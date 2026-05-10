@@ -164,7 +164,19 @@ If vcpkg is integrated with Visual Studio, all dependencies will be automaticall
 * Not intended as a plug-and-play game engine
 * Designed to explore modern high-performance rendering techniques
 
-## License
+## Licensing
 
-This project is licensed under the Apache License 2.0.
-See the LICENSE file for details.
+SynapseEngine is dual-licensed:
+
+- GNU Affero General Public License v3.0 (AGPLv3) for open-source and non-commercial use
+- Commercial license available for proprietary/commercial usage
+
+If you want to use SynapseEngine in a closed-source product,
+commercial game,
+proprietary engine,
+or commercial environment without AGPL obligations,
+you must obtain a commercial license.
+
+For commercial licensing inquiries:
+
+tamaspeti3451@gmail.com
