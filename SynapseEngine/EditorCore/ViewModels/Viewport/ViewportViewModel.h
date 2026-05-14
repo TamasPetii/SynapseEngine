@@ -60,6 +60,9 @@ namespace Syn {
                 else if constexpr (std::is_same_v<T, PickEntityIntent>)           HandlePickEntity(arg);
                 else if constexpr (std::is_same_v<T, ToggleDebugVisibilityIntent>)     HandleToggleDebugVisibility(arg);
                 else if constexpr (std::is_same_v<T, ChangeDebugVisibilityModeIntent>) HandleChangeDebugVisibilityMode(arg);
+				else if constexpr (std::is_same_v<T, ChangeSnapTranslateIntent>) _state.snapTranslate = arg.snap;
+				else if constexpr (std::is_same_v<T, ChangeSnapRotateIntent>)    _state.snapAngle = arg.angle;
+				else if constexpr (std::is_same_v<T, ChangeSnapScaleIntent>)     _state.snapScale = arg.scale;
                 }, intent);
         }
 

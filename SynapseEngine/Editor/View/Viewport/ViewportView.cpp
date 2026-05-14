@@ -62,49 +62,49 @@ namespace Syn {
                 ImGui::SeparatorText("Operation");
 
                 int mode = static_cast<int>(state.gizmoMode);
-                if (ImGui::RadioButton("Local", &mode, ImGuizmo::LOCAL))
+                if (ImGui::RadioButton("Local##Gizmo", &mode, ImGuizmo::LOCAL))
                     vm.Dispatch(ChangeGizmoModeIntent{ ImGuizmo::LOCAL });
 
                 ImGui::SameLine();
 
-                if (ImGui::RadioButton("World", &mode, ImGuizmo::WORLD))
+                if (ImGui::RadioButton("World##Gizmo", &mode, ImGuizmo::WORLD))
                     vm.Dispatch(ChangeGizmoModeIntent{ ImGuizmo::WORLD });
 
                 int op = static_cast<int>(state.gizmoOperation);
 
-                if (ImGui::RadioButton("Translate", &op, ImGuizmo::TRANSLATE))
+                if (ImGui::RadioButton("Translate##Gizmo", &op, ImGuizmo::TRANSLATE))
                     vm.Dispatch(ChangeGizmoOperationIntent{ ImGuizmo::TRANSLATE });
 
                 ImGui::SameLine();
 
-                if (ImGui::RadioButton("Rotate", &op, ImGuizmo::ROTATE))
+                if (ImGui::RadioButton("Rotate##Gizmo", &op, ImGuizmo::ROTATE))
                     vm.Dispatch(ChangeGizmoOperationIntent{ ImGuizmo::ROTATE });
 
                 ImGui::SameLine();
 
-                if (ImGui::RadioButton("Scale", &op, ImGuizmo::SCALE))
+                if (ImGui::RadioButton("Scale##Gizmo", &op, ImGuizmo::SCALE))
                     vm.Dispatch(ChangeGizmoOperationIntent{ ImGuizmo::SCALE });
 
                 ImGui::SeparatorText("Snapping");
 
                 bool snap = state.useSnap;
-                ImGui::Text("Enable");
-                ImGui::SameLine(80);
-                if (ImGui::Checkbox("##EnableSnap", &snap))
+                if (ImGui::Checkbox("Enable##Snap", &snap))
                     vm.Dispatch(ToggleSnapIntent{ snap });
 
-                ViewportState& mutableState = const_cast<ViewportState&>(state);
-                ImGui::Text("Translate");
-                ImGui::SameLine(80);
-                ImGui::DragFloat3("##TranslateSnap", mutableState.snapTranslate);
+                glm::vec3 snapTrans = state.snapTranslate;
+                if (ImGui::DragFloat3("Translate##Snap", glm::value_ptr(snapTrans), 0.1f)) {
+                    vm.Dispatch(ChangeSnapTranslateIntent{ snapTrans });
+                }
 
-                ImGui::Text("Rotate");
-                ImGui::SameLine(80);
-                ImGui::DragFloat("##RotateSnap", &mutableState.snapAngle);
+                float snapRot = state.snapAngle;
+                if (ImGui::DragFloat("Rotate##Snap", &snapRot, 1.0f)) {
+                    vm.Dispatch(ChangeSnapRotateIntent{ snapRot });
+                }
 
-                ImGui::Text("Scale");
-                ImGui::SameLine(80);
-                ImGui::DragFloat("##ScaleSnap", &mutableState.snapScale);
+                float snapScl = state.snapScale;
+                if (ImGui::DragFloat("Scale##Snap", &snapScl, 0.1f)) {
+                    vm.Dispatch(ChangeSnapScaleIntent{ snapScl });
+                }
 
                 ImGui::EndChild();
             }
@@ -266,7 +266,7 @@ namespace Syn {
         float* snapValue = nullptr;
         if (state.useSnap) {
             switch (state.gizmoOperation) {
-            case ImGuizmo::TRANSLATE: snapValue = const_cast<float*>(state.snapTranslate); break;
+            case ImGuizmo::TRANSLATE: snapValue = const_cast<float*>(glm::value_ptr(state.snapTranslate)); break;
             case ImGuizmo::ROTATE:    snapValue = const_cast<float*>(&state.snapAngle); break;
             case ImGuizmo::SCALE:     snapValue = const_cast<float*>(&state.snapScale); break;
             }

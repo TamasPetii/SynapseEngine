@@ -154,6 +154,22 @@ namespace Syn
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueForwardPass>(MaterialRenderType::Opaque1Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueForwardPass>(MaterialRenderType::Opaque2Sided));
 
+        // Wireframe Passes
+        pipeline->AddPass(std::make_unique<WireframeMeshSetupPass>());
+        pipeline->AddPass(std::make_unique<WireframeMeshAabbPass>());
+        pipeline->AddPass(std::make_unique<WireframeMeshSpherePass>());
+        pipeline->AddPass(std::make_unique<PointLightAabbWireframePass>());
+        pipeline->AddPass(std::make_unique<PointLightSphereWireframePass>());
+        pipeline->AddPass(std::make_unique<SpotLightAabbWireframePass>());
+        pipeline->AddPass(std::make_unique<SpotLightSphereWireframePass>());
+
+        //Billboard Passes
+        pipeline->AddPass(std::make_unique<BillboardTransitionPass>());
+        pipeline->AddPass(std::make_unique<CameraBillboardPass>());
+        pipeline->AddPass(std::make_unique<DirectionLightBillboardPass>());
+        pipeline->AddPass(std::make_unique<PointLightBillboardPass>());
+        pipeline->AddPass(std::make_unique<SpotLightBillboardPass>());
+
 		//Forward+ Transparent Lighting Passes (WBOIT)
 		pipeline->AddPass(std::make_unique<TransparentForwardTransitionPass>());
         pipeline->AddPass(std::make_unique<MeshletTransparentForwardPass>(MaterialRenderType::Transparent1Sided));
@@ -164,24 +180,6 @@ namespace Syn
 		//Transparent Composite Passes (WBOIT)
         pipeline->AddPass(std::make_unique<TransparentCompositeTransitionPass>());
         pipeline->AddPass(std::make_unique<TransparentCompositePass>());
-
-		//Billboard Passes
-        /*
-        pipeline->AddPass(std::make_unique<BillboardTransitionPass>());
-        pipeline->AddPass(std::make_unique<CameraBillboardPass>());
-        pipeline->AddPass(std::make_unique<DirectionLightBillboardPass>());
-        pipeline->AddPass(std::make_unique<PointLightBillboardPass>());
-        pipeline->AddPass(std::make_unique<SpotLightBillboardPass>());
-
-        // Wireframe Passes
-        pipeline->AddPass(std::make_unique<WireframeMeshSetupPass>());
-        pipeline->AddPass(std::make_unique<WireframeMeshAabbPass>());
-        pipeline->AddPass(std::make_unique<WireframeMeshSpherePass>());
-        pipeline->AddPass(std::make_unique<PointLightAabbWireframePass>());
-        pipeline->AddPass(std::make_unique<PointLightSphereWireframePass>());
-        pipeline->AddPass(std::make_unique<SpotLightAabbWireframePass>());
-        pipeline->AddPass(std::make_unique<SpotLightSphereWireframePass>());
-        */
 
         // Bloom Post-processing passes
         pipeline->AddPass(std::make_unique<BloomPrefilterPass>());

@@ -59,7 +59,10 @@ namespace Syn
             bool spawnSponza = config.value("/environment/spawn_sponza"_json_pointer, true);
             bool spawnBistro = config.value("/environment/spawn_bistro"_json_pointer, false);
             bool spawnFloor = config.value("/environment/spawn_floor"_json_pointer, true);
+            bool spawnPbrSponza = config.value("/environment/spawn_pbr_sponza"_json_pointer, true);
+            bool spawnMonkey = config.value("/environment/spawn_monkey"_json_pointer, true);
             bool useUniqueMaterials = config.value("/materials/use_unique_materials"_json_pointer, true);
+
             int sharedMatCount = config.value("/materials/shared_material_count"_json_pointer, 25);
 
             int charCount = config.value("/entities/animated_characters"_json_pointer, 100);
@@ -73,17 +76,6 @@ namespace Syn
             int pointShadowCount = config.value("/lights/point_shadow_count"_json_pointer, 5);
             int spotLightCount = config.value("/lights/spot_count"_json_pointer, 50);
             int spotShadowCount = config.value("/lights/spot_shadow_count"_json_pointer, 5);
-
-            uint32_t sponzaId = modelManager->LoadModelAsync(basePath + "Sponza/sponza.obj");
-			uint32_t bistroId = modelManager->LoadModelAsync(basePath + "Bistro/BistroExterior.fbx");
-            uint32_t mutantId = modelManager->LoadModelAsync(basePath + "Monster/Mutant/Mutant.dae");
-
-            std::vector<uint32_t> animationIds;
-            animationIds.push_back(animationManager->LoadAnimationAsync(basePath + "Monster/Breakdance 1990/Breakdance 1990.dae", mutantId));
-            animationIds.push_back(animationManager->LoadAnimationAsync(basePath + "Monster/Breakdance Ending 1/Breakdance Ending 1.dae", mutantId));
-            animationIds.push_back(animationManager->LoadAnimationAsync(basePath + "Monster/Dancing/Dancing.dae", mutantId));
-            animationIds.push_back(animationManager->LoadAnimationAsync(basePath + "Monster/Hip Hop Dancing/Hip Hop Dancing.dae", mutantId));
-            animationIds.push_back(animationManager->LoadAnimationAsync(basePath + "Monster/Hip Hop Dancing_2/Hip Hop Dancing.dae", mutantId));
 
             std::vector<uint32_t> geoIds = {
                 modelManager->GetResourceIndex(MeshSourceNames::Cube),
@@ -116,9 +108,27 @@ namespace Syn
                 _debugCameraEntity = debugCam;
             }
 
+            if (spawnMonkey)
+            {
+                uint32_t monkeyModelIndex = modelManager->LoadModelAsync(basePath + "Monkey/monkey.obj");
+
+                EntityID monkeyId = registry->CreateEntity();
+                registry->AddComponent<TransformComponent>(monkeyId);
+                registry->AddComponent<ModelComponent>(monkeyId);
+
+                registry->GetComponent<TransformComponent>(monkeyId).translation = glm::vec3(0.0f, 0.0f, 0.0f);
+                registry->GetComponent<TransformComponent>(monkeyId).scale = glm::vec3(5.0f, 5.0f, 5.0f);
+                registry->GetComponent<ModelComponent>(monkeyId).modelIndex = monkeyModelIndex;
+
+                registry->GetPool<TransformComponent>()->SetCategory(monkeyId, StorageCategory::Static);
+                registry->GetPool<ModelComponent>()->SetCategory(monkeyId, StorageCategory::Static);
+            }
+
             // Sponza Environment
             if (spawnSponza)
             {
+                uint32_t sponzaId = modelManager->LoadModelAsync(basePath + "Sponza/sponza.obj");
+
                 EntityID sponzaEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(sponzaEntity);
                 registry->AddComponent<ModelComponent>(sponzaEntity);
@@ -133,6 +143,8 @@ namespace Syn
 
             if (spawnBistro)
             {
+                uint32_t bistroId = modelManager->LoadModelAsync(basePath + "Bistro/BistroExterior.fbx");
+
                 EntityID bistroEntity = registry->CreateEntity();
                 registry->AddComponent<TransformComponent>(bistroEntity);
                 registry->AddComponent<ModelComponent>(bistroEntity);
@@ -175,27 +187,64 @@ namespace Syn
                 registry->GetComponent<MaterialOverrideComponent>(floorEntity).materials.push_back(floorMatId);
             }
 
-            // Animated Characters
-            for (int i = 0; i < charCount; i++)
+            if (spawnPbrSponza)
             {
-                EntityID characterEntity = registry->CreateEntity();
-                registry->AddComponent<TransformComponent>(characterEntity);
-                registry->AddComponent<ModelComponent>(characterEntity);
-                registry->AddComponent<AnimationComponent>(characterEntity);
+                uint32_t sponzaPbr = modelManager->LoadModelAsync(basePath + "Sponza_Pbr/NewSponza_Main_Yup_003.fbx");
+                uint32_t sponzaPbrCurtains = modelManager->LoadModelAsync(basePath + "Sponza_Pbr_Curtains/NewSponza_Curtains_FBX_YUp.fbx");
+                uint32_t sponzaPbrFlowers = modelManager->LoadModelAsync(basePath + "Sponza_Pbr_Flowers/NewSponza_IvyGrowth_FBX_YUp.fbx");
+                uint32_t sponzaPbrTree = modelManager->LoadModelAsync(basePath + "Sponza_Pbr_Tree/NewSponza_CypressTree_FBX_YUp.fbx");
 
-                registry->GetComponent<TransformComponent>(characterEntity).translation = glm::vec3(
-                    (rand() % 400) - 200.0f, (rand() % 400) - 200.0f, (rand() % 400) - 200.0f);
-                registry->GetComponent<TransformComponent>(characterEntity).scale = glm::vec3(5.f);
-                registry->GetComponent<ModelComponent>(characterEntity).modelIndex = mutantId;
+                std::array<uint32_t, 4> sponzaModels = { sponzaPbr, sponzaPbrCurtains, sponzaPbrFlowers, sponzaPbrTree };
 
-                auto& animComp = registry->GetComponent<AnimationComponent>(characterEntity);
-                animComp.animationIndex = animationIds[rand() % animationIds.size()];
-                animComp.speed = 0.5f + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * 1.5f;
+				for (auto modelIndex : sponzaModels)
+                {    
+                    EntityID entity = registry->CreateEntity();
+                    registry->AddComponent<TransformComponent>(entity);
+                    registry->AddComponent<ModelComponent>(entity);
 
-                registry->GetPool<TransformComponent>()->SetCategory(characterEntity, StorageCategory::Static);
-                registry->GetPool<ModelComponent>()->SetCategory(characterEntity, StorageCategory::Static);
-                registry->GetPool<AnimationComponent>()->SetCategory(characterEntity, StorageCategory::Stream);
+                    registry->GetComponent<TransformComponent>(entity).translation = glm::vec3(0.0f, 0.0f, 0.0f);
+                    registry->GetComponent<TransformComponent>(entity).scale = glm::vec3(0.2f, 0.2f, 0.2f);
+                    registry->GetComponent<ModelComponent>(entity).modelIndex = modelIndex;
+
+                    registry->GetPool<TransformComponent>()->SetCategory(entity, StorageCategory::Static);
+                    registry->GetPool<ModelComponent>()->SetCategory(entity, StorageCategory::Static);
+                }
             }
+
+            if (charCount > 0)
+            {
+                uint32_t mutantId = modelManager->LoadModelAsync(basePath + "Monster/Mutant/Mutant.dae");
+
+                std::vector<uint32_t> animationIds;
+                animationIds.push_back(animationManager->LoadAnimationAsync(basePath + "Monster/Breakdance 1990/Breakdance 1990.dae", mutantId));
+                animationIds.push_back(animationManager->LoadAnimationAsync(basePath + "Monster/Breakdance Ending 1/Breakdance Ending 1.dae", mutantId));
+                animationIds.push_back(animationManager->LoadAnimationAsync(basePath + "Monster/Dancing/Dancing.dae", mutantId));
+                animationIds.push_back(animationManager->LoadAnimationAsync(basePath + "Monster/Hip Hop Dancing/Hip Hop Dancing.dae", mutantId));
+                animationIds.push_back(animationManager->LoadAnimationAsync(basePath + "Monster/Hip Hop Dancing_2/Hip Hop Dancing.dae", mutantId));
+
+                // Animated Characters
+                for (int i = 0; i < charCount; i++)
+                {
+                    EntityID characterEntity = registry->CreateEntity();
+                    registry->AddComponent<TransformComponent>(characterEntity);
+                    registry->AddComponent<ModelComponent>(characterEntity);
+                    registry->AddComponent<AnimationComponent>(characterEntity);
+
+                    registry->GetComponent<TransformComponent>(characterEntity).translation = glm::vec3((rand() % 400) - 200.0f, 0.0f, (rand() % 400) - 200.0f);
+                    registry->GetComponent<TransformComponent>(characterEntity).scale = glm::vec3(5.f);
+                    registry->GetComponent<ModelComponent>(characterEntity).modelIndex = mutantId;
+
+                    auto& animComp = registry->GetComponent<AnimationComponent>(characterEntity);
+                    animComp.animationIndex = animationIds[rand() % animationIds.size()];
+                    animComp.speed = 0.5f + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * 1.5f;
+
+                    registry->GetPool<TransformComponent>()->SetCategory(characterEntity, StorageCategory::Static);
+                    registry->GetPool<ModelComponent>()->SetCategory(characterEntity, StorageCategory::Static);
+                    registry->GetPool<AnimationComponent>()->SetCategory(characterEntity, StorageCategory::Stream);
+                }
+            }
+
+            
 
             // Generate Shared Materials
             std::vector<uint32_t> sharedMaterialIds;

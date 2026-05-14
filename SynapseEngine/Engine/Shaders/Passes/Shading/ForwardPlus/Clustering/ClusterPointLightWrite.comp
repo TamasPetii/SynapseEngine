@@ -37,7 +37,7 @@ void main() {
     uint activeClusterCount = GET_CLUSTER_COUNT(ctx.forwardPlusClusterCountBufferAddr);
     if (clusterIdx >= activeClusterCount) return;
 
-    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
+    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
     ClusterData cluster = GET_CLUSTER_DATA(ctx.forwardPlusClusterListBufferAddr, clusterIdx);
 

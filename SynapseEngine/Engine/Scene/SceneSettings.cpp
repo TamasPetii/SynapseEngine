@@ -3,7 +3,7 @@
 namespace Syn
 {
     SceneSettings::SceneSettings()
-		: pipelineType(PipelineType::ForwardPlus)
+		: pipelineType(PipelineType::Deferred)
         , useDebugCamera(false)
         , enableGpuCulling(true)
         , enableBloom(true)

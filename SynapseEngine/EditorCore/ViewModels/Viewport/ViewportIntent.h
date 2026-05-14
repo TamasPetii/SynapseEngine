@@ -30,6 +30,18 @@ namespace Syn {
         bool useSnap;
     };
 
+    struct ChangeSnapTranslateIntent {
+        glm::vec3 snap;
+    };
+
+    struct ChangeSnapRotateIntent {
+        float angle;
+    };
+
+    struct ChangeSnapScaleIntent {
+        float scale;
+    };
+
     struct ApplyGizmoTransformIntent { 
         glm::mat4 newWorldMatrix;
     }; 
@@ -56,6 +68,9 @@ namespace Syn {
         ApplyGizmoTransformIntent,
         PickEntityIntent,
         ToggleDebugVisibilityIntent,
-        ChangeDebugVisibilityModeIntent
+        ChangeDebugVisibilityModeIntent,
+        ChangeSnapTranslateIntent,
+        ChangeSnapRotateIntent,
+        ChangeSnapScaleIntent
     >;
 }

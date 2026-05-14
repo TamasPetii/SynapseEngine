@@ -37,7 +37,7 @@ void main() {
     if (clusterIdx >= activeClusterCount) return;
     
     uint totalLights = GET_VK_DRAW_CMD(ctx.pointLightIndirectCommandBufferAddr, 0).instanceCount;
-    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
+    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
 
     if (threadId == 0) {

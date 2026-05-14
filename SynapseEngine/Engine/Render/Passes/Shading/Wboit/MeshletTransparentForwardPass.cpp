@@ -147,6 +147,7 @@ namespace Syn {
 		pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
         pc.baseDescriptorOffset = drawData->Models.activeTraditionalCount + drawData->Models.meshletCmdOffsets[_renderType];
         pc.materialRenderType = static_cast<uint32_t>(_renderType);
+        pc.disableConeCulling = (_renderType == MaterialRenderType::Transparent2Sided) ? 1 : 0;
 
         vkCmdPushConstants(
             context.cmd,

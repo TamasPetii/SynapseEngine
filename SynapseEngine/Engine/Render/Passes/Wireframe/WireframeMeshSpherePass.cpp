@@ -36,8 +36,8 @@ namespace Syn {
             },
             .depth = {
                 .testEnable = VK_TRUE,
-                .writeEnable = VK_FALSE,
-                .compareOp = VK_COMPARE_OP_LESS_OR_EQUAL
+                .writeEnable = VK_TRUE,
+                .compareOp = VK_COMPARE_OP_LESS
             },
             .blendStates = {
                 {
