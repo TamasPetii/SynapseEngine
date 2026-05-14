@@ -79,12 +79,12 @@ namespace Syn
         return builder->BuildFromSource(source);
     }
 
-    std::shared_ptr<StaticMesh> MeshFactory::CreatePyramid(float baseRadius, float height, uint32_t heightSegments)
+    std::shared_ptr<StaticMesh> MeshFactory::CreatePyramid(float baseSize, float height)
     {
         auto builder = ServiceLocator::GetStaticMeshBuilder();
         if (!builder) return nullptr;
 
-        PyramidMeshSource source(baseRadius, height, heightSegments);
+        PyramidMeshSource source(baseSize, height);
         return builder->BuildFromSource(source);
     }
 

@@ -56,6 +56,9 @@ namespace Syn
         coneSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
         coneSingleCmdBuffer.UpdateCapacityAll(1);
 
+		pyramidSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
+		pyramidSingleCmdBuffer.UpdateCapacityAll(1);
+
         aabbSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
         aabbSingleCmdBuffer.UpdateCapacityAll(1);
 
@@ -67,6 +70,7 @@ namespace Syn
             aabbSingleCmdBuffer.GetMapped(i)->Write(&aabbCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
             billboardSingleCmdBuffer.GetMapped(i)->Write(&billboardCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
 			coneSingleCmdBuffer.GetMapped(i)->Write(&coneCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+			pyramidSingleCmdBuffer.GetMapped(i)->Write(&pyramidCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
         }
     }
 

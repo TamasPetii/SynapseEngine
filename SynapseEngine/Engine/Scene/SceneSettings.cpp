@@ -16,6 +16,7 @@ namespace Syn
         , enableSpotLightSphereWireframe(false)
         , enableSpotLightAabbWireframe(false)
         , enableSpotLightConeWireframe(false)
+        , enableSpotLightPyramidWireframe(false)
         , enableWireframeMeshAabb(false)
         , enableWireframeMeshSphere(false)
         , enableDeferredEmissiveAo(true)

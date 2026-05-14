@@ -11,6 +11,7 @@ namespace Syn
         RenderBuffer aabbSingleCmdBuffer;
         RenderBuffer sphereSingleCmdBuffer;
         RenderBuffer coneSingleCmdBuffer;
+        RenderBuffer pyramidSingleCmdBuffer;
         RenderBuffer billboardSingleCmdBuffer;
 
         CpuData<uint32_t> instances;
