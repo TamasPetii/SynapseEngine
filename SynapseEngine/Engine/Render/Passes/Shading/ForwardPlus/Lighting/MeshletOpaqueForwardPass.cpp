@@ -23,7 +23,8 @@ namespace Syn {
 
     bool MeshletOpaqueForwardPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->pipelineType == PipelineType::ForwardPlus;
+        return context.scene->GetSettings()->pipelineType == PipelineType::ForwardPlus 
+            && !context.scene->GetSettings()->enableDebugVisibility;;
     }
 
     MeshletOpaqueForwardPass::MeshletOpaqueForwardPass(MaterialRenderType renderType)
@@ -132,6 +133,7 @@ namespace Syn {
         pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
         pc.baseDescriptorOffset = drawData->Models.activeTraditionalCount + drawData->Models.meshletCmdOffsets[_renderType];
         pc.materialRenderType = static_cast<uint32_t>(_renderType);
+        pc.disableConeCulling = 0;
 
         vkCmdPushConstants(
             context.cmd,

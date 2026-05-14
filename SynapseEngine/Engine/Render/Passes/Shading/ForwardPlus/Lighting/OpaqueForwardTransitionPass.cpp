@@ -4,7 +4,8 @@
 namespace Syn {
 
     bool OpaqueForwardTransitionPass::ShouldExecute(const RenderContext& context) const {
-        return context.scene->GetSettings()->pipelineType == PipelineType::ForwardPlus;
+        return context.scene->GetSettings()->pipelineType == PipelineType::ForwardPlus 
+            && !context.scene->GetSettings()->enableDebugVisibility;;
     }
 
     void OpaqueForwardTransitionPass::PrepareFrame(const RenderContext& context) {

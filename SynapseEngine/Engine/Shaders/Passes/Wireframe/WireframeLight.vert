@@ -27,6 +27,8 @@ void main() {
     vec3 worldPos = vec3(0.0);
     vec3 lightColor = vec3(1.0);
 
+    //Todo: constexpr 0-5
+
     // 0: Point Sphere, 1: Point Aabb
     if (pc.lightDrawType <= 1) {
         uint entityId = VisiblePointLightBuffer(ctx.pointLightVisibleIndexBufferAddr).data[gl_InstanceIndex];
@@ -51,11 +53,16 @@ void main() {
             worldPos = col.center + (v.position * col.radius);
         } 
         // 3: Spot Aabb Box
-        else 
+        else if(pc.lightDrawType == 3)
         { 
             vec3 extents = (col.aabbMax - col.aabbMin) * 0.5;
             vec3 center = (col.aabbMax + col.aabbMin) * 0.5;
             worldPos = center + (v.position * extents);
+        }
+        // 4: Spot Cone
+        else if(pc.lightDrawType == 4) 
+        {
+            worldPos = (light.transform * vec4(v.position, 1.0)).xyz;
         }
     }
 

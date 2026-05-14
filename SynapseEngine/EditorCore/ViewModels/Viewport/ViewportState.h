@@ -24,7 +24,8 @@ namespace Syn {
         ImGuizmo::OPERATION gizmoOperation = ImGuizmo::TRANSLATE;
         ImGuizmo::MODE gizmoMode = ImGuizmo::LOCAL;
         bool useSnap = false;
-        float snapTranslate[3] = { 1.0f, 1.0f, 1.0f };
+
+        glm::vec3 snapTranslate{ 1.0f, 1.0f, 1.0f };
         float snapAngle = 45.0f;
         float snapScale = 0.5f;
 
@@ -34,5 +35,8 @@ namespace Syn {
         glm::mat4 entityWorldTransform{ 1.0f };
         glm::mat4 parentWorldTransform{ 1.0f };
         bool hasParent = false;
+
+        bool enableDebugVisibility = false;
+        uint32_t debugVisibilityMode = 0;
     };
 }

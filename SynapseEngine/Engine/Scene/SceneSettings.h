@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine/SynApi.h"
+#include <cstdint>
 
 namespace Syn
 {
@@ -8,6 +9,20 @@ namespace Syn
 		Deferred,
 		ForwardPlus
 	};
+
+    enum SYN_API DebugVisibilityMode
+    {
+        EntityId = 0,
+        Pipeline = 1,
+        LodLevel = 2,
+        MeshIndex = 3,
+        MeshletIndex = 4,
+        TriangleIndex = 5,
+        AllCombined = 6,
+        MaterialType = 7,
+        ForwardPlusSlices = 8,
+        ForwardPlusLightCount = 9
+    };
 
     struct SYN_API SceneSettings
     {
@@ -36,6 +51,7 @@ namespace Syn
         bool enablePointLightAabbWireframe;
         bool enableSpotLightSphereWireframe;
         bool enableSpotLightAabbWireframe;
+		bool enableSpotLightConeWireframe;
 
         bool enableBillboardCameras;
 		bool enableBillboardPointLights;
@@ -50,5 +66,8 @@ namespace Syn
         float bloomFilterRadius;
         float bloomExposure;
         float bloomStrength;
+
+        bool enableDebugVisibility;
+        DebugVisibilityMode debugVisibilityMode;
     };
 }

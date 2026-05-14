@@ -74,6 +74,9 @@
 #include "Engine/Render/Passes/Wireframe/PointLightSphereWireframePass.h"
 #include "Engine/Render/Passes/Wireframe/SpotLightAabbWireframePass.h"
 #include "Engine/Render/Passes/Wireframe/SpotLightSphereWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/SpotLightConeWireframePass.h"
+
+#include "Engine/Render/Passes/Shading/Visibility/DebugVisibilityPass.h"
 
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "RenderNames.h"
@@ -152,6 +155,23 @@ namespace Syn
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueForwardPass>(MaterialRenderType::Opaque1Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueForwardPass>(MaterialRenderType::Opaque2Sided));
 
+        // Wireframe Passes
+        pipeline->AddPass(std::make_unique<WireframeMeshSetupPass>());
+        pipeline->AddPass(std::make_unique<WireframeMeshAabbPass>());
+        pipeline->AddPass(std::make_unique<WireframeMeshSpherePass>());
+        pipeline->AddPass(std::make_unique<PointLightAabbWireframePass>());
+        pipeline->AddPass(std::make_unique<PointLightSphereWireframePass>());
+        pipeline->AddPass(std::make_unique<SpotLightAabbWireframePass>());
+        pipeline->AddPass(std::make_unique<SpotLightSphereWireframePass>());
+        pipeline->AddPass(std::make_unique<SpotLightConeWireframePass>());
+
+        //Billboard Passes
+        pipeline->AddPass(std::make_unique<BillboardTransitionPass>());
+        pipeline->AddPass(std::make_unique<CameraBillboardPass>());
+        pipeline->AddPass(std::make_unique<DirectionLightBillboardPass>());
+        pipeline->AddPass(std::make_unique<PointLightBillboardPass>());
+        pipeline->AddPass(std::make_unique<SpotLightBillboardPass>());
+
 		//Forward+ Transparent Lighting Passes (WBOIT)
 		pipeline->AddPass(std::make_unique<TransparentForwardTransitionPass>());
         pipeline->AddPass(std::make_unique<MeshletTransparentForwardPass>(MaterialRenderType::Transparent1Sided));
@@ -163,36 +183,18 @@ namespace Syn
         pipeline->AddPass(std::make_unique<TransparentCompositeTransitionPass>());
         pipeline->AddPass(std::make_unique<TransparentCompositePass>());
 
-		//Billboard Passes
-		/*
-        pipeline->AddPass(std::make_unique<BillboardTransitionPass>());
-        pipeline->AddPass(std::make_unique<CameraBillboardPass>());
-        pipeline->AddPass(std::make_unique<DirectionLightBillboardPass>());
-        pipeline->AddPass(std::make_unique<PointLightBillboardPass>());
-        pipeline->AddPass(std::make_unique<SpotLightBillboardPass>());
-        */
-
-        // Wireframe Passes
-        /*
-        pipeline->AddPass(std::make_unique<WireframeMeshSetupPass>());
-        pipeline->AddPass(std::make_unique<WireframeMeshAabbPass>());
-        pipeline->AddPass(std::make_unique<WireframeMeshSpherePass>());
-        pipeline->AddPass(std::make_unique<PointLightAabbWireframePass>());
-        pipeline->AddPass(std::make_unique<PointLightSphereWireframePass>());
-        pipeline->AddPass(std::make_unique<SpotLightAabbWireframePass>());
-        pipeline->AddPass(std::make_unique<SpotLightSphereWireframePass>());
-        */
-
         // Bloom Post-processing passes
         pipeline->AddPass(std::make_unique<BloomPrefilterPass>());
         pipeline->AddPass(std::make_unique<BloomDownsamplePass>());
         pipeline->AddPass(std::make_unique<BloomUpsamplePass>());
         pipeline->AddPass(std::make_unique<BloomCompositePass>());
 
+		//Debug Visibility Pass
+        pipeline->AddPass(std::make_unique<DebugVisibilityPass>());     
+
 		//Gui and Present Passes
 		pipeline->AddPass(std::make_unique<PresentationTransitionPass>());
         pipeline->AddPass(std::make_unique<GuiPass>());
-
         pipeline->InitializeAll();
 
         renderManager->RegisterPipeline(RenderPipelineNames::DeferredPipeline, std::move(pipeline));
@@ -255,7 +257,6 @@ namespace Syn
 
         rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::NormalRoughness, normalImageSpec);
 
-
         Vk::ImageConfig emissiveAoImageSpec{};
         emissiveAoImageSpec.width = initWidth;
         emissiveAoImageSpec.height = initHeight;
@@ -300,7 +301,7 @@ namespace Syn
         entityImageSpec.width = initWidth;
         entityImageSpec.height = initHeight;
         entityImageSpec.type = VK_IMAGE_TYPE_2D;
-        entityImageSpec.format = VK_FORMAT_R32_UINT;
+        entityImageSpec.format = VK_FORMAT_R32G32_UINT;
         entityImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         entityImageSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::EntityIndex, entityImageSpec);
@@ -366,53 +367,6 @@ namespace Syn
         transparentDepthSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         transparentDepthSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
         rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::TransparentDepth, transparentDepthSpec);
-
-        Vk::ImageConfig debugImageSpec{};
-        debugImageSpec.width = initWidth;
-        debugImageSpec.height = initHeight;
-        debugImageSpec.type = VK_IMAGE_TYPE_2D;
-        debugImageSpec.format = VK_FORMAT_R8G8B8A8_UNORM;
-        debugImageSpec.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-        debugImageSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-
-        Vk::ImageConfig debugGeometryPipelineSpec = debugImageSpec;
-        debugGeometryPipelineSpec.AddView(RenderTargetViewNames::DebugTopology, Vk::ImageViewConfig{
-            .viewType = VK_IMAGE_VIEW_TYPE_2D,
-            .mipLevelCount = 1,
-            .swizzle = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_ONE }
-            });
-        debugGeometryPipelineSpec.AddView(RenderTargetViewNames::DebugPipeline, Vk::ImageViewConfig{
-            .viewType = VK_IMAGE_VIEW_TYPE_2D,
-            .mipLevelCount = 1,
-            .swizzle = { VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_ONE }
-            });
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::DebugTopologyPipeline, debugGeometryPipelineSpec);
-
-        Vk::ImageConfig debugLodSpec = debugImageSpec;
-        debugLodSpec.AddView(RenderTargetViewNames::DebugMeshlet, Vk::ImageViewConfig{
-            .viewType = VK_IMAGE_VIEW_TYPE_2D,
-            .mipLevelCount = 1,
-            .swizzle = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_ONE }
-            });
-        debugLodSpec.AddView(RenderTargetViewNames::DebugLodGrayscale, Vk::ImageViewConfig{
-            .viewType = VK_IMAGE_VIEW_TYPE_2D,
-            .mipLevelCount = 1,
-            .swizzle = { VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_ONE }
-            });
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::DebugMeshletLod, debugLodSpec);
-
-        Vk::ImageConfig debugMaterialUvSpec = debugImageSpec;
-        debugMaterialUvSpec.AddView(RenderTargetViewNames::DebugMaterial, Vk::ImageViewConfig{
-            .viewType = VK_IMAGE_VIEW_TYPE_2D,
-            .mipLevelCount = 1,
-            .swizzle = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_ZERO, VK_COMPONENT_SWIZZLE_ONE }
-            });
-        debugMaterialUvSpec.AddView(RenderTargetViewNames::DebugUv, Vk::ImageViewConfig{
-            .viewType = VK_IMAGE_VIEW_TYPE_2D,
-            .mipLevelCount = 1,
-            .swizzle = { VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_ZERO, VK_COMPONENT_SWIZZLE_ONE }
-            });
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::DebugMaterialUv, debugMaterialUvSpec);
 
         return renderManager;
     }

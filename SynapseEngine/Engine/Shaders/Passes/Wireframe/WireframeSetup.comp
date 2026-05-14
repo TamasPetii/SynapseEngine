@@ -8,13 +8,13 @@
 #include "../../Includes/Common/IndirectCommand.glsl"
 #include "../../Includes/Common/Culling.glsl"
 
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
 #include "../../Includes/PushConstants/WireframeSetupPC.glsl"
 
 layout(push_constant) uniform PushConstants {
     WireframeSetupPC pc;
 };
-
-layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
 
 void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);

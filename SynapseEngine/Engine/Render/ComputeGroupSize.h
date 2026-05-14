@@ -9,6 +9,9 @@ namespace Syn
         static constexpr uint32_t Image8D = 8;
         static constexpr uint32_t Image16D = 16;
         static constexpr uint32_t Image32D = 32;
+        static constexpr uint32_t Image64D = 64;
+        static constexpr uint32_t Image128D = 128;
+        static constexpr uint32_t Image256D = 256;
 
         static constexpr uint32_t Buffer32D = 32;
         static constexpr uint32_t Buffer64D = 64;

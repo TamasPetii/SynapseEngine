@@ -1,4 +1,4 @@
-#include "PointLightAabbWireframePass.h"
+#include "SpotLightConeWireframePass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Manager/ComponentBufferManager.h"
@@ -11,15 +11,14 @@
 #include "Engine/Vk/Image/ImageViewNames.h"
 
 namespace Syn {
+#include "Engine/Shaders/Includes/PushConstants/WireframeLightPC.glsl"
 
-    #include "Engine/Shaders/Includes/PushConstants/WireframeLightPC.glsl"
-
-    bool PointLightAabbWireframePass::ShouldExecute(const RenderContext& context) const
+    bool SpotLightConeWireframePass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enablePointLightAabbWireframe;
+        return context.scene->GetSettings()->enableSpotLightConeWireframe;
     }
 
-    void PointLightAabbWireframePass::Initialize() {
+    void SpotLightConeWireframePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 
         Vk::ShaderProgramConfig config;
@@ -50,7 +49,7 @@ namespace Syn {
         };
     }
 
-    void PointLightAabbWireframePass::PrepareFrame(const RenderContext& context) {
+    void SpotLightConeWireframePass::PrepareFrame(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
 
@@ -82,11 +81,11 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-		auto isGpu = scene->GetSettings()->enableGpuCulling;
+        auto isGpu = scene->GetSettings()->enableGpuCulling;
 
         Vk::BufferCopyInfo copyRegion{};
-        copyRegion.srcBuffer = drawData->PointLights.indirectBuffer.GetHandle(fIdx, isGpu);
-        copyRegion.dstBuffer = drawData->PointLights.aabbSingleCmdBuffer.GetHandle(fIdx, isGpu);
+        copyRegion.srcBuffer = drawData->SpotLights.indirectBuffer.GetHandle(fIdx, isGpu);
+        copyRegion.dstBuffer = drawData->SpotLights.coneSingleCmdBuffer.GetHandle(fIdx, isGpu);
         copyRegion.srcOffset = offsetof(VkDrawIndirectCommand, instanceCount);
         copyRegion.dstOffset = offsetof(VkDrawIndirectCommand, instanceCount);
         copyRegion.size = sizeof(uint32_t);
@@ -94,7 +93,7 @@ namespace Syn {
         Vk::BufferUtils::CopyBuffer(context.cmd, copyRegion);
 
         Vk::BufferBarrierInfo memBarrier{};
-        memBarrier.buffer = drawData->PointLights.aabbSingleCmdBuffer.GetHandle(fIdx, isGpu);
+        memBarrier.buffer = drawData->SpotLights.coneSingleCmdBuffer.GetHandle(fIdx, isGpu);
         memBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
         memBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
         memBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
@@ -103,19 +102,19 @@ namespace Syn {
         Vk::BufferUtils::InsertBarrier(context.cmd, memBarrier);
     }
 
-    void PointLightAabbWireframePass::PushConstants(const RenderContext& context) {
+    void SpotLightConeWireframePass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         auto compManager = scene->GetComponentBufferManager();
         auto modelManager = ServiceLocator::GetModelManager();
         uint32_t fIdx = context.frameIndex;
 
-        auto cube = modelManager->GetResource(MeshSourceNames::Cube);
+        auto cone = modelManager->GetResource(MeshSourceNames::Cone);
 
         WireframeLightPC pc{};
-		pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-        pc.vertexPositionBufferAddr = cube->hardwareBuffers.vertexPositions->GetDeviceAddress();
-		pc.indexBufferAddr = cube->hardwareBuffers.indices->GetDeviceAddress();
-		pc.lightDrawType = 1;
+        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc.vertexPositionBufferAddr = cone->hardwareBuffers.vertexPositions->GetDeviceAddress();
+        pc.indexBufferAddr = cone->hardwareBuffers.indices->GetDeviceAddress();
+        pc.lightDrawType = 4;
 
         vkCmdPushConstants(
             context.cmd,
@@ -127,13 +126,13 @@ namespace Syn {
         );
     }
 
-    void PointLightAabbWireframePass::Draw(const RenderContext& context) {
+    void SpotLightConeWireframePass::Draw(const RenderContext& context) {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
         auto isGpu = scene->GetSettings()->enableGpuCulling;
 
-		auto indirectBuffer = drawData->PointLights.aabbSingleCmdBuffer.GetHandle(fIdx, isGpu);
+        auto indirectBuffer = drawData->SpotLights.coneSingleCmdBuffer.GetHandle(fIdx, isGpu);
 
         vkCmdDrawIndirect(
             context.cmd,

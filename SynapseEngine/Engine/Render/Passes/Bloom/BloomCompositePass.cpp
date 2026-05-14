@@ -15,7 +15,8 @@ namespace Syn {
 
     bool BloomCompositePass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableBloom;
+        return context.scene->GetSettings()->enableBloom 
+            && !context.scene->GetSettings()->enableDebugVisibility;
     }
 
     void BloomCompositePass::Initialize() {

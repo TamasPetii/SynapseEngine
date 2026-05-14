@@ -9,8 +9,6 @@ namespace Syn
         std::string GetName() const override { return "ClusterLightWriteSyncPass"; }
         void Initialize() override {}
     protected:
-        void PushConstants(const RenderContext& context) override {}
-        void BindDescriptors(const RenderContext& context) override {}
         void Dispatch(const RenderContext& context) override;
     };
 }

@@ -41,7 +41,7 @@ void main() {
     uint transformIdx = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
     TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformIdx);
 
-    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
+    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
 
     // 3. Resolve Model metadata and addresses

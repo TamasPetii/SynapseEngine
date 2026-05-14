@@ -147,6 +147,11 @@ namespace Syn {
         );
     }
 
+    bool TraditionalTransparentForwardPass::ShouldExecute(const RenderContext& context) const
+    {
+        return !context.scene->GetSettings()->enableDebugVisibility;
+    }
+
     void TraditionalTransparentForwardPass::BindDescriptors(const RenderContext& context) {
         auto imageManager = ServiceLocator::GetImageManager();
         auto bindlessBuffer = imageManager->GetBindlessBuffer();

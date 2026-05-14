@@ -7,6 +7,7 @@ struct TraditionalMeshletPassPC {
     uint64_t frameGlobalContextBufferAddr;
     uint baseDescriptorOffset;
     uint materialRenderType;
+    uint disableConeCulling;
 };
 
 #endif

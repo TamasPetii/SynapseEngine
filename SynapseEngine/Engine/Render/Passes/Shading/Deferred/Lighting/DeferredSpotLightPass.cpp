@@ -21,7 +21,8 @@ namespace Syn {
     bool DeferredSpotLightPass::ShouldExecute(const RenderContext& context) const
     {
         return context.scene->GetSettings()->pipelineType == PipelineType::Deferred 
-            && context.scene->GetSettings()->enableDeferredSpotLights;
+            && context.scene->GetSettings()->enableDeferredSpotLights
+            && !context.scene->GetSettings()->enableDebugVisibility;
     }
 
     void DeferredSpotLightPass::Initialize() {

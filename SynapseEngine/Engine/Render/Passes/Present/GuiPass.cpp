@@ -33,10 +33,7 @@ namespace Syn
             RenderTargetNames::Bloom,
             RenderTargetNames::OpaqueDepth,
             RenderTargetNames::TransparentAccum,
-            RenderTargetNames::TransparentReveal,
-            RenderTargetNames::DebugTopologyPipeline,
-            RenderTargetNames::DebugMeshletLod,
-			RenderTargetNames::DebugMaterialUv
+            RenderTargetNames::TransparentReveal
         };
 
         for (const auto& targetName : debugTargets) {

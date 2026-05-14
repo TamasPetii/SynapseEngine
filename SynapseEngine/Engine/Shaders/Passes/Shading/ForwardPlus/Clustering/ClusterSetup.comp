@@ -34,7 +34,7 @@ void main() {
     uint flattenTileIdx = tileId.y * ctx.tileCountX + tileId.x;
 
     if (threadId == 0) {
-        uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
+        uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
         CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
         float near = GET_CAMERA_NEAR(camera);
         float far  = GET_CAMERA_FAR(camera);

@@ -3,6 +3,7 @@
 #extension GL_EXT_nonuniform_qualifier : require
 
 #include "../../../../Includes/Core.glsl"
+#include "../../../../Includes/Common/Visibility.glsl"
 #include "../../../../Includes/Common/FrameGlobalContext.glsl"
 #include "../../../../Includes/Common/Material.glsl"
 #include "../../../../Includes/Common/Texture.glsl"
@@ -17,15 +18,21 @@ layout(push_constant) uniform PushConstants {
 };
 
 layout(location = 0) in vec2 inUV;
-layout(location = 1) in flat uvec2 inId;
+layout(location = 1) in flat uvec3 inId;
 
-layout(location = 0) out uint outEntityIndex;
+layout(location = 0) out uvec2 outId;
 
 void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
-    uint entityId = inId.x;
-    uint materialId = inId.y;
+    uint packedEntity = inId.x;
+    uint materialId   = inId.y;
+    uint partial      = inId.z;
+
+    uint pipelineFlag = UNPACK_VISIBILITY_PIPELINE(packedEntity);
+    uint finalPayload = pipelineFlag == VIS_PIPELINE_MESH_SHADER 
+                                    ? FINALIZE_VIS_MS(partial, gl_PrimitiveID)
+                                    : FINALIZE_VIS_TRADITIONAL(partial, gl_PrimitiveID);
 
     // 1. Fetch Material
     Material mat = GET_MATERIAL(ctx.materialBufferAddr, materialId);
@@ -37,5 +44,5 @@ void main() {
         discard;
     }
 
-    outEntityIndex = entityId;
+    outId = uvec2(packedEntity, finalPayload);
 }

@@ -17,7 +17,7 @@
 layout(location = 0) in vec3 inNormal;
 layout(location = 1) in vec4 inTangent;
 layout(location = 2) in vec2 inUV;
-layout(location = 3) in flat uvec4 inId; // (EntityID, MaterialID, MeshletIndex, LodIndex) 
+layout(location = 3) in flat uvec3 inId; // (PackedEntity, Material, PartialPayload)
 
 layout(location = 0) out vec4 outAccum;
 layout(location = 1) out float outReveal;

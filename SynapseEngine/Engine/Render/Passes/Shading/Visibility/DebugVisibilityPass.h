@@ -2,16 +2,19 @@
 #include "Engine/SynApi.h"
 #include "Engine/Render/Passes/GraphicsPass.h"
 
-namespace Syn {
-    class SYN_API TransparentCompositePass : public GraphicsPass {
+namespace Syn
+{
+    class SYN_API DebugVisibilityPass : public GraphicsPass {
     public:
-        TransparentCompositePass() = default;
+        DebugVisibilityPass() = default;
 
-        std::string GetName() const override { return "Transparent_Composite"; }
+        std::string GetName() const override { return "DebugVisibilityPass"; }
         void Initialize() override;
+
     protected:
-		bool ShouldExecute(const RenderContext& context) const override;
+        bool ShouldExecute(const RenderContext& context) const override;
         void PrepareFrame(const RenderContext& context) override;
+        void PushConstants(const RenderContext& context) override;
         void BindDescriptors(const RenderContext& context) override;
         void Draw(const RenderContext& context) override;
     };

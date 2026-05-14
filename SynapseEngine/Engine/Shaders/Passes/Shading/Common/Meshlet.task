@@ -85,7 +85,7 @@ void main() {
         GpuMeshletCollider worldCollider = TransformCollider(localCollider, transform.transform, transform.transformIT);
 
         // 7. Backface Cone Culling
-        if ((ctx.enableConeCulling == 1) && TestConeCulling(worldCollider, camera.eye.xyz)) {
+        if ((pc.disableConeCulling == 0 && ctx.enableConeCulling == 1) && TestConeCulling(worldCollider, camera.eye.xyz)) {
             isVisible = false;
         }
 

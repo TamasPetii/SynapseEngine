@@ -95,8 +95,8 @@ namespace Syn {
         ctx.forwardPlusSpotLightIndexListBufferAddr = drawData->ForwardPlus.spotLightIndexBuffer.GetAddress(fIdx, true);
 
         ctx.wireframeMeshletInstanceIndexBufferAddr = drawData->Debug.instanceBuffer.GetAddress(fIdx, true);
-        ctx.wireframeMeshAabbIndirectCommandBufferAddr = drawData->Debug.meshletAabbIndirectBuffer.GetAddress(fIdx, true);
-        ctx.wireframeMeshSphereIndirectCommandBufferAddr = drawData->Debug.meshletSphereIndirectBuffer.GetAddress(fIdx, true);
+        ctx.wireframeMeshAabbIndirectCommandBufferAddr = drawData->Debug.modelAabbIndirectBuffer.GetAddress(fIdx, true);
+        ctx.wireframeMeshSphereIndirectCommandBufferAddr = drawData->Debug.modelSphereIndirectBuffer.GetAddress(fIdx, true);
 
         ctx.screenWidth = static_cast<float>(rtGroup->GetWidth());
         ctx.screenHeight = static_cast<float>(rtGroup->GetHeight());

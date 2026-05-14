@@ -15,6 +15,7 @@ namespace Syn
         , enablePointLightAabbWireframe(false)
         , enableSpotLightSphereWireframe(false)
         , enableSpotLightAabbWireframe(false)
+        , enableSpotLightConeWireframe(false)
         , enableWireframeMeshAabb(false)
         , enableWireframeMeshSphere(false)
         , enableDeferredEmissiveAo(true)
@@ -32,5 +33,7 @@ namespace Syn
         , bloomFilterRadius(0.005f)
         , bloomExposure(1.0f)
         , bloomStrength(1.0f)
+        , enableDebugVisibility(false)
+        , debugVisibilityMode(DebugVisibilityMode::AllCombined)
     {}
 }

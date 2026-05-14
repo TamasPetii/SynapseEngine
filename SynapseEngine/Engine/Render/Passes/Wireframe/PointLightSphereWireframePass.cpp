@@ -43,7 +43,7 @@ namespace Syn {
             },
             .depth = {
                 .testEnable = VK_TRUE,
-                .writeEnable = VK_FALSE,
+                .writeEnable = VK_TRUE,
                 .compareOp = VK_COMPARE_OP_LESS
             },
             .colorAttachmentCount = 1

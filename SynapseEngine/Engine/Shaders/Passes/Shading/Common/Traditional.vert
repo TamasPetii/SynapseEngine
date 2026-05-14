@@ -3,6 +3,7 @@
 #extension GL_ARB_shader_draw_parameters : require
 
 #include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/Visibility.glsl"
 #include "../../../Includes/Common/FrameGlobalContext.glsl"
 #include "../../../Includes/Common/Camera.glsl"
 #include "../../../Includes/Common/Mesh.glsl"
@@ -14,7 +15,7 @@
 layout(location = 0) out vec3 outNormal;
 layout(location = 1) out vec4 outTangent;
 layout(location = 2) out vec2 outUV;
-layout(location = 3) out flat uvec4 outId; //(EntityID, MaterialID,  MeshIndex, LodIndex) 
+layout(location = 3) out flat uvec3 outId; // (PackedEntity, Material, PartialPayload)
 
 #include "../../../Includes/PushConstants/TraditionalMeshletPassPC.glsl"
 
@@ -106,5 +107,8 @@ void main() {
     outNormal = (transform.transformIT * finalModelMatIT * vec4(attr.normal, 0.0)).xyz;
     outTangent = vec4((transform.transform * finalModelMat * vec4(attr.tangent, 0.0)).xyz, 1.0); // Todo: Invert Normal from model!
     outUV = vec2(attr.uv_x, 1.0 - attr.uv_y);
-    outId = uvec4(entityId, resolvedMaterialId, meshIndex, desc.lodIndex);
+
+    uint packedEntity = PACK_VISIBILITY_ENTITY(entityId, VIS_PIPELINE_TRADITIONAL);
+    uint partialPayload = PACK_PARTIAL_TRADITIONAL(desc.lodIndex, meshIndex);
+    outId = uvec3(packedEntity, resolvedMaterialId, partialPayload);
 }

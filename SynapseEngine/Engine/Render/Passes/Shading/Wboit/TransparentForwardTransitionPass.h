@@ -7,6 +7,7 @@ namespace Syn {
     public:
         std::string GetName() const override { return "TransparentForwardTransitionPass"; }
     protected:
+		bool ShouldExecute(const RenderContext& context) const override;
         void PrepareFrame(const RenderContext& context) override;
     };
 }

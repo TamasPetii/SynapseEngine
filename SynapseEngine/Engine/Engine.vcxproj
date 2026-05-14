@@ -235,6 +235,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Render\Passes\Shading\Visibility\DebugVisibilityPass.cpp" />
     <ClCompile Include="Render\Passes\Setup\HizInitPass.cpp" />
     <ClCompile Include="Render\Passes\Present\PresentationTransitionPass.cpp" />
     <ClCompile Include="Render\Passes\Billboard\BillboardTransitionPass.cpp" />
@@ -257,6 +258,7 @@
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\MeshletOpaqueDepthPrepass.cpp" />
     <ClCompile Include="Scene\NatureScene.cpp" />
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSetupPass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\SpotLightConeWireframePass.cpp" />
     <ClCompile Include="System\Physics\CapsuleColliderSystem.cpp" />
     <ClCompile Include="System\Physics\SphereColliderSystem.cpp" />
     <ClCompile Include="System\Physics\RigidBodySystem.cpp" />
@@ -576,6 +578,7 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\Passes\Shading\Visibility\DebugVisibilityPass.h" />
     <ClInclude Include="Render\Passes\Setup\HizInitPass.h" />
     <ClInclude Include="Render\Passes\Present\PresentationTransitionPass.h" />
     <ClInclude Include="Render\Passes\Billboard\BillboardTransitionPass.h" />
@@ -598,6 +601,7 @@
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\MeshletOpaqueDepthPrepass.h" />
     <ClInclude Include="Scene\NatureScene.h" />
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSetupPass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\SpotLightConeWireframePass.h" />
     <ClInclude Include="System\Physics\CapsuleColliderSystem.h" />
     <ClInclude Include="System\Physics\SphereColliderSystem.h" />
     <ClInclude Include="System\Physics\PhysicsUtils.h" />
@@ -972,6 +976,7 @@
     <None Include="Shaders\Includes\Common\SpotLight.glsl" />
     <None Include="Shaders\Includes\Common\Texture.glsl" />
     <None Include="Shaders\Includes\Common\Transform.glsl" />
+    <None Include="Shaders\Includes\Common\Visibility.glsl" />
     <None Include="Shaders\Includes\Core.glsl" />
     <None Include="Shaders\Includes\Payload\TaskPayload.glsl" />
     <None Include="Shaders\Includes\Payload\WorkGraphCullingPayload.glsl" />
@@ -985,6 +990,7 @@
     <None Include="Shaders\Includes\PushConstants\ClusterPrefixSumPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\ClusterSetupPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\CullingCommandResetPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\DebugVisibilityPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredDirectionLightPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredEmissiveAoPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredPointLightPC.glsl" />
@@ -1012,6 +1018,7 @@
     <None Include="Shaders\Passes\Billboard\Billboard.vert" />
     <None Include="Shaders\Passes\Common\Composite.frag" />
     <None Include="Shaders\Passes\Common\Fullscreen.vert" />
+    <None Include="Shaders\Passes\Shading\Visibility\DebugVisibility.frag" />
     <None Include="Shaders\Passes\Shading\Common\Meshlet.mesh" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightCount.comp" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightWrite.comp" />

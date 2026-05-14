@@ -30,6 +30,18 @@ namespace Syn {
         bool useSnap;
     };
 
+    struct ChangeSnapTranslateIntent {
+        glm::vec3 snap;
+    };
+
+    struct ChangeSnapRotateIntent {
+        float angle;
+    };
+
+    struct ChangeSnapScaleIntent {
+        float scale;
+    };
+
     struct ApplyGizmoTransformIntent { 
         glm::mat4 newWorldMatrix;
     }; 
@@ -39,6 +51,14 @@ namespace Syn {
         uint32_t y;
     };
 
+    struct ToggleDebugVisibilityIntent { 
+        bool enabled;
+    };
+
+    struct ChangeDebugVisibilityModeIntent { 
+        uint32_t mode;
+    };
+
     using ViewportIntent = std::variant<
         ResizeViewportIntent,
         ChangeTargetIntent,
@@ -46,6 +66,11 @@ namespace Syn {
         ChangeGizmoModeIntent,
         ToggleSnapIntent,
         ApplyGizmoTransformIntent,
-        PickEntityIntent
+        PickEntityIntent,
+        ToggleDebugVisibilityIntent,
+        ChangeDebugVisibilityModeIntent,
+        ChangeSnapTranslateIntent,
+        ChangeSnapRotateIntent,
+        ChangeSnapScaleIntent
     >;
 }
