@@ -29,7 +29,7 @@ namespace Syn
 
     }
 
-    void ForwardPlusDrawGroup::CheckResize(uint32_t width, uint32_t height, uint32_t frameIndex)
+    void ForwardPlusDrawGroup::CheckResize(uint32_t tileSize, uint32_t width, uint32_t height, uint32_t frameIndex)
     {
         ComputeGroupSize::CalculateDispatchCount(width, tileSize);
 

@@ -8,7 +8,7 @@ namespace Syn
     {
         ForwardPlusDrawGroup(uint32_t frameCount);	
         virtual void CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) override;
-        void CheckResize(uint32_t width, uint32_t height, uint32_t frameIndex);
+        void CheckResize(uint32_t tileSize,uint32_t width, uint32_t height, uint32_t frameIndex);
 
         RenderBuffer tileGridBuffer;
         RenderBuffer clusterListBuffer;
@@ -17,7 +17,6 @@ namespace Syn
         RenderBuffer pointLightIndexBuffer;
         RenderBuffer spotLightIndexBuffer;
 
-        uint32_t maxClusters = 0;     
-        uint32_t tileSize = ComputeGroupSize::Image16D;
+        uint32_t maxClusters = 0;
     };
 }

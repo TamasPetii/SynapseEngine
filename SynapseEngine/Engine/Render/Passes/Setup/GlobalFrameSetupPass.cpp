@@ -30,7 +30,7 @@ namespace Syn {
         uint32_t height = rtGroup->GetHeight();
         bool isGpu = scene->GetSettings()->enableGpuCulling;
 
-        drawData->ForwardPlus.CheckResize(width, height, fIdx);
+        drawData->ForwardPlus.CheckResize(scene->GetSettings()->tileSize, width, height, fIdx);
 
         auto modelManager = ServiceLocator::GetModelManager();
         auto materialManager = ServiceLocator::GetMaterialManager();
@@ -122,7 +122,7 @@ namespace Syn {
         ctx.pointLightCount = pointLightPool->Size();
         ctx.spotLightCount = spotLightPool->Size();
 
-        ctx.tileSize = drawData->ForwardPlus.tileSize;
+        ctx.tileSize = scene->GetSettings()->tileSize;
         ctx.tileCountX = ComputeGroupSize::CalculateDispatchCount(rtGroup->GetWidth(), ctx.tileSize);
         ctx.tileCountY = ComputeGroupSize::CalculateDispatchCount(rtGroup->GetHeight(), ctx.tileSize);
         ctx.hizMipLevel = std::log2(static_cast<float>(ctx.tileSize));

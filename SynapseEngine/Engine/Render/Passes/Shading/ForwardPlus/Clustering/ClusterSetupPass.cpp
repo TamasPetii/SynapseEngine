@@ -75,8 +75,8 @@ namespace Syn {
         uint32_t width = rtGroup->GetWidth();
         uint32_t height = rtGroup->GetHeight();
 
-        uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(width, drawData->ForwardPlus.tileSize);
-        uint32_t groupCountY = ComputeGroupSize::CalculateDispatchCount(height, drawData->ForwardPlus.tileSize);
+        uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(width, scene->GetSettings()->tileSize);
+        uint32_t groupCountY = ComputeGroupSize::CalculateDispatchCount(height, scene->GetSettings()->tileSize);
 
         VkDispatchIndirectCommand resetCmd{ 0, 1, 1 };
 

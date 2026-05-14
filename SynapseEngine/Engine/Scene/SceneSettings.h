@@ -29,6 +29,7 @@ namespace Syn
         SceneSettings();
 
 		PipelineType pipelineType;
+        uint32_t tileSize;
 
         bool useDebugCamera;
 

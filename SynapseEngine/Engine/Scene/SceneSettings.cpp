@@ -1,9 +1,11 @@
 #include "SceneSettings.h"
+#include "Engine/Render/ComputeGroupSize.h"
 
 namespace Syn
 {
     SceneSettings::SceneSettings()
 		: pipelineType(PipelineType::ForwardPlus)
+        , tileSize(ComputeGroupSize::Image64D)
         , useDebugCamera(false)
         , enableGpuCulling(true)
         , enableBloom(true)
