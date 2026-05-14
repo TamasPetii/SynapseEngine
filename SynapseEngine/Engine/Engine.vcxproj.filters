@@ -1035,6 +1035,9 @@
     <ClCompile Include="Render\Passes\Shading\Visibility\DebugVisibilityPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Passes\Wireframe\SpotLightConeWireframePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2172,6 +2175,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Shading\Visibility\DebugVisibilityPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Wireframe\SpotLightConeWireframePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

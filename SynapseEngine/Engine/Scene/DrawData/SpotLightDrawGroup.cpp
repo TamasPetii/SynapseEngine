@@ -10,6 +10,7 @@ namespace Syn
         auto modelManager = ServiceLocator::GetModelManager();
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
         auto sphere = modelManager->GetResource(MeshSourceNames::Sphere);
+        auto cone = modelManager->GetResource(MeshSourceNames::Cone);
         auto pyramid = modelManager->GetResource(MeshSourceNames::Pyramid);
 
         VkDrawIndirectCommand sphereCmdTemplate{};
@@ -30,6 +31,12 @@ namespace Syn
         pyramidCmdTemplate.firstVertex = pyramid->baseDrawCommands[0].traditionalCmd.firstVertex;
         pyramidCmdTemplate.firstInstance = 0;
 
+        VkDrawIndirectCommand coneCmdTemplate{};
+        coneCmdTemplate.vertexCount = cone->baseDrawCommands[0].traditionalCmd.vertexCount;
+        coneCmdTemplate.instanceCount = 0;
+        coneCmdTemplate.firstVertex = cone->baseDrawCommands[0].traditionalCmd.firstVertex;
+        coneCmdTemplate.firstInstance = 0;
+
         VkDrawIndirectCommand billboardCmdTemplate{};
         billboardCmdTemplate.vertexCount = 6;
         billboardCmdTemplate.instanceCount = 0;
@@ -46,6 +53,9 @@ namespace Syn
         sphereSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
         sphereSingleCmdBuffer.UpdateCapacityAll(1);
 
+        coneSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
+        coneSingleCmdBuffer.UpdateCapacityAll(1);
+
         aabbSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
         aabbSingleCmdBuffer.UpdateCapacityAll(1);
 
@@ -56,6 +66,7 @@ namespace Syn
             sphereSingleCmdBuffer.GetMapped(i)->Write(&sphereCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
             aabbSingleCmdBuffer.GetMapped(i)->Write(&aabbCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
             billboardSingleCmdBuffer.GetMapped(i)->Write(&billboardCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+			coneSingleCmdBuffer.GetMapped(i)->Write(&coneCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
         }
     }
 

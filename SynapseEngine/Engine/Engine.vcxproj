@@ -258,6 +258,7 @@
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\MeshletOpaqueDepthPrepass.cpp" />
     <ClCompile Include="Scene\NatureScene.cpp" />
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSetupPass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\SpotLightConeWireframePass.cpp" />
     <ClCompile Include="System\Physics\CapsuleColliderSystem.cpp" />
     <ClCompile Include="System\Physics\SphereColliderSystem.cpp" />
     <ClCompile Include="System\Physics\RigidBodySystem.cpp" />
@@ -600,6 +601,7 @@
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\MeshletOpaqueDepthPrepass.h" />
     <ClInclude Include="Scene\NatureScene.h" />
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSetupPass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\SpotLightConeWireframePass.h" />
     <ClInclude Include="System\Physics\CapsuleColliderSystem.h" />
     <ClInclude Include="System\Physics\SphereColliderSystem.h" />
     <ClInclude Include="System\Physics\PhysicsUtils.h" />

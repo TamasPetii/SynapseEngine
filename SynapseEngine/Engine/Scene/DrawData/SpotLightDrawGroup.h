@@ -8,8 +8,9 @@ namespace Syn
 		virtual void CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) override;
 
         RenderBuffer indirectBuffer;
-        RenderBuffer sphereSingleCmdBuffer;
         RenderBuffer aabbSingleCmdBuffer;
+        RenderBuffer sphereSingleCmdBuffer;
+        RenderBuffer coneSingleCmdBuffer;
         RenderBuffer billboardSingleCmdBuffer;
 
         CpuData<uint32_t> instances;

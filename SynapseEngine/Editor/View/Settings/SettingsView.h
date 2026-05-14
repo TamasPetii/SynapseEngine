@@ -28,6 +28,7 @@ namespace Syn {
             changed |= ImGui::Checkbox("Point Light AABB", &settings.enablePointLightAabbWireframe);
             changed |= ImGui::Checkbox("Spot Light Sphere", &settings.enableSpotLightSphereWireframe);
             changed |= ImGui::Checkbox("Spot Light AABB", &settings.enableSpotLightAabbWireframe);
+            changed |= ImGui::Checkbox("Spot Light Cone", &settings.enableSpotLightConeWireframe);
 
             ImGui::SeparatorText("Mesh Debug (Wireframe)");
             changed |= ImGui::Checkbox("Mesh AABB", &settings.enableWireframeMeshAabb);
