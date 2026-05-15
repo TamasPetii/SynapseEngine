@@ -50,7 +50,9 @@ namespace Syn
         bool transformDirty = transformPool->IsStateBitSet<CHANGED_BIT>() || transformPool->IsStateBitSet<INDEX_CHANGED_BIT>();
         bool modelDirty = modelPool->IsStateBitSet<CHANGED_BIT>() || modelPool->IsStateBitSet<INDEX_CHANGED_BIT>();
         bool staticDirty = !transformPool->GetStorage().GetDirtyStatics().empty();
-        bool forceUpload = this->ShouldForceUpload();
+
+        bool indexChanged = transformPool->IsStateBitSet<INDEX_CHANGED_BIT>();
+        bool forceUpload = this->ShouldForceUpload() || indexChanged;
 
         if (!transformDirty && !modelDirty && !staticDirty && !forceUpload) {
             //std::println("  -> [TransformModelLink] Kilép: Minden tiszta (nincs dirty flag)");

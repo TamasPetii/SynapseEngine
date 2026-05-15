@@ -92,8 +92,13 @@ struct FrameGlobalContext {
     uint directionLightCount;
     uint pointLightCount;
     uint spotLightCount;
-    uint transformCount;
-    //Todo
+
+    uint enableStaticBvhCulling;
+    uint allTransformCount;
+    uint staticTransformCount;
+    uint dynamicTransformCount;
+    uint streamTransformCount;
+    uint nonStaticTransformCount;
 
     uint tileSize;
     uint tileCountX;

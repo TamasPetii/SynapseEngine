@@ -17,7 +17,8 @@ namespace Syn {
 
     bool StaticChunkCullingPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableGpuCulling;
+        return context.scene->GetSettings()->enableGpuCulling
+            && context.scene->GetSettings()->enableStaticBvhCulling;
     }
 
     void StaticChunkCullingPass::Initialize() {
@@ -75,21 +76,6 @@ namespace Syn {
 
         VkBuffer dispatchBuf = drawData->Chunks.indirectDispatchBuffer.GetHandle(fIdx, isGpu);
 
-        Vk::BufferUtils::UpdateBuffer(context.cmd, {
-            .buffer = dispatchBuf,
-            .offset = 0,
-            .size = sizeof(VkDispatchIndirectCommand),
-            .pData = &drawData->Chunks.dispatchCmdTemplate
-        });
-
-        Vk::BufferBarrierInfo updateBarrier{};
-        updateBarrier.buffer = dispatchBuf;
-        updateBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
-        updateBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-        updateBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        updateBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT | VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
-        Vk::BufferUtils::InsertBarrier(context.cmd, updateBarrier);
-
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_activeChunkCount, ComputeGroupSize::Buffer32D);
         vkCmdDispatch(context.cmd, groupCountX, 1, 1);
 
@@ -102,7 +88,8 @@ namespace Syn {
         Vk::BufferUtils::InsertBarrier(context.cmd, cullBarrier);
 
         Vk::BufferBarrierInfo chunkBarrier{};
-        chunkBarrier.buffer = drawData->Chunks.chunkVisibilityBuffer.GetHandle(fIdx, isGpu);;
+        chunkBarrier.buffer = drawData->Chunks.chunkVisibilityBuffer.GetHandle(fIdx, isGpu);
+        chunkBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         chunkBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         chunkBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         chunkBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;

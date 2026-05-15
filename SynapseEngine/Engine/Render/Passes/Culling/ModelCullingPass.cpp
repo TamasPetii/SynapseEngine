@@ -42,9 +42,18 @@ namespace Syn {
 
         auto registry = scene->GetRegistry();
         auto transformPool = registry->GetPool<TransformComponent>();
-        _totalModelsToTest = transformPool ? static_cast<uint32_t>(transformPool->Size()) : 0;
 
-        if (_totalModelsToTest == 0) return;
+        if (!transformPool || transformPool->Size() == 0) {
+            _totalModelsToTest = 0;
+            return;
+        }
+
+        _totalModelsToTest = static_cast<uint32_t>(transformPool->Size());
+
+        if (scene->GetSettings()->enableStaticBvhCulling) {
+            uint32_t staticCount = static_cast<uint32_t>(transformPool->GetStorage().GetStaticEntities().size());
+            _totalModelsToTest -= staticCount;
+        }
 
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
@@ -92,23 +101,6 @@ namespace Syn {
         auto compManager = scene->GetComponentBufferManager();
         uint32_t fIdx = context.frameIndex;
 		auto isGpu = scene->GetSettings()->enableGpuCulling;
-
-        VkBuffer countBuf = drawData->Models.computeCountBuffer.GetHandle(fIdx, isGpu);
-
-        Vk::BufferUtils::UpdateBuffer(context.cmd, {
-            .buffer = countBuf,
-            .offset = 0,
-            .size = sizeof(VkDispatchIndirectCommand),
-            .pData = &drawData->Models.dispatchCmdTemplate
-            });
-
-        Vk::BufferBarrierInfo updateBarrier{};
-        updateBarrier.buffer = countBuf;
-        updateBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
-        updateBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-        updateBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        updateBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT | VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
-        Vk::BufferUtils::InsertBarrier(context.cmd, updateBarrier);
 
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_totalModelsToTest, ComputeGroupSize::Buffer32D);
         vkCmdDispatch(context.cmd, groupCountX, 1, 1);

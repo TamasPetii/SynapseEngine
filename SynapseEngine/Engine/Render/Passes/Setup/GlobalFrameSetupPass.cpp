@@ -128,7 +128,13 @@ namespace Syn {
         ctx.directionLightCount = directionLightPool->Size();
         ctx.pointLightCount = pointLightPool->Size();
         ctx.spotLightCount = spotLightPool->Size();
-        ctx.transformCount = transformPool->Size();
+
+        ctx.enableStaticBvhCulling = scene->GetSettings()->enableStaticBvhCulling ? 1 : 0;
+        ctx.allTransformCount = transformPool->Size();
+        ctx.staticTransformCount = transformPool->GetStaticEntities().size();
+        ctx.dynamicTransformCount = transformPool->GetDynamicEntities().size();
+        ctx.streamTransformCount = transformPool->GetStreamEntities().size();
+        ctx.nonStaticTransformCount = ctx.allTransformCount - ctx.staticTransformCount;
 
         ctx.tileSize = scene->GetSettings()->tileSize;
         ctx.tileCountX = ComputeGroupSize::CalculateDispatchCount(rtGroup->GetWidth(), ctx.tileSize);

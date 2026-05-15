@@ -54,5 +54,43 @@ namespace Syn {
         indirectBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
         indirectBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT | VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT;
         Vk::BufferUtils::InsertBarrier(context.cmd, indirectBarrier);
+
+        { //Model->Mesh indirect command reset
+            VkBuffer countBuf = drawData->Models.computeCountBuffer.GetHandle(fIdx, isGpu);
+            Vk::BufferUtils::UpdateBuffer(context.cmd, {
+                .buffer = countBuf,
+                .offset = 0,
+                .size = sizeof(VkDispatchIndirectCommand),
+                .pData = &drawData->Models.dispatchCmdTemplate
+                });
+
+            Vk::BufferBarrierInfo updateBarrier{};
+            updateBarrier.buffer = countBuf;
+            updateBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+            updateBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+            updateBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+            updateBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT | VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
+            Vk::BufferUtils::InsertBarrier(context.cmd, updateBarrier);
+
+        }
+
+        { //Chunk->model indirect command reset
+            VkBuffer dispatchBuf = drawData->Chunks.indirectDispatchBuffer.GetHandle(fIdx, isGpu);
+
+            Vk::BufferUtils::UpdateBuffer(context.cmd, {
+                .buffer = dispatchBuf,
+                .offset = 0,
+                .size = sizeof(VkDispatchIndirectCommand),
+                .pData = &drawData->Chunks.dispatchCmdTemplate
+                });
+
+            Vk::BufferBarrierInfo updateBarrier{};
+            updateBarrier.buffer = dispatchBuf;
+            updateBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+            updateBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+            updateBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+            updateBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT | VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
+            Vk::BufferUtils::InsertBarrier(context.cmd, updateBarrier);
+        }
     }
 }

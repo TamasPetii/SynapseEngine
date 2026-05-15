@@ -30,8 +30,11 @@ void main()
 {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
-    uint transformDenseIndex = gl_GlobalInvocationID.x;
-    if (transformDenseIndex >= ctx.transformCount) return;
+    uint offset = ctx.staticTransformCount * ctx.enableStaticBvhCulling;
+    uint transformDenseIndex = gl_GlobalInvocationID.x + offset;
+    uint transformCount = ctx.allTransformCount - offset;
+
+    if (gl_GlobalInvocationID.x >= transformCount) return;
 
     TransformModelLink link = GET_TRANSFORM_MODEL_LINK(ctx.transformModelLinkBufferAddr, transformDenseIndex);
     if (link.modelDenseIndex == INVALID_INDEX) return;

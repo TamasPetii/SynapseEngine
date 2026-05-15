@@ -8,6 +8,7 @@ namespace Syn
         , tileSize(ComputeGroupSize::Image64D)
         , useDebugCamera(false)
         , enableGpuCulling(true)
+        , enableStaticBvhCulling(true)
         , enableBloom(true)
         , enableHiz(true)
         , enableOcclusionCulling(true)

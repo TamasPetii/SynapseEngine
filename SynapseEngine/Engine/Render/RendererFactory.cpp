@@ -13,6 +13,8 @@
 #include "Engine/Render/Passes/Bloom/BloomCompositePass.h"
 
 #include "Engine/Render/Passes/Culling/ModelCullingPass.h"
+#include "Engine/Render/Passes/Culling/StaticModelCullingPass.h"
+#include "Engine/Render/Passes/Culling/StaticChunkCullingPass.h"
 #include "Engine/Render/Passes/Culling/MeshCullingPass.h"
 #include "Engine/Render/Passes/Culling/PointLightCullingPass.h"
 #include "Engine/Render/Passes/Culling/SpotLightCullingPass.h"
@@ -98,6 +100,8 @@ namespace Syn
 
 		//Geometry Culling Passes
 		pipeline->AddPass(std::make_unique<CullingCommandResetPass>());
+        pipeline->AddPass(std::make_unique<StaticChunkCullingPass>());
+        pipeline->AddPass(std::make_unique<StaticModelCullingPass>());
         pipeline->AddPass(std::make_unique<ModelCullingPass>());
         pipeline->AddPass(std::make_unique<MeshCullingPass>());
 
