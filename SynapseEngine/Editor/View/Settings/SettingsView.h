@@ -131,6 +131,7 @@ namespace Syn {
                 ImGui::SeparatorText("Mesh Wireframes");
                 changed |= ImGui::Checkbox("Mesh AABB", &settings.enableWireframeMeshAabb);
                 changed |= ImGui::Checkbox("Mesh Sphere", &settings.enableWireframeMeshSphere);
+                changed |= ImGui::Checkbox("Static Chunk AABB", &settings.enableStaticChunkAabbWireframe);
             }
             EndSection(isDebugOpen);
 

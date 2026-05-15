@@ -1,4 +1,4 @@
-#include "SpotLightConeWireframePass.h"
+#include "StaticChunkAabbWireframePass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Manager/ComponentBufferManager.h"
@@ -11,21 +11,23 @@
 #include "Engine/Vk/Image/ImageViewNames.h"
 
 namespace Syn {
-#include "Engine/Shaders/Includes/PushConstants/WireframeDebugPC.glsl"
 
-    bool SpotLightConeWireframePass::ShouldExecute(const RenderContext& context) const
+    #include "Engine/Shaders/Includes/PushConstants/WireframeDebugPC.glsl"
+
+    bool StaticChunkAabbWireframePass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableSpotLightConeWireframe;
+        return context.scene->GetSettings()->enableStaticChunkAabbWireframe 
+            && context.scene->GetSettings()->enableStaticBvhCulling;
     }
 
-    void SpotLightConeWireframePass::Initialize() {
+    void StaticChunkAabbWireframePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
         _shaderProgram = shaderManager->CreateProgram(
-            "WireframeLightProgram",
+            "DebugWireframeProgram",
             {
                 ShaderNames::WireframeDebugVert,
                 ShaderNames::WireframeFrag
@@ -49,7 +51,7 @@ namespace Syn {
         };
     }
 
-    void SpotLightConeWireframePass::PrepareFrame(const RenderContext& context) {
+    void StaticChunkAabbWireframePass::PrepareFrame(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
 
@@ -83,38 +85,39 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
         auto isGpu = scene->GetSettings()->enableGpuCulling;
 
-        Vk::BufferCopyInfo copyRegion{};
-        copyRegion.srcBuffer = drawData->SpotLights.indirectBuffer.GetHandle(fIdx, isGpu);
-        copyRegion.dstBuffer = drawData->SpotLights.coneSingleCmdBuffer.GetHandle(fIdx, isGpu);
-        copyRegion.srcOffset = offsetof(VkDrawIndirectCommand, instanceCount);
-        copyRegion.dstOffset = offsetof(VkDrawIndirectCommand, instanceCount);
-        copyRegion.size = sizeof(uint32_t);
+        if (isGpu) {
+            Vk::BufferCopyInfo copyRegion{};
+            copyRegion.srcBuffer = drawData->Chunks.indirectDispatchBuffer.GetHandle(fIdx, isGpu);
+            copyRegion.dstBuffer = drawData->Chunks.aabbSingleCmdBuffer.GetHandle(fIdx, isGpu);
+            copyRegion.srcOffset = 0;
+            copyRegion.dstOffset = offsetof(VkDrawIndirectCommand, instanceCount);
+            copyRegion.size = sizeof(uint32_t);
 
-        Vk::BufferUtils::CopyBuffer(context.cmd, copyRegion);
+            Vk::BufferUtils::CopyBuffer(context.cmd, copyRegion);
 
-        Vk::BufferBarrierInfo memBarrier{};
-        memBarrier.buffer = drawData->SpotLights.coneSingleCmdBuffer.GetHandle(fIdx, isGpu);
-        memBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
-        memBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-        memBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
-        memBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT;
+            Vk::BufferBarrierInfo memBarrier{};
+            memBarrier.buffer = drawData->Chunks.aabbSingleCmdBuffer.GetHandle(fIdx, isGpu);
+            memBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+            memBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+            memBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
+            memBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT;
 
-        Vk::BufferUtils::InsertBarrier(context.cmd, memBarrier);
+            Vk::BufferUtils::InsertBarrier(context.cmd, memBarrier);
+        }
     }
 
-    void SpotLightConeWireframePass::PushConstants(const RenderContext& context) {
+    void StaticChunkAabbWireframePass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
-        auto compManager = scene->GetComponentBufferManager();
         auto modelManager = ServiceLocator::GetModelManager();
         uint32_t fIdx = context.frameIndex;
 
-        auto cone = modelManager->GetResource(MeshSourceNames::Cone);
+        auto cube = modelManager->GetResource(MeshSourceNames::Cube);
 
         WireframeDebugPC pc{};
         pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-        pc.vertexPositionBufferAddr = cone->hardwareBuffers.vertexPositions->GetDeviceAddress();
-        pc.indexBufferAddr = cone->hardwareBuffers.indices->GetDeviceAddress();
-        pc.lightDrawType = 4;
+        pc.vertexPositionBufferAddr = cube->hardwareBuffers.vertexPositions->GetDeviceAddress();
+        pc.indexBufferAddr = cube->hardwareBuffers.indices->GetDeviceAddress();
+        pc.lightDrawType = 5;
 
         vkCmdPushConstants(
             context.cmd,
@@ -126,13 +129,13 @@ namespace Syn {
         );
     }
 
-    void SpotLightConeWireframePass::Draw(const RenderContext& context) {
+    void StaticChunkAabbWireframePass::Draw(const RenderContext& context) {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
         auto isGpu = scene->GetSettings()->enableGpuCulling;
 
-        auto indirectBuffer = drawData->SpotLights.coneSingleCmdBuffer.GetHandle(fIdx, isGpu);
+        auto indirectBuffer = drawData->Chunks.aabbSingleCmdBuffer.GetHandle(fIdx, isGpu);
 
         vkCmdDrawIndirect(
             context.cmd,

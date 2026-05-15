@@ -14,6 +14,7 @@ namespace Syn
         , enableOcclusionCulling(true)
         , enableConeCulling(true)
         , enableFrustumCulling(true)
+        , enableStaticChunkAabbWireframe(false)
         , enablePointLightSphereWireframe(false)
         , enablePointLightAabbWireframe(false)
         , enableSpotLightSphereWireframe(false)

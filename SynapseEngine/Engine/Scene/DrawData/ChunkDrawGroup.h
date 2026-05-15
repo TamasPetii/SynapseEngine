@@ -18,7 +18,7 @@ namespace Syn
 
         RenderBuffer chunkDataBuffer;
         RenderBuffer chunkVisibilityBuffer;
-        RenderBuffer indirectDrawBuffer;
+        RenderBuffer aabbSingleCmdBuffer;
         RenderBuffer indirectDispatchBuffer;
 
         std::vector<ChunkDataGPU> chunks;

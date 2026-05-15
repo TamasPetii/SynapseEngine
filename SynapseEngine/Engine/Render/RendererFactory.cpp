@@ -78,6 +78,8 @@
 #include "Engine/Render/Passes/Wireframe/SpotLightSphereWireframePass.h"
 #include "Engine/Render/Passes/Wireframe/SpotLightConeWireframePass.h"
 #include "Engine/Render/Passes/Wireframe/SpotLightPyramidWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/StaticChunkAabbWireframePass.h"
+
 
 #include "Engine/Render/Passes/Shading/Visibility/DebugVisibilityPass.h"
 
@@ -170,6 +172,7 @@ namespace Syn
         pipeline->AddPass(std::make_unique<SpotLightSphereWireframePass>());
         pipeline->AddPass(std::make_unique<SpotLightConeWireframePass>());
         pipeline->AddPass(std::make_unique<SpotLightPyramidWireframePass>());
+        pipeline->AddPass(std::make_unique<StaticChunkAabbWireframePass>());
 
         //Billboard Passes
         pipeline->AddPass(std::make_unique<BillboardTransitionPass>());

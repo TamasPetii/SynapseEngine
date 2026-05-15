@@ -15,16 +15,16 @@
   },
   "entities": {
     "animated_characters": 0,
-    "static_geometry": 1000000,
+    "static_geometry": 10000,
     "physics_boxes": 0,
     "physics_spheres": 0,
     "physics_capsules": 0
   },
   "lights": {
     "directional_count": 1,
-    "point_count": 0,
+    "point_count": 64,
     "point_shadow_count": 0,
-    "spot_count": 0,
+    "spot_count": 64,
     "spot_shadow_count": 0
   }
 }

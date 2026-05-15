@@ -12,7 +12,7 @@
 
 namespace Syn {
 
-    #include "Engine/Shaders/Includes/PushConstants/WireframeLightPC.glsl"
+    #include "Engine/Shaders/Includes/PushConstants/WireframeDebugPC.glsl"
 
     bool SpotLightAabbWireframePass::ShouldExecute(const RenderContext& context) const
     {
@@ -28,7 +28,7 @@ namespace Syn {
         _shaderProgram = shaderManager->CreateProgram(
             "WireframeLightProgram",
             {
-                ShaderNames::WireframeLightVert,
+                ShaderNames::WireframeDebugVert,
                 ShaderNames::WireframeFrag
             },
             config
@@ -111,7 +111,7 @@ namespace Syn {
 
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
 
-        WireframeLightPC pc{};
+        WireframeDebugPC pc{};
 		pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
 		pc.vertexPositionBufferAddr = cube->hardwareBuffers.vertexPositions->GetDeviceAddress();
 		pc.indexBufferAddr = cube->hardwareBuffers.indices->GetDeviceAddress();
@@ -122,7 +122,7 @@ namespace Syn {
             _shaderProgram->GetLayout(),
             VK_SHADER_STAGE_ALL,
             0,
-            sizeof(WireframeLightPC),
+            sizeof(WireframeDebugPC),
             &pc
         );
     }

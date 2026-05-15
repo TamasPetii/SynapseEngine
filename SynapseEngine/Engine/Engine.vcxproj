@@ -263,6 +263,7 @@
     <ClCompile Include="Render\Passes\Wireframe\SpotLightPyramidWireframePass.cpp" />
     <ClCompile Include="Render\Passes\Culling\StaticChunkCullingPass.cpp" />
     <ClCompile Include="Render\Passes\Culling\StaticModelCullingPass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\StaticChunkAabbWireframePass.cpp" />
     <ClCompile Include="System\Core\StaticSpatialSahSystem.cpp" />
     <ClCompile Include="System\Physics\CapsuleColliderSystem.cpp" />
     <ClCompile Include="System\Physics\SphereColliderSystem.cpp" />
@@ -613,6 +614,7 @@
     <ClInclude Include="Render\Passes\Wireframe\SpotLightPyramidWireframePass.h" />
     <ClInclude Include="Render\Passes\Culling\StaticChunkCullingPass.h" />
     <ClInclude Include="Render\Passes\Culling\StaticModelCullingPass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\StaticChunkAabbWireframePass.h" />
     <ClInclude Include="System\Core\StaticSpatialSahSystem.h" />
     <ClInclude Include="System\Physics\CapsuleColliderSystem.h" />
     <ClInclude Include="System\Physics\SphereColliderSystem.h" />
@@ -1016,7 +1018,7 @@
     <None Include="Shaders\Includes\PushConstants\ModelMeshCullingPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\PointLightCullingPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\SpotLightCullingPC.glsl" />
-    <None Include="Shaders\Includes\PushConstants\WireframeLightPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\WireframeDebugPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframeSetupPC.glsl" />
     <None Include="Shaders\Includes\SharedGpuTypes.glsl" />
@@ -1074,7 +1076,7 @@
     <None Include="Shaders\Passes\PostProcess\BloomUpsample.comp" />
     <None Include="Shaders\Passes\Wireframe\Wireframe.frag" />
     <None Include="Shaders\Passes\Wireframe\Wireframe.vert" />
-    <None Include="Shaders\Passes\Wireframe\WireframeLight.vert" />
+    <None Include="Shaders\Passes\Wireframe\WireframeDebug.vert" />
     <None Include="Shaders\Passes\Wireframe\WireframeSetup.comp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
