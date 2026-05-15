@@ -14,6 +14,7 @@
 #include "Engine/Component/Light/Point/PointLightComponent.h"
 #include "Engine/Component/Light/Spot/SpotLightComponent.h"
 #include "Engine/Component/Rendering/ModelComponent.h"
+#include "Engine/Component/Core/TransformComponent.h"
 
 namespace Syn {
 
@@ -120,13 +121,14 @@ namespace Syn {
         ctx.mainCameraEntity = scene->GetSceneCameraEntity();
         ctx.activeCameraEntity = scene->GetSettings()->useDebugCamera ? scene->GetDebugCameraEntity() : scene->GetSceneCameraEntity();
 
-		auto [modelPool, directionLightPool, pointLightPool, spotLightPool, cameraPool] = scene->GetRegistry()->GetPools<ModelComponent, DirectionLightComponent, PointLightComponent, SpotLightComponent, CameraComponent>();
+		auto [modelPool, directionLightPool, pointLightPool, spotLightPool, cameraPool, transformPool] = scene->GetRegistry()->GetPools<ModelComponent, DirectionLightComponent, PointLightComponent, SpotLightComponent, CameraComponent, TransformComponent>();
 
 		ctx.staticChunkCount = drawData->Chunks.chunkCounter.load(std::memory_order_relaxed);
         ctx.modelCount = modelPool->Size();
         ctx.directionLightCount = directionLightPool->Size();
         ctx.pointLightCount = pointLightPool->Size();
         ctx.spotLightCount = spotLightPool->Size();
+        ctx.transformCount = transformPool->Size();
 
         ctx.tileSize = scene->GetSettings()->tileSize;
         ctx.tileCountX = ComputeGroupSize::CalculateDispatchCount(rtGroup->GetWidth(), ctx.tileSize);

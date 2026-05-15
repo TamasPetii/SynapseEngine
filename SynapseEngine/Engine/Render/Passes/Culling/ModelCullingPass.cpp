@@ -15,6 +15,7 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
+#include "Engine/Component/Core/TransformComponent.h"
 
 namespace Syn {
 
@@ -40,8 +41,8 @@ namespace Syn {
         auto scene = context.scene;
 
         auto registry = scene->GetRegistry();
-        auto modelPool = registry->GetPool<ModelComponent>();
-        _totalModelsToTest = modelPool ? static_cast<uint32_t>(modelPool->Size()) : 0;
+        auto transformPool = registry->GetPool<TransformComponent>();
+        _totalModelsToTest = transformPool ? static_cast<uint32_t>(transformPool->Size()) : 0;
 
         if (_totalModelsToTest == 0) return;
 

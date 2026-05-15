@@ -92,6 +92,8 @@ struct FrameGlobalContext {
     uint directionLightCount;
     uint pointLightCount;
     uint spotLightCount;
+    uint transformCount;
+    //Todo
 
     uint tileSize;
     uint tileCountX;
