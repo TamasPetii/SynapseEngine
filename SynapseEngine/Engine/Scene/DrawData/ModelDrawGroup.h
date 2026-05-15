@@ -41,6 +41,8 @@ namespace Syn
         uint32_t traditionalCmdOffsets[MaterialRenderType::Count] = { 0 };
         uint32_t traditionalCmdCounts[MaterialRenderType::Count] = { 0 };
         uint32_t meshletCmdOffsets[MaterialRenderType::Count] = { 0 };
-        uint32_t meshletCmdCounts[MaterialRenderType::Count] = { 0 };        
+        uint32_t meshletCmdCounts[MaterialRenderType::Count] = { 0 };   
+
+        VkDispatchIndirectCommand dispatchCmdTemplate{};
     };
 }

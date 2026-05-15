@@ -75,20 +75,20 @@ namespace Syn {
 
         VkBuffer dispatchBuf = drawData->Chunks.indirectDispatchBuffer.GetHandle(fIdx, isGpu);
 
-        Vk::BufferUtils::FillBuffer(context.cmd, {
+        Vk::BufferUtils::UpdateBuffer(context.cmd, {
             .buffer = dispatchBuf,
-            .offset = offsetof(VkDispatchIndirectCommand, x),
-            .size = sizeof(uint32_t),
-            .data = 0
+            .offset = 0,
+            .size = sizeof(VkDispatchIndirectCommand),
+            .pData = &drawData->Chunks.dispatchCmdTemplate
         });
 
-        Vk::BufferBarrierInfo fillBarrier{};
-        fillBarrier.buffer = dispatchBuf;
-        fillBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
-        fillBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-        fillBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        fillBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT | VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
-        Vk::BufferUtils::InsertBarrier(context.cmd, fillBarrier);
+        Vk::BufferBarrierInfo updateBarrier{};
+        updateBarrier.buffer = dispatchBuf;
+        updateBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+        updateBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+        updateBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        updateBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT | VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, updateBarrier);
 
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_activeChunkCount, ComputeGroupSize::Buffer32D);
         vkCmdDispatch(context.cmd, groupCountX, 1, 1);
