@@ -1047,6 +1047,15 @@
     <ClCompile Include="System\Core\TransformModelLinkSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Scene\DrawData\ChunkDrawGroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Culling\StaticChunkCullingPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Culling\StaticModelCullingPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2198,6 +2207,15 @@
     <ClInclude Include="System\Core\TransformModelLinkSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\DrawData\ChunkDrawGroup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Culling\StaticChunkCullingPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Culling\StaticModelCullingPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Includes\Common\Animation.glsl" />
@@ -2299,5 +2317,7 @@
     <None Include="Shaders\Includes\Common\Visibility.glsl" />
     <None Include="Shaders\Passes\Shading\Visibility\DebugVisibility.frag" />
     <None Include="Shaders\Includes\PushConstants\DebugVisibilityPC.glsl" />
+    <None Include="Shaders\Includes\Common\StaticChunk.glsl" />
+    <None Include="Shaders\Passes\Culling\StaticChunkCulling.comp" />
   </ItemGroup>
 </Project>

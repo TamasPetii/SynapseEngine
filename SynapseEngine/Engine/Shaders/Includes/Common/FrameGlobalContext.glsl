@@ -18,6 +18,11 @@ struct FrameGlobalContext {
 
     uint64_t transformBufferAddr;
     uint64_t transformSparseMapBufferAddr;
+    uint64_t transformModelLinkBufferAddr;
+
+    uint64_t staticChunkDataBufferAddr;
+    uint64_t staticChunkVisibleIndexBufferAddr;
+    uint64_t staticChunkCountBufferAddr;
 
     uint64_t modelAddressBufferAddr; 
     uint64_t modelBufferAddr;
@@ -82,6 +87,7 @@ struct FrameGlobalContext {
     uint mainCameraEntity;
     uint activeCameraEntity;
 
+    uint staticChunkCount;
     uint modelCount;
     uint directionLightCount;
     uint pointLightCount;

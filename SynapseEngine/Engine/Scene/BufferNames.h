@@ -5,8 +5,6 @@ namespace Syn
 {
     struct SYN_API BufferNames
     {
-        static constexpr const char* StaticChunkData = "StaticChunkData";
-
         static constexpr const char* TransformSparseMap = "TransformSparseMap";
         static constexpr const char* TransformData = "TransformData";
         static constexpr const char* TransformModelLinkData = "TransformModelLinkData";

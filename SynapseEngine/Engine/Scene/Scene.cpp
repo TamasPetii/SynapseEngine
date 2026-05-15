@@ -111,22 +111,6 @@ namespace Syn
 
     void Scene::InitializeComponentBuffers()
     {
-        RegisterGenericBuffer<ChunkDataGPU>(BufferNames::StaticChunkData,
-            [this]() -> uint32_t {
-                auto pool = _registry->GetPool<TransformComponent>();
-                if (!pool) return 0;
-
-                size_t staticCount = pool->GetStorage().GetStaticEntities().size();
-                if (staticCount == 0) return 0;
-
-                return static_cast<uint32_t>(pool->GetStorage().GetStaticEntities().size());
-            },
-            [this]() -> bool {
-                auto pool = _registry->GetPool<TransformComponent>();
-                return pool && !pool->GetStorage().GetStaticEntities().empty();
-            }
-        );
-
         RegisterComponentSparseMapBuffer<TransformComponent>(BufferNames::TransformSparseMap);
         RegisterComponentBuffer<TransformComponent, TransformComponentGPU>(BufferNames::TransformData);   
         RegisterComponentBuffer<TransformComponent, TransformModelLinkGPU>(BufferNames::TransformModelLinkData);

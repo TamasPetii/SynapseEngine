@@ -19,6 +19,9 @@ namespace Syn
         static constexpr const char* CullingCommandReset = "../Engine/Shaders/Passes/Culling/CullingCommandReset.comp";
         static constexpr const char* MeshCulling = "../Engine/Shaders/Passes/Culling/MeshCulling.comp";
         static constexpr const char* ModelCulling = "../Engine/Shaders/Passes/Culling/ModelCulling.comp";
+        static constexpr const char* StaticChunkCulling = "../Engine/Shaders/Passes/Culling/StaticChunkCulling.comp";
+        static constexpr const char* StaticModelCulling = "../Engine/Shaders/Passes/Culling/StaticModelCulling.comp";
+
         static constexpr const char* PointLightCulling = "../Engine/Shaders/Passes/Culling/PointLightCulling.comp";
         static constexpr const char* SpotLightCulling = "../Engine/Shaders/Passes/Culling/SpotLightCulling.comp";
 

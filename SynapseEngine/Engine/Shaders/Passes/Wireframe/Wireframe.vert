@@ -12,6 +12,7 @@
 #include "../../Includes/Common/Transform.glsl"
 #include "../../Includes/Common/Animation.glsl"
 #include "../../Includes/Utils/ColorMath.glsl"
+#include "../../Includes/Common/StaticChunk.glsl"
 
 layout(location = 0) out vec4 outColor;
 

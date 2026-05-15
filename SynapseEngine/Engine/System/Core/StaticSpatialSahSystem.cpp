@@ -36,8 +36,10 @@ namespace Syn
             return;
         }
 
+        auto chunkGroup = &scene->GetSceneDrawData()->Chunks;
+
         bool hasDirtyStatics = !transformPool->GetStorage().GetDirtyStatics().empty();
-        if (!hasDirtyStatics && !_chunks.empty()) {
+        if (!hasDirtyStatics && !chunkGroup->chunks.empty()) {
             //std::println("  -> [StaticSpatialSah] OnUpdate kilép: Nincsenek dirty statikusok és a chunkok sem üresek");
             return;
         }
@@ -56,11 +58,11 @@ namespace Syn
         _spatialItems.clear();
         _spatialItems.resize(staticEntities.size());
 
-        _chunks.clear();
-        _chunks.resize(staticEntities.size());
+        chunkGroup->chunks.clear();
+        chunkGroup->chunks.resize(staticEntities.size());
 
-        _chunkCounter.store(0, std::memory_order_relaxed);
-		_needsChunkUpload = true;
+        chunkGroup->chunkCounter.store(0, std::memory_order_relaxed);
+        chunkGroup->needsUpload.store(true, std::memory_order_relaxed);
 
         auto gatherTaskOpt = this->ForEachIndex(size_t(0), staticEntities.size(), size_t(1), subflow, "GatherSpatialItems",
             [this, staticEntities, transformPool, modelPool, modelSnapshot](size_t i) {
@@ -99,15 +101,15 @@ namespace Syn
             });
 
         // 2. Recursive SAH BVH builder a te EmplaceTask wrappereddel
-        tf::Task sahRootTask = this->EmplaceTask(subflow, "BuildBinnedSAH_Root", [this, frameIndex](tf::Subflow& sf) {
+        tf::Task sahRootTask = this->EmplaceTask(subflow, "BuildBinnedSAH_Root", [this, scene, frameIndex](tf::Subflow& sf) {
             //std::println("[StaticSpatialSah] BuildBinnedSAH_Root TASK fut (Frame: {})", frameIndex);
             std::span<SpatialItem> allItems(_spatialItems.data(), _spatialItems.size());
-            BuildBinnedSahNodeTask(sf, allItems);
+            BuildBinnedSahNodeTask(sf, scene, allItems);
             });
 
         // 3. Ecs Sync
-        tf::Task syncEcsTask = this->EmplaceTask(subflow, "SyncECS_And_TriggerUpload", [this, transformPool, frameIndex]() {    
-            //std::println("[StaticSpatialSah] SyncECS_And_TriggerUpload TASK fut (Frame: {})", frameIndex);
+        tf::Task syncEcsTask = this->EmplaceTask(subflow, "SyncECS_And_TriggerUpload", [this, transformPool, frameIndex]() {
+            std::println("[StaticSpatialSah] SyncECS_And_TriggerUpload TASK fut (Frame: {})", frameIndex);
             size_t staticCount = _spatialItems.size();
             std::vector<TransformComponent> sortedTransforms(staticCount);
             std::vector<EntityID> sortedEntities(staticCount);
@@ -129,8 +131,13 @@ namespace Syn
 
             transformPool->IncrementMappingVersion();
 
-            for (EntityID entity : sortedEntities) 
+            //Pool State Bit Set!
+
+            /*
+            for (EntityID entity : sortedEntities)
                 transformPool->SetBit<DIRTY_STATIC_BIT>(entity);
+
+            */
             });
 
         if (gatherTaskOpt) {
@@ -144,35 +151,31 @@ namespace Syn
     {
         //std::println("[StaticSpatialSah] OnUploadToGpu hívva (Frame: {})", frameIndex);
 
-        if (!_needsChunkUpload || _chunks.empty()) {
+        auto chunkGroup = &scene->GetSceneDrawData()->Chunks;
+
+        if (!chunkGroup->needsUpload.load(std::memory_order_relaxed) || chunkGroup->chunks.empty()) {
             //std::println("  -> [StaticSpatialSah] OnUploadToGpu kilép: Nincs feltöltési igény (_needsChunkUpload=false vagy chunks üres)");
             return;
         }
 
-        this->EmplaceTask(subflow, "UploadChunks", [this, scene, frameIndex]() {
-            auto bufferManager = scene->GetComponentBufferManager();
-            auto chunkBufferView = bufferManager->GetComponentBuffer(BufferNames::StaticChunkData, frameIndex);
+        this->EmplaceTask(subflow, "UploadChunks", [chunkGroup, frameIndex]() {
+            size_t activeChunkCount = chunkGroup->chunkCounter.load(std::memory_order_relaxed);
 
-            if (chunkBufferView.buffer) {
-                //std::println("[StaticSpatialSah] UploadChunks TASK fut (Frame: {})", frameIndex);
-                void* mappedData = chunkBufferView.buffer->Map();
+            chunkGroup->chunkDataBuffer.UpdateCapacity(frameIndex, activeChunkCount);
+            chunkGroup->chunkVisibilityBuffer.UpdateCapacity(frameIndex, activeChunkCount);
 
-                size_t activeChunkCount = _chunkCounter.load(std::memory_order_relaxed);
-                size_t dataSize = activeChunkCount * sizeof(ChunkDataGPU);
-
-                std::memcpy(mappedData, _chunks.data(), dataSize);
-
-                if (!chunkBufferView.versions.empty()) {
-                    chunkBufferView.versions[0]++;
-                }
+            if (auto mappedData = chunkGroup->chunkDataBuffer.GetMapped(frameIndex)) {
+                mappedData->Write(chunkGroup->chunks.data(), activeChunkCount * sizeof(ChunkDataGPU), 0);
             }
 
-            _needsChunkUpload = false;
+            chunkGroup->needsUpload.store(false, std::memory_order_relaxed);
             });
     }
 
-    void StaticSpatialSahSystem::BuildBinnedSahNodeTask(tf::Subflow& subflow, std::span<SpatialItem> items)
+    void StaticSpatialSahSystem::BuildBinnedSahNodeTask(tf::Subflow& subflow, Scene* scene, std::span<SpatialItem> items)
     {
+        auto chunkGroup = &scene->GetSceneDrawData()->Chunks;
+
         // Base Case: Leaf node reached, chunk size constraint met
         if (items.size() <= CHUNK_MAX_SIZE)
         {
@@ -186,10 +189,10 @@ namespace Syn
             }
 
             // Lock-free atomic chunk allocation
-            uint32_t chunkIndex = _chunkCounter.fetch_add(1, std::memory_order_relaxed);
+            uint32_t chunkIndex = chunkGroup->chunkCounter.fetch_add(1, std::memory_order_relaxed);
             uint32_t startIndex = static_cast<uint32_t>(items.data() - _spatialItems.data());
 
-            _chunks[chunkIndex] = {
+            chunkGroup->chunks[chunkIndex] = {
                 nodeMin,
                 startIndex,
                 nodeMax,
@@ -216,8 +219,8 @@ namespace Syn
         // Edge Case: All items share the exact same centroid. Force split in half to avoid infinite recursion.
         if (extent[splitAxis] < 1e-4f) {
             size_t mid = items.size() / 2;
-            subflow.emplace([this, items, mid](tf::Subflow& sf) { BuildBinnedSahNodeTask(sf, items.subspan(0, mid)); }).name("SAH_Fallback_Left");
-            subflow.emplace([this, items, mid](tf::Subflow& sf) { BuildBinnedSahNodeTask(sf, items.subspan(mid)); }).name("SAH_Fallback_Right");
+            subflow.emplace([this, scene, items, mid](tf::Subflow& sf) { BuildBinnedSahNodeTask(sf, scene, items.subspan(0, mid)); }).name("SAH_Fallback_Left");
+            subflow.emplace([this, scene, items, mid](tf::Subflow& sf) { BuildBinnedSahNodeTask(sf, scene, items.subspan(mid)); }).name("SAH_Fallback_Right");
             return;
         }
 
@@ -285,7 +288,7 @@ namespace Syn
         }
 
         // Spawn child tasks for the left and right sub-trees
-        subflow.emplace([this, items, midIndex](tf::Subflow& sf) { BuildBinnedSahNodeTask(sf, items.subspan(0, midIndex)); }).name("SAH_Left");
-        subflow.emplace([this, items, midIndex](tf::Subflow& sf) { BuildBinnedSahNodeTask(sf, items.subspan(midIndex)); }).name("SAH_Right");
+        subflow.emplace([this, scene, items, midIndex](tf::Subflow& sf) { BuildBinnedSahNodeTask(sf, scene, items.subspan(0, midIndex)); }).name("SAH_Left");
+        subflow.emplace([this, scene, items, midIndex](tf::Subflow& sf) { BuildBinnedSahNodeTask(sf, scene, items.subspan(midIndex)); }).name("SAH_Right");
     }
 }

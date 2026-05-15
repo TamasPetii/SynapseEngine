@@ -1,15 +1,9 @@
-#include "ModelCullingPass.h"
+#include "StaticModelCullingPass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Manager/ShaderManager.h"
-#include "Engine/Mesh/ModelManager.h"
-#include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Scene/BufferNames.h"
-#include "Engine/Component/Rendering/ModelComponent.h"
 #include "Engine/Vk/Buffer/BufferUtils.h"
-#include "Engine/Render/ComputeGroupSize.h"
-#include "Engine/Animation/AnimationManager.h"
-#include "Engine/Material/MaterialManager.h"
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Render/RenderNames.h"
@@ -20,38 +14,27 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/ModelMeshCullingPC.glsl"
 
-    bool ModelCullingPass::ShouldExecute(const RenderContext& context) const
+    bool StaticModelCullingPass::ShouldExecute(const RenderContext& context) const
     {
         return context.scene->GetSettings()->enableGpuCulling;
     }
 
-    void ModelCullingPass::Initialize() {
+    void StaticModelCullingPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
-
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("ModelCullingProgram", {
-            ShaderNames::ModelCulling
+        _shaderProgram = shaderManager->CreateProgram("StaticModelCullingProgram", {
+            ShaderNames::StaticModelCulling
             }, config);
     }
 
-    void ModelCullingPass::PushConstants(const RenderContext& context) {
+    void StaticModelCullingPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
-
-        auto registry = scene->GetRegistry();
-        auto modelPool = registry->GetPool<ModelComponent>();
-        _totalModelsToTest = modelPool ? static_cast<uint32_t>(modelPool->Size()) : 0;
-
-        if (_totalModelsToTest == 0) return;
-
         auto drawData = scene->GetSceneDrawData();
-        auto compManager = scene->GetComponentBufferManager();
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto materialManager = ServiceLocator::GetMaterialManager();
-        auto animationManager = ServiceLocator::GetAnimationManager();
 
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        uint32_t activeChunks = drawData->Chunks.chunkCounter.load(std::memory_order_relaxed);
+        if (activeChunks == 0) return;
 
         uint32_t fIdx = context.frameIndex;
         bool isGpu = scene->GetSettings()->enableGpuCulling;
@@ -62,17 +45,15 @@ namespace Syn {
         vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ModelMeshCullingPC), &pc);
     }
 
-    void ModelCullingPass::BindDescriptors(const RenderContext& context) {
+    void StaticModelCullingPass::BindDescriptors(const RenderContext& context) {
         auto imageManager = ServiceLocator::GetImageManager();
 
-        //Using prevous frame's depth pyramid!
         uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, prevFrameIndex);
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
         auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);
 
         Vk::PushDescriptorWriter pushWriter;
-
         pushWriter.AddCombinedImageSampler(
             0,
             depthPyramid->GetView(Vk::ImageViewNames::Default),
@@ -83,34 +64,18 @@ namespace Syn {
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
     }
 
-    void ModelCullingPass::Dispatch(const RenderContext& context) {
+    void StaticModelCullingPass::Dispatch(const RenderContext& context) {
         auto scene = context.scene;
-        if (_totalModelsToTest == 0) return;
-
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
+
+        if (drawData->Chunks.chunkCounter.load(std::memory_order_relaxed) == 0) return;
+
         uint32_t fIdx = context.frameIndex;
-		auto isGpu = scene->GetSettings()->enableGpuCulling;
+        bool isGpu = scene->GetSettings()->enableGpuCulling;
 
-        VkBuffer countBuf = drawData->Models.computeCountBuffer.GetHandle(fIdx, isGpu);
-
-        Vk::BufferUtils::FillBuffer(context.cmd, {
-            .buffer = countBuf,
-            .offset = offsetof(VkDispatchIndirectCommand, x),
-            .size = sizeof(uint32_t),
-            .data = 0
-            });
-
-        Vk::BufferBarrierInfo fillBarrier{};
-        fillBarrier.buffer = countBuf;
-        fillBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
-        fillBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-        fillBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        fillBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT | VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
-        Vk::BufferUtils::InsertBarrier(context.cmd, fillBarrier);
-
-        uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_totalModelsToTest, ComputeGroupSize::Buffer32D);
-        vkCmdDispatch(context.cmd, groupCountX, 1, 1);
+        VkBuffer dispatchBuf = drawData->Chunks.indirectDispatchBuffer.GetHandle(fIdx, isGpu);
+        vkCmdDispatchIndirect(context.cmd, dispatchBuf, 0);
 
         Vk::BufferBarrierInfo countBarrier{};
         countBarrier.buffer = drawData->Models.computeCountBuffer.GetHandle(fIdx, isGpu);

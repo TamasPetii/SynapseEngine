@@ -235,6 +235,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Scene\DrawData\ChunkDrawGroup.cpp" />
     <ClCompile Include="Render\Passes\Shading\Visibility\DebugVisibilityPass.cpp" />
     <ClCompile Include="Render\Passes\Setup\HizInitPass.cpp" />
     <ClCompile Include="Render\Passes\Present\PresentationTransitionPass.cpp" />
@@ -260,6 +261,8 @@
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSetupPass.cpp" />
     <ClCompile Include="Render\Passes\Wireframe\SpotLightConeWireframePass.cpp" />
     <ClCompile Include="Render\Passes\Wireframe\SpotLightPyramidWireframePass.cpp" />
+    <ClCompile Include="Render\Passes\Culling\StaticChunkCullingPass.cpp" />
+    <ClCompile Include="Render\Passes\Culling\StaticModelCullingPass.cpp" />
     <ClCompile Include="System\Core\StaticSpatialSahSystem.cpp" />
     <ClCompile Include="System\Physics\CapsuleColliderSystem.cpp" />
     <ClCompile Include="System\Physics\SphereColliderSystem.cpp" />
@@ -581,6 +584,7 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Scene\DrawData\ChunkDrawGroup.h" />
     <ClInclude Include="Render\Passes\Shading\Visibility\DebugVisibilityPass.h" />
     <ClInclude Include="Render\Passes\Setup\HizInitPass.h" />
     <ClInclude Include="Render\Passes\Present\PresentationTransitionPass.h" />
@@ -606,6 +610,8 @@
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSetupPass.h" />
     <ClInclude Include="Render\Passes\Wireframe\SpotLightConeWireframePass.h" />
     <ClInclude Include="Render\Passes\Wireframe\SpotLightPyramidWireframePass.h" />
+    <ClInclude Include="Render\Passes\Culling\StaticChunkCullingPass.h" />
+    <ClInclude Include="Render\Passes\Culling\StaticModelCullingPass.h" />
     <ClInclude Include="System\Core\StaticSpatialSahSystem.h" />
     <ClInclude Include="System\Physics\CapsuleColliderSystem.h" />
     <ClInclude Include="System\Physics\SphereColliderSystem.h" />
@@ -980,6 +986,7 @@
     <None Include="Shaders\Includes\Common\Model.glsl" />
     <None Include="Shaders\Includes\Common\PointLight.glsl" />
     <None Include="Shaders\Includes\Common\SpotLight.glsl" />
+    <None Include="Shaders\Includes\Common\StaticChunk.glsl" />
     <None Include="Shaders\Includes\Common\Texture.glsl" />
     <None Include="Shaders\Includes\Common\Transform.glsl" />
     <None Include="Shaders\Includes\Common\Visibility.glsl" />
@@ -1024,6 +1031,7 @@
     <None Include="Shaders\Passes\Billboard\Billboard.vert" />
     <None Include="Shaders\Passes\Common\Composite.frag" />
     <None Include="Shaders\Passes\Common\Fullscreen.vert" />
+    <None Include="Shaders\Passes\Culling\StaticChunkCulling.comp" />
     <None Include="Shaders\Passes\Shading\Visibility\DebugVisibility.frag" />
     <None Include="Shaders\Passes\Shading\Common\Meshlet.mesh" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightCount.comp" />

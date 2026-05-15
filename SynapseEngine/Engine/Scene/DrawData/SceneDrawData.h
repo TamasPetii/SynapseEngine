@@ -7,6 +7,7 @@
 #include "SpotLightDrawGroup.h"
 #include "DirectionLightDrawGroup.h"
 #include "ForwardPlusDrawGroup.h"
+#include "ChunkDrawGroup.h"
 #include <atomic>
 #include "IDrawGroup.h"
 
@@ -27,6 +28,7 @@ namespace Syn
         SpotLightDrawGroup SpotLights;
         DirectionLightDrawGroup DirectionLights;
         ForwardPlusDrawGroup ForwardPlus;
+		ChunkDrawGroup Chunks;
         std::atomic<uint32_t> syncFramesRemaining{ 0 };
     };
 }

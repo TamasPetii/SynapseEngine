@@ -51,6 +51,11 @@ namespace Syn {
 
         ctx.transformBufferAddr = compManager->GetBufferAddr(BufferNames::TransformData, fIdx);
         ctx.transformSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::TransformSparseMap, fIdx);
+		ctx.transformModelLinkBufferAddr = compManager->GetBufferAddr(BufferNames::TransformModelLinkData, fIdx);
+
+		ctx.staticChunkDataBufferAddr = drawData->Chunks.chunkDataBuffer.GetAddress(fIdx, isGpu);
+        ctx.staticChunkVisibleIndexBufferAddr = drawData->Chunks.chunkVisibilityBuffer.GetAddress(fIdx, isGpu);
+        ctx.staticChunkCountBufferAddr = drawData->Chunks.indirectDispatchBuffer.GetAddress(fIdx, isGpu);
 
         ctx.modelAddressBufferAddr = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
         ctx.modelBufferAddr = compManager->GetBufferAddr(BufferNames::ModelData, fIdx);
@@ -117,6 +122,7 @@ namespace Syn {
 
 		auto [modelPool, directionLightPool, pointLightPool, spotLightPool, cameraPool] = scene->GetRegistry()->GetPools<ModelComponent, DirectionLightComponent, PointLightComponent, SpotLightComponent, CameraComponent>();
 
+		ctx.staticChunkCount = drawData->Chunks.chunkCounter.load(std::memory_order_relaxed);
         ctx.modelCount = modelPool->Size();
         ctx.directionLightCount = directionLightPool->Size();
         ctx.pointLightCount = pointLightPool->Size();
