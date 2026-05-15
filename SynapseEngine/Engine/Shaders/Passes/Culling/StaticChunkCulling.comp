@@ -7,11 +7,6 @@
 #include "../../Includes/Core.glsl"
 #include "../../Includes/Common/FrameGlobalContext.glsl"
 #include "../../Includes/Common/Camera.glsl"
-#include "../../Includes/Common/Transform.glsl"
-#include "../../Includes/Common/Model.glsl"
-#include "../../Includes/Common/Mesh.glsl"
-#include "../../Includes/Common/Animation.glsl"
-#include "../../Includes/Common/Material.glsl"
 #include "../../Includes/Common/Culling.glsl"
 #include "../../Includes/Utils/CullingMath.glsl"
 #include "../../Includes/Utils/Occlusion.glsl"
@@ -30,11 +25,11 @@ layout(set = 2, binding = 0) uniform sampler2D depthPyramid;
 void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
-    uint globalId = gl_GlobalInvocationID.x;
-    if (globalId >= ctx.staticChunkCount) return; 
+    uint chunkId = gl_GlobalInvocationID.x;
+    if (chunkId >= ctx.staticChunkCount) return;
 
     // 1. Fetch Chunk Data
-    StaticChunk chunk = GET_STATIC_CHUNK(ctx.staticChunkDataBufferAddr, globalId);
+    StaticChunk chunk = GET_STATIC_CHUNK(ctx.staticChunkDataBufferAddr, chunkId);
 
     // 2. Camera data
     uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
@@ -55,26 +50,21 @@ void main() {
         return;
     }
 
-    /*
     uint needsWrite = 1;
     uint subgroupWriteCount = subgroupAdd(needsWrite);
-    uint localOffset = subgroupExclusiveAdd(needsWrite);
+    uint localOffset = subgroupExclusiveAdd(needsWrite); 
     uint baseOffset = 0;
 
-    if (subgroupElect()) {
-        baseOffset = atomicAdd(GET_DISPATCH_CMD(ctx.modelCountBufferAddr).groupCountX, subgroupWriteCount);
+    if (subgroupElect() && subgroupWriteCount > 0) {
+        baseOffset = atomicAdd(GET_DISPATCH_CMD(ctx.staticChunkCountBufferAddr).groupCountX, subgroupWriteCount);
     }
 
     baseOffset = subgroupBroadcastFirst(baseOffset);
 
     if (needsWrite == 1) {
         uint finalIndex = baseOffset + localOffset;
-        VisibleModelData outData;
-
-        outData.entityId = SET_BIT_TO(entityId, 31, visibility == INTERSECTION_INSIDE);
-        outData.modelIndex = modelComp.modelIndex;
-
-        GET_VISIBLE_MODEL(ctx.modelVisibleIndexBufferAddr, finalIndex) = outData;
+        uint payload = SET_BIT_TO(chunkId, 31, visibility == INTERSECTION_INSIDE);
+        
+        GET_VISIBLE_CHUNK(ctx.staticChunkVisibleIndexBufferAddr, finalIndex) = payload;
     }
-    */
 }

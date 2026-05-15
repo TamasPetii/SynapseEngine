@@ -2319,5 +2319,6 @@
     <None Include="Shaders\Includes\PushConstants\DebugVisibilityPC.glsl" />
     <None Include="Shaders\Includes\Common\StaticChunk.glsl" />
     <None Include="Shaders\Passes\Culling\StaticChunkCulling.comp" />
+    <None Include="Shaders\Passes\Culling\StaticModelCulling.comp" />
   </ItemGroup>
 </Project>
