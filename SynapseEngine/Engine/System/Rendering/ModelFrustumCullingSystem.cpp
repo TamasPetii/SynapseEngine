@@ -235,6 +235,8 @@ namespace Syn
 
         if (settings->enableStaticBvhCulling && chunkGroup->chunkCounter.load(std::memory_order_relaxed) > 0)
         {
+            chunkGroup->visibleChunkCount.store(0, std::memory_order_relaxed);
+
             uint32_t activeChunks = chunkGroup->chunkCounter.load(std::memory_order_relaxed);
 
             staticTask = this->ForEachIndex(uint32_t(0), activeChunks, uint32_t(1), subflow, "Update Static Chunks",
@@ -243,6 +245,11 @@ namespace Syn
 
                     IntersectionType visibility = CollisionTester::TestAabbFrustumIntersectionType(chunk.minBounds, chunk.maxBounds, cameraComp.frustum);
                     if (visibility == IntersectionType::Outside) return;
+
+                    uint32_t slot = chunkGroup->visibleChunkCount.fetch_add(1, std::memory_order_relaxed);
+                    uint32_t packedId = chunkIdx;
+                    if (visibility == IntersectionType::Inside) packedId |= (1u << 31);
+                    chunkGroup->visibleChunkIds[slot] = packedId;
 
                     for (uint32_t i = 0; i < chunk.entityCount; ++i) {
                         EntityID entity = staticEntities[chunk.firstEntityIndex + i];
@@ -288,6 +295,23 @@ namespace Syn
                 if (instanceSize > 0) {
                     if (auto mappedInstance = drawData->Models.instanceBuffer.GetMapped(frameIndex)) {
                         mappedInstance->Write(drawData->Models.instances.Data(), instanceSize, 0);
+                    }
+                }
+
+                if (settings->enableStaticBvhCulling)
+                {
+                    uint32_t visibleCount = drawData->Chunks.visibleChunkCount.load(std::memory_order_relaxed);
+
+                    if (auto mappedCmd = drawData->Chunks.aabbSingleCmdBuffer.GetMapped(frameIndex)) {
+                        VkDrawIndirectCommand cmd = drawData->Chunks.wireframeCmdTemplate;
+                        cmd.instanceCount = visibleCount;
+                        mappedCmd->Write(&cmd, sizeof(VkDrawIndirectCommand), 0);
+                    }
+
+                    if (visibleCount > 0) {
+                        if (auto mappedVis = drawData->Chunks.chunkVisibilityBuffer.GetMapped(frameIndex)) {
+                            mappedVis->Write(drawData->Chunks.visibleChunkIds.data(), visibleCount * sizeof(uint32_t), 0);
+                        }
                     }
                 }
             }

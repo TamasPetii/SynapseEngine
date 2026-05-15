@@ -23,8 +23,8 @@ namespace Syn
     class SYN_API StaticSpatialSahSystem : public ISystem
     {
     public:
-        static constexpr size_t SAH_NUM_BINS = 16;
-        static constexpr size_t CHUNK_MAX_SIZE = 64;
+        static constexpr size_t SAH_NUM_BINS = 8;
+        static constexpr size_t CHUNK_MAX_SIZE = 32;
 
         std::string GetName() const override { return "StaticSpatialSahSystem"; }
         std::string GetGroup() const override { return SystemGroupNames::CoreSystems; }

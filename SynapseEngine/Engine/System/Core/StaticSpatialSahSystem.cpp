@@ -51,8 +51,10 @@ namespace Syn
         _spatialItems.clear();
         _spatialItems.resize(staticEntities.size());
 
+
         chunkGroup->chunks.clear();
         chunkGroup->chunks.resize(staticEntities.size());
+        chunkGroup->visibleChunkIds.resize(staticEntities.size());
 
         chunkGroup->chunkCounter.store(0, std::memory_order_relaxed);
         _uploadCountdown.store(3, std::memory_order_relaxed);

@@ -22,7 +22,9 @@ namespace Syn
         RenderBuffer indirectDispatchBuffer;
 
         std::vector<ChunkDataGPU> chunks;
+        std::vector<uint32_t> visibleChunkIds;
 
+        std::atomic<uint32_t> visibleChunkCount{ 0 };
         std::atomic<uint32_t> chunkCounter{ 0 };
 
         VkDrawIndirectCommand wireframeCmdTemplate{};
