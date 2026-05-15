@@ -3,15 +3,15 @@
     "base_model_path": "C:/Users/User/Desktop/Models/"
   },
   "environment": {
-    "spawn_sponza": true,
+    "spawn_sponza": false,
     "spawn_bistro": false,
-    "spawn_floor": true,
+    "spawn_floor": false,
     "spawn_pbr_sponza": false,
     "spawn_monkey": false
   },
   "materials": {
     "use_unique_materials": false,
-    "shared_material_count": 100
+    "shared_material_count": 25
   },
   "entities": {
     "animated_characters": 0,
