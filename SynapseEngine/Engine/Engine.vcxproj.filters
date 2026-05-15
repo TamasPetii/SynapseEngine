@@ -1041,6 +1041,12 @@
     <ClCompile Include="Render\Passes\Wireframe\SpotLightPyramidWireframePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="System\Core\StaticSpatialSahSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Core\TransformModelLinkSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2184,6 +2190,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Wireframe\SpotLightPyramidWireframePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Core\StaticSpatialSahSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Core\TransformModelLinkSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

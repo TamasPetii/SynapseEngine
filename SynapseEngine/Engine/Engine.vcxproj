@@ -260,6 +260,7 @@
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSetupPass.cpp" />
     <ClCompile Include="Render\Passes\Wireframe\SpotLightConeWireframePass.cpp" />
     <ClCompile Include="Render\Passes\Wireframe\SpotLightPyramidWireframePass.cpp" />
+    <ClCompile Include="System\Core\StaticSpatialSahSystem.cpp" />
     <ClCompile Include="System\Physics\CapsuleColliderSystem.cpp" />
     <ClCompile Include="System\Physics\SphereColliderSystem.cpp" />
     <ClCompile Include="System\Physics\RigidBodySystem.cpp" />
@@ -276,6 +277,7 @@
     <ClCompile Include="Render\Passes\TransitionPass.cpp" />
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\TransparentDepthTransitionPrepass.cpp" />
     <ClCompile Include="Render\Passes\Shading\Wboit\TransparentForwardTransitionPass.cpp" />
+    <ClCompile Include="System\Core\TransformModelLinkSystem.cpp" />
     <ClCompile Include="Utils\RenderBuffer.cpp" />
     <ClCompile Include="Render\Passes\Culling\CullingCommandResetPass.cpp" />
     <ClCompile Include="Render\Passes\Shading\Wboit\TransparentCompositeTransitionPass.cpp" />
@@ -604,6 +606,7 @@
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSetupPass.h" />
     <ClInclude Include="Render\Passes\Wireframe\SpotLightConeWireframePass.h" />
     <ClInclude Include="Render\Passes\Wireframe\SpotLightPyramidWireframePass.h" />
+    <ClInclude Include="System\Core\StaticSpatialSahSystem.h" />
     <ClInclude Include="System\Physics\CapsuleColliderSystem.h" />
     <ClInclude Include="System\Physics\SphereColliderSystem.h" />
     <ClInclude Include="System\Physics\PhysicsUtils.h" />
@@ -623,6 +626,7 @@
     <ClInclude Include="Render\Passes\TransitionPass.h" />
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\TransparentDepthTransitionPrepass.h" />
     <ClInclude Include="Render\Passes\Shading\Wboit\TransparentForwardTransitionPass.h" />
+    <ClInclude Include="System\Core\TransformModelLinkSystem.h" />
     <ClInclude Include="Utils\RenderBuffer.h" />
     <ClInclude Include="Render\Passes\Culling\CullingCommandResetPass.h" />
     <ClInclude Include="Render\Passes\Shading\Wboit\TransparentCompositeTransitionPass.h" />

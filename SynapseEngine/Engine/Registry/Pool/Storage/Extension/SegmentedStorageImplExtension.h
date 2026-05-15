@@ -79,6 +79,31 @@ namespace Syn
             DenseIndex index = AsDerived().GetMapping().Get(entity);
             return AsDerived().GetStorage().IsStream(index);
         }
+
+        template<typename U> 
+            requires (!std::is_void_v<U>)
+        SYN_INLINE void UpdateStaticData(std::span<const U> sortedData)
+        {
+            AsDerived().GetStorage().UpdateStaticData(sortedData);
+        }
+
+        SYN_INLINE void UpdateStaticEntities(std::span<const EntityID> sortedEntities)
+        {
+            AsDerived().GetStorage().UpdateStaticEntities(sortedEntities);
+        }
+
+        SYN_INLINE void RebuildStaticIndices(std::span<const EntityID> sortedEntities)
+        {
+            auto& pool = AsDerived();
+            SYN_ASSERT(sortedEntities.size() == pool.GetStorage().GetStaticEntities().size(), "Error: Sorted entity array size differs from the static region size!");
+
+            auto& mapping = pool.GetMapping();
+
+            for (size_t i = 0; i < sortedEntities.size(); ++i)
+            {
+                mapping.Set(sortedEntities[i], static_cast<DenseIndex>(i));
+            }
+        }
     };
 
     template<typename T>

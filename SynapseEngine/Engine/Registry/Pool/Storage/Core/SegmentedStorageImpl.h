@@ -55,6 +55,11 @@ namespace Syn
         SYN_INLINE bool IsStatic(DenseIndex index) const;
         SYN_INLINE bool IsDynamic(DenseIndex index) const;
         SYN_INLINE bool IsStream(DenseIndex index) const;
+
+        template<typename U = T> 
+            requires (!std::is_void_v<U>)
+        SYN_INLINE void UpdateStaticData(std::span<const U> sortedData);
+        SYN_INLINE void UpdateStaticEntities(std::span<const EntityID> sortedEntities);
     private:
         SYN_INLINE void EnsureDirtyCapacity();
     protected:
@@ -294,5 +299,30 @@ namespace Syn
     SYN_INLINE bool SegmentedStorageImpl<T, FlagMixinPolicy>::IsStream(DenseIndex index) const
     {
         return index >= _dynamicEnd;
+    }
+
+    template<typename T, typename FlagMixinPolicy>
+    template<typename U>
+        requires (!std::is_void_v<U>)
+    SYN_INLINE void SegmentedStorageImpl<T, FlagMixinPolicy>::UpdateStaticData(std::span<const U> sortedData)
+    {
+        SYN_ASSERT(sortedData.size() == _staticEnd, "Error: Sorted data array size does not match the static region size!");
+
+        if constexpr (std::is_trivially_copyable_v<U>)
+        {
+            std::memcpy(&this->Get(0), sortedData.data(), _staticEnd * sizeof(U));
+        }
+        else
+        {
+            for (size_t i = 0; i < _staticEnd; ++i)
+                this->Get(static_cast<DenseIndex>(i)) = sortedData[i];
+        }
+    }
+
+    template<typename T, typename FlagMixinPolicy>
+    SYN_INLINE void SegmentedStorageImpl<T, FlagMixinPolicy>::UpdateStaticEntities(std::span<const EntityID> sortedEntities)
+    {
+        SYN_ASSERT(sortedEntities.size() == _staticEnd, "Error: Sorted entity array size does not match the static region size!");
+        std::memcpy(Base::_entities.data(), sortedEntities.data(), _staticEnd * sizeof(EntityID));
     }
 }

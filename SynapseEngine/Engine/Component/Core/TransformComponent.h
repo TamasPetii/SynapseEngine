@@ -3,6 +3,7 @@
 #include "Engine/Component/Core/Component.h"
 #include "Engine/Registry/BitFlag.h"
 #include <glm/glm.hpp>
+#include <cstdint>
 
 namespace Syn
 {
@@ -27,5 +28,13 @@ namespace Syn
 
 		glm::mat4 transform;
 		glm::mat4 transformIT;
+	};
+
+	struct SYN_API TransformModelLinkGPU
+	{
+		TransformModelLinkGPU(uint32_t entityIndex, uint32_t modelDenseIndex);
+
+		uint32_t entityIndex;
+		uint32_t modelDenseIndex;
 	};
 }

@@ -53,6 +53,9 @@ namespace Syn
         template<typename T>
         void RegisterSystem();
 
+        template<typename TGpuStruct>
+        void RegisterGenericBuffer(const std::string& name, std::function<uint32_t()> sizeCallback, std::function<bool()> activeCallback, ComponentMemoryType memoryType = ComponentMemoryType::Persistent);
+
         template<typename TComponent, typename TGpuStruct>
         void RegisterComponentBuffer(const std::string& name, ComponentMemoryType memoryType = ComponentMemoryType::Persistent);
 
@@ -84,10 +87,16 @@ namespace Syn
         _systems.push_back(std::make_unique<T>());
     }
 
+    template<typename TGpuStruct>
+    SYN_INLINE void Scene::RegisterGenericBuffer(const std::string& name, std::function<uint32_t()> sizeCallback, std::function<bool()> activeCallback, ComponentMemoryType memoryType)
+    {
+        _componentBufferManager->RegisterBuffer(name, sizeof(TGpuStruct), std::move(sizeCallback), std::move(activeCallback), memoryType);
+    }
+
     template<typename TComponent, typename TGpuStruct>
     SYN_INLINE void Scene::RegisterComponentBuffer(const std::string& name, ComponentMemoryType memoryType)
     {
-        _componentBufferManager->RegisterBuffer(name, sizeof(TGpuStruct),
+        this->RegisterGenericBuffer<TGpuStruct>(name,
             [this]() -> uint32_t {
                 auto pool = _registry->GetPool<TComponent>();
                 return pool ? static_cast<uint32_t>(pool->Size()) : 0;
@@ -102,7 +111,7 @@ namespace Syn
     template<typename TComponent>
     SYN_INLINE void Scene::RegisterComponentSparseMapBuffer(const std::string& name)
     {
-        _componentBufferManager->RegisterBuffer(name, sizeof(DenseIndex),
+        this->RegisterGenericBuffer<DenseIndex>(name,
             [this]() -> uint32_t {
                 auto pool = _registry->GetPool<TComponent>();
                 return pool ? static_cast<uint32_t>(pool->GetSparseIndices().size()) : 0;
