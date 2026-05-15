@@ -6,6 +6,8 @@ namespace Syn {
     class SYN_API ModelCullingPass : public ComputePass {
     public:
         std::string GetName() const override { return "ModelCullingPass"; }
+        std::string GetGroup() const override { return PassGroupNames::CullingPasses; }
+
         void Initialize() override;
     protected:
 		bool ShouldExecute(const RenderContext& context) const override;

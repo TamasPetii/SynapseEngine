@@ -8,6 +8,7 @@ namespace Syn
     {
     public:
         std::string GetName() const override { return "CameraSystem"; }
+        std::string GetGroup() const override { return SystemGroupNames::CoreSystems; }
         std::vector<TypeID> GetReadDependencies() const override;
         std::vector<TypeID> GetWriteDependencies() const override;
     protected:

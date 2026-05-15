@@ -6,6 +6,7 @@ namespace Syn {
     class SYN_API HizLinearPreparePass : public ComputePass {
     public:
         std::string GetName() const override { return "HizLinearPreparePass"; }
+        std::string GetGroup() const override { return PassGroupNames::HizPasses; }
         void Initialize() override;
     protected:
 		bool ShouldExecute(const RenderContext& context) const override;

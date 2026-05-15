@@ -14,11 +14,11 @@ namespace Syn {
         _activeMeasurements[frameIndex].clear();
     }
 
-    uint32_t DefaultCpuProfiler::StartMeasurement(uint32_t frameIndex, const std::string& name) {
+    uint32_t DefaultCpuProfiler::StartMeasurement(uint32_t frameIndex, const std::string& groupName, const std::string& name) {
         auto now = std::chrono::high_resolution_clock::now();
 
         std::lock_guard<std::mutex> lock(_mutex);
-        _activeMeasurements[frameIndex].push_back({ name, now, now });
+        _activeMeasurements[frameIndex].push_back({ groupName, name, now, now });
         return static_cast<uint32_t>(_activeMeasurements[frameIndex].size() - 1);
     }
 
@@ -32,21 +32,47 @@ namespace Syn {
     void DefaultCpuProfiler::ResolveFrame(uint32_t frameIndex) {
         std::lock_guard<std::mutex> lock(_mutex);
         auto& measurements = _activeMeasurements[frameIndex];
+        auto& timings = _resolvedTimings[frameIndex];
 
-        _resolvedTimings[frameIndex].clear();
+        timings.clear();
 
         if (measurements.empty()) {
             return;
         }
 
+        GroupTiming* currentGroup = nullptr;
+
         for (const auto& m : measurements) {
             float ms = std::chrono::duration<float, std::milli>(m.endTime - m.startTime).count();
-            _resolvedTimings[frameIndex][m.passName] += ms;
+
+            if (currentGroup == nullptr || currentGroup->name != m.groupName) {
+                auto it = std::find_if(timings.begin(), timings.end(),
+                    [&](const GroupTiming& g) { return g.name == m.groupName; });
+
+                if (it != timings.end()) {
+                    currentGroup = &(*it);
+                }
+                else {
+                    timings.push_back({ m.groupName, 0.0f, {} });
+                    currentGroup = &timings.back();
+                }
+            }
+
+            auto entryIt = std::find_if(currentGroup->entries.begin(), currentGroup->entries.end(),
+                [&](const ProfilerEntry& e) { return e.name == m.entryName; });
+
+            if (entryIt != currentGroup->entries.end()) {
+                entryIt->timeMs += ms;
+            }
+            else {
+                currentGroup->entries.push_back({ m.entryName, ms });
+            }
+
+            currentGroup->totalTimeMs += ms;
         }
     }
 
-    const std::unordered_map<std::string, float>& DefaultCpuProfiler::GetTimings(uint32_t frameIndex) const {
+    const std::vector<GroupTiming>& DefaultCpuProfiler::GetTimings(uint32_t frameIndex) const {
         return _resolvedTimings[frameIndex];
     }
-
 }

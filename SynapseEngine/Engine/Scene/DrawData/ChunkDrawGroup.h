@@ -23,7 +23,6 @@ namespace Syn
 
         std::vector<ChunkDataGPU> chunks;
 
-        std::atomic<bool> needsUpload{ false };
         std::atomic<uint32_t> chunkCounter{ 0 };
 
         VkDrawIndirectCommand wireframeCmdTemplate{};

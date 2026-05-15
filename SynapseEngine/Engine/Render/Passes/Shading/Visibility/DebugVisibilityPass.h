@@ -9,6 +9,7 @@ namespace Syn
         DebugVisibilityPass() = default;
 
         std::string GetName() const override { return "DebugVisibilityPass"; }
+        std::string GetGroup() const override { return PassGroupNames::DebugPasses; }
         void Initialize() override;
 
     protected:

@@ -6,6 +6,7 @@ namespace Syn {
     class SYN_API TransparentInitPass : public GraphicsPass {
     public:
         std::string GetName() const override { return "TransparentInitPass"; }
+        std::string GetGroup() const override { return PassGroupNames::ShadingSetupPasses; }
     protected:
         void PrepareFrame(const RenderContext& context) override;
     };

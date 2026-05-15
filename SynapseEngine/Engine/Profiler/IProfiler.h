@@ -4,119 +4,45 @@
 #include <unordered_map>
 #include <format>
 
-namespace Syn {
+namespace Syn 
+{
+    struct SYN_API ProfilerEntry {
+        std::string name;
+        float timeMs;
+    };
+
+    struct SYN_API GroupTiming {
+        std::string name;
+        float totalTimeMs;
+        std::vector<ProfilerEntry> entries;
+    };
 
     class SYN_API IProfiler {
     public:
         virtual ~IProfiler() = default;
 
         virtual void ResolveFrame(uint32_t frameIndex) = 0;
-        virtual const std::unordered_map<std::string, float>& GetTimings(uint32_t frameIndex) const = 0;
+        virtual const std::vector<GroupTiming>& GetTimings(uint32_t frameIndex) const = 0;
 
         virtual std::string GenerateReport(uint32_t frameIndex, const std::string& title) const {
-            const auto& rawTimings = GetTimings(frameIndex);
-            if (rawTimings.empty()) {
-                return "";
-            }
-
-            std::unordered_map<std::string, float> timings(rawTimings.begin(), rawTimings.end());
-
-            struct PassGroup {
-                std::string name;
-                std::vector<std::string> passes;
-            };
-
-            std::vector<PassGroup> groups = {
-                {"Setup Passes", {
-                    "GlobalFrameSetupPass", "OpaqueInitPass", "TransparentInitPass", "HizInitPass"
-                }},
-                {"Geometry Culling", {
-                    "CullingCommandResetPass", "ModelCullingPass", "MeshCullingPass"
-                }},
-                {"Depth Prepass (Opaque)", {
-                    "OpaqueDepthTransitionPrepass", "MeshletOpaqueDepthPrepass1Sided",
-                    "MeshletOpaqueDepthPrepass2Sided", "TraditionalOpaqueZPrepass1Sided",
-                    "TraditionalOpaqueZPrepass2Sided", "Depth_Copy_Pass"
-                }},
-                {"Deferred G-Buffer (Opaque)", {
-                    "OpaqueDeferredTransitionPass",
-                    "MeshletOpaqueDeferredPass1Sided", "MeshletOpaqueDeferredPass2Sided",
-                    "TraditionalOpaqueDeferredPass1Sided", "TraditionalOpaqueDeferredPass2Sided",
-                    "MeshletOpaqueDeferred1Sided", "MeshletOpaqueDeferred2Sided",
-                    "TraditionalOpaqueDeferred1Sided", "TraditionalOpaqueDeferred2Sided"
-                }},
-                {"Deferred Lighting", {
-                    "DeferredLightTransitionPass", "DeferredEmissiveAoPass",
-                    "DeferredDirectionLightPass", "DeferredPointLightPass", "DeferredSpotLightPass"
-                }},
-                {"Depth Prepass (Transparent)", {
-                    "TransparentDepthTransitionPrepass", "MeshletTransparentDepthPrepass1Sided",
-                    "MeshletTransparentDepthPrepass2Sided", "TraditionalTransparentDepthPrepass1Sided",
-                    "TraditionalTransparentDepthPrepass2Sided"
-                }},
-                {"Hi-Z Generation", {
-                    "HizLinearPreparePass", "HizDownsamplePass"
-                }},
-                {"Light Culling", {
-                    "PointLightCullingPass", "SpotLightCullingPass"
-                }},
-                {"Forward+ Clustering", {
-                    "ClusterSetupPass", "ClusterPointLightCountPass", "ClusterSpotLightCountPass",
-                    "ClusterPrefixSumPass", "ClusterPointLightWritePass", "ClusterSpotLightWritePass",
-                    "ClusterLightWriteSyncPass"
-                }},
-                {"Lighting (Opaque Forward+)", {
-                    "OpaqueForwardTransitionPass", "MeshletOpaqueForward1Sided",
-                    "MeshletOpaqueForward2Sided", "TraditionalOpaqueForward1Sided",
-                    "TraditionalOpaqueForward2Sided"
-                }},
-                {"Lighting (Transparent WBOIT)", {
-                    "TransparentForwardTransitionPass", "Meshlet_Transparent_Forward_1Sided",
-                    "Meshlet_Transparent_Forward_2Sided", "Traditional_Transparent_Forward_1Sided",
-                    "Traditional_Transparent_Forward_2Sided", "TransparentCompositeTransitionPass",
-                    "Transparent_Composite"
-                }},
-                {"Bloom Post-Processing", {
-                    "BloomPrefilterPass", "BloomDownsamplePass", "BloomUpsamplePass", "BloomCompositePass"
-                }},
-                {"Presentation & UI", {
-                    "PresentationTransitionPass", "GuiPass"
-                }}
-            };
+            const auto& groups = GetTimings(frameIndex);
+            if (groups.empty()) return "";
 
             std::string report = std::format("{} Timings:\n", title);
-            float totalGpuTime = 0.0f;
+            float totalTime = 0.0f;
 
             for (const auto& group : groups) {
-                bool groupHasPass = false;
-                std::string groupLines = "";
+                report += std::format("    +---[ {} ] - Total: {:.3f} ms\n", group.name, group.totalTimeMs);
 
-                for (const auto& passName : group.passes) {
-                    auto it = timings.find(passName);
-                    if (it != timings.end()) {
-                        groupHasPass = true;
-                        groupLines += std::format("    |   {:<42} : {:>8.3f} ms\n", passName, it->second);
-                        totalGpuTime += it->second;
-                        timings.erase(it);
-                    }
+                for (const auto& entry : group.entries) {
+                    report += std::format("    |   {:<42} : {:>8.3f} ms\n", entry.name, entry.timeMs);
                 }
 
-                if (groupHasPass) {
-                    report += std::format("    +---[ {} ]\n", group.name);
-                    report += groupLines;
-                }
-            }
-
-            if (!timings.empty()) {
-                report += "    +---[ Uncategorized Passes ]\n";
-                for (const auto& [name, ms] : timings) {
-                    report += std::format("    |   {:<42} : {:>8.3f} ms\n", name, ms);
-                    totalGpuTime += ms;
-                }
+                totalTime += group.totalTimeMs;
             }
 
             report += "    ----------------------------------------------------------------------\n";
-            report += std::format("    = {:<44} : {:>8.3f} ms\n", "TOTAL " + title + " TIME", totalGpuTime);
+            report += std::format("    = {:<44} : {:>8.3f} ms\n", "TOTAL " + title + " TIME", totalTime);
 
             return report;
         }

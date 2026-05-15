@@ -395,7 +395,7 @@ namespace Syn
                 registry->AddComponent<PointLightComponent>(e);
 
                 auto& transform = registry->GetComponent<TransformComponent>(e);
-                transform.translation = glm::vec3((rand() % 400) - 200.0f, (rand() % 50) - 25.0f, (rand() % 400) - 200.0f);
+                transform.translation = glm::vec3((rand() % 400) - 200.0f, (rand() % 100), (rand() % 400) - 200.0f);
 
                 auto& light = registry->GetComponent<PointLightComponent>(e);
                 light.position = transform.translation;
@@ -417,13 +417,13 @@ namespace Syn
                 registry->AddComponent<SpotLightComponent>(e);
 
                 auto& transform = registry->GetComponent<TransformComponent>(e);
-                transform.translation = glm::vec3((rand() % 400) - 200.0f, (rand() % 50) - 25.0f, (rand() % 400) - 200.0f);
+                transform.translation = glm::vec3((rand() % 400) - 200.0f, (rand() % 100), (rand() % 400) - 200.0f);
                 transform.rotation = glm::vec3(-45.0f - (rand() % 45), (float)(rand() % 360), 0.0f);
 
                 auto& light = registry->GetComponent<SpotLightComponent>(e);
                 light.position = transform.translation;
                 light.color = glm::vec3(static_cast<float>(rand()) / RAND_MAX, static_cast<float>(rand()) / RAND_MAX, static_cast<float>(rand()) / RAND_MAX);
-                light.range = 30.0f + (rand() % 30);
+                light.range = 25.0f + (rand() % 50);
                 light.innerAngle = 15.0f + (rand() % 10);
                 light.outerAngle = light.innerAngle + 10.0f + (rand() % 15);
                 light.strength = 5.0f + (rand() % 25);

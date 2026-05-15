@@ -11,7 +11,8 @@
 namespace Syn {
 
     struct SYN_API CpuProfilerMeasurement {
-        std::string passName;
+        std::string groupName;
+        std::string entryName; 
         std::chrono::high_resolution_clock::time_point startTime;
         std::chrono::high_resolution_clock::time_point endTime;
     };
@@ -25,17 +26,17 @@ namespace Syn {
         DefaultCpuProfiler& operator=(const DefaultCpuProfiler&) = delete;
 
         void BeginFrame(uint32_t frameIndex) override;
-        uint32_t StartMeasurement(uint32_t frameIndex, const std::string& name) override;
         void EndMeasurement(uint32_t frameIndex, uint32_t measurementIndex) override;
+        uint32_t StartMeasurement(uint32_t frameIndex, const std::string& groupName, const std::string& name) override;
 
         void ResolveFrame(uint32_t frameIndex) override;
-        const std::unordered_map<std::string, float>& GetTimings(uint32_t frameIndex) const override;
+        const std::vector<GroupTiming>& GetTimings(uint32_t frameIndex) const override;
 
     private:
         uint32_t _framesInFlight;
 
+        std::vector<std::vector<GroupTiming>> _resolvedTimings;
         std::vector<std::vector<CpuProfilerMeasurement>> _activeMeasurements;
-        std::vector<std::unordered_map<std::string, float>> _resolvedTimings;
 
         mutable std::mutex _mutex;
     };

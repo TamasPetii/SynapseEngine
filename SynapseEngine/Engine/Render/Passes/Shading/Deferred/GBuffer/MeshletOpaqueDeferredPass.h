@@ -10,6 +10,8 @@ namespace Syn
         MeshletOpaqueDeferredPass(MaterialRenderType renderType);
 
         std::string GetName() const override { return _passName; }
+        std::string GetGroup() const override { return PassGroupNames::DeferredGBufferPasses; }
+
         void Initialize() override;
     protected:
         bool ShouldExecute(const RenderContext& context) const override;

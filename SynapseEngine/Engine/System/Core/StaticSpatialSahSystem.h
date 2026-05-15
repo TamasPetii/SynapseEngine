@@ -27,6 +27,7 @@ namespace Syn
         static constexpr size_t CHUNK_MAX_SIZE = 64;
 
         std::string GetName() const override { return "StaticSpatialSahSystem"; }
+        std::string GetGroup() const override { return SystemGroupNames::CoreSystems; }
 
         std::vector<TypeID> GetReadDependencies() const override;
         std::vector<TypeID> GetWriteDependencies() const override;
@@ -38,5 +39,6 @@ namespace Syn
     private:
         void BuildBinnedSahNodeTask(tf::Subflow& subflow, Scene* scene, std::span<SpatialItem> items);
         std::vector<SpatialItem> _spatialItems;
+        std::atomic<uint32_t> _uploadCountdown{ 0 };
     };
 }

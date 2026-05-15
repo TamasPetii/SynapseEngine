@@ -22,13 +22,10 @@ namespace Syn
 
     void TransformModelLinkSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
     {
-        //std::println("[TransformModelLink] OnUploadToGpu hívva (Frame: {})", frameIndex);
-
         auto registry = scene->GetRegistry();
         auto [transformPool, modelPool] = registry->GetPools<TransformComponent, ModelComponent>();
 
         if (!transformPool || !modelPool) {
-            //std::println("  -> [TransformModelLink] Kilép: Nincs transformPool vagy modelPool");
             return;
         }
 
@@ -36,7 +33,6 @@ namespace Syn
         auto linkBuffer = componentBufferManager->GetComponentBuffer(BufferNames::TransformModelLinkData, frameIndex);
 
         if (!linkBuffer.buffer) {
-            //std::println("  -> [TransformModelLink] Kilép: Nincs linkBuffer");
             return;
         }
 
@@ -54,21 +50,27 @@ namespace Syn
         bool indexChanged = transformPool->IsStateBitSet<INDEX_CHANGED_BIT>();
         bool forceUpload = this->ShouldForceUpload() || indexChanged;
 
-        if (!transformDirty && !modelDirty && !staticDirty && !forceUpload) {
-            //std::println("  -> [TransformModelLink] Kilép: Minden tiszta (nincs dirty flag)");
+        if (transformDirty || modelDirty || staticDirty || forceUpload) {
+            _globalLinkVersion++;
+        }
+
+        if (_gpuLinkVersions[frameIndex] == _globalLinkVersion) {
             return;
         }
 
-        //std::println("  -> [TransformModelLink] Upload indul! Okok: TransformDirty: {}, ModelDirty: {}, StaticDirty: {}, Force: {}", transformDirty, modelDirty, staticDirty, forceUpload);
+        bool isCatchingUp = (_gpuLinkVersions[frameIndex] < _globalLinkVersion);
+        bool effectiveForceUpload = forceUpload || isCatchingUp;
+
+        _gpuLinkVersions[frameIndex] = _globalLinkVersion;
 
         auto linkBufferHandler = static_cast<TransformModelLinkGPU*>(linkBuffer.buffer->Map());
 
-        auto processLink = [transformPool, modelPool, linkBuffer, linkBufferHandler, forceUpload](EntityID entity)
+        auto processLink = [transformPool, modelPool, linkBuffer, linkBufferHandler, effectiveForceUpload](EntityID entity)
             {
                 auto transformIndex = transformPool->GetMapping().Get(entity);
                 auto& transformComp = transformPool->Get(entity);
 
-                if (forceUpload || linkBuffer.versions[transformIndex] != transformComp.version)
+                if (effectiveForceUpload || linkBuffer.versions[transformIndex] != transformComp.version)
                 {
                     uint32_t modelIdx = NULL_INDEX;
                     if (modelPool->Has(entity))
@@ -86,10 +88,10 @@ namespace Syn
         if (!streamEntities.empty())
             subflow.for_each(streamEntities.begin(), streamEntities.end(), processLink);
 
-        if (forceUpload || transformDirty || modelDirty)
+        if (effectiveForceUpload || transformDirty || modelDirty)
             subflow.for_each(dynamicEntities.begin(), dynamicEntities.end(), processLink);
 
-        if (forceUpload || staticDirty || modelDirty)
+        if (effectiveForceUpload || staticDirty || modelDirty)
             subflow.for_each(staticEntities.begin(), staticEntities.end(), processLink);
     }
 }

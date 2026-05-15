@@ -176,7 +176,9 @@ namespace Syn
                 else if (phase == SystemPhase::UploadGPU) profilerName += " [Upload GPU]";
                 else profilerName += " [Finish]";
 
-                CpuProfileScope profile(ServiceLocator::GetCpuProfiler(), _currentFrameIndex, profilerName);
+                std::string groupName = sys->GetGroup();
+
+                CpuProfileScope profile(ServiceLocator::GetCpuProfiler(), _currentFrameIndex, groupName, profilerName);
 
                 switch (phase)
                 {

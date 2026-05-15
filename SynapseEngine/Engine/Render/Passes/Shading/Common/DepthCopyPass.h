@@ -6,7 +6,9 @@ namespace Syn {
     class SYN_API DepthCopyPass : public TransferPass {
     public:
         DepthCopyPass() = default;
-        std::string GetName() const override { return "Depth_Copy_Pass"; }
+        std::string GetName() const override { return "DepthCopyPass"; }
+        std::string GetGroup() const override { return PassGroupNames::ShadingSetupPasses; }
+
         void Initialize() override {}
     protected:
         void PrepareFrame(const RenderContext& context) override;

@@ -8,6 +8,7 @@ namespace Syn
     {
     public:
         std::string GetName() const override { return "ModelFrustumCullingSystem"; }
+        std::string GetGroup() const override { return SystemGroupNames::RenderingSystems; }
 
         std::vector<TypeID> GetReadDependencies() const override;
 

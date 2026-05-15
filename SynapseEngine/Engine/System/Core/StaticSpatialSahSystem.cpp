@@ -26,13 +26,10 @@ namespace Syn
 
     void StaticSpatialSahSystem::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
     {
-        //std::println("[StaticSpatialSah] OnUpdate hívva (Frame: {})", frameIndex);
-
         auto registry = scene->GetRegistry();
         auto transformPool = registry->GetPool<TransformComponent>();
         auto modelPool = registry->GetPool<ModelComponent>();
         if (!transformPool || !modelPool) {
-            //std::println("  -> [StaticSpatialSah] OnUpdate kilép: Nincs transformPool vagy modelPool");
             return;
         }
 
@@ -40,17 +37,13 @@ namespace Syn
 
         bool hasDirtyStatics = !transformPool->GetStorage().GetDirtyStatics().empty();
         if (!hasDirtyStatics && !chunkGroup->chunks.empty()) {
-            //std::println("  -> [StaticSpatialSah] OnUpdate kilép: Nincsenek dirty statikusok és a chunkok sem üresek");
             return;
         }
 
         auto staticEntities = transformPool->GetStorage().GetStaticEntities();
         if (staticEntities.empty()) {
-            //std::println("  -> [StaticSpatialSah] OnUpdate kilép: Nincsenek statikus entitások");
             return;
         }
-
-        //std::println("  -> [StaticSpatialSah] SAH újraépítés indul {} statikus entitásra", staticEntities.size());
 
         auto modelManager = ServiceLocator::GetModelManager();
         auto modelSnapshot = modelManager->GetResourceSnapshot();
@@ -62,7 +55,7 @@ namespace Syn
         chunkGroup->chunks.resize(staticEntities.size());
 
         chunkGroup->chunkCounter.store(0, std::memory_order_relaxed);
-        chunkGroup->needsUpload.store(true, std::memory_order_relaxed);
+        _uploadCountdown.store(3, std::memory_order_relaxed);
 
         auto gatherTaskOpt = this->ForEachIndex(size_t(0), staticEntities.size(), size_t(1), subflow, "GatherSpatialItems",
             [this, staticEntities, transformPool, modelPool, modelSnapshot](size_t i) {
@@ -102,7 +95,6 @@ namespace Syn
 
         // 2. Recursive SAH BVH builder a te EmplaceTask wrappereddel
         tf::Task sahRootTask = this->EmplaceTask(subflow, "BuildBinnedSAH_Root", [this, scene, frameIndex](tf::Subflow& sf) {
-            //std::println("[StaticSpatialSah] BuildBinnedSAH_Root TASK fut (Frame: {})", frameIndex);
             std::span<SpatialItem> allItems(_spatialItems.data(), _spatialItems.size());
             BuildBinnedSahNodeTask(sf, scene, allItems);
             });
@@ -130,14 +122,6 @@ namespace Syn
             transformPool->RebuildStaticIndices(std::span<const EntityID>(sortedEntities));
 
             transformPool->IncrementMappingVersion();
-
-            //Pool State Bit Set!
-
-            /*
-            for (EntityID entity : sortedEntities)
-                transformPool->SetBit<DIRTY_STATIC_BIT>(entity);
-
-            */
             });
 
         if (gatherTaskOpt) {
@@ -153,12 +137,11 @@ namespace Syn
 
         auto chunkGroup = &scene->GetSceneDrawData()->Chunks;
 
-        if (!chunkGroup->needsUpload.load(std::memory_order_relaxed) || chunkGroup->chunks.empty()) {
-            //std::println("  -> [StaticSpatialSah] OnUploadToGpu kilép: Nincs feltöltési igény (_needsChunkUpload=false vagy chunks üres)");
+        if (_uploadCountdown.load(std::memory_order_relaxed) == 0 || chunkGroup->chunks.empty()) {
             return;
         }
 
-        this->EmplaceTask(subflow, "UploadChunks", [chunkGroup, frameIndex]() {
+        this->EmplaceTask(subflow, "UploadChunks", [this, chunkGroup, frameIndex]() {
             size_t activeChunkCount = chunkGroup->chunkCounter.load(std::memory_order_relaxed);
 
             chunkGroup->chunkDataBuffer.UpdateCapacity(frameIndex, activeChunkCount);
@@ -168,7 +151,9 @@ namespace Syn
                 mappedData->Write(chunkGroup->chunks.data(), activeChunkCount * sizeof(ChunkDataGPU), 0);
             }
 
-            chunkGroup->needsUpload.store(false, std::memory_order_relaxed);
+            uint32_t currentCount = _uploadCountdown.load(std::memory_order_relaxed);
+            while (currentCount > 0 && !_uploadCountdown.compare_exchange_weak(currentCount, currentCount - 1, std::memory_order_relaxed)) {
+            }
             });
     }
 

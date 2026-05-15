@@ -6,6 +6,8 @@ namespace Syn {
     class SYN_API CompositePass : public GraphicsPass {
     public:
         std::string GetName() const override { return "CompositePass"; }
+        std::string GetGroup() const override { return PassGroupNames::PresentPasses; }
+
         void Initialize() override;
     protected:
         void PrepareFrame(const RenderContext& context) override;

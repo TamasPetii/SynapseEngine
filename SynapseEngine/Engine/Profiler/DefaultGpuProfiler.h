@@ -9,8 +9,9 @@
 
 namespace Syn {
 
-    struct SYN_API ProfilerMeasurement {
-        std::string passName;
+    struct SYN_API GpuProfilerMeasurement {
+        std::string groupName;
+        std::string entryName;
         uint32_t startQueryId;
         uint32_t endQueryId;
     };
@@ -24,19 +25,19 @@ namespace Syn {
         DefaultGpuProfiler& operator=(const DefaultGpuProfiler&) = delete;
 
         void BeginFrame(VkCommandBuffer cmd, uint32_t frameIndex) override;
-        uint32_t StartPass(VkCommandBuffer cmd, uint32_t frameIndex, const std::string& name) override;
         void EndPass(VkCommandBuffer cmd, uint32_t frameIndex, uint32_t measurementIndex) override;
+        uint32_t StartPass(VkCommandBuffer cmd, uint32_t frameIndex, const std::string& groupName, const std::string& name) override;
 
         void ResolveFrame(uint32_t frameIndex) override;
-        const std::unordered_map<std::string, float>& GetTimings(uint32_t frameIndex) const override;
+        const std::vector<GroupTiming>& GetTimings(uint32_t frameIndex) const override;
     private:
         float _timestampPeriod = 1.0f;
         uint32_t _framesInFlight;
         std::vector<uint32_t> _queryCounters;
         std::vector<std::unique_ptr<Vk::TimestampQueryPool>> _pools;
 
-        std::vector<std::vector<ProfilerMeasurement>> _activeMeasurements;
-        std::vector<std::unordered_map<std::string, float>> _resolvedTimings;
+        std::vector<std::vector<GroupTiming>> _resolvedTimings;
+        std::vector<std::vector<GpuProfilerMeasurement>> _activeMeasurements;
     };
 
 }

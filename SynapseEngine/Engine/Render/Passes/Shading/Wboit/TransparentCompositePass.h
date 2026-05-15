@@ -8,6 +8,7 @@ namespace Syn {
         TransparentCompositePass() = default;
 
         std::string GetName() const override { return "Transparent_Composite"; }
+        std::string GetGroup() const override { return PassGroupNames::WboitPasses; }
         void Initialize() override;
     protected:
 		bool ShouldExecute(const RenderContext& context) const override;

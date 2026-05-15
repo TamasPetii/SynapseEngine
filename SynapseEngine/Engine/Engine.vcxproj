@@ -584,6 +584,7 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\PassGroupNames.h" />
     <ClInclude Include="Scene\DrawData\ChunkDrawGroup.h" />
     <ClInclude Include="Render\Passes\Shading\Visibility\DebugVisibilityPass.h" />
     <ClInclude Include="Render\Passes\Setup\HizInitPass.h" />
@@ -633,6 +634,7 @@
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\TransparentDepthTransitionPrepass.h" />
     <ClInclude Include="Render\Passes\Shading\Wboit\TransparentForwardTransitionPass.h" />
     <ClInclude Include="System\Core\TransformModelLinkSystem.h" />
+    <ClInclude Include="System\SystemGroupNames.h" />
     <ClInclude Include="Utils\RenderBuffer.h" />
     <ClInclude Include="Render\Passes\Culling\CullingCommandResetPass.h" />
     <ClInclude Include="Render\Passes\Shading\Wboit\TransparentCompositeTransitionPass.h" />

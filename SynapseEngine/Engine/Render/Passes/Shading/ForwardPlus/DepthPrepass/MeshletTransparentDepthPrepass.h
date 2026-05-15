@@ -9,6 +9,7 @@ namespace Syn {
         MeshletTransparentDepthPrepass(MaterialRenderType renderType);
 
         std::string GetName() const override { return _passName; }
+        std::string GetGroup() const override { return PassGroupNames::ForwardPlusDepthPrePasses; }
         void Initialize() override;
     protected:
         void PrepareFrame(const RenderContext& context) override;

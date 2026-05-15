@@ -7,6 +7,7 @@ namespace Syn
     class SYN_API ClusterPointLightWritePass : public ComputePass {
     public:
         std::string GetName() const override { return "ClusterPointLightWritePass"; }
+        std::string GetGroup() const override { return PassGroupNames::ForwardPlusClusterPasses; }
         void Initialize() override;
     protected:
         void PushConstants(const RenderContext& context) override;

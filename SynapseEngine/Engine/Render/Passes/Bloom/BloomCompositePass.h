@@ -6,6 +6,7 @@ namespace Syn {
     class SYN_API BloomCompositePass : public ComputePass {
     public:
         std::string GetName() const override { return "BloomCompositePass"; }
+        std::string GetGroup() const override { return PassGroupNames::BloomPasses; }
         void Initialize() override;
     protected:
 		bool ShouldExecute(const RenderContext& context) const override;

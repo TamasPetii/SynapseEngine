@@ -79,7 +79,7 @@ namespace Syn {
             }
             EndSection(isGeneralOpen);
 
-            bool isCullingOpen = BeginSection("Culling & Optimization", false);
+            bool isCullingOpen = BeginSection("Culling & Optimization", true);
             if (isCullingOpen) {
                 changed |= ImGui::Checkbox("GPU Culling", &settings.enableGpuCulling);
                 changed |= ImGui::Checkbox("Static Bvh Culling", &settings.enableStaticBvhCulling);
