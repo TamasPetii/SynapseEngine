@@ -1,0 +1,95 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_KHR_shader_subgroup_basic : require
+#extension GL_KHR_shader_subgroup_arithmetic : require
+#extension GL_KHR_shader_subgroup_ballot : require
+
+#include "../../../../Includes/Core.glsl"
+#include "../../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../../Includes/Common/Camera.glsl"
+#include "../../../../Includes/Common/Cluster.glsl"
+#include "../../../../Includes/Common/PointLight.glsl"
+#include "../../../../Includes/Common/IndirectCommand.glsl"
+#include "../../../../Includes/Utils/CullingMath.glsl"
+#include "../../../../Includes/Utils/ClusterMath.glsl"
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../../../Includes/PushConstants/ClusterLightWritePC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    ClusterLightWritePC pc;
+};
+
+#define MAX_LIGHTS_PER_CLUSTER 512
+
+shared uint s_localPointLightCount;
+shared vec3 s_clusterAABBMin;
+shared vec3 s_clusterAABBMax;
+
+void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    uint threadId = gl_LocalInvocationID.x;
+    uint clusterIdx = gl_WorkGroupID.x;
+
+    uint activeClusterCount = GET_CLUSTER_COUNT(ctx.forwardPlusClusterCountBufferAddr);
+    if (clusterIdx >= activeClusterCount) return;
+
+    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
+    ClusterData cluster = GET_CLUSTER_DATA(ctx.forwardPlusClusterListBufferAddr, clusterIdx);
+
+    if (threadId == 0) {
+        s_localPointLightCount = 0;
+        
+        GetClusterViewSpaceAABB(
+            cluster.tileIndex, ctx.tileCountX, ctx.tileSize, ctx.screenWidth, ctx.screenHeight, 
+            cluster.minZ, cluster.maxZ, camera.projVulkanInv, 
+            s_clusterAABBMin, s_clusterAABBMax
+        );
+    }
+    
+    barrier();
+
+    uint totalLights = GET_VK_DRAW_CMD(ctx.pointLightIndirectCommandBufferAddr, 0).instanceCount;
+    uint globalOffset = clusterIdx * MAX_LIGHTS_PER_CLUSTER;
+
+    for (uint i = threadId; i < totalLights; i += gl_WorkGroupSize.x) {
+        uint entityIdx = GET_VISIBLE_POINT_LIGHT(ctx.pointLightVisibleIndexBufferAddr, i);
+        uint denseIdx = GET_SPARSE_INDEX(ctx.pointLightSparseMapBufferAddr, entityIdx);
+        PointLightColliderGPU collider = GET_POINT_LIGHT_COLLIDER(ctx.pointLightColliderBufferAddr, denseIdx);
+        
+        bool isIntersecting = TestSphereAABB(collider.viewSpaceCenter, collider.radius, s_clusterAABBMin, s_clusterAABBMax);
+        
+        uvec4 ballot = subgroupBallot(isIntersecting);
+        uint activeCount = subgroupBallotBitCount(ballot);
+        
+        uint baseOffset = 0;
+        if (subgroupElect() && activeCount > 0) {
+            baseOffset = atomicAdd(s_localPointLightCount, activeCount);
+        }
+        baseOffset = subgroupBroadcastFirst(baseOffset);
+
+        uint isIntersectingInt = isIntersecting ? 1 : 0;
+        uint threadOffset = subgroupExclusiveAdd(isIntersectingInt);
+
+        if (isIntersecting) {
+            uint localIdx = baseOffset + threadOffset;
+            
+            if (localIdx < MAX_LIGHTS_PER_CLUSTER) {
+                uint finalIdx = globalOffset + localIdx;
+                GET_LIGHT_INDEX(ctx.forwardPlusPointLightIndexListBufferAddr, finalIdx) = entityIdx;
+            }
+        }
+    }
+
+    barrier();
+
+    if (threadId == 0) {
+        GET_CLUSTER_DATA(ctx.forwardPlusClusterListBufferAddr, clusterIdx).pointLightCount = min(s_localPointLightCount, MAX_LIGHTS_PER_CLUSTER);
+        GET_CLUSTER_DATA(ctx.forwardPlusClusterListBufferAddr, clusterIdx).pointLightOffset = globalOffset;
+    }
+}

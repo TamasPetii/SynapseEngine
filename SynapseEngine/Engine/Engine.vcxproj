@@ -235,6 +235,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightSinglePass.cpp" />
+    <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightSinglePass.cpp" />
+    <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterDispatchSetupPass.cpp" />
     <ClCompile Include="Scene\DrawData\ChunkDrawGroup.cpp" />
     <ClCompile Include="Render\Passes\Shading\Visibility\DebugVisibilityPass.cpp" />
     <ClCompile Include="Render\Passes\Setup\HizInitPass.cpp" />
@@ -585,6 +588,9 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightSinglePass.h" />
+    <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightSinglePass.h" />
+    <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterDispatchSetupPass.h" />
     <ClInclude Include="Render\PassGroupNames.h" />
     <ClInclude Include="Scene\DrawData\ChunkDrawGroup.h" />
     <ClInclude Include="Render\Passes\Shading\Visibility\DebugVisibilityPass.h" />
@@ -983,6 +989,7 @@
     <None Include="Shaders\Includes\Common\Cluster.glsl" />
     <None Include="Shaders\Includes\Common\Culling.glsl" />
     <None Include="Shaders\Includes\Common\DirectionLight.glsl" />
+    <None Include="Shaders\Includes\Common\ForwardPlusDispatch.glsl" />
     <None Include="Shaders\Includes\Common\FrameGlobalContext.glsl" />
     <None Include="Shaders\Includes\Common\IndirectCommand.glsl" />
     <None Include="Shaders\Includes\Common\Material.glsl" />
@@ -1002,6 +1009,7 @@
     <None Include="Shaders\Includes\PushConstants\BloomDownSamplePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\BloomPrefilterPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\BloomUpSamplePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\ClusterDispatchSetupPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\ClusterLightCountPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\ClusterLightWritePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\ClusterPrefixSumPC.glsl" />
@@ -1037,7 +1045,10 @@
     <None Include="Shaders\Passes\Common\Fullscreen.vert" />
     <None Include="Shaders\Passes\Culling\StaticChunkCulling.comp" />
     <None Include="Shaders\Passes\Culling\StaticModelCulling.comp" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterDispatchSetup.comp" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightSingle.comp" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightCount.comp" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightSingle.comp" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightWrite.comp" />
     <None Include="Shaders\Passes\Shading\Visibility\DebugVisibility.frag" />
     <None Include="Shaders\Passes\Shading\Common\Meshlet.mesh" />

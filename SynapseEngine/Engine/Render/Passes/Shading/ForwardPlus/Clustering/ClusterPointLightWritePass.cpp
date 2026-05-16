@@ -41,7 +41,7 @@ namespace Syn {
     void ClusterPointLightWritePass::Dispatch(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
 
-        VkBuffer indirectBuffer = drawData->ForwardPlus.clusterCountBuffer.GetHandle(context.frameIndex, true);
-        vkCmdDispatchIndirect(context.cmd, indirectBuffer, 0);
+        VkBuffer indirectBuffer = drawData->ForwardPlus.dispatchArgsBuffer.GetHandle(context.frameIndex, true);
+        vkCmdDispatchIndirect(context.cmd, indirectBuffer, offsetof(ForwardPlusDispatchArgs, pointSlowWrite));
     }
 }

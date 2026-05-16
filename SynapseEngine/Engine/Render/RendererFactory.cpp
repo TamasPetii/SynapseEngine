@@ -51,6 +51,9 @@
 #include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterPointLightWritePass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterSpotLightWritePass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterLightWriteSyncPass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterDispatchSetupPass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterPointLightSinglePass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterSpotLightSinglePass.h"
 
 #include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/OpaqueDepthTransitionPrepass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/MeshletOpaqueDepthPrepass.h"
@@ -148,6 +151,9 @@ namespace Syn
 
         //Forward+ Cluster Passes
 		pipeline->AddPass(std::make_unique<ClusterSetupPass>());
+        pipeline->AddPass(std::make_unique<ClusterDispatchSetupPass>());
+        pipeline->AddPass(std::make_unique<ClusterPointLightSinglePass>());
+        pipeline->AddPass(std::make_unique<ClusterSpotLightSinglePass>());
 		pipeline->AddPass(std::make_unique<ClusterPointLightCountPass>());
 		pipeline->AddPass(std::make_unique<ClusterSpotLightCountPass>());
 		pipeline->AddPass(std::make_unique<ClusterPrefixSumPass>());

@@ -1059,6 +1059,15 @@
     <ClCompile Include="Render\Passes\Wireframe\StaticChunkAabbWireframePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterDispatchSetupPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightSinglePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightSinglePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2228,6 +2237,15 @@
     <ClInclude Include="Render\Passes\Wireframe\StaticChunkAabbWireframePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterDispatchSetupPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightSinglePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightSinglePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Includes\Common\Animation.glsl" />
@@ -2334,5 +2352,10 @@
     <None Include="Shaders\Passes\Culling\StaticModelCulling.comp" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightCount.comp" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightWrite.comp" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightSingle.comp" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightSingle.comp" />
+    <None Include="Shaders\Includes\Common\ForwardPlusDispatch.glsl" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterDispatchSetup.comp" />
+    <None Include="Shaders\Includes\PushConstants\ClusterDispatchSetupPC.glsl" />
   </ItemGroup>
 </Project>

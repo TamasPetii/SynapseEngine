@@ -41,6 +41,10 @@ namespace Syn
         static constexpr const char* DeferredDirectionLightVert = "../Engine/Shaders/Passes/Shading/Deferred/Lighting/DeferredDirectionLight.vert";
         static constexpr const char* DeferredDirectionLightFrag = "../Engine/Shaders/Passes/Shading/Deferred/Lighting/DeferredDirectionLight.frag";
 
+
+        static constexpr const char* ClusterSpotLightSingle = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterSpotLightSingle.comp";
+        static constexpr const char* ClusterPointLightSingle = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterPointLightSingle.comp";
+        static constexpr const char* ClusterDispatchSetup = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterDispatchSetup.comp";
         static constexpr const char* ClusterSetup = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterSetup.comp";
         static constexpr const char* ClusterPointLightCount = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterPointLightCount.comp";
         static constexpr const char* ClusterSpotLightCount = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterSpotLightCount.comp";

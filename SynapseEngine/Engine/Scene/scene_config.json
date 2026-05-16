@@ -15,10 +15,10 @@
   },
   "entities": {
     "animated_characters": 0,
-    "static_geometry": 100000,
-    "physics_boxes": 0,
-    "physics_spheres": 0,
-    "physics_capsules": 0
+    "static_geometry": 1000000,
+    "physics_boxes": 1000,
+    "physics_spheres": 1000,
+    "physics_capsules": 1000
   },
   "lights": {
     "directional_count": 1,

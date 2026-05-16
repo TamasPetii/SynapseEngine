@@ -4,6 +4,22 @@
 
 namespace Syn
 {
+    struct SYN_API ForwardPlusDispatchCmd {
+        uint32_t x, y, z, pad;
+    };
+
+    struct SYN_API ForwardPlusDispatchArgs {
+        ForwardPlusDispatchCmd pointFastPath;
+        ForwardPlusDispatchCmd pointSlowCount;
+        ForwardPlusDispatchCmd pointSlowWrite;
+
+        ForwardPlusDispatchCmd spotFastPath;
+        ForwardPlusDispatchCmd spotSlowCount;
+        ForwardPlusDispatchCmd spotSlowWrite;
+
+        ForwardPlusDispatchCmd prefixSum;
+    };
+
     struct SYN_API ForwardPlusDrawGroup : public IDrawGroup 
     {
         ForwardPlusDrawGroup(uint32_t frameCount);	
@@ -13,6 +29,8 @@ namespace Syn
         RenderBuffer tileGridBuffer;
         RenderBuffer clusterListBuffer;
         RenderBuffer clusterCountBuffer;
+
+        RenderBuffer dispatchArgsBuffer;
 
         RenderBuffer pointLightIndexBuffer;
         RenderBuffer spotLightIndexBuffer;
