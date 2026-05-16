@@ -2087,9 +2087,6 @@
     <ClInclude Include="Scene\DrawData\CpuData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Scene\DrawData\RenderConstants.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Scene\DrawData\DebugDrawGroup.h">
       <Filter>Header Files</Filter>
     </ClInclude>

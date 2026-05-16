@@ -45,7 +45,7 @@ namespace Syn
         tileGridBuffer.UpdateCapacity(frameIndex, gridX * gridY);
         clusterListBuffer.UpdateCapacity(frameIndex, maxClusters);
 
-        uint32_t expectedAverageLightsPerCluster = 512;
+        uint32_t expectedAverageLightsPerCluster = 1024;
         uint32_t totalLightIndices = maxClusters * expectedAverageLightsPerCluster;
 
         pointLightIndexBuffer.UpdateCapacity(frameIndex, totalLightIndices);

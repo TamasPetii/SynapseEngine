@@ -244,8 +244,6 @@ namespace Syn
                 }
             }
 
-            
-
             // Generate Shared Materials
             std::vector<uint32_t> sharedMaterialIds;
             if (!useUniqueMaterials) {
@@ -294,7 +292,7 @@ namespace Syn
                 registry->AddComponent<MaterialOverrideComponent>(e);
 
                 auto& transform = registry->GetComponent<TransformComponent>(e);
-                transform.translation = glm::vec3((rand() % 400) - 200.0f, (rand() % 400) + 5, (rand() % 400) - 200.0f);
+                transform.translation = glm::vec3((rand() % 800) - 400.0f, (rand() % 800) + 5, (rand() % 800) - 400.0f);
                 transform.rotation = glm::vec3(rand() % 360, rand() % 360, rand() % 360);
 
                 registry->GetComponent<ModelComponent>(e).modelIndex = geoIds[rand() % geoIds.size()];

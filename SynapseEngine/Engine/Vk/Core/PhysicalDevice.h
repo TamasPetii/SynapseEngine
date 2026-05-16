@@ -23,6 +23,7 @@ namespace Syn::Vk {
         VkPhysicalDeviceProperties _properties{};
         VkPhysicalDeviceMemoryProperties _memoryProperties{};
         VkPhysicalDeviceDescriptorBufferPropertiesEXT _descriptorBufferProperties{};
+        VkPhysicalDeviceMaintenance3Properties _maintenance3Properties{};
         std::set<std::string> _supportedExtensions;
     };
 }

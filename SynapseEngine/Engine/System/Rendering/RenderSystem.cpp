@@ -157,7 +157,7 @@ namespace Syn
         uint32_t totalMaterialIndicesCapacity = 0;
         uint32_t totalMaxMeshletInstances = 0;
 
-        // --- 1. Pass: Számoljuk össze a szükséges command darabszámokat ---
+        // 1. Pass: Count commands
         uint32_t tradCmdCounts[MaterialRenderType::Count] = { 0 };
         uint32_t meshletCmdCounts[MaterialRenderType::Count] = { 0 };
 
@@ -183,7 +183,7 @@ namespace Syn
             }
         }
 
-        // --- 2. Pass: Osztjuk ki az offseteket ---
+        // 2. Pass: Distribution of offset ---
         uint32_t tradOffsets[MaterialRenderType::Count];
         uint32_t meshletOffsets[MaterialRenderType::Count];
         drawData->Models.activeTraditionalCount = 0;
@@ -201,7 +201,36 @@ namespace Syn
             drawData->Models.activeMeshletCount += meshletCmdCounts[t];
         }
 
-        // --- 3. Pass: Építsük fel az Allocations és Descriptors buffereket ---
+        uint32_t totalDescriptors = drawData->Models.activeTraditionalCount + drawData->Models.activeMeshletCount;
+
+        uint32_t totalBlueprints = 0;
+        for (uint32_t modelId = 0; modelId < _modelCapacities.size(); ++modelId) {
+            if (_modelCapacities[modelId] > 0 && modelId < modelSnapshots.size() && modelSnapshots[modelId].resource) {
+                totalBlueprints += modelSnapshots[modelId].resource->baseDrawCommands.size();
+            }
+        }
+
+        if (drawData->Models.traditionalCmds.Size() < drawData->Models.activeTraditionalCount)
+            drawData->Models.traditionalCmds.Resize(drawData->Models.activeTraditionalCount);
+
+        if (drawData->Models.meshletCmds.Size() < drawData->Models.activeMeshletCount)
+            drawData->Models.meshletCmds.Resize(drawData->Models.activeMeshletCount);
+
+        if (drawData->Models.descriptors.Size() < totalDescriptors)
+            drawData->Models.descriptors.Resize(totalDescriptors);
+
+        if (drawData->Models.meshAllocations.Size() < totalBlueprints)
+            drawData->Models.meshAllocations.Resize(totalBlueprints);
+
+        if (drawData->Debug.modelAabbCmds.Size() < drawData->Models.activeTraditionalCount) {
+            drawData->Debug.modelAabbCmds.data.assign(drawData->Models.activeTraditionalCount, drawData->Debug.modelAabbCmdTemplate);
+        }
+
+        if (drawData->Debug.modelSphereCmds.Size() < drawData->Models.activeTraditionalCount) {
+            drawData->Debug.modelSphereCmds.data.assign(drawData->Models.activeTraditionalCount, drawData->Debug.modelSphereCmdTemplate);
+        }
+
+        // 3. Pass: Build Allocations and Descriptors buffers ---
         for (uint32_t modelId = 0; modelId < _modelCapacities.size(); ++modelId)
         {
             uint32_t capacity = _modelCapacities[modelId];
@@ -289,6 +318,20 @@ namespace Syn
         drawData->Debug.totalMaxMeshletInstances = totalMaxMeshletInstances;
         drawData->Models.requiredMaterialBufferSize = totalMaterialIndicesCapacity * sizeof(uint32_t);
 
+        if (drawData->Models.instances.Size() < globalInstanceOffset) {
+            drawData->Models.instances.Resize(globalInstanceOffset);
+        }
+
+        const uint32_t paddingFactor = 16;
+
+        if (drawData->Models.paddedTraditionalCounts.Size() < drawData->Models.activeTraditionalCount * paddingFactor) {
+            drawData->Models.paddedTraditionalCounts.Resize(drawData->Models.activeTraditionalCount * paddingFactor);
+        }
+
+        if (drawData->Models.paddedMeshletCounts.Size() < drawData->Models.activeMeshletCount * paddingFactor) {
+            drawData->Models.paddedMeshletCounts.Resize(drawData->Models.activeMeshletCount * paddingFactor);
+        }
+
         if (false)
         {
             std::stringstream ss;
@@ -361,13 +404,32 @@ namespace Syn
 
             auto drawData = scene->GetSceneDrawData();
 
-            uint32_t totalDebugInstances = drawData->Debug.totalMaxMeshletInstances;
-            if (totalDebugInstances > 0)
-                drawData->Debug.instanceBuffer.UpdateCapacity(frameIndex, totalDebugInstances);
+            uint32_t tradCount = drawData->Models.activeTraditionalCount;
+            if (tradCount > 0) {
+                drawData->Debug.modelAabbIndirectBuffer.UpdateCapacity(frameIndex, tradCount);
+                drawData->Debug.modelSphereIndirectBuffer.UpdateCapacity(frameIndex, tradCount);
+            }
+
+            uint32_t totalInstances = drawData->Models.totalAllocatedInstances;
+            if (totalInstances > 0) {
+                drawData->Models.instanceBuffer.UpdateCapacity(frameIndex, totalInstances);
+            }
 
             uint32_t totalDescriptors = drawData->Models.activeTraditionalCount + drawData->Models.activeMeshletCount;
-            size_t totalDescSize = totalDescriptors * sizeof(MeshDrawDescriptor);
+            if (totalDescriptors > 0) {
+                drawData->Models.descriptorBuffer.UpdateCapacity(frameIndex, totalDescriptors);
+            }
 
+            size_t indirectSize = (drawData->Models.activeTraditionalCount * sizeof(VkDrawIndirectCommand)) + (drawData->Models.activeMeshletCount * sizeof(VkDrawMeshTasksIndirectCommandEXT));
+            if (indirectSize > 0) {
+                drawData->Models.indirectBuffer.UpdateCapacity(frameIndex, indirectSize);
+            }
+
+            if (drawData->Models.activeDescriptorCount > 0) {
+                drawData->Models.meshAllocBuffer.UpdateCapacity(frameIndex, drawData->Models.activeDescriptorCount);
+            }
+
+            size_t totalDescSize = totalDescriptors * sizeof(MeshDrawDescriptor);
             if (auto mappedDesc = drawData->Models.descriptorBuffer.GetMapped(frameIndex); mappedDesc && totalDescSize > 0)
                 mappedDesc->Write(drawData->Models.descriptors.Data(), totalDescSize, 0);
 

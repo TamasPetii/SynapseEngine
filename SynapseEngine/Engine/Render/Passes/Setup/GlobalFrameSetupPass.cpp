@@ -101,7 +101,6 @@ namespace Syn {
         ctx.forwardPlusPointLightIndexListBufferAddr = drawData->ForwardPlus.pointLightIndexBuffer.GetAddress(fIdx, true);
         ctx.forwardPlusSpotLightIndexListBufferAddr = drawData->ForwardPlus.spotLightIndexBuffer.GetAddress(fIdx, true);
 
-        ctx.wireframeMeshletInstanceIndexBufferAddr = drawData->Debug.instanceBuffer.GetAddress(fIdx, true);
         ctx.wireframeMeshAabbIndirectCommandBufferAddr = drawData->Debug.modelAabbIndirectBuffer.GetAddress(fIdx, true);
         ctx.wireframeMeshSphereIndirectCommandBufferAddr = drawData->Debug.modelSphereIndirectBuffer.GetAddress(fIdx, true);
 

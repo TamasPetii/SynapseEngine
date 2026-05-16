@@ -21,17 +21,17 @@ namespace Syn
         modelSphereCmdTemplate.firstVertex = sphere->baseDrawCommands[0].traditionalCmd.firstVertex;
         modelSphereCmdTemplate.firstInstance = 0;
 
-        modelAabbCmds.data.assign(MAX_INDIRECT_COMMANDS, modelAabbCmdTemplate);
-        modelSphereCmds.data.assign(MAX_INDIRECT_COMMANDS, modelSphereCmdTemplate);
+        modelAabbCmds.data.assign(1, modelAabbCmdTemplate);
+        modelSphereCmds.data.assign(1, modelSphereCmdTemplate);
 
         VkBufferUsageFlags indirectUsage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
         VkBufferUsageFlags storageUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
-        modelAabbIndirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
-        modelAabbIndirectBuffer.UpdateCapacityAll(MAX_INDIRECT_COMMANDS);
+        modelAabbIndirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage, 1024, 2048 });
+        modelAabbIndirectBuffer.UpdateCapacityAll(1);
 
-        modelSphereIndirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
-        modelSphereIndirectBuffer.UpdateCapacityAll(MAX_INDIRECT_COMMANDS);
+        modelSphereIndirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage, 1024, 2048 });
+        modelSphereIndirectBuffer.UpdateCapacityAll(1);
 
         meshletAabbIndirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
         meshletAabbIndirectBuffer.UpdateCapacityAll(1);
@@ -39,13 +39,7 @@ namespace Syn
         meshletSphereIndirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
         meshletSphereIndirectBuffer.UpdateCapacityAll(1);
 
-        instanceBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(uint32_t), storageUsage });
-        instanceBuffer.UpdateCapacityAll(1);
-
-        for (uint32_t i = 0; i < frameCount; ++i) {
-            modelAabbIndirectBuffer.GetMapped(i)->Write(modelAabbCmds.Data(), modelAabbCmds.GetSizeBytes(), 0);
-            modelSphereIndirectBuffer.GetMapped(i)->Write(modelSphereCmds.Data(), modelSphereCmds.GetSizeBytes(), 0);
-        }
+        //Todo: Meshlet visibility buffer?
     }
 
     void DebugDrawGroup::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) {

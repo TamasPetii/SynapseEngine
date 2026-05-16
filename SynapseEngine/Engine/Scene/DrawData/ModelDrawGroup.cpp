@@ -9,41 +9,41 @@ namespace Syn
         dispatchCmdTemplate.y = 1;
         dispatchCmdTemplate.z = 1;
 
-        paddedTraditionalCounts.AssignZero(MAX_INDIRECT_COMMANDS * 16);
-        paddedMeshletCounts.AssignZero(MAX_INDIRECT_COMMANDS * 16);
+        paddedTraditionalCounts.AssignZero(16);
+        paddedMeshletCounts.AssignZero(16);
 
-        instances.AssignZero(MAX_INSTANCES);
-        traditionalCmds.AssignZero(MAX_INDIRECT_COMMANDS);
-        meshletCmds.AssignZero(MAX_INDIRECT_COMMANDS);
-        descriptors.AssignZero(MAX_INDIRECT_COMMANDS);
-        meshAllocations.AssignZero(MAX_INDIRECT_COMMANDS);
+        instances.AssignZero(1);
+        traditionalCmds.AssignZero(1);
+        meshletCmds.AssignZero(1);
+        descriptors.AssignZero(1);
+        meshAllocations.AssignZero(1);
         modelAllocations.AssignZero(ModelManager::MAX_MODELS);
 
         VkBufferUsageFlags storageUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
         VkBufferUsageFlags indirectStorageUsage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
-        instanceBuffer.Initialize({ BufferStrategy::Hybrid_Dynamic, frameCount, sizeof(uint32_t), storageUsage });
-        instanceBuffer.UpdateCapacityAll(MAX_INSTANCES);
+        instanceBuffer.Initialize({ BufferStrategy::Hybrid_Dynamic, frameCount, sizeof(uint32_t), storageUsage, 16384, 32768 });
+        instanceBuffer.UpdateCapacityAll(1);
 
-        indirectBuffer.Initialize({ BufferStrategy::Hybrid_Dynamic, frameCount, 1, indirectStorageUsage });
-        indirectBuffer.UpdateCapacityAll((MAX_INDIRECT_COMMANDS * sizeof(VkDrawIndirectCommand) + MAX_INDIRECT_COMMANDS * sizeof(VkDrawMeshTasksIndirectCommandEXT)));
+        indirectBuffer.Initialize({ BufferStrategy::Hybrid_Dynamic, frameCount, 1, indirectStorageUsage, 1024, 2048 });
+        indirectBuffer.UpdateCapacityAll(1);
 
-        descriptorBuffer.Initialize({ BufferStrategy::Hybrid_Static, frameCount, sizeof(MeshDrawDescriptor), storageUsage });
-        descriptorBuffer.UpdateCapacityAll(MAX_INDIRECT_COMMANDS);
+        descriptorBuffer.Initialize({ BufferStrategy::Hybrid_Static, frameCount, sizeof(MeshDrawDescriptor), storageUsage, 1024, 2048 });
+        descriptorBuffer.UpdateCapacityAll(1);
 
-        modelAllocBuffer.Initialize({ BufferStrategy::Hybrid_Static, frameCount, sizeof(ModelAllocationInfo), storageUsage });
+        modelAllocBuffer.Initialize({ BufferStrategy::Hybrid_Static, frameCount, sizeof(ModelAllocationInfo), storageUsage, 1024, 2048 });
         modelAllocBuffer.UpdateCapacityAll(ModelManager::MAX_MODELS);
 
-        meshAllocBuffer.Initialize({ BufferStrategy::Hybrid_Static, frameCount, sizeof(MeshAllocationInfo), storageUsage });
-        meshAllocBuffer.UpdateCapacityAll(MAX_INDIRECT_COMMANDS);
+        meshAllocBuffer.Initialize({ BufferStrategy::Hybrid_Static, frameCount, sizeof(MeshAllocationInfo), storageUsage, 1024, 2048 });
+        meshAllocBuffer.UpdateCapacityAll(1);
 
-        materialIndexBuffer.Initialize({ BufferStrategy::Hybrid_Static, frameCount, sizeof(int32_t), storageUsage });
+        materialIndexBuffer.Initialize({ BufferStrategy::Hybrid_Static, frameCount, sizeof(int32_t), storageUsage, 1024, 2048 });
         materialIndexBuffer.UpdateCapacityAll(1);
 
-        drawCountBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(uint32_t), indirectStorageUsage });
+        drawCountBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(uint32_t), indirectStorageUsage, 1, 1 });
         drawCountBuffer.UpdateCapacityAll(MaterialRenderType::Count * 2);
 
-        computeCountBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage });
+        computeCountBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
         computeCountBuffer.UpdateCapacityAll(1);
     }
 
