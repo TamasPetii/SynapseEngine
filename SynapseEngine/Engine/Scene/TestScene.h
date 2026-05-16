@@ -253,14 +253,16 @@ namespace Syn
                     float r = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                     float g = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                     float b = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-                    float randomFloat = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-
+  
                     MaterialInfo matInfo{};
-                    matInfo.color = glm::vec4(r, g, b, 0.1f + (randomFloat * 0.9f));
+                    matInfo.color = glm::vec4(r, g, b, 0.1f + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 0.9f));
                     matInfo.doubleSided = rand() % 2;
                     matInfo.isTransparent = rand() % 2;
                     matInfo.emissiveFactor = glm::vec3(r, g, b);
-                    matInfo.emissiveIntensity = randomFloat * 2;
+                    matInfo.emissiveIntensity = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2;
+                    matInfo.metallicFactor = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    matInfo.roughnessFactor = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    matInfo.aoStrength = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 
                     sharedMaterialIds.push_back(materialManager->LoadMaterial("SharedMat_" + std::to_string(j), matInfo));
                 }
@@ -275,6 +277,8 @@ namespace Syn
                     MaterialInfo matInfo{};
                     matInfo.color = glm::vec4(r, g, b, 1.0f);
                     matInfo.emissiveFactor = glm::vec3(r, g, b);
+                    matInfo.metallicFactor = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
+                    matInfo.roughnessFactor = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                     overrideComp.materials.push_back(materialManager->LoadMaterial("UniqueMat_" + std::to_string(index), matInfo));
                 }
                 else if (!sharedMaterialIds.empty()) {

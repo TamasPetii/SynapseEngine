@@ -44,7 +44,7 @@ void main() {
 
     float screenSizePixels = 0.0;
     vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);
-    bool enableDepthOcclusion = (ctx.enableOcclusionCulling == 1);
+    bool enableDepthOcclusion = (ctx.enableModelOcclusionCulling == 1);
 
     // Collaborative processing of models within the chunk
     for (uint i = gl_LocalInvocationID.x; i < chunk.entityCount; i += gl_WorkGroupSize.x) 
@@ -78,7 +78,7 @@ void main() {
         uint visibility = INTERSECTION_INSIDE;
         GpuMeshCollider worldCollider = TransformCollider(localGlobalCollider, transform.transform);
 
-        if (!chunkFullyInside) { 
+        if (!chunkFullyInside && ctx.enableModelFrustumCulling == 1) { 
             visibility = TestFrustum(worldCollider, camera);
             if (visibility == INTERSECTION_OUTSIDE) continue;
         }

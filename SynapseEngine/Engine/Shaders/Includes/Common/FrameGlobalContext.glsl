@@ -76,9 +76,26 @@ struct FrameGlobalContext {
     float emissiveStrength;
     float alphaLimitDiscard;
 
-    uint enableConeCulling;
-    uint enableFrustumCulling;
-    uint enableOcclusionCulling;
+    uint enableMeshletConeCulling;
+
+    uint enableChunkFrustumCulling;
+    uint enableModelFrustumCulling;
+    uint enableMeshFrustumCulling;
+    uint enableMeshletFrustumCulling;
+    uint enablePointLightFrustumCulling;
+    uint enableSpotLightFrustumCulling;
+
+    uint enableChunkOcclusionCulling;
+    uint enableModelOcclusionCulling;
+    uint enableMeshOcclusionCulling;
+    uint enableMeshletOcclusionCulling;
+    uint enablePointLightOcclusionCulling;
+    uint enableSpotLightOcclusionCulling;
+
+    uint enableForwardPlusEmissiveAo;
+    uint enableForwardPlusPointLights;
+    uint enableForwardPlusSpotLights;
+    uint enableForwardPlusDirectionalLights;
 
     uint globalIndirectCommandCount;
     uint globalTraditionalCommandsCount;

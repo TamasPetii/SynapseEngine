@@ -36,12 +36,16 @@ void main() {
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
 
     // 3. Frustum Culling Test + Occlusion Culling
-    uint visibility = TestAABBFrustum(chunk.minBounds, chunk.maxBounds, camera);
-    if (visibility == INTERSECTION_OUTSIDE) return;
+    uint visibility = INTERSECTION_INSIDE;
+    if(ctx.enableChunkFrustumCulling == 1)
+    {
+         visibility = TestAABBFrustum(chunk.minBounds, chunk.maxBounds, camera);
+        if (visibility == INTERSECTION_OUTSIDE) return;
+    }
 
     float screenSizePixels = 0.0;
     vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);
-    bool enableDepthOcclusion = (ctx.enableOcclusionCulling == 1);
+    bool enableDepthOcclusion = (ctx.enableChunkOcclusionCulling == 1);
 
     vec3 sphereCenter = (chunk.minBounds + chunk.maxBounds) * 0.5;
     float sphereRadius = length(chunk.maxBounds - sphereCenter);

@@ -23,15 +23,16 @@ namespace Syn {
     void GlobalFrameSetupPass::Transfer(const RenderContext& context) {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
+        auto settings = scene->GetSettings();
         auto compManager = scene->GetComponentBufferManager();
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
         uint32_t fIdx = context.frameIndex;
         uint32_t width = rtGroup->GetWidth();
         uint32_t height = rtGroup->GetHeight();
-        bool isGpu = scene->GetSettings()->enableGpuCulling;
+        bool isGpu = settings->enableGpuCulling;
 
-        drawData->ForwardPlus.CheckResize(scene->GetSettings()->tileSize, width, height, fIdx);
+        drawData->ForwardPlus.CheckResize(settings->tileSize, width, height, fIdx);
 
         auto modelManager = ServiceLocator::GetModelManager();
         auto materialManager = ServiceLocator::GetMaterialManager();
@@ -106,13 +107,30 @@ namespace Syn {
 
         ctx.screenWidth = static_cast<float>(rtGroup->GetWidth());
         ctx.screenHeight = static_cast<float>(rtGroup->GetHeight());
-        ctx.ambientStrength = scene->GetSettings()->ambientStrength;
-        ctx.emissiveStrength = scene->GetSettings()->emissiveStrength;
+        ctx.ambientStrength = settings->ambientStrength;
+        ctx.emissiveStrength = settings->emissiveStrength;
         ctx.alphaLimitDiscard = 0.025f;
 
-        ctx.enableConeCulling = scene->GetSettings()->enableConeCulling ? 1 : 0;
-        ctx.enableFrustumCulling = scene->GetSettings()->enableFrustumCulling ? 1 : 0;
-        ctx.enableOcclusionCulling = scene->GetSettings()->enableOcclusionCulling ? 1 : 0;
+        ctx.enableMeshletConeCulling = settings->enableMeshletConeCulling ? 1 : 0;
+
+        ctx.enableChunkFrustumCulling = settings->enableFrustumCulling && settings->enableChunkFrustumCulling ? 1 : 0;
+        ctx.enableModelFrustumCulling = settings->enableFrustumCulling && settings->enableModelFrustumCulling ? 1 : 0;
+        ctx.enableMeshFrustumCulling = settings->enableFrustumCulling && settings->enableMeshFrustumCulling ? 1 : 0;
+        ctx.enableMeshletFrustumCulling = settings->enableFrustumCulling && settings->enableMeshletFrustumCulling ? 1 : 0;
+        ctx.enablePointLightFrustumCulling = settings->enableFrustumCulling && settings->enablePointLightFrustumCulling ? 1 : 0;
+        ctx.enableSpotLightFrustumCulling = settings->enableFrustumCulling && settings->enableSpotLightFrustumCulling ? 1 : 0;
+
+        ctx.enableChunkOcclusionCulling = settings->enableOcclusionCulling && settings->enableChunkOcclusionCulling ? 1 : 0;
+        ctx.enableModelOcclusionCulling = settings->enableOcclusionCulling && settings->enableModelOcclusionCulling ? 1 : 0;
+        ctx.enableMeshOcclusionCulling = settings->enableOcclusionCulling && settings->enableMeshOcclusionCulling ? 1 : 0;
+        ctx.enableMeshletOcclusionCulling = settings->enableOcclusionCulling && settings->enableMeshletOcclusionCulling ? 1 : 0;
+        ctx.enablePointLightOcclusionCulling = settings->enableFrustumCulling && settings->enablePointLightOcclusionCulling ? 1 : 0;
+        ctx.enableSpotLightOcclusionCulling = settings->enableFrustumCulling && settings->enableSpotLightOcclusionCulling ? 1 : 0;
+
+        ctx.enableForwardPlusEmissiveAo = scene->GetSettings()->enableForwardPlusEmissiveAo ? 1 : 0;
+        ctx.enableForwardPlusPointLights = scene->GetSettings()->enableForwardPlusPointLights ? 1 : 0;
+        ctx.enableForwardPlusSpotLights = scene->GetSettings()->enableForwardPlusSpotLights ? 1 : 0;
+        ctx.enableForwardPlusDirectionalLights = scene->GetSettings()->enableForwardPlusDirectionalLights ? 1 : 0;
 
         ctx.globalIndirectCommandCount = drawData->Models.activeTraditionalCount + drawData->Models.activeMeshletCount;
         ctx.globalTraditionalCommandsCount = drawData->Models.activeTraditionalCount;

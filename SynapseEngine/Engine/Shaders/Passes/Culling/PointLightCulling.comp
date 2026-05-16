@@ -37,13 +37,17 @@ void main() {
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
 
     // 1. Frustum Culling (Sphere)
-    uint visibility = TestSphereFrustum(collider.center, collider.radius, camera);
-    if (visibility == INTERSECTION_OUTSIDE) return;
+    uint visibility = INTERSECTION_INSIDE;
+    if(ctx.enablePointLightFrustumCulling == 1)
+    {
+        uint visibility = TestSphereFrustum(collider.center, collider.radius, camera);
+        if (visibility == INTERSECTION_OUTSIDE) return;
+    }
 
     // 2. Occlusion és 0-pixel Culling
     float screenSizePixels = 0.0;
     vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);
-    bool enableDepthOcclusion = (ctx.enableOcclusionCulling == 1);
+    bool enableDepthOcclusion = (ctx.enablePointLightOcclusionCulling == 1);
 
     if (IsSphereOccluded(collider.center, collider.radius, camera, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
         return;

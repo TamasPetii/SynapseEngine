@@ -84,9 +84,81 @@ namespace Syn {
                 changed |= ImGui::Checkbox("GPU Culling", &settings.enableGpuCulling);
                 changed |= ImGui::Checkbox("Static Bvh Culling", &settings.enableStaticBvhCulling);
                 changed |= ImGui::Checkbox("Hi-Z", &settings.enableHiz);
-                changed |= ImGui::Checkbox("Occlusion Culling", &settings.enableOcclusionCulling);
-                changed |= ImGui::Checkbox("Frustum Culling", &settings.enableFrustumCulling);
-                changed |= ImGui::Checkbox("Cone Culling", &settings.enableConeCulling);
+
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+
+                changed |= ImGui::Checkbox("Global Frustum Culling", &settings.enableFrustumCulling);
+                changed |= ImGui::Checkbox("Global Occlusion Culling", &settings.enableOcclusionCulling);
+
+                ImGui::Spacing();
+                ImGui::SeparatorText("Chunk Level");
+
+                ImGui::BeginDisabled(!settings.enableFrustumCulling);
+                changed |= ImGui::Checkbox("Frustum Culling##Chunk", &settings.enableChunkFrustumCulling);
+                ImGui::EndDisabled();
+
+                ImGui::BeginDisabled(!settings.enableOcclusionCulling);
+                changed |= ImGui::Checkbox("Occlusion Culling##Chunk", &settings.enableChunkOcclusionCulling);
+                ImGui::EndDisabled();
+
+                ImGui::Spacing();
+                ImGui::SeparatorText("Model Level");
+
+                ImGui::BeginDisabled(!settings.enableFrustumCulling);
+                changed |= ImGui::Checkbox("Frustum Culling##Model", &settings.enableModelFrustumCulling);
+                ImGui::EndDisabled();
+
+                ImGui::BeginDisabled(!settings.enableOcclusionCulling);
+                changed |= ImGui::Checkbox("Occlusion Culling##Model", &settings.enableModelOcclusionCulling);
+                ImGui::EndDisabled();
+
+                ImGui::Spacing();
+                ImGui::SeparatorText("Mesh Level");
+
+                ImGui::BeginDisabled(!settings.enableFrustumCulling);
+                changed |= ImGui::Checkbox("Frustum Culling##Mesh", &settings.enableMeshFrustumCulling);
+                ImGui::EndDisabled();
+
+                ImGui::BeginDisabled(!settings.enableOcclusionCulling);
+                changed |= ImGui::Checkbox("Occlusion Culling##Mesh", &settings.enableMeshOcclusionCulling);
+                ImGui::EndDisabled();
+
+                ImGui::Spacing();
+                ImGui::SeparatorText("Meshlet Level");
+
+                ImGui::BeginDisabled(!settings.enableFrustumCulling);
+                changed |= ImGui::Checkbox("Frustum Culling##Meshlet", &settings.enableMeshletFrustumCulling);
+                ImGui::EndDisabled();
+
+                ImGui::BeginDisabled(!settings.enableOcclusionCulling);
+                changed |= ImGui::Checkbox("Occlusion Culling##Meshlet", &settings.enableMeshletOcclusionCulling);
+                ImGui::EndDisabled();
+
+                changed |= ImGui::Checkbox("Cone Culling##Meshlet", &settings.enableMeshletConeCulling);
+
+                ImGui::Spacing();
+                ImGui::SeparatorText("Point Light Level");
+
+                ImGui::BeginDisabled(!settings.enableFrustumCulling);
+                changed |= ImGui::Checkbox("Frustum Culling##PointLight", &settings.enablePointLightFrustumCulling);
+                ImGui::EndDisabled();
+
+                ImGui::BeginDisabled(!settings.enableOcclusionCulling);
+                changed |= ImGui::Checkbox("Occlusion Culling##PointLight", &settings.enablePointLightOcclusionCulling);
+                ImGui::EndDisabled();
+
+                ImGui::Spacing();
+                ImGui::SeparatorText("Spot Light Level");
+
+                ImGui::BeginDisabled(!settings.enableFrustumCulling);
+                changed |= ImGui::Checkbox("Frustum Culling##SpotLight", &settings.enableSpotLightFrustumCulling);
+                ImGui::EndDisabled();
+
+                ImGui::BeginDisabled(!settings.enableOcclusionCulling);
+                changed |= ImGui::Checkbox("Occlusion Culling##SpotLight", &settings.enableSpotLightOcclusionCulling);
+                ImGui::EndDisabled();
             }
             EndSection(isCullingOpen);
 
@@ -111,6 +183,15 @@ namespace Syn {
                 changed |= ImGui::Checkbox("Directional Lights##Deferred", &settings.enableDeferredDirectionalLights);
             }
             EndSection(isDeferredOpen);
+
+            bool isForwardPlusOpen = BeginSection("Forward Plus Shading Features", false);
+            if (isForwardPlusOpen) {
+                changed |= ImGui::Checkbox("Emissive AO##ForwardPlus", &settings.enableForwardPlusEmissiveAo);
+                changed |= ImGui::Checkbox("Point Lights##ForwardPlus", &settings.enableForwardPlusPointLights);
+                changed |= ImGui::Checkbox("Spot Lights##ForwardPlus", &settings.enableForwardPlusSpotLights);
+                changed |= ImGui::Checkbox("Directional Lights##ForwardPlus", &settings.enableForwardPlusDirectionalLights);
+            }
+            EndSection(isForwardPlusOpen);
 
             bool isDebugOpen = BeginSection("Debug Visualization", false);
             if (isDebugOpen) {

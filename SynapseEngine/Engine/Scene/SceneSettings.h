@@ -37,14 +37,33 @@ namespace Syn
         bool enableStaticBvhCulling;
         bool enableBloom;
         bool enableHiz;
-        bool enableOcclusionCulling;
-        bool enableConeCulling;
+        bool enableMeshletConeCulling;
+
         bool enableFrustumCulling;
+        bool enableChunkFrustumCulling;
+        bool enableModelFrustumCulling;
+        bool enableMeshFrustumCulling;
+        bool enableMeshletFrustumCulling;
+        bool enablePointLightFrustumCulling;
+        bool enableSpotLightFrustumCulling;
+
+        bool enableOcclusionCulling;
+        bool enableChunkOcclusionCulling;
+        bool enableModelOcclusionCulling;
+        bool enableMeshOcclusionCulling;
+        bool enableMeshletOcclusionCulling;
+        bool enablePointLightOcclusionCulling;
+        bool enableSpotLightOcclusionCulling;
 
         bool enableDeferredEmissiveAo;
         bool enableDeferredPointLights;
         bool enableDeferredSpotLights;
         bool enableDeferredDirectionalLights;
+
+        bool enableForwardPlusEmissiveAo;
+        bool enableForwardPlusPointLights;
+        bool enableForwardPlusSpotLights;
+        bool enableForwardPlusDirectionalLights;
 
         bool enableWireframeMeshAabb;
         bool enableWireframeMeshSphere;

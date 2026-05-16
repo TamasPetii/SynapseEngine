@@ -68,7 +68,7 @@ void main() {
     }
 
     vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);
-    bool enableDepthOcclusion = (ctx.enableOcclusionCulling == 1);
+    bool enableDepthOcclusion = (ctx.enableMeshOcclusionCulling == 1);
 
     // 6. Collaborative Loop: Process all meshes of the current model
     for (uint m = localThreadId; m < addrs.meshCount; m += gl_WorkGroupSize.x) {    
@@ -83,7 +83,7 @@ void main() {
 
         // 7. Precise Frustum Test (Optimization: Skip if parent model is already fully inside)
         uint visibility = INTERSECTION_INSIDE;
-        if (!parentFullyInside) {
+        if (!parentFullyInside && ctx.enableMeshFrustumCulling == 1) {
             visibility = TestFrustum(worldCollider, camera);
             if (visibility == INTERSECTION_OUTSIDE) continue;
         }

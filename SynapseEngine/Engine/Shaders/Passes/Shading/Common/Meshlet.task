@@ -85,12 +85,12 @@ void main() {
         GpuMeshletCollider worldCollider = TransformCollider(localCollider, transform.transform, transform.transformIT);
 
         // 7. Backface Cone Culling
-        if ((pc.disableConeCulling == 0 && ctx.enableConeCulling == 1) && TestConeCulling(worldCollider, camera.eye.xyz)) {
+        if ((pc.disableConeCulling == 0 && ctx.enableMeshletConeCulling == 1) && TestConeCulling(worldCollider, camera.eye.xyz)) {
             isVisible = false;
         }
 
         // 8. Frustum Culling (Skip if parent model is already fully inside)
-        if (isVisible && !isParentFullyInside) {
+        if (isVisible && !isParentFullyInside && ctx.enableMeshletFrustumCulling == 1) {
             if (TestFrustum(worldCollider.center, worldCollider.radius, worldCollider.aabbMin, worldCollider.aabbMax, camera) == INTERSECTION_OUTSIDE) {
                 isVisible = false;
             }
@@ -100,7 +100,7 @@ void main() {
         float screenSizePixels = 0.0;
         if (isVisible) {
             vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);
-            bool enableDepthOcclusion = (ctx.enableOcclusionCulling == 1);
+            bool enableDepthOcclusion = (ctx.enableMeshletOcclusionCulling == 1);
             
             if (IsSphereOccluded(worldCollider.center, worldCollider.radius, camera, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
                 isVisible = false;
