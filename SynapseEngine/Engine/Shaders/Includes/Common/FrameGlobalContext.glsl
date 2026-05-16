@@ -66,7 +66,6 @@ struct FrameGlobalContext {
     uint64_t forwardPlusPointLightIndexListBufferAddr;
     uint64_t forwardPlusSpotLightIndexListBufferAddr;
 
-    uint64_t wireframeMeshletInstanceIndexBufferAddr;
     uint64_t wireframeMeshAabbIndirectCommandBufferAddr;
     uint64_t wireframeMeshSphereIndirectCommandBufferAddr;
 

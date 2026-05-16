@@ -632,7 +632,6 @@
     <ClInclude Include="Scene\DrawData\DebugDrawGroup.h" />
     <ClInclude Include="Scene\DrawData\CpuData.h" />
     <ClInclude Include="Scene\DrawData\ModelDrawGroup.h" />
-    <ClInclude Include="Scene\DrawData\RenderConstants.h" />
     <ClInclude Include="Scene\DrawData\SpotLightDrawGroup.h" />
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\TraditionalOpaqueDepthPrepass.h" />
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\TraditionalTransparentDepthPrepass.h" />

@@ -1,6 +1,5 @@
 #pragma once
 #include "CpuData.h"
-#include "RenderConstants.h"
 #include "Engine/Utils/RenderBuffer.h"
 
 namespace Syn

@@ -5,26 +5,26 @@
   "environment": {
     "spawn_sponza": false,
     "spawn_bistro": false,
-    "spawn_floor": true,
+    "spawn_floor": false,
     "spawn_pbr_sponza": false,
     "spawn_monkey": false
   },
   "materials": {
     "use_unique_materials": false,
-    "shared_material_count": 25
+    "shared_material_count": 100
   },
   "entities": {
     "animated_characters": 0,
-    "static_geometry": 10000,
-    "physics_boxes": 100,
-    "physics_spheres": 100,
-    "physics_capsules": 100
+    "static_geometry": 1000000,
+    "physics_boxes": 0,
+    "physics_spheres": 0,
+    "physics_capsules": 0
   },
   "lights": {
     "directional_count": 1,
-    "point_count": 512,
+    "point_count": 256,
     "point_shadow_count": 0,
-    "spot_count": 512,
+    "spot_count": 256,
     "spot_shadow_count": 0
   }
 }

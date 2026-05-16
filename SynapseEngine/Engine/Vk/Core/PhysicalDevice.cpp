@@ -8,9 +8,11 @@ namespace Syn::Vk {
         SYN_ASSERT(_handle != VK_NULL_HANDLE, "Failed to find a suitable GPU with Vulkan support");
 
         _descriptorBufferProperties = { VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_PROPERTIES_EXT };
+        _maintenance3Properties.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MAINTENANCE_3_PROPERTIES;
+        _maintenance3Properties.pNext = &_descriptorBufferProperties;
 
         VkPhysicalDeviceProperties2 props2{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2 };
-        props2.pNext = &_descriptorBufferProperties;
+        props2.pNext = &_maintenance3Properties;
 
         vkGetPhysicalDeviceProperties2(_handle, &props2);
         _properties = props2.properties;
@@ -148,7 +150,6 @@ namespace Syn::Vk {
     }
 
     void PhysicalDevice::LogProperties() const {
-        
         if constexpr (!Syn::EnableLogging) {
             return;
         }
@@ -168,31 +169,43 @@ namespace Syn::Vk {
         }
 
         std::stringstream ss;
-        ss << "\n-----------------------------------------\n";
+        ss << "\n=========================================\n";
+        ss << std::format(" GPU Device:      {}\n", _properties.deviceName);
+        ss << std::format(" GPU Type:        {}\n", deviceTypeStr);
+        ss << std::format(" API Ver:         {}\n", apiVersionStr);
+        ss << std::format(" Driver Ver:      {}\n", _properties.driverVersion);
+        ss << "=========================================\n";
 
-        ss << std::format("GPU Device:      {}\n", _properties.deviceName);
-        ss << std::format("GPU Type:        {}\n", deviceTypeStr);
-        ss << std::format("API Ver:         {}\n", apiVersionStr);
-        ss << std::format("Driver Ver:      {}\n", _properties.driverVersion);
-        ss << std::format("Vendor ID:       {}\n", _properties.vendorID);
+        ss << "\n--- VRAM (Device Local) ---\n";
+        for (uint32_t i = 0; i < _memoryProperties.memoryHeapCount; i++) {
+            if (_memoryProperties.memoryHeaps[i].flags & VK_MEMORY_HEAP_DEVICE_LOCAL_BIT) {
+                ss << std::format("Heap {}: {} MB\n", i, _memoryProperties.memoryHeaps[i].size / (1024 * 1024));
+            }
+        }
 
-        ss << "\n"; // Kis elválasztás
-        ss << std::format("Max Image Dim 2D:    {}\n", _properties.limits.maxImageDimension2D);
-        ss << std::format("Max Push Constants:  {} bytes\n", _properties.limits.maxPushConstantsSize);
-        ss << std::format("Max Sampler Aniso:   {}\n", _properties.limits.maxSamplerAnisotropy);
-        ss << std::format("Timestamp Period:    {} ns\n", _properties.limits.timestampPeriod);
+        ss << "\n--- Memory & Buffer Limits ---\n";
+        ss << std::format("Max Storage Buffer Range:  {} MB\n", _properties.limits.maxStorageBufferRange / (1024 * 1024));
+        ss << std::format("Max Memory Alloc Size:     {} MB\n", _maintenance3Properties.maxMemoryAllocationSize / (1024 * 1024));
+        ss << std::format("Max Allocations Count:     {}\n", _properties.limits.maxMemoryAllocationCount);
+        ss << std::format("Max Uniform Buffer Range:  {} KB\n", _properties.limits.maxUniformBufferRange / 1024);
+        ss << std::format("Max Push Constants:        {} bytes\n", _properties.limits.maxPushConstantsSize);
+
+        ss << "\n--- Compute Shader Limits ---\n";
+        ss << std::format("Max WorkGroup Invocations: {}\n", _properties.limits.maxComputeWorkGroupInvocations);
+        ss << std::format("Max WorkGroup Size:        [{}, {}, {}]\n",
+            _properties.limits.maxComputeWorkGroupSize[0],
+            _properties.limits.maxComputeWorkGroupSize[1],
+            _properties.limits.maxComputeWorkGroupSize[2]);
+        ss << std::format("Max Shared Memory Size:    {} KB\n", _properties.limits.maxComputeSharedMemorySize / 1024);
 
         ss << "\n--- Descriptor Buffer Properties ---\n";
-        ss << std::format("Combined Image Sampler Size: {} bytes\n", _descriptorBufferProperties.combinedImageSamplerDescriptorSize);
-        ss << std::format("Sampled Image Size:          {} bytes\n", _descriptorBufferProperties.sampledImageDescriptorSize);
-        ss << std::format("Storage Image Size:          {} bytes\n", _descriptorBufferProperties.storageImageDescriptorSize);
-        ss << std::format("Uniform Buffer Size:         {} bytes\n", _descriptorBufferProperties.uniformBufferDescriptorSize);
         ss << std::format("Storage Buffer Size:         {} bytes\n", _descriptorBufferProperties.storageBufferDescriptorSize);
+        ss << std::format("Storage Image Size:          {} bytes\n", _descriptorBufferProperties.storageImageDescriptorSize);
+        ss << std::format("Sampled Image Size:          {} bytes\n", _descriptorBufferProperties.sampledImageDescriptorSize);
         ss << std::format("Desc. Buffer Offset Align:   {} bytes\n", _descriptorBufferProperties.descriptorBufferOffsetAlignment);
 
-        ss << "-----------------------------------------";
+        ss << "=========================================\n";
 
-        // 3. Egyetlen log hívás a végén
         Logger::Get().Dispatch(LogLevel::Info, ss.str(), "Vulkan", 0);
     }
 }
