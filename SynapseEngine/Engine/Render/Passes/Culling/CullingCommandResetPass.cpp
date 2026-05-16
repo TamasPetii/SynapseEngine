@@ -10,7 +10,7 @@ namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/CullingCommandResetPC.glsl"
 
     bool CullingCommandResetPass::ShouldExecute(const RenderContext& context) const {
-        return context.scene->GetSettings()->enableGpuCulling;
+        return context.scene->GetSettings()->enableGeometryGpuCulling;
     }
 
     void CullingCommandResetPass::Initialize() {
@@ -29,7 +29,7 @@ namespace Syn {
         auto drawData = context.scene->GetSceneDrawData();
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGpuCulling;
+        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         _totalCommands = drawData->Models.activeTraditionalCount + drawData->Models.activeMeshletCount;
 
@@ -41,7 +41,7 @@ namespace Syn {
 
     void CullingCommandResetPass::Dispatch(const RenderContext& context) {
 		auto drawData = context.scene->GetSceneDrawData();
-        bool isGpu = context.scene->GetSettings()->enableGpuCulling;
+        bool isGpu = context.scene->GetSettings()->enableGeometryGpuCulling;
         uint32_t fIdx = context.frameIndex;
 
         uint32_t dispatchCount = std::max(1u, ComputeGroupSize::CalculateDispatchCount(_totalCommands, ComputeGroupSize::Buffer256D));

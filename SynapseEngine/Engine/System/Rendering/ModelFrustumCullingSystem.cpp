@@ -57,7 +57,7 @@ namespace Syn
             drawData->Debug.modelSphereCmdTemplate.instanceCount = 0;
             });
 
-        if (settings->enableGpuCulling) {
+        if (settings->enableGeometryGpuCulling) {
             return;
         }
 
@@ -79,7 +79,7 @@ namespace Syn
 
         glm::vec2 screenRes = glm::vec2(cameraComp.width, cameraComp.height);
 
-        auto cullFunc = [drawData, modelPool, transformPool, modelSnapshot, cameraComp, animPool, animSnapshot, matTypeSnapshot, overridePool, screenRes]
+        auto cullFunc = [settings, drawData, modelPool, transformPool, modelSnapshot, cameraComp, animPool, animSnapshot, matTypeSnapshot, overridePool, screenRes]
         (EntityID entity, IntersectionType chunkVisibility) {
             const FrustumCollider& frustum = cameraComp.frustum;
             const auto& transformComp = transformPool->Get(entity);
@@ -130,12 +130,10 @@ namespace Syn
             GpuMeshCollider globalWorldCollider = MeshUtils::TransformCollider(globalLocalCollider, transform);
 
             IntersectionType visibility = chunkVisibility;
-            if (visibility == IntersectionType::Intersect) {
+            if (visibility == IntersectionType::Intersect && settings->enableFrustumCulling && settings->enableModelFrustumCulling) {
                 visibility = CollisionTester::IsInFrustumIntersectionType(globalWorldCollider, frustum);
+                if (visibility == IntersectionType::Outside) return;
             }
-
-            if (visibility == IntersectionType::Outside)
-                return;
 
             bool parentFullyInside = (visibility == IntersectionType::Inside);
 
@@ -163,7 +161,7 @@ namespace Syn
 
                     worldCollider = MeshUtils::TransformCollider(localCollider, transform);
 
-                    if(!parentFullyInside)
+                    if (!parentFullyInside && settings->enableFrustumCulling && settings->enableMeshFrustumCulling)
                         isVisible = CollisionTester::IsInFrustum(worldCollider, frustum);
                 }
                 else {
@@ -240,11 +238,16 @@ namespace Syn
             uint32_t activeChunks = chunkGroup->chunkCounter.load(std::memory_order_relaxed);
 
             staticTask = this->ForEachIndex(uint32_t(0), activeChunks, uint32_t(1), subflow, "Update Static Chunks",
-                [chunkGroup, staticEntities, cullFunc, &cameraComp](uint32_t chunkIdx) {
+                [settings, chunkGroup, staticEntities, cullFunc, &cameraComp](uint32_t chunkIdx) {
                     const auto& chunk = chunkGroup->chunks[chunkIdx];
 
-                    IntersectionType visibility = CollisionTester::TestAabbFrustumIntersectionType(chunk.minBounds, chunk.maxBounds, cameraComp.frustum);
-                    if (visibility == IntersectionType::Outside) return;
+                    IntersectionType visibility = IntersectionType::Intersect;
+
+                    if (settings->enableFrustumCulling && settings->enableChunkFrustumCulling)
+                    {
+                        visibility = CollisionTester::TestAabbFrustumIntersectionType(chunk.minBounds, chunk.maxBounds, cameraComp.frustum);
+                        if (visibility == IntersectionType::Outside) return;
+                    }
 
                     uint32_t slot = chunkGroup->visibleChunkCount.fetch_add(1, std::memory_order_relaxed);
                     uint32_t packedId = chunkIdx;
@@ -279,9 +282,9 @@ namespace Syn
             auto drawData = scene->GetSceneDrawData();
             auto settings = scene->GetSettings();
 
-            bool needsCommandUpload = (!settings->enableGpuCulling) || (drawData->syncFramesRemaining.load(std::memory_order_relaxed) > 0);
+            bool needsCommandUpload = (!settings->enableGeometryGpuCulling) || (drawData->syncFramesRemaining.load(std::memory_order_relaxed) > 0);
 
-            if (!settings->enableGpuCulling)
+            if (!settings->enableGeometryGpuCulling)
             {
                 for (uint32_t i = 0; i < drawData->Models.activeTraditionalCount; ++i) {
                     drawData->Models.traditionalCmds[i].instanceCount = drawData->Models.paddedTraditionalCounts[i * 16];

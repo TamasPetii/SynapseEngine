@@ -18,7 +18,7 @@ struct PointLightColliderGPU
 {
     vec3 center;
     float radius;
-    vec3 viewSpaceCenter;
+    vec3 padding;
     uint entityIndex;
 };
 

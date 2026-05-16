@@ -41,11 +41,9 @@ namespace Syn
         entityIndex(entityId),
         aabbMax(component.aabbCollider.max),
         range(component.range),
-		viewSpaceCenter(0.0f),
-        outerAngle(component.outerAngle),
-        viewSpacePos(0.0f),
+        worldPos(component.position),
         outerAngleCos(std::cos(glm::radians(component.outerAngle))),
-        viewSpaceDir(0.0f),
+        worldDir(component.direction),
         outerAngleSin(std::sin(glm::radians(component.outerAngle)))
     {}
 }

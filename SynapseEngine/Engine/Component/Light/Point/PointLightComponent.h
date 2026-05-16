@@ -36,7 +36,7 @@ namespace Syn
 
         glm::vec3 center;
         float radius;
-        glm::vec3 viewSpaceCenter;
+        glm::vec3 padding;
         uint32_t entityIndex;
     };
 }

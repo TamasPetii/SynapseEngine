@@ -173,7 +173,7 @@ namespace Syn {
     {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
-        bool isGpu = scene->GetSettings()->enableGpuCulling;
+        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         auto indirectBuffer = drawData->Models.indirectBuffer.GetHandle(context.frameIndex, isGpu);
         auto countBuffer = drawData->Models.drawCountBuffer.GetHandle(context.frameIndex, isGpu);

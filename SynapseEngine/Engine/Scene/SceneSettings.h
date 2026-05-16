@@ -33,10 +33,14 @@ namespace Syn
 
         bool useDebugCamera;
 
-        bool enableGpuCulling;
+        bool enableGeometryGpuCulling;
+        bool enablePointLightGpuCulling;
+        bool enableSpotLightGpuCulling;
+
+        bool enableHiz;
         bool enableStaticBvhCulling;
         bool enableBloom;
-        bool enableHiz;
+
         bool enableMeshletConeCulling;
 
         bool enableFrustumCulling;

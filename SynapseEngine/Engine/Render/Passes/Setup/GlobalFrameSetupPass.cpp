@@ -30,7 +30,7 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
         uint32_t width = rtGroup->GetWidth();
         uint32_t height = rtGroup->GetHeight();
-        bool isGpu = settings->enableGpuCulling;
+        bool isGpu = settings->enableGeometryGpuCulling;
 
         drawData->ForwardPlus.CheckResize(settings->tileSize, width, height, fIdx);
 

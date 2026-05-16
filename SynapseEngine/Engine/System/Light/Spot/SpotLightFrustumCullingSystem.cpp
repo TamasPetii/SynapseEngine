@@ -43,16 +43,21 @@ namespace Syn
             }
             });
 
-        if (settings->enableGpuCulling) {
+        if (settings->enableSpotLightGpuCulling) {
             return;
         }
 
         glm::vec2 screenRes = glm::vec2(cameraComp.width, cameraComp.height);
 
-        auto cullFunc = [this, pool, cameraComp, drawData, screenRes](EntityID entity) {
+        auto cullFunc = [this, settings, pool, cameraComp, drawData, screenRes](EntityID entity) {
             const auto& lightComp = pool->Get(entity);
 
-            if (CollisionTester::IsInFrustum(lightComp.sphereCollider.center, lightComp.sphereCollider.radius, lightComp.aabbCollider.min, lightComp.aabbCollider.max, cameraComp.frustum))
+            bool visibility = true;
+
+            if (settings->enableFrustumCulling && settings->enableSpotLightFrustumCulling)
+                visibility = CollisionTester::IsInFrustum(lightComp.sphereCollider.center, lightComp.sphereCollider.radius, lightComp.aabbCollider.min, lightComp.aabbCollider.max, cameraComp.frustum);
+
+            if (visibility)
             {
                 float screenSize = CollisionTester::CalculateSphereScreenSize(
                     lightComp.sphereCollider.center, lightComp.sphereCollider.radius,
@@ -87,7 +92,7 @@ namespace Syn
             auto settings = scene->GetSettings();
             uint32_t count = drawData->SpotLights.cmdTemplate.instanceCount;
 
-            if (!settings->enableGpuCulling) {
+            if (!settings->enableSpotLightGpuCulling) {
                 auto instanceBufferView = bufferManager->GetComponentBuffer(BufferNames::SpotLightVisibleData, frameIndex);
                 if (count > 0 && instanceBufferView.buffer) {
                     instanceBufferView.buffer->Write(drawData->SpotLights.instances.Data(), count * sizeof(uint32_t), 0);

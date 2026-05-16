@@ -36,7 +36,7 @@ void main() {
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
 
     // 3. Frustum Culling Test + Occlusion Culling
-    uint visibility = INTERSECTION_INSIDE;
+    uint visibility = INTERSECTION_INTERSECT;
     if(ctx.enableChunkFrustumCulling == 1)
     {
          visibility = TestAABBFrustum(chunk.minBounds, chunk.maxBounds, camera);

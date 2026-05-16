@@ -81,7 +81,7 @@ namespace Syn {
 
             bool isCullingOpen = BeginSection("Culling & Optimization", true);
             if (isCullingOpen) {
-                changed |= ImGui::Checkbox("GPU Culling", &settings.enableGpuCulling);
+                changed |= ImGui::Checkbox("Geometry GPU Culling", &settings.enableGeometryGpuCulling);
                 changed |= ImGui::Checkbox("Static Bvh Culling", &settings.enableStaticBvhCulling);
                 changed |= ImGui::Checkbox("Hi-Z", &settings.enableHiz);
 
@@ -141,6 +141,8 @@ namespace Syn {
                 ImGui::Spacing();
                 ImGui::SeparatorText("Point Light Level");
 
+                changed |= ImGui::Checkbox("Point Light GPU Culling", &settings.enablePointLightGpuCulling);
+
                 ImGui::BeginDisabled(!settings.enableFrustumCulling);
                 changed |= ImGui::Checkbox("Frustum Culling##PointLight", &settings.enablePointLightFrustumCulling);
                 ImGui::EndDisabled();
@@ -151,6 +153,8 @@ namespace Syn {
 
                 ImGui::Spacing();
                 ImGui::SeparatorText("Spot Light Level");
+
+                changed |= ImGui::Checkbox("Spot Light GPU Culling", &settings.enableSpotLightGpuCulling);
 
                 ImGui::BeginDisabled(!settings.enableFrustumCulling);
                 changed |= ImGui::Checkbox("Frustum Culling##SpotLight", &settings.enableSpotLightFrustumCulling);

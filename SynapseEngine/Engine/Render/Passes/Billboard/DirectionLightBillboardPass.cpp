@@ -106,7 +106,7 @@ namespace Syn {
 
         uint32_t fIdx = context.frameIndex;
         auto drawData = context.scene->GetSceneDrawData();
-        bool isGpu = context.scene->GetSettings()->enableGpuCulling;
+        bool isGpu = context.scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::BufferCopyInfo copyRegion{};
         copyRegion.srcBuffer = drawData->DirectionLights.indirectBuffer.GetHandle(fIdx, isGpu);
@@ -160,7 +160,7 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGpuCulling;
+        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         vkCmdDrawIndirect(
             context.cmd,

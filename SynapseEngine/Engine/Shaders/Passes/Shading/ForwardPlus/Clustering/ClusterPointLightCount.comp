@@ -58,7 +58,7 @@ void main() {
         uint denseIdx = GET_SPARSE_INDEX(ctx.pointLightSparseMapBufferAddr, entityIdx);
         PointLightColliderGPU collider = GET_POINT_LIGHT_COLLIDER(ctx.pointLightColliderBufferAddr, denseIdx);
         
-        vec3 viewSpaceCenter = collider.viewSpaceCenter;
+        vec3 viewSpaceCenter = (camera.view * vec4(collider.center, 1.0)).xyz;
         bool isIntersecting = TestSphereAABB(viewSpaceCenter, collider.radius, s_clusterAABBMin, s_clusterAABBMax);
 
         uvec4 ballot = subgroupBallot(isIntersecting);

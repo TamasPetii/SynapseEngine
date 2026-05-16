@@ -82,7 +82,7 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-		auto isGpu = scene->GetSettings()->enableGpuCulling;
+		auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::BufferCopyInfo copyRegion{};
         copyRegion.srcBuffer = drawData->PointLights.indirectBuffer.GetHandle(fIdx, isGpu);
@@ -131,7 +131,7 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-		auto isGpu = scene->GetSettings()->enableGpuCulling;
+		auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
 		auto indirectBuffer = drawData->PointLights.sphereSingleCmdBuffer.GetHandle(fIdx, isGpu);
 

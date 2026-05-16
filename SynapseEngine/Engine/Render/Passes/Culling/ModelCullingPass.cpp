@@ -23,7 +23,7 @@ namespace Syn {
 
     bool ModelCullingPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableGpuCulling;
+        return context.scene->GetSettings()->enableGeometryGpuCulling;
     }
 
     void ModelCullingPass::Initialize() {
@@ -64,7 +64,7 @@ namespace Syn {
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGpuCulling;
+        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         ModelMeshCullingPC pc{};
         pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
@@ -100,7 +100,7 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
         uint32_t fIdx = context.frameIndex;
-		auto isGpu = scene->GetSettings()->enableGpuCulling;
+		auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_totalModelsToTest, ComputeGroupSize::Buffer32D);
         vkCmdDispatch(context.cmd, groupCountX, 1, 1);

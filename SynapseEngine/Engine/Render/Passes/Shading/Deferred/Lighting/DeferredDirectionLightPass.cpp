@@ -104,7 +104,7 @@ namespace Syn {
     void DeferredDirectionLightPass::Draw(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
 		auto fIdx = context.frameIndex;
-		auto isGpu = context.scene->GetSettings()->enableGpuCulling;
+		auto isGpu = context.scene->GetSettings()->enableGeometryGpuCulling;
 
 		auto indirectBuffer = drawData->DirectionLights.indirectBuffer.GetHandle(fIdx, isGpu);
 
