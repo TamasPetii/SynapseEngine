@@ -120,4 +120,19 @@ GpuMeshletCollider TransformCollider(GpuMeshletCollider local, mat4 transform, m
     return world;
 }
 
+//Paper: https://bartwronski.com/2017/04/13/cull-that-cone/
+bool TestConeSphere(vec3 conePos, vec3 coneDir, float coneRange, float coneCosAngle, float coneSinAngle, vec3 sphereCenter, float sphereRadius) {
+    vec3 v = sphereCenter - conePos;
+    float lenSq = dot(v, v);
+    float v1Len = dot(v, coneDir);
+
+    float distanceClosestPoint = coneCosAngle * sqrt(max(lenSq - v1Len * v1Len, 0.0)) - v1Len * coneSinAngle;
+
+    bool angleCull = distanceClosestPoint > sphereRadius;
+    bool frontCull = v1Len > sphereRadius + coneRange;
+    bool backCull  = v1Len < -sphereRadius;
+
+    return !(angleCull || frontCull || backCull);
+}
+
 #endif

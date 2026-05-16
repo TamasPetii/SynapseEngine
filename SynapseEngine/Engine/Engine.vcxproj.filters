@@ -2314,12 +2314,12 @@
     <None Include="Shaders\Passes\Shading\Wboit\TransparentForward.frag" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightCount.comp" />
     <None Include="Shaders\Includes\Utils\ClusterMath.glsl" />
-    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightCount.comp" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightCountSlow.comp" />
     <None Include="Shaders\Includes\PushConstants\ClusterLightCountPC.glsl" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPrefixSum.comp" />
     <None Include="Shaders\Includes\PushConstants\ClusterPrefixSumPC.glsl" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightWrite.comp" />
-    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightWrite.comp" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightWriteSlow.comp" />
     <None Include="Shaders\Includes\PushConstants\ClusterLightWritePC.glsl" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Lighting\OpaqueForward.frag" />
     <None Include="Shaders\Includes\Common\FrameGlobalContext.glsl" />
@@ -2332,5 +2332,7 @@
     <None Include="Shaders\Includes\Common\StaticChunk.glsl" />
     <None Include="Shaders\Passes\Culling\StaticChunkCulling.comp" />
     <None Include="Shaders\Passes\Culling\StaticModelCulling.comp" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightCount.comp" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightWrite.comp" />
   </ItemGroup>
 </Project>

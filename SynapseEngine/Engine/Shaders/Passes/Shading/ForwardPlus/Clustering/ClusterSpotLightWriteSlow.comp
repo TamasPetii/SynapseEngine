@@ -11,75 +11,75 @@
 #include "../../../../Includes/Common/Camera.glsl"
 #include "../../../../Includes/Common/Cluster.glsl"
 #include "../../../../Includes/Common/SpotLight.glsl"
-#include "../../../../Includes/Utils/CullingMath.glsl" 
-#include "../../../../Includes/Utils/ClusterMath.glsl"
 #include "../../../../Includes/Common/IndirectCommand.glsl"
+#include "../../../../Includes/Utils/CullingMath.glsl"
+#include "../../../../Includes/Utils/ClusterMath.glsl"
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
-#include "../../../../Includes/PushConstants/ClusterLightCountPC.glsl"
+#include "../../../../Includes/PushConstants/ClusterLightWritePC.glsl"
 
 layout(push_constant) uniform PushConstants {
-    ClusterLightCountPC pc;
+    ClusterLightWritePC pc;
 };
 
 shared uint s_localSpotLightCount;
-shared vec3 s_clusterSphereCenter;
-shared float s_clusterSphereRadius;
+shared vec3 s_clusterAABBMin;
+shared vec3 s_clusterAABBMax;
 
 void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
     uint threadId = gl_LocalInvocationID.x;
     uint clusterIdx = gl_WorkGroupID.x;
-
+    
     uint activeClusterCount = GET_CLUSTER_COUNT(ctx.forwardPlusClusterCountBufferAddr);
     if (clusterIdx >= activeClusterCount) return;
-    
-    uint totalLights = GET_VK_DRAW_CMD(ctx.spotLightIndirectCommandBufferAddr, 0).instanceCount;
+
     uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
+    ClusterData cluster = GET_CLUSTER_DATA(ctx.forwardPlusClusterListBufferAddr, clusterIdx);
 
     if (threadId == 0) {
         s_localSpotLightCount = 0;
-        ClusterData cluster = GET_CLUSTER_DATA(ctx.forwardPlusClusterListBufferAddr, clusterIdx);
-
-        vec3 aabbMin, aabbMax;
+        
         GetClusterViewSpaceAABB(
             cluster.tileIndex, ctx.tileCountX, ctx.tileSize, ctx.screenWidth, ctx.screenHeight, 
             cluster.minZ, cluster.maxZ, camera.projVulkanInv, 
-            aabbMin, aabbMax
+            s_clusterAABBMin, s_clusterAABBMax
         );
-        
-        vec3 extents = (aabbMax - aabbMin) * 0.5;
-        s_clusterSphereCenter = aabbMin + extents;
-        s_clusterSphereRadius = length(extents);
     }
-
+    
     barrier();
+
+    uint totalLights = GET_VK_DRAW_CMD(ctx.spotLightIndirectCommandBufferAddr, 0).instanceCount;
+    uint globalOffset = cluster.spotLightOffset;
 
     for (uint i = threadId; i < totalLights; i += gl_WorkGroupSize.x) {
         uint entityIdx = GET_VISIBLE_SPOT_LIGHT(ctx.spotLightVisibleIndexBufferAddr, i);
         uint denseIdx = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, entityIdx);
         SpotLightColliderGPU collider = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, denseIdx);
         
-        bool isIntersecting = TestConeSphere(
-            collider.viewSpacePos, collider.viewSpaceDir, 
-            collider.range, collider.outerAngleCos, collider.outerAngleSin,
-            s_clusterSphereCenter, s_clusterSphereRadius
-        );
-
+        vec3 viewSpaceCenter = collider.viewSpaceCenter;
+        bool isIntersecting = TestSphereAABB(viewSpaceCenter, collider.radius, s_clusterAABBMin, s_clusterAABBMax);
+        
         uvec4 ballot = subgroupBallot(isIntersecting);
         uint activeCount = subgroupBallotBitCount(ballot);
-
+        
+        uint baseOffset = 0;
+        
         if (subgroupElect() && activeCount > 0) {
-            atomicAdd(s_localSpotLightCount, activeCount);
+            baseOffset = atomicAdd(s_localSpotLightCount, activeCount);
         }
-    }
+        
+        baseOffset = subgroupBroadcastFirst(baseOffset);
+        
+        uint isIntersectingInt = isIntersecting ? 1 : 0;
+        uint threadOffset = subgroupExclusiveAdd(isIntersectingInt);
 
-    barrier();
-  
-    if (threadId == 0) {
-        GET_CLUSTER_DATA(ctx.forwardPlusClusterListBufferAddr, clusterIdx).spotLightCount = s_localSpotLightCount;
+        if (isIntersecting) {
+            uint finalIdx = globalOffset + baseOffset + threadOffset;
+            GET_LIGHT_INDEX(ctx.forwardPlusSpotLightIndexListBufferAddr, finalIdx) = entityIdx;
+        }
     }
 }

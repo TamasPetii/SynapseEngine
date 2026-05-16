@@ -49,6 +49,11 @@ void main() {
         return;
     }
 
+    uint denseIdx = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, collider.entityIndex);
+    SpotLightComponent light = GET_SPOT_LIGHT(ctx.spotLightDataBufferAddr, denseIdx);
+
+    GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, globalId).viewSpacePos = (camera.view * vec4(light.position, 1.0)).xyz;
+    GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, globalId).viewSpaceDir = normalize((camera.view * vec4(light.direction, 0)).xyz);
     GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, globalId).viewSpaceCenter = (camera.view *  vec4(collider.center, 1.0)).xyz;
 
     uint needsWrite = 1;
