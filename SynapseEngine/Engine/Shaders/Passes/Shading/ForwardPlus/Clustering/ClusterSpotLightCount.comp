@@ -63,8 +63,11 @@ void main() {
         uint denseIdx = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, entityIdx);
         SpotLightColliderGPU collider = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, denseIdx);
         
+        vec3 viewSpacePos = (camera.view * vec4(collider.worldPos, 1.0)).xyz;
+        vec3 viewSpaceDir = normalize(mat3(camera.view) * collider.worldDir);
+
         bool isIntersecting = TestConeSphere(
-            collider.viewSpacePos, collider.viewSpaceDir, 
+            viewSpacePos, viewSpaceDir, 
             collider.range, collider.outerAngleCos, collider.outerAngleSin,
             s_clusterSphereCenter, s_clusterSphereRadius
         );

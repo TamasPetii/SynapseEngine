@@ -37,7 +37,7 @@ void main() {
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
 
     // 1. Frustum Culling (Sphere)
-    uint visibility = INTERSECTION_INSIDE;
+    uint visibility = INTERSECTION_INTERSECT;
     if(ctx.enablePointLightFrustumCulling == 1)
     {
         uint visibility = TestSphereFrustum(collider.center, collider.radius, camera);
@@ -52,8 +52,6 @@ void main() {
     if (IsSphereOccluded(collider.center, collider.radius, camera, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
         return;
     }
-
-    GET_POINT_LIGHT_COLLIDER(ctx.pointLightColliderBufferAddr, globalId).viewSpaceCenter = (camera.view *  vec4(collider.center, 1.0)).xyz;
 
     uint needsWrite = 1;
     uint subgroupWriteCount = subgroupAdd(needsWrite);

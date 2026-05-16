@@ -17,7 +17,7 @@ namespace Syn {
 
     bool StaticChunkCullingPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableGpuCulling
+        return context.scene->GetSettings()->enableGeometryGpuCulling
             && context.scene->GetSettings()->enableStaticBvhCulling;
     }
 
@@ -39,7 +39,7 @@ namespace Syn {
         if (_activeChunkCount == 0) return;
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGpuCulling;
+        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         ModelMeshCullingPC pc{};
         pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
@@ -72,7 +72,7 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGpuCulling;
+        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         VkBuffer dispatchBuf = drawData->Chunks.indirectDispatchBuffer.GetHandle(fIdx, isGpu);
 

@@ -28,12 +28,10 @@ struct SpotLightColliderGPU {
     uint entityIndex;
     vec3 aabbMax;
     float range;
-    vec3 viewSpaceCenter;
-    float outerAngle;
-    vec3 viewSpacePos;
-    uint outerAngleCos;
-    vec3 viewSpaceDir;
-    uint outerAngleSin;
+    vec3 worldPos;
+    float outerAngleCos;
+    vec3 worldDir;
+    float outerAngleSin;
 };
 
 struct SpotLightShadowComponent {

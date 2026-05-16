@@ -34,7 +34,7 @@ namespace Syn {
 
         _shouldDispatch = true;
         uint32_t fIdx = context.frameIndex;
-		auto isGpu = scene->GetSettings()->enableGpuCulling;
+		auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         WireframeSetupPC pc{};
 		pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
@@ -47,7 +47,7 @@ namespace Syn {
 
         auto drawData = context.scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-		auto isGpu = context.scene->GetSettings()->enableGpuCulling;
+		auto isGpu = context.scene->GetSettings()->enableGeometryGpuCulling;
 
         uint32_t totalCommands = drawData->Models.activeTraditionalCount + drawData->Models.activeMeshletCount;
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(totalCommands, ComputeGroupSize::Buffer256D);

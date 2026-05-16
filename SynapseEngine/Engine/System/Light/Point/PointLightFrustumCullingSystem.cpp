@@ -45,16 +45,21 @@ namespace Syn
             }
             });
 
-        if (settings->enableGpuCulling) {
+        if (settings->enablePointLightGpuCulling) {
             return;
         }
 
         glm::vec2 screenRes = glm::vec2(cameraComp.width, cameraComp.height);
 
-        auto cullFunc = [this, pool, cameraComp, drawData, screenRes](EntityID entity) {
+        auto cullFunc = [this, settings, pool, cameraComp, drawData, screenRes](EntityID entity) {
             const auto& lightComp = pool->Get(entity);
 
-            if (CollisionTester::TestSphereFrustum(lightComp.position, lightComp.radius, cameraComp.frustum))
+            bool visibility = true;
+
+            if (settings->enableFrustumCulling && settings->enablePointLightFrustumCulling)
+                visibility = CollisionTester::TestSphereFrustum(lightComp.position, lightComp.radius, cameraComp.frustum);
+
+            if (visibility)
             {
                 float screenSize = CollisionTester::CalculateSphereScreenSize(
                     lightComp.position, lightComp.radius,
@@ -89,7 +94,7 @@ namespace Syn
             auto settings = scene->GetSettings();
             uint32_t count = drawData->PointLights.cmdTemplate.instanceCount;
 
-            if (!settings->enableGpuCulling) {
+            if (!settings->enablePointLightGpuCulling) {
                 auto instanceBufferView = bufferManager->GetComponentBuffer(BufferNames::PointLightVisibleData, frameIndex);
                 if (count > 0 && instanceBufferView.buffer) {
                     instanceBufferView.buffer->Write(drawData->PointLights.instances.Data(), count * sizeof(uint32_t), 0);

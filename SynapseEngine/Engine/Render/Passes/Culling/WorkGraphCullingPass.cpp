@@ -23,7 +23,7 @@ namespace Syn {
 
     bool WorkGraphCullingPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableGpuCulling;
+        return context.scene->GetSettings()->enableGeometryGpuCulling;
     }
 
     void WorkGraphCullingPass::Initialize() {
@@ -134,7 +134,7 @@ namespace Syn {
 
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGpuCulling;
+        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         ModelMeshCullingPC pc{};
         pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
@@ -169,7 +169,7 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGpuCulling;
+        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         vkCmdBindPipeline(context.cmd, VK_PIPELINE_BIND_POINT_EXECUTION_GRAPH_AMDX, _graphPipeline);
 

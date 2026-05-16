@@ -63,11 +63,9 @@ namespace Syn
         uint32_t entityIndex;
         glm::vec3 aabbMax;
         float range;
-        glm::vec3 viewSpaceCenter;
-        float outerAngle;
-        glm::vec3 viewSpacePos;
+        glm::vec3 worldPos;
         float outerAngleCos;
-        glm::vec3 viewSpaceDir;
+        glm::vec3 worldDir;
         float outerAngleSin;
     };
 }

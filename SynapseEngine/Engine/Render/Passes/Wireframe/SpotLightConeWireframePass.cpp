@@ -81,7 +81,7 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        auto isGpu = scene->GetSettings()->enableGpuCulling;
+        auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::BufferCopyInfo copyRegion{};
         copyRegion.srcBuffer = drawData->SpotLights.indirectBuffer.GetHandle(fIdx, isGpu);
@@ -130,7 +130,7 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        auto isGpu = scene->GetSettings()->enableGpuCulling;
+        auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         auto indirectBuffer = drawData->SpotLights.coneSingleCmdBuffer.GetHandle(fIdx, isGpu);
 

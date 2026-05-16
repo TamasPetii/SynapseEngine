@@ -19,7 +19,7 @@ namespace Syn {
 
     bool SpotLightCullingPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableGpuCulling;
+        return context.scene->GetSettings()->enableSpotLightGpuCulling;
     }
 
     void SpotLightCullingPass::Initialize() {
@@ -41,7 +41,7 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGpuCulling;
+        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         SpotLightCullingPC pc{};
 		pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
@@ -78,7 +78,7 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGpuCulling;
+        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::BufferBarrierInfo cmdBarrier{};
         cmdBarrier.buffer = drawData->SpotLights.indirectBuffer.GetHandle(fIdx, isGpu);

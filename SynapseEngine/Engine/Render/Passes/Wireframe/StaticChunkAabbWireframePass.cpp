@@ -83,7 +83,7 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        auto isGpu = scene->GetSettings()->enableGpuCulling;
+        auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         if (isGpu) {
             Vk::BufferCopyInfo copyRegion{};
@@ -133,7 +133,7 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        auto isGpu = scene->GetSettings()->enableGpuCulling;
+        auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         auto indirectBuffer = drawData->Chunks.aabbSingleCmdBuffer.GetHandle(fIdx, isGpu);
 

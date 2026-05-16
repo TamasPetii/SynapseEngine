@@ -94,7 +94,7 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
 
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
-		auto isGpu = scene->GetSettings()->enableGpuCulling;
+		auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         WireframePC pc{};
 		pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
@@ -109,7 +109,7 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t totalCommands = drawData->Models.activeTraditionalCount + drawData->Models.activeMeshletCount;
-		auto isGpu = scene->GetSettings()->enableGpuCulling;
+		auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 		auto fIdx = context.frameIndex;
 
         if (totalCommands == 0) return;

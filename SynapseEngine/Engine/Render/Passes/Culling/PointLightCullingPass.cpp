@@ -19,7 +19,7 @@ namespace Syn {
 
     bool PointLightCullingPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableGpuCulling;
+        return context.scene->GetSettings()->enablePointLightGpuCulling;
     }
 
     void PointLightCullingPass::Initialize() {
@@ -46,7 +46,7 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGpuCulling;
+        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         PointLightCullingPC pc{};
 		pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
@@ -81,7 +81,7 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGpuCulling;
+        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_totalLightsToTest, ComputeGroupSize::Buffer32D);
         vkCmdDispatch(context.cmd, groupCountX, 1, 1);

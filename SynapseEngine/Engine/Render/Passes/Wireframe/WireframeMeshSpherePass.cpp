@@ -95,7 +95,7 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
 
         auto sphere = modelManager->GetResource(MeshSourceNames::Sphere);
-		auto isGpu = scene->GetSettings()->enableGpuCulling;
+		auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         WireframePC pc{};
 		pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
@@ -114,7 +114,7 @@ namespace Syn {
         if (totalCommands == 0) return;
 
 		auto fIdx = context.frameIndex;
-		auto isGpu = scene->GetSettings()->enableGpuCulling;
+		auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         auto indirectBuffer = drawData->Debug.modelSphereIndirectBuffer.GetHandle(fIdx, isGpu);
 
