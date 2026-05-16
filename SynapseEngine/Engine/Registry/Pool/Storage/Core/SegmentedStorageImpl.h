@@ -324,5 +324,9 @@ namespace Syn
     {
         SYN_ASSERT(sortedEntities.size() == _staticEnd, "Error: Sorted entity array size does not match the static region size!");
         std::memcpy(Base::_entities.data(), sortedEntities.data(), _staticEnd * sizeof(EntityID));
+        
+        [[unlikely]]
+        if(_dynamicEnd != 0)
+            Base::SetBit<INDEX_CHANGED_BIT>(0);
     }
 }

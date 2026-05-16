@@ -43,7 +43,7 @@ namespace Syn
         // 1. A transform moved or was added (Transform INDEX_CHANGED_BIT or CHANGED_BIT)
         // 2. A model was changed or added (Model CHANGED_BIT)
         // 3. The static hierarchy was rebuilt (reordering occurred)
-        bool transformDirty = transformPool->IsStateBitSet<CHANGED_BIT>() || transformPool->IsStateBitSet<INDEX_CHANGED_BIT>();
+        bool transformDirty = transformPool->IsStateBitSet<INDEX_CHANGED_BIT>();
         bool modelDirty = modelPool->IsStateBitSet<CHANGED_BIT>() || modelPool->IsStateBitSet<INDEX_CHANGED_BIT>();
         bool staticDirty = !transformPool->GetStorage().GetDirtyStatics().empty();
 

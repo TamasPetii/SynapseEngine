@@ -51,7 +51,6 @@ namespace Syn
         _spatialItems.clear();
         _spatialItems.resize(staticEntities.size());
 
-
         chunkGroup->chunks.clear();
         chunkGroup->chunks.resize(staticEntities.size());
         chunkGroup->visibleChunkIds.resize(staticEntities.size());
