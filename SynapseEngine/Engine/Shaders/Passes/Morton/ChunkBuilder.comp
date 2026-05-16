@@ -30,29 +30,42 @@ void main() {
 
     if (globalId == 0) {
         uint chunkCount = (ctx.staticTransformCount + CHUNK_SIZE - 1) / CHUNK_SIZE;
-        
-        GET_VK_DISPATCH_CMD(ctx.mortonChunkCountBufferAddr).groupCountX = chunkCount;
-        GET_VK_DISPATCH_CMD(ctx.mortonChunkCountBufferAddr).groupCountY = 1;
-        GET_VK_DISPATCH_CMD(ctx.mortonChunkCountBufferAddr).groupCountZ = 1;
+        GET_VK_DRAW_CMD(ctx.mortonChunkIndirectDrawBufferAddr, 0).instanceCount = chunkCount;
+
+        uint dispatchGroupCount = (chunkCount + 31) / 32;
+        GET_VK_DISPATCH_CMD(ctx.mortonChunkIndirectDispatchBufferAddr).groupCountX = dispatchGroupCount;
     }
 
     vec3 localMin = BOUNDS_INIT_MIN;
     vec3 localMax = BOUNDS_INIT_MAX;
 
+    //Todo: Ne csak static
     if (globalId < ctx.staticTransformCount) {
         uint64_t packedData = GET_MORTON_KEY(ctx.mortonKeysBufferAddr, globalId);
         uint transformDenseIndex = uint(packedData & 0xFFFFFFFFul);
 
-        TransformModelLink link = GET_TRANSFORM_MODEL_LINK(ctx.transformModelLinkBufferAddr, transformDenseIndex);
-        ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, link.modelDenseIndex);
-        TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
-        GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, modelComp.modelIndex);
-
         GET_CHUNK_TRANSFORM_IDX(ctx.mortonChunkTransformsIndexBufferAddr, globalId) = transformDenseIndex;
 
-        GpuMeshCollider worldCollider = TransformCollider(addrs.globalCollider, transform.transform);
-        localMin = worldCollider.aabbMin;
-        localMax = worldCollider.aabbMax;
+        TransformModelLink link = GET_TRANSFORM_MODEL_LINK(ctx.transformModelLinkBufferAddr, transformDenseIndex);
+        TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
+
+        vec3 translation = vec3(transform.transform[3]);
+        vec3 scale = vec3(length(transform.transform[0]), length(transform.transform[1]), length(transform.transform[2]));
+            
+        localMin = translation - scale;
+        localMax = translation + scale;
+
+        if (link.modelDenseIndex != INVALID_INDEX) {
+            ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, link.modelDenseIndex);
+
+            if (modelComp.modelIndex != INVALID_INDEX) {
+                GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, modelComp.modelIndex);
+                GpuMeshCollider worldCollider = TransformCollider(addrs.globalCollider, transform.transform);
+            
+                localMin = worldCollider.aabbMin;
+                localMax = worldCollider.aabbMax;     
+            }
+        }
     }
 
     vec3 macroMin = subgroupMin(localMin);

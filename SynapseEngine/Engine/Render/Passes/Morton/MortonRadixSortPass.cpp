@@ -33,10 +33,12 @@ namespace Syn {
 
     bool MortonRadixSortPass::ShouldExecute(const RenderContext& context) const {
         auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
-        return pool && !pool->GetStorage().GetStaticEntities().empty();
+        return context.scene->GetSettings()->enableMortonBvhCulling &&  pool && !pool->GetStorage().GetStaticEntities().empty();
     }
 
     void MortonRadixSortPass::Dispatch(const RenderContext& context) {
+        auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
+        _staticCount = static_cast<uint32_t>(pool->GetStorage().GetStaticEntities().size());
         if (_staticCount == 0) return;
 
         auto drawData = context.scene->GetSceneDrawData();

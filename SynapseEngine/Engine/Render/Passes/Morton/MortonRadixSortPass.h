@@ -10,7 +10,7 @@ namespace Syn {
         ~MortonRadixSortPass();
 
         std::string GetName() const override { return "MortonRadixSortPass"; }
-        std::string GetGroup() const override { return PassGroupNames::CullingPasses; }
+        std::string GetGroup() const override { return PassGroupNames::MortonPasses; }
 
         void Initialize() override;
     protected:

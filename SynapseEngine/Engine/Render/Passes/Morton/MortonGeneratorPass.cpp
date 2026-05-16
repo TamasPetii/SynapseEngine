@@ -24,7 +24,7 @@ namespace Syn {
 
     bool MortonGeneratorPass::ShouldExecute(const RenderContext& context) const {
         auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
-        return pool && !pool->GetStorage().GetStaticEntities().empty();
+        return context.scene->GetSettings()->enableMortonBvhCulling && pool && !pool->GetStorage().GetStaticEntities().empty();
     }
 
     void MortonGeneratorPass::PushConstants(const RenderContext& context) {

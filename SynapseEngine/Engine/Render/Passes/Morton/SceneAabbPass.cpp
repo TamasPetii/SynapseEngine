@@ -22,7 +22,7 @@ namespace Syn {
 
     bool SceneAabbPass::ShouldExecute(const RenderContext& context) const {
         auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
-        return pool && !pool->GetStorage().GetStaticEntities().empty();
+        return context.scene->GetSettings()->enableMortonBvhCulling && pool && !pool->GetStorage().GetStaticEntities().empty();
     }
 
     void SceneAabbPass::PushConstants(const RenderContext& context) {
@@ -73,7 +73,7 @@ namespace Syn {
         vkCmdDispatch(context.cmd, groupCountX, 1, 1);
 
         Vk::BufferBarrierInfo aabbBarrier{};
-        aabbBarrier.buffer = drawData->Models.computeCountBuffer.GetHandle(fIdx, isGpu);
+        aabbBarrier.buffer = aabbBufferHandle;
         aabbBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         aabbBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         aabbBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;

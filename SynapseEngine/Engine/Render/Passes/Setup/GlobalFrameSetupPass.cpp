@@ -60,11 +60,13 @@ namespace Syn {
         ctx.staticChunkCountBufferAddr = drawData->Chunks.indirectDispatchBuffer.GetAddress(fIdx, isGpu);
 
         ctx.sceneAabbBufferAddr = drawData->Chunks.sceneAabbBuffer.GetAddress(fIdx, isGpu);
-        ctx.mortonChunkCountBufferAddr = drawData->Chunks.mortonIndirectDispatchBuffer.GetAddress(fIdx, isGpu);
+        ctx.mortonChunkIndirectDispatchBufferAddr = drawData->Chunks.mortonIndirectDispatchBuffer.GetAddress(fIdx, isGpu);
+        ctx.mortonChunkIndirectDrawBufferAddr = drawData->Chunks.mortonIndirectDrawBuffer.GetAddress(fIdx, isGpu);
         ctx.mortonKeysBufferAddr = compManager->GetBufferAddr(BufferNames::MortonKeysData, fIdx);
         ctx.mortonChunkDataBufferAddr = compManager->GetBufferAddr(BufferNames::MortonChunkData, fIdx);
         ctx.mortonChunkVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::MortonChunkVisibileIndex, fIdx);
         ctx.mortonChunkTransformsIndexBufferAddr = compManager->GetBufferAddr(BufferNames::MortonChunkTransformsIndex, fIdx);
+        ctx.mortonChunkVisibleIndirectDispatchBufferAddr = drawData->Chunks.mortonChunkVisibleIndirectDispatchBuffer.GetAddress(fIdx, isGpu);
 
         ctx.modelAddressBufferAddr = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
         ctx.modelBufferAddr = compManager->GetBufferAddr(BufferNames::ModelData, fIdx);
@@ -153,7 +155,7 @@ namespace Syn {
         ctx.pointLightCount = pointLightPool->Size();
         ctx.spotLightCount = spotLightPool->Size();
 
-        ctx.enableStaticBvhCulling = scene->GetSettings()->enableStaticBvhCulling ? 1 : 0;
+        ctx.enableStaticBvhCulling = scene->GetSettings()->enableStaticBvhCulling || context.scene->GetSettings()->enableMortonBvhCulling ? 1 : 0;
         ctx.allTransformCount = transformPool->Size();
         ctx.staticTransformCount = transformPool->GetStaticEntities().size();
         ctx.dynamicTransformCount = transformPool->GetDynamicEntities().size();

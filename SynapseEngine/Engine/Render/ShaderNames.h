@@ -22,6 +22,9 @@ namespace Syn
         static constexpr const char* StaticChunkCulling = "../Engine/Shaders/Passes/Culling/StaticChunkCulling.comp";
         static constexpr const char* StaticModelCulling = "../Engine/Shaders/Passes/Culling/StaticModelCulling.comp";
 
+        static constexpr const char* MortonChunkCulling = "../Engine/Shaders/Passes/Culling/MortonChunkCulling.comp";
+        static constexpr const char* MortonModelCulling = "../Engine/Shaders/Passes/Culling/MortonModelCulling.comp";
+
         static constexpr const char* StaticSceneAABB = "../Engine/Shaders/Passes/Morton/StaticSceneAABB.comp";
         static constexpr const char* MortonGenerator = "../Engine/Shaders/Passes/Morton/MortonGenerator.comp";
         static constexpr const char* ChunkBuilder = "../Engine/Shaders/Passes/Morton/ChunkBuilder.comp";

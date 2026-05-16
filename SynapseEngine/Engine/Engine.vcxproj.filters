@@ -1080,6 +1080,12 @@
     <ClCompile Include="Render\Passes\Morton\ChunkBuilderPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Passes\Culling\MortonChunkCullingPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Culling\MortonModelCullingPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2267,6 +2273,12 @@
     <ClInclude Include="Render\Passes\Morton\ChunkBuilderPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Passes\Culling\MortonChunkCullingPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Culling\MortonModelCullingPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Includes\Common\Animation.glsl" />
@@ -2384,5 +2396,7 @@
     <None Include="Shaders\Passes\Morton\ChunkBuilder.comp" />
     <None Include="Shaders\Includes\Utils\MortonUtils.glsl" />
     <None Include="Shaders\Includes\PushConstants\ChunkBuilderPC.glsl" />
+    <None Include="Shaders\Passes\Culling\MortonChunkCulling.comp" />
+    <None Include="Shaders\Passes\Culling\MortonModelCulling.comp" />
   </ItemGroup>
 </Project>

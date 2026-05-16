@@ -6,7 +6,7 @@ namespace Syn {
     class SYN_API SceneAabbPass : public ComputePass {
     public:
         std::string GetName() const override { return "SceneAabbPass"; }
-        std::string GetGroup() const override { return PassGroupNames::CullingPasses; }
+        std::string GetGroup() const override { return PassGroupNames::MortonPasses; }
 
         void Initialize() override;
     protected:

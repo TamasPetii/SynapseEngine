@@ -28,17 +28,24 @@ void main() {
     vec3 localMin = BOUNDS_INIT_MIN;
     vec3 localMax = BOUNDS_INIT_MAX;
 
+    //Todo: Ne csak static?
     if (transformDenseIndex < ctx.staticTransformCount) {
         TransformModelLink link = GET_TRANSFORM_MODEL_LINK(ctx.transformModelLinkBufferAddr, transformDenseIndex);
+        TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
         
+        vec3 translation = vec3(transform.transform[3]);
+        vec3 scale = vec3(length(transform.transform[0]), length(transform.transform[1]), length(transform.transform[2]));
+            
+        localMin = translation - scale;
+        localMax = translation + scale;
+
         if (link.modelDenseIndex != INVALID_INDEX) {
             ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, link.modelDenseIndex);
             
             if (modelComp.modelIndex != INVALID_INDEX) {
-                TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
                 GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, modelComp.modelIndex);
-                
                 GpuMeshCollider worldCollider = TransformCollider(addrs.globalCollider, transform.transform);
+
                 localMin = worldCollider.aabbMin;
                 localMax = worldCollider.aabbMax;
             }

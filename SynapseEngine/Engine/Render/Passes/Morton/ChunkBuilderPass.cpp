@@ -24,7 +24,7 @@ namespace Syn {
 
     bool ChunkBuilderPass::ShouldExecute(const RenderContext& context) const {
         auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
-        return pool && !pool->GetStorage().GetStaticEntities().empty();
+        return context.scene->GetSettings()->enableMortonBvhCulling && pool && !pool->GetStorage().GetStaticEntities().empty();
     }
 
     void ChunkBuilderPass::PushConstants(const RenderContext& context) {
@@ -40,14 +40,48 @@ namespace Syn {
     void ChunkBuilderPass::Dispatch(const RenderContext& context) {
         if (_staticCount == 0) return;
 
-        uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_staticCount, 32);
-        vkCmdDispatch(context.cmd, groupCountX, 1, 1);
-
         auto scene = context.scene;
         auto compManager = scene->GetComponentBufferManager();
-        auto drawData = scene->GetSceneDrawData();
+        auto drawGroup = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
         bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
+
+        VkDrawIndirectCommand drawTemplate = drawGroup->Chunks.wireframeCmdTemplate;
+
+        Vk::BufferUpdateInfo drawUpdateInfo{};
+        drawUpdateInfo.buffer = drawGroup->Chunks.mortonIndirectDrawBuffer.GetHandle(fIdx, isGpu);
+        drawUpdateInfo.offset = 0;
+        drawUpdateInfo.size = sizeof(VkDrawIndirectCommand);
+        drawUpdateInfo.pData = &drawTemplate;
+        Vk::BufferUtils::UpdateBuffer(context.cmd, drawUpdateInfo);
+            
+        Vk::BufferBarrierInfo drawBarrier{};
+        drawBarrier.buffer = drawUpdateInfo.buffer;
+        drawBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+        drawBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+        drawBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        drawBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, drawBarrier);
+
+        VkDispatchIndirectCommand dispatchTemplate = drawGroup->Chunks.dispatchCmdTemplate;
+
+        Vk::BufferUpdateInfo dispatchUpdateInfo{};
+        dispatchUpdateInfo.buffer = drawGroup->Chunks.mortonIndirectDispatchBuffer.GetHandle(fIdx, isGpu);
+        dispatchUpdateInfo.offset = 0;
+        dispatchUpdateInfo.size = sizeof(VkDispatchIndirectCommand);
+        dispatchUpdateInfo.pData = &dispatchTemplate;
+        Vk::BufferUtils::UpdateBuffer(context.cmd, dispatchUpdateInfo);
+
+        Vk::BufferBarrierInfo dispatchBarrier{};
+        dispatchBarrier.buffer = dispatchUpdateInfo.buffer;
+        dispatchBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+        dispatchBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+        dispatchBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        dispatchBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, dispatchBarrier);
+
+        uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_staticCount, 32);
+        vkCmdDispatch(context.cmd, groupCountX, 1, 1);
 
         Vk::BufferBarrierInfo chunkDataBarrier{};
         chunkDataBarrier.buffer = compManager->GetComponentBuffer(BufferNames::MortonChunkData, fIdx).buffer->Handle();
@@ -64,5 +98,21 @@ namespace Syn {
         chunkTransformIndicesBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         chunkTransformIndicesBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
         Vk::BufferUtils::InsertBarrier(context.cmd, chunkTransformIndicesBarrier);
+
+        Vk::BufferBarrierInfo indirectDispatchBarrier{};
+        indirectDispatchBarrier.buffer = drawGroup->Chunks.mortonIndirectDispatchBuffer.GetHandle(fIdx, isGpu);
+        indirectDispatchBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        indirectDispatchBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        indirectDispatchBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
+        indirectDispatchBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, indirectDispatchBarrier);
+
+        Vk::BufferBarrierInfo indirectDrawBarrier{};
+        indirectDrawBarrier.buffer = drawGroup->Chunks.mortonIndirectDrawBuffer.GetHandle(fIdx, isGpu);
+        indirectDrawBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        indirectDrawBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        indirectDrawBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
+        indirectDrawBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, indirectDrawBarrier);
     }
 }

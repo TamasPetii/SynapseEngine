@@ -39,6 +39,7 @@ namespace Syn
 
         bool enableHiz;
         bool enableStaticBvhCulling;
+        bool enableMortonBvhCulling;
         bool enableBloom;
 
         bool enableMeshletConeCulling;

@@ -29,6 +29,8 @@ namespace Syn
         RenderBuffer sceneAabbBuffer;
         RenderBuffer mortonRadixSortTempBuffer;
         RenderBuffer mortonIndirectDispatchBuffer;
+        RenderBuffer mortonIndirectDrawBuffer;
+        RenderBuffer mortonChunkVisibleIndirectDispatchBuffer;
 
         std::vector<ChunkDataGPU> chunks;
         std::vector<uint32_t> visibleChunkIds;

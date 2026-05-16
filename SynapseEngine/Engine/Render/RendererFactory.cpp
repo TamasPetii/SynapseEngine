@@ -15,10 +15,17 @@
 #include "Engine/Render/Passes/Culling/ModelCullingPass.h"
 #include "Engine/Render/Passes/Culling/StaticModelCullingPass.h"
 #include "Engine/Render/Passes/Culling/StaticChunkCullingPass.h"
+#include "Engine/Render/Passes/Culling/MortonModelCullingPass.h"
+#include "Engine/Render/Passes/Culling/MortonChunkCullingPass.h"
 #include "Engine/Render/Passes/Culling/MeshCullingPass.h"
 #include "Engine/Render/Passes/Culling/PointLightCullingPass.h"
 #include "Engine/Render/Passes/Culling/SpotLightCullingPass.h"
 #include "Engine/Render/Passes/Culling/CullingCommandResetPass.h"
+
+#include "Engine/Render/Passes/Morton/ChunkBuilderPass.h"
+#include "Engine/Render/Passes/Morton/MortonGeneratorPass.h"
+#include "Engine/Render/Passes/Morton/MortonRadixSortPass.h"
+#include "Engine/Render/Passes/Morton/SceneAabbPass.h"
 
 #include "Engine/Render/Passes/Setup/HizInitPass.h"
 #include "Engine/Render/Passes/Hiz/HizLinearPreparePass.h"
@@ -103,8 +110,16 @@ namespace Syn
 		pipeline->AddPass(std::make_unique<TransparentInitPass>());
 		pipeline->AddPass(std::make_unique<HizInitPass>());
 
+        //Morton Gpu Driven Bvh Builder
+        pipeline->AddPass(std::make_unique<SceneAabbPass>());
+        pipeline->AddPass(std::make_unique<MortonGeneratorPass>());
+        pipeline->AddPass(std::make_unique<MortonRadixSortPass>());
+        pipeline->AddPass(std::make_unique<ChunkBuilderPass>());
+
 		//Geometry Culling Passes
 		pipeline->AddPass(std::make_unique<CullingCommandResetPass>());
+        pipeline->AddPass(std::make_unique<MortonChunkCullingPass>());
+        pipeline->AddPass(std::make_unique<MortonModelCullingPass>());
         pipeline->AddPass(std::make_unique<StaticChunkCullingPass>());
         pipeline->AddPass(std::make_unique<StaticModelCullingPass>());
         pipeline->AddPass(std::make_unique<ModelCullingPass>());
