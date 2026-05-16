@@ -111,6 +111,31 @@ namespace Syn
 
     void Scene::InitializeComponentBuffers()
     {
+        RegisterComponentBuffer<TransformComponent, uint64_t>(BufferNames::MortonKeysData, ComponentMemoryType::GpuOnly);
+        RegisterComponentBuffer<TransformComponent, uint32_t>(BufferNames::MortonChunkTransformsIndex, ComponentMemoryType::GpuOnly);
+        
+        RegisterGenericBuffer<ChunkDataGPU>(BufferNames::MortonChunkData,
+            [this]() -> uint32_t {
+                auto pool = _registry->GetPool<TransformComponent>();
+                return pool ? ComputeGroupSize::CalculateDispatchCount(static_cast<uint32_t>(pool->Size()), ComputeGroupSize::Buffer32D) : 0;
+            },
+            [this]() -> bool {
+                auto pool = _registry->GetPool<TransformComponent>();
+                return pool && pool->Size() > 0;
+            },
+            ComponentMemoryType::GpuOnly);
+
+        RegisterGenericBuffer<uint32_t>(BufferNames::MortonChunkVisibileIndex,
+            [this]() -> uint32_t {
+                auto pool = _registry->GetPool<TransformComponent>();
+                return pool ? ComputeGroupSize::CalculateDispatchCount(static_cast<uint32_t>(pool->Size()), ComputeGroupSize::Buffer32D) : 0;
+            },
+            [this]() -> bool {
+                auto pool = _registry->GetPool<TransformComponent>();
+                return pool && pool->Size() > 0;
+            },
+            ComponentMemoryType::GpuOnly);
+
         RegisterComponentSparseMapBuffer<TransformComponent>(BufferNames::TransformSparseMap);
         RegisterComponentBuffer<TransformComponent, TransformComponentGPU>(BufferNames::TransformData);   
         RegisterComponentBuffer<TransformComponent, TransformModelLinkGPU>(BufferNames::TransformModelLinkData);

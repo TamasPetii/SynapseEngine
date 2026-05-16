@@ -1,3 +1,6 @@
 [submodule "External/vcpkg"]
 	path = External/vcpkg
 	url = https://github.com/microsoft/vcpkg.git
+[submodule "External/vulkan_radix_sort"]
+	path = External/vulkan_radix_sort
+	url = https://github.com/jaesung-cs/vulkan_radix_sort.git

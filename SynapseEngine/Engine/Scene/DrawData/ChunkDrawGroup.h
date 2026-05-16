@@ -12,6 +12,11 @@ namespace Syn
         uint32_t  entityCount;
     };
 
+    struct SYN_API SceneAABB {
+        uint32_t minX, minY, minZ;
+        uint32_t maxX, maxY, maxZ;
+    };
+
     struct SYN_API ChunkDrawGroup : public IDrawGroup {
         ChunkDrawGroup(uint32_t frameCount);
         virtual void CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) override;
@@ -20,6 +25,10 @@ namespace Syn
         RenderBuffer chunkVisibilityBuffer;
         RenderBuffer aabbSingleCmdBuffer;
         RenderBuffer indirectDispatchBuffer;
+
+        RenderBuffer sceneAabbBuffer;
+        RenderBuffer mortonRadixSortTempBuffer;
+        RenderBuffer mortonIndirectDispatchBuffer;
 
         std::vector<ChunkDataGPU> chunks;
         std::vector<uint32_t> visibleChunkIds;

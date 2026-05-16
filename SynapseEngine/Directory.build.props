@@ -22,7 +22,7 @@
       <LanguageStandard>$(CppStandardVersion)</LanguageStandard>
       <LanguageStandard_C>$(CStandardVersion)</LanguageStandard_C>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+		<AdditionalIncludeDirectories>$(SolutionDir);$(MSBuildThisFileDirectory)..\External\vulkan_radix_sort\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 
       <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
 

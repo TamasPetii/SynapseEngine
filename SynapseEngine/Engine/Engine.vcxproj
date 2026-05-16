@@ -235,9 +235,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Render\Passes\Morton\ChunkBuilderPass.cpp" />
+    <ClCompile Include="Render\Passes\Morton\MortonRadixSortPass.cpp" />
+    <ClCompile Include="Render\Passes\Morton\MortonGeneratorPass.cpp" />
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightSinglePass.cpp" />
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightSinglePass.cpp" />
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterDispatchSetupPass.cpp" />
+    <ClCompile Include="Render\Passes\Morton\SceneAabbPass.cpp" />
     <ClCompile Include="Scene\DrawData\ChunkDrawGroup.cpp" />
     <ClCompile Include="Render\Passes\Shading\Visibility\DebugVisibilityPass.cpp" />
     <ClCompile Include="Render\Passes\Setup\HizInitPass.cpp" />
@@ -588,10 +592,14 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\Passes\Morton\ChunkBuilderPass.h" />
+    <ClInclude Include="Render\Passes\Morton\MortonRadixSortPass.h" />
+    <ClInclude Include="Render\Passes\Morton\MortonGeneratorPass.h" />
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightSinglePass.h" />
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightSinglePass.h" />
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterDispatchSetupPass.h" />
     <ClInclude Include="Render\PassGroupNames.h" />
+    <ClInclude Include="Render\Passes\Morton\SceneAabbPass.h" />
     <ClInclude Include="Scene\DrawData\ChunkDrawGroup.h" />
     <ClInclude Include="Render\Passes\Shading\Visibility\DebugVisibilityPass.h" />
     <ClInclude Include="Render\Passes\Setup\HizInitPass.h" />
@@ -1008,6 +1016,7 @@
     <None Include="Shaders\Includes\PushConstants\BloomDownSamplePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\BloomPrefilterPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\BloomUpSamplePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\ChunkBuilderPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\ClusterDispatchSetupPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\ClusterLightCountPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\ClusterLightWritePC.glsl" />
@@ -1029,12 +1038,14 @@
     <None Include="Shaders\Includes\PushConstants\WireframePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframeSetupPC.glsl" />
     <None Include="Shaders\Includes\SharedGpuTypes.glsl" />
+    <None Include="Shaders\Includes\Utils\AtomicFloatUtils.glsl" />
     <None Include="Shaders\Includes\Utils\ClusterMath.glsl" />
     <None Include="Shaders\Includes\Utils\ColorMath.glsl" />
     <None Include="Shaders\Includes\Utils\CullingMath.glsl" />
     <None Include="Shaders\Includes\Utils\DepthMath.glsl" />
     <None Include="Shaders\Includes\Utils\LightMath.glsl" />
     <None Include="Shaders\Includes\Utils\MaterialMath.glsl" />
+    <None Include="Shaders\Includes\Utils\MortonUtils.glsl" />
     <None Include="Shaders\Includes\Utils\Occlusion.glsl" />
     <None Include="Shaders\Includes\Utils\PbrMath.glsl" />
     <None Include="Shaders\Includes\Utils\WboitMath.glsl" />
@@ -1044,6 +1055,9 @@
     <None Include="Shaders\Passes\Common\Fullscreen.vert" />
     <None Include="Shaders\Passes\Culling\StaticChunkCulling.comp" />
     <None Include="Shaders\Passes\Culling\StaticModelCulling.comp" />
+    <None Include="Shaders\Passes\Morton\ChunkBuilder.comp" />
+    <None Include="Shaders\Passes\Morton\MortonGenerator.comp" />
+    <None Include="Shaders\Passes\Morton\StaticSceneAABB.comp" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterDispatchSetup.comp" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightSingle.comp" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightCount.comp" />

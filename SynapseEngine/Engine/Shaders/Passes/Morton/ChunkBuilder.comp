@@ -1,0 +1,75 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_KHR_shader_subgroup_arithmetic : require
+
+#include "../../Includes/Core.glsl"
+#include "../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../Includes/Common/Transform.glsl"
+#include "../../Includes/Common/Model.glsl"
+#include "../../Includes/Common/Mesh.glsl"
+#include "../../Includes/Common/StaticChunk.glsl"
+#include "../../Includes/Utils/CullingMath.glsl"
+#include "../../Includes/Common/IndirectCommand.glsl"
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../Includes/PushConstants/ChunkBuilderPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    ChunkBuilderPC pc;
+};
+
+void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    uint globalId = gl_GlobalInvocationID.x;
+    uint chunkId = gl_WorkGroupID.x;
+    uint threadId = gl_LocalInvocationID.x;
+
+    if (globalId == 0) {
+        uint chunkCount = (ctx.staticTransformCount + CHUNK_SIZE - 1) / CHUNK_SIZE;
+        
+        GET_VK_DISPATCH_CMD(ctx.mortonChunkCountBufferAddr).groupCountX = chunkCount;
+        GET_VK_DISPATCH_CMD(ctx.mortonChunkCountBufferAddr).groupCountY = 1;
+        GET_VK_DISPATCH_CMD(ctx.mortonChunkCountBufferAddr).groupCountZ = 1;
+    }
+
+    vec3 localMin = BOUNDS_INIT_MIN;
+    vec3 localMax = BOUNDS_INIT_MAX;
+
+    if (globalId < ctx.staticTransformCount) {
+        uint64_t packedData = GET_MORTON_KEY(ctx.mortonKeysBufferAddr, globalId);
+        uint transformDenseIndex = uint(packedData & 0xFFFFFFFFul);
+
+        TransformModelLink link = GET_TRANSFORM_MODEL_LINK(ctx.transformModelLinkBufferAddr, transformDenseIndex);
+        ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, link.modelDenseIndex);
+        TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
+        GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, modelComp.modelIndex);
+
+        GET_CHUNK_TRANSFORM_IDX(ctx.mortonChunkTransformsIndexBufferAddr, globalId) = transformDenseIndex;
+
+        GpuMeshCollider worldCollider = TransformCollider(addrs.globalCollider, transform.transform);
+        localMin = worldCollider.aabbMin;
+        localMax = worldCollider.aabbMax;
+    }
+
+    vec3 macroMin = subgroupMin(localMin);
+    vec3 macroMax = subgroupMax(localMax);
+
+    if (threadId == 0) {
+        uint entitiesInThisChunk = CHUNK_SIZE;
+        if (globalId + CHUNK_SIZE > ctx.staticTransformCount) {
+            entitiesInThisChunk = ctx.staticTransformCount - (chunkId * CHUNK_SIZE);
+        }
+
+        StaticChunk chunk;
+        chunk.minBounds = macroMin;
+        chunk.firstEntityIndex = chunkId * CHUNK_SIZE;
+        chunk.maxBounds = macroMax;
+        chunk.entityCount = entitiesInThisChunk;
+
+        GET_STATIC_CHUNK(ctx.staticChunkDataBufferAddr, chunkId) = chunk;
+    }
+}

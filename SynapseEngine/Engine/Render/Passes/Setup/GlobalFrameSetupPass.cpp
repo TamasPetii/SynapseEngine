@@ -59,6 +59,13 @@ namespace Syn {
         ctx.staticChunkVisibleIndexBufferAddr = drawData->Chunks.chunkVisibilityBuffer.GetAddress(fIdx, isGpu);
         ctx.staticChunkCountBufferAddr = drawData->Chunks.indirectDispatchBuffer.GetAddress(fIdx, isGpu);
 
+        ctx.sceneAabbBufferAddr = drawData->Chunks.sceneAabbBuffer.GetAddress(fIdx, isGpu);
+        ctx.mortonChunkCountBufferAddr = drawData->Chunks.mortonIndirectDispatchBuffer.GetAddress(fIdx, isGpu);
+        ctx.mortonKeysBufferAddr = compManager->GetBufferAddr(BufferNames::MortonKeysData, fIdx);
+        ctx.mortonChunkDataBufferAddr = compManager->GetBufferAddr(BufferNames::MortonChunkData, fIdx);
+        ctx.mortonChunkVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::MortonChunkVisibileIndex, fIdx);
+        ctx.mortonChunkTransformsIndexBufferAddr = compManager->GetBufferAddr(BufferNames::MortonChunkTransformsIndex, fIdx);
+
         ctx.modelAddressBufferAddr = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
         ctx.modelBufferAddr = compManager->GetBufferAddr(BufferNames::ModelData, fIdx);
         ctx.modelSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::ModelSparseMap, fIdx);

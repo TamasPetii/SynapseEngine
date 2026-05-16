@@ -22,6 +22,10 @@ namespace Syn
         static constexpr const char* StaticChunkCulling = "../Engine/Shaders/Passes/Culling/StaticChunkCulling.comp";
         static constexpr const char* StaticModelCulling = "../Engine/Shaders/Passes/Culling/StaticModelCulling.comp";
 
+        static constexpr const char* StaticSceneAABB = "../Engine/Shaders/Passes/Morton/StaticSceneAABB.comp";
+        static constexpr const char* MortonGenerator = "../Engine/Shaders/Passes/Morton/MortonGenerator.comp";
+        static constexpr const char* ChunkBuilder = "../Engine/Shaders/Passes/Morton/ChunkBuilder.comp";
+
         static constexpr const char* PointLightCulling = "../Engine/Shaders/Passes/Culling/PointLightCulling.comp";
         static constexpr const char* SpotLightCulling = "../Engine/Shaders/Passes/Culling/SpotLightCulling.comp";
 
@@ -40,7 +44,6 @@ namespace Syn
         static constexpr const char* DeferredSpotLightFrag = "../Engine/Shaders/Passes/Shading/Deferred/Lighting/DeferredSpotLight.frag";
         static constexpr const char* DeferredDirectionLightVert = "../Engine/Shaders/Passes/Shading/Deferred/Lighting/DeferredDirectionLight.vert";
         static constexpr const char* DeferredDirectionLightFrag = "../Engine/Shaders/Passes/Shading/Deferred/Lighting/DeferredDirectionLight.frag";
-
 
         static constexpr const char* ClusterSpotLightSingle = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterSpotLightSingle.comp";
         static constexpr const char* ClusterPointLightSingle = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterPointLightSingle.comp";

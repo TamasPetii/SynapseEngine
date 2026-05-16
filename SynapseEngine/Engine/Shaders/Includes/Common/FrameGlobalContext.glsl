@@ -69,6 +69,13 @@ struct FrameGlobalContext {
     uint64_t wireframeMeshAabbIndirectCommandBufferAddr;
     uint64_t wireframeMeshSphereIndirectCommandBufferAddr;
 
+    uint64_t sceneAabbBufferAddr;
+    uint64_t mortonKeysBufferAddr;
+    uint64_t mortonChunkDataBufferAddr;
+    uint64_t mortonChunkCountBufferAddr;
+    uint64_t mortonChunkVisibleIndexBufferAddr;
+    uint64_t mortonChunkTransformsIndexBufferAddr;
+
     float screenWidth;
     float screenHeight;
     float ambientStrength;

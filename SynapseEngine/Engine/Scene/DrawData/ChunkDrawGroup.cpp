@@ -36,6 +36,15 @@ namespace Syn
         indirectDispatchBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectUsage });
         indirectDispatchBuffer.UpdateCapacityAll(1);
 
+        sceneAabbBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(SceneAABB), storageUsage });
+        sceneAabbBuffer.UpdateCapacityAll(1);
+
+        mortonRadixSortTempBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(uint64_t), storageUsage, 10000, 20000 });
+        mortonRadixSortTempBuffer.UpdateCapacityAll(1);
+
+        mortonIndirectDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectUsage });
+        mortonIndirectDispatchBuffer.UpdateCapacityAll(1);
+
         for (uint32_t i = 0; i < frameCount; ++i) {
             aabbSingleCmdBuffer.GetMapped(i)->Write(&wireframeCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
             indirectDispatchBuffer.GetMapped(i)->Write(&dispatchCmdTemplate, sizeof(VkDispatchIndirectCommand), 0);

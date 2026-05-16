@@ -27,10 +27,6 @@ namespace Syn
     class SYN_API Scene
     {
     public:
-        static constexpr uint32_t MAX_INSTANCES = 10000000;
-        static constexpr uint32_t MAX_INDIRECT_COMMANDS = 200000;
-        static constexpr uint32_t MESHLET_OFFSET_START = 100000;
-
         Scene(uint32_t frameCount);
         virtual ~Scene();
 

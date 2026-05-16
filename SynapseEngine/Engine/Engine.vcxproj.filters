@@ -1068,6 +1068,18 @@
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightSinglePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Passes\Morton\SceneAabbPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Morton\MortonGeneratorPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Morton\MortonRadixSortPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Morton\ChunkBuilderPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2243,6 +2255,18 @@
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightSinglePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Passes\Morton\SceneAabbPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Morton\MortonGeneratorPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Morton\MortonRadixSortPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Morton\ChunkBuilderPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Includes\Common\Animation.glsl" />
@@ -2354,5 +2378,11 @@
     <None Include="Shaders\Includes\Common\ForwardPlusDispatch.glsl" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterDispatchSetup.comp" />
     <None Include="Shaders\Includes\PushConstants\ClusterDispatchSetupPC.glsl" />
+    <None Include="Shaders\Includes\Utils\AtomicFloatUtils.glsl" />
+    <None Include="Shaders\Passes\Morton\StaticSceneAABB.comp" />
+    <None Include="Shaders\Passes\Morton\MortonGenerator.comp" />
+    <None Include="Shaders\Passes\Morton\ChunkBuilder.comp" />
+    <None Include="Shaders\Includes\Utils\MortonUtils.glsl" />
+    <None Include="Shaders\Includes\PushConstants\ChunkBuilderPC.glsl" />
   </ItemGroup>
 </Project>

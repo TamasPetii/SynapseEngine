@@ -41,7 +41,7 @@ struct SpotLightShadowComponent {
 };
 
 layout(buffer_reference, std430) readonly restrict buffer SpotLightDataBuffer { SpotLightComponent data[]; };
-layout(buffer_reference, std430) restrict buffer SpotLightColliderDataBuffer { SpotLightColliderGPU data[]; };
+layout(buffer_reference, std430) readonly restrict buffer SpotLightColliderDataBuffer { SpotLightColliderGPU data[]; };
 layout(buffer_reference, std430) readonly restrict buffer SpotLightShadowDataBuffer { SpotLightShadowComponent data[]; };
 layout(buffer_reference, std430) readonly restrict buffer VisibleSpotLightBuffer { uint data[]; };
 

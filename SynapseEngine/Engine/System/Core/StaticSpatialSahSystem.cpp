@@ -8,6 +8,9 @@
 #include <algorithm>
 #include <print>
 
+#include "Engine/ServiceLocator.h"
+#include "Engine/FrameContext.h"
+
 namespace Syn
 {
     std::vector<TypeID> StaticSpatialSahSystem::GetReadDependencies() const {
@@ -56,7 +59,8 @@ namespace Syn
         chunkGroup->visibleChunkIds.resize(staticEntities.size());
 
         chunkGroup->chunkCounter.store(0, std::memory_order_relaxed);
-        _uploadCountdown.store(3, std::memory_order_relaxed);
+        uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
+        this->SetFramesToUpload(framesInFlight);
 
         auto gatherTaskOpt = this->ForEachIndex(size_t(0), staticEntities.size(), size_t(1), subflow, "GatherSpatialItems",
             [this, staticEntities, transformPool, modelPool, modelSnapshot](size_t i) {
@@ -138,7 +142,7 @@ namespace Syn
 
         auto chunkGroup = &scene->GetSceneDrawData()->Chunks;
 
-        if (_uploadCountdown.load(std::memory_order_relaxed) == 0 || chunkGroup->chunks.empty()) {
+        if (GetFramesToUpload() == 0 || chunkGroup->chunks.empty()) {
             return;
         }
 
@@ -152,9 +156,8 @@ namespace Syn
                 mappedData->Write(chunkGroup->chunks.data(), activeChunkCount * sizeof(ChunkDataGPU), 0);
             }
 
-            uint32_t currentCount = _uploadCountdown.load(std::memory_order_relaxed);
-            while (currentCount > 0 && !_uploadCountdown.compare_exchange_weak(currentCount, currentCount - 1, std::memory_order_relaxed)) {
-            }
+            DecrementFramesToUpload();
+
             });
     }
 
