@@ -26,7 +26,7 @@ namespace Syn
             for (auto& pass : _passes) {
                 if (pass->ShouldExecute(context))
                 {
-                    uint32_t measureIdx = profiler->StartPass(context.cmd, context.frameIndex, pass->GetName());
+                    uint32_t measureIdx = profiler->StartPass(context.cmd, context.frameIndex, pass->GetGroup(), pass->GetName());
                     pass->Execute(context);
                     profiler->EndPass(context.cmd, context.frameIndex, measureIdx);
                 }

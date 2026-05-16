@@ -6,6 +6,8 @@ namespace Syn {
     class SYN_API HizDownsamplePass : public ComputePass {
     public:
         std::string GetName() const override { return "HizDownsamplePass"; }
+        std::string GetGroup() const override { return PassGroupNames::HizPasses; }
+
         void Initialize() override;
     protected:
 		bool ShouldExecute(const RenderContext& context) const override;

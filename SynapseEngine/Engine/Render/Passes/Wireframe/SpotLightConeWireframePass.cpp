@@ -11,7 +11,7 @@
 #include "Engine/Vk/Image/ImageViewNames.h"
 
 namespace Syn {
-#include "Engine/Shaders/Includes/PushConstants/WireframeLightPC.glsl"
+#include "Engine/Shaders/Includes/PushConstants/WireframeDebugPC.glsl"
 
     bool SpotLightConeWireframePass::ShouldExecute(const RenderContext& context) const
     {
@@ -27,7 +27,7 @@ namespace Syn {
         _shaderProgram = shaderManager->CreateProgram(
             "WireframeLightProgram",
             {
-                ShaderNames::WireframeLightVert,
+                ShaderNames::WireframeDebugVert,
                 ShaderNames::WireframeFrag
             },
             config
@@ -110,7 +110,7 @@ namespace Syn {
 
         auto cone = modelManager->GetResource(MeshSourceNames::Cone);
 
-        WireframeLightPC pc{};
+        WireframeDebugPC pc{};
         pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
         pc.vertexPositionBufferAddr = cone->hardwareBuffers.vertexPositions->GetDeviceAddress();
         pc.indexBufferAddr = cone->hardwareBuffers.indices->GetDeviceAddress();
@@ -121,7 +121,7 @@ namespace Syn {
             _shaderProgram->GetLayout(),
             VK_SHADER_STAGE_ALL,
             0,
-            sizeof(WireframeLightPC),
+            sizeof(WireframeDebugPC),
             &pc
         );
     }

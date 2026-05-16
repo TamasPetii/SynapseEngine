@@ -8,6 +8,7 @@ namespace Syn {
         DeferredSpotLightPass() = default;
 
         std::string GetName() const override { return "DeferredSpotLightPass"; }
+        std::string GetGroup() const override { return PassGroupNames::DeferredLightingPasses; }
         void Initialize() override;
     protected:
 		bool ShouldExecute(const RenderContext& context) const override;

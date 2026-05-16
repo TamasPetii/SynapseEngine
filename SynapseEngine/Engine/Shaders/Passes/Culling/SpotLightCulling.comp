@@ -37,18 +37,27 @@ void main() {
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
 
     // 1. Frustum Culling (Sphere + AABB)
-    uint visibility = TestFrustum(collider.center, collider.radius, collider.aabbMin, collider.aabbMax, camera);
-    if (visibility == INTERSECTION_OUTSIDE) return;
+    uint visibility = INTERSECTION_INSIDE;
+    if(ctx.enableSpotLightFrustumCulling == 1)
+    {
+        uint visibility = TestFrustum(collider.center, collider.radius, collider.aabbMin, collider.aabbMax, camera);
+        if (visibility == INTERSECTION_OUTSIDE) return;
+    }
 
     // 2. Occlusion és 0-pixel Culling
     float screenSizePixels = 0.0;
     vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);
-    bool enableDepthOcclusion = (ctx.enableOcclusionCulling == 1);
+    bool enableDepthOcclusion = (ctx.enableSpotLightOcclusionCulling == 1);
 
     if (IsSphereOccluded(collider.center, collider.radius, camera, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
         return;
     }
 
+    uint denseIdx = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, collider.entityIndex);
+    SpotLightComponent light = GET_SPOT_LIGHT(ctx.spotLightDataBufferAddr, denseIdx);
+
+    GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, globalId).viewSpacePos = (camera.view * vec4(light.position, 1.0)).xyz;
+    GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, globalId).viewSpaceDir = normalize((camera.view * vec4(light.direction, 0)).xyz);
     GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, globalId).viewSpaceCenter = (camera.view *  vec4(collider.center, 1.0)).xyz;
 
     uint needsWrite = 1;

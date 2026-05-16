@@ -18,6 +18,11 @@ struct FrameGlobalContext {
 
     uint64_t transformBufferAddr;
     uint64_t transformSparseMapBufferAddr;
+    uint64_t transformModelLinkBufferAddr;
+
+    uint64_t staticChunkDataBufferAddr;
+    uint64_t staticChunkVisibleIndexBufferAddr;
+    uint64_t staticChunkCountBufferAddr;
 
     uint64_t modelAddressBufferAddr; 
     uint64_t modelBufferAddr;
@@ -71,9 +76,26 @@ struct FrameGlobalContext {
     float emissiveStrength;
     float alphaLimitDiscard;
 
-    uint enableConeCulling;
-    uint enableFrustumCulling;
-    uint enableOcclusionCulling;
+    uint enableMeshletConeCulling;
+
+    uint enableChunkFrustumCulling;
+    uint enableModelFrustumCulling;
+    uint enableMeshFrustumCulling;
+    uint enableMeshletFrustumCulling;
+    uint enablePointLightFrustumCulling;
+    uint enableSpotLightFrustumCulling;
+
+    uint enableChunkOcclusionCulling;
+    uint enableModelOcclusionCulling;
+    uint enableMeshOcclusionCulling;
+    uint enableMeshletOcclusionCulling;
+    uint enablePointLightOcclusionCulling;
+    uint enableSpotLightOcclusionCulling;
+
+    uint enableForwardPlusEmissiveAo;
+    uint enableForwardPlusPointLights;
+    uint enableForwardPlusSpotLights;
+    uint enableForwardPlusDirectionalLights;
 
     uint globalIndirectCommandCount;
     uint globalTraditionalCommandsCount;
@@ -82,10 +104,18 @@ struct FrameGlobalContext {
     uint mainCameraEntity;
     uint activeCameraEntity;
 
+    uint staticChunkCount;
     uint modelCount;
     uint directionLightCount;
     uint pointLightCount;
     uint spotLightCount;
+
+    uint enableStaticBvhCulling;
+    uint allTransformCount;
+    uint staticTransformCount;
+    uint dynamicTransformCount;
+    uint streamTransformCount;
+    uint nonStaticTransformCount;
 
     uint tileSize;
     uint tileCountX;

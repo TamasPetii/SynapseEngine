@@ -18,13 +18,6 @@ void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
     uint id = gl_GlobalInvocationID.x;
-
-    if (id == 0) {
-        GET_VK_DISPATCH_CMD(ctx.modelCountBufferAddr).groupCountX = 0;
-        GET_VK_DISPATCH_CMD(ctx.modelCountBufferAddr).groupCountY = 1;
-        GET_VK_DISPATCH_CMD(ctx.modelCountBufferAddr).groupCountZ = 1;
-    }
-
     if (id >= ctx.globalIndirectCommandCount) return;
 
     if (id < ctx.globalTraditionalCommandsCount) {

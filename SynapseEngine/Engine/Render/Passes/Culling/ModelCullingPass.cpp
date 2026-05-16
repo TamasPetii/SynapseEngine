@@ -15,6 +15,7 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
+#include "Engine/Component/Core/TransformComponent.h"
 
 namespace Syn {
 
@@ -40,10 +41,19 @@ namespace Syn {
         auto scene = context.scene;
 
         auto registry = scene->GetRegistry();
-        auto modelPool = registry->GetPool<ModelComponent>();
-        _totalModelsToTest = modelPool ? static_cast<uint32_t>(modelPool->Size()) : 0;
+        auto transformPool = registry->GetPool<TransformComponent>();
 
-        if (_totalModelsToTest == 0) return;
+        if (!transformPool || transformPool->Size() == 0) {
+            _totalModelsToTest = 0;
+            return;
+        }
+
+        _totalModelsToTest = static_cast<uint32_t>(transformPool->Size());
+
+        if (scene->GetSettings()->enableStaticBvhCulling) {
+            uint32_t staticCount = static_cast<uint32_t>(transformPool->GetStorage().GetStaticEntities().size());
+            _totalModelsToTest -= staticCount;
+        }
 
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
@@ -93,7 +103,6 @@ namespace Syn {
 		auto isGpu = scene->GetSettings()->enableGpuCulling;
 
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_totalModelsToTest, ComputeGroupSize::Buffer32D);
-
         vkCmdDispatch(context.cmd, groupCountX, 1, 1);
 
         Vk::BufferBarrierInfo countBarrier{};

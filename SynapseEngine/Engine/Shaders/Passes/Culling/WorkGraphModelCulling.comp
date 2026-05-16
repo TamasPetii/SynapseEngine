@@ -63,12 +63,17 @@ void main() {
     }
     
     GpuMeshCollider worldCollider = TransformCollider(localGlobalCollider, transform.transform);
-    uint visibility = TestFrustum(worldCollider, camera);
-    if (visibility == INTERSECTION_OUTSIDE) return;
+    
+    uint visibility = INTERSECTION_INSIDE;
+    if(ctx.enableModelFrustumCulling == 1)
+    {
+        visibility = TestFrustum(worldCollider, camera);
+        if (visibility == INTERSECTION_OUTSIDE) return;
+    }
 
     float screenSizePixels = 0.0;
     vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);
-    bool enableDepthOcclusion = (ctx.enableOcclusionCulling == 1);
+    bool enableDepthOcclusion = (ctx.enableModelOcclusionCulling == 1);
 
     if (IsSphereOccluded(worldCollider.center, worldCollider.radius, camera, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
         return;

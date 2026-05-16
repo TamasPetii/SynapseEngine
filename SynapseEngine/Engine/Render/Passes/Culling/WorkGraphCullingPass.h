@@ -8,6 +8,8 @@ namespace Syn {
         ~WorkGraphCullingPass();
 
         std::string GetName() const override { return "WorkGraphCullingPass"; }
+        std::string GetGroup() const override { return PassGroupNames::CullingPasses; }
+
         void Initialize() override;
         void Execute(const RenderContext& context) override;
     protected:

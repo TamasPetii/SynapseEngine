@@ -82,12 +82,13 @@ void main()
     //7. Simulate Lighting
     vec3 totalRadiance = vec3(0.0);
 
-    for(uint i = 0; i < ctx.directionLightCount; ++i) {
-        uint lightDenseIndex = GET_VISIBLE_DIRECTION_LIGHT(ctx.directionLightVisibleIndexBufferAddr, i); 
+    for(uint i = 0; i < ctx.directionLightCount && ctx.enableForwardPlusDirectionalLights == 1; ++i) {
+        uint entityId = GET_VISIBLE_DIRECTION_LIGHT(ctx.directionLightVisibleIndexBufferAddr, i); 
+        uint lightDenseIndex = GET_SPARSE_INDEX(ctx.directionLightSparseMapBufferAddr, entityId);  
         totalRadiance += SimulateDirectionalLight(ctx.directionLightDataBufferAddr, lightDenseIndex, albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness);
     }
 
-    for (uint i = 0; i < cluster.pointLightCount; ++i) {
+    for (uint i = 0; i < cluster.pointLightCount && ctx.enableForwardPlusPointLights == 1; ++i) {
         uint globalLightIndex = cluster.pointLightOffset + i;
         uint lightEntityIndex = GET_LIGHT_INDEX(ctx.forwardPlusPointLightIndexListBufferAddr, globalLightIndex);
         uint lightDenseIndex = GET_SPARSE_INDEX(ctx.pointLightSparseMapBufferAddr, lightEntityIndex);
@@ -95,7 +96,7 @@ void main()
         totalRadiance += SimulatePointLight(ctx.pointLightDataBufferAddr, lightDenseIndex, worldPos, albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness);
     }
 
-    for (uint i = 0; i < cluster.spotLightCount; ++i) {
+    for (uint i = 0; i < cluster.spotLightCount && ctx.enableForwardPlusSpotLights == 1; ++i) {
         uint globalLightIndex = cluster.spotLightOffset + i;
         uint lightEntityIndex = GET_LIGHT_INDEX(ctx.forwardPlusSpotLightIndexListBufferAddr, globalLightIndex);
         uint lightDenseIndex = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, lightEntityIndex);
@@ -103,11 +104,14 @@ void main()
         totalRadiance += SimulateSpotLight(ctx.spotLightDataBufferAddr, lightDenseIndex, worldPos, albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness);
     }
 
-    //Ambient
-    totalRadiance += SimulateAmbientLight(albedoAlpha.rgb, finalAo, ctx.ambientStrength);
+    if(ctx.enableForwardPlusEmissiveAo == 1)
+    {
+        //Ambient
+        totalRadiance += SimulateAmbientLight(albedoAlpha.rgb, finalAo, ctx.ambientStrength);
 
-    //Bloom Radiance
-    totalRadiance += SimulateBloom(finalEmissive, 1.0, ctx.emissiveStrength);
+        //Bloom Radiance
+        totalRadiance += SimulateBloom(finalEmissive, 1.0, ctx.emissiveStrength);
+    }
 
     // 8. Write WBOIT Accumulation
     vec3 premultipliedColor = totalRadiance * albedoAlpha.a;

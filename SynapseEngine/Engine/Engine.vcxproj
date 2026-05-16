@@ -235,6 +235,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightSinglePass.cpp" />
+    <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightSinglePass.cpp" />
+    <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterDispatchSetupPass.cpp" />
+    <ClCompile Include="Scene\DrawData\ChunkDrawGroup.cpp" />
     <ClCompile Include="Render\Passes\Shading\Visibility\DebugVisibilityPass.cpp" />
     <ClCompile Include="Render\Passes\Setup\HizInitPass.cpp" />
     <ClCompile Include="Render\Passes\Present\PresentationTransitionPass.cpp" />
@@ -259,6 +263,11 @@
     <ClCompile Include="Scene\NatureScene.cpp" />
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSetupPass.cpp" />
     <ClCompile Include="Render\Passes\Wireframe\SpotLightConeWireframePass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\SpotLightPyramidWireframePass.cpp" />
+    <ClCompile Include="Render\Passes\Culling\StaticChunkCullingPass.cpp" />
+    <ClCompile Include="Render\Passes\Culling\StaticModelCullingPass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\StaticChunkAabbWireframePass.cpp" />
+    <ClCompile Include="System\Core\StaticSpatialSahSystem.cpp" />
     <ClCompile Include="System\Physics\CapsuleColliderSystem.cpp" />
     <ClCompile Include="System\Physics\SphereColliderSystem.cpp" />
     <ClCompile Include="System\Physics\RigidBodySystem.cpp" />
@@ -275,6 +284,7 @@
     <ClCompile Include="Render\Passes\TransitionPass.cpp" />
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\TransparentDepthTransitionPrepass.cpp" />
     <ClCompile Include="Render\Passes\Shading\Wboit\TransparentForwardTransitionPass.cpp" />
+    <ClCompile Include="System\Core\TransformModelLinkSystem.cpp" />
     <ClCompile Include="Utils\RenderBuffer.cpp" />
     <ClCompile Include="Render\Passes\Culling\CullingCommandResetPass.cpp" />
     <ClCompile Include="Render\Passes\Shading\Wboit\TransparentCompositeTransitionPass.cpp" />
@@ -578,6 +588,11 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightSinglePass.h" />
+    <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightSinglePass.h" />
+    <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterDispatchSetupPass.h" />
+    <ClInclude Include="Render\PassGroupNames.h" />
+    <ClInclude Include="Scene\DrawData\ChunkDrawGroup.h" />
     <ClInclude Include="Render\Passes\Shading\Visibility\DebugVisibilityPass.h" />
     <ClInclude Include="Render\Passes\Setup\HizInitPass.h" />
     <ClInclude Include="Render\Passes\Present\PresentationTransitionPass.h" />
@@ -602,6 +617,11 @@
     <ClInclude Include="Scene\NatureScene.h" />
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSetupPass.h" />
     <ClInclude Include="Render\Passes\Wireframe\SpotLightConeWireframePass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\SpotLightPyramidWireframePass.h" />
+    <ClInclude Include="Render\Passes\Culling\StaticChunkCullingPass.h" />
+    <ClInclude Include="Render\Passes\Culling\StaticModelCullingPass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\StaticChunkAabbWireframePass.h" />
+    <ClInclude Include="System\Core\StaticSpatialSahSystem.h" />
     <ClInclude Include="System\Physics\CapsuleColliderSystem.h" />
     <ClInclude Include="System\Physics\SphereColliderSystem.h" />
     <ClInclude Include="System\Physics\PhysicsUtils.h" />
@@ -621,6 +641,8 @@
     <ClInclude Include="Render\Passes\TransitionPass.h" />
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\DepthPrepass\TransparentDepthTransitionPrepass.h" />
     <ClInclude Include="Render\Passes\Shading\Wboit\TransparentForwardTransitionPass.h" />
+    <ClInclude Include="System\Core\TransformModelLinkSystem.h" />
+    <ClInclude Include="System\SystemGroupNames.h" />
     <ClInclude Include="Utils\RenderBuffer.h" />
     <ClInclude Include="Render\Passes\Culling\CullingCommandResetPass.h" />
     <ClInclude Include="Render\Passes\Shading\Wboit\TransparentCompositeTransitionPass.h" />
@@ -967,6 +989,7 @@
     <None Include="Shaders\Includes\Common\Cluster.glsl" />
     <None Include="Shaders\Includes\Common\Culling.glsl" />
     <None Include="Shaders\Includes\Common\DirectionLight.glsl" />
+    <None Include="Shaders\Includes\Common\ForwardPlusDispatch.glsl" />
     <None Include="Shaders\Includes\Common\FrameGlobalContext.glsl" />
     <None Include="Shaders\Includes\Common\IndirectCommand.glsl" />
     <None Include="Shaders\Includes\Common\Material.glsl" />
@@ -974,6 +997,7 @@
     <None Include="Shaders\Includes\Common\Model.glsl" />
     <None Include="Shaders\Includes\Common\PointLight.glsl" />
     <None Include="Shaders\Includes\Common\SpotLight.glsl" />
+    <None Include="Shaders\Includes\Common\StaticChunk.glsl" />
     <None Include="Shaders\Includes\Common\Texture.glsl" />
     <None Include="Shaders\Includes\Common\Transform.glsl" />
     <None Include="Shaders\Includes\Common\Visibility.glsl" />
@@ -985,6 +1009,7 @@
     <None Include="Shaders\Includes\PushConstants\BloomDownSamplePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\BloomPrefilterPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\BloomUpSamplePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\ClusterDispatchSetupPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\ClusterLightCountPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\ClusterLightWritePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\ClusterPrefixSumPC.glsl" />
@@ -1001,7 +1026,7 @@
     <None Include="Shaders\Includes\PushConstants\ModelMeshCullingPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\PointLightCullingPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\SpotLightCullingPC.glsl" />
-    <None Include="Shaders\Includes\PushConstants\WireframeLightPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\WireframeDebugPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframeSetupPC.glsl" />
     <None Include="Shaders\Includes\SharedGpuTypes.glsl" />
@@ -1018,13 +1043,20 @@
     <None Include="Shaders\Passes\Billboard\Billboard.vert" />
     <None Include="Shaders\Passes\Common\Composite.frag" />
     <None Include="Shaders\Passes\Common\Fullscreen.vert" />
+    <None Include="Shaders\Passes\Culling\StaticChunkCulling.comp" />
+    <None Include="Shaders\Passes\Culling\StaticModelCulling.comp" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterDispatchSetup.comp" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightSingle.comp" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightCount.comp" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightSingle.comp" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightWrite.comp" />
     <None Include="Shaders\Passes\Shading\Visibility\DebugVisibility.frag" />
     <None Include="Shaders\Passes\Shading\Common\Meshlet.mesh" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightCount.comp" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightWrite.comp" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPrefixSum.comp" />
-    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightCount.comp" />
-    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightWrite.comp" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightCountSlow.comp" />
+    <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightWriteSlow.comp" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Lighting\OpaqueForward.frag" />
     <None Include="Shaders\Passes\Shading\Wboit\TransparentForward.frag" />
     <None Include="Shaders\Passes\Shading\Wboit\TransparentComposite.frag" />
@@ -1057,7 +1089,7 @@
     <None Include="Shaders\Passes\PostProcess\BloomUpsample.comp" />
     <None Include="Shaders\Passes\Wireframe\Wireframe.frag" />
     <None Include="Shaders\Passes\Wireframe\Wireframe.vert" />
-    <None Include="Shaders\Passes\Wireframe\WireframeLight.vert" />
+    <None Include="Shaders\Passes\Wireframe\WireframeDebug.vert" />
     <None Include="Shaders\Passes\Wireframe\WireframeSetup.comp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

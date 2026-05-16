@@ -40,7 +40,8 @@ namespace Syn
         listBarrierPre.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
         Vk::BufferUtils::InsertBarrier(context.cmd, listBarrierPre);
 
-        vkCmdDispatch(context.cmd, 1, 1, 1);
+        VkBuffer indirectBuffer = drawData->ForwardPlus.dispatchArgsBuffer.GetHandle(context.frameIndex, true);
+        vkCmdDispatchIndirect(context.cmd, indirectBuffer, offsetof(ForwardPlusDispatchArgs, prefixSum));
         
         Vk::BufferBarrierInfo listBarrierPost{};
         listBarrierPost.buffer = drawData->ForwardPlus.clusterListBuffer.GetHandle(context.frameIndex, true);

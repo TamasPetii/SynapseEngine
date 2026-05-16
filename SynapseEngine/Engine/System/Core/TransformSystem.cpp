@@ -4,12 +4,14 @@
 #include <glm/gtx/transform2.hpp>
 #include <glm/gtx/matrix_decompose.hpp>
 #include <print>
+#include "Engine/Component/Rendering/ModelComponent.h"
+#include "Engine/System/Rendering/ModelSystem.h"
 
 namespace Syn
 {
     std::vector<TypeID> TransformSystem::GetWriteDependencies() const
     {
-        { return { TypeInfo<TransformSystem>::ID }; }
+        return { TypeInfo<TransformSystem>::ID };
     }
 
     void TransformSystem::UpdateComponents(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
@@ -43,19 +45,28 @@ namespace Syn
         auto transformPool = registry->GetPool<TransformComponent>();
         if (!transformPool) return;
 
-        auto componentBuffer = componentBufferManager->GetComponentBuffer(BufferNames::TransformData, frameIndex);
-        if (!componentBuffer.buffer) return;
+        auto transformDataBuffer = componentBufferManager->GetComponentBuffer(BufferNames::TransformData, frameIndex);
+        if (!transformDataBuffer.buffer) return;
+        auto transformDataBufferHandler = static_cast<TransformComponentGPU*>(transformDataBuffer.buffer->Map());
 
-        auto bufferHandler = static_cast<TransformComponentGPU*>(componentBuffer.buffer->Map());
+		auto transformLinkBuffer = componentBufferManager->GetComponentBuffer(BufferNames::TransformModelLinkData, frameIndex);
+        if(!transformLinkBuffer.buffer) return;
+		auto transformLinkBufferHandler = static_cast<TransformModelLinkGPU*>(transformLinkBuffer.buffer->Map());
 
-        auto processUpload = [transformPool, bufferHandler, componentBuffer](EntityID entity) {
+        auto processUpload = [transformPool, transformDataBuffer, transformDataBufferHandler, transformLinkBuffer, transformLinkBufferHandler](EntityID entity) {
             auto& transformComponent = transformPool->Get(entity);
             auto transformIndex = transformPool->GetMapping().Get(entity);
 
-            if (componentBuffer.versions[transformIndex] != transformComponent.version)
+            if (transformDataBuffer.versions[transformIndex] != transformComponent.version)
             {
-                componentBuffer.versions[transformIndex] = transformComponent.version;
-                bufferHandler[transformIndex] = TransformComponentGPU(transformComponent);
+                transformDataBuffer.versions[transformIndex] = transformComponent.version;
+                transformDataBufferHandler[transformIndex] = TransformComponentGPU(transformComponent);
+            }
+
+            if (transformLinkBuffer.versions[transformIndex] != transformComponent.version)
+            {
+                transformLinkBuffer.versions[transformIndex] = transformComponent.version;
+                transformLinkBufferHandler[transformIndex].entityIndex = entity;
             }
             };
 

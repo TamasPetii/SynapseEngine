@@ -8,6 +8,8 @@ namespace Syn
     {
     public:
         std::string GetName() const override { return "AnimationSystem"; }
+        std::string GetGroup() const override { return SystemGroupNames::RenderingSystems; }
+
         std::vector<TypeID> GetWriteDependencies() const override;
     protected:
         std::string GetSparseBufferName() const override { return BufferNames::AnimationSparseMap; }

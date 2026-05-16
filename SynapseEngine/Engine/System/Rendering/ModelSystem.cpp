@@ -7,7 +7,9 @@
 namespace Syn
 {
     std::vector<TypeID> ModelSystem::GetReadDependencies() const {
-        return { TypeInfo<MaterialSystem>::ID };
+        return { 
+            TypeInfo<MaterialSystem>::ID
+        };
     }
 
     std::vector<TypeID> ModelSystem::GetWriteDependencies() const { 
@@ -42,37 +44,29 @@ namespace Syn
     {
         auto registry = scene->GetRegistry();
         auto componentBufferManager = scene->GetComponentBufferManager();
-        auto modelPool = registry->GetPool<ModelComponent>();
+        auto modelPool= registry->GetPool<ModelComponent>();
         if (!modelPool) return;
 
-        auto componentBuffer = componentBufferManager->GetComponentBuffer(BufferNames::ModelData, frameIndex);
-        if (!componentBuffer.buffer) return;
-
-        auto bufferHandler = static_cast<ModelComponentGPU*>(componentBuffer.buffer->Map());
+        auto modelDataBuffer = componentBufferManager->GetComponentBuffer(BufferNames::ModelData, frameIndex);
+        if (!modelDataBuffer.buffer) return;
+        auto modelDataBufferHandler = static_cast<ModelComponentGPU*>(modelDataBuffer.buffer->Map());
 
         bool forceUpload = this->ShouldForceUpload();
 
-        auto processUpload = [modelPool, bufferHandler, componentBuffer, forceUpload](EntityID entity) {
+        auto processUpload = [modelPool, modelDataBuffer, modelDataBufferHandler, forceUpload](EntityID entity) {
             auto& modelComponent = modelPool->Get(entity);
             auto modelIndex = modelPool->GetMapping().Get(entity);
 
-            if (forceUpload || componentBuffer.versions[modelIndex] != modelComponent.version)
+            if (forceUpload || modelDataBuffer.versions[modelIndex] != modelComponent.version)
             {
-                componentBuffer.versions[modelIndex] = modelComponent.version;
-                bufferHandler[modelIndex] = ModelComponentGPU(entity, modelComponent);
+                modelDataBuffer.versions[modelIndex] = modelComponent.version;
+                modelDataBufferHandler[modelIndex] = ModelComponentGPU(entity, modelComponent);
             }
+
             };
 
         ForEachStream(modelPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
-
-        if (uploadDynamic)
-        {
-            ForEachDynamic(modelPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
-        }
-
-        if (uploadStatic)
-        {
-            ForEachStatic(modelPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
-        }
+        if (uploadDynamic) ForEachDynamic(modelPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
+        if (uploadStatic) ForEachStatic(modelPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
     }
 }

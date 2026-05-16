@@ -6,6 +6,7 @@ namespace Syn {
     class SYN_API PointLightAabbWireframePass : public GraphicsPass {
     public:
         std::string GetName() const override { return "PointLightAabbWireframePass"; }
+        std::string GetGroup() const override { return PassGroupNames::WireframePasses; }
         void Initialize() override;
     protected:
 		bool ShouldExecute(const RenderContext& context) const override;

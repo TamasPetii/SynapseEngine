@@ -9,13 +9,14 @@
 #include "../../Includes/Common/Mesh.glsl"
 #include "../../Includes/Common/PointLight.glsl"
 #include "../../Includes/Common/SpotLight.glsl"
+#include "../../Includes/Common/StaticChunk.glsl"
 
 layout(location = 0) out vec4 outColor;
 
-#include "../../Includes/PushConstants/WireframeLightPC.glsl"
+#include "../../Includes/PushConstants/WireframeDebugPC.glsl"
 
 layout(push_constant) uniform PushConstants {
-    WireframeLightPC pc;
+    WireframeDebugPC pc;
 };
 
 void main() {
@@ -31,7 +32,7 @@ void main() {
 
     // 0: Point Sphere, 1: Point Aabb
     if (pc.lightDrawType <= 1) {
-        uint entityId = VisiblePointLightBuffer(ctx.pointLightVisibleIndexBufferAddr).data[gl_InstanceIndex];
+        uint entityId = GET_VISIBLE_POINT_LIGHT(ctx.pointLightVisibleIndexBufferAddr, gl_InstanceIndex);
         uint denseIdx = GET_SPARSE_INDEX(ctx.pointLightSparseMapBufferAddr, entityId);
         PointLightColliderGPU col = GET_POINT_LIGHT_COLLIDER(ctx.pointLightColliderBufferAddr, denseIdx);
         PointLightComponent light = GET_POINT_LIGHT(ctx.pointLightDataBufferAddr, denseIdx);
@@ -40,8 +41,8 @@ void main() {
         lightColor = light.color;
     } 
     // Spot Light
-    else {
-        uint entityId = VisibleSpotLightBuffer(ctx.spotLightVisibleIndexBufferAddr).data[gl_InstanceIndex];
+    else if (pc.lightDrawType >= 2 && pc.lightDrawType <= 4) {
+        uint entityId = GET_VISIBLE_SPOT_LIGHT(ctx.spotLightVisibleIndexBufferAddr, gl_InstanceIndex);
         uint denseIdx = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, entityId);
         SpotLightColliderGPU col = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, denseIdx);
         SpotLightComponent light = GET_SPOT_LIGHT(ctx.spotLightDataBufferAddr, denseIdx);
@@ -64,6 +65,20 @@ void main() {
         {
             worldPos = (light.transform * vec4(v.position, 1.0)).xyz;
         }
+    }
+    else if (pc.lightDrawType == 5) {
+        uint rawChunkId = GET_VISIBLE_CHUNK(ctx.staticChunkVisibleIndexBufferAddr, gl_InstanceIndex);
+        
+        bool chunkFullyInside = (rawChunkId >> 31) != 0;
+        uint pureChunkId = rawChunkId & 0x7FFFFFFF;
+
+        StaticChunk chunk = GET_STATIC_CHUNK(ctx.staticChunkDataBufferAddr, pureChunkId);
+
+        vec3 extents = (chunk.maxBounds - chunk.minBounds) * 0.5;
+        vec3 center = (chunk.maxBounds + chunk.minBounds) * 0.5;
+        worldPos = center + (v.position * extents);
+
+        lightColor = chunkFullyInside ? vec3(0.1, 1.0, 0.1) : vec3(1.0, 0.5, 0.0);
     }
 
     uint cameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);

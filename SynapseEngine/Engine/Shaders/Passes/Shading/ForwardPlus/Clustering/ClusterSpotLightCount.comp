@@ -24,15 +24,15 @@ layout(push_constant) uniform PushConstants {
 };
 
 shared uint s_localSpotLightCount;
-shared vec3 s_clusterAABBMin;
-shared vec3 s_clusterAABBMax;
+shared vec3 s_clusterSphereCenter;
+shared float s_clusterSphereRadius;
 
 void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
     uint threadId = gl_LocalInvocationID.x;
     uint clusterIdx = gl_WorkGroupID.x;
-    
+
     uint activeClusterCount = GET_CLUSTER_COUNT(ctx.forwardPlusClusterCountBufferAddr);
     if (clusterIdx >= activeClusterCount) return;
     
@@ -41,14 +41,19 @@ void main() {
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
 
     if (threadId == 0) {
-        s_localSpotLightCount = 0;     
+        s_localSpotLightCount = 0;
         ClusterData cluster = GET_CLUSTER_DATA(ctx.forwardPlusClusterListBufferAddr, clusterIdx);
 
+        vec3 aabbMin, aabbMax;
         GetClusterViewSpaceAABB(
             cluster.tileIndex, ctx.tileCountX, ctx.tileSize, ctx.screenWidth, ctx.screenHeight, 
             cluster.minZ, cluster.maxZ, camera.projVulkanInv, 
-            s_clusterAABBMin, s_clusterAABBMax
+            aabbMin, aabbMax
         );
+        
+        vec3 extents = (aabbMax - aabbMin) * 0.5;
+        s_clusterSphereCenter = aabbMin + extents;
+        s_clusterSphereRadius = length(extents);
     }
 
     barrier();
@@ -58,8 +63,11 @@ void main() {
         uint denseIdx = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, entityIdx);
         SpotLightColliderGPU collider = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, denseIdx);
         
-        vec3 viewSpaceCenter = collider.viewSpaceCenter;
-        bool isIntersecting = TestSphereAABB(viewSpaceCenter, collider.radius, s_clusterAABBMin, s_clusterAABBMax);
+        bool isIntersecting = TestConeSphere(
+            collider.viewSpacePos, collider.viewSpaceDir, 
+            collider.range, collider.outerAngleCos, collider.outerAngleSin,
+            s_clusterSphereCenter, s_clusterSphereRadius
+        );
 
         uvec4 ballot = subgroupBallot(isIntersecting);
         uint activeCount = subgroupBallotBitCount(ballot);

@@ -11,6 +11,7 @@
 #include <taskflow/algorithm/for_each.hpp>
 #include "Engine/Scene/Scene.h"
 #include "SystemPhaseNames.h"
+#include "SystemGroupNames.h"
 
 namespace Syn
 {
@@ -26,6 +27,7 @@ namespace Syn
         virtual std::vector<TypeID> GetReadDependencies() const { return {}; }
         virtual std::vector<TypeID> GetWriteDependencies() const { return {}; }
         virtual std::string GetName() const = 0;
+        virtual std::string GetGroup() const { return SystemGroupNames::UndefinedSystems; }
 
         SYN_INLINE void SetFramesToUpload(uint32_t frames) { _framesToUpload = frames; }
         SYN_INLINE uint32_t GetFramesToUpload() const { return _framesToUpload; }

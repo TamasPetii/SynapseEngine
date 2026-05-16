@@ -34,7 +34,8 @@
 #include "Engine/System/Physics/SphereColliderSystem.h"
 #include "Engine/System/Physics/CapsuleColliderSystem.h"
 #include "Engine/System/Physics/RigidBodySystem.h"
-
+#include "Engine/System/Core/StaticSpatialSahSystem.h"
+#include "Engine/System/Core/TransformModelLinkSystem.h"
 #include "Engine/Profiler/ICpuProfiler.h"
 #include "Engine/FrameContext.h"
 
@@ -84,6 +85,8 @@ namespace Syn
     void Scene::InitializeSystems()
     {
         RegisterSystem<TransformSystem>();
+        RegisterSystem<TransformModelLinkSystem>();
+        RegisterSystem<StaticSpatialSahSystem>();
         RegisterSystem<MaterialSystem>();
         RegisterSystem<CameraSystem>();
         RegisterSystem<RenderSystem>();
@@ -110,6 +113,7 @@ namespace Syn
     {
         RegisterComponentSparseMapBuffer<TransformComponent>(BufferNames::TransformSparseMap);
         RegisterComponentBuffer<TransformComponent, TransformComponentGPU>(BufferNames::TransformData);   
+        RegisterComponentBuffer<TransformComponent, TransformModelLinkGPU>(BufferNames::TransformModelLinkData);
 
         RegisterComponentSparseMapBuffer<CameraComponent>(BufferNames::CameraSparseMap);
         RegisterComponentBuffer<CameraComponent, CameraComponentGPU>(BufferNames::CameraData);
@@ -172,7 +176,9 @@ namespace Syn
                 else if (phase == SystemPhase::UploadGPU) profilerName += " [Upload GPU]";
                 else profilerName += " [Finish]";
 
-                CpuProfileScope profile(ServiceLocator::GetCpuProfiler(), _currentFrameIndex, profilerName);
+                std::string groupName = sys->GetGroup();
+
+                CpuProfileScope profile(ServiceLocator::GetCpuProfiler(), _currentFrameIndex, groupName, profilerName);
 
                 switch (phase)
                 {

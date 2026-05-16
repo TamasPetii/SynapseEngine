@@ -11,6 +11,7 @@
 #include "RenderContext.h"
 #include "ShaderNames.h"
 #include "RenderNames.h"
+#include "PassGroupNames.h"
 
 namespace Syn 
 {
@@ -29,8 +30,9 @@ namespace Syn
         virtual ~IRenderPass() = default;
         virtual void Initialize() {};
         virtual void Execute(const RenderContext& context) {};
-        virtual std::string GetName() const = 0;      
         virtual bool ShouldExecute(const RenderContext& context) const { return true; }
+        virtual std::string GetName() const = 0;
+        virtual std::string GetGroup() const { return PassGroupNames::UndefinedPasses; }
     };
 }
 

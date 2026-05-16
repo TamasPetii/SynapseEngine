@@ -14,6 +14,7 @@
 #include "Engine/Component/Light/Point/PointLightComponent.h"
 #include "Engine/Component/Light/Spot/SpotLightComponent.h"
 #include "Engine/Component/Rendering/ModelComponent.h"
+#include "Engine/Component/Core/TransformComponent.h"
 
 namespace Syn {
 
@@ -22,15 +23,16 @@ namespace Syn {
     void GlobalFrameSetupPass::Transfer(const RenderContext& context) {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
+        auto settings = scene->GetSettings();
         auto compManager = scene->GetComponentBufferManager();
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
         uint32_t fIdx = context.frameIndex;
         uint32_t width = rtGroup->GetWidth();
         uint32_t height = rtGroup->GetHeight();
-        bool isGpu = scene->GetSettings()->enableGpuCulling;
+        bool isGpu = settings->enableGpuCulling;
 
-        drawData->ForwardPlus.CheckResize(width, height, fIdx);
+        drawData->ForwardPlus.CheckResize(settings->tileSize, width, height, fIdx);
 
         auto modelManager = ServiceLocator::GetModelManager();
         auto materialManager = ServiceLocator::GetMaterialManager();
@@ -51,6 +53,11 @@ namespace Syn {
 
         ctx.transformBufferAddr = compManager->GetBufferAddr(BufferNames::TransformData, fIdx);
         ctx.transformSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::TransformSparseMap, fIdx);
+		ctx.transformModelLinkBufferAddr = compManager->GetBufferAddr(BufferNames::TransformModelLinkData, fIdx);
+
+		ctx.staticChunkDataBufferAddr = drawData->Chunks.chunkDataBuffer.GetAddress(fIdx, isGpu);
+        ctx.staticChunkVisibleIndexBufferAddr = drawData->Chunks.chunkVisibilityBuffer.GetAddress(fIdx, isGpu);
+        ctx.staticChunkCountBufferAddr = drawData->Chunks.indirectDispatchBuffer.GetAddress(fIdx, isGpu);
 
         ctx.modelAddressBufferAddr = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
         ctx.modelBufferAddr = compManager->GetBufferAddr(BufferNames::ModelData, fIdx);
@@ -100,13 +107,30 @@ namespace Syn {
 
         ctx.screenWidth = static_cast<float>(rtGroup->GetWidth());
         ctx.screenHeight = static_cast<float>(rtGroup->GetHeight());
-        ctx.ambientStrength = scene->GetSettings()->ambientStrength;
-        ctx.emissiveStrength = scene->GetSettings()->emissiveStrength;
+        ctx.ambientStrength = settings->ambientStrength;
+        ctx.emissiveStrength = settings->emissiveStrength;
         ctx.alphaLimitDiscard = 0.025f;
 
-        ctx.enableConeCulling = scene->GetSettings()->enableConeCulling ? 1 : 0;
-        ctx.enableFrustumCulling = scene->GetSettings()->enableFrustumCulling ? 1 : 0;
-        ctx.enableOcclusionCulling = scene->GetSettings()->enableOcclusionCulling ? 1 : 0;
+        ctx.enableMeshletConeCulling = settings->enableMeshletConeCulling ? 1 : 0;
+
+        ctx.enableChunkFrustumCulling = settings->enableFrustumCulling && settings->enableChunkFrustumCulling ? 1 : 0;
+        ctx.enableModelFrustumCulling = settings->enableFrustumCulling && settings->enableModelFrustumCulling ? 1 : 0;
+        ctx.enableMeshFrustumCulling = settings->enableFrustumCulling && settings->enableMeshFrustumCulling ? 1 : 0;
+        ctx.enableMeshletFrustumCulling = settings->enableFrustumCulling && settings->enableMeshletFrustumCulling ? 1 : 0;
+        ctx.enablePointLightFrustumCulling = settings->enableFrustumCulling && settings->enablePointLightFrustumCulling ? 1 : 0;
+        ctx.enableSpotLightFrustumCulling = settings->enableFrustumCulling && settings->enableSpotLightFrustumCulling ? 1 : 0;
+
+        ctx.enableChunkOcclusionCulling = settings->enableOcclusionCulling && settings->enableChunkOcclusionCulling ? 1 : 0;
+        ctx.enableModelOcclusionCulling = settings->enableOcclusionCulling && settings->enableModelOcclusionCulling ? 1 : 0;
+        ctx.enableMeshOcclusionCulling = settings->enableOcclusionCulling && settings->enableMeshOcclusionCulling ? 1 : 0;
+        ctx.enableMeshletOcclusionCulling = settings->enableOcclusionCulling && settings->enableMeshletOcclusionCulling ? 1 : 0;
+        ctx.enablePointLightOcclusionCulling = settings->enableFrustumCulling && settings->enablePointLightOcclusionCulling ? 1 : 0;
+        ctx.enableSpotLightOcclusionCulling = settings->enableFrustumCulling && settings->enableSpotLightOcclusionCulling ? 1 : 0;
+
+        ctx.enableForwardPlusEmissiveAo = scene->GetSettings()->enableForwardPlusEmissiveAo ? 1 : 0;
+        ctx.enableForwardPlusPointLights = scene->GetSettings()->enableForwardPlusPointLights ? 1 : 0;
+        ctx.enableForwardPlusSpotLights = scene->GetSettings()->enableForwardPlusSpotLights ? 1 : 0;
+        ctx.enableForwardPlusDirectionalLights = scene->GetSettings()->enableForwardPlusDirectionalLights ? 1 : 0;
 
         ctx.globalIndirectCommandCount = drawData->Models.activeTraditionalCount + drawData->Models.activeMeshletCount;
         ctx.globalTraditionalCommandsCount = drawData->Models.activeTraditionalCount;
@@ -115,14 +139,22 @@ namespace Syn {
         ctx.mainCameraEntity = scene->GetSceneCameraEntity();
         ctx.activeCameraEntity = scene->GetSettings()->useDebugCamera ? scene->GetDebugCameraEntity() : scene->GetSceneCameraEntity();
 
-		auto [modelPool, directionLightPool, pointLightPool, spotLightPool, cameraPool] = scene->GetRegistry()->GetPools<ModelComponent, DirectionLightComponent, PointLightComponent, SpotLightComponent, CameraComponent>();
+		auto [modelPool, directionLightPool, pointLightPool, spotLightPool, cameraPool, transformPool] = scene->GetRegistry()->GetPools<ModelComponent, DirectionLightComponent, PointLightComponent, SpotLightComponent, CameraComponent, TransformComponent>();
 
+		ctx.staticChunkCount = drawData->Chunks.chunkCounter.load(std::memory_order_relaxed);
         ctx.modelCount = modelPool->Size();
         ctx.directionLightCount = directionLightPool->Size();
         ctx.pointLightCount = pointLightPool->Size();
         ctx.spotLightCount = spotLightPool->Size();
 
-        ctx.tileSize = drawData->ForwardPlus.tileSize;
+        ctx.enableStaticBvhCulling = scene->GetSettings()->enableStaticBvhCulling ? 1 : 0;
+        ctx.allTransformCount = transformPool->Size();
+        ctx.staticTransformCount = transformPool->GetStaticEntities().size();
+        ctx.dynamicTransformCount = transformPool->GetDynamicEntities().size();
+        ctx.streamTransformCount = transformPool->GetStreamEntities().size();
+        ctx.nonStaticTransformCount = ctx.allTransformCount - ctx.staticTransformCount;
+
+        ctx.tileSize = scene->GetSettings()->tileSize;
         ctx.tileCountX = ComputeGroupSize::CalculateDispatchCount(rtGroup->GetWidth(), ctx.tileSize);
         ctx.tileCountY = ComputeGroupSize::CalculateDispatchCount(rtGroup->GetHeight(), ctx.tileSize);
         ctx.hizMipLevel = std::log2(static_cast<float>(ctx.tileSize));

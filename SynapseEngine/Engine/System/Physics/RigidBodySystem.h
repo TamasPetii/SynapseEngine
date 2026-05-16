@@ -8,6 +8,8 @@ namespace Syn
     {
     public:
         std::string GetName() const override { return "RigidBodySystem"; }
+        std::string GetGroup() const override { return SystemGroupNames::PhysicsSystems; }
+
         std::vector<TypeID> GetReadDependencies() const override;
         std::vector<TypeID> GetWriteDependencies() const override;
     protected:

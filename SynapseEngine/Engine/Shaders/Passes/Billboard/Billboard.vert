@@ -45,7 +45,7 @@ void main() {
     TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIdx);
     vec3 worldCenter = transform.transform[3].xyz;
 
-    uint activeCamDenseIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
+    uint activeCamDenseIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
     CameraComponent activeCamera = GET_CAMERA(ctx.cameraBufferAddr, activeCamDenseIdx);
 
     vec3 camRight = vec3(activeCamera.view[0][0], activeCamera.view[1][0], activeCamera.view[2][0]);

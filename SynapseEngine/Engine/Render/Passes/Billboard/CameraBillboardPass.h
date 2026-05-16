@@ -6,6 +6,7 @@ namespace Syn {
     class SYN_API CameraBillboardPass : public GraphicsPass {
     public:
         std::string GetName() const override { return "CameraBillboardPass"; }
+        std::string GetGroup() const override { return PassGroupNames::BillboardPasses; }
         void Initialize() override;
     protected:
         bool ShouldExecute(const RenderContext& context) const override;

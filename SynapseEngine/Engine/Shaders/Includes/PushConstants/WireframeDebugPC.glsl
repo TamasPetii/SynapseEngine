@@ -3,7 +3,7 @@
 
 #include "../SharedGpuTypes.glsl"
 
-struct WireframeLightPC {
+struct WireframeDebugPC {
     uint64_t frameGlobalContextBufferAddr;
     uint64_t indexBufferAddr;
     uint64_t vertexPositionBufferAddr;

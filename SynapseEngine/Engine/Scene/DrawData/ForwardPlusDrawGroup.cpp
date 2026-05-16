@@ -18,6 +18,9 @@ namespace Syn
         clusterCountBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectUsage, 1, 1});
         clusterCountBuffer.UpdateCapacityAll(1);
 
+        dispatchArgsBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(ForwardPlusDispatchArgs), indirectUsage, 1, 1 });
+        dispatchArgsBuffer.UpdateCapacityAll(1);
+
         pointLightIndexBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 10000, 20000 });
         pointLightIndexBuffer.UpdateCapacityAll(1);
         
@@ -29,7 +32,7 @@ namespace Syn
 
     }
 
-    void ForwardPlusDrawGroup::CheckResize(uint32_t width, uint32_t height, uint32_t frameIndex)
+    void ForwardPlusDrawGroup::CheckResize(uint32_t tileSize, uint32_t width, uint32_t height, uint32_t frameIndex)
     {
         ComputeGroupSize::CalculateDispatchCount(width, tileSize);
 
@@ -42,7 +45,7 @@ namespace Syn
         tileGridBuffer.UpdateCapacity(frameIndex, gridX * gridY);
         clusterListBuffer.UpdateCapacity(frameIndex, maxClusters);
 
-        uint32_t expectedAverageLightsPerCluster = 1024;
+        uint32_t expectedAverageLightsPerCluster = 512;
         uint32_t totalLightIndices = maxClusters * expectedAverageLightsPerCluster;
 
         pointLightIndexBuffer.UpdateCapacity(frameIndex, totalLightIndices);

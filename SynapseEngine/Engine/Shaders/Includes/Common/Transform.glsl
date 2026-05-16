@@ -13,6 +13,12 @@ struct GpuNodeTransform {
     mat4 globalTransformIT;
 };
 
+struct TransformModelLink
+{
+    uint entityIndex;
+    uint modelDenseIndex;
+};
+
 layout(buffer_reference, std430) readonly restrict buffer TransformPool { 
     TransformComponent data[]; 
 };
@@ -21,8 +27,14 @@ layout(buffer_reference, std430) readonly restrict buffer NodeBuffer {
     GpuNodeTransform data[];
 };
 
+layout(buffer_reference, std430) readonly restrict buffer TransformModelLinkBuffer { 
+    TransformModelLink data[];
+};
+
+
 #define GET_TRANSFORM_POOL(addr)        TransformPool(addr)
 #define GET_TRANSFORM(addr, idx)        TransformPool(addr).data[idx]
 #define GET_NODE_TRANSFORM(addr, idx)   NodeBuffer(addr).data[idx]
+#define GET_TRANSFORM_MODEL_LINK(addr, idx)   TransformModelLinkBuffer(addr).data[idx]
 
 #endif

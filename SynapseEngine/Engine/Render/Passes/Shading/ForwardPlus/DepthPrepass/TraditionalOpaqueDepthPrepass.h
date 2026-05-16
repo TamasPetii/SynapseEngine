@@ -9,6 +9,7 @@ namespace Syn {
         TraditionalOpaqueDepthPrepass(MaterialRenderType renderType);
 
         std::string GetName() const override { return _passName; }
+        std::string GetGroup() const override { return PassGroupNames::ForwardPlusDepthPrePasses; }
         void Initialize() override;
     protected:
         bool ShouldExecute(const RenderContext& context) const override;

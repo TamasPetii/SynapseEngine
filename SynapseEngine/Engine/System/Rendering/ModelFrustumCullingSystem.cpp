@@ -10,6 +10,8 @@
 #include "Engine/Animation/AnimationManager.h"
 #include "Engine/System/Rendering/AnimationSystem.h"
 #include "Engine/System/Rendering/MaterialSystem.h"
+#include "Engine/System/Core/StaticSpatialSahSystem.h"
+
 #include "Engine/Material/MaterialManager.h"
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
 
@@ -28,7 +30,8 @@ namespace Syn
             TypeInfo<RenderSystem>::ID,
             TypeInfo<CameraSystem>::ID,
             TypeInfo<AnimationSystem>::ID,
-            TypeInfo<MaterialSystem>::ID
+            TypeInfo<MaterialSystem>::ID,
+            TypeInfo<StaticSpatialSahSystem>::ID
         };
     }
 
@@ -76,10 +79,15 @@ namespace Syn
 
         glm::vec2 screenRes = glm::vec2(cameraComp.width, cameraComp.height);
 
-        auto cullFunc = [drawData, modelPool, transformPool, modelSnapshot, cameraComp, animPool, animSnapshot, matTypeSnapshot, overridePool, screenRes](EntityID entity) {
+        auto cullFunc = [drawData, modelPool, transformPool, modelSnapshot, cameraComp, animPool, animSnapshot, matTypeSnapshot, overridePool, screenRes]
+        (EntityID entity, IntersectionType chunkVisibility) {
             const FrustumCollider& frustum = cameraComp.frustum;
-            const auto& modelComp = modelPool->Get(entity);
             const auto& transformComp = transformPool->Get(entity);
+
+            if (!modelPool->Has(entity))
+                return;
+
+            const auto& modelComp = modelPool->Get(entity);
 
             if (modelComp.modelIndex == NULL_INDEX)
                 return;
@@ -121,7 +129,11 @@ namespace Syn
 
             GpuMeshCollider globalWorldCollider = MeshUtils::TransformCollider(globalLocalCollider, transform);
 
-            IntersectionType visibility = CollisionTester::IsInFrustumIntersectionType(globalWorldCollider, frustum);
+            IntersectionType visibility = chunkVisibility;
+            if (visibility == IntersectionType::Intersect) {
+                visibility = CollisionTester::IsInFrustumIntersectionType(globalWorldCollider, frustum);
+            }
+
             if (visibility == IntersectionType::Outside)
                 return;
 
@@ -214,13 +226,47 @@ namespace Syn
             }
         };
 
-        const auto& staticEntities = modelPool->GetStorage().GetStaticEntities();
-        const auto& dynamicEntities = modelPool->GetStorage().GetDynamicEntities();
-        const auto& streamEntities = modelPool->GetStorage().GetStreamEntities();
+        const auto& staticEntities = transformPool->GetStorage().GetStaticEntities();
+        const auto& dynamicEntities = transformPool->GetStorage().GetDynamicEntities();
+        const auto& streamEntities = transformPool->GetStorage().GetStreamEntities();
 
-        auto staticTask = this->ForEach(staticEntities, subflow, "Update Static", cullFunc);
-        auto dynamicTask = this->ForEach(dynamicEntities, subflow, "Update Dynamic", cullFunc);
-        auto streamTask = this->ForEach(streamEntities, subflow, "Update Stream", cullFunc);
+        std::optional<tf::Task> staticTask;
+        auto chunkGroup = &drawData->Chunks;
+
+        if (settings->enableStaticBvhCulling && chunkGroup->chunkCounter.load(std::memory_order_relaxed) > 0)
+        {
+            chunkGroup->visibleChunkCount.store(0, std::memory_order_relaxed);
+
+            uint32_t activeChunks = chunkGroup->chunkCounter.load(std::memory_order_relaxed);
+
+            staticTask = this->ForEachIndex(uint32_t(0), activeChunks, uint32_t(1), subflow, "Update Static Chunks",
+                [chunkGroup, staticEntities, cullFunc, &cameraComp](uint32_t chunkIdx) {
+                    const auto& chunk = chunkGroup->chunks[chunkIdx];
+
+                    IntersectionType visibility = CollisionTester::TestAabbFrustumIntersectionType(chunk.minBounds, chunk.maxBounds, cameraComp.frustum);
+                    if (visibility == IntersectionType::Outside) return;
+
+                    uint32_t slot = chunkGroup->visibleChunkCount.fetch_add(1, std::memory_order_relaxed);
+                    uint32_t packedId = chunkIdx;
+                    if (visibility == IntersectionType::Inside) packedId |= (1u << 31);
+                    chunkGroup->visibleChunkIds[slot] = packedId;
+
+                    for (uint32_t i = 0; i < chunk.entityCount; ++i) {
+                        EntityID entity = staticEntities[chunk.firstEntityIndex + i];
+                        cullFunc(entity, visibility);
+                    }
+                });
+        }
+        else
+        {
+            staticTask = this->ForEach(staticEntities, subflow, "Update Static",
+                [cullFunc](EntityID entity) { cullFunc(entity, IntersectionType::Intersect); });
+        }
+
+        auto dynamicTask = this->ForEach(dynamicEntities, subflow, "Update Dynamic",
+            [cullFunc](EntityID entity) { cullFunc(entity, IntersectionType::Intersect); });
+        auto streamTask = this->ForEach(streamEntities, subflow, "Update Stream",
+            [cullFunc](EntityID entity) { cullFunc(entity, IntersectionType::Intersect); });
 
         if (staticTask) initTask.precede(*staticTask);
         if (dynamicTask) initTask.precede(*dynamicTask);
@@ -249,6 +295,23 @@ namespace Syn
                 if (instanceSize > 0) {
                     if (auto mappedInstance = drawData->Models.instanceBuffer.GetMapped(frameIndex)) {
                         mappedInstance->Write(drawData->Models.instances.Data(), instanceSize, 0);
+                    }
+                }
+
+                if (settings->enableStaticBvhCulling)
+                {
+                    uint32_t visibleCount = drawData->Chunks.visibleChunkCount.load(std::memory_order_relaxed);
+
+                    if (auto mappedCmd = drawData->Chunks.aabbSingleCmdBuffer.GetMapped(frameIndex)) {
+                        VkDrawIndirectCommand cmd = drawData->Chunks.wireframeCmdTemplate;
+                        cmd.instanceCount = visibleCount;
+                        mappedCmd->Write(&cmd, sizeof(VkDrawIndirectCommand), 0);
+                    }
+
+                    if (visibleCount > 0) {
+                        if (auto mappedVis = drawData->Chunks.chunkVisibilityBuffer.GetMapped(frameIndex)) {
+                            mappedVis->Write(drawData->Chunks.visibleChunkIds.data(), visibleCount * sizeof(uint32_t), 0);
+                        }
                     }
                 }
             }

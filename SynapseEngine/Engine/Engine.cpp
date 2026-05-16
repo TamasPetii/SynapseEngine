@@ -99,7 +99,7 @@ namespace Syn
 		_inputManager = std::make_unique<InputManager>();
 		ServiceLocator::ProvideInputManager(_inputManager.get());
 
-		InitFrameContext(1);
+		InitFrameContext(2);
 		InitLogger();
 		InitVulkan(params);
 		InitTaskExecutor();
@@ -164,7 +164,7 @@ namespace Syn
 
 		if (timeDiff >= 1.0f) {
 
-			std::string logReport = std::format("FPS: {} ({} ms/frame)\n\n", frameCount, 1000.0f / frameCount);
+			std::string logReport = "";
 
 			if (auto cpuProfiler = ServiceLocator::GetCpuProfiler()) {
 				logReport += cpuProfiler->GenerateReport(prevFrame, "CPU") + "\n";
@@ -173,8 +173,8 @@ namespace Syn
 			if (auto gpuProfiler = ServiceLocator::GetGpuProfiler()) {
 				logReport += gpuProfiler->GenerateReport(prevFrame, "GPU") + "\n";
 			}
-
-			std::println("{}", logReport);
+			std::println("{}\n", logReport);
+			std::println("FPS: {} ({} ms/frame)\n", frameCount, 1000.0f / frameCount);
 
 			frameCount = 0;
 			lastTime = currentTime;

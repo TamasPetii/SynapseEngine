@@ -9,8 +9,6 @@
 #include "../../../../Includes/Common/Texture.glsl"
 #include "../../../../Includes/Utils/MaterialMath.glsl"
 
-layout(early_fragment_tests) in;
-
 #include "../../../../Includes/PushConstants/TraditionalMeshletPassPC.glsl"
 
 layout(push_constant) uniform PushConstants {

@@ -13,6 +13,8 @@
 #include "Engine/Render/Passes/Bloom/BloomCompositePass.h"
 
 #include "Engine/Render/Passes/Culling/ModelCullingPass.h"
+#include "Engine/Render/Passes/Culling/StaticModelCullingPass.h"
+#include "Engine/Render/Passes/Culling/StaticChunkCullingPass.h"
 #include "Engine/Render/Passes/Culling/MeshCullingPass.h"
 #include "Engine/Render/Passes/Culling/PointLightCullingPass.h"
 #include "Engine/Render/Passes/Culling/SpotLightCullingPass.h"
@@ -49,6 +51,9 @@
 #include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterPointLightWritePass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterSpotLightWritePass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterLightWriteSyncPass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterDispatchSetupPass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterPointLightSinglePass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterSpotLightSinglePass.h"
 
 #include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/OpaqueDepthTransitionPrepass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/MeshletOpaqueDepthPrepass.h"
@@ -75,6 +80,9 @@
 #include "Engine/Render/Passes/Wireframe/SpotLightAabbWireframePass.h"
 #include "Engine/Render/Passes/Wireframe/SpotLightSphereWireframePass.h"
 #include "Engine/Render/Passes/Wireframe/SpotLightConeWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/SpotLightPyramidWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/StaticChunkAabbWireframePass.h"
+
 
 #include "Engine/Render/Passes/Shading/Visibility/DebugVisibilityPass.h"
 
@@ -97,6 +105,8 @@ namespace Syn
 
 		//Geometry Culling Passes
 		pipeline->AddPass(std::make_unique<CullingCommandResetPass>());
+        pipeline->AddPass(std::make_unique<StaticChunkCullingPass>());
+        pipeline->AddPass(std::make_unique<StaticModelCullingPass>());
         pipeline->AddPass(std::make_unique<ModelCullingPass>());
         pipeline->AddPass(std::make_unique<MeshCullingPass>());
 
@@ -141,6 +151,9 @@ namespace Syn
 
         //Forward+ Cluster Passes
 		pipeline->AddPass(std::make_unique<ClusterSetupPass>());
+        pipeline->AddPass(std::make_unique<ClusterDispatchSetupPass>());
+        pipeline->AddPass(std::make_unique<ClusterPointLightSinglePass>());
+        pipeline->AddPass(std::make_unique<ClusterSpotLightSinglePass>());
 		pipeline->AddPass(std::make_unique<ClusterPointLightCountPass>());
 		pipeline->AddPass(std::make_unique<ClusterSpotLightCountPass>());
 		pipeline->AddPass(std::make_unique<ClusterPrefixSumPass>());
@@ -164,6 +177,8 @@ namespace Syn
         pipeline->AddPass(std::make_unique<SpotLightAabbWireframePass>());
         pipeline->AddPass(std::make_unique<SpotLightSphereWireframePass>());
         pipeline->AddPass(std::make_unique<SpotLightConeWireframePass>());
+        pipeline->AddPass(std::make_unique<SpotLightPyramidWireframePass>());
+        pipeline->AddPass(std::make_unique<StaticChunkAabbWireframePass>());
 
         //Billboard Passes
         pipeline->AddPass(std::make_unique<BillboardTransitionPass>());

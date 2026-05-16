@@ -19,6 +19,9 @@ namespace Syn
         static constexpr const char* CullingCommandReset = "../Engine/Shaders/Passes/Culling/CullingCommandReset.comp";
         static constexpr const char* MeshCulling = "../Engine/Shaders/Passes/Culling/MeshCulling.comp";
         static constexpr const char* ModelCulling = "../Engine/Shaders/Passes/Culling/ModelCulling.comp";
+        static constexpr const char* StaticChunkCulling = "../Engine/Shaders/Passes/Culling/StaticChunkCulling.comp";
+        static constexpr const char* StaticModelCulling = "../Engine/Shaders/Passes/Culling/StaticModelCulling.comp";
+
         static constexpr const char* PointLightCulling = "../Engine/Shaders/Passes/Culling/PointLightCulling.comp";
         static constexpr const char* SpotLightCulling = "../Engine/Shaders/Passes/Culling/SpotLightCulling.comp";
 
@@ -38,6 +41,10 @@ namespace Syn
         static constexpr const char* DeferredDirectionLightVert = "../Engine/Shaders/Passes/Shading/Deferred/Lighting/DeferredDirectionLight.vert";
         static constexpr const char* DeferredDirectionLightFrag = "../Engine/Shaders/Passes/Shading/Deferred/Lighting/DeferredDirectionLight.frag";
 
+
+        static constexpr const char* ClusterSpotLightSingle = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterSpotLightSingle.comp";
+        static constexpr const char* ClusterPointLightSingle = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterPointLightSingle.comp";
+        static constexpr const char* ClusterDispatchSetup = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterDispatchSetup.comp";
         static constexpr const char* ClusterSetup = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterSetup.comp";
         static constexpr const char* ClusterPointLightCount = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterPointLightCount.comp";
         static constexpr const char* ClusterSpotLightCount = "../Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterSpotLightCount.comp";
@@ -57,7 +64,7 @@ namespace Syn
         static constexpr const char* WireframeSetup = "../Engine/Shaders/Passes/Wireframe/WireframeSetup.comp";
         static constexpr const char* WireframeVert = "../Engine/Shaders/Passes/Wireframe/Wireframe.vert";
         static constexpr const char* WireframeFrag = "../Engine/Shaders/Passes/Wireframe/Wireframe.frag";
-        static constexpr const char* WireframeLightVert = "../Engine/Shaders/Passes/Wireframe/WireframeLight.vert";
+        static constexpr const char* WireframeDebugVert = "../Engine/Shaders/Passes/Wireframe/WireframeDebug.vert";
 
         static constexpr const char* DebugVisibilityFrag = "../Engine/Shaders/Passes/Shading/Visibility/DebugVisibility.frag";
         

@@ -14,4 +14,10 @@ namespace Syn
 		transform(component.transform),
 		transformIT(component.transformIT)
 	{}
+
+	TransformModelLinkGPU::TransformModelLinkGPU(uint32_t entityIndex, uint32_t modelDenseIndex) :
+		entityIndex(entityIndex),
+		modelDenseIndex(modelDenseIndex)
+	{
+	}
 }

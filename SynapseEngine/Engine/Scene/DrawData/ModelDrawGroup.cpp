@@ -5,6 +5,10 @@ namespace Syn
 {
     ModelDrawGroup::ModelDrawGroup(uint32_t frameCount)
     {
+        dispatchCmdTemplate.x = 0;
+        dispatchCmdTemplate.y = 1;
+        dispatchCmdTemplate.z = 1;
+
         paddedTraditionalCounts.AssignZero(MAX_INDIRECT_COMMANDS * 16);
         paddedMeshletCounts.AssignZero(MAX_INDIRECT_COMMANDS * 16);
 
@@ -16,7 +20,7 @@ namespace Syn
         modelAllocations.AssignZero(ModelManager::MAX_MODELS);
 
         VkBufferUsageFlags storageUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-        VkBufferUsageFlags indirectStorageUsage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
+        VkBufferUsageFlags indirectStorageUsage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
         instanceBuffer.Initialize({ BufferStrategy::Hybrid_Dynamic, frameCount, sizeof(uint32_t), storageUsage });
         instanceBuffer.UpdateCapacityAll(MAX_INSTANCES);

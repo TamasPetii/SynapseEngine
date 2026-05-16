@@ -9,6 +9,8 @@ namespace Syn
     {
     public:
         std::string GetName() const override { return "SpotLightSystem"; }
+        std::string GetGroup() const override { return SystemGroupNames::SpotLightSystems; }
+
         std::vector<TypeID> GetReadDependencies() const override;
         std::vector<TypeID> GetWriteDependencies() const override;
 

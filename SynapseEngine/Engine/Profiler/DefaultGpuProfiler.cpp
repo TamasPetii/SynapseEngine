@@ -22,11 +22,11 @@ namespace Syn {
         _pools[frameIndex]->Reset(cmd, 0, 256);
     }
 
-    uint32_t DefaultGpuProfiler::StartPass(VkCommandBuffer cmd, uint32_t frameIndex, const std::string& name) {
+    uint32_t DefaultGpuProfiler::StartPass(VkCommandBuffer cmd, uint32_t frameIndex, const std::string& groupName, const std::string& name) {
         uint32_t startId = _queryCounters[frameIndex]++;
 
         _pools[frameIndex]->WriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, startId);
-        _activeMeasurements[frameIndex].push_back({ name, startId, 0 });
+        _activeMeasurements[frameIndex].push_back({ groupName, name, startId, 0 });
         return static_cast<uint32_t>(_activeMeasurements[frameIndex].size() - 1);
     }
 
@@ -45,20 +45,46 @@ namespace Syn {
         std::vector<uint64_t> results(totalQueries);
 
         if (_pools[frameIndex]->GetResults(0, totalQueries, results, false)) {
-            _resolvedTimings[frameIndex].clear();
+            auto& timings = _resolvedTimings[frameIndex];
+            timings.clear();
+
+            GroupTiming* currentGroup = nullptr;
 
             for (const auto& m : measurements) {
                 uint64_t startTick = results[m.startQueryId];
                 uint64_t endTick = results[m.endQueryId];
 
                 float ms = static_cast<float>(endTick - startTick) * _timestampPeriod / 1000000.0f;
-                _resolvedTimings[frameIndex][m.passName] = ms;
+
+                if (currentGroup == nullptr || currentGroup->name != m.groupName) {
+                    auto it = std::find_if(timings.begin(), timings.end(),
+                        [&](const GroupTiming& g) { return g.name == m.groupName; });
+
+                    if (it != timings.end()) {
+                        currentGroup = &(*it);
+                    }
+                    else {
+                        timings.push_back({ m.groupName, 0.0f, {} });
+                        currentGroup = &timings.back();
+                    }
+                }
+
+                auto entryIt = std::find_if(currentGroup->entries.begin(), currentGroup->entries.end(),
+                    [&](const ProfilerEntry& e) { return e.name == m.entryName; });
+
+                if (entryIt != currentGroup->entries.end()) {
+                    entryIt->timeMs += ms;
+                }
+                else {
+                    currentGroup->entries.push_back({ m.entryName, ms });
+                }
+
+                currentGroup->totalTimeMs += ms;
             }
         }
     }
 
-    const std::unordered_map<std::string, float>& DefaultGpuProfiler::GetTimings(uint32_t frameIndex) const {
+    const std::vector<GroupTiming>& DefaultGpuProfiler::GetTimings(uint32_t frameIndex) const {
         return _resolvedTimings[frameIndex];
     }
-
 }

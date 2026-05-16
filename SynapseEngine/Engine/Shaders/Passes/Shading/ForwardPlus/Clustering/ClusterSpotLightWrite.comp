@@ -24,30 +24,36 @@ layout(push_constant) uniform PushConstants {
 };
 
 shared uint s_localSpotLightCount;
-shared vec3 s_clusterAABBMin;
-shared vec3 s_clusterAABBMax;
+shared vec3 s_clusterSphereCenter;
+shared float s_clusterSphereRadius;
 
 void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
     uint threadId = gl_LocalInvocationID.x;
     uint clusterIdx = gl_WorkGroupID.x;
-    
+
     uint activeClusterCount = GET_CLUSTER_COUNT(ctx.forwardPlusClusterCountBufferAddr);
     if (clusterIdx >= activeClusterCount) return;
 
     uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
+
     ClusterData cluster = GET_CLUSTER_DATA(ctx.forwardPlusClusterListBufferAddr, clusterIdx);
 
     if (threadId == 0) {
         s_localSpotLightCount = 0;
         
+        vec3 aabbMin, aabbMax;
         GetClusterViewSpaceAABB(
             cluster.tileIndex, ctx.tileCountX, ctx.tileSize, ctx.screenWidth, ctx.screenHeight, 
             cluster.minZ, cluster.maxZ, camera.projVulkanInv, 
-            s_clusterAABBMin, s_clusterAABBMax
+            aabbMin, aabbMax
         );
+
+        vec3 extents = (aabbMax - aabbMin) * 0.5;
+        s_clusterSphereCenter = aabbMin + extents;
+        s_clusterSphereRadius = length(extents);
     }
     
     barrier();
@@ -60,20 +66,23 @@ void main() {
         uint denseIdx = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, entityIdx);
         SpotLightColliderGPU collider = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, denseIdx);
         
-        vec3 viewSpaceCenter = collider.viewSpaceCenter;
-        bool isIntersecting = TestSphereAABB(viewSpaceCenter, collider.radius, s_clusterAABBMin, s_clusterAABBMax);
+        bool isIntersecting = TestConeSphere(
+            collider.viewSpacePos, collider.viewSpaceDir, 
+            collider.range, collider.outerAngleCos, collider.outerAngleSin,
+            s_clusterSphereCenter, s_clusterSphereRadius
+        );
         
         uvec4 ballot = subgroupBallot(isIntersecting);
         uint activeCount = subgroupBallotBitCount(ballot);
         
         uint baseOffset = 0;
-        
+
         if (subgroupElect() && activeCount > 0) {
             baseOffset = atomicAdd(s_localSpotLightCount, activeCount);
         }
         
         baseOffset = subgroupBroadcastFirst(baseOffset);
-        
+
         uint isIntersectingInt = isIntersecting ? 1 : 0;
         uint threadOffset = subgroupExclusiveAdd(isIntersectingInt);
 

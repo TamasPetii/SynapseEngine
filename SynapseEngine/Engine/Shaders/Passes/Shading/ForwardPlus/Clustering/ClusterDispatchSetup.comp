@@ -1,0 +1,59 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
+#include "../../../../Includes/Core.glsl"
+#include "../../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../../Includes/Common/Cluster.glsl"
+#include "../../../../Includes/Common/IndirectCommand.glsl"
+#include "../../../../Includes/Common/ForwardPlusDispatch.glsl"
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../../../Includes/PushConstants/ClusterDispatchSetupPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    ClusterDispatchSetupPC pc;
+};
+
+void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+    
+    uint activeClusterCount = GET_CLUSTER_COUNT(ctx.forwardPlusClusterCountBufferAddr);
+    bool needPrefixSum = false;
+
+    uint visiblePointLights = GET_VK_DRAW_CMD(ctx.pointLightIndirectCommandBufferAddr, 0).instanceCount;  
+    if (visiblePointLights <= MAX_FAST_PATH_LIGHTS) {
+        // Fast Path: Single Pass
+        GET_FORWARD_PLUS_DISPATCH_ARGS(pc.dispatchArgsBufferAddr).pointFastPath  = uvec4(activeClusterCount, 1, 1, 0);
+        GET_FORWARD_PLUS_DISPATCH_ARGS(pc.dispatchArgsBufferAddr).pointSlowCount = uvec4(0, 0, 0, 0);
+        GET_FORWARD_PLUS_DISPATCH_ARGS(pc.dispatchArgsBufferAddr).pointSlowWrite = uvec4(0, 0, 0, 0);
+    } else {
+        // Slow Path: (Count->PrefixSum->Write)
+        GET_FORWARD_PLUS_DISPATCH_ARGS(pc.dispatchArgsBufferAddr).pointFastPath  = uvec4(0, 0, 0, 0);
+        GET_FORWARD_PLUS_DISPATCH_ARGS(pc.dispatchArgsBufferAddr).pointSlowCount = uvec4(activeClusterCount, 1, 1, 0);
+        GET_FORWARD_PLUS_DISPATCH_ARGS(pc.dispatchArgsBufferAddr).pointSlowWrite = uvec4(activeClusterCount, 1, 1, 0);
+        needPrefixSum = true;
+    }
+
+    uint visibleSpotLights = GET_VK_DRAW_CMD(ctx.spotLightIndirectCommandBufferAddr, 0).instanceCount;
+    if (visibleSpotLights <= MAX_FAST_PATH_LIGHTS) {
+        // Fast Path: Single Pass
+        GET_FORWARD_PLUS_DISPATCH_ARGS(pc.dispatchArgsBufferAddr).spotFastPath  = uvec4(activeClusterCount, 1, 1, 0);
+        GET_FORWARD_PLUS_DISPATCH_ARGS(pc.dispatchArgsBufferAddr).spotSlowCount = uvec4(0, 0, 0, 0);
+        GET_FORWARD_PLUS_DISPATCH_ARGS(pc.dispatchArgsBufferAddr).spotSlowWrite = uvec4(0, 0, 0, 0);
+    } else {
+        // Slow Path: (Count->PrefixSum->Write)
+        GET_FORWARD_PLUS_DISPATCH_ARGS(pc.dispatchArgsBufferAddr).spotFastPath  = uvec4(0, 0, 0, 0);
+        GET_FORWARD_PLUS_DISPATCH_ARGS(pc.dispatchArgsBufferAddr).spotSlowCount = uvec4(activeClusterCount, 1, 1, 0);
+        GET_FORWARD_PLUS_DISPATCH_ARGS(pc.dispatchArgsBufferAddr).spotSlowWrite = uvec4(activeClusterCount, 1, 1, 0);
+        needPrefixSum = true;
+    }
+
+    if (needPrefixSum) {
+        GET_FORWARD_PLUS_DISPATCH_ARGS(pc.dispatchArgsBufferAddr).prefixSum = uvec4(1, 1, 1, 0);
+    } else {
+        GET_FORWARD_PLUS_DISPATCH_ARGS(pc.dispatchArgsBufferAddr).prefixSum = uvec4(0, 0, 0, 0);
+    }
+}

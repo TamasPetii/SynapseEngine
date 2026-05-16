@@ -26,20 +26,27 @@ layout(push_constant) uniform PushConstants {
 
 layout(set = 2, binding = 0) uniform sampler2D depthPyramid;
 
-void main() {
+void main() 
+{
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
-    uint globalId = gl_GlobalInvocationID.x;
-    if (globalId >= ctx.modelCount) return; 
+    uint offset = ctx.staticTransformCount * ctx.enableStaticBvhCulling;
+    uint transformDenseIndex = gl_GlobalInvocationID.x + offset;
+    uint transformCount = ctx.allTransformCount - offset;
+
+    if (gl_GlobalInvocationID.x >= transformCount) return;
+
+    TransformModelLink link = GET_TRANSFORM_MODEL_LINK(ctx.transformModelLinkBufferAddr, transformDenseIndex);
+    if (link.modelDenseIndex == INVALID_INDEX) return;
+
+    uint entityId = link.entityIndex;
 
     // 1. Fetch Model component and Entity ID
-    ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, globalId);
+    ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, link.modelDenseIndex);
     if (modelComp.modelIndex == INVALID_INDEX) return;
-    uint entityId = modelComp.entityIndex;
 
     // 2. Resolve Transform and Camera data
-    uint transformIdx = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
-    TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformIdx);
+    TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
 
     uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
@@ -63,12 +70,17 @@ void main() {
     
     // 4. Frustum Culling Test + Occlusion Culling
     GpuMeshCollider worldCollider = TransformCollider(localGlobalCollider, transform.transform);
-    uint visibility = TestFrustum(worldCollider, camera);
-    if (visibility == INTERSECTION_OUTSIDE) return;
+
+    uint visibility = INTERSECTION_INSIDE;
+    if(ctx.enableModelFrustumCulling == 1)
+    {
+        visibility = TestFrustum(worldCollider, camera);
+        if (visibility == INTERSECTION_OUTSIDE) return;
+    }
 
     float screenSizePixels = 0.0;
     vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);
-    bool enableDepthOcclusion = (ctx.enableOcclusionCulling == 1);
+    bool enableDepthOcclusion = (ctx.enableModelOcclusionCulling == 1);
 
     if (IsSphereOccluded(worldCollider.center, worldCollider.radius, camera, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
         return;

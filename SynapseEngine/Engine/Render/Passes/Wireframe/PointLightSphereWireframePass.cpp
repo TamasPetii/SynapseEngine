@@ -12,7 +12,7 @@
 
 namespace Syn {
 
-    #include "Engine/Shaders/Includes/PushConstants/WireframeLightPC.glsl"
+    #include "Engine/Shaders/Includes/PushConstants/WireframeDebugPC.glsl"
 
     bool PointLightSphereWireframePass::ShouldExecute(const RenderContext& context) const
     {
@@ -28,7 +28,7 @@ namespace Syn {
         _shaderProgram = shaderManager->CreateProgram(
             "WireframeLightProgram",
             {
-                ShaderNames::WireframeLightVert,
+                ShaderNames::WireframeDebugVert,
                 ShaderNames::WireframeFrag
             },
             config
@@ -111,7 +111,7 @@ namespace Syn {
 
         auto sphere = modelManager->GetResource(MeshSourceNames::Sphere);
 
-        WireframeLightPC pc{};
+        WireframeDebugPC pc{};
 		pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
         pc.vertexPositionBufferAddr = sphere->hardwareBuffers.vertexPositions->GetDeviceAddress();
 		pc.indexBufferAddr = sphere->hardwareBuffers.indices->GetDeviceAddress();
@@ -122,7 +122,7 @@ namespace Syn {
             _shaderProgram->GetLayout(),
             VK_SHADER_STAGE_ALL,
             0,
-            sizeof(WireframeLightPC),
+            sizeof(WireframeDebugPC),
             &pc
         );
     }
