@@ -90,6 +90,8 @@
 #include "Engine/Render/Passes/Wireframe/SpotLightPyramidWireframePass.h"
 #include "Engine/Render/Passes/Wireframe/StaticChunkAabbWireframePass.h"
 
+#include "Engine/Render/Passes/Ssao/DpHvoPass.h"
+#include "Engine/Render/Passes/Ssao/DpHvoBlurPass.h"
 
 #include "Engine/Render/Passes/Shading/Visibility/DebugVisibilityPass.h"
 
@@ -152,6 +154,8 @@ namespace Syn
 		//Build Hi-Z depth pyramid (Opaque|Transparent)
         pipeline->AddPass(std::make_unique<HizLinearPreparePass>());
         pipeline->AddPass(std::make_unique<HizDownsamplePass>());
+        pipeline->AddPass(std::make_unique<DpHvoPass>());
+        pipeline->AddPass(std::make_unique<DpHvoBlurPass>());
 
 		//Light Culling Passes
         pipeline->AddPass(std::make_unique<PointLightCullingPass>());
@@ -397,6 +401,24 @@ namespace Syn
         transparentDepthSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         transparentDepthSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
         rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::TransparentDepth, transparentDepthSpec);
+
+        Vk::ImageConfig volumetricAoImageSpec{};
+        volumetricAoImageSpec.width = initWidth;
+        volumetricAoImageSpec.height = initHeight;
+        volumetricAoImageSpec.type = VK_IMAGE_TYPE_2D;
+        volumetricAoImageSpec.format = VK_FORMAT_R16_SFLOAT;
+        volumetricAoImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+        volumetricAoImageSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::VolumetricAo, volumetricAoImageSpec);
+
+        Vk::ImageConfig volumetricAoIntermediateImageSpec{};
+        volumetricAoIntermediateImageSpec.width = initWidth;
+        volumetricAoIntermediateImageSpec.height = initHeight;
+        volumetricAoIntermediateImageSpec.type = VK_IMAGE_TYPE_2D;
+        volumetricAoIntermediateImageSpec.format = VK_FORMAT_R16_SFLOAT;
+        volumetricAoIntermediateImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
+        volumetricAoIntermediateImageSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::VolumetricAoIntermediate, volumetricAoIntermediateImageSpec);
 
         return renderManager;
     }

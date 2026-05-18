@@ -21,6 +21,10 @@ uint CalculateSizeBin(float radius) {
     return clamp(uint(max(bin, 0.0)), 0u, 15u);
 }
 
+uint PackMorton32(uint sizeBin, uint morton27) {
+    return (sizeBin << 27) | (morton27 & 0x07FFFFFFu);
+}
+
 uint64_t PackMorton64(uint sizeBin, uint morton27, uint denseIndex) {
     return (uint64_t(sizeBin) << 60) | (uint64_t(morton27) << 32) | uint64_t(denseIndex);
 }

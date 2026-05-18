@@ -137,6 +137,7 @@ namespace Syn {
                 RadioButton("Roughness", RenderTargetGroupNames::Deferred, RenderTargetNames::NormalRoughness, RenderTargetViewNames::Roughness);
                 RadioButton("Emissive", RenderTargetGroupNames::Deferred, RenderTargetNames::EmissiveAo, RenderTargetViewNames::Emissive);
                 RadioButton("Ambient Occlusion", RenderTargetGroupNames::Deferred, RenderTargetNames::EmissiveAo, RenderTargetViewNames::AmbientOcclusion);
+                RadioButton("DP-HVO", RenderTargetGroupNames::Deferred, RenderTargetNames::VolumetricAo, Vk::ImageViewNames::Default);
 
                 ImGui::SeparatorText("Wboit Textures");
 

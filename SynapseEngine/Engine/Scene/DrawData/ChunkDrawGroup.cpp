@@ -39,7 +39,7 @@ namespace Syn
         sceneAabbBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(SceneAABB), storageUsage });
         sceneAabbBuffer.UpdateCapacityAll(1);
 
-        mortonRadixSortTempBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(uint64_t), storageUsage, 10000, 20000 });
+        mortonRadixSortTempBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, 1, storageUsage | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 10000, 20000 });
         mortonRadixSortTempBuffer.UpdateCapacityAll(1);
 
         mortonIndirectDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectUsage });

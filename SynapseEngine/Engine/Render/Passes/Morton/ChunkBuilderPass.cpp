@@ -111,8 +111,8 @@ namespace Syn {
         indirectDrawBarrier.buffer = drawGroup->Chunks.mortonIndirectDrawBuffer.GetHandle(fIdx, isGpu);
         indirectDrawBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         indirectDrawBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
-        indirectDrawBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
-        indirectDrawBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT;
+        indirectDrawBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
+        indirectDrawBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT;
         Vk::BufferUtils::InsertBarrier(context.cmd, indirectDrawBarrier);
     }
 }

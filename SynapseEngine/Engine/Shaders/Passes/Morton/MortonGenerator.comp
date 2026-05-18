@@ -59,6 +59,7 @@ void main() {
     uint mortonCode = CalculateMortonCode27(normalizedPos);
     uint sizeBin = CalculateSizeBin(radius);
     
-    uint64_t packedData = PackMorton64(sizeBin, mortonCode, transformDenseIndex);
-    GET_MORTON_KEY(ctx.mortonKeysBufferAddr, transformDenseIndex) = packedData;
+    uint key = PackMorton32(sizeBin, mortonCode);
+    GET_MORTON_KEY(ctx.mortonKeysBufferAddr, transformDenseIndex) = key;
+    GET_MORTON_VALUE(ctx.mortonValuesBufferAddr, transformDenseIndex) = transformDenseIndex;
 }

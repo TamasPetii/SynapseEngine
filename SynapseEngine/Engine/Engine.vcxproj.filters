@@ -1086,6 +1086,12 @@
     <ClCompile Include="Render\Passes\Culling\MortonModelCullingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Passes\Ssao\DpHvoPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Ssao\DpHvoBlurPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2279,6 +2285,12 @@
     <ClInclude Include="Render\Passes\Culling\MortonModelCullingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Passes\Ssao\DpHvoPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Ssao\DpHvoBlurPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Includes\Common\Animation.glsl" />
@@ -2398,5 +2410,9 @@
     <None Include="Shaders\Includes\PushConstants\ChunkBuilderPC.glsl" />
     <None Include="Shaders\Passes\Culling\MortonChunkCulling.comp" />
     <None Include="Shaders\Passes\Culling\MortonModelCulling.comp" />
+    <None Include="Shaders\Passes\Ssao\DpHvo.comp" />
+    <None Include="Shaders\Includes\PushConstants\DpHvoPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\DpHvoBlurPC.glsl" />
+    <None Include="Shaders\Passes\Ssao\DpHvoBlur.comp" />
   </ItemGroup>
 </Project>

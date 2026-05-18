@@ -71,6 +71,7 @@ struct FrameGlobalContext {
 
     uint64_t sceneAabbBufferAddr;
     uint64_t mortonKeysBufferAddr;
+    uint64_t mortonValuesBufferAddr;
     uint64_t mortonChunkDataBufferAddr;
     uint64_t mortonChunkIndirectDispatchBufferAddr;
     uint64_t mortonChunkIndirectDrawBufferAddr;

@@ -11,7 +11,7 @@ namespace Syn
         , enablePointLightGpuCulling(true)
         , enableSpotLightGpuCulling(true)
         , enableStaticBvhCulling(false)
-        , enableMortonBvhCulling(true)
+        , enableMortonBvhCulling(false)
         , enableBloom(true)
         , enableHiz(true)
         , enableMeshletConeCulling(true)

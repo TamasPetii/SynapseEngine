@@ -44,6 +44,35 @@ namespace Syn {
         auto compManager = scene->GetComponentBufferManager();
         uint32_t fIdx = context.frameIndex;
 
+        VkBuffer keysHandle = compManager->GetComponentBuffer(BufferNames::MortonKeysData, fIdx).buffer->Handle();
+        VkBuffer valuesHandle = compManager->GetComponentBuffer(BufferNames::MortonValuesData, fIdx).buffer->Handle();
+
+        Vk::BufferFillInfo keysFill{};
+        keysFill.buffer = keysHandle;
+        keysFill.data = 0xFFFFFFFF;
+        Vk::BufferUtils::FillBuffer(context.cmd, keysFill);
+
+        Vk::BufferBarrierInfo keysFillBarrier{};
+        keysFillBarrier.buffer = keysHandle;
+        keysFillBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+        keysFillBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+        keysFillBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        keysFillBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, keysFillBarrier);
+
+        Vk::BufferBarrierInfo valuesFillBarrier{};
+        valuesFillBarrier.buffer = valuesHandle;
+        valuesFillBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+        valuesFillBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+        valuesFillBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        valuesFillBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, valuesFillBarrier);
+
+        Vk::BufferFillInfo valuesFill{};
+        valuesFill.buffer = valuesHandle;
+        valuesFill.data = 0xFFFFFFFF;
+        Vk::BufferUtils::FillBuffer(context.cmd, valuesFill);
+
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_staticCount, ComputeGroupSize::Buffer32D);
         vkCmdDispatch(context.cmd, groupCountX, 1, 1);
 
@@ -54,5 +83,13 @@ namespace Syn {
         keysBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         keysBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         Vk::BufferUtils::InsertBarrier(context.cmd, keysBarrier);
+
+        Vk::BufferBarrierInfo valuesBarrier{};
+        valuesBarrier.buffer = compManager->GetComponentBuffer(BufferNames::MortonValuesData, fIdx).buffer->Handle();
+        valuesBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        valuesBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        valuesBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        valuesBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, valuesBarrier);
     }
 }

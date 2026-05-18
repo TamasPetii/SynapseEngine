@@ -9,8 +9,6 @@ namespace Syn
 
         RenderBuffer modelAabbIndirectBuffer;
         RenderBuffer modelSphereIndirectBuffer;
-        RenderBuffer meshletAabbIndirectBuffer;
-        RenderBuffer meshletSphereIndirectBuffer;
 
         CpuData<VkDrawIndirectCommand> modelAabbCmds;
         CpuData<VkDrawIndirectCommand> modelSphereCmds;

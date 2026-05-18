@@ -50,7 +50,7 @@ namespace Syn {
 
         _totalModelsToTest = static_cast<uint32_t>(transformPool->Size());
 
-        if (scene->GetSettings()->enableStaticBvhCulling) {
+        if (scene->GetSettings()->enableStaticBvhCulling || scene->GetSettings()->enableMortonBvhCulling) {
             uint32_t staticCount = static_cast<uint32_t>(transformPool->GetStorage().GetStaticEntities().size());
             _totalModelsToTest -= staticCount;
         }

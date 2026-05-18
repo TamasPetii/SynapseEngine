@@ -33,12 +33,6 @@ namespace Syn
         modelSphereIndirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage, 1024, 2048 });
         modelSphereIndirectBuffer.UpdateCapacityAll(1);
 
-        meshletAabbIndirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
-        meshletAabbIndirectBuffer.UpdateCapacityAll(1);
-
-        meshletSphereIndirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
-        meshletSphereIndirectBuffer.UpdateCapacityAll(1);
-
         //Todo: Meshlet visibility buffer?
     }
 

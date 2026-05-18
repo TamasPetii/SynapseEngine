@@ -110,9 +110,32 @@ namespace Syn
     }
 
     void Scene::InitializeComponentBuffers()
-    {
-        RegisterComponentBuffer<TransformComponent, uint64_t>(BufferNames::MortonKeysData, ComponentMemoryType::GpuOnly);
+    {   
+        auto mortonCondition = [this]() -> bool {
+            auto pool = _registry->GetPool<TransformComponent>();
+            return pool && !pool->GetStorage().GetStaticEntities().empty();
+            };
+
+        auto mortonBufferSizing = [this]() -> uint32_t {
+            auto pool = _registry->GetPool<TransformComponent>();
+            if (!pool) return 0;
+            uint32_t staticCount = static_cast<uint32_t>(pool->GetStorage().GetStaticEntities().size());
+            return ((staticCount + 1023) / 1024) * 1024;
+            };
+
+        auto mortonChunkBufferSizing = [this]() -> uint32_t {
+            auto pool = _registry->GetPool<TransformComponent>();
+            if (!pool) return 0;
+            uint32_t staticCount = static_cast<uint32_t>(pool->GetStorage().GetStaticEntities().size());
+            return ComputeGroupSize::CalculateDispatchCount(staticCount, ComputeGroupSize::Buffer32D); // Ahol a Buffer32D a CHUNK_SIZE
+            };
+
+        RegisterGenericBuffer<uint32_t>(BufferNames::MortonKeysData, mortonBufferSizing, mortonCondition, ComponentMemoryType::GpuOnly);
+        RegisterGenericBuffer<uint32_t>(BufferNames::MortonValuesData, mortonBufferSizing, mortonCondition, ComponentMemoryType::GpuOnly);
+        RegisterGenericBuffer<ChunkDataGPU>(BufferNames::MortonChunkData, mortonChunkBufferSizing, mortonCondition, ComponentMemoryType::GpuOnly);
+        RegisterGenericBuffer<uint32_t>(BufferNames::MortonChunkVisibileIndex, mortonChunkBufferSizing, mortonCondition, ComponentMemoryType::GpuOnly);
         RegisterComponentBuffer<TransformComponent, uint32_t>(BufferNames::MortonChunkTransformsIndex, ComponentMemoryType::GpuOnly);
+
         
         RegisterGenericBuffer<ChunkDataGPU>(BufferNames::MortonChunkData,
             [this]() -> uint32_t {

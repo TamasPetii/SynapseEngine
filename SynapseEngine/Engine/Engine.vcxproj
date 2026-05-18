@@ -235,6 +235,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Render\Passes\Ssao\DpHvoBlurPass.cpp" />
+    <ClCompile Include="Render\Passes\Ssao\DpHvoPass.cpp" />
     <ClCompile Include="Render\Passes\Culling\MortonModelCullingPass.cpp" />
     <ClCompile Include="Render\Passes\Culling\MortonChunkCullingPass.cpp" />
     <ClCompile Include="Render\Passes\Morton\ChunkBuilderPass.cpp" />
@@ -594,6 +596,8 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Render\Passes\Ssao\DpHvoBlurPass.h" />
+    <ClInclude Include="Render\Passes\Ssao\DpHvoPass.h" />
     <ClInclude Include="Render\Passes\Culling\MortonModelCullingPass.h" />
     <ClInclude Include="Render\Passes\Culling\MortonChunkCullingPass.h" />
     <ClInclude Include="Render\Passes\Morton\ChunkBuilderPass.h" />
@@ -1032,6 +1036,8 @@
     <None Include="Shaders\Includes\PushConstants\DeferredEmissiveAoPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredPointLightPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredSpotLightPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\DpHvoBlurPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\DpHvoPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\HizDownSamplePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\HizLinearizeDepthPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\TraditionalMeshletPassPC.glsl" />
@@ -1106,6 +1112,8 @@
     <None Include="Shaders\Passes\PostProcess\BloomDownsample.comp" />
     <None Include="Shaders\Passes\PostProcess\BloomPrefilter.comp" />
     <None Include="Shaders\Passes\PostProcess\BloomUpsample.comp" />
+    <None Include="Shaders\Passes\Ssao\DpHvo.comp" />
+    <None Include="Shaders\Passes\Ssao\DpHvoBlur.comp" />
     <None Include="Shaders\Passes\Wireframe\Wireframe.frag" />
     <None Include="Shaders\Passes\Wireframe\Wireframe.vert" />
     <None Include="Shaders\Passes\Wireframe\WireframeDebug.vert" />

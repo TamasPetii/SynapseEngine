@@ -63,6 +63,7 @@ namespace Syn {
         ctx.mortonChunkIndirectDispatchBufferAddr = drawData->Chunks.mortonIndirectDispatchBuffer.GetAddress(fIdx, isGpu);
         ctx.mortonChunkIndirectDrawBufferAddr = drawData->Chunks.mortonIndirectDrawBuffer.GetAddress(fIdx, isGpu);
         ctx.mortonKeysBufferAddr = compManager->GetBufferAddr(BufferNames::MortonKeysData, fIdx);
+        ctx.mortonValuesBufferAddr = compManager->GetBufferAddr(BufferNames::MortonValuesData, fIdx);
         ctx.mortonChunkDataBufferAddr = compManager->GetBufferAddr(BufferNames::MortonChunkData, fIdx);
         ctx.mortonChunkVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::MortonChunkVisibileIndex, fIdx);
         ctx.mortonChunkTransformsIndexBufferAddr = compManager->GetBufferAddr(BufferNames::MortonChunkTransformsIndex, fIdx);

@@ -97,5 +97,12 @@ namespace Syn
 
         bool enableDebugVisibility;
         DebugVisibilityMode debugVisibilityMode;
+
+        float aoRadius = 0.930f;
+        float aoIntensity = 100.0f;
+        float maxOcclusionDistance = 3.0f;
+        float depthSharpness = 0.0f;
+        float bias = 0.005f;
+        int sampleCount = 16;
     };
 }

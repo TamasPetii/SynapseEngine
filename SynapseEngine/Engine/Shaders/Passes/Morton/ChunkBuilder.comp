@@ -41,30 +41,34 @@ void main() {
 
     //Todo: Ne csak static
     if (globalId < ctx.staticTransformCount) {
-        uint64_t packedData = GET_MORTON_KEY(ctx.mortonKeysBufferAddr, globalId);
-        uint transformDenseIndex = uint(packedData & 0xFFFFFFFFul);
+        uint transformDenseIndex = GET_MORTON_VALUE(ctx.mortonValuesBufferAddr, globalId);
 
-        GET_CHUNK_TRANSFORM_IDX(ctx.mortonChunkTransformsIndexBufferAddr, globalId) = transformDenseIndex;
+        if (transformDenseIndex < ctx.staticTransformCount) {
+            GET_CHUNK_TRANSFORM_IDX(ctx.mortonChunkTransformsIndexBufferAddr, globalId) = transformDenseIndex;
 
-        TransformModelLink link = GET_TRANSFORM_MODEL_LINK(ctx.transformModelLinkBufferAddr, transformDenseIndex);
-        TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
+            TransformModelLink link = GET_TRANSFORM_MODEL_LINK(ctx.transformModelLinkBufferAddr, transformDenseIndex);
+            TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
 
-        vec3 translation = vec3(transform.transform[3]);
-        vec3 scale = vec3(length(transform.transform[0]), length(transform.transform[1]), length(transform.transform[2]));
+            vec3 translation = vec3(transform.transform[3]);
+            vec3 scale = vec3(length(transform.transform[0]), length(transform.transform[1]), length(transform.transform[2]));
             
-        localMin = translation - scale;
-        localMax = translation + scale;
+            localMin = translation - scale;
+            localMax = translation + scale;
 
-        if (link.modelDenseIndex != INVALID_INDEX) {
-            ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, link.modelDenseIndex);
+            if (link.modelDenseIndex != INVALID_INDEX) {
+                ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, link.modelDenseIndex);
 
-            if (modelComp.modelIndex != INVALID_INDEX) {
-                GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, modelComp.modelIndex);
-                GpuMeshCollider worldCollider = TransformCollider(addrs.globalCollider, transform.transform);
+                if (modelComp.modelIndex != INVALID_INDEX) {
+                    GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, modelComp.modelIndex);
+                    GpuMeshCollider worldCollider = TransformCollider(addrs.globalCollider, transform.transform);
             
-                localMin = worldCollider.aabbMin;
-                localMax = worldCollider.aabbMax;     
-            }
+                    localMin = worldCollider.aabbMin;
+                    localMax = worldCollider.aabbMax;     
+                }
+            }   
+        }
+        else {
+            GET_CHUNK_TRANSFORM_IDX(ctx.mortonChunkTransformsIndexBufferAddr, globalId) = 0xFFFFFFFF;
         }
     }
 
@@ -83,6 +87,6 @@ void main() {
         chunk.maxBounds = macroMax;
         chunk.entityCount = entitiesInThisChunk;
 
-        GET_STATIC_CHUNK(ctx.staticChunkDataBufferAddr, chunkId) = chunk;
+        GET_STATIC_CHUNK(ctx.mortonChunkDataBufferAddr, chunkId) = chunk;
     }
 }

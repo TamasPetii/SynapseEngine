@@ -25,7 +25,8 @@ namespace Syn
         instanceBuffer.Initialize({ BufferStrategy::Hybrid_Dynamic, frameCount, sizeof(uint32_t), storageUsage, 16384, 32768 });
         instanceBuffer.UpdateCapacityAll(1);
 
-        indirectBuffer.Initialize({ BufferStrategy::Hybrid_Dynamic, frameCount, 1, indirectStorageUsage, 1024, 2048 });
+		//VkDrawIndirectCommand + VkDrawMeshTasksIndirectCommandEXT
+        indirectBuffer.Initialize({ BufferStrategy::Hybrid_Dynamic, frameCount, sizeof(VkDrawIndirectCommand) * 4, indirectStorageUsage, 1024, 2048 });
         indirectBuffer.UpdateCapacityAll(1);
 
         descriptorBuffer.Initialize({ BufferStrategy::Hybrid_Static, frameCount, sizeof(MeshDrawDescriptor), storageUsage, 1024, 2048 });
@@ -57,10 +58,7 @@ namespace Syn
             materialIndexBuffer.RecordSync(cmd, frameIndex, requiredMaterialBufferSize / sizeof(int32_t));
         }
 
-        size_t tradSize = activeTraditionalCount * sizeof(VkDrawIndirectCommand);
-        size_t meshletSize = activeMeshletCount * sizeof(VkDrawMeshTasksIndirectCommandEXT);
-        size_t totalCommandSize = tradSize + meshletSize;
-
+        size_t totalCommandSize = activeTraditionalCount + activeMeshletCount;
         if (totalCommandSize > 0) {
             indirectBuffer.RecordSync(cmd, frameIndex, totalCommandSize);
         }

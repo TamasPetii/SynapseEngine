@@ -1,0 +1,64 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
+#include "../../Includes/Core.glsl"
+#include "../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../Includes/Common/Camera.glsl"
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout(set = 2, binding = 0) uniform sampler2D inAoImage;
+layout(set = 2, binding = 1) uniform sampler2D inHizPyramid;
+layout(set = 2, binding = 2, r16f) uniform writeonly image2D outAoImage;
+
+#include "../../Includes/PushConstants/DpHvoBlurPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+   DpHvoBlurPC pc;
+};
+
+const float GaussianWeights[5] = float[](0.227027, 0.1945946, 0.1216216, 0.054054, 0.016216);
+
+void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
+    if (pos.x >= int(ctx.screenWidth) || pos.y >= int(ctx.screenHeight)) return;
+
+    vec2 uv = (vec2(pos) + vec2(0.5)) / vec2(ctx.screenWidth, ctx.screenHeight);
+
+    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
+
+    float centerAo = texture(inAoImage, uv).r;
+    float centerDepthNorm = textureLod(inHizPyramid, uv, 0).x;
+    float centerViewZ = mix(camera.params.x, camera.params.y, centerDepthNorm);
+
+    float result = centerAo * GaussianWeights[0];
+    float weightSum = GaussianWeights[0];
+
+    vec2 offsetDir = pc.blurDirection / vec2(ctx.screenWidth, ctx.screenHeight);
+    float tolerance = max(centerViewZ * 0.05, 0.01);
+
+    for (int i = 1; i < 5; i++) {
+        vec2 uvP = uv + offsetDir * float(i);
+        float aoP = texture(inAoImage, uvP).r;
+        float viewZP = mix(camera.params.x, camera.params.y, textureLod(inHizPyramid, uvP, 0).x);
+        
+        float weightP = GaussianWeights[i] * exp(-(abs(viewZP - centerViewZ) * pc.depthSharpness) / tolerance);
+        result += aoP * weightP;
+        weightSum += weightP;
+
+        vec2 uvN = uv - offsetDir * float(i);
+        float aoN = texture(inAoImage, uvN).r;
+        float viewZN = mix(camera.params.x, camera.params.y, textureLod(inHizPyramid, uvN, 0).x);
+        
+        float weightN = GaussianWeights[i] * exp(-(abs(viewZN - centerViewZ) * pc.depthSharpness) / tolerance);
+        result += aoN * weightN;
+        weightSum += weightN;
+    }
+
+    imageStore(outAoImage, pos, vec4(result / weightSum, 0.0, 0.0, 0.0));
+}

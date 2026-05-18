@@ -334,14 +334,15 @@ namespace Syn
                     }
                 }
 
-                if (drawData->Models.activeMeshletCount > 0)
+				auto totalCommandCount = drawData->Models.activeTraditionalCount + drawData->Models.activeMeshletCount;
+                if (totalCommandCount > 0)
                 {
                     if (auto mappedAabb = drawData->Debug.modelAabbIndirectBuffer.GetMapped(frameIndex)) {
-                        mappedAabb->Write(&drawData->Debug.modelAabbCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+                        mappedAabb->Write(drawData->Debug.modelAabbCmds.Data(), totalCommandCount * sizeof(VkDrawIndirectCommand), 0);
                     }
 
                     if (auto mappedSphere = drawData->Debug.modelSphereIndirectBuffer.GetMapped(frameIndex)) {
-                        mappedSphere->Write(&drawData->Debug.modelSphereCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+                        mappedSphere->Write(drawData->Debug.modelSphereCmds.Data(), totalCommandCount * sizeof(VkDrawIndirectCommand), 0);
                     }
                 }
             }

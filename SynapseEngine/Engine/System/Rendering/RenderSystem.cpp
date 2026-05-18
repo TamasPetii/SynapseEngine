@@ -222,12 +222,12 @@ namespace Syn
         if (drawData->Models.meshAllocations.Size() < totalBlueprints)
             drawData->Models.meshAllocations.Resize(totalBlueprints);
 
-        if (drawData->Debug.modelAabbCmds.Size() < drawData->Models.activeTraditionalCount) {
-            drawData->Debug.modelAabbCmds.data.assign(drawData->Models.activeTraditionalCount, drawData->Debug.modelAabbCmdTemplate);
+        if (drawData->Debug.modelAabbCmds.Size() < totalDescriptors) {
+            drawData->Debug.modelAabbCmds.data.assign(totalDescriptors, drawData->Debug.modelAabbCmdTemplate);
         }
 
-        if (drawData->Debug.modelSphereCmds.Size() < drawData->Models.activeTraditionalCount) {
-            drawData->Debug.modelSphereCmds.data.assign(drawData->Models.activeTraditionalCount, drawData->Debug.modelSphereCmdTemplate);
+        if (drawData->Debug.modelSphereCmds.Size() < totalDescriptors) {
+            drawData->Debug.modelSphereCmds.data.assign(totalDescriptors, drawData->Debug.modelSphereCmdTemplate);
         }
 
         // 3. Pass: Build Allocations and Descriptors buffers ---
@@ -404,12 +404,6 @@ namespace Syn
 
             auto drawData = scene->GetSceneDrawData();
 
-            uint32_t tradCount = drawData->Models.activeTraditionalCount;
-            if (tradCount > 0) {
-                drawData->Debug.modelAabbIndirectBuffer.UpdateCapacity(frameIndex, tradCount);
-                drawData->Debug.modelSphereIndirectBuffer.UpdateCapacity(frameIndex, tradCount);
-            }
-
             uint32_t totalInstances = drawData->Models.totalAllocatedInstances;
             if (totalInstances > 0) {
                 drawData->Models.instanceBuffer.UpdateCapacity(frameIndex, totalInstances);
@@ -420,9 +414,11 @@ namespace Syn
                 drawData->Models.descriptorBuffer.UpdateCapacity(frameIndex, totalDescriptors);
             }
 
-            size_t indirectSize = (drawData->Models.activeTraditionalCount * sizeof(VkDrawIndirectCommand)) + (drawData->Models.activeMeshletCount * sizeof(VkDrawMeshTasksIndirectCommandEXT));
+            size_t indirectSize = (drawData->Models.activeTraditionalCount + drawData->Models.activeMeshletCount);
             if (indirectSize > 0) {
                 drawData->Models.indirectBuffer.UpdateCapacity(frameIndex, indirectSize);
+                drawData->Debug.modelAabbIndirectBuffer.UpdateCapacity(frameIndex, indirectSize);
+                drawData->Debug.modelSphereIndirectBuffer.UpdateCapacity(frameIndex, indirectSize);
             }
 
             if (drawData->Models.activeDescriptorCount > 0) {

@@ -52,6 +52,9 @@ void main() {
         // Morton Indirection
         uint indirectOffset = chunk.firstEntityIndex + i;
         uint denseIndex = GET_CHUNK_TRANSFORM_IDX(ctx.mortonChunkTransformsIndexBufferAddr, indirectOffset);
+
+        if (denseIndex == 0xFFFFFFFF) continue;
+
         TransformModelLink link = GET_TRANSFORM_MODEL_LINK(ctx.transformModelLinkBufferAddr, denseIndex);
         
         if (link.modelDenseIndex == INVALID_INDEX) continue;

@@ -122,7 +122,8 @@ namespace Syn
 
             auto drawData = scene->GetSceneDrawData();
 
-            drawData->Models.materialIndexBuffer.UpdateCapacity(frameIndex, _flatMaterialIndices.size());
+            size_t requiredElements = std::max(_flatMaterialIndices.size(), (size_t)(drawData->Models.requiredMaterialBufferSize / sizeof(uint32_t)));
+            drawData->Models.materialIndexBuffer.UpdateCapacity(frameIndex, requiredElements);
 
             if (auto mappedBuffer = drawData->Models.materialIndexBuffer.GetMapped(frameIndex)) {
                 size_t actualDataSize = _flatMaterialIndices.size() * sizeof(uint32_t);

@@ -83,6 +83,8 @@ namespace Syn {
             if (isCullingOpen) {
                 changed |= ImGui::Checkbox("Geometry GPU Culling", &settings.enableGeometryGpuCulling);
                 changed |= ImGui::Checkbox("Static Bvh Culling", &settings.enableStaticBvhCulling);
+                changed |= ImGui::Checkbox("Morton Bvh Culling", &settings.enableMortonBvhCulling);
+
                 changed |= ImGui::Checkbox("Hi-Z", &settings.enableHiz);
 
                 ImGui::Spacing();
@@ -219,6 +221,20 @@ namespace Syn {
                 changed |= ImGui::Checkbox("Static Chunk AABB", &settings.enableStaticChunkAabbWireframe);
             }
             EndSection(isDebugOpen);
+
+            bool isSsaoOpen = BeginSection("DP-HVO (SSAO)", false);
+            if (isSsaoOpen) {
+                ImGui::SeparatorText("Parameters");
+                changed |= ImGui::DragFloat("Radius##Ssao", &settings.aoRadius, 0.01f, 0.0f, 100.f);
+                changed |= ImGui::DragFloat("Intensity##Ssao", &settings.aoIntensity, 0.1f, 0.0f, 100.f);
+                changed |= ImGui::DragFloat("Max Distance##Ssao", &settings.maxOcclusionDistance, 0.1f, 0.0f, 100.f);
+                changed |= ImGui::DragFloat("Depth Sharpness##Ssao", &settings.depthSharpness, 0.05f, 0.0f, 100.f);
+                changed |= ImGui::DragFloat("Bias##Ssao", &settings.bias, 0.001f, 0.0f, 100.f);
+                changed |= ImGui::DragInt("Sample Count##Ssao", &settings.sampleCount, 1.0f, 1, 100);
+                
+
+            }
+            EndSection(isSsaoOpen);
 
             if (changed) {
                 vm.Dispatch(UpdateSceneSettingsIntent{ settings });

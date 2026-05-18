@@ -73,6 +73,7 @@ namespace Syn
         static constexpr const char* WireframeDebugVert = "../Engine/Shaders/Passes/Wireframe/WireframeDebug.vert";
 
         static constexpr const char* DebugVisibilityFrag = "../Engine/Shaders/Passes/Shading/Visibility/DebugVisibility.frag";
-        
+        static constexpr const char* DpHvoComp = "../Engine/Shaders/Passes/Ssao/DpHvo.comp";
+        static constexpr const char* DpHvoBlurComp = "../Engine/Shaders/Passes/Ssao/DpHvoBlur.comp";
     };
 }

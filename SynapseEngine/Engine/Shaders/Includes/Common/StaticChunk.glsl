@@ -34,7 +34,11 @@ layout(buffer_reference, std430) restrict buffer SceneAABBBuffer {
 };
 
 layout(buffer_reference, std430) restrict buffer MortonKeysBuffer { 
-    uint64_t data[]; 
+    uint data[]; 
+};
+
+layout(buffer_reference, std430) restrict buffer MortonValueBuffer { 
+    uint data[]; 
 };
 
 layout(buffer_reference, std430) restrict buffer ChunkTransformIndicesBuffer { 
@@ -45,6 +49,7 @@ layout(buffer_reference, std430) restrict buffer ChunkTransformIndicesBuffer {
 #define GET_VISIBLE_CHUNK(addr, idx)    VisibleChunkList(addr).data[idx]
 #define GET_SCENE_AABB(addr)            SceneAABBBuffer(addr).data
 #define GET_MORTON_KEY(addr, idx)       MortonKeysBuffer(addr).data[idx]
+#define GET_MORTON_VALUE(addr, idx)     MortonValueBuffer(addr).data[idx]
 #define GET_CHUNK_TRANSFORM_IDX(addr, idx)     ChunkTransformIndicesBuffer(addr).data[idx]
 
 #endif
