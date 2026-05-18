@@ -11,20 +11,20 @@
   },
   "materials": {
     "use_unique_materials": false,
-    "shared_material_count": 100
+    "shared_material_count": 10
   },
   "entities": {
     "animated_characters": 0,
-    "static_geometry": 10000,
-    "physics_boxes": 0,
-    "physics_spheres": 0,
-    "physics_capsules": 0
+    "static_geometry": 1000000,
+    "physics_boxes": 2500,
+    "physics_spheres": 2500,
+    "physics_capsules": 2500
   },
   "lights": {
     "directional_count": 1,
-    "point_count": 256,
+    "point_count": 1024,
     "point_shadow_count": 0,
-    "spot_count": 256,
+    "spot_count": 1024,
     "spot_shadow_count": 0
   }
 }

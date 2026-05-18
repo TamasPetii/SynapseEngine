@@ -7,9 +7,9 @@
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Scene/BufferNames.h"
 
+#include <volk.h>
 #define VRDX_IMPLEMENTATION
 #include <vk_radix_sort.h>
-#include <volk.h>
 
 namespace Syn {
     MortonRadixSortPass::~MortonRadixSortPass()
@@ -53,7 +53,6 @@ namespace Syn {
         VkBuffer valuesHandle = compManager->GetComponentBuffer(BufferNames::MortonValuesData, fIdx).buffer->Handle();
         VkBuffer tempHandle = tempBuffer.GetHandle(context.frameIndex, true);
 
-        /*
         vrdxCmdSortKeyValue(
             context.cmd,
             _radixSorter,
@@ -67,7 +66,6 @@ namespace Syn {
             VK_NULL_HANDLE,
             0
         );
-        */
 
         Vk::BufferBarrierInfo keysBarrier{};
         keysBarrier.buffer = keysHandle;
