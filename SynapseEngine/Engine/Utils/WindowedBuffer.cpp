@@ -7,12 +7,12 @@ namespace Syn
     {
     }
 
-    std::pair<bool, std::shared_ptr<Vk::Buffer>> WindowedBuffer::UpdateCapacity(uint32_t requiredElements)
+    std::pair<bool, std::shared_ptr<Vk::Buffer>> WindowedBuffer::UpdateCapacity(uint64_t requiredElements)
     {
         if (requiredElements == 0) requiredElements = 1;
 
         bool needsResize = false;
-        uint32_t newCapacity = _capacity;
+        uint64_t newCapacity = _capacity;
 
         if (requiredElements > _capacity)
         {

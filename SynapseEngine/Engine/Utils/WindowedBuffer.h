@@ -10,17 +10,17 @@ namespace Syn
     {
     public:
         WindowedBuffer(const Vk::BufferConfig& baseConfig, uint32_t elementSize, uint32_t upWindow = 256, uint32_t downWindow = 512);
-        std::pair<bool, std::shared_ptr<Vk::Buffer>> UpdateCapacity(uint32_t requiredElements);
+        std::pair<bool, std::shared_ptr<Vk::Buffer>> UpdateCapacity(uint64_t requiredElements);
 
         Vk::Buffer* GetBuffer() const { return _buffer.get(); }
-        uint32_t GetCapacity() const { return _capacity; }
+        uint64_t GetCapacity() const { return _capacity; }
         size_t GetElementSize() const { return _elementSize; }
     private:
         Vk::BufferConfig _baseConfig;
         size_t _elementSize;
         uint32_t _upWindow;
         uint32_t _downWindow;
-        uint32_t _capacity = 0;
+        uint64_t _capacity = 0;
         std::shared_ptr<Vk::Buffer> _buffer;
     };
 }

@@ -34,8 +34,16 @@
 #include "Engine/Profiler/DefaultGpuProfiler.h"
 #include "Engine/Profiler/DefaultCpuProfiler.h"
 
+#include "Engine/Serialization/Serializer.h"
+#include "Engine/Serialization/Archive/DefaultArchiveRegistry.h"
+#include "Engine/Serialization/Archive/Output/NlohmannJsonOutputArchive.h"
+#include "Engine/Serialization/Archive/Input/NlohmannJsonInputArchive.h"
+
 #include <print>
 #include <filesystem>
+
+#include "Engine/Serialization/Schema/GlmSchema.h"
+#include "Engine/Serialization/Schema/TransformComponentSchema.h"
 
 namespace Syn
 {
@@ -99,10 +107,11 @@ namespace Syn
 		_inputManager = std::make_unique<InputManager>();
 		ServiceLocator::ProvideInputManager(_inputManager.get());
 
-		InitFrameContext(2);
+		InitFrameContext(1);
 		InitLogger();
 		InitVulkan(params);
 		InitTaskExecutor();
+		InitSerializer();
 		InitResourceManager();
 		InitRenderManager(params);
 		InitSceneManager();
@@ -208,10 +217,9 @@ namespace Syn
 	{
 		_physicsEngine->Shutdown();
 		_physicsEngine.reset();
-
 		_taskExecutor.reset();
 		_inputManager.reset();
-
+		_serializer.reset();
 		_cpuProfiler.reset();
 		_gpuProfiler.reset();
 		_sceneManager.reset();
@@ -297,5 +305,47 @@ namespace Syn
 		_physicsEngine = std::make_unique<JoltPhysicsEngine>();
 		_physicsEngine->Init();
 		ServiceLocator::ProvidePhysicsEngine(_physicsEngine.get());
+	}
+
+	void Engine::InitSerializer()
+	{
+		auto registry = std::make_unique<DefaultArchiveRegistry>();
+		registry->RegisterOutputAuto<NlohmannJsonOutputArchive>(10);
+		registry->RegisterInputAuto<NlohmannJsonInputArchive>(10);
+
+		auto service = std::make_unique<DefaultSerializationService>(std::move(registry));
+
+		_serializer = std::make_unique<Serializer>(std::move(service));
+
+		ServiceLocator::ProvideSerializer(_serializer.get());
+
+		Info("[Serializer] Transform teszt inditasa...");
+
+		const char* appDataPath = std::getenv("APPDATA");
+		std::filesystem::path baseDir = appDataPath ? appDataPath : ".";
+		std::filesystem::path saveDir = baseDir / "Synapse" / "Saves";
+
+		if (!std::filesystem::exists(saveDir)) {
+			std::filesystem::create_directories(saveDir);
+		}
+
+		std::filesystem::path savePath = saveDir / "transform_test.json";
+
+		TransformComponent myTransform;
+		myTransform.translation = glm::vec3(100.5f, 50.0f, -25.2f);
+		myTransform.rotation = glm::vec3(90.0f, 0.0f, 0.0f);
+		myTransform.scale = glm::vec3(2.0f, 2.0f, 2.0f);
+
+		if (_serializer->SaveToFile(savePath, myTransform)) {
+			Info("[Serializer] Transform elmentve ide: {}", savePath.string());
+		}
+
+		TransformComponent loadedTransform;
+		if (_serializer->LoadFromFile(savePath, loadedTransform)) {
+			Info("[Serializer] Transform betoltve!");
+			Info("  > Pos: {}, {}, {}", loadedTransform.translation.x, loadedTransform.translation.y, loadedTransform.translation.z);
+			Info("  > Rot: {}, {}, {}", loadedTransform.rotation.x, loadedTransform.rotation.y, loadedTransform.rotation.z);
+			Info("  > Scl: {}, {}, {}", loadedTransform.scale.x, loadedTransform.scale.y, loadedTransform.scale.z);
+		}
 	}
 }

@@ -19,6 +19,7 @@ namespace Syn {
 	IPhysicsEngine* ServiceLocator::_physicsEngine = nullptr;
 	IGpuProfiler* ServiceLocator::_gpuProfiler = nullptr;
 	ICpuProfiler* ServiceLocator::_cpuProfiler = nullptr;
+	Serializer* ServiceLocator::_serializer = nullptr;
 
 	void ServiceLocator::Shutdown()
 	{
@@ -40,5 +41,6 @@ namespace Syn {
 		_physicsEngine = nullptr;
 		_gpuProfiler = nullptr;
 		_cpuProfiler = nullptr;
+		_serializer = nullptr;
 	}
 }

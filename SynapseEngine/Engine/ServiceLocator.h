@@ -24,6 +24,7 @@ namespace Syn {
     class IPhysicsEngine;
 	class IGpuProfiler;
     class ICpuProfiler;
+    class Serializer;
 }
 
 namespace Syn 
@@ -89,6 +90,9 @@ namespace Syn
 
 		static void ProvideCpuProfiler(ICpuProfiler* profiler) { _cpuProfiler = profiler; }
 		static ICpuProfiler* GetCpuProfiler() { return _cpuProfiler; }
+
+        static void ProvideSerializer(Serializer* serializer) { _serializer = serializer; }
+        static Serializer* GetSerializer() { return _serializer; }
     private:
         static Vk::Context* _vkContext;
         static Vk::GpuUploader* _gpuUploader;
@@ -108,5 +112,6 @@ namespace Syn
         static IPhysicsEngine* _physicsEngine;
 		static IGpuProfiler* _gpuProfiler;
 		static ICpuProfiler* _cpuProfiler;
+        static Serializer* _serializer;
     };
 }

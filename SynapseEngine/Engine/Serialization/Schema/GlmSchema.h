@@ -1,0 +1,48 @@
+#pragma once
+#include "Schema.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/quaternion.hpp>
+
+namespace Syn
+{
+    template <>
+    struct Schema<glm::vec3> {
+        static constexpr bool exists = true;
+
+        template <typename Archive, typename T>
+        static void Invoke(Archive& ar, const char* name, T& val) {
+            ScopedArchiveObject obj(ar, name);
+            ar.Property("x", val.x);
+            ar.Property("y", val.y);
+            ar.Property("z", val.z);
+        }
+    };
+
+    template <>
+    struct Schema<glm::vec4> {
+        static constexpr bool exists = true;
+
+        template <typename Archive, typename T>
+        static void Invoke(Archive& ar, const char* name, T& val) {
+            ScopedArchiveObject obj(ar, name);
+            ar.Property("x", val.x);
+            ar.Property("y", val.y);
+            ar.Property("z", val.z);
+            ar.Property("w", val.w);
+        }
+    };
+
+    template <>
+    struct Schema<glm::quat> {
+        static constexpr bool exists = true;
+
+        template <typename Archive, typename T>
+        static void Invoke(Archive& ar, const char* name, T& val) {
+            ScopedArchiveObject obj(ar, name);
+            ar.Property("w", val.w);
+            ar.Property("x", val.x);
+            ar.Property("y", val.y);
+            ar.Property("z", val.z);
+        }
+    };
+}

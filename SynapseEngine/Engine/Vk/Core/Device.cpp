@@ -61,6 +61,8 @@ namespace Syn::Vk {
         features13.dynamicRendering = VK_TRUE;
         features13.maintenance4 = VK_TRUE;
         features13.shaderDemoteToHelperInvocation = VK_TRUE;
+        features13.subgroupSizeControl = VK_TRUE;
+        features13.computeFullSubgroups = VK_TRUE;
 
         VkPhysicalDeviceVulkan12Features features12{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES };
         features12.bufferDeviceAddress = VK_TRUE;
@@ -91,10 +93,6 @@ namespace Syn::Vk {
         deviceFeatures.features.pipelineStatisticsQuery = VK_TRUE;
         deviceFeatures.features.shaderInt64 = VK_TRUE;
 
-        VkPhysicalDeviceSubgroupSizeControlFeaturesEXT subgroup{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SUBGROUP_SIZE_CONTROL_FEATURES_EXT };
-        subgroup.subgroupSizeControl = VK_TRUE;
-        subgroup.computeFullSubgroups = VK_TRUE;
-
         deviceFeatures.pNext = &features11;
         features11.pNext = &features12;
         features12.pNext = &features13;
@@ -106,8 +104,7 @@ namespace Syn::Vk {
         dynamicState1.pNext = &dynamicState2;
         dynamicState2.pNext = &dynamicState3;
         dynamicState3.pNext = &maintenance1Features;
-        maintenance1Features.pNext = &subgroup;
-        subgroup.pNext = nullptr;
+        maintenance1Features.pNext = nullptr;
 
         /*
         maintenance1Features.pNext = &enqueueFeatures;
