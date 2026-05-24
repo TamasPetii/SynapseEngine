@@ -12,7 +12,7 @@ namespace Syn {
 
     class SYN_API ResourceManager {
     public:
-        ResourceManager();
+        ResourceManager(uint32_t framesInFlight);
         ~ResourceManager();
 
         ResourceManager(const ResourceManager&) = delete;
@@ -35,5 +35,7 @@ namespace Syn {
 
         std::shared_ptr<AnimationBuilder> _animationBuilder;
         std::unique_ptr<AnimationManager> _animationManager;
+
+		uint32_t _framesInFlight;
     };
 }

@@ -297,7 +297,7 @@
     <ClCompile Include="Mesh\Source\Procedural\Shape\ConeMeshSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh\Source\Procedural\Shape\PyramidMeshSource.cpp">
+    <ClCompile Include="Mesh\Source\Procedural\Shape\ProxyPyramidMeshSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mesh\Source\Procedural\Shape\QuadMeshSource.cpp">
@@ -1092,6 +1092,12 @@
     <ClCompile Include="Render\Passes\Ssao\DpHvoBlurPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Manager\AddressResourceManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh\Source\Procedural\Shape\PyramidMeshSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1442,7 +1448,7 @@
     <ClInclude Include="Mesh\Source\Procedural\Shape\ConeMeshSource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh\Source\Procedural\Shape\PyramidMeshSource.h">
+    <ClInclude Include="Mesh\Source\Procedural\Shape\ProxyPyramidMeshSource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mesh\Source\Procedural\Shape\QuadMeshSource.h">
@@ -2289,6 +2295,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Ssao\DpHvoBlurPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\AddressResourceManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh\Source\Procedural\Shape\PyramidMeshSource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

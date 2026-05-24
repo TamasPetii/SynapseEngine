@@ -47,7 +47,7 @@ namespace Syn {
 
         VrdxSorterStorageRequirements reqs;
         vrdxGetSorterKeyValueStorageRequirements(_radixSorter, _staticCount, &reqs);
-        tempBuffer.UpdateCapacity(context.frameIndex, static_cast<uint32_t>(reqs.size));
+        tempBuffer.UpdateCapacity(context.frameIndex, reqs.size);
 
         VkBuffer keysHandle = compManager->GetComponentBuffer(BufferNames::MortonKeysData, fIdx).buffer->Handle();
         VkBuffer valuesHandle = compManager->GetComponentBuffer(BufferNames::MortonValuesData, fIdx).buffer->Handle();

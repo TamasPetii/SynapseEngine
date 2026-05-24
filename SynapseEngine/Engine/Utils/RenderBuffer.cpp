@@ -53,8 +53,8 @@ namespace Syn
     {
         bool resized = false;
         if (frameIndex < _config.frames) {
-            if (_mapped[frameIndex] && _mapped[frameIndex]->UpdateCapacity(requiredElements)) resized = true;
-            if (_gpu[frameIndex] && _gpu[frameIndex]->UpdateCapacity(requiredElements)) resized = true;
+            if (_mapped[frameIndex] && _mapped[frameIndex]->UpdateCapacity(requiredElements).first) resized = true;
+            if (_gpu[frameIndex] && _gpu[frameIndex]->UpdateCapacity(requiredElements).first) resized = true;
         }
         return resized;
     }

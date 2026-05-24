@@ -27,6 +27,8 @@ namespace Syn
 
         static std::shared_ptr<StaticMesh> CreatePyramid(float baseSize = 1.0f, float height = 2.0f);
 
+        static std::shared_ptr<StaticMesh> CreateProxyPyramid(float baseSize = 1.0f, float height = 2.0f);
+
         static std::shared_ptr<StaticMesh> CreateQuad(float width = 1.0f, float height = 1.0f);
 
         static std::shared_ptr<StaticMesh> CreateScreenQuad(float width = 1.0f, float height = 1.0f);

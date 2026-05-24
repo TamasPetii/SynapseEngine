@@ -35,7 +35,7 @@
 
 namespace Syn {
 
-    ResourceManager::ResourceManager() {
+    ResourceManager::ResourceManager(uint32_t framesInFlight) : _framesInFlight(framesInFlight) {
 		InitShaderManager();
 		InitImageManager();
 		InitMaterialManager();
@@ -74,6 +74,7 @@ namespace Syn {
 	void ResourceManager::InitMaterialManager()
 	{
 		_materialManager = std::make_unique<MaterialManager>(
+			_framesInFlight,
 			[this](const TexturePayload& payload) -> uint32_t {
 				if (payload.IsEmbedded()) {
 					
@@ -121,6 +122,7 @@ namespace Syn {
 		ServiceLocator::ProvideStaticMeshBuilder(_staticMeshBuilder.get());
 
 		_modelManager = std::make_unique<ModelManager>(
+			_framesInFlight,
 			_staticMeshBuilder,
 			std::make_unique<DefaultGpuModelUploader>(),
 			[this](const std::string& name, const MaterialInfo& info) -> uint32_t {
@@ -139,6 +141,7 @@ namespace Syn {
 		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::Capsule, []() { return MeshFactory::CreateCapsule(); });
 		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::Hemisphere, []() { return MeshFactory::CreateHemisphere(); });
 		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::Pyramid, []() { return MeshFactory::CreatePyramid(); });
+		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::ProxyPyramid, []() { return MeshFactory::CreateProxyPyramid(); });
 		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::Grid, []() { return MeshFactory::CreateGrid(); });
 		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::Torus, []() { return MeshFactory::CreateTorus(); });
 	}
@@ -159,6 +162,7 @@ namespace Syn {
 		ServiceLocator::ProvideAnimationBuilder(_animationBuilder.get());
 
 		_animationManager = std::make_unique<AnimationManager>(
+			_framesInFlight,
 			_animationBuilder,
 			std::make_unique<DefaultGpuAnimationUploader>()
 		);

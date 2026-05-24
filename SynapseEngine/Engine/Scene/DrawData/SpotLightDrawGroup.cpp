@@ -11,7 +11,7 @@ namespace Syn
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
         auto sphere = modelManager->GetResource(MeshSourceNames::Sphere);
         auto cone = modelManager->GetResource(MeshSourceNames::Cone);
-        auto pyramid = modelManager->GetResource(MeshSourceNames::Pyramid);
+        auto pyramid = modelManager->GetResource(MeshSourceNames::ProxyPyramid);
 
         VkDrawIndirectCommand sphereCmdTemplate{};
         sphereCmdTemplate.vertexCount = sphere->baseDrawCommands[0].traditionalCmd.vertexCount;

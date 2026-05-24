@@ -222,6 +222,9 @@ namespace Syn
         if (drawData->Models.meshAllocations.Size() < totalBlueprints)
             drawData->Models.meshAllocations.Resize(totalBlueprints);
 
+        if (drawData->Models.modelAllocations.Size() < _modelCapacities.size())
+            drawData->Models.modelAllocations.Resize(_modelCapacities.size());
+
         if (drawData->Debug.modelAabbCmds.Size() < totalDescriptors) {
             drawData->Debug.modelAabbCmds.data.assign(totalDescriptors, drawData->Debug.modelAabbCmdTemplate);
         }
@@ -423,6 +426,11 @@ namespace Syn
 
             if (drawData->Models.activeDescriptorCount > 0) {
                 drawData->Models.meshAllocBuffer.UpdateCapacity(frameIndex, drawData->Models.activeDescriptorCount);
+            }
+
+            size_t neededModelCapacity = drawData->Models.modelAllocations.Size();
+            if (neededModelCapacity > 0) {
+                drawData->Models.modelAllocBuffer.UpdateCapacity(frameIndex, neededModelCapacity);
             }
 
             size_t totalDescSize = totalDescriptors * sizeof(MeshDrawDescriptor);

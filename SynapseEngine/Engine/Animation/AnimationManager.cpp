@@ -9,13 +9,10 @@
 
 namespace Syn {
 
-    AnimationManager::AnimationManager(std::shared_ptr<AnimationBuilder> builder, std::unique_ptr<IGpuAnimationUploader> uploader)
-        : _builder(builder), _uploader(std::move(uploader))
+    AnimationManager::AnimationManager(uint32_t framesInFlight, std::shared_ptr<AnimationBuilder> builder, std::unique_ptr<IGpuAnimationUploader> uploader)
+        : AddressResourceManager<Animation, GpuAnimationAddresses>(framesInFlight, 100, 256, 512),
+        _builder(builder), _uploader(std::move(uploader))
     {
-        _animationAddressBuffer = Vk::BufferFactory::CreatePersistent(
-            MAX_ANIMATIONS * sizeof(GpuAnimationAddresses),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
-        );
     }
 
     uint32_t AnimationManager::LoadAnimationAsync(const std::string& filePath, uint32_t baseModelId) {
@@ -93,7 +90,6 @@ namespace Syn {
         addresses.descriptor = entry.resource->gpuData.descriptor;
         addresses.padding = 0;
 
-        size_t offset = entryIndex * sizeof(GpuAnimationAddresses);
-        _animationAddressBuffer->Write(&addresses, sizeof(GpuAnimationAddresses), offset);
+        WriteAddress(entryIndex, addresses);
     }
 }

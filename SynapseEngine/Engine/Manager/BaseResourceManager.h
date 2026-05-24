@@ -54,7 +54,7 @@ namespace Syn {
 
         virtual ~BaseResourceManager() = default;
 
-        void Update();
+        virtual void Update();
         void WaitForResource(uint32_t id) const;
         void SetResourceState(uint32_t id, ResourceState newState);
 

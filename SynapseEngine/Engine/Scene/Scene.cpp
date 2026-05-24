@@ -287,14 +287,14 @@ namespace Syn
 
         if (_sceneCameraEntity != NULL_ENTITY && _registry->HasComponent<CameraComponent>(_sceneCameraEntity))
         {
-            _registry->GetComponent<CameraComponent>(_sceneCameraEntity).width = screenWidth;
-            _registry->GetComponent<CameraComponent>(_sceneCameraEntity).height = screenHeight;
+            _registry->GetComponent<CameraComponent>(_sceneCameraEntity).width = (float)screenWidth;
+            _registry->GetComponent<CameraComponent>(_sceneCameraEntity).height = (float)screenHeight;
         }
 
         if (_debugCameraEntity != NULL_ENTITY && _registry->HasComponent<CameraComponent>(_debugCameraEntity))
         {
-            _registry->GetComponent<CameraComponent>(_debugCameraEntity).width = screenWidth;
-            _registry->GetComponent<CameraComponent>(_debugCameraEntity).height = screenHeight;
+            _registry->GetComponent<CameraComponent>(_debugCameraEntity).width = (float)screenWidth;
+            _registry->GetComponent<CameraComponent>(_debugCameraEntity).height = (float)screenHeight;
         }
 
         ServiceLocator::GetTaskExecutor()->run(_updateTaskflow).wait();

@@ -139,7 +139,7 @@ namespace Syn
 
 	void Engine::InitResourceManager()
 	{
-		_resourceManager = std::make_unique<ResourceManager>();
+		_resourceManager = std::make_unique<ResourceManager>(_frameContext.framesInFlight);
 		ServiceLocator::ProvideResourceManager(_resourceManager.get());
 	}
 

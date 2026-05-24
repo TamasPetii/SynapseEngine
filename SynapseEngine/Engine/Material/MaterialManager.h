@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine/SynApi.h"
-#include "Engine/Manager/BaseResourceManager.h"
+#include "Engine/Manager/AddressResourceManager.h"
 #include "Engine/Vk/Buffer/Buffer.h"
 #include "Engine/Material/Material.h"
 #include "Engine/Mesh/Data/Common/MaterialInfo.h"
@@ -9,16 +9,12 @@
 namespace Syn {
     using TextureLoadCallback = std::function<uint32_t(const TexturePayload& payload)>;
 
-    class SYN_API MaterialManager : public BaseResourceManager<Material> {
+    class SYN_API MaterialManager : public AddressResourceManager<Material, GpuMaterial> {
     public:
-        static constexpr uint32_t MAX_MATERIALS = 2000000; //Todo: Dynamic
-
-        MaterialManager(TextureLoadCallback textureLoadCallback);
+        MaterialManager(uint32_t framesInFlight, TextureLoadCallback textureLoadCallback);
         ~MaterialManager() = default;
 
         uint32_t LoadMaterial(const std::string& name, const MaterialInfo& info);
-        Vk::Buffer* GetMaterialBuffer() const { return _materialBuffer.get(); }
-
         std::span<const MaterialRenderType> GetRenderTypeSnapshot() const { return _renderTypeCache; }
     protected:
         void StartGpuUpload(EntryType& entry) override;
@@ -27,7 +23,6 @@ namespace Syn {
         void LoadDefaultMaterialSync();
     private:
         TextureLoadCallback _textureLoadCallback;
-        std::unique_ptr<Vk::Buffer> _materialBuffer;
         std::vector<MaterialRenderType> _renderTypeCache;
     };
 }

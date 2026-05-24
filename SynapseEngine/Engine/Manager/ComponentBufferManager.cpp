@@ -44,10 +44,10 @@ namespace Syn
             uint32_t requiredSize = state.sizeCallback();
             auto& frameData = state.frames[frameIndex];
 
-            if (frameData.gpuBuffer.UpdateCapacity(requiredSize))
-            {
+            auto [resized, oldBuffer] = frameData.gpuBuffer.UpdateCapacity(requiredSize);
+
+            if (resized)
                 frameData.versions.resize(frameData.gpuBuffer.GetCapacity(), 0);
-            }
         }
     }
 

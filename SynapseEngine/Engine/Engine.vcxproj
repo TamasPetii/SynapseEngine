@@ -235,6 +235,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Manager\AddressResourceManager.cpp" />
+    <ClCompile Include="Mesh\Source\Procedural\Shape\PyramidMeshSource.cpp" />
     <ClCompile Include="Render\Passes\Ssao\DpHvoBlurPass.cpp" />
     <ClCompile Include="Render\Passes\Ssao\DpHvoPass.cpp" />
     <ClCompile Include="Render\Passes\Culling\MortonModelCullingPass.cpp" />
@@ -494,7 +496,7 @@
     <ClCompile Include="Mesh\Source\Procedural\Shape\CapsuleMeshSource.cpp" />
     <ClCompile Include="Mesh\Utils\MeshUtils.cpp" />
     <ClCompile Include="Mesh\Source\Procedural\Shape\TorusMeshSource.cpp" />
-    <ClCompile Include="Mesh\Source\Procedural\Shape\PyramidMeshSource.cpp" />
+    <ClCompile Include="Mesh\Source\Procedural\Shape\ProxyPyramidMeshSource.cpp" />
     <ClCompile Include="Mesh\Source\Procedural\Shape\QuadMeshSource.cpp" />
     <ClCompile Include="Mesh\Source\Procedural\Shape\ScreenQuadMeshSource.cpp" />
     <ClCompile Include="Collision\Colliders\SphereCollider.cpp" />
@@ -596,6 +598,8 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Manager\AddressResourceManager.h" />
+    <ClInclude Include="Mesh\Source\Procedural\Shape\PyramidMeshSource.h" />
     <ClInclude Include="Render\Passes\Ssao\DpHvoBlurPass.h" />
     <ClInclude Include="Render\Passes\Ssao\DpHvoPass.h" />
     <ClInclude Include="Render\Passes\Culling\MortonModelCullingPass.h" />
@@ -873,7 +877,7 @@
     <ClInclude Include="Mesh\Source\Procedural\Shape\CapsuleMeshSource.h" />
     <ClInclude Include="Mesh\Utils\MeshUtils.h" />
     <ClInclude Include="Mesh\Source\Procedural\Shape\TorusMeshSource.h" />
-    <ClInclude Include="Mesh\Source\Procedural\Shape\PyramidMeshSource.h" />
+    <ClInclude Include="Mesh\Source\Procedural\Shape\ProxyPyramidMeshSource.h" />
     <ClInclude Include="Mesh\Source\Procedural\Shape\QuadMeshSource.h" />
     <ClInclude Include="Mesh\Source\Procedural\Shape\ScreenQuadMeshSource.h" />
     <ClInclude Include="Collision\Colliders\SphereCollider.h" />

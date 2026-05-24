@@ -7,7 +7,7 @@ namespace Syn
     {
     }
 
-    bool WindowedBuffer::UpdateCapacity(uint32_t requiredElements)
+    std::pair<bool, std::shared_ptr<Vk::Buffer>> WindowedBuffer::UpdateCapacity(uint32_t requiredElements)
     {
         if (requiredElements == 0) requiredElements = 1;
 
@@ -31,6 +31,8 @@ namespace Syn
             _baseConfig.size = _capacity * _elementSize;
             auto newBuffer = std::make_shared<Vk::Buffer>(_baseConfig);
 
+            std::shared_ptr<Vk::Buffer> oldBuffer = _buffer;
+
             if (_buffer)
             {
                 bool isMappable = (_baseConfig.allocationFlags & VMA_ALLOCATION_CREATE_MAPPED_BIT) != 0;
@@ -52,9 +54,9 @@ namespace Syn
             }
 
             _buffer = std::move(newBuffer);
-            return true;
+            return std::make_pair(true, oldBuffer);
         }
 
-        return false;
+        return std::make_pair(false, nullptr);
     }
 }

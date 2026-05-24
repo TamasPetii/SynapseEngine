@@ -10,6 +10,7 @@
 #include "Engine/Mesh/Source/Procedural/Shape/GridMeshSource.h"
 #include "Engine/Mesh/Source/Procedural/Shape/HemisphereMeshSource.h"
 #include "Engine/Mesh/Source/Procedural/Shape/PyramidMeshSource.h"
+#include "Engine/Mesh/Source/Procedural/Shape/ProxyPyramidMeshSource.h"
 #include "Engine/Mesh/Source/Procedural/Shape/QuadMeshSource.h"
 #include "Engine/Mesh/Source/Procedural/Shape/ScreenQuadMeshSource.h"
 #include "Engine/Mesh/Source/Procedural/Shape/SphereMeshSource.h"
@@ -85,6 +86,15 @@ namespace Syn
         if (!builder) return nullptr;
 
         PyramidMeshSource source(baseSize, height);
+        return builder->BuildFromSource(source);
+    }
+
+    std::shared_ptr<StaticMesh> MeshFactory::CreateProxyPyramid(float baseSize, float height)
+    {
+        auto builder = ServiceLocator::GetStaticMeshBuilder();
+        if (!builder) return nullptr;
+
+        ProxyPyramidMeshSource source(baseSize, height);
         return builder->BuildFromSource(source);
     }
 

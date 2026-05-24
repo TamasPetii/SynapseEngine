@@ -12,13 +12,10 @@
 
 namespace Syn {
 
-    ModelManager::ModelManager(std::shared_ptr<StaticMeshBuilder> builder, std::unique_ptr<IGpuModelUploader> uploader, MaterialLoadCallback materialLoadCallback)
-        : _builder(builder), _uploader(std::move(uploader)), _materialLoadCallback(std::move(materialLoadCallback))
+    ModelManager::ModelManager(uint32_t framesInFlight, std::shared_ptr<StaticMeshBuilder> builder, std::unique_ptr<IGpuModelUploader> uploader, MaterialLoadCallback materialLoadCallback)
+        : AddressResourceManager<StaticMesh, GpuModelAddresses>(framesInFlight, 100, 256, 512),
+        _builder(builder), _uploader(std::move(uploader)), _materialLoadCallback(std::move(materialLoadCallback))
     {
-        _modelAddressBuffer = Vk::BufferFactory::CreatePersistent(
-            MAX_MODELS * sizeof(GpuModelAddresses),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
-        );
     }
 
     uint32_t ModelManager::LoadModelAsync(const std::string& filePath) {
@@ -197,26 +194,21 @@ namespace Syn {
         addresses.vertexPositions = getAddr(hw.vertexPositions);
         addresses.vertexAttributes = getAddr(hw.vertexAttributes);
         addresses.indices = getAddr(hw.indices);
-
         addresses.meshDescriptors = getAddr(hw.meshDescriptors);
         addresses.meshColliders = getAddr(hw.meshColliders);
         addresses.lodDescriptors = getAddr(hw.lodDescriptors);
-
         addresses.meshletVertexIndices = getAddr(hw.meshletVertexIndices);
         addresses.meshletTriangleIndices = getAddr(hw.meshletTriangleIndices);
         addresses.meshletDescriptors = getAddr(hw.meshletDescriptors);
         addresses.meshletDrawDescriptors = getAddr(hw.meshletDrawDescriptors);
         addresses.meshletColliders = getAddr(hw.meshletColliders);
-
         addresses.nodeTransforms = getAddr(hw.nodeTransforms);
-
         addresses.globalCollider = entry.resource->gpuData.globalCollider;
         addresses.vertexCount = entry.resource->gpuData.globalVertexCount;
         addresses.indexCount = entry.resource->gpuData.globalIndexCount;
         addresses.averageLodIndexCount = entry.resource->gpuData.globalAverageLodIndexCount;
         addresses.meshCount = entry.resource->gpuData.globalMeshCount;
 
-        size_t offset = entryIndex * sizeof(GpuModelAddresses);
-        _modelAddressBuffer->Write(&addresses, sizeof(GpuModelAddresses), offset);
+        WriteAddress(entryIndex, addresses);
     }
 }
