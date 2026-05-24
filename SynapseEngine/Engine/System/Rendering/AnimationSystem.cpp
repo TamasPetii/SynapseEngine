@@ -30,8 +30,8 @@ namespace Syn
 
                     auto animData = snapshot.resource;
 
-                    float duration = animData->gpuData.descriptor.durationInSeconds;
-                    uint32_t maxFrames = animData->gpuData.descriptor.frameCount;
+                    float duration = animData->cpuData.descriptor.durationInSeconds;
+                    uint32_t maxFrames = animData->cpuData.descriptor.frameCount;
 
                     if (duration > 0.0f && maxFrames > 0)
                     {

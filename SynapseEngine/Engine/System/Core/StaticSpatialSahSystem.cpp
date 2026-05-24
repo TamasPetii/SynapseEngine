@@ -81,7 +81,7 @@ namespace Syn
 
                         if (snapshotEntry.resource != nullptr && snapshotEntry.state == ResourceState::Ready)
                         {
-                            GpuMeshCollider globalLocalCollider = snapshotEntry.resource->gpuData.globalCollider;
+                            GpuMeshCollider globalLocalCollider = snapshotEntry.resource->cpuData.globalCollider;
                             GpuMeshCollider globalWorldCollider = MeshUtils::TransformCollider(globalLocalCollider, transform.transform);
 
                             minB = globalWorldCollider.aabbMin;

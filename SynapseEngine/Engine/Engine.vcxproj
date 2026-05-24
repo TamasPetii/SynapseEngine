@@ -235,6 +235,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Animation\Data\Cpu\CpuAnimationData.cpp" />
+    <ClCompile Include="Animation\Converter\ICpuAnimationExtractor.cpp" />
+    <ClCompile Include="Animation\Converter\DefaultCpuAnimationExtractor.cpp" />
+    <ClCompile Include="Image\Converter\DefaultCpuImageExtractor.cpp" />
+    <ClCompile Include="Image\Converter\ICpuImageExtractor.cpp" />
+    <ClCompile Include="Image\Data\Cpu\CpuTextureData.cpp" />
+    <ClCompile Include="Mesh\Converter\DefaultCpuModelExtractor.cpp" />
+    <ClCompile Include="Mesh\Converter\ICpuModelExtractor.cpp" />
+    <ClCompile Include="Mesh\Data\Cpu\CpuModelData.cpp" />
     <ClCompile Include="Manager\AddressResourceManager.cpp" />
     <ClCompile Include="Mesh\Source\Procedural\Shape\PyramidMeshSource.cpp" />
     <ClCompile Include="Render\Passes\Ssao\DpHvoBlurPass.cpp" />
@@ -598,6 +607,15 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Animation\Data\Cpu\CpuAnimationData.h" />
+    <ClInclude Include="Animation\Converter\ICpuAnimationExtractor.h" />
+    <ClInclude Include="Animation\Converter\DefaultCpuAnimationExtractor.h" />
+    <ClInclude Include="Image\Converter\DefaultCpuImageExtractor.h" />
+    <ClInclude Include="Image\Converter\ICpuImageExtractor.h" />
+    <ClInclude Include="Image\Data\Cpu\CpuTextureData.h" />
+    <ClInclude Include="Mesh\Converter\DefaultCpuModelExtractor.h" />
+    <ClInclude Include="Mesh\Converter\ICpuModelExtractor.h" />
+    <ClInclude Include="Mesh\Data\Cpu\CpuModelData.h" />
     <ClInclude Include="Manager\AddressResourceManager.h" />
     <ClInclude Include="Mesh\Source\Procedural\Shape\PyramidMeshSource.h" />
     <ClInclude Include="Render\Passes\Ssao\DpHvoBlurPass.h" />

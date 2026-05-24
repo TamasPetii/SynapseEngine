@@ -26,6 +26,8 @@ namespace Syn
     {
         GpuAnimationDescriptor descriptor;
 
+        GpuMeshCollider globalCollider;
+
         // Flattened by meshNodeDescriptors!
         std::vector<VertexSkinData> vertexSkinData;
 

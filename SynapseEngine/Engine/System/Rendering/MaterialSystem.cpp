@@ -43,7 +43,7 @@ namespace Syn
             auto countFunc = [&](EntityID entity) {
                 auto& comp = pool->Get(entity);
                 if (comp.modelIndex < modelSnapshots.size() && modelSnapshots[comp.modelIndex].resource) {
-                    totalExactMaterials += static_cast<uint32_t>(modelSnapshots[comp.modelIndex].resource->meshMaterialIndices.size());
+                    totalExactMaterials += static_cast<uint32_t>(modelSnapshots[comp.modelIndex].resource->cpuData.meshMaterialIndices.size());
                 }
                 };
 
@@ -63,7 +63,7 @@ namespace Syn
                 auto model = modelSnapshots[comp.modelIndex].resource;
                 if (!model) return;
 
-                const auto& defaultMaterials = model->meshMaterialIndices;
+                const auto& defaultMaterials = model->cpuData.meshMaterialIndices;
                 uint32_t materialCount = static_cast<uint32_t>(defaultMaterials.size());
                 
                 std::span<const uint32_t> overrides;

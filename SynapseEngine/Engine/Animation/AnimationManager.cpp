@@ -9,9 +9,15 @@
 
 namespace Syn {
 
-    AnimationManager::AnimationManager(uint32_t framesInFlight, std::shared_ptr<AnimationBuilder> builder, std::unique_ptr<IGpuAnimationUploader> uploader)
+    AnimationManager::AnimationManager(
+        uint32_t framesInFlight,
+        std::shared_ptr<AnimationBuilder> builder,
+        std::unique_ptr<IGpuAnimationUploader> uploader,
+        std::unique_ptr<ICpuAnimationExtractor> cpuExtractor)
         : AddressResourceManager<Animation, GpuAnimationAddresses>(framesInFlight, 100, 256, 512),
-        _builder(builder), _uploader(std::move(uploader))
+        _builder(builder), 
+        _uploader(std::move(uploader)), 
+        _cpuExtractor(std::move(cpuExtractor))
     {
     }
 
@@ -33,7 +39,7 @@ namespace Syn {
             if (!baseModel) 
                 return std::shared_ptr<Animation>(nullptr);
 
-            return _builder->BuildFromFile(filePath, baseModel->cpuData);
+            return _builder->BuildFromFile(filePath, *baseModel->transientCpuData);
             });
     }
 
@@ -47,14 +53,14 @@ namespace Syn {
             if (!baseModel) 
                 return std::shared_ptr<Animation>(nullptr);
 
-            return _builder->BuildFromFile(filePath, baseModel->cpuData);
+            return _builder->BuildFromFile(filePath, *baseModel->transientCpuData);
             });
     }
 
     void AnimationManager::StartGpuUpload(EntryType& entry) {
         Vk::GpuUploadRequest request{
             .uploadCallback = [this, &entry](VkCommandBuffer cmd) {
-                auto uploadResult = _uploader->Upload(entry.resource->gpuData, cmd);
+                auto uploadResult = _uploader->Upload(*(entry.resource->transientGpuData), cmd);
                 entry.resource->hardwareBuffers = std::move(uploadResult.hardwareBuffers);
                 entry.stagingBuffer = std::move(uploadResult.stagingBuffer);
             },
@@ -63,7 +69,7 @@ namespace Syn {
                 entry.stagingBuffer.reset();
                 entry.state = ResourceState::Ready;
                 _version.fetch_add(1, std::memory_order_release);
-                Info("Animation loaded: {}", entry.path);
+                Info("Animation loaded, extracted, and RAM freed: {}", entry.path);
             },
             .needsGraphics = false
         };
@@ -75,21 +81,27 @@ namespace Syn {
     {
         uint32_t entryIndex = _pathToId.at(entry.path);
 
+        auto& gpuData = *(entry.resource->transientGpuData);
+        auto& cookedData = *(entry.resource->transientCpuData);
+        auto& cpuData = entry.resource->cpuData;
+
+        _cpuExtractor->Extract(cookedData, gpuData, cpuData);
+
         GpuAnimationAddresses addresses{};
         const auto& hw = entry.resource->hardwareBuffers;
 
-        auto getAddr = [](const std::unique_ptr<Vk::Buffer>& buf) -> VkDeviceAddress {
-            return buf ? buf->GetDeviceAddress() : 0;
-            };
-
-        addresses.vertexSkinData = getAddr(hw.vertexSkinData);
-        addresses.nodeTransforms = getAddr(hw.nodeTransforms);
-        addresses.frameGlobalColliders = getAddr(hw.frameGlobalColliders);
-        addresses.frameMeshColliders = getAddr(hw.frameMeshColliders);
-        addresses.frameMeshletColliders = getAddr(hw.frameMeshletColliders);
-        addresses.descriptor = entry.resource->gpuData.descriptor;
+        addresses.vertexSkinData = hw.vertexSkinData->GetDeviceAddress();
+        addresses.nodeTransforms = hw.nodeTransforms->GetDeviceAddress();
+        addresses.frameGlobalColliders = hw.frameGlobalColliders->GetDeviceAddress();
+        addresses.frameMeshColliders = hw.frameMeshColliders->GetDeviceAddress();
+        addresses.frameMeshletColliders = hw.frameMeshletColliders->GetDeviceAddress();
+        addresses.descriptor = entry.resource->cpuData.descriptor;
+		addresses.globalCollider = entry.resource->cpuData.globalCollider;
         addresses.padding = 0;
 
         WriteAddress(entryIndex, addresses);
+
+        entry.resource->transientGpuData.reset();
+        entry.resource->transientCpuData.reset();
     }
 }

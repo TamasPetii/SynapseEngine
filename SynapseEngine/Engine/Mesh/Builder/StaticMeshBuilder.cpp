@@ -45,11 +45,12 @@ namespace Syn
             return nullptr;
 
         auto staticMesh = std::make_shared<StaticMesh>();
-        staticMesh->cpuData = _cooker->Cook(std::move(rawModelOpt).value());
+        staticMesh->transientCpuData = std::make_unique<CookedModel>();
+        staticMesh->transientGpuData = std::make_unique<GpuBatchedModel>();
 
-        _pipeline->Run(staticMesh->cpuData);
-
-        staticMesh->gpuData = _converter->Convert(staticMesh->cpuData);
+        *(staticMesh->transientCpuData) = _cooker->Cook(std::move(rawModelOpt).value());
+        _pipeline->Run(*(staticMesh->transientCpuData));
+        *(staticMesh->transientGpuData) = _converter->Convert(*(staticMesh->transientCpuData));
 
         return staticMesh;
     }

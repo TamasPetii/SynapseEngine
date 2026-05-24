@@ -3,6 +3,7 @@
 #include "Engine/Manager/BaseResourceManager.h"
 #include "Engine/Image/Builder/ImageBuilder.h"
 #include "Engine/Image/Uploader/IGpuImageUploader.h"
+#include "Engine/Image/Converter/ICpuImageExtractor.h"  
 
 #include "Engine/Vk/Core/ThreadSafeQueue.h"
 #include "Engine/Vk/Command/CommandPool.h"
@@ -21,7 +22,11 @@ namespace Syn {
         static constexpr uint32_t BINDING_SAMPLERS = 0;
         static constexpr uint32_t BINDING_TEXTURES = 1;
 
-        ImageManager(std::shared_ptr<ImageBuilder> builder, std::unique_ptr<IGpuImageUploader> uploader);
+        ImageManager(
+            std::shared_ptr<ImageBuilder> builder,
+            std::unique_ptr<IGpuImageUploader> uploader,
+            std::unique_ptr<ICpuImageExtractor> cpuExtractor);
+
         ~ImageManager() = default;
 
         uint32_t LoadImageAsync(const std::string& filePath);
@@ -45,6 +50,7 @@ namespace Syn {
     private:
         std::shared_ptr<ImageBuilder> _builder;
         std::unique_ptr<IGpuImageUploader> _uploader;
+        std::unique_ptr<ICpuImageExtractor> _cpuExtractor;
 
         VkDescriptorSetLayout _bindlessLayout = VK_NULL_HANDLE;
         std::unique_ptr<Vk::DescriptorBuffer> _bindlessBuffer;

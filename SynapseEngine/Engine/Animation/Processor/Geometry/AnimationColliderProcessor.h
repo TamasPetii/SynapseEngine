@@ -13,5 +13,6 @@ namespace Syn
         virtual void Process(CookedAnimation& inOutAnimation, const CookedModel& baseModel) override;
     private:
         void ComputeFrameColliders(uint32_t frameIndex, CookedAnimation& anim, const CookedModel& model, tf::Subflow& subflow);
+        void ComputeGlobalAnimationCollider(CookedAnimation& anim);
     };
 }

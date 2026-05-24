@@ -14,27 +14,27 @@ namespace Syn
         auto pyramid = modelManager->GetResource(MeshSourceNames::ProxyPyramid);
 
         VkDrawIndirectCommand sphereCmdTemplate{};
-        sphereCmdTemplate.vertexCount = sphere->baseDrawCommands[0].traditionalCmd.vertexCount;
+        sphereCmdTemplate.vertexCount = sphere->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;
         sphereCmdTemplate.instanceCount = 0;
-        sphereCmdTemplate.firstVertex = sphere->baseDrawCommands[0].traditionalCmd.firstVertex;
+        sphereCmdTemplate.firstVertex = sphere->cpuData.baseDrawCommands[0].traditionalCmd.firstVertex;
         sphereCmdTemplate.firstInstance = 0;
 
         VkDrawIndirectCommand aabbCmdTemplate{};
-        aabbCmdTemplate.vertexCount = cube->baseDrawCommands[0].traditionalCmd.vertexCount;
+        aabbCmdTemplate.vertexCount = cube->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;
         aabbCmdTemplate.instanceCount = 0;
-        aabbCmdTemplate.firstVertex = cube->baseDrawCommands[0].traditionalCmd.firstVertex;
+        aabbCmdTemplate.firstVertex = cube->cpuData.baseDrawCommands[0].traditionalCmd.firstVertex;
         aabbCmdTemplate.firstInstance = 0;
 
         VkDrawIndirectCommand pyramidCmdTemplate{};
-        pyramidCmdTemplate.vertexCount = pyramid->baseDrawCommands[0].traditionalCmd.vertexCount;
+        pyramidCmdTemplate.vertexCount = pyramid->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;
         pyramidCmdTemplate.instanceCount = 0;
-        pyramidCmdTemplate.firstVertex = pyramid->baseDrawCommands[0].traditionalCmd.firstVertex;
+        pyramidCmdTemplate.firstVertex = pyramid->cpuData.baseDrawCommands[0].traditionalCmd.firstVertex;
         pyramidCmdTemplate.firstInstance = 0;
 
         VkDrawIndirectCommand coneCmdTemplate{};
-        coneCmdTemplate.vertexCount = cone->baseDrawCommands[0].traditionalCmd.vertexCount;
+        coneCmdTemplate.vertexCount = cone->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;
         coneCmdTemplate.instanceCount = 0;
-        coneCmdTemplate.firstVertex = cone->baseDrawCommands[0].traditionalCmd.firstVertex;
+        coneCmdTemplate.firstVertex = cone->cpuData.baseDrawCommands[0].traditionalCmd.firstVertex;
         coneCmdTemplate.firstInstance = 0;
 
         VkDrawIndirectCommand billboardCmdTemplate{};

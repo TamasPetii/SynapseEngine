@@ -10,9 +10,9 @@ namespace Syn
         auto modelManager = ServiceLocator::GetModelManager();
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
 
-        wireframeCmdTemplate.vertexCount = cube->baseDrawCommands[0].traditionalCmd.vertexCount;
+        wireframeCmdTemplate.vertexCount = cube->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;
         wireframeCmdTemplate.instanceCount = 0;
-        wireframeCmdTemplate.firstVertex = cube->baseDrawCommands[0].traditionalCmd.firstVertex;
+        wireframeCmdTemplate.firstVertex = cube->cpuData.baseDrawCommands[0].traditionalCmd.firstVertex;
         wireframeCmdTemplate.firstInstance = 0;
 
         dispatchCmdTemplate.x = 0;

@@ -44,12 +44,12 @@ namespace Syn
             return nullptr;
 
         auto animation = std::make_shared<Animation>();
+        animation->transientCpuData = std::make_unique<CookedAnimation>();
+        animation->transientGpuData = std::make_unique<GpuBatchedAnimation>();
 
-        animation->cpuData = _cooker->Cook(std::move(rawAnimOpt).value());
-
-        _pipeline->Run(animation->cpuData, baseModel);
-
-        animation->gpuData = _converter->Convert(animation->cpuData, baseModel);
+        *(animation->transientCpuData) = _cooker->Cook(std::move(rawAnimOpt).value());
+        _pipeline->Run(*(animation->transientCpuData), baseModel);
+        *(animation->transientGpuData) = _converter->Convert(*(animation->transientCpuData), baseModel);
 
         return animation;
     }

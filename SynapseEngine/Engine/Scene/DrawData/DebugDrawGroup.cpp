@@ -11,14 +11,14 @@ namespace Syn
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
         auto sphere = modelManager->GetResource(MeshSourceNames::Sphere);
 
-        modelAabbCmdTemplate.vertexCount = cube->baseDrawCommands[0].traditionalCmd.vertexCount;
+        modelAabbCmdTemplate.vertexCount = cube->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;
         modelAabbCmdTemplate.instanceCount = 0;
-        modelAabbCmdTemplate.firstVertex = cube->baseDrawCommands[0].traditionalCmd.firstVertex;
+        modelAabbCmdTemplate.firstVertex = cube->cpuData.baseDrawCommands[0].traditionalCmd.firstVertex;
         modelAabbCmdTemplate.firstInstance = 0;
 
-        modelSphereCmdTemplate.vertexCount = sphere->baseDrawCommands[0].traditionalCmd.vertexCount;
+        modelSphereCmdTemplate.vertexCount = sphere->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;
         modelSphereCmdTemplate.instanceCount = 0;
-        modelSphereCmdTemplate.firstVertex = sphere->baseDrawCommands[0].traditionalCmd.firstVertex;
+        modelSphereCmdTemplate.firstVertex = sphere->cpuData.baseDrawCommands[0].traditionalCmd.firstVertex;
         modelSphereCmdTemplate.firstInstance = 0;
 
         modelAabbCmds.data.assign(1, modelAabbCmdTemplate);

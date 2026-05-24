@@ -6,6 +6,9 @@
 #include "Engine/Mesh/Uploader/DefaultGpuModelUploader.h"
 #include "Engine/Mesh/Converter/DefaultModelCooker.h"
 #include "Engine/Mesh/Converter/DefaultGpuModelConverter.h"
+#include "Engine/Mesh/Converter/DefaultCpuModelExtractor.h"
+#include "Engine/Animation/Converter/DefaultCpuAnimationExtractor.h"
+#include "Engine/Image/Converter/DefaultCpuImageExtractor.h"
 
 #include "Engine/Mesh/Loader/MeshLoaders.h"
 #include "Engine/Mesh/Source/MeshSources.h"
@@ -65,7 +68,8 @@ namespace Syn {
 
 		_imageManager = std::make_unique<ImageManager>(
 			_imageBuilder,
-			std::make_unique<DefaultGpuImageUploader>()
+			std::make_unique<DefaultGpuImageUploader>(),
+			std::make_unique<DefaultCpuImageExtractor>()
 		);
 
 		ServiceLocator::ProvideImageManager(_imageManager.get());
@@ -125,6 +129,7 @@ namespace Syn {
 			_framesInFlight,
 			_staticMeshBuilder,
 			std::make_unique<DefaultGpuModelUploader>(),
+			std::make_unique<DefaultCpuModelExtractor>(),
 			[this](const std::string& name, const MaterialInfo& info) -> uint32_t {
 				return _materialManager->LoadMaterial(name, info);
 			}
@@ -164,7 +169,8 @@ namespace Syn {
 		_animationManager = std::make_unique<AnimationManager>(
 			_framesInFlight,
 			_animationBuilder,
-			std::make_unique<DefaultGpuAnimationUploader>()
+			std::make_unique<DefaultGpuAnimationUploader>(),
+			std::make_unique<DefaultCpuAnimationExtractor>()
 		);
 
 		ServiceLocator::ProvideAnimationManager(_animationManager.get());

@@ -26,5 +26,6 @@ namespace Syn
         std::vector<BoneTrack> tracks;
         std::vector<AnimationNode> nodes;
         std::vector<CookedAnimationFrame> frames;
+        CookedMeshCollisionData globalFrameCollider;
     };
 }

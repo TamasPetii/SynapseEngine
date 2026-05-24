@@ -12,9 +12,16 @@
 
 namespace Syn {
 
-    ModelManager::ModelManager(uint32_t framesInFlight, std::shared_ptr<StaticMeshBuilder> builder, std::unique_ptr<IGpuModelUploader> uploader, MaterialLoadCallback materialLoadCallback)
+    ModelManager::ModelManager(uint32_t framesInFlight,
+        std::shared_ptr<StaticMeshBuilder> builder,
+        std::unique_ptr<IGpuModelUploader> uploader,
+        std::unique_ptr<ICpuModelExtractor> cpuExtractor,
+        MaterialLoadCallback materialLoadCallback)
         : AddressResourceManager<StaticMesh, GpuModelAddresses>(framesInFlight, 100, 256, 512),
-        _builder(builder), _uploader(std::move(uploader)), _materialLoadCallback(std::move(materialLoadCallback))
+        _builder(builder), 
+        _uploader(std::move(uploader)), 
+        _cpuExtractor(std::move(cpuExtractor)),
+        _materialLoadCallback(std::move(materialLoadCallback))
     {
     }
 
@@ -61,13 +68,15 @@ namespace Syn {
     }
 
     void ModelManager::StartGpuUpload(EntryType& entry) {
-        if (_materialLoadCallback && entry.resource) {
+        if (_materialLoadCallback && entry.resource && entry.resource->transientGpuData) 
+        {
             std::filesystem::path modelDir = std::filesystem::path(entry.path).parent_path();
+            auto& transientGpu = *(entry.resource->transientGpuData);
 
             std::vector<uint32_t> loadedMaterialIds;
-            loadedMaterialIds.reserve(entry.resource->gpuData.materials.size());
+            loadedMaterialIds.reserve(transientGpu.materials.size());
 
-            for (auto& matInfo : entry.resource->gpuData.materials) {
+            for (auto& matInfo : transientGpu.materials) {
                 auto resolvePath = [&](TexturePayload& payload) {
                     if (!payload.path.empty() && !payload.IsEmbedded()) {
                         if (payload.path.empty() || payload.path[0] != '*') {
@@ -96,21 +105,21 @@ namespace Syn {
                 loadedMaterialIds.push_back(matId);
             }
 
-            size_t totalDescriptors = entry.resource->gpuData.indexedData.meshDescriptors.size();
+            size_t totalDescriptors = transientGpu.indexedData.meshDescriptors.size();
             size_t meshCount = totalDescriptors / 4;
 
-            entry.resource->meshMaterialIndices.clear();
-            entry.resource->meshMaterialIndices.reserve(meshCount);
+            entry.resource->cpuData.meshMaterialIndices.clear();
+            entry.resource->cpuData.meshMaterialIndices.reserve(meshCount);
 
             for (size_t i = 0; i < meshCount; ++i) {
-                uint32_t localMatIndex = entry.resource->gpuData.indexedData.meshDescriptors[i * 4].materialIndex;
+                uint32_t localMatIndex = transientGpu.indexedData.meshDescriptors[i * 4].materialIndex;
 
                 if (localMatIndex >= loadedMaterialIds.size()) {
                     localMatIndex = 0;
                 }
 
                 uint32_t globalMatId = loadedMaterialIds[localMatIndex];
-                entry.resource->meshMaterialIndices.push_back(globalMatId);
+                entry.resource->cpuData.meshMaterialIndices.push_back(globalMatId);
             }
         }
 
@@ -121,7 +130,7 @@ namespace Syn {
                 std::lock_guard lock(_mutex);
                 auto& entry = _entries[entryId];
 
-                auto uploadResult = _uploader->Upload(entry.resource->gpuData, cmd);
+                auto uploadResult = _uploader->Upload(*(entry.resource->transientGpuData), cmd);
                 entry.resource->hardwareBuffers = std::move(uploadResult.hardwareBuffers);
                 entry.stagingBuffer = std::move(uploadResult.stagingBuffer);
             },
@@ -133,7 +142,7 @@ namespace Syn {
                 entry.stagingBuffer.reset();
                 SetResourceState(entryId, ResourceState::Ready);
                 _version.fetch_add(1, std::memory_order_release);
-                Info("Model loaded: {}", entry.path);
+                Info("Model loaded, hardware buffers ready and transient RAM freed: {}", entry.path);
             },
             .needsGraphics = false
         };
@@ -143,72 +152,37 @@ namespace Syn {
 
     void ModelManager::FinalizeResource(EntryType& entry)
     {
-        auto& gpuData = entry.resource->gpuData;
-        size_t totalLodCount = gpuData.indexedData.meshDescriptors.size();
+        auto& gpuData = *(entry.resource->transientGpuData);
+        auto& cpuData = entry.resource->cpuData;
 
-        entry.resource->baseDrawCommands.reserve(totalLodCount);
-
-        for (size_t i = 0; i < totalLodCount; ++i)
-        {
-            const auto& tradDesc = gpuData.indexedData.meshDescriptors[i];
-
-            bool hasMeshlet = i < gpuData.meshletData.drawDescriptors.size();
-            const auto& meshletDesc = hasMeshlet ? gpuData.meshletData.drawDescriptors[i] : GpuMeshletDrawDescriptor{};
-
-            MeshDrawBlueprint blueprint{};
-
-            blueprint.traditionalCmd.vertexCount = tradDesc.indexCount;
-            blueprint.traditionalCmd.instanceCount = 0; // GPU/CPU culling fogja növelni!
-            blueprint.traditionalCmd.firstVertex = tradDesc.indexOffset;
-            blueprint.traditionalCmd.firstInstance = 0;
-
-            /*
-            * Mesh shader: blueprint.meshletCmd.groupCountY = meshletDesc.meshletCount;
-            * Task shader: blueprint.meshletCmd.groupCountY = (meshletDesc.meshletCount + 31) / 32;
-            */
-
-            uint32_t groupCountY = ComputeGroupSize::CalculateDispatchCount(meshletDesc.meshletCount, ComputeGroupSize::Buffer32D);
-            blueprint.meshletCmd.groupCountX = 0; // GPU/CPU culling fogja növelni!
-            blueprint.meshletCmd.groupCountY = groupCountY;
-            blueprint.meshletCmd.groupCountZ = 1;
-
-            if (true) {
-                blueprint.isMeshletPipeline = MeshDrawBlueprint::PIPELINE_MESHLET;
-            }
-            else {
-                blueprint.isMeshletPipeline = MeshDrawBlueprint::PIPELINE_TRADITIONAL;
-            }
-
-            entry.resource->baseDrawCommands.push_back(blueprint);
-        }
-        
+        _cpuExtractor->Extract(gpuData, cpuData);
+      
         uint32_t entryIndex = _pathToId.at(entry.path);
 
         GpuModelAddresses addresses{};
         const auto& hw = entry.resource->hardwareBuffers;
 
-        auto getAddr = [](const std::unique_ptr<Vk::Buffer>& buf) -> VkDeviceAddress {
-            return buf ? buf->GetDeviceAddress() : 0;
-            };
-
-        addresses.vertexPositions = getAddr(hw.vertexPositions);
-        addresses.vertexAttributes = getAddr(hw.vertexAttributes);
-        addresses.indices = getAddr(hw.indices);
-        addresses.meshDescriptors = getAddr(hw.meshDescriptors);
-        addresses.meshColliders = getAddr(hw.meshColliders);
-        addresses.lodDescriptors = getAddr(hw.lodDescriptors);
-        addresses.meshletVertexIndices = getAddr(hw.meshletVertexIndices);
-        addresses.meshletTriangleIndices = getAddr(hw.meshletTriangleIndices);
-        addresses.meshletDescriptors = getAddr(hw.meshletDescriptors);
-        addresses.meshletDrawDescriptors = getAddr(hw.meshletDrawDescriptors);
-        addresses.meshletColliders = getAddr(hw.meshletColliders);
-        addresses.nodeTransforms = getAddr(hw.nodeTransforms);
-        addresses.globalCollider = entry.resource->gpuData.globalCollider;
-        addresses.vertexCount = entry.resource->gpuData.globalVertexCount;
-        addresses.indexCount = entry.resource->gpuData.globalIndexCount;
-        addresses.averageLodIndexCount = entry.resource->gpuData.globalAverageLodIndexCount;
-        addresses.meshCount = entry.resource->gpuData.globalMeshCount;
+        addresses.vertexPositions = hw.vertexPositions->GetDeviceAddress();
+        addresses.vertexAttributes = hw.vertexAttributes->GetDeviceAddress();
+        addresses.indices = hw.indices->GetDeviceAddress();
+        addresses.meshDescriptors = hw.meshDescriptors->GetDeviceAddress();
+        addresses.meshColliders = hw.meshColliders->GetDeviceAddress();
+        addresses.lodDescriptors = hw.lodDescriptors->GetDeviceAddress();
+        addresses.meshletVertexIndices = hw.meshletVertexIndices->GetDeviceAddress();
+        addresses.meshletTriangleIndices = hw.meshletTriangleIndices->GetDeviceAddress();
+        addresses.meshletDescriptors = hw.meshletDescriptors->GetDeviceAddress();
+        addresses.meshletDrawDescriptors = hw.meshletDrawDescriptors->GetDeviceAddress();
+        addresses.meshletColliders = hw.meshletColliders->GetDeviceAddress();
+        addresses.nodeTransforms = hw.nodeTransforms->GetDeviceAddress();
+        addresses.globalCollider = cpuData.globalCollider;
+        addresses.vertexCount = cpuData.globalVertexCount;
+        addresses.indexCount = cpuData.globalIndexCount;
+        addresses.meshCount = cpuData.globalMeshCount;
+        addresses.averageLodIndexCount = cpuData.globalAverageLodIndexCount;
 
         WriteAddress(entryIndex, addresses);
+    
+        entry.resource->transientGpuData.reset();
+        entry.resource->transientCpuData.reset();
     }
 }

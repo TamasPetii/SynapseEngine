@@ -25,6 +25,39 @@ namespace Syn
         }
 
         ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
+
+		ComputeGlobalAnimationCollider(inOutAnimation);
+    }
+
+    void AnimationColliderProcessor::ComputeGlobalAnimationCollider(CookedAnimation& anim)
+    {
+        glm::vec3 animMin(std::numeric_limits<float>::max());
+        glm::vec3 animMax(std::numeric_limits<float>::lowest());
+
+        for (uint32_t f = 0; f < anim.frameCount; ++f)
+        {
+            const auto& frameCollider = anim.frames[f].globalCollider;
+            animMin = glm::min(animMin, frameCollider.aabb.min);
+            animMax = glm::max(animMax, frameCollider.aabb.max);
+        }
+
+        anim.globalFrameCollider.aabb.min = animMin;
+        anim.globalFrameCollider.aabb.max = animMax;
+        anim.globalFrameCollider.sphere.center = (animMin + animMax) * 0.5f;
+
+        float maxRadius = 0.0f;
+        for (uint32_t f = 0; f < anim.frameCount; ++f)
+        {
+            const auto& frameCollider = anim.frames[f].globalCollider;
+
+            float dist = glm::length(frameCollider.sphere.center - anim.globalFrameCollider.sphere.center);
+            float requiredRadius = dist + frameCollider.sphere.radius;
+
+            if (requiredRadius > maxRadius)
+                maxRadius = requiredRadius;
+        }
+
+        anim.globalFrameCollider.sphere.radius = maxRadius;
     }
 
     void AnimationColliderProcessor::ComputeFrameColliders(uint32_t frameIndex, CookedAnimation& anim, const CookedModel& model, tf::Subflow& subflow)

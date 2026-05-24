@@ -80,13 +80,13 @@ namespace Syn
                 auto model = modelSnapshots[modelId].resource;
                 if (!model) continue;
 
-                uint32_t meshCount = model->gpuData.globalMeshCount;
+                uint32_t meshCount = model->cpuData.globalMeshCount;
                 if (_meshMatCapacities[modelId].size() < meshCount) {
                     _meshMatCapacities[modelId].resize(meshCount);
                 }
 
                 std::vector<MeshMatCapacity> currentCounts(meshCount);
-                const auto& defaultMatIndices = model->meshMaterialIndices;
+                const auto& defaultMatIndices = model->cpuData.meshMaterialIndices;
 
                 for (EntityID e : _entitiesPerModel[modelId]) {
                     std::span<const uint32_t> overrides;
@@ -167,7 +167,7 @@ namespace Syn
             auto model = modelSnapshots[modelId].resource;
             if (!model) continue;
 
-            const auto& blueprints = model->baseDrawCommands;
+            const auto& blueprints = model->cpuData.baseDrawCommands;
             for (size_t i = 0; i < blueprints.size(); ++i) {
                 uint32_t meshIndex = static_cast<uint32_t>(i / 4);
                 bool isMeshlet = (blueprints[i].isMeshletPipeline == MeshDrawBlueprint::PIPELINE_MESHLET);
@@ -206,7 +206,7 @@ namespace Syn
         uint32_t totalBlueprints = 0;
         for (uint32_t modelId = 0; modelId < _modelCapacities.size(); ++modelId) {
             if (_modelCapacities[modelId] > 0 && modelId < modelSnapshots.size() && modelSnapshots[modelId].resource) {
-                totalBlueprints += modelSnapshots[modelId].resource->baseDrawCommands.size();
+                totalBlueprints += modelSnapshots[modelId].resource->cpuData.baseDrawCommands.size();
             }
         }
 
@@ -242,18 +242,18 @@ namespace Syn
             if (!model) continue;
 
             uint32_t maxMeshletsForModel = 0;
-            uint32_t meshCount = model->gpuData.globalMeshCount;
+            uint32_t meshCount = model->cpuData.globalMeshCount;
             for (uint32_t m = 0; m < meshCount; ++m) {
                 uint32_t lod0Index = m * 4;
-                if (lod0Index < model->gpuData.meshletData.drawDescriptors.size()) {
-                    maxMeshletsForModel += model->gpuData.meshletData.drawDescriptors[lod0Index].meshletCount;
+                if (lod0Index < model->cpuData.meshletDrawDescriptors.size()) {
+                    maxMeshletsForModel += model->cpuData.meshletDrawDescriptors[lod0Index].meshletCount;
                 }
             }
 
             totalMaxMeshletInstances += capacity * maxMeshletsForModel;
             totalMaterialIndicesCapacity += capacity * meshCount;
 
-            const auto& blueprints = model->baseDrawCommands;
+            const auto& blueprints = model->cpuData.baseDrawCommands;
             ModelAllocationInfo& allocationInfo = drawData->Models.modelAllocations[modelId];
             allocationInfo.maxInstances = capacity;
             allocationInfo.meshAllocationOffset = drawData->Models.activeDescriptorCount;

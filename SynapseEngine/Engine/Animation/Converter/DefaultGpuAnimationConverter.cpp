@@ -13,6 +13,10 @@ namespace Syn
         result.descriptor.nodeCount = cookedAnimation.nodeCount;
         result.descriptor.durationInSeconds = cookedAnimation.durationInSeconds;
         result.descriptor.sampleRate = cookedAnimation.sampleRate;
+		result.globalCollider.center = cookedAnimation.globalFrameCollider.sphere.center;
+		result.globalCollider.radius = cookedAnimation.globalFrameCollider.sphere.radius;
+		result.globalCollider.aabbMin = cookedAnimation.globalFrameCollider.aabb.min;
+		result.globalCollider.aabbMax = cookedAnimation.globalFrameCollider.aabb.max;
 
         for (size_t instanceIdx = 0; instanceIdx < baseModel.meshNodeDescriptors.size(); ++instanceIdx)
         {
