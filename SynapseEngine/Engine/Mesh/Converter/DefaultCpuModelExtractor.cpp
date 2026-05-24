@@ -17,6 +17,9 @@ namespace Syn
         outCpuData.meshColliders = std::move(gpuData.indexedData.meshColliders);
         outCpuData.meshDescriptors = std::move(gpuData.indexedData.meshDescriptors);
         outCpuData.meshletDrawDescriptors = std::move(gpuData.meshletData.drawDescriptors);
+        outCpuData.meshletVertexIndices = std::move(gpuData.meshletData.vertexIndices);
+        outCpuData.meshletTriangleIndices = std::move(gpuData.meshletData.triangleIndices);
+		outCpuData.meshletDescriptors = std::move(gpuData.meshletData.meshletDescriptors);
         outCpuData.baseDrawCommands.reserve(totalLodCount);
 
         for (size_t i = 0; i < totalLodCount; ++i)
@@ -43,11 +46,11 @@ namespace Syn
             outCpuData.baseDrawCommands.push_back(blueprint);
         }
 
-        outCpuData.physicsVertices.reserve(gpuData.vertexData.vertexPositions.size());
+        outCpuData.vertices.reserve(gpuData.vertexData.vertexPositions.size());
         for (const auto& v : gpuData.vertexData.vertexPositions) {
-            outCpuData.physicsVertices.push_back(v.position);
+            outCpuData.vertices.push_back(v.position);
         }
 
-        outCpuData.physicsIndices = std::move(gpuData.indexedData.indices);
+        outCpuData.indices = std::move(gpuData.indexedData.indices);
     }
 }

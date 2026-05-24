@@ -39,7 +39,7 @@ namespace Syn {
             if (!baseModel) 
                 return std::shared_ptr<Animation>(nullptr);
 
-            return _builder->BuildFromFile(filePath, *baseModel->transientCpuData);
+            return _builder->BuildFromFile(filePath, baseModel->cpuData);
             });
     }
 
@@ -53,7 +53,7 @@ namespace Syn {
             if (!baseModel) 
                 return std::shared_ptr<Animation>(nullptr);
 
-            return _builder->BuildFromFile(filePath, *baseModel->transientCpuData);
+            return _builder->BuildFromFile(filePath, baseModel->cpuData);
             });
     }
 

@@ -1,10 +1,12 @@
 #include "StaticSpatialSahSystem.h"
 #include "Engine/Component/Core/TransformComponent.h"
 #include "Engine/Component/Rendering/ModelComponent.h"
+#include "Engine/Component/Rendering/AnimationComponent.h"
 #include "Engine/System/Core/TransformSystem.h"
 #include "Engine/System/Rendering/ModelSystem.h"
 #include "Engine/Mesh/Utils/MeshUtils.h"
 #include "Engine/Mesh/ModelManager.h"
+#include "Engine/Animation/AnimationManager.h"
 #include <algorithm>
 #include <print>
 
@@ -36,6 +38,7 @@ namespace Syn
             return;
         }
 
+		auto animPool = registry->GetPool<AnimationComponent>();
         auto chunkGroup = &scene->GetSceneDrawData()->Chunks;
 
         bool hasDirtyStatics = !transformPool->GetStorage().GetDirtyStatics().empty();
@@ -50,6 +53,8 @@ namespace Syn
 
         auto modelManager = ServiceLocator::GetModelManager();
         auto modelSnapshot = modelManager->GetResourceSnapshot();
+        auto animationManager = ServiceLocator::GetAnimationManager();
+        auto animSnapshot = animationManager->GetResourceSnapshot();
 
         _spatialItems.clear();
         _spatialItems.resize(staticEntities.size());
@@ -63,7 +68,7 @@ namespace Syn
         this->SetFramesToUpload(framesInFlight);
 
         auto gatherTaskOpt = this->ForEachIndex(size_t(0), staticEntities.size(), size_t(1), subflow, "GatherSpatialItems",
-            [this, staticEntities, transformPool, modelPool, modelSnapshot](size_t i) {
+            [this, staticEntities, transformPool, modelPool, modelSnapshot, animPool, animSnapshot](size_t i) {
                 EntityID entity = staticEntities[i];
                 auto& transform = transformPool->Get(entity);
 
@@ -81,8 +86,23 @@ namespace Syn
 
                         if (snapshotEntry.resource != nullptr && snapshotEntry.state == ResourceState::Ready)
                         {
-                            GpuMeshCollider globalLocalCollider = snapshotEntry.resource->cpuData.globalCollider;
-                            GpuMeshCollider globalWorldCollider = MeshUtils::TransformCollider(globalLocalCollider, transform.transform);
+                            GpuMeshCollider collider = snapshotEntry.resource->cpuData.globalCollider;
+
+                            if (animPool && animPool->Has(entity))
+                            {
+                                const auto& animComp = animPool->Get(entity);
+
+                                if (animComp.animationIndex != NULL_INDEX && animComp.animationIndex < animSnapshot.size())
+                                {
+                                    const auto& aSnapshotEntry = animSnapshot[animComp.animationIndex];
+                                    if (aSnapshotEntry.resource != nullptr && aSnapshotEntry.state == ResourceState::Ready)
+                                    {
+                                        collider = aSnapshotEntry.resource->cpuData.globalCollider;
+                                    }
+                                }
+                            }
+
+                            GpuMeshCollider globalWorldCollider = MeshUtils::TransformCollider(collider, transform.transform);
 
                             minB = globalWorldCollider.aabbMin;
                             maxB = globalWorldCollider.aabbMax;

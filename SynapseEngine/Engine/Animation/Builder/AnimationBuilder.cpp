@@ -24,7 +24,7 @@ namespace Syn
         _pipeline->AddProcessor(std::move(processor));
     }
 
-    std::shared_ptr<Animation> AnimationBuilder::BuildFromFile(const std::string& filePath, const CookedModel& baseModel)
+    std::shared_ptr<Animation> AnimationBuilder::BuildFromFile(const std::string& filePath, const CpuModelData& baseModel)
     {
         std::string ext = std::filesystem::path(filePath).extension().string();
         IAnimationLoader* loader = _registry->GetLoaderForExtension(ext);
@@ -36,7 +36,7 @@ namespace Syn
         return BuildFromSource(source, baseModel);
     }
 
-    std::shared_ptr<Animation> AnimationBuilder::BuildFromSource(IAnimationSource& source, const CookedModel& baseModel)
+    std::shared_ptr<Animation> AnimationBuilder::BuildFromSource(IAnimationSource& source, const CpuModelData& baseModel)
     {
         auto rawAnimOpt = source.Produce();
 

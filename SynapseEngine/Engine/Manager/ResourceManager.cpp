@@ -33,7 +33,6 @@
 #include "Engine/Animation/Processor/Geometry/AnimationColliderProcessor.h"
 #include "Engine/Animation/Uploader/DefaultGpuAnimationUploader.h"
 
-
 #include "Engine/Mesh/MeshSourceNames.h"
 
 namespace Syn {

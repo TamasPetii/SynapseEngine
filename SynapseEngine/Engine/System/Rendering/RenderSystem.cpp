@@ -151,6 +151,7 @@ namespace Syn
         auto drawData = scene->GetSceneDrawData();
         auto modelSnapshots = modelManager->GetResourceSnapshot();
 
+
         drawData->Models.activeDescriptorCount = 0;
 
         uint32_t globalInstanceOffset = 0;

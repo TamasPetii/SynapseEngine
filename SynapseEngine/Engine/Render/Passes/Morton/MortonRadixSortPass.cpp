@@ -69,7 +69,7 @@ namespace Syn {
 
         Vk::BufferBarrierInfo keysBarrier{};
         keysBarrier.buffer = keysHandle;
-        keysBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        keysBarrier.srcStage = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
         keysBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         keysBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         keysBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
@@ -77,7 +77,7 @@ namespace Syn {
 
         Vk::BufferBarrierInfo valuesBarrier{};
         valuesBarrier.buffer = valuesHandle;
-        valuesBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        valuesBarrier.srcStage = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
         valuesBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         valuesBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         valuesBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;

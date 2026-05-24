@@ -14,8 +14,8 @@
     "shared_material_count": 2048
   },
   "entities": {
-    "animated_characters": 0,
-    "static_geometry": 250,
+    "animated_characters": 250,
+    "static_geometry": 250000,
     "physics_boxes": 250,
     "physics_spheres": 250,
     "physics_capsules": 250

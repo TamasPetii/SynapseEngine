@@ -7,7 +7,7 @@ namespace Syn
         _processors.push_back(std::move(processor));
     }
 
-    void AnimationProcessorPipeline::Run(CookedAnimation& inOutAnimation, const CookedModel& baseModel)
+    void AnimationProcessorPipeline::Run(CookedAnimation& inOutAnimation, const CpuModelData& baseModel)
     {
         for (auto& processor : _processors)
         {

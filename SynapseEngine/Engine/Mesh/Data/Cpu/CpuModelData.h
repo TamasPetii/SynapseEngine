@@ -3,6 +3,8 @@
 #include "Engine/Mesh/Data/Cooked/CookedModel.h"
 #include "Engine/Mesh/Data/Gpu/GpuBatchedModel.h"
 #include "Engine/Mesh/Data/Gpu/GpuModelBuffers.h"
+#include <optional>
+#include <vector>
 
 namespace Syn
 {
@@ -22,8 +24,12 @@ namespace Syn
         std::vector<MeshDrawBlueprint> baseDrawCommands;
         std::vector<uint32_t> meshMaterialIndices;
 
-        std::vector<glm::vec3> physicsVertices;
-        std::vector<uint32_t> physicsIndices;
+        std::vector<glm::vec3> vertices;
+        std::vector<uint32_t> indices;
+
+        std::optional<std::vector<uint32_t>> meshletVertexIndices;
+		std::optional<std::vector<uint8_t>> meshletTriangleIndices;     
+        std::optional<std::vector<GpuMeshletDescriptor>> meshletDescriptors;
     };
 }
 

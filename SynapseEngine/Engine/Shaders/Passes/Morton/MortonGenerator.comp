@@ -12,6 +12,7 @@
 #include "../../Includes/Utils/CullingMath.glsl"
 #include "../../Includes/Utils/AtomicFloatUtils.glsl"
 #include "../../Includes/Utils/MortonUtils.glsl"
+#include "../../Includes/Common/Animation.glsl"
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
@@ -34,16 +35,28 @@ void main() {
     vec3 translation = vec3(transform.transform[3]);
     vec3 scale = vec3(length(transform.transform[0]), length(transform.transform[1]), length(transform.transform[2]));
         
-     vec3 center = translation;
-     float radius = length(scale);
+    vec3 center = translation;
+    float radius = length(scale);
 
     if (link.modelDenseIndex != INVALID_INDEX) {
          ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, link.modelDenseIndex);
             
         if (modelComp.modelIndex != INVALID_INDEX) {
             GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, modelComp.modelIndex);
-            GpuMeshCollider worldCollider = TransformCollider(addrs.globalCollider, transform.transform);
-        
+            GpuMeshCollider collider = addrs.globalCollider;
+
+            if (ctx.animationSparseMapBufferAddr != 0) {
+                uint animSparseIndex = GET_SPARSE_INDEX(ctx.animationSparseMapBufferAddr, link.entityIndex);
+                if (animSparseIndex != INVALID_INDEX) {
+                    AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animSparseIndex);
+                    if (animComp.animationIndex != INVALID_INDEX) {
+                        GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
+                        collider = animAddrs.globalCollider;
+                    }
+                }
+            }
+
+            GpuMeshCollider worldCollider = TransformCollider(collider, transform.transform);
             center = worldCollider.center;
             radius = worldCollider.radius;
         }
