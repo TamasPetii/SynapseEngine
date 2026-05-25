@@ -142,8 +142,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Test.cpp" />
+    <ClCompile Include="TestComponentsSchema.h" />
     <ClCompile Include="TestPool.cpp" />
     <ClCompile Include="TestRegistry.cpp" />
+    <ClCompile Include="TestSerialization.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TestComponents.h" />

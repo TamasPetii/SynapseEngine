@@ -23,6 +23,17 @@ namespace Syn
         }
     }
 
+    bool NlohmannJsonInputArchive::HasProperty(const char* name)
+    {
+        if (_stack.empty()) return false;
+
+        auto& ctx = _stack.back();
+        if (ctx.jsonNode->is_object()) {
+            return ctx.jsonNode->contains(name);
+        }
+        return false;
+    }
+
     void NlohmannJsonInputArchive::EnterObject(const char* name)
     {
         auto& ctx = _stack.back();

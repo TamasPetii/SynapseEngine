@@ -13,6 +13,8 @@
     <ClCompile Include="TestRegistry.cpp">
       <Filter>Test</Filter>
     </ClCompile>
+    <ClCompile Include="TestSerialization.cpp" />
+    <ClCompile Include="TestComponentsSchema.h" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="TestComponents.h">

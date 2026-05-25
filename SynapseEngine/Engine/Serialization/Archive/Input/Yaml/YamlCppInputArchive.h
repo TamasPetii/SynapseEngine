@@ -16,6 +16,7 @@ namespace Syn
         ~YamlCppInputArchive() override = default;
 
         void Deserialize() override;
+        bool HasProperty(const char* name) override;
 
         void EnterObject(const char* name) override;
         void LeaveObject() override;

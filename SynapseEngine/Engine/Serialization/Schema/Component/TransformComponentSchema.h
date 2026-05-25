@@ -1,9 +1,11 @@
 #pragma once
-#include "Schema.h"
+#include "Engine/Serialization/Schema/Schema.h"
 #include "Engine/Component/Core/TransformComponent.h"
 
 namespace Syn
 {
+    SYN_REGISTER_COMPONENT(Syn::TransformComponent, "TransformComponent");
+
     template <>
     struct SYN_API Schema<TransformComponent> {
         static constexpr bool exists = true;

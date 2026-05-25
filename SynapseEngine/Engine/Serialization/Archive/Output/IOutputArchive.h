@@ -14,8 +14,9 @@ namespace Syn
         explicit IOutputArchive(IOutputStream& stream) : _stream(stream) {}
         virtual ~IOutputArchive() = default;
 
-        virtual void Serialize() = 0;
+        virtual bool IsBinary() const { return false; }
 
+        virtual void Serialize() = 0;
         virtual void EnterObject(const char* name) = 0;
         virtual void LeaveObject() = 0;
         virtual void EnterArray(const char* name, uint32_t size) = 0;

@@ -1197,9 +1197,6 @@
     <ClCompile Include="Serialization\Serializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Serialization\Schema\Schemas.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Serialization\Archive\Output\Xml\IXmlOutputArchive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1234,6 +1231,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Serialization\Archive\Input\Toml\PlusPlusTomlInputArchive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Registry\Insiders\SparseMappingInsider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Registry\Insiders\StorageBackendInsider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Registry\Insiders\DataMixinInsider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Registry\Insiders\SegmentedStorageInsider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Registry\Insiders\RegistryInsider.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -2546,13 +2558,13 @@
     <ClInclude Include="Serialization\Serializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Serialization\Schema\GlmSchema.h">
+    <ClInclude Include="Serialization\Schema\Core\GlmSchema.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Serialization\Schema\TransformComponentSchema.h">
+    <ClInclude Include="Serialization\Schema\Component\TransformComponentSchema.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Serialization\Schema\VectorSchema.h">
+    <ClInclude Include="Serialization\Schema\Core\VectorSchema.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Serialization\Archive\Output\Xml\IXmlOutputArchive.h">
@@ -2589,6 +2601,48 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Serialization\Archive\Input\Toml\PlusPlusTomlInputArchive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Insiders\EngineKey.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Passkey.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Insiders\DataMixinInsider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Insiders\StorageBackendInsider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Insiders\SegmentedStorageInsider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Insiders\SparseMappingInsider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Registry\SparseVectorMappingSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Registry\DataMixinSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Registry\StorageBackendSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Registry\SegmentedStorageImplSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Registry\PoolSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Registry\Insiders\RegistryInsider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Registry\RegistrySchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Registry\FlatStorageImplSchema.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

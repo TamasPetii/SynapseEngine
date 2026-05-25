@@ -11,6 +11,8 @@
 
 namespace Syn
 {
+    class SegmentedStorageInsider;
+
     template<typename T, typename FlagMixinPolicy = SimpleFlagMixin>
     class SegmentedStorageImpl :
         public StorageBackend<T, FlagMixinPolicy>,
@@ -67,6 +69,8 @@ namespace Syn
         size_t _dynamicEnd = 0;
         std::vector<EntityID> _dirtyStaticList;
         std::atomic<size_t>   _dirtyStaticCount{ 0 };
+    private:
+        friend class SegmentedStorageInsider;
     };
 
     template<typename T> using SegmentedStorage = SegmentedStorageImpl<T, SimpleFlagMixin>;

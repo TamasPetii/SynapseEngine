@@ -32,6 +32,19 @@ namespace Syn
         }
     }
 
+    bool PlusPlusTomlInputArchive::HasProperty(const char* name)
+    {
+        if (_stack.empty()) return false;
+
+        auto& current = _stack.back();
+        if (current.type == NodeType::Table) {
+            auto* tbl = static_cast<toml::table*>(current.nodePtr);
+            return tbl->contains(name);
+        }
+
+        return false;
+    }
+
     void PlusPlusTomlInputArchive::EnterObject(const char* name)
     {
         toml::node* next = GetNextNode(name);

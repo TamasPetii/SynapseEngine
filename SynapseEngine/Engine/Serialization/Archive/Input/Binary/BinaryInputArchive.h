@@ -13,7 +13,10 @@ namespace Syn
 		explicit BinaryInputArchive(IInputStream& stream) : IInputArchive(stream) {}
         ~BinaryInputArchive() override = default;
 
+        bool IsBinary() const override { return true; }
+
         void Deserialize() override {}
+        bool HasProperty(const char* name) override { return true; }
 
         void EnterObject(const char* name) override {}
         void LeaveObject() override {}

@@ -19,6 +19,17 @@ namespace Syn
         }
     }
 
+    bool YamlCppInputArchive::HasProperty(const char* name)
+    {
+        if (_stack.empty()) return false;
+
+        auto& ctx = _stack.back();
+        if (ctx.node.IsMap()) {
+            return ctx.node[name].IsDefined();
+        }
+        return false;
+    }
+
     void YamlCppInputArchive::EnterObject(const char* name)
     {
         auto& ctx = _stack.back();

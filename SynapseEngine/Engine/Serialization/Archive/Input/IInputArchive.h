@@ -14,6 +14,9 @@ namespace Syn
         explicit IInputArchive(IInputStream& stream) : _stream(stream) {}
         virtual ~IInputArchive() = default;
 
+        virtual bool IsBinary() const { return false; }
+
+        virtual bool HasProperty(const char* name) = 0;
         virtual void Deserialize() = 0;
 
         virtual void EnterObject(const char* name) = 0;

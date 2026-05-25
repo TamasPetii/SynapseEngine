@@ -1,5 +1,5 @@
 #pragma once
-#include "Schema.h"
+#include "Engine/Serialization/Schema/Schema.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 

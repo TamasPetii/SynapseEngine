@@ -1,0 +1,248 @@
+#include "gtest/gtest.h"
+#include <filesystem>
+#include <vector>
+
+#include "Engine/Serialization/Serializer.h"
+#include "Engine/Serialization/Archive/DefaultArchiveRegistry.h"
+#include "Engine/Serialization/Archive/Output/Json/NlohmannJsonOutputArchive.h"
+#include "Engine/Serialization/Archive/Input/Json/NlohmannJsonInputArchive.h"
+#include "Engine/Serialization/Archive/Input/Binary/BinaryInputArchive.h"
+#include "Engine/Serialization/Archive/Output/Binary/BinaryOutputArchive.h"
+#include "Engine/Serialization/Archive/Input/Xml/TinyXmlInputArchive.h"
+#include "Engine/Serialization/Archive/Output/Xml/TinyXmlOutputArchive.h"
+#include "Engine/Serialization/Archive/Input/Yaml/YamlCppInputArchive.h"
+#include "Engine/Serialization/Archive/Output/Yaml/YamlCppOutputArchive.h"
+#include "Engine/Serialization/Archive/Input/Toml/PlusPlusTomlInputArchive.h"
+#include "Engine/Serialization/Archive/Output/Toml/PlusPlusTomlOutputArchive.h"
+
+#include "Engine/Serialization/Schema/Core/GlmSchema.h"
+#include "Engine/Serialization/Schema/Core/VectorSchema.h"
+#include "Engine/Serialization/Schema/Component/TransformComponentSchema.h"
+
+#include "Engine/Registry/Pool/Pool.h"
+#include "Engine/Registry/Pool/Storage/SynStorage.h"
+#include "Engine/Registry/Pool/Mapping/SynMapping.h"
+#include "Engine/Registry/Pool/Mapping/Extension/SparseVectorMappingExtension.h"
+#include "Engine/Registry/Pool/Storage/Extension/SegmentedStorageImplExtension.h"
+
+#include "Engine/Serialization/Schema/Registry/PoolSchema.h"
+#include "Engine/Serialization/Schema/Registry/DataMixinSchema.h"
+#include "Engine/Serialization/Schema/Registry/SegmentedStorageImplSchema.h"
+#include "Engine/Serialization/Schema/Registry/SparseVectorMappingSchema.h"
+#include "Engine/Serialization/Schema/Registry/StorageBackendSchema.h"
+#include "Engine/Serialization/Schema/Registry/RegistrySchema.h"
+#include "Engine/Serialization/Schema/Registry/FlatStorageImplSchema.h"
+
+#include "TestComponents.h"
+#include "TestComponentsSchema.h"
+
+using namespace Syn;
+
+class SerializationTest : public ::testing::Test {
+protected:
+    std::unique_ptr<Serializer> serializer;
+    std::filesystem::path saveDir;
+
+    void SetUp() override {
+        auto registry = std::make_unique<DefaultArchiveRegistry>();
+        registry->RegisterOutputAuto<NlohmannJsonOutputArchive>(10);
+        registry->RegisterInputAuto<NlohmannJsonInputArchive>(10);
+        registry->RegisterOutputAuto<BinaryOutputArchive>(10);
+        registry->RegisterInputAuto<BinaryInputArchive>(10);
+        registry->RegisterOutputAuto<TinyXmlOutputArchive>(10);
+        registry->RegisterInputAuto<TinyXmlInputArchive>(10);
+        registry->RegisterOutputAuto<YamlCppOutputArchive>(10);
+        registry->RegisterInputAuto<YamlCppInputArchive>(10);
+        registry->RegisterOutputAuto<PlusPlusTomlOutputArchive>(10);
+        registry->RegisterInputAuto<PlusPlusTomlInputArchive>(10);
+
+        auto service = std::make_unique<DefaultSerializationService>(std::move(registry));
+        serializer = std::make_unique<Serializer>(std::move(service));
+
+        const char* appDataPath = std::getenv("APPDATA");
+        std::filesystem::path baseDir = appDataPath ? appDataPath : ".";
+        saveDir = baseDir / "Synapse" / "TestSaves";
+
+        if (!std::filesystem::exists(saveDir)) {
+            std::filesystem::create_directories(saveDir);
+        }
+    }
+
+    TransformComponent CreateDummyTransform(float xOffset = 0.0f) {
+        TransformComponent t;
+        t.translation = glm::vec3(100.5f + xOffset, 50.0f, -25.2f);
+        t.rotation = glm::vec3(90.0f, 0.0f, 0.0f);
+        t.scale = glm::vec3(2.0f, 2.0f, 2.0f);
+        return t;
+    }
+};
+
+TEST_F(SerializationTest, SingleTransform_AllFormats) {
+    TransformComponent original = CreateDummyTransform();
+
+    auto runFormatTest = [&](const std::string& extension) {
+        std::filesystem::path path = saveDir / ("single_transform" + extension);
+
+        EXPECT_TRUE(serializer->SaveToFile(path, original)) << "Failed to save " << extension;
+
+        TransformComponent loaded;
+        EXPECT_TRUE(serializer->LoadFromFile(path, loaded)) << "Failed to load " << extension;
+
+        EXPECT_FLOAT_EQ(loaded.translation.x, original.translation.x);
+        EXPECT_FLOAT_EQ(loaded.rotation.x, original.rotation.x);
+        EXPECT_FLOAT_EQ(loaded.scale.z, original.scale.z);
+        };
+
+    runFormatTest(".json");
+    runFormatTest(".bin");
+    runFormatTest(".xml");
+    runFormatTest(".yaml");
+    runFormatTest(".toml");
+}
+
+TEST_F(SerializationTest, Vector10k_PerformanceAndIntegrity) {
+    const int NUM_ELEMENTS = 10000;
+    std::vector<TransformComponent> transformsToSave;
+    transformsToSave.reserve(NUM_ELEMENTS);
+
+    for (int i = 0; i < NUM_ELEMENTS; ++i) {
+        transformsToSave.push_back(CreateDummyTransform(static_cast<float>(i)));
+    }
+
+    auto runVectorTest = [&](const std::string& extension, bool useBlit = false) {
+        std::filesystem::path path = saveDir / ("vec10k" + extension);
+
+        if (useBlit) {
+            BlitVector<TransformComponent> saveArray{ transformsToSave };
+            EXPECT_TRUE(serializer->SaveToFile(path, saveArray)) << "Failed to save FAST " << extension;
+
+            std::vector<TransformComponent> loaded;
+            BlitVector<TransformComponent> loadArray{ loaded };
+            EXPECT_TRUE(serializer->LoadFromFile(path, loadArray)) << "Failed to load FAST " << extension;
+
+            ASSERT_EQ(loaded.size(), NUM_ELEMENTS);
+            EXPECT_FLOAT_EQ(loaded.back().translation.x, transformsToSave.back().translation.x);
+        }
+        else {
+            EXPECT_TRUE(serializer->SaveToFile(path, transformsToSave)) << "Failed to save " << extension;
+
+            std::vector<TransformComponent> loaded;
+            EXPECT_TRUE(serializer->LoadFromFile(path, loaded)) << "Failed to load " << extension;
+
+            ASSERT_EQ(loaded.size(), NUM_ELEMENTS);
+            EXPECT_FLOAT_EQ(loaded.back().translation.x, transformsToSave.back().translation.x);
+        }
+        };
+
+    runVectorTest(".json");
+    runVectorTest(".xml");
+    runVectorTest(".yaml");
+    runVectorTest(".toml");
+    runVectorTest("_slow.bin", false);
+    runVectorTest("_fast.bin", true);
+}
+
+TEST_F(SerializationTest, Pool_BinaryBlit_Integrity) {
+    using TestPool = Pool<TransformComponent, SegmentedStorage<TransformComponent>, SparseVectorMapping>;
+    TestPool originalPool;
+
+    EntityID e1 = 5;
+    EntityID e2 = 42;
+    EntityID e3 = 1024;
+
+    originalPool.Add(e1, CreateDummyTransform(5.0f));
+    originalPool.Add(e2, CreateDummyTransform(42.0f));
+    originalPool.Add(e3, CreateDummyTransform(1024.0f));
+
+    originalPool.SetCategory(e1, StorageCategory::Static);
+    originalPool.SetCategory(e2, StorageCategory::Dynamic);
+
+    EXPECT_EQ(originalPool.Size(), 3);
+    EXPECT_TRUE(originalPool.Has(e2));
+
+    std::filesystem::path poolPath = saveDir / "isolated_pool.bin";
+    EXPECT_TRUE(serializer->SaveToFile(poolPath, originalPool));
+
+    TestPool loadedPool;
+    EXPECT_TRUE(serializer->LoadFromFile(poolPath, loadedPool));
+    ASSERT_EQ(loadedPool.Size(), 3);
+
+    EXPECT_TRUE(loadedPool.Has(e1));
+    EXPECT_TRUE(loadedPool.Has(e2));
+    EXPECT_TRUE(loadedPool.Has(e3));
+    EXPECT_FALSE(loadedPool.Has(99));
+
+    EXPECT_FLOAT_EQ(loadedPool.Get(e2).translation.x, 100.5f + 42.0f);
+    EXPECT_FLOAT_EQ(loadedPool.Get(e3).translation.x, 100.5f + 1024.0f);
+
+    EXPECT_EQ(loadedPool.GetCategory(e1), StorageCategory::Static);
+    EXPECT_EQ(loadedPool.GetCategory(e2), StorageCategory::Dynamic);
+    EXPECT_EQ(loadedPool.GetCategory(e3), StorageCategory::Stream);
+}
+
+TEST_F(SerializationTest, Registry100_AllFormats) {
+    Registry originalReg;
+    const int NUM_ENTITIES = 100;
+
+    for (int i = 0; i < NUM_ENTITIES; ++i) {
+        EntityID e = originalReg.CreateEntity();
+
+        originalReg.AddComponent<TransformComponent>(e, CreateDummyTransform(static_cast<float>(i)));
+
+        if (i % 2 == 0) {
+            originalReg.AddComponent<Velocity>(e, Velocity{ static_cast<float>(i), 0.0f });
+        }
+
+        if (i % 3 == 0) {
+            originalReg.AddComponent<Health>(e, Health{ i, 100 });
+        }
+
+        if (i % 10 == 0) {
+            originalReg.AddComponent<TagEnemy>(e);
+        }
+    }
+
+    originalReg.DestroyEntity(5);
+    originalReg.DestroyEntity(50);
+    originalReg.DestroyEntity(95);
+
+    using TestSnapshot = RegistrySnapshot<TransformComponent, Velocity, Health, TagEnemy>;
+
+    auto runRegistryTest = [&](const std::string& extension) {
+        std::filesystem::path path = saveDir / ("registry100" + extension);
+
+        TestSnapshot saveSnapshot{ originalReg };
+        EXPECT_TRUE(serializer->SaveToFile(path, saveSnapshot)) << "Failed to save Registry as " << extension;
+
+        Registry loadedReg;
+        TestSnapshot loadSnapshot{ loadedReg };
+        EXPECT_TRUE(serializer->LoadFromFile(path, loadSnapshot)) << "Failed to load Registry from " << extension;
+
+        EXPECT_FALSE(loadedReg.IsValid(5));
+        EXPECT_FALSE(loadedReg.IsValid(50));
+        EXPECT_FALSE(loadedReg.IsValid(95));
+
+        EXPECT_TRUE(loadedReg.IsValid(4));
+        EXPECT_TRUE(loadedReg.IsValid(99));
+
+        EXPECT_TRUE(loadedReg.HasComponent<TransformComponent>(4));
+        EXPECT_TRUE(loadedReg.HasComponent<Velocity>(4));
+        EXPECT_FALSE(loadedReg.HasComponent<Health>(4));
+        EXPECT_FALSE(loadedReg.HasComponent<TagEnemy>(4));
+
+        EXPECT_FLOAT_EQ(loadedReg.GetComponent<TransformComponent>(4).translation.x, 100.5f + 4.0f);
+        EXPECT_FLOAT_EQ(loadedReg.GetComponent<Velocity>(4).dx, 4.0f);
+
+        EXPECT_TRUE((loadedReg.HasComponents<TransformComponent, Velocity, Health, TagEnemy>(30)));
+        EXPECT_EQ(loadedReg.GetComponent<Health>(30).hp, 30);
+
+        EntityID newEntity = loadedReg.CreateEntity();
+        EXPECT_TRUE(newEntity == 5 || newEntity == 50 || newEntity == 95);
+        };
+
+    runRegistryTest(".bin");
+    runRegistryTest(".xml");
+    runRegistryTest(".toml");
+    runRegistryTest(".json");
+    runRegistryTest(".yaml");
+}

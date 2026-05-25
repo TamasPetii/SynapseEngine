@@ -23,6 +23,16 @@ namespace Syn
         }
     }
 
+    bool TinyXmlInputArchive::HasProperty(const char* name)
+    {
+        if (_stack.empty()) return false;
+
+        auto& ctx = _stack.back();
+        if (ctx.isArray) return false;
+
+        return ctx.node->FirstChildElement(name) != nullptr;
+    }
+
     tinyxml2::XMLElement* TinyXmlInputArchive::GetNextElement(const char* name)
     {
         auto& ctx = _stack.back();

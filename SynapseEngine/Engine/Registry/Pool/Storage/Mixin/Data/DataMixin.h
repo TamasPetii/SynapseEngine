@@ -8,6 +8,8 @@
 
 namespace Syn
 {
+    class DataMixinInsider;
+
     template<typename T>
     struct DataMixin
     {
@@ -25,6 +27,8 @@ namespace Syn
         SYN_INLINE std::span<const T> GetRawData() const;
     protected:
         std::vector<T> _data;
+    private:
+        friend class DataMixinInsider;
     };
 
     template<>

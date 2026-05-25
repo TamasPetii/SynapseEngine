@@ -10,6 +10,8 @@
 
 namespace Syn
 {
+    class SparseMappingInsider;
+
     class SYN_API SparseVectorMapping : public MappingCRTP<SparseVectorMapping>
     {
     public:
@@ -23,6 +25,8 @@ namespace Syn
         std::span<const DenseIndex> GetSparseIndices() const;
     private:
         std::vector<DenseIndex> _indices;
+    private:
+        friend class SparseMappingInsider;
     };
 }
 

@@ -14,7 +14,8 @@ struct Health {
     int maxHp;
 };
 
-struct TagEnemy {};
+struct TagEnemy {
+};
 
 struct Vec3 {
     float x, y, z;

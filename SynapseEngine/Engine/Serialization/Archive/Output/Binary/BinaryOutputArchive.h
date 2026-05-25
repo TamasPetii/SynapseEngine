@@ -12,6 +12,8 @@ namespace Syn
         explicit BinaryOutputArchive(IOutputStream& stream) : IOutputArchive(stream) {}
         ~BinaryOutputArchive() override = default;
 
+        bool IsBinary() const override { return true; }
+
         void Serialize() override;
 
         void EnterObject(const char* name) override {}
