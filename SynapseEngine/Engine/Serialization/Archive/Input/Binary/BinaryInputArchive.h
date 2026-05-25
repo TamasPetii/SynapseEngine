@@ -1,19 +1,23 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include "Engine/Serialization/Stream/Input/IInputStream.h"
-#include "IInputArchive.h"
+#include "Engine/Serialization/Archive/Input/IInputArchive.h"
 
 namespace Syn
 {
     class SYN_API BinaryInputArchive : public IInputArchive
     {
     public:
+        static std::vector<std::string> GetSupportedExtensions() { return { ".bin", ".dat" }; }
+
 		explicit BinaryInputArchive(IInputStream& stream) : IInputArchive(stream) {}
         ~BinaryInputArchive() override = default;
 
+        void Deserialize() override {}
+
         void EnterObject(const char* name) override {}
         void LeaveObject() override {}
-        void EnterArray(const char* name, size_t& size) override;
+        void EnterArray(const char* name, uint32_t& size) override;
         void LeaveArray() override {}
 
         void PropertyBool(const char* name, bool& value) override;

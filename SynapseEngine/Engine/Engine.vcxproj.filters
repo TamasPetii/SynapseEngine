@@ -1152,25 +1152,25 @@
     <ClCompile Include="Serialization\Archive\Output\IOutputArchive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Serialization\Archive\Output\BinaryOutputArchive.cpp">
+    <ClCompile Include="Serialization\Archive\Output\Binary\BinaryOutputArchive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Serialization\Archive\Input\IInputArchive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Serialization\Archive\Input\BinaryInputArchive.cpp">
+    <ClCompile Include="Serialization\Archive\Input\Binary\BinaryInputArchive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Serialization\Archive\Output\IJsonOutputArchive.cpp">
+    <ClCompile Include="Serialization\Archive\Output\Json\IJsonOutputArchive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Serialization\Archive\Output\NlohmannJsonOutputArchive.cpp">
+    <ClCompile Include="Serialization\Archive\Output\Json\NlohmannJsonOutputArchive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Serialization\Archive\Input\IJsonInputArchive.cpp">
+    <ClCompile Include="Serialization\Archive\Input\Json\IJsonInputArchive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Serialization\Archive\Input\NlohmannJsonInputArchive.cpp">
+    <ClCompile Include="Serialization\Archive\Input\Json\NlohmannJsonInputArchive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Serialization\Stream\Output\StringOutputStream.cpp">
@@ -1198,6 +1198,42 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Serialization\Schema\Schemas.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Serialization\Archive\Output\Xml\IXmlOutputArchive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Serialization\Archive\Output\Xml\TinyXmlOutputArchive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Serialization\Archive\Input\Xml\IXmlInputArchive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Serialization\Archive\Input\Xml\TinyXmlInputArchive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Serialization\Archive\Output\Yaml\IYamlOutputArchive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Serialization\Archive\Output\Yaml\YamlCppOutputArchive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Serialization\Archive\Input\Yaml\IYamlInputArchive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Serialization\Archive\Input\Yaml\YamlCppInputArchive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Serialization\Archive\Output\Toml\ITomlOutputArchive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Serialization\Archive\Output\Toml\PlusPlusTomlOutputArchive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Serialization\Archive\Input\Toml\ITomlInputArchive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Serialization\Archive\Input\Toml\PlusPlusTomlInputArchive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -2459,25 +2495,25 @@
     <ClInclude Include="Serialization\Archive\Output\IOutputArchive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Serialization\Archive\Output\BinaryOutputArchive.h">
+    <ClInclude Include="Serialization\Archive\Output\Binary\BinaryOutputArchive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Serialization\Archive\Input\IInputArchive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Serialization\Archive\Input\BinaryInputArchive.h">
+    <ClInclude Include="Serialization\Archive\Input\Binary\BinaryInputArchive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Serialization\Archive\Output\IJsonOutputArchive.h">
+    <ClInclude Include="Serialization\Archive\Output\Json\IJsonOutputArchive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Serialization\Archive\Output\NlohmannJsonOutputArchive.h">
+    <ClInclude Include="Serialization\Archive\Output\Json\NlohmannJsonOutputArchive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Serialization\Archive\Input\IJsonInputArchive.h">
+    <ClInclude Include="Serialization\Archive\Input\Json\IJsonInputArchive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Serialization\Archive\Input\NlohmannJsonInputArchive.h">
+    <ClInclude Include="Serialization\Archive\Input\Json\NlohmannJsonInputArchive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Serialization\Stream\Output\StringOutputStream.h">
@@ -2514,6 +2550,45 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Serialization\Schema\TransformComponentSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\VectorSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Archive\Output\Xml\IXmlOutputArchive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Archive\Output\Xml\TinyXmlOutputArchive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Archive\Input\Xml\IXmlInputArchive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Archive\Input\Xml\TinyXmlInputArchive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Archive\Output\Yaml\IYamlOutputArchive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Archive\Output\Yaml\YamlCppOutputArchive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Archive\Input\Yaml\IYamlInputArchive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Archive\Input\Yaml\YamlCppInputArchive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Archive\Output\Toml\ITomlOutputArchive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Archive\Output\Toml\PlusPlusTomlOutputArchive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Archive\Input\Toml\ITomlInputArchive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Archive\Input\Toml\PlusPlusTomlInputArchive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

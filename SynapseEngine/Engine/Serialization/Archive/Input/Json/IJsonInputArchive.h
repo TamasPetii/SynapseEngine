@@ -1,5 +1,5 @@
 #pragma once
-#include "IInputArchive.h"
+#include "Engine/Serialization/Archive/Input/IInputArchive.h"
 #include <string>
 
 namespace Syn

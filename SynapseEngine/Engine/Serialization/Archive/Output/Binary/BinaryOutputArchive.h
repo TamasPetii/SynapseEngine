@@ -1,12 +1,14 @@
 #pragma once
 #include "Engine/SynApi.h"
-#include "IOutputArchive.h"
+#include "Engine/Serialization/Archive/Output/IOutputArchive.h"
 
 namespace Syn
 {
     class SYN_API BinaryOutputArchive : public IOutputArchive
     {
     public:
+        static std::vector<std::string> GetSupportedExtensions() { return { ".bin", ".dat" }; }
+
         explicit BinaryOutputArchive(IOutputStream& stream) : IOutputArchive(stream) {}
         ~BinaryOutputArchive() override = default;
 
@@ -14,7 +16,7 @@ namespace Syn
 
         void EnterObject(const char* name) override {}
         void LeaveObject() override {}
-        void EnterArray(const char* name, size_t size) override;
+        void EnterArray(const char* name, uint32_t size) override;
         void LeaveArray() override {}
 
         void PropertyBool(const char* name, bool value) override;

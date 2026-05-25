@@ -68,6 +68,7 @@ namespace Syn
         void Shutdown();
     private:
         void AdvanceFrameIndex();
+        void TestSerializer();
     private:
 		bool _isMinimized = false;
         bool _inputEnabled = true;

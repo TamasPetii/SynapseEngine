@@ -18,7 +18,7 @@ namespace Syn
 
         virtual void EnterObject(const char* name) = 0;
         virtual void LeaveObject() = 0;
-        virtual void EnterArray(const char* name, size_t& size) = 0;
+        virtual void EnterArray(const char* name, uint32_t& size) = 0;
         virtual void LeaveArray() = 0;
 
         virtual void PropertyBool(const char* name, bool& value) = 0;

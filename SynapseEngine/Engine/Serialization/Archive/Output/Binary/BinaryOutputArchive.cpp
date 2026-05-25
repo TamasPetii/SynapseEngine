@@ -7,7 +7,7 @@ namespace Syn
 		//No need to do anything here since we write directly to the stream in the property methods.
     }
 
-    void BinaryOutputArchive::EnterArray(const char*, size_t size)
+    void BinaryOutputArchive::EnterArray(const char*, uint32_t size)
     {
         uint32_t s = static_cast<uint32_t>(size);
         _stream.WriteRaw(&s, sizeof(uint32_t));

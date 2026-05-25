@@ -2,11 +2,11 @@
 
 namespace Syn
 {
-    void BinaryInputArchive::EnterArray(const char*, size_t& size)
+    void BinaryInputArchive::EnterArray(const char*, uint32_t& size)
     {
         uint32_t s;
         _stream.ReadRaw(&s, sizeof(uint32_t));
-        size = static_cast<size_t>(s);
+        size = static_cast<uint32_t>(s);
     }
 
     void BinaryInputArchive::PropertyBool(const char*, bool& value) { 

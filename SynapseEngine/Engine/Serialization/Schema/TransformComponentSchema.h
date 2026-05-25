@@ -5,7 +5,7 @@
 namespace Syn
 {
     template <>
-    struct Schema<TransformComponent> {
+    struct SYN_API Schema<TransformComponent> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename T>

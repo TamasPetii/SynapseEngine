@@ -6,7 +6,7 @@
 namespace Syn
 {
     template <typename T, typename Enable = void>
-    struct Schema {
+    struct SYN_API Schema {
         static constexpr bool exists = false;
     };
 

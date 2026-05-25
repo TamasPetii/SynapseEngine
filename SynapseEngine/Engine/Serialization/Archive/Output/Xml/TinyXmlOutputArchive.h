@@ -1,26 +1,26 @@
 #pragma once
 #include "Engine/SynApi.h"
-#include "IJsonOutputArchive.h"
-#include <nlohmann/json.hpp>
+#include "IXmlOutputArchive.h"
+#include <tinyxml2.h>
 #include <vector>
 #include <string>
 
 namespace Syn
 {
-    class SYN_API NlohmannJsonOutputArchive : public IJsonOutputArchive
+    class SYN_API TinyXmlOutputArchive : public IXmlOutputArchive
     {
     public:
-        static std::vector<std::string> GetSupportedExtensions() { return {".json", ".jsn"}; }
+        static std::vector<std::string> GetSupportedExtensions() { return { ".xml" }; }
 
-        explicit NlohmannJsonOutputArchive(IOutputStream& stream);
-        ~NlohmannJsonOutputArchive() override = default;
+        explicit TinyXmlOutputArchive(IOutputStream& stream);
+        ~TinyXmlOutputArchive() override = default;
 
         std::string ToString() const override;
         void Serialize() override;
 
         void EnterObject(const char* name) override;
         void LeaveObject() override;
-        void EnterArray(const char* name, size_t size) override;
+        void EnterArray(const char* name, uint32_t size) override;
         void LeaveArray() override;
 
         void PropertyBool(const char* name, bool value) override;
@@ -33,8 +33,17 @@ namespace Syn
         void PropertyDouble(const char* name, double value) override;
         void PropertyString(const char* name, const std::string& value) override;
         void PropertyBytes(const char* name, const void* data, size_t size) override;
+
     private:
-        nlohmann::json _root;
-        std::vector<nlohmann::json*> _stack;
+        struct ContextNode {
+            tinyxml2::XMLNode* node;
+            bool isArray;
+        };
+
+        template<typename T>
+        void WriteValue(const char* name, T value);
+
+        tinyxml2::XMLDocument _doc;
+        std::vector<ContextNode> _stack;
     };
 }

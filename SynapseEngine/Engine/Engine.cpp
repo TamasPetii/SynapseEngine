@@ -36,13 +36,22 @@
 
 #include "Engine/Serialization/Serializer.h"
 #include "Engine/Serialization/Archive/DefaultArchiveRegistry.h"
-#include "Engine/Serialization/Archive/Output/NlohmannJsonOutputArchive.h"
-#include "Engine/Serialization/Archive/Input/NlohmannJsonInputArchive.h"
+#include "Engine/Serialization/Archive/Output/Json/NlohmannJsonOutputArchive.h"
+#include "Engine/Serialization/Archive/Input/Json/NlohmannJsonInputArchive.h"
+#include "Engine/Serialization/Archive/Input/Binary/BinaryInputArchive.h"
+#include "Engine/Serialization/Archive/Output/Binary/BinaryOutputArchive.h"
+#include "Engine/Serialization/Archive/Input/Xml/TinyXmlInputArchive.h"
+#include "Engine/Serialization/Archive/Output/Xml/TinyXmlOutputArchive.h"
+#include "Engine/Serialization/Archive/Input/Yaml/YamlCppInputArchive.h"
+#include "Engine/Serialization/Archive/Output/Yaml/YamlCppOutputArchive.h"
+#include "Engine/Serialization/Archive/Input/Toml/PlusPlusTomlInputArchive.h"
+#include "Engine/Serialization/Archive/Output/Toml/PlusPlusTomlOutputArchive.h"
 
 #include <print>
 #include <filesystem>
 
 #include "Engine/Serialization/Schema/GlmSchema.h"
+#include "Engine/Serialization/Schema/VectorSchema.h"
 #include "Engine/Serialization/Schema/TransformComponentSchema.h"
 
 namespace Syn
@@ -117,6 +126,8 @@ namespace Syn
 		InitSceneManager();
 		InitPhysicsEngine();
 		InitProfilers();
+
+		TestSerializer();
 	}
 
 	void Engine::InitLogger()
@@ -312,15 +323,24 @@ namespace Syn
 		auto registry = std::make_unique<DefaultArchiveRegistry>();
 		registry->RegisterOutputAuto<NlohmannJsonOutputArchive>(10);
 		registry->RegisterInputAuto<NlohmannJsonInputArchive>(10);
+		registry->RegisterOutputAuto<BinaryOutputArchive>(10);
+		registry->RegisterInputAuto<BinaryInputArchive>(10);
+		registry->RegisterOutputAuto<TinyXmlOutputArchive>(10);
+		registry->RegisterInputAuto<TinyXmlInputArchive>(10);
+		registry->RegisterOutputAuto<YamlCppOutputArchive>(10);
+		registry->RegisterInputAuto<YamlCppInputArchive>(10);
+		registry->RegisterOutputAuto<PlusPlusTomlOutputArchive>(10);
+		registry->RegisterInputAuto<PlusPlusTomlInputArchive>(10);
 
 		auto service = std::make_unique<DefaultSerializationService>(std::move(registry));
 
 		_serializer = std::make_unique<Serializer>(std::move(service));
 
 		ServiceLocator::ProvideSerializer(_serializer.get());
+	}
 
-		Info("[Serializer] Transform teszt inditasa...");
-
+	void Engine::TestSerializer()
+	{
 		const char* appDataPath = std::getenv("APPDATA");
 		std::filesystem::path baseDir = appDataPath ? appDataPath : ".";
 		std::filesystem::path saveDir = baseDir / "Synapse" / "Saves";
@@ -329,23 +349,201 @@ namespace Syn
 			std::filesystem::create_directories(saveDir);
 		}
 
-		std::filesystem::path savePath = saveDir / "transform_test.json";
+		Info("[Serializer] Starting JSON Transform test...");
+		std::filesystem::path jsonPath = saveDir / "transform_test.json";
 
 		TransformComponent myTransform;
 		myTransform.translation = glm::vec3(100.5f, 50.0f, -25.2f);
 		myTransform.rotation = glm::vec3(90.0f, 0.0f, 0.0f);
 		myTransform.scale = glm::vec3(2.0f, 2.0f, 2.0f);
 
-		if (_serializer->SaveToFile(savePath, myTransform)) {
-			Info("[Serializer] Transform elmentve ide: {}", savePath.string());
+		{
+			Info("[Serializer] --- STARTING SINGLE JSON TEST ---");
+			std::filesystem::path jsonPath = saveDir / "transform_test.json";
+
+			if (_serializer->SaveToFile(jsonPath, myTransform)) {
+				Info("  > Saved successfully!");
+			}
+
+			TransformComponent loadedJsonTransform;
+			if (_serializer->LoadFromFile(jsonPath, loadedJsonTransform)) {
+				Info("  > Loaded Pos: {}, {}, {}", loadedJsonTransform.translation.x, loadedJsonTransform.translation.y, loadedJsonTransform.translation.z);
+			}
 		}
 
-		TransformComponent loadedTransform;
-		if (_serializer->LoadFromFile(savePath, loadedTransform)) {
-			Info("[Serializer] Transform betoltve!");
-			Info("  > Pos: {}, {}, {}", loadedTransform.translation.x, loadedTransform.translation.y, loadedTransform.translation.z);
-			Info("  > Rot: {}, {}, {}", loadedTransform.rotation.x, loadedTransform.rotation.y, loadedTransform.rotation.z);
-			Info("  > Scl: {}, {}, {}", loadedTransform.scale.x, loadedTransform.scale.y, loadedTransform.scale.z);
+		{
+			Info("[Serializer] --- STARTING SINGLE BINARY TEST ---");
+			std::filesystem::path binPath = saveDir / "transform_test.bin";
+
+			if (_serializer->SaveToFile(binPath, myTransform)) {
+				Info("  > Saved successfully to: {}", binPath.string());
+			}
+
+			TransformComponent loadedBinTransform;
+			if (_serializer->LoadFromFile(binPath, loadedBinTransform)) {
+				Info("  > Loaded Pos: {}, {}, {}", loadedBinTransform.translation.x, loadedBinTransform.translation.y, loadedBinTransform.translation.z);
+			}
 		}
+
+		{
+			Info("[Serializer] --- STARTING SINGLE XML TEST ---");
+			std::filesystem::path xmlSinglePath = saveDir / "transform_test.xml";
+
+			if (_serializer->SaveToFile(xmlSinglePath, myTransform)) {
+				Info("  > Saved successfully to: {}", xmlSinglePath.string());
+			}
+
+			TransformComponent loadedXmlTransform;
+			if (_serializer->LoadFromFile(xmlSinglePath, loadedXmlTransform)) {
+				Info("  > Loaded Pos: {}, {}, {}", loadedXmlTransform.translation.x, loadedXmlTransform.translation.y, loadedXmlTransform.translation.z);
+			}
+		}
+
+		{
+			Info("[Serializer] --- STARTING SINGLE YAML TEST ---");
+			std::filesystem::path yamlSinglePath = saveDir / "transform_test.yaml";
+
+			if (_serializer->SaveToFile(yamlSinglePath, myTransform)) {
+				Info("  > Saved successfully to: {}", yamlSinglePath.string());
+			}
+
+			TransformComponent loadedYamlTransform;
+			if (_serializer->LoadFromFile(yamlSinglePath, loadedYamlTransform)) {
+				Info("  > Loaded Pos: {}, {}, {}", loadedYamlTransform.translation.x, loadedYamlTransform.translation.y, loadedYamlTransform.translation.z);
+			}
+		}
+
+		{
+			Info("[Serializer] --- STARTING SINGLE TOML TEST ---");
+			std::filesystem::path tomlSinglePath = saveDir / "transform_test.toml";
+
+			if (_serializer->SaveToFile(tomlSinglePath, myTransform)) {
+				Info("  > Saved successfully to: {}", tomlSinglePath.string());
+			}
+
+			TransformComponent loadedTomlTransform;
+			if (_serializer->LoadFromFile(tomlSinglePath, loadedTomlTransform)) {
+				Info("  > Loaded Pos: {}, {}, {}", loadedTomlTransform.translation.x, loadedTomlTransform.translation.y, loadedTomlTransform.translation.z);
+			}
+		}
+
+		Info("[Serializer] Generating 10,000 Transforms for benchmark...");
+		const int NUM_ELEMENTS = 10000;
+		std::vector<TransformComponent> transformsToSave;
+		transformsToSave.reserve(NUM_ELEMENTS);
+
+		for (int i = 0; i < NUM_ELEMENTS; ++i) {
+			TransformComponent dummyTransform;
+			dummyTransform.translation = glm::vec3(i * 1.5f, 0.0f, 0.0f);
+			dummyTransform.rotation = glm::vec3(0.0f);
+			dummyTransform.scale = glm::vec3(1.0f);
+			transformsToSave.push_back(dummyTransform);
+		}
+
+		{
+			Info("[Serializer] --- STARTING FAST BINARY (DOD) VECTOR TEST ---");
+			std::filesystem::path vecBinPath = saveDir / "transform_vector_test.bin";
+
+			BlitVector<TransformComponent> saveArray{ transformsToSave };
+			if (_serializer->SaveToFile(vecBinPath, saveArray)) {
+				Info("  > 10,000 Transforms saved FAST in binary!");
+			}
+
+			std::vector<TransformComponent> loadedTransforms;
+			BlitVector<TransformComponent> loadArray{ loadedTransforms };
+			if (_serializer->LoadFromFile(vecBinPath, loadArray)) {
+				Info("  > Vector loaded! Element count: {}", loadedTransforms.size());
+				if (!loadedTransforms.empty()) {
+					Info("  > Last element Pos X: {}", loadedTransforms.back().translation.x);
+				}
+			}
+		}
+
+		{
+			Info("[Serializer] --- STARTING SLOW BINARY VECTOR TEST ---");
+			std::filesystem::path vecSlowBinPath = saveDir / "transform_vector_slow_test.bin";
+
+			if (_serializer->SaveToFile(vecSlowBinPath, transformsToSave)) {
+				Info("  > 10,000 Transforms saved SLOW in binary!");
+			}
+
+			std::vector<TransformComponent> loadedSlowTransforms;
+			if (_serializer->LoadFromFile(vecSlowBinPath, loadedSlowTransforms)) {
+				Info("  > Slow Vector loaded! Element count: {}", loadedSlowTransforms.size());
+				if (!loadedSlowTransforms.empty()) {
+					Info("  > Last element Pos X: {}", loadedSlowTransforms.back().translation.x);
+				}
+			}
+		}
+
+		{
+			Info("[Serializer] --- STARTING JSON VECTOR TEST ---");
+			std::filesystem::path vecJsonPath = saveDir / "transform_vector_test.json";
+
+			if (_serializer->SaveToFile(vecJsonPath, transformsToSave)) {
+				Info("  > 10,000 Transforms saved in JSON!");
+			}
+
+			std::vector<TransformComponent> loadedJsonTransforms;
+			if (_serializer->LoadFromFile(vecJsonPath, loadedJsonTransforms)) {
+				Info("  > JSON Vector loaded! Element count: {}", loadedJsonTransforms.size());
+				if (!loadedJsonTransforms.empty()) {
+					Info("  > Last element Pos X: {}", loadedJsonTransforms.back().translation.x);
+				}
+			}
+		}
+
+		{
+			Info("[Serializer] --- STARTING XML VECTOR TEST ---");
+			std::filesystem::path vecXmlPath = saveDir / "transform_vector_test.xml";
+
+			if (_serializer->SaveToFile(vecXmlPath, transformsToSave)) {
+				Info("  > 10,000 Transforms saved in XML!");
+			}
+
+			std::vector<TransformComponent> loadedXmlTransforms;
+			if (_serializer->LoadFromFile(vecXmlPath, loadedXmlTransforms)) {
+				Info("  > XML Vector loaded! Element count: {}", loadedXmlTransforms.size());
+				if (!loadedXmlTransforms.empty()) {
+					Info("  > Last element Pos X: {}", loadedXmlTransforms.back().translation.x);
+				}
+			}
+		}
+
+		{
+			Info("[Serializer] --- STARTING YAML VECTOR TEST ---");
+			std::filesystem::path vecYamlPath = saveDir / "transform_vector_test.yaml";
+
+			if (_serializer->SaveToFile(vecYamlPath, transformsToSave)) {
+				Info("  > 10,000 Transforms saved in YAML!");
+			}
+
+			std::vector<TransformComponent> loadedYamlTransforms;
+			if (_serializer->LoadFromFile(vecYamlPath, loadedYamlTransforms)) {
+				Info("  > YAML Vector loaded! Element count: {}", loadedYamlTransforms.size());
+				if (!loadedYamlTransforms.empty()) {
+					Info("  > Last element Pos X: {}", loadedYamlTransforms.back().translation.x);
+				}
+			}
+		}
+
+		{
+			Info("[Serializer] --- STARTING TOML VECTOR TEST ---");
+			std::filesystem::path vecTomlPath = saveDir / "transform_vector_test.toml";
+
+			if (_serializer->SaveToFile(vecTomlPath, transformsToSave)) {
+				Info("  > 10,000 Transforms saved in TOML!");
+			}
+
+			std::vector<TransformComponent> loadedTomlTransforms;
+			if (_serializer->LoadFromFile(vecTomlPath, loadedTomlTransforms)) {
+				Info("  > TOML Vector loaded! Element count: {}", loadedTomlTransforms.size());
+				if (!loadedTomlTransforms.empty()) {
+					Info("  > Last element Pos X: {}", loadedTomlTransforms.back().translation.x);
+				}
+			}
+		}
+
+		Info("[Serializer] Benchmark complete!");
 	}
 }

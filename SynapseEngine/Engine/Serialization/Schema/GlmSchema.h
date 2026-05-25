@@ -6,7 +6,7 @@
 namespace Syn
 {
     template <>
-    struct Schema<glm::vec3> {
+    struct SYN_API Schema<glm::vec3> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename T>
@@ -19,7 +19,7 @@ namespace Syn
     };
 
     template <>
-    struct Schema<glm::vec4> {
+    struct SYN_API Schema<glm::vec4> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename T>
@@ -33,7 +33,7 @@ namespace Syn
     };
 
     template <>
-    struct Schema<glm::quat> {
+    struct SYN_API Schema<glm::quat> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename T>
