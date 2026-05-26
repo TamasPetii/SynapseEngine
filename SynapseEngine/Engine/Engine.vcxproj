@@ -238,8 +238,10 @@
     <ClCompile Include="Animation\Data\Cpu\CpuAnimationData.cpp" />
     <ClCompile Include="Animation\Converter\ICpuAnimationExtractor.cpp" />
     <ClCompile Include="Animation\Converter\DefaultCpuAnimationExtractor.cpp" />
-    <ClCompile Include="Scene\ISceneWriter.cpp" />
-    <ClCompile Include="Scene\ManifestSceneWriter.cpp" />
+    <ClCompile Include="Scene\Loader\ManifestSceneLoader.cpp" />
+    <ClCompile Include="Scene\Loader\ISceneLoader.cpp" />
+    <ClCompile Include="Scene\Writer\ISceneWriter.cpp" />
+    <ClCompile Include="Scene\Writer\ManifestSceneWriter.cpp" />
     <ClCompile Include="Serialization\Schema\Animation\GpuBatchedAnimationSchema.cpp" />
     <ClCompile Include="Scene\Source\Procedural\NatureSceneSource.cpp" />
     <ClCompile Include="Scene\Source\File\FileSceneSource.cpp" />
@@ -658,8 +660,11 @@
     <ClInclude Include="Animation\Converter\ICpuAnimationExtractor.h" />
     <ClInclude Include="Animation\Converter\DefaultCpuAnimationExtractor.h" />
     <ClInclude Include="Component\Components.h" />
-    <ClInclude Include="Scene\ISceneWriter.h" />
-    <ClInclude Include="Scene\ManifestSceneWriter.h" />
+    <ClInclude Include="Scene\Loader\ManifestSceneLoader.h" />
+    <ClInclude Include="Scene\Loader\ISceneLoader.h" />
+    <ClInclude Include="Serialization\Schema\Component\Physics\PhysicsComponentSchemas.h" />
+    <ClInclude Include="Scene\Writer\ISceneWriter.h" />
+    <ClInclude Include="Scene\Writer\ManifestSceneWriter.h" />
     <ClInclude Include="Serialization\Schema\Animation\GpuBatchedAnimationSchema.h" />
     <ClInclude Include="Scene\Source\Procedural\NatureSceneSource.h" />
     <ClInclude Include="Scene\Source\File\FileSceneSource.h" />

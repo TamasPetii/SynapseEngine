@@ -16,7 +16,7 @@ namespace Syn
         uint32_t tempAllocatorSizeMB = 256;
     };
 
-    enum class SYN_API PhysicsMotionType
+    enum SYN_API PhysicsMotionType
     {
         Static,
         Kinematic,

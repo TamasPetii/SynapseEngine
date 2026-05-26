@@ -10,7 +10,6 @@ namespace Syn
 	{}
 
 	AnimationComponentGPU::AnimationComponentGPU(const AnimationComponent& component) :
-
 		animationIndex(component.animationIndex),
 		frameIndex(component.frameIndex),
 		padding0(0),

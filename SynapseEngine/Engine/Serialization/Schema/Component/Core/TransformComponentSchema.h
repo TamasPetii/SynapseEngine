@@ -13,9 +13,11 @@ namespace Syn
         template <typename Archive, typename T>
         static void Invoke(Archive& ar, const char* name, T& val) {
             ScopedArchiveObject obj(ar, name);
-            ar.Property("translation", val.translation);
-            ar.Property("rotation", val.rotation);
-            ar.Property("scale", val.scale);
+            auto& comp = const_cast<std::remove_const_t<T>&>(val);
+
+            ar.Property("translation", comp.translation);
+            ar.Property("rotation", comp.rotation);
+            ar.Property("scale", comp.scale);
         }
     };
 }

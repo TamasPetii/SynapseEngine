@@ -16,9 +16,11 @@ namespace Syn
         static void Invoke(Archive& ar, const char* name, T& val) 
         {
             ScopedArchiveObject obj(ar, name);
-            ar.Property("color", val.color);
-            ar.Property("strength", val.strength);
-            ar.Property("useShadow", val.useShadow);
+            auto& comp = const_cast<std::remove_const_t<T>&>(val);
+
+            ar.Property("color", comp.color);
+            ar.Property("strength", comp.strength);
+            ar.Property("useShadow", comp.useShadow);
         }
     };
 
@@ -32,11 +34,13 @@ namespace Syn
         static void Invoke(Archive& ar, const char* name, T& val) 
         {
             ScopedArchiveObject obj(ar, name);
-            ar.Property("color", val.color);
-            ar.Property("strength", val.strength);
-            ar.Property("useShadow", val.useShadow);
-            ar.Property("radius", val.radius);
-            ar.Property("weakenDistance", val.weakenDistance);
+            auto& comp = const_cast<std::remove_const_t<T>&>(val);
+
+            ar.Property("color", comp.color);
+            ar.Property("strength", comp.strength);
+            ar.Property("useShadow", comp.useShadow);
+            ar.Property("radius", comp.radius);
+            ar.Property("weakenDistance", comp.weakenDistance);
         }
     };
 
@@ -50,13 +54,15 @@ namespace Syn
         static void Invoke(Archive& ar, const char* name, T& val) 
         {
             ScopedArchiveObject obj(ar, name);
-            ar.Property("color", val.color);
-            ar.Property("strength", val.strength);
-            ar.Property("useShadow", val.useShadow);
-            ar.Property("range", val.range);
-            ar.Property("weakenDistance", val.weakenDistance);
-            ar.Property("innerAngle", val.innerAngle);
-            ar.Property("outerAngle", val.outerAngle);
+            auto& comp = const_cast<std::remove_const_t<T>&>(val);
+
+            ar.Property("color", comp.color);
+            ar.Property("strength", comp.strength);
+            ar.Property("useShadow", comp.useShadow);
+            ar.Property("range", comp.range);
+            ar.Property("weakenDistance", comp.weakenDistance);
+            ar.Property("innerAngle", comp.innerAngle);
+            ar.Property("outerAngle", comp.outerAngle);
         }
     };
 }

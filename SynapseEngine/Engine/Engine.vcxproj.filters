@@ -1260,10 +1260,16 @@
     <ClCompile Include="Serialization\Schema\Animation\GpuBatchedAnimationSchema.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Scene\ManifestSceneWriter.cpp">
+    <ClCompile Include="Scene\Writer\ManifestSceneWriter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Scene\ISceneWriter.cpp">
+    <ClCompile Include="Scene\Writer\ISceneWriter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Loader\ISceneLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Loader\ManifestSceneLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -2711,10 +2717,10 @@
     <ClInclude Include="Serialization\Schema\Component\Light\LightShadowComponentSchemas.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Scene\ManifestSceneWriter.h">
+    <ClInclude Include="Scene\Writer\ManifestSceneWriter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Scene\ISceneWriter.h">
+    <ClInclude Include="Scene\Writer\ISceneWriter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Serialization\Schema\Component\Rendering\ModelComponentSchema.h">
@@ -2727,6 +2733,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Serialization\Schema\Scene\SceneSnapshotTypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Component\Physics\PhysicsComponentSchemas.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Loader\ISceneLoader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Loader\ManifestSceneLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

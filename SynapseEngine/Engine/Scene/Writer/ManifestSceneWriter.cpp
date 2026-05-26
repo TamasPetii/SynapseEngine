@@ -7,6 +7,7 @@
 #include "Engine/Component/Rendering/ModelComponent.h"
 #include "Engine/Component/Rendering/AnimationComponent.h"
 #include "Engine/Component/Core/TransformComponent.h"
+#include "Engine/Serialization/Schema/Scene/SceneSnapshotTypes.h"
 
 namespace Syn
 {
@@ -21,7 +22,6 @@ namespace Syn
         ProcessModels(scene, modelManifest, localToGlobalModels);
         ProcessAnimations(scene, animManifest, localToGlobalAnims);
 
-        using FullSceneSnapshot = SceneSnapshot<TransformComponent, ModelComponent, AnimationComponent>;
         FullSceneSnapshot snapshot{ scene };
         snapshot.modelManifest = std::move(modelManifest);
         snapshot.animationManifest = std::move(animManifest);

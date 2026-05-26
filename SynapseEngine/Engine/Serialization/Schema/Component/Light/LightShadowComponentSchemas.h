@@ -15,8 +15,10 @@ namespace Syn
         template <typename Archive, typename T>
         static void Invoke(Archive& ar, const char* name, T& val) {
             ScopedArchiveObject obj(ar, name);
-            ar.Property("shadowFarPlane", val.shadowFarPlane);
-            ar.Property("cascadeSplits", val.cascadeSplits);
+            auto& comp = const_cast<std::remove_const_t<T>&>(val);
+
+            ar.Property("shadowFarPlane", comp.shadowFarPlane);
+            ar.Property("cascadeSplits", comp.cascadeSplits);
         }
     };
 
@@ -29,8 +31,10 @@ namespace Syn
         template <typename Archive, typename T>
         static void Invoke(Archive& ar, const char* name, T& val) {
             ScopedArchiveObject obj(ar, name);
-            ar.Property("nearPlane", val.nearPlane);
-            ar.Property("farPlane", val.farPlane);
+            auto& comp = const_cast<std::remove_const_t<T>&>(val);
+            
+            ar.Property("nearPlane", comp.nearPlane);
+            ar.Property("farPlane", comp.farPlane);
         }
     };
 
@@ -43,8 +47,10 @@ namespace Syn
         template <typename Archive, typename T>
         static void Invoke(Archive& ar, const char* name, T& val) {
             ScopedArchiveObject obj(ar, name);
-            ar.Property("nearPlane", val.nearPlane);
-            ar.Property("farPlane", val.farPlane);
+            auto& comp = const_cast<std::remove_const_t<T>&>(val);
+
+            ar.Property("nearPlane", comp.nearPlane);
+            ar.Property("farPlane", comp.farPlane);
         }
     };
 }

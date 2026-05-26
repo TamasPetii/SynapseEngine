@@ -47,6 +47,8 @@
 #include "Engine/Serialization/Archive/Output/Yaml/YamlCppOutputArchive.h"
 #include "Engine/Serialization/Archive/Input/Toml/PlusPlusTomlInputArchive.h"
 #include "Engine/Serialization/Archive/Output/Toml/PlusPlusTomlOutputArchive.h"
+#include "Engine/Scene/Writer/ManifestSceneWriter.h"
+#include "Engine/Scene/Loader/ManifestSceneLoader.h"
 
 #include <print>
 #include <filesystem>
@@ -296,7 +298,10 @@ namespace Syn
 	{
 		uint32_t frames = _frameContext.framesInFlight;
 
-		_sceneManager = std::make_unique<SceneManager>();
+		auto writer = std::make_unique<ManifestSceneWriter>();
+		auto loader = std::make_unique<ManifestSceneLoader>();
+
+		_sceneManager = std::make_unique<Syn::SceneManager>(std::move(writer), std::move(loader));
 		ServiceLocator::ProvideSceneManager(_sceneManager.get());
 
 		_sceneManager->RegisterScene("TestLevel", [frames]() {
@@ -308,6 +313,14 @@ namespace Syn
 			});
 
 		_sceneManager->LoadScene("TestLevel");
+
+		_sceneManager->Finish();
+		auto activeScene = _sceneManager->GetActiveScene();
+
+		_sceneManager->SaveActiveScene("C:\\Users\\User\\Desktop\\SceneSave\\TestLevel.json");
+		_sceneManager->SaveActiveScene("C:\\Users\\User\\Desktop\\SceneSave\\TestLevel.yaml");
+		_sceneManager->SaveActiveScene("C:\\Users\\User\\Desktop\\SceneSave\\TestLevel.toml");
+		_sceneManager->SaveActiveScene("C:\\Users\\User\\Desktop\\SceneSave\\TestLevel.xml");
 	}
 
 	void Engine::InitPhysicsEngine()

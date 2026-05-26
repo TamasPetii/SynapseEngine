@@ -8,6 +8,10 @@ namespace Syn
         TransformComponent,
         CameraComponent,
         ModelComponent,
-        AnimationComponent
+        AnimationComponent,
+        BoxColliderComponent,
+        SphereColliderComponent,
+        CapsuleColliderComponent,
+        RigidBodyComponent
     >;
 }

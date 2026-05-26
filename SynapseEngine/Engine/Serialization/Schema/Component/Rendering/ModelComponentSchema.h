@@ -13,12 +13,13 @@ namespace Syn
         template <typename Archive, typename T>
         static void Invoke(Archive& ar, const char* name, T& val) {
             ScopedArchiveObject obj(ar, name);
+            auto& comp = const_cast<std::remove_const_t<T>&>(val);
 
-            ar.Property("castShadow", val.castShadow);
-            ar.Property("receiveShadow", val.receiveShadow);
-            ar.Property("hasDirectxNormals", val.hasDirectxNormals);
-            ar.Property("modelIndex", val.modelIndex);
-            ar.Property("materialOffset", val.materialOffset);
+            ar.Property("castShadow", comp.castShadow);
+            ar.Property("receiveShadow", comp.receiveShadow);
+            ar.Property("hasDirectxNormals", comp.hasDirectxNormals);
+            ar.Property("modelIndex", comp.modelIndex);
+            ar.Property("materialOffset", comp.materialOffset);
         }
     };
 }

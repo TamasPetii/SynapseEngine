@@ -14,15 +14,16 @@ namespace Syn
         static void Invoke(Archive& ar, const char* name, T& val) 
         {
             ScopedArchiveObject obj(ar, name);
+            auto& comp = const_cast<std::remove_const_t<T>&>(val);
 
-            ar.Property("nearPlane", val.nearPlane);
-            ar.Property("farPlane", val.farPlane);
-            ar.Property("fov", val.fov);
-            ar.Property("width", val.width);
-            ar.Property("height", val.height);
-            ar.Property("speed", val.speed);
-            ar.Property("sensitivity", val.sensitivity);
-            ar.Property("distance", val.distance);
+            ar.Property("nearPlane", comp.nearPlane);
+            ar.Property("farPlane", comp.farPlane);
+            ar.Property("fov", comp.fov);
+            ar.Property("width", comp.width);
+            ar.Property("height", comp.height);
+            ar.Property("speed", comp.speed);
+            ar.Property("sensitivity", comp.sensitivity);
+            ar.Property("distance", comp.distance);
         }
     };
 }

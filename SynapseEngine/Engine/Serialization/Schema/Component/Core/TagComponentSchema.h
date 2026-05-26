@@ -14,8 +14,10 @@ namespace Syn
         static void Invoke(Archive& ar, const char* name, T& val) 
         {
             ScopedArchiveObject obj(ar, name);
-            ar.Property("name", val.name);
-            ar.Property("tag", val.tag);
+            auto& comp = const_cast<std::remove_const_t<T>&>(val);
+
+            ar.Property("name", comp.name);
+            ar.Property("tag", comp.tag);
         }
     };
 }
