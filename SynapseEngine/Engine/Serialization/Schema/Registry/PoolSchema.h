@@ -7,7 +7,7 @@
 namespace Syn
 {
     template<typename T, typename StoragePolicy, typename MappingPolicy>
-    struct SYN_API Schema<Pool<T, StoragePolicy, MappingPolicy>> 
+    struct Schema<Pool<T, StoragePolicy, MappingPolicy>> 
     {
         static constexpr bool exists = true;
 

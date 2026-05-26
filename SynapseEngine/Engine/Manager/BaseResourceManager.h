@@ -65,6 +65,7 @@ namespace Syn {
         std::shared_ptr<TResource> GetResource(uint32_t id) const;
         std::shared_ptr<TResource> GetResource(const std::string & name) const;
         std::vector<ResourceSnapshot> GetResourceSnapshot() const;
+        std::vector<std::string> GetResourcePaths() const;
     protected:
         uint32_t InternalLoadAsync(const std::string & key, std::function<std::shared_ptr<TResource>()> task);
         uint32_t InternalLoadSync(const std::string & key, std::function<std::shared_ptr<TResource>()> task);
@@ -212,6 +213,17 @@ namespace Syn {
             snapshot.push_back({ entry.resource, entry.state });
         }
         return snapshot;
+    }
+
+    template <typename TResource>
+    std::vector<std::string> BaseResourceManager<TResource>::GetResourcePaths() const {
+        std::lock_guard lock(_mutex);
+        std::vector<std::string> paths;
+        paths.reserve(_entries.size());
+        for (const auto& entry : _entries) {
+            paths.push_back(entry.path);
+        }
+        return paths;
     }
 
     template <typename TResource>

@@ -17,7 +17,7 @@
 
 #include "Engine/Serialization/Schema/Core/GlmSchema.h"
 #include "Engine/Serialization/Schema/Core/VectorSchema.h"
-#include "Engine/Serialization/Schema/Component/TransformComponentSchema.h"
+#include "Engine/Serialization/Schema/Component/Core/TransformComponentSchema.h"
 
 #include "Engine/Registry/Pool/Pool.h"
 #include "Engine/Registry/Pool/Storage/SynStorage.h"
@@ -40,6 +40,8 @@
 #include "Engine/Scene/SceneSettings.h"
 #include "Engine/Serialization/Schema/Scene/SceneSchema.h"
 #include "Engine/Serialization/Schema/Scene/SceneSettingsSchema.h"
+
+#include "Engine/Component/Components.h"
 
 using namespace Syn;
 

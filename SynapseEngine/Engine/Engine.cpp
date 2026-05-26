@@ -51,10 +51,6 @@
 #include <print>
 #include <filesystem>
 
-#include "Engine/Serialization/Schema/Core/GlmSchema.h"
-#include "Engine/Serialization/Schema/Core/VectorSchema.h"
-#include "Engine/Serialization/Schema/Component/TransformComponentSchema.h"
-
 namespace Syn
 {
 	Engine::Engine(const EngineInitParams& params)

@@ -8,7 +8,7 @@
 namespace Syn
 {
     template<>
-    struct SYN_API Schema<SparseVectorMapping> {
+    struct Schema<SparseVectorMapping> {
         static constexpr bool exists = true;
 
         template<typename Archive, typename U>

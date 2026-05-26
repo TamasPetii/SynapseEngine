@@ -238,6 +238,8 @@
     <ClCompile Include="Animation\Data\Cpu\CpuAnimationData.cpp" />
     <ClCompile Include="Animation\Converter\ICpuAnimationExtractor.cpp" />
     <ClCompile Include="Animation\Converter\DefaultCpuAnimationExtractor.cpp" />
+    <ClCompile Include="Scene\ISceneWriter.cpp" />
+    <ClCompile Include="Scene\ManifestSceneWriter.cpp" />
     <ClCompile Include="Serialization\Schema\Animation\GpuBatchedAnimationSchema.cpp" />
     <ClCompile Include="Scene\Source\Procedural\NatureSceneSource.cpp" />
     <ClCompile Include="Scene\Source\File\FileSceneSource.cpp" />
@@ -656,6 +658,8 @@
     <ClInclude Include="Animation\Converter\ICpuAnimationExtractor.h" />
     <ClInclude Include="Animation\Converter\DefaultCpuAnimationExtractor.h" />
     <ClInclude Include="Component\Components.h" />
+    <ClInclude Include="Scene\ISceneWriter.h" />
+    <ClInclude Include="Scene\ManifestSceneWriter.h" />
     <ClInclude Include="Serialization\Schema\Animation\GpuBatchedAnimationSchema.h" />
     <ClInclude Include="Scene\Source\Procedural\NatureSceneSource.h" />
     <ClInclude Include="Scene\Source\File\FileSceneSource.h" />
@@ -690,6 +694,13 @@
     <ClInclude Include="Serialization\Archive\Input\IInputArchive.h" />
     <ClInclude Include="Serialization\Archive\Output\Binary\BinaryOutputArchive.h" />
     <ClInclude Include="Serialization\Archive\Output\IOutputArchive.h" />
+    <ClInclude Include="Serialization\Schema\Component\ComponentSchemas.h" />
+    <ClInclude Include="Serialization\Schema\Component\Core\CameraComponentSchema.h" />
+    <ClInclude Include="Serialization\Schema\Component\Core\TagComponentSchema.h" />
+    <ClInclude Include="Serialization\Schema\Component\Light\LightComponentSchemas.h" />
+    <ClInclude Include="Serialization\Schema\Component\Light\LightShadowComponentSchemas.h" />
+    <ClInclude Include="Serialization\Schema\Component\Rendering\AnimationComponentSchema.h" />
+    <ClInclude Include="Serialization\Schema\Component\Rendering\ModelComponentSchema.h" />
     <ClInclude Include="Serialization\Schema\Core\GlmSchema.h" />
     <ClInclude Include="Serialization\Schema\Core\VectorSchema.h" />
     <ClInclude Include="Serialization\Schema\Models\GpuBatchedModelSchema.h" />
@@ -706,8 +717,9 @@
     <ClInclude Include="Serialization\Schema\Registry\StorageBackendSchema.h" />
     <ClInclude Include="Serialization\Schema\Scene\SceneSchema.h" />
     <ClInclude Include="Serialization\Schema\Scene\SceneSettingsSchema.h" />
+    <ClInclude Include="Serialization\Schema\Scene\SceneSnapshotTypes.h" />
     <ClInclude Include="Serialization\Schema\Schema.h" />
-    <ClInclude Include="Serialization\Schema\Component\TransformComponentSchema.h" />
+    <ClInclude Include="Serialization\Schema\Component\Core\TransformComponentSchema.h" />
     <ClInclude Include="Serialization\Stream\Input\NetworkInputStream.h" />
     <ClInclude Include="Serialization\Stream\Output\NetworkOutputStream.h" />
     <ClInclude Include="Serialization\Stream\Input\MemoryInputStream.h" />

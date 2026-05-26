@@ -1,20 +1,23 @@
 #pragma once
 #include "Engine/Serialization/Schema/Schema.h"
 #include "Engine/Serialization/Schema/Core/VectorSchema.h"
-#include <type_traits>
 
 #include "Engine/Registry/Registry.h"
 #include "Engine/Registry/Pool/PoolTypes.h"
 #include "Engine/Registry/Insiders/RegistryInsider.h"
+#include "Engine/Serialization/Archive/Output/IOutputArchive.h"
 
 #include "PoolSchema.h"
 #include "FlatStorageImplSchema.h"
 #include "SegmentedStorageImplSchema.h"
+#include "Engine/Serialization/Schema/Component/ComponentSchemas.h"
+
+#include <type_traits>
 
 namespace Syn
 {
     template <typename... Components>
-    struct SYN_API RegistrySnapshot
+    struct RegistrySnapshot
     {
         Registry& registry;
     };
@@ -52,7 +55,7 @@ namespace Syn
     }
 
     template <typename... Components>
-    struct SYN_API Schema<RegistrySnapshot<Components...>>
+    struct Schema<RegistrySnapshot<Components...>>
     {
         static constexpr bool exists = true;
 

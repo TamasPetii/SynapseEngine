@@ -13,7 +13,8 @@
 
 namespace Syn
 {
-    template <> struct Schema<AnimationKeyPosition> {
+    template <> 
+    struct Schema<AnimationKeyPosition> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename U> 
@@ -26,7 +27,8 @@ namespace Syn
         }
     };
 
-    template <> struct Schema<AnimationKeyRotation> {
+    template <> 
+    struct Schema<AnimationKeyRotation> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename U> 
@@ -38,7 +40,8 @@ namespace Syn
             ar.Property("value", v.value);
         }
     };
-    template <> struct Schema<AnimationKeyScale> {
+    template <> 
+    struct Schema<AnimationKeyScale> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename U> 
@@ -51,7 +54,8 @@ namespace Syn
         }
     };
 
-    template <> struct Schema<BoneTrack> {
+    template <> 
+    struct Schema<BoneTrack> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename U> 
@@ -79,7 +83,8 @@ namespace Syn
     };
 
 
-    template <> struct Schema<GpuAnimationDescriptor> {
+    template <> 
+    struct Schema<GpuAnimationDescriptor> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename U>
@@ -97,7 +102,8 @@ namespace Syn
         }
     };
 
-    template <> struct Schema<VertexSkinData> {
+    template <> 
+    struct Schema<VertexSkinData> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename U>
@@ -111,7 +117,8 @@ namespace Syn
         }
     };
 
-    template <> struct Schema<GpuBatchedAnimation> {
+    template <> 
+    struct Schema<GpuBatchedAnimation> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename U>

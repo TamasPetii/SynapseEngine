@@ -8,7 +8,7 @@
 namespace Syn
 {
     template<typename T>
-    struct SYN_API Schema<DataMixin<T>> {
+    struct Schema<DataMixin<T>> {
         static constexpr bool exists = true;
 
         template<typename Archive, typename U>

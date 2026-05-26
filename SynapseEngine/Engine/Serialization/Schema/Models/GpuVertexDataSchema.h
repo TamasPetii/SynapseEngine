@@ -6,7 +6,8 @@
 
 namespace Syn
 {
-    template <> struct Schema<GpuVertexPosition> {
+    template <> 
+    struct Schema<GpuVertexPosition> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename U> 
@@ -19,7 +20,8 @@ namespace Syn
         }
     };
 
-    template <> struct Schema<GpuVertexAttributes> {
+    template <> 
+    struct Schema<GpuVertexAttributes> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename U> 
@@ -34,7 +36,8 @@ namespace Syn
         }
     };
 
-    template <> struct Schema<GpuVertexData> {
+    template <> 
+    struct Schema<GpuVertexData> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename U> 

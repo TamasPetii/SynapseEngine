@@ -1260,6 +1260,12 @@
     <ClCompile Include="Serialization\Schema\Animation\GpuBatchedAnimationSchema.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Scene\ManifestSceneWriter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\ISceneWriter.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2567,7 +2573,7 @@
     <ClInclude Include="Serialization\Schema\Core\GlmSchema.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Serialization\Schema\Component\TransformComponentSchema.h">
+    <ClInclude Include="Serialization\Schema\Component\Core\TransformComponentSchema.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Serialization\Schema\Core\VectorSchema.h">
@@ -2691,6 +2697,36 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Serialization\Schema\Animation\GpuBatchedAnimationSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Component\Core\TagComponentSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Component\Core\CameraComponentSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Component\Light\LightComponentSchemas.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Component\Light\LightShadowComponentSchemas.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\ManifestSceneWriter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\ISceneWriter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Component\Rendering\ModelComponentSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Component\Rendering\AnimationComponentSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Component\ComponentSchemas.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Scene\SceneSnapshotTypes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

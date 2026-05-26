@@ -6,7 +6,7 @@
 namespace Syn
 {
     template<typename T, typename FlagMixinPolicy>
-    struct SYN_API Schema<FlatStorageImpl<T, FlagMixinPolicy>>
+    struct Schema<FlatStorageImpl<T, FlagMixinPolicy>>
     {
         static constexpr bool exists = true;
 

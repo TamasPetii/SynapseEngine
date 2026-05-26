@@ -7,7 +7,7 @@
 namespace Syn
 {
     template <typename T>
-    struct SYN_API ComponentName;
+    struct ComponentName;
 
     #define SYN_REGISTER_COMPONENT(Type, Name) \
         template <> struct ComponentName<Type> { \
@@ -15,7 +15,7 @@ namespace Syn
         }
 
     template <typename T, typename Enable = void>
-    struct SYN_API Schema {
+    struct Schema {
         static constexpr bool exists = false;
     };
 

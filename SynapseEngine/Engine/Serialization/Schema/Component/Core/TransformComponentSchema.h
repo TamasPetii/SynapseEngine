@@ -7,7 +7,7 @@ namespace Syn
     SYN_REGISTER_COMPONENT(Syn::TransformComponent, "TransformComponent");
 
     template <>
-    struct SYN_API Schema<TransformComponent> {
+    struct Schema<TransformComponent> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename T>

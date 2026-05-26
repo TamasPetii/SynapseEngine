@@ -7,7 +7,7 @@
 namespace Syn
 {
     template <typename T>
-    struct SYN_API Schema<std::vector<T>> {
+    struct Schema<std::vector<T>> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename U>

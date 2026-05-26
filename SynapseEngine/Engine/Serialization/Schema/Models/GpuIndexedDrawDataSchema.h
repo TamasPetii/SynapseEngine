@@ -6,7 +6,8 @@
 
 namespace Syn
 {
-    template <> struct Schema<GpuMeshCollider> {
+    template <> 
+    struct Schema<GpuMeshCollider> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename U> 
@@ -21,7 +22,8 @@ namespace Syn
         }
     };
 
-    template <> struct Schema<GpuMeshDescriptor> {
+    template <> 
+    struct Schema<GpuMeshDescriptor> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename U> 
@@ -37,7 +39,8 @@ namespace Syn
         }
     };
 
-    template <> struct Schema<GpuMeshLodDescriptor> {
+    template <> 
+    struct Schema<GpuMeshLodDescriptor> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename U> 
@@ -53,7 +56,8 @@ namespace Syn
         }
     };
 
-    template <> struct Schema<GpuIndexedDrawData> {
+    template <> 
+    struct Schema<GpuIndexedDrawData> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename U> 

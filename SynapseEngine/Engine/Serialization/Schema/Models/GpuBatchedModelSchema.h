@@ -12,7 +12,8 @@
 
 namespace Syn
 {
-    template <> struct Schema<GpuNodeTransform> {
+    template <> 
+    struct Schema<GpuNodeTransform> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename U> 
@@ -25,7 +26,8 @@ namespace Syn
         }
     };
 
-    template <> struct Schema<GpuBatchedModel> {
+    template <> 
+    struct Schema<GpuBatchedModel> {
         static constexpr bool exists = true;
 
         template <typename Archive, typename U> 

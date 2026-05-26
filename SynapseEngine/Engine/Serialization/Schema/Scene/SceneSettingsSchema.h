@@ -6,7 +6,7 @@
 namespace Syn
 {
     template <>
-    struct SYN_API Schema<SceneSettings>
+    struct Schema<SceneSettings>
     {
         static constexpr bool exists = true;
 
