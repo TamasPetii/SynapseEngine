@@ -552,9 +552,6 @@
     <ClCompile Include="Scene\SceneManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Scene\TestScene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Component\Rendering\ModelComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -948,9 +945,6 @@
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSetupPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Scene\NatureScene.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Image\Source\Memory\MemoryImageSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -1246,6 +1240,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Registry\Insiders\RegistryInsider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Insiders\SceneInsider.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Source\ISceneSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Source\File\FileSceneSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Source\Procedural\NatureSceneSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\Source\Procedural\TestSceneSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1865,9 +1874,6 @@
     <ClInclude Include="Scene\SceneManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Scene\TestScene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Component\Rendering\ModelComponent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -2297,9 +2303,6 @@
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSetupPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Scene\NatureScene.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Image\Source\Memory\MemoryImageSource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -2645,6 +2648,30 @@
     <ClInclude Include="Serialization\Schema\Registry\FlatStorageImplSchema.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\Insiders\SceneInsider.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Scene\SceneSettingsSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Scene\SceneSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Source\ISceneSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Source\File\FileSceneSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\Components.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Source\Procedural\NatureSceneSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\Source\Procedural\TestSceneSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Includes\Common\Animation.glsl" />
@@ -2723,8 +2750,8 @@
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSetup.comp" />
     <None Include="Shaders\Includes\PushConstants\ClusterSetupPC.glsl" />
     <None Include="Shaders\Includes\Common\Cluster.glsl" />
-    <None Include="Scene\scene_config.json" />
-    <None Include="Scene\nature_config.json" />
+    <None Include="Scene\Source\Procedural\test_config.json" />
+    <None Include="Scene\Source\Procedural\nature_config.json" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\DepthPrepass\MeshletPreDepth.mesh" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\DepthPrepass\PreDepth.frag" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\DepthPrepass\TraditionalPreDepth.vert" />

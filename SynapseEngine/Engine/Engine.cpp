@@ -25,8 +25,9 @@
 #include "Engine/Manager/InputManager.h"
 #include "Engine/Logger/LogUtils.h"
 #include "Engine/Scene/SceneManager.h"
-#include "Engine/Scene/TestScene.h"
-#include "Engine/Scene/NatureScene.h"
+#include "Engine/Scene/Source/Procedural/TestSceneSource.h"
+#include "Engine/Scene/Source/Procedural/NatureSceneSource.h"
+#include "Engine/Scene/Source/File/FileSceneSource.h"
 
 #include "Engine/Render/RendererFactory.h"
 #include "Engine/Physics/JoltPhysicsEngine.h"
@@ -303,8 +304,12 @@ namespace Syn
 		ServiceLocator::ProvideSceneManager(_sceneManager.get());
 
 		_sceneManager->RegisterScene("TestLevel", [frames]() {
-			return std::make_unique<TestScene>(frames);
-		});
+			return std::make_unique<Scene>(frames, std::make_unique<TestSceneSource>());
+			});
+
+		_sceneManager->RegisterScene("NatureLevel", [frames]() {
+			return std::make_unique<Scene>(frames, std::make_unique<NatureSceneSource>());
+			});
 
 		_sceneManager->LoadScene("TestLevel");
 	}

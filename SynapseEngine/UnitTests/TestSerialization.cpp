@@ -36,6 +36,11 @@
 #include "TestComponents.h"
 #include "TestComponentsSchema.h"
 
+#include "Engine/Scene/Scene.h"
+#include "Engine/Scene/SceneSettings.h"
+#include "Engine/Serialization/Schema/Scene/SceneSchema.h"
+#include "Engine/Serialization/Schema/Scene/SceneSettingsSchema.h"
+
 using namespace Syn;
 
 class SerializationTest : public ::testing::Test {
@@ -245,4 +250,57 @@ TEST_F(SerializationTest, Registry100_AllFormats) {
     runRegistryTest(".toml");
     runRegistryTest(".json");
     runRegistryTest(".yaml");
+}
+
+TEST_F(SerializationTest, SceneSnapshot_AllFormats) {
+    Scene originalScene(1, nullptr, false);
+
+    SceneSettings* originalSettings = originalScene.GetSettings();
+    originalSettings->bloomThreshold = 3.14f;
+    originalSettings->enableBloom = false;
+    originalSettings->ambientStrength = 0.88f;
+    originalSettings->pipelineType = PipelineType::Deferred;
+    originalSettings->enableMeshletConeCulling = false;
+
+    Registry* originalReg = originalScene.GetRegistry();
+
+    EntityID e1 = originalReg->CreateEntity();
+    originalReg->AddComponent<TransformComponent>(e1, CreateDummyTransform(10.0f));
+
+    EntityID e2 = originalReg->CreateEntity();
+    originalReg->AddComponent<TransformComponent>(e2, CreateDummyTransform(20.0f));
+
+    using TestSnapshot = SceneSnapshot<TransformComponent>;
+
+    auto runSceneTest = [&](const std::string& extension) {
+        std::filesystem::path path = saveDir / ("scene_full" + extension);
+
+        TestSnapshot saveSnapshot{ originalScene };
+        EXPECT_TRUE(serializer->SaveToFile(path, saveSnapshot)) << "Failed to save Scene as " << extension;
+
+        Scene loadedScene(1, nullptr, false);
+        TestSnapshot loadSnapshot{ loadedScene };
+        EXPECT_TRUE(serializer->LoadFromFile(path, loadSnapshot)) << "Failed to load Scene from " << extension;
+
+        SceneSettings* loadedSettings = loadedScene.GetSettings();
+        EXPECT_FLOAT_EQ(loadedSettings->bloomThreshold, 3.14f);
+        EXPECT_FALSE(loadedSettings->enableBloom);
+        EXPECT_FLOAT_EQ(loadedSettings->ambientStrength, 0.88f);
+        EXPECT_EQ(loadedSettings->pipelineType, PipelineType::Deferred);
+        EXPECT_FALSE(loadedSettings->enableMeshletConeCulling);
+
+        Registry* loadedReg = loadedScene.GetRegistry();
+
+        EXPECT_TRUE(loadedReg->IsValid(e1));
+        EXPECT_TRUE(loadedReg->IsValid(e2));
+
+        EXPECT_FLOAT_EQ(loadedReg->GetComponent<TransformComponent>(e1).translation.x, 100.5f + 10.0f);
+        EXPECT_FLOAT_EQ(loadedReg->GetComponent<TransformComponent>(e2).translation.x, 100.5f + 20.0f);
+        };
+
+    runSceneTest(".json");
+    runSceneTest(".bin");
+    runSceneTest(".xml");
+    runSceneTest(".yaml");
+    runSceneTest(".toml");
 }

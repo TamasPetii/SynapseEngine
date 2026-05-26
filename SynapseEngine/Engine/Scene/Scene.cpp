@@ -4,6 +4,8 @@
 #include "Engine/Mesh/ModelManager.h"
 #include "BufferNames.h"
 
+#include "Engine/Scene/Source/ISceneSource.h"
+
 #include "Engine/Component/Core/TransformComponent.h"
 #include "Engine/Component/Core/CameraComponent.h"
 #include "Engine/Component/Rendering/ModelComponent.h"
@@ -41,9 +43,11 @@
 
 namespace Syn
 {
-    Scene::Scene(uint32_t frameCount)
+    Scene::Scene(uint32_t frameCount, std::unique_ptr<ISceneSource> source, bool initSystems)
     {
         _registry = std::make_unique<Registry>();
+        _sceneSettings = std::make_unique<SceneSettings>();
+
 		_registry->EnsurePool<TransformComponent>();
         _registry->EnsurePool<AnimationComponent>();
         _registry->EnsurePool<CameraComponent>();
@@ -60,16 +64,21 @@ namespace Syn
 		_registry->EnsurePool<CapsuleColliderComponent>();
 		_registry->EnsurePool<RigidBodyComponent>();
 
-        _componentBufferManager = std::make_unique<ComponentBufferManager>(frameCount);
-        _sceneDrawData = std::make_unique<SceneDrawData>(frameCount);
-        _sceneSettings = std::make_unique<SceneSettings>();
+        if(source)
+			source->Populate(*this);
 
-        InitializeSystems();
-        InitializeComponentBuffers();
+        if (initSystems)
+        {
+            _componentBufferManager = std::make_unique<ComponentBufferManager>(frameCount);
+            _sceneDrawData = std::make_unique<SceneDrawData>(frameCount);
 
-        BuildTaskflowGraph(_updateTaskflow, SystemPhase::Update);
-        BuildTaskflowGraph(_gpuTaskflow, SystemPhase::UploadGPU);
-        BuildTaskflowGraph(_finishTaskflow, SystemPhase::Finish);
+            InitializeSystems();
+            InitializeComponentBuffers();
+
+            BuildTaskflowGraph(_updateTaskflow, SystemPhase::Update);
+            BuildTaskflowGraph(_gpuTaskflow, SystemPhase::UploadGPU);
+            BuildTaskflowGraph(_finishTaskflow, SystemPhase::Finish);
+        }
     }
 
     Scene::~Scene()
