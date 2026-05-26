@@ -690,6 +690,11 @@
     <ClInclude Include="Serialization\Archive\Output\IOutputArchive.h" />
     <ClInclude Include="Serialization\Schema\Core\GlmSchema.h" />
     <ClInclude Include="Serialization\Schema\Core\VectorSchema.h" />
+    <ClInclude Include="Serialization\Schema\Models\GpuBatchedModelSchema.h" />
+    <ClInclude Include="Serialization\Schema\Models\GpuIndexedDrawDataSchema.h" />
+    <ClInclude Include="Serialization\Schema\Models\GpuMeshletDrawDataSchema.h" />
+    <ClInclude Include="Serialization\Schema\Models\GpuVertexDataSchema.h" />
+    <ClInclude Include="Serialization\Schema\Models\MaterialInfoSchema.h" />
     <ClInclude Include="Serialization\Schema\Registry\DataMixinSchema.h" />
     <ClInclude Include="Serialization\Schema\Registry\FlatStorageImplSchema.h" />
     <ClInclude Include="Serialization\Schema\Registry\PoolSchema.h" />

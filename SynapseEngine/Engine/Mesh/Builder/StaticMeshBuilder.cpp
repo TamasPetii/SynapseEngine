@@ -1,6 +1,10 @@
 #include "StaticMeshBuilder.h"
 #include "Engine/Mesh/Source/File/FileMeshSource.h"
 #include "Engine/Mesh/Utils/MeshUtils.h"
+#include "Engine/ServiceLocator.h"
+#include "Engine/Logger/SynLog.h"
+#include "Engine/Serialization/Serializer.h"
+#include "Engine/Serialization/Schema/Models/GpuBatchedModelSchema.h"
 
 namespace Syn
 {
@@ -27,14 +31,56 @@ namespace Syn
 
     std::shared_ptr<StaticMesh> StaticMeshBuilder::BuildFromFile(const std::string& filePath)
     {
-        std::string ext = std::filesystem::path(filePath).extension().string();
-        IMeshLoader* loader = _registry->GetLoaderForExtension(ext);
+        std::filesystem::path srcPath(filePath);
 
-        if (!loader) 
-            return nullptr;
+        const char* appDataPath = std::getenv("APPDATA");
+        std::filesystem::path baseDir = appDataPath ? appDataPath : ".";
+        std::filesystem::path saveDir = baseDir / "Synapse" / "Cache" / "Models";
+
+        if (!std::filesystem::exists(saveDir)) {
+            std::filesystem::create_directories(saveDir);
+        }
+
+        std::filesystem::path cachePath = saveDir / srcPath.filename();
+        cachePath.replace_extension(".synmodel");
+
+        auto staticMesh = std::make_shared<StaticMesh>();
+        staticMesh->transientGpuData = std::make_unique<GpuBatchedModel>();
+
+        auto serializer = ServiceLocator::GetSerializer();
+
+        bool useCache = false;
+        if (std::filesystem::exists(cachePath) && std::filesystem::exists(srcPath)) {
+            if (std::filesystem::last_write_time(cachePath) >= std::filesystem::last_write_time(srcPath)) {
+                useCache = true;
+            }
+        }
+
+        if (useCache && serializer) {
+            if (serializer->LoadFromFile(cachePath, *(staticMesh->transientGpuData))) {
+                Info("Loaded {} from binary cache.", srcPath.filename().string());
+                return staticMesh;
+            }
+            Warning("Cache corrupted for {}, rebuilding.", srcPath.filename().string());
+        }
+
+        Info("Cooking {} from source...", srcPath.filename().string());
+
+        std::string ext = srcPath.extension().string();
+        IMeshLoader* loader = _registry->GetLoaderForExtension(ext);
+        if (!loader) return nullptr;
 
         FileMeshSource source(filePath, loader);
-        return BuildFromSource(source);
+        auto generatedMesh = BuildFromSource(source);
+
+        if (!generatedMesh || !generatedMesh->transientGpuData) 
+            return nullptr;
+
+        if (serializer) {
+            serializer->SaveToFile(cachePath, *(generatedMesh->transientGpuData));
+        }
+
+        return generatedMesh;
     }
 
     std::shared_ptr<StaticMesh> StaticMeshBuilder::BuildFromSource(IMeshSource& source)
