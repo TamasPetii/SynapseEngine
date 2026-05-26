@@ -45,6 +45,7 @@ namespace Syn
         cachePath.replace_extension(".synmodel");
 
         auto staticMesh = std::make_shared<StaticMesh>();
+        staticMesh->transientCpuData = std::make_unique<CookedModel>();
         staticMesh->transientGpuData = std::make_unique<GpuBatchedModel>();
 
         auto serializer = ServiceLocator::GetSerializer();

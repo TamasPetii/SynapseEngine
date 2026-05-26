@@ -37,6 +37,7 @@ namespace Syn
             ar.Property("vertexData", m.vertexData);
             ar.Property("indexedData", m.indexedData);
             ar.Property("meshletData", m.meshletData);
+            ar.Property("materials", m.materials);
 
             if (ar.IsBinary()) {
                 BlitVector<GpuNodeTransform> nodeTransforms{ m.nodeTransforms };
@@ -46,10 +47,10 @@ namespace Syn
                 ar.Property("nodeTransforms", m.nodeTransforms);
             }
 
-            ar.Property("materials", m.materials);
             ar.Property("globalCollider", m.globalCollider);
             ar.Property("globalVertexCount", m.globalVertexCount);
             ar.Property("globalIndexCount", m.globalIndexCount);
+            ar.Property("globalAverageLodIndexCount", m.globalAverageLodIndexCount);
             ar.Property("globalMeshCount", m.globalMeshCount);
         }
     };

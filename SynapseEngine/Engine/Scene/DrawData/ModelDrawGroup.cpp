@@ -26,7 +26,7 @@ namespace Syn
         instanceBuffer.UpdateCapacityAll(1);
 
 		//VkDrawIndirectCommand + VkDrawMeshTasksIndirectCommandEXT
-        indirectBuffer.Initialize({ BufferStrategy::Hybrid_Dynamic, frameCount, sizeof(VkDrawIndirectCommand) * 4, indirectStorageUsage, 1024, 2048 });
+        indirectBuffer.Initialize({ BufferStrategy::Hybrid_Dynamic, frameCount, sizeof(VkDrawIndirectCommand) * 8, indirectStorageUsage, 1024, 2048 });
         indirectBuffer.UpdateCapacityAll(1);
 
         descriptorBuffer.Initialize({ BufferStrategy::Hybrid_Static, frameCount, sizeof(MeshDrawDescriptor), storageUsage, 1024, 2048 });
