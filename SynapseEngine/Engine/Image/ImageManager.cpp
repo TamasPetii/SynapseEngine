@@ -237,16 +237,27 @@ namespace Syn {
     void ImageManager::StartGpuUpload(EntryType& entry) {
         bool needsGraphics = entry.resource->transientGpuData->autoGenerateMipmaps;
 
+        uint32_t entryId = _pathToId.at(entry.path);
+        std::shared_ptr<Texture> res = entry.resource;
+
         Vk::GpuUploadRequest request{
-            .uploadCallback = [this, &entry](VkCommandBuffer cmd) {
-                auto uploadResult = _uploader->Upload(*(entry.resource->transientGpuData), cmd);
-                entry.resource->image = uploadResult.texture;
-                entry.stagingBuffer = std::move(uploadResult.stagingBuffer);
+            .uploadCallback = [this, entryId, res](VkCommandBuffer cmd) {
+
+                auto uploadResult = _uploader->Upload(*(res->transientGpuData), cmd); 
+                res->image = uploadResult.texture;
+
+                std::lock_guard lock(_mutex);
+                _entries[entryId].stagingBuffer = std::move(uploadResult.stagingBuffer);
             },
-            .onFinished = [this, &entry]() {
+            .onFinished = [this, entryId]() {
+                std::lock_guard lock(_mutex);
+                auto& entry = _entries[entryId];
+
                 FinalizeResource(entry);
                 entry.stagingBuffer.reset();
-                entry.state = ResourceState::Ready;
+
+                SetResourceState(entryId, ResourceState::Ready);
+
                 _version.fetch_add(1, std::memory_order_release);
                 Info("Image '{}' is ready", entry.path);
             },
