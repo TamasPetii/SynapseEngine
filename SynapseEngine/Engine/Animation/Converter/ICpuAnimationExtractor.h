@@ -1,7 +1,6 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include "Engine/Animation/Data/Gpu/GpuBatchedAnimation.h"
-#include "Engine/Animation/Data/Cooked/CookedAnimation.h"
 #include "Engine/Animation/Data/Cpu/CpuAnimationData.h"
 
 namespace Syn
@@ -10,6 +9,6 @@ namespace Syn
     {
     public:
         virtual ~ICpuAnimationExtractor() = default;
-        virtual void Extract(CookedAnimation& cookedData, GpuBatchedAnimation& gpuData, CpuAnimationData& outCpuData) const = 0;
+        virtual void Extract(GpuBatchedAnimation& gpuData, CpuAnimationData& outCpuData) const = 0;
     };
 }

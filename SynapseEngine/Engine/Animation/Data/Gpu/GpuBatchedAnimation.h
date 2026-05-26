@@ -4,6 +4,7 @@
 #include "Engine/Mesh/Data/Gpu/GpuIndexedDrawData.h"
 #include "Engine/Mesh/Data/Gpu/GpuMeshletDrawData.h"
 #include "Engine/Mesh/Data/Gpu/GpuNodeTransform.h"
+#include "Engine/Animation/Data/Common/BoneTrack.h"
 #include <vector>
 #include <glm/glm.hpp>
 
@@ -42,5 +43,7 @@ namespace Syn
 
         // [Frame0_Meshlet0... Frame0_MeshletN | Frame1_Meshlet0... ]
         std::vector<GpuMeshletCollider> frameMeshletColliders;
+
+        std::vector<BoneTrack> tracks;
     };
 }

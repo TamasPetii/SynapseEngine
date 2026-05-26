@@ -9,6 +9,6 @@ namespace Syn
         DefaultCpuAnimationExtractor() = default;
         ~DefaultCpuAnimationExtractor() override = default;
 
-        void Extract(CookedAnimation& cookedData, GpuBatchedAnimation& gpuData, CpuAnimationData& outCpuData) const override;
+        void Extract(GpuBatchedAnimation& gpuData, CpuAnimationData& outCpuData) const override;
     };
 }

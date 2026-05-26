@@ -1257,6 +1257,9 @@
     <ClCompile Include="Scene\Source\Procedural\TestSceneSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Serialization\Schema\Animation\GpuBatchedAnimationSchema.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2685,6 +2688,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Serialization\Schema\Models\MaterialInfoSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Animation\GpuBatchedAnimationSchema.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -19,6 +19,8 @@ namespace Syn
 		result.globalCollider.aabbMin = cookedAnimation.globalFrameCollider.aabb.min;
 		result.globalCollider.aabbMax = cookedAnimation.globalFrameCollider.aabb.max;
 
+        result.tracks = cookedAnimation.tracks;
+
         uint32_t flattenedMeshCount = static_cast<uint32_t>(baseModel.meshColliders.size());
 
         for (uint32_t m = 0; m < flattenedMeshCount; ++m)

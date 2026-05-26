@@ -238,6 +238,7 @@
     <ClCompile Include="Animation\Data\Cpu\CpuAnimationData.cpp" />
     <ClCompile Include="Animation\Converter\ICpuAnimationExtractor.cpp" />
     <ClCompile Include="Animation\Converter\DefaultCpuAnimationExtractor.cpp" />
+    <ClCompile Include="Serialization\Schema\Animation\GpuBatchedAnimationSchema.cpp" />
     <ClCompile Include="Scene\Source\Procedural\NatureSceneSource.cpp" />
     <ClCompile Include="Scene\Source\File\FileSceneSource.cpp" />
     <ClCompile Include="Scene\Source\ISceneSource.cpp" />
@@ -655,6 +656,7 @@
     <ClInclude Include="Animation\Converter\ICpuAnimationExtractor.h" />
     <ClInclude Include="Animation\Converter\DefaultCpuAnimationExtractor.h" />
     <ClInclude Include="Component\Components.h" />
+    <ClInclude Include="Serialization\Schema\Animation\GpuBatchedAnimationSchema.h" />
     <ClInclude Include="Scene\Source\Procedural\NatureSceneSource.h" />
     <ClInclude Include="Scene\Source\File\FileSceneSource.h" />
     <ClInclude Include="Insiders\EngineKey.h" />

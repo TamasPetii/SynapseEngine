@@ -124,25 +124,28 @@ namespace Syn {
         }
 
         uint32_t entryId = _pathToId.at(entry.path);
+        std::shared_ptr<StaticMesh> res = entry.resource;
 
         Vk::GpuUploadRequest request{
-            .uploadCallback = [this,entryId](VkCommandBuffer cmd) {
-                std::lock_guard lock(_mutex);
-                auto& entry = _entries[entryId];
+            .uploadCallback = [this, entryId, res](VkCommandBuffer cmd) 
+            {
+                auto uploadResult = _uploader->Upload(*(res->transientGpuData), cmd);
 
-                auto uploadResult = _uploader->Upload(*(entry.resource->transientGpuData), cmd);
-                entry.resource->hardwareBuffers = std::move(uploadResult.hardwareBuffers);
-                entry.stagingBuffer = std::move(uploadResult.stagingBuffer);
+                std::lock_guard lock(_mutex);
+                auto& safeEntry = _entries[entryId];
+                safeEntry.resource->hardwareBuffers = std::move(uploadResult.hardwareBuffers);
+                safeEntry.stagingBuffer = std::move(uploadResult.stagingBuffer);
             },
             .onFinished = [this, entryId]() {
                 std::lock_guard lock(_mutex);
-                auto& entry = _entries[entryId];
+                auto& safeEntry = _entries[entryId];
 
-                FinalizeResource(entry);
-                entry.stagingBuffer.reset();
+                FinalizeResource(safeEntry);
+                safeEntry.stagingBuffer.reset();
+
                 SetResourceState(entryId, ResourceState::Ready);
                 _version.fetch_add(1, std::memory_order_release);
-                Info("Model loaded, hardware buffers ready and transient RAM freed: {}", entry.path);
+                Info("Model loaded, hardware buffers ready and transient RAM freed: {}", safeEntry.path);
             },
             .needsGraphics = false
         };

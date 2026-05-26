@@ -57,19 +57,30 @@ namespace Syn {
             });
     }
 
-    void AnimationManager::StartGpuUpload(EntryType& entry) {
+    void AnimationManager::StartGpuUpload(EntryType& entry) 
+    {
+        uint32_t entryId = _pathToId.at(entry.path);
+        std::shared_ptr<Animation> res = entry.resource;
+
         Vk::GpuUploadRequest request{
-            .uploadCallback = [this, &entry](VkCommandBuffer cmd) {
-                auto uploadResult = _uploader->Upload(*(entry.resource->transientGpuData), cmd);
-                entry.resource->hardwareBuffers = std::move(uploadResult.hardwareBuffers);
-                entry.stagingBuffer = std::move(uploadResult.stagingBuffer);
+            .uploadCallback = [this, entryId, res](VkCommandBuffer cmd) {
+                auto uploadResult = _uploader->Upload(*(res->transientGpuData), cmd);
+
+                std::lock_guard lock(_mutex);
+                auto& safeEntry = _entries[entryId];
+                safeEntry.resource->hardwareBuffers = std::move(uploadResult.hardwareBuffers);
+                safeEntry.stagingBuffer = std::move(uploadResult.stagingBuffer);
             },
-            .onFinished = [this, &entry]() {
-                FinalizeResource(entry);
-                entry.stagingBuffer.reset();
-                entry.state = ResourceState::Ready;
+            .onFinished = [this, entryId]() {
+                std::lock_guard lock(_mutex);
+                auto& safeEntry = _entries[entryId];
+
+                FinalizeResource(safeEntry);
+                safeEntry.stagingBuffer.reset();
+
+                SetResourceState(entryId, ResourceState::Ready);
                 _version.fetch_add(1, std::memory_order_release);
-                Info("Animation loaded, extracted, and RAM freed: {}", entry.path);
+                Info("Animation loaded, extracted, and RAM freed: {}", safeEntry.path);
             },
             .needsGraphics = false
         };
@@ -82,10 +93,9 @@ namespace Syn {
         uint32_t entryIndex = _pathToId.at(entry.path);
 
         auto& gpuData = *(entry.resource->transientGpuData);
-        auto& cookedData = *(entry.resource->transientCpuData);
         auto& cpuData = entry.resource->cpuData;
 
-        _cpuExtractor->Extract(cookedData, gpuData, cpuData);
+        _cpuExtractor->Extract(gpuData, cpuData);
 
         GpuAnimationAddresses addresses{};
         const auto& hw = entry.resource->hardwareBuffers;
