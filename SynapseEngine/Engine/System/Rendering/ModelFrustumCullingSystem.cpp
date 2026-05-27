@@ -121,10 +121,10 @@ namespace Syn
                 }
             }
 
-            GpuMeshCollider globalLocalCollider = resource->gpuData.globalCollider;
+            GpuMeshCollider globalLocalCollider = resource->cpuData.globalCollider;
 
             if (hasAnimation) {
-                globalLocalCollider = animResource->gpuData.frameGlobalColliders[animFrameIndex];
+                globalLocalCollider = animResource->cpuData.frameGlobalColliders[animFrameIndex];
             }
 
             GpuMeshCollider globalWorldCollider = MeshUtils::TransformCollider(globalLocalCollider, transform);
@@ -152,11 +152,11 @@ namespace Syn
                     GpuMeshCollider localCollider;
 
                     if (hasAnimation) {
-                        uint32_t frameOffset = animFrameIndex * animResource->gpuData.descriptor.globalMeshCount;
-                        localCollider = animResource->gpuData.frameMeshColliders[frameOffset + m];
+                        uint32_t frameOffset = animFrameIndex * animResource->cpuData.descriptor.globalMeshCount;
+                        localCollider = animResource->cpuData.frameMeshColliders[frameOffset + m];
                     }
                     else {
-                        localCollider = resource->gpuData.indexedData.meshColliders[m];
+                        localCollider = resource->cpuData.meshColliders[m];
                     }
 
                     worldCollider = MeshUtils::TransformCollider(localCollider, transform);
@@ -182,7 +182,7 @@ namespace Syn
                     uint32_t allocIndex = modelAlloc.meshAllocationOffset + (m * 4) + lod;
                     const auto& meshAlloc = drawData->Models.meshAllocations[allocIndex];
 
-                    uint32_t matIdx = resource->meshMaterialIndices[m];
+                    uint32_t matIdx = resource->cpuData.meshMaterialIndices[m];
                     if (!overrides.empty() && m < overrides.size() && overrides[m] != UINT32_MAX) {
                         matIdx = overrides[m];
                     }

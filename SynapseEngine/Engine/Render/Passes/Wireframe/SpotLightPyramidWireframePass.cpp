@@ -108,7 +108,7 @@ namespace Syn {
         auto modelManager = ServiceLocator::GetModelManager();
         uint32_t fIdx = context.frameIndex;
 
-        auto pyramid = modelManager->GetResource(MeshSourceNames::Pyramid);
+        auto pyramid = modelManager->GetResource(MeshSourceNames::ProxyPyramid);
 
         WireframeDebugPC pc{};
         pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);

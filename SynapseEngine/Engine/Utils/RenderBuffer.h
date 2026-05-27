@@ -36,8 +36,8 @@ namespace Syn
         RenderBuffer& operator=(RenderBuffer&& other) noexcept = default;
 
         void Initialize(const RenderBufferConfig& config);
-        bool UpdateCapacity(uint32_t frameIndex, uint32_t requiredElements);
-        bool UpdateCapacityAll(uint32_t requiredElements);
+        bool UpdateCapacity(uint32_t frameIndex, uint64_t requiredElements);
+        bool UpdateCapacityAll(uint64_t requiredElements);
         void RecordSync(VkCommandBuffer cmd, uint32_t frameIndex, size_t copySizeElements);
 
         Vk::Buffer* GetMapped(uint32_t frameIndex) const;

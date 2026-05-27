@@ -12,15 +12,15 @@ namespace Syn
         auto sphere = modelManager->GetResource(MeshSourceNames::Sphere);
 
         VkDrawIndirectCommand sphereCmdTemplate{};
-        sphereCmdTemplate.vertexCount = sphere->baseDrawCommands[0].traditionalCmd.vertexCount;
+        sphereCmdTemplate.vertexCount = sphere->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;
         sphereCmdTemplate.instanceCount = 0;
-        sphereCmdTemplate.firstVertex = sphere->baseDrawCommands[0].traditionalCmd.firstVertex;
+        sphereCmdTemplate.firstVertex = sphere->cpuData.baseDrawCommands[0].traditionalCmd.firstVertex;
         sphereCmdTemplate.firstInstance = 0;
 
         VkDrawIndirectCommand aabbCmdTemplate{};
-        aabbCmdTemplate.vertexCount = cube->baseDrawCommands[0].traditionalCmd.vertexCount;
+        aabbCmdTemplate.vertexCount = cube->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;
         aabbCmdTemplate.instanceCount = 0;
-        aabbCmdTemplate.firstVertex = cube->baseDrawCommands[0].traditionalCmd.firstVertex;
+        aabbCmdTemplate.firstVertex = cube->cpuData.baseDrawCommands[0].traditionalCmd.firstVertex;
         aabbCmdTemplate.firstInstance = 0;
 
         VkDrawIndirectCommand billboardCmdTemplate{};

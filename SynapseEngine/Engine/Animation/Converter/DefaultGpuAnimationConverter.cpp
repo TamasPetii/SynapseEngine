@@ -5,7 +5,7 @@ namespace Syn
 {
     constexpr uint32_t MAX_LODS = 4;
 
-    GpuBatchedAnimation DefaultGpuAnimationConverter::Convert(const CookedAnimation& cookedAnimation, const CookedModel& baseModel) const
+    GpuBatchedAnimation DefaultGpuAnimationConverter::Convert(const CookedAnimation& cookedAnimation, const CpuModelData& baseModel) const
     {
         GpuBatchedAnimation result;
 
@@ -14,11 +14,18 @@ namespace Syn
         result.descriptor.durationInSeconds = cookedAnimation.durationInSeconds;
         result.descriptor.sampleRate = cookedAnimation.sampleRate;
 
-        for (size_t instanceIdx = 0; instanceIdx < baseModel.meshNodeDescriptors.size(); ++instanceIdx)
-        {
-            const auto& instanceDesc = baseModel.meshNodeDescriptors[instanceIdx];
-            const auto& skinData = cookedAnimation.meshSkins[instanceDesc.meshIndex];
+		result.globalCollider.center = cookedAnimation.globalFrameCollider.sphere.center;
+		result.globalCollider.radius = cookedAnimation.globalFrameCollider.sphere.radius;
+		result.globalCollider.aabbMin = cookedAnimation.globalFrameCollider.aabb.min;
+		result.globalCollider.aabbMax = cookedAnimation.globalFrameCollider.aabb.max;
 
+        result.tracks = cookedAnimation.tracks;
+
+        uint32_t flattenedMeshCount = static_cast<uint32_t>(baseModel.meshColliders.size());
+
+        for (uint32_t m = 0; m < flattenedMeshCount; ++m)
+        {
+            const auto& skinData = cookedAnimation.meshSkins[m];
             for (const auto& vSkin : skinData.vertices)
             {
                 result.vertexSkinData.push_back(vSkin);
@@ -49,14 +56,10 @@ namespace Syn
 
             bool isFirstFrame = (f == 0);
 
-            for (size_t instanceIdx = 0; instanceIdx < baseModel.meshNodeDescriptors.size(); ++instanceIdx)
+            for (uint32_t m = 0; m < flattenedMeshCount; ++m)
             {
                 if (isFirstFrame) totalMeshesPerFrame++;
-
-                const auto& instanceDesc = baseModel.meshNodeDescriptors[instanceIdx];
-                const CookedAnimationFrameMesh& animMesh = cookedFrame.meshes[instanceDesc.meshIndex];
-                const CookedMesh& cookedMesh = baseModel.meshes[instanceDesc.meshIndex];
-
+                const CookedAnimationFrameMesh& animMesh = cookedFrame.meshes[m];
 
                 GpuMeshCollider modelSpaceCollider{};
                 modelSpaceCollider.center = animMesh.collider.sphere.center;

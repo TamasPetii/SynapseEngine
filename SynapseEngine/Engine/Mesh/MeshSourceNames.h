@@ -14,6 +14,7 @@ namespace Syn
         static constexpr const char* Capsule = "Capsule";
         static constexpr const char* Hemisphere = "Hemisphere";
         static constexpr const char* Pyramid = "Pyramid";
+        static constexpr const char* ProxyPyramid = "ProxyPyramid";
         static constexpr const char* Grid = "Grid";
         static constexpr const char* Torus = "Torus";
     };

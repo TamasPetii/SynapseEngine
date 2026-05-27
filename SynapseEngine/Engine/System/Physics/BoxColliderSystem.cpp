@@ -25,7 +25,7 @@ namespace Syn
         auto boxPool = registry->GetPool<BoxColliderComponent>();
         auto rbPool = registry->GetPool<RigidBodyComponent>();
         auto transformPool = registry->GetPool<TransformComponent>();
-        auto physicsEngine = ServiceLocator::GetPhysicsEngine();
+        auto physicsEngine = scene->GetPhysicsEngine();
 
         if (!boxPool || !rbPool || !transformPool || !physicsEngine) return;
 

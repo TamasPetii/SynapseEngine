@@ -13,6 +13,8 @@
 
 namespace Syn
 {
+    class StorageBackendInsider;
+
     template<typename T, typename FlagMixinPolicy = NoFlagMixin>
         requires FlagMixinConstraint<FlagMixinPolicy>
     class StorageBackend : public DataMixin<T>, public FlagMixinPolicy
@@ -33,6 +35,8 @@ namespace Syn
         SYN_INLINE std::span<const EntityID> GetDenseEntities() const;
     protected:
         std::vector<EntityID> _entities;
+    private:
+        friend class StorageBackendInsider;
     };
 }
 

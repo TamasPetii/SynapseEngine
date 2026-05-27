@@ -84,6 +84,16 @@ namespace Syn
         {
             _state.store(0, std::memory_order_relaxed);
         }
+
+        SYN_INLINE void InitializeFlagsImpl(size_t count) {
+            constexpr uint32_t mask = (1 << REGENERATE_BIT) | (1 << UPDATE_BIT) | (1 << INDEX_CHANGED_BIT);
+
+            _flags.assign(count, mask);
+
+            if (count > 0) {
+                _state.fetch_or(mask, std::memory_order_relaxed);
+            }
+        }
     protected:
         std::vector<uint32_t> _flags;
         std::atomic<uint32_t> _state{ 0 };

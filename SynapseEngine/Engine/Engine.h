@@ -22,6 +22,7 @@ namespace Syn {
     class IPhysicsEngine;
 	class IGpuProfiler;
     class ICpuProfiler;
+    class Serializer;
 }
 
 namespace Syn
@@ -63,6 +64,7 @@ namespace Syn
         void InitSceneManager();
         void InitPhysicsEngine();
         void InitProfilers();
+        void InitSerializer();
         void Shutdown();
     private:
         void AdvanceFrameIndex();
@@ -77,9 +79,9 @@ namespace Syn
         std::unique_ptr<InputManager> _inputManager;
         std::unique_ptr<SceneManager> _sceneManager;
 		std::unique_ptr<tf::Executor> _taskExecutor;
-        std::unique_ptr<IPhysicsEngine> _physicsEngine;
-		std::unique_ptr<IGpuProfiler> _gpuProfiler;
+        std::unique_ptr<IGpuProfiler> _gpuProfiler;
         std::unique_ptr<ICpuProfiler> _cpuProfiler;
+		std::unique_ptr<Serializer> _serializer;
 
         std::function<void(uint32_t)> _onGuiFlushCallback;
     };

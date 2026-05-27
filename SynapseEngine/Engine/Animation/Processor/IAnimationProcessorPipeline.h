@@ -10,6 +10,6 @@ namespace Syn
     {
     public:
         virtual void AddProcessor(std::unique_ptr<IAnimationProcessor> processor) = 0;
-        virtual void Run(CookedAnimation& inOutAnimation, const CookedModel& baseModel) = 0;
+        virtual void Run(CookedAnimation& inOutAnimation, const CpuModelData& baseModel) = 0;
     };
 }

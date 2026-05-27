@@ -13,7 +13,7 @@
 
 namespace Syn
 {
-    void AnimationColliderProcessor::Process(CookedAnimation& inOutAnimation, const CookedModel& baseModel)
+    void AnimationColliderProcessor::Process(CookedAnimation& inOutAnimation, const CpuModelData& baseModel)
     {
         tf::Taskflow taskflow;
 
@@ -25,31 +25,68 @@ namespace Syn
         }
 
         ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
+
+		ComputeGlobalAnimationCollider(inOutAnimation);
     }
 
-    void AnimationColliderProcessor::ComputeFrameColliders(uint32_t frameIndex, CookedAnimation& anim, const CookedModel& model, tf::Subflow& subflow)
+    void AnimationColliderProcessor::ComputeGlobalAnimationCollider(CookedAnimation& anim)
+    {
+        glm::vec3 animMin(std::numeric_limits<float>::max());
+        glm::vec3 animMax(std::numeric_limits<float>::lowest());
+
+        for (uint32_t f = 0; f < anim.frameCount; ++f)
+        {
+            const auto& frameCollider = anim.frames[f].globalCollider;
+            animMin = glm::min(animMin, frameCollider.aabb.min);
+            animMax = glm::max(animMax, frameCollider.aabb.max);
+        }
+
+        anim.globalFrameCollider.aabb.min = animMin;
+        anim.globalFrameCollider.aabb.max = animMax;
+        anim.globalFrameCollider.sphere.center = (animMin + animMax) * 0.5f;
+
+        float maxRadius = 0.0f;
+        for (uint32_t f = 0; f < anim.frameCount; ++f)
+        {
+            const auto& frameCollider = anim.frames[f].globalCollider;
+
+            float dist = glm::length(frameCollider.sphere.center - anim.globalFrameCollider.sphere.center);
+            float requiredRadius = dist + frameCollider.sphere.radius;
+
+            if (requiredRadius > maxRadius)
+                maxRadius = requiredRadius;
+        }
+
+        anim.globalFrameCollider.sphere.radius = maxRadius;
+    }
+
+    void AnimationColliderProcessor::ComputeFrameColliders(uint32_t frameIndex, CookedAnimation& anim, const CpuModelData& model, tf::Subflow& subflow)
     {
         CookedAnimationFrame& currentFrame = anim.frames[frameIndex];
-        currentFrame.meshes.resize(model.meshes.size());
+        currentFrame.meshes.resize(model.globalMeshCount);
 
-        std::vector<glm::vec3> meshMins(model.meshes.size(), glm::vec3(std::numeric_limits<float>::max()));
-        std::vector<glm::vec3> meshMaxs(model.meshes.size(), glm::vec3(std::numeric_limits<float>::lowest()));
-        std::vector<glm::vec3> meshCenters(model.meshes.size());
-        std::vector<float> meshRadii(model.meshes.size());
+        std::vector<glm::vec3> meshMins(model.globalMeshCount, glm::vec3(std::numeric_limits<float>::max()));
+        std::vector<glm::vec3> meshMaxs(model.globalMeshCount, glm::vec3(std::numeric_limits<float>::lowest()));
+        std::vector<glm::vec3> meshCenters(model.globalMeshCount);
+        std::vector<float> meshRadii(model.globalMeshCount);
+        std::vector<glm::vec3> deformedPositions(model.globalVertexCount);
 
         tf::GuidedPartitioner partitioner(1);
 
-        subflow.for_each_index(size_t(0), model.meshes.size(), size_t(1),
+        subflow.for_each_index(size_t(0), model.globalMeshCount, size_t(1),
             [&](size_t m) {
-                const CookedMesh& staticMesh = model.meshes[m];
+                //Todo: Change to new cpu model!
+                const auto& meshDesc = model.meshDescriptors[m * 4];
+                uint32_t vOffset = meshDesc.vertexOffset;
+                uint32_t vCount = meshDesc.vertexCount;
+
                 const CookedAnimationMeshSkin& skinData = anim.meshSkins[m];
                 CookedAnimationFrameMesh& frameMesh = currentFrame.meshes[m];
 
-                std::vector<glm::vec3> deformedPositions(staticMesh.vertices.size());
                 glm::vec3 mMin(std::numeric_limits<float>::max());
                 glm::vec3 mMax(std::numeric_limits<float>::lowest());
 
-                for (size_t v = 0; v < staticMesh.vertices.size(); ++v)
+                for (size_t v = 0; v < vCount; ++v)
                 {
                     glm::mat4 skinMat(0.0f);
 
@@ -64,8 +101,9 @@ namespace Syn
                         }
                     }
 
-                    glm::vec3 animPos = glm::vec3(skinMat * glm::vec4(staticMesh.vertices[v].position, 1.0f));
-                    deformedPositions[v] = animPos;
+                    glm::vec3 originalPos = model.vertices[vOffset + v];
+                    glm::vec3 animPos = glm::vec3(skinMat * glm::vec4(originalPos, 1.0f));
+                    deformedPositions[vOffset + v] = animPos;
 
                     mMin = glm::min(mMin, animPos);
                     mMax = glm::max(mMax, animPos);
@@ -87,44 +125,65 @@ namespace Syn
                 meshCenters[m] = frameMesh.collider.sphere.center;
                 meshRadii[m] = frameMesh.collider.sphere.radius;
 
-                frameMesh.lods.resize(staticMesh.lods.size());
-                for (size_t l = 0; l < staticMesh.lods.size(); ++l)
+                uint32_t lodCount = 4;
+                frameMesh.lods.resize(lodCount);
+
+                if (model.meshletVertexIndices.has_value() && model.meshletTriangleIndices.has_value() && model.meshletDescriptors.has_value())
                 {
-                    const CookedMeshLod& staticLod = staticMesh.lods[l];
-                    CookedAnimationFrameLod& frameLod = frameMesh.lods[l];
-                    frameLod.meshlets.resize(staticLod.meshlets.size());
+                    const auto& rawVerts = model.meshletVertexIndices.value();
+                    const auto& rawTris = model.meshletTriangleIndices.value();
+                    const auto& meshletDescs = model.meshletDescriptors.value();
 
-                    for (size_t ml = 0; ml < staticLod.meshlets.size(); ++ml)
+                    for (size_t l = 0; l < lodCount; ++l)
                     {
-                        const CookedMeshlet& staticMeshlet = staticLod.meshlets[ml];
-                        CookedAnimationFrameMeshlet& frameMeshlet = frameLod.meshlets[ml];
+                        uint32_t lodDescIndex = (static_cast<uint32_t>(m) * 4) + l;
+                        if (lodDescIndex >= model.meshletDrawDescriptors.size()) continue;
 
-                        meshopt_Bounds bounds = meshopt_computeMeshletBounds(
-                            &staticLod.meshletVertexIndices[staticMeshlet.vertexOffset],
-                            &staticLod.meshletTriangleIndices[staticMeshlet.triangleOffset],
-                            staticMeshlet.triangleCount,
-                            &deformedPositions[0].x,
-                            deformedPositions.size(),
-                            sizeof(glm::vec3)
-                        );
+                        const auto& drawDesc = model.meshletDrawDescriptors[lodDescIndex];
+                        uint32_t meshletOffset = drawDesc.meshletOffset;
+                        uint32_t meshletCount = drawDesc.meshletCount;
 
-                        frameMeshlet.collider.sphere.center = glm::vec3(bounds.center[0], bounds.center[1], bounds.center[2]);
-                        frameMeshlet.collider.sphere.radius = bounds.radius;
-                        frameMeshlet.collider.cone.apex = glm::vec3(bounds.cone_apex[0], bounds.cone_apex[1], bounds.cone_apex[2]);
-                        frameMeshlet.collider.cone.axis = glm::vec3(bounds.cone_axis[0], bounds.cone_axis[1], bounds.cone_axis[2]);
-                        frameMeshlet.collider.cone.cutoff = bounds.cone_cutoff;
+                        CookedAnimationFrameLod& frameLod = frameMesh.lods[l];
+                        frameLod.meshlets.resize(meshletCount);
 
-                        glm::vec3 mlMin(std::numeric_limits<float>::max());
-                        glm::vec3 mlMax(std::numeric_limits<float>::lowest());
-                        for (uint32_t i = 0; i < staticMeshlet.vertexCount; ++i) {
-                            uint32_t vIdx = staticLod.meshletVertexIndices[staticMeshlet.vertexOffset + i];
-                            mlMin = glm::min(mlMin, deformedPositions[vIdx]);
-                            mlMax = glm::max(mlMax, deformedPositions[vIdx]);
+                        for (size_t ml = 0; ml < meshletCount; ++ml)
+                        {
+                            uint32_t globalMeshletIdx = meshletOffset + ml;
+                            const auto& meshletDesc = meshletDescs[globalMeshletIdx];
+                            CookedAnimationFrameMeshlet& frameMeshlet = frameLod.meshlets[ml];
+
+                            const uint32_t* mVertices = &rawVerts[meshletDesc.vertexIndicesOffset];
+                            const uint8_t* mTriangles = &rawTris[meshletDesc.triangleIndicesOffset];
+
+                            meshopt_Bounds bounds = meshopt_computeMeshletBounds(
+                                mVertices,
+                                mTriangles,
+                                meshletDesc.triangleCount,
+                                &deformedPositions[0].x,
+                                deformedPositions.size(),
+                                sizeof(glm::vec3)
+                            );
+
+                            frameMeshlet.collider.sphere.center = glm::vec3(bounds.center[0], bounds.center[1], bounds.center[2]);
+                            frameMeshlet.collider.sphere.radius = bounds.radius;
+                            frameMeshlet.collider.cone.apex = glm::vec3(bounds.cone_apex[0], bounds.cone_apex[1], bounds.cone_apex[2]);
+                            frameMeshlet.collider.cone.axis = glm::vec3(bounds.cone_axis[0], bounds.cone_axis[1], bounds.cone_axis[2]);
+                            frameMeshlet.collider.cone.cutoff = bounds.cone_cutoff;
+
+                            glm::vec3 mlMin(std::numeric_limits<float>::max());
+                            glm::vec3 mlMax(std::numeric_limits<float>::lowest());
+
+                            for (uint32_t i = 0; i < meshletDesc.vertexCount; ++i) {
+                                uint32_t globalVIdx = mVertices[i];
+                                mlMin = glm::min(mlMin, deformedPositions[globalVIdx]);
+                                mlMax = glm::max(mlMax, deformedPositions[globalVIdx]);
+                            }
+
+                            frameMeshlet.collider.aabb.min = mlMin;
+                            frameMeshlet.collider.aabb.max = mlMax;
                         }
-                        frameMeshlet.collider.aabb.min = mlMin;
-                        frameMeshlet.collider.aabb.max = mlMax;
                     }
-                }
+                }    
             },
             partitioner
         );
@@ -134,7 +193,7 @@ namespace Syn
         glm::vec3 globalMin(std::numeric_limits<float>::max());
         glm::vec3 globalMax(std::numeric_limits<float>::lowest());
 
-        for (size_t i = 0; i < model.meshes.size(); ++i) {
+        for (size_t i = 0; i < model.globalMeshCount; ++i) {
             globalMin = glm::min(globalMin, meshMins[i]);
             globalMax = glm::max(globalMax, meshMaxs[i]);
         }
@@ -144,7 +203,7 @@ namespace Syn
         currentFrame.globalCollider.sphere.center = (globalMin + globalMax) * 0.5f;
 
         float globalMaxRadius = 0.0f;
-        for (size_t i = 0; i < model.meshes.size(); ++i) {
+        for (size_t i = 0; i < model.globalMeshCount; ++i) {
             float dist = glm::length(meshCenters[i] - currentFrame.globalCollider.sphere.center);
             float boundsRadius = dist + meshRadii[i];
             if (boundsRadius > globalMaxRadius) {

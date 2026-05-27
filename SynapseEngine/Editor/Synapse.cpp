@@ -12,6 +12,9 @@
 #include "Editor/View/Settings/SettingsView.h"
 #include "EditorCore/ViewModels/Settings/SettingsViewModel.h"
 
+#include "Editor/View/MainMenu/MainMenuView.h"
+#include "EditorCore/ViewModels/MainMenu/MainMenuViewModel.h"
+
 #include "Manager/GuiTextureManager.h"
 
 Synapse::Synapse(const Syn::ApplicationConfig& config)
@@ -95,6 +98,14 @@ void Synapse::OnInit() {
         Syn::SettingsViewModel{
             _editorApi.get()
         });
+
+    using MainMenuWin = Syn::EditorWindow<Syn::MainMenuView, Syn::MainMenuViewModel>;
+    _guiManager->AddWindow<MainMenuWin>(
+        Syn::MainMenuView{},
+        Syn::MainMenuViewModel{
+            _editorApi.get()
+        }
+    );
 #endif
 
     _inputDispatcher = std::make_unique<Syn::InputDispatcher>(_guiManager.get(), _engine.get());

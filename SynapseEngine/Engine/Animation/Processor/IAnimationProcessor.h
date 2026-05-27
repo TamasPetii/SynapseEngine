@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine/SynApi.h"
-#include "Engine/Mesh/Data/Cooked/CookedModel.h"
+#include "Engine/Mesh/Data/Cpu/CpuModelData.h"
 #include "Engine/Animation/Data/Cooked/CookedAnimation.h"
 
 namespace Syn
@@ -9,6 +9,6 @@ namespace Syn
     {
     public:
         virtual ~IAnimationProcessor() = default;
-        virtual void Process(CookedAnimation& inOutAnimation, const CookedModel& baseModel) = 0;
+        virtual void Process(CookedAnimation& inOutAnimation, const CpuModelData& baseModel) = 0;
     };
 }

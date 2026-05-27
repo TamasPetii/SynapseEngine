@@ -38,7 +38,7 @@ namespace Syn
         }
     }
 
-    bool RenderBuffer::UpdateCapacityAll(uint32_t requiredElements)
+    bool RenderBuffer::UpdateCapacityAll(uint64_t requiredElements)
     {
         bool resized = false;
         for (uint32_t i = 0; i < _config.frames; ++i) {
@@ -49,12 +49,12 @@ namespace Syn
         return resized;
     }
 
-    bool RenderBuffer::UpdateCapacity(uint32_t frameIndex, uint32_t requiredElements)
+    bool RenderBuffer::UpdateCapacity(uint32_t frameIndex, uint64_t requiredElements)
     {
         bool resized = false;
         if (frameIndex < _config.frames) {
-            if (_mapped[frameIndex] && _mapped[frameIndex]->UpdateCapacity(requiredElements)) resized = true;
-            if (_gpu[frameIndex] && _gpu[frameIndex]->UpdateCapacity(requiredElements)) resized = true;
+            if (_mapped[frameIndex] && _mapped[frameIndex]->UpdateCapacity(requiredElements).first) resized = true;
+            if (_gpu[frameIndex] && _gpu[frameIndex]->UpdateCapacity(requiredElements).first) resized = true;
         }
         return resized;
     }

@@ -2,6 +2,7 @@
 #include "Engine/SynApi.h"
 #include "Engine/SynMacro.h"
 #include <taskflow/taskflow.hpp>
+#include <functional>
 
 namespace Syn::Vk { 
     class Context;
@@ -24,6 +25,9 @@ namespace Syn {
     class IPhysicsEngine;
 	class IGpuProfiler;
     class ICpuProfiler;
+    class Serializer;
+
+    using PhysicsFactory = std::function<std::unique_ptr<IPhysicsEngine>()>;
 }
 
 namespace Syn 
@@ -81,14 +85,18 @@ namespace Syn
         static void ProvideAnimationManager(AnimationManager* manager) { _animationManager = manager; }
         static AnimationManager* GetAnimationManager() { return _animationManager; }
 
-        static void ProvidePhysicsEngine(IPhysicsEngine* engine) { _physicsEngine = engine; }
-        static IPhysicsEngine* GetPhysicsEngine() { return _physicsEngine; }
-
 		static void ProvideGpuProfiler(IGpuProfiler* profiler) { _gpuProfiler = profiler; }
 		static IGpuProfiler* GetGpuProfiler() { return _gpuProfiler; }
 
 		static void ProvideCpuProfiler(ICpuProfiler* profiler) { _cpuProfiler = profiler; }
 		static ICpuProfiler* GetCpuProfiler() { return _cpuProfiler; }
+
+        static void ProvideSerializer(Serializer* serializer) { _serializer = serializer; }
+        static Serializer* GetSerializer() { return _serializer; }
+
+        static void ProvidePhysicsFactory(PhysicsFactory factory) { _physicsFactory = std::move(factory); }
+        static PhysicsFactory& GetPhysicsFactory() { return _physicsFactory; }
+
     private:
         static Vk::Context* _vkContext;
         static Vk::GpuUploader* _gpuUploader;
@@ -105,8 +113,9 @@ namespace Syn
         static MaterialManager* _materialManager;
         static AnimationBuilder* _animationBuilder;
         static AnimationManager* _animationManager;
-        static IPhysicsEngine* _physicsEngine;
 		static IGpuProfiler* _gpuProfiler;
 		static ICpuProfiler* _cpuProfiler;
+        static Serializer* _serializer;
+        static PhysicsFactory _physicsFactory;
     };
 }

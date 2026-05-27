@@ -239,7 +239,11 @@
     <ClCompile Include="Api\ITransformAPI.cpp" />
     <ClCompile Include="Interaction\DragInteraction.cpp" />
     <ClCompile Include="Api\IRenderAPI.cpp" />
-    <ClCompile Include="Api\ISettingsApi.cpp" />
+    <ClCompile Include="Api\ISettingsAPI.cpp" />
+    <ClCompile Include="Api\ISceneAPI.cpp" />
+    <ClCompile Include="ViewModels\MainMenu\MainMenuViewModel.cpp" />
+    <ClCompile Include="ViewModels\MainMenu\MainMenuIntent.cpp" />
+    <ClCompile Include="ViewModels\MainMenu\MainMenuState.cpp" />
     <ClCompile Include="ViewModels\Settings\SettingsViewModel.cpp" />
     <ClCompile Include="ViewModels\Settings\SettingsIntent.cpp" />
     <ClCompile Include="ViewModels\Settings\SettingsState.cpp" />
@@ -262,7 +266,11 @@
     <ClInclude Include="Api\ITransformAPI.h" />
     <ClInclude Include="Interaction\DragInteraction.h" />
     <ClInclude Include="Api\IRenderAPI.h" />
-    <ClInclude Include="Api\ISettingsApi.h" />
+    <ClInclude Include="Api\ISettingsAPI.h" />
+    <ClInclude Include="Api\ISceneAPI.h" />
+    <ClInclude Include="ViewModels\MainMenu\MainMenuViewModel.h" />
+    <ClInclude Include="ViewModels\MainMenu\MainMenuIntent.h" />
+    <ClInclude Include="ViewModels\MainMenu\MainMenuState.h" />
     <ClInclude Include="ViewModels\Settings\SettingsViewModel.h" />
     <ClInclude Include="ViewModels\Settings\SettingsIntent.h" />
     <ClInclude Include="ViewModels\Settings\SettingsState.h" />

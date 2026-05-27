@@ -24,6 +24,9 @@
     "spirv-headers",
     "taskflow",
     "imguizmo",
-    "joltphysics"
+    "joltphysics",
+    "tinyxml2",
+    "yaml-cpp",
+    "tomlplusplus"
   ]
 }

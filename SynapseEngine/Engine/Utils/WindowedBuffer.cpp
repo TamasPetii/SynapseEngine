@@ -7,12 +7,12 @@ namespace Syn
     {
     }
 
-    bool WindowedBuffer::UpdateCapacity(uint32_t requiredElements)
+    std::pair<bool, std::shared_ptr<Vk::Buffer>> WindowedBuffer::UpdateCapacity(uint64_t requiredElements)
     {
         if (requiredElements == 0) requiredElements = 1;
 
         bool needsResize = false;
-        uint32_t newCapacity = _capacity;
+        uint64_t newCapacity = _capacity;
 
         if (requiredElements > _capacity)
         {
@@ -30,6 +30,8 @@ namespace Syn
             _capacity = newCapacity;
             _baseConfig.size = _capacity * _elementSize;
             auto newBuffer = std::make_shared<Vk::Buffer>(_baseConfig);
+
+            std::shared_ptr<Vk::Buffer> oldBuffer = _buffer;
 
             if (_buffer)
             {
@@ -52,9 +54,9 @@ namespace Syn
             }
 
             _buffer = std::move(newBuffer);
-            return true;
+            return std::make_pair(true, oldBuffer);
         }
 
-        return false;
+        return std::make_pair(false, nullptr);
     }
 }

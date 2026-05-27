@@ -3,13 +3,15 @@
 #include "ITransformAPI.h"
 #include "IRenderAPI.h"
 #include "ISettingsApi.h"
+#include "ISceneAPI.h"
 
 namespace Syn {
     class IEditorAPI :
         public ISelectionAPI,
         public ITransformAPI,
         public IRenderAPI,
-        public ISettingsAPI
+        public ISettingsAPI,
+        public ISceneAPI
     {
     public:
         virtual ~IEditorAPI() = default;

@@ -23,5 +23,6 @@ namespace Syn
         VkDeviceAddress frameMeshletColliders;
         uint64_t padding;
         GpuAnimationDescriptor descriptor;
+		GpuMeshCollider globalCollider;
     };
 }

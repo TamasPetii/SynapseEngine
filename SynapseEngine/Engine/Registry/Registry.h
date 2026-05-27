@@ -13,6 +13,8 @@
 
 namespace Syn
 {
+	class RegistryInsider;
+
 	class SYN_API Registry
 	{
 	public:
@@ -97,6 +99,8 @@ namespace Syn
 		std::vector<EntityID> _freeEntities;
 		SparseSet _activeEntities;
 		DataPool<IPool*> _pools;
+	private:
+		friend class RegistryInsider;
 	};
 }
 

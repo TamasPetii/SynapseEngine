@@ -7,7 +7,7 @@ namespace Syn
     class SYN_API AnimationBakeProcessor : public IAnimationProcessor
     {
     public:
-        virtual void Process(CookedAnimation& inOutAnimation, const CookedModel& baseModel) override;
+        virtual void Process(CookedAnimation& inOutAnimation, const CpuModelData& baseModel) override;
     private:
         void BakeFrame(uint32_t frameIndex, CookedAnimation& anim);
 

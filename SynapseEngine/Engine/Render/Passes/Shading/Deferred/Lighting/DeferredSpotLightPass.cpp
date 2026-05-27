@@ -95,7 +95,7 @@ namespace Syn {
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
         uint32_t fIdx = context.frameIndex;
-        auto pyramid = modelManager->GetResource(MeshSourceNames::Pyramid);
+        auto pyramid = modelManager->GetResource(MeshSourceNames::ProxyPyramid);
 
         DeferredSpotLightPC pc{};
         pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);

@@ -69,18 +69,18 @@ namespace Syn {
         ctx.mortonChunkTransformsIndexBufferAddr = compManager->GetBufferAddr(BufferNames::MortonChunkTransformsIndex, fIdx);
         ctx.mortonChunkVisibleIndirectDispatchBufferAddr = drawData->Chunks.mortonChunkVisibleIndirectDispatchBuffer.GetAddress(fIdx, isGpu);
 
-        ctx.modelAddressBufferAddr = modelManager->GetModelAddressBuffer()->GetDeviceAddress();
+        ctx.modelAddressBufferAddr = modelManager->GetAddressBuffer()->GetDeviceAddress();
         ctx.modelBufferAddr = compManager->GetBufferAddr(BufferNames::ModelData, fIdx);
         ctx.modelSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::ModelSparseMap, fIdx);
 		ctx.modelCountBufferAddr = drawData->Models.computeCountBuffer.GetAddress(fIdx, isGpu);
         ctx.modelVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::ModelVisibleData, fIdx);
 
-        ctx.animationAddressBufferAddr = animationManager->GetAnimationAddressBuffer()->GetDeviceAddress();
+        ctx.animationAddressBufferAddr = animationManager->GetAddressBuffer()->GetDeviceAddress();
         ctx.animationBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationData, fIdx);
         ctx.animationSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationSparseMap, fIdx);
         
         ctx.materialLookupBufferAddr = drawData->Models.materialIndexBuffer.GetAddress(fIdx, isGpu);
-        ctx.materialBufferAddr = materialManager->GetMaterialBuffer()->GetDeviceAddress();
+        ctx.materialBufferAddr = materialManager->GetAddressBuffer()->GetDeviceAddress();
 
         ctx.directionLightIndirectCommandBufferAddr = drawData->DirectionLights.indirectBuffer.GetAddress(fIdx, isGpu);
         ctx.directionLightVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightVisibleData, fIdx);

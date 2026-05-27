@@ -67,6 +67,19 @@ namespace Syn
             _state.reset();
         }
 
+        SYN_INLINE void InitializeFlagsImpl(size_t count) {
+            std::bitset<N> bits;
+            bits.set(REGENERATE_BIT);
+            bits.set(UPDATE_BIT);
+            bits.set(INDEX_CHANGED_BIT);
+
+            _flags.assign(count, bits);
+
+            if (count > 0) {
+                _state |= bits;
+            }
+        }
+
     protected:
         std::vector<std::bitset<N>> _flags;
         std::bitset<N> _state;

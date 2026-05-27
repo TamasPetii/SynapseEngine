@@ -44,11 +44,12 @@ namespace Syn
             return nullptr;
 
 		auto texture = std::make_shared<Texture>();
-		texture->cpuData = _cooker->Cook(std::move(rawTextureOpt).value());
+        texture->transientCpuData = std::make_unique<CookedImage>();
+        texture->transientGpuData = std::make_unique<GpuImage>();
 
-        _pipeline->Run(texture->cpuData);
-
-        texture->gpuData = _converter->Convert(texture->cpuData);
+        *(texture->transientCpuData) = _cooker->Cook(std::move(rawTextureOpt).value());
+        _pipeline->Run(*(texture->transientCpuData));
+        *(texture->transientGpuData) = _converter->Convert(*(texture->transientCpuData));
 
         return texture;
     }

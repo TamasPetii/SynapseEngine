@@ -1,8 +1,9 @@
 #pragma once
 #include "Engine/SynApi.h"
-#include "Engine/Manager/BaseResourceManager.h"
+#include "Engine/Manager/AddressResourceManager.h"
 #include "Engine/Mesh/Builder/StaticMeshBuilder.h"
 #include "Engine/Mesh/Uploader/IGpuModelUploader.h"
+#include "Engine/Mesh/Converter/ICpuModelExtractor.h"
 
 #include "Engine/Vk/Core/ThreadSafeQueue.h"
 #include "Engine/Vk/Command/CommandPool.h"
@@ -14,11 +15,13 @@ namespace Syn {
     using MeshSourceFactory = std::function<std::unique_ptr<IMeshSource>()>;
     using StaticMeshFactory = std::function<std::shared_ptr<StaticMesh>()>;
 
-    class SYN_API ModelManager : public BaseResourceManager<StaticMesh> {
+    class SYN_API ModelManager : public AddressResourceManager<StaticMesh, GpuModelAddresses> {
     public:
-        static constexpr uint32_t MAX_MODELS = 10000;
-
-        ModelManager(std::shared_ptr<StaticMeshBuilder> builder, std::unique_ptr<IGpuModelUploader> uploader, MaterialLoadCallback materialLoadCallback = nullptr);
+        ModelManager(uint32_t framesInFlight, 
+            std::shared_ptr<StaticMeshBuilder> builder,
+            std::unique_ptr<IGpuModelUploader> uploader,
+            std::unique_ptr<ICpuModelExtractor> cpuExtractor,
+            MaterialLoadCallback materialLoadCallback = nullptr);
         ~ModelManager() = default;
 
         uint32_t LoadModelAsync(const std::string& filePath);
@@ -28,8 +31,6 @@ namespace Syn {
         uint32_t LoadModelSync(const std::string& filePath);
         uint32_t LoadModelFromSourceSync(const std::string& name, MeshSourceFactory factory);
         uint32_t LoadModelFromStaticMeshSync(const std::string& name, StaticMeshFactory factory);
-
-        Vk::Buffer* GetModelAddressBuffer() const { return _modelAddressBuffer.get(); }
     protected:
         void StartGpuUpload(EntryType& entry) override;
         void FinalizeResource(EntryType& entry) override;
@@ -37,6 +38,6 @@ namespace Syn {
         MaterialLoadCallback _materialLoadCallback;
         std::shared_ptr<StaticMeshBuilder> _builder;
         std::unique_ptr<IGpuModelUploader> _uploader;
-        std::unique_ptr<Vk::Buffer> _modelAddressBuffer;
+        std::unique_ptr<ICpuModelExtractor> _cpuExtractor;
     };
 }

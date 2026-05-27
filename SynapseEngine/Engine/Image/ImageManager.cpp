@@ -12,8 +12,13 @@
 
 namespace Syn {
 
-    ImageManager::ImageManager(std::shared_ptr<ImageBuilder> builder, std::unique_ptr<IGpuImageUploader> uploader)
-        : _builder(builder), _uploader(std::move(uploader))
+    ImageManager::ImageManager(
+        std::shared_ptr<ImageBuilder> builder,
+        std::unique_ptr<IGpuImageUploader> uploader,
+        std::unique_ptr<ICpuImageExtractor> cpuExtractor)
+		: _builder(builder), 
+        _uploader(std::move(uploader)), 
+        _cpuExtractor(std::move(cpuExtractor))
     {
         InitializeBindlessSetup();
     }
@@ -230,20 +235,31 @@ namespace Syn {
     }
 
     void ImageManager::StartGpuUpload(EntryType& entry) {
-        bool needsGraphics = entry.resource->gpuData.autoGenerateMipmaps;
+        bool needsGraphics = entry.resource->transientGpuData->autoGenerateMipmaps;
+
+        uint32_t entryId = _pathToId.at(entry.path);
+        std::shared_ptr<Texture> res = entry.resource;
 
         Vk::GpuUploadRequest request{
-            .uploadCallback = [this, &entry](VkCommandBuffer cmd) {
-                auto uploadResult = _uploader->Upload(entry.resource->gpuData, cmd);
-                entry.resource->image = uploadResult.texture;
-                entry.stagingBuffer = std::move(uploadResult.stagingBuffer);
+            .uploadCallback = [this, entryId, res](VkCommandBuffer cmd) {
+
+                auto uploadResult = _uploader->Upload(*(res->transientGpuData), cmd); 
+                res->image = uploadResult.texture;
+
+                std::lock_guard lock(_mutex);
+                _entries[entryId].stagingBuffer = std::move(uploadResult.stagingBuffer);
             },
-            .onFinished = [this, &entry]() {
+            .onFinished = [this, entryId]() {
+                std::lock_guard lock(_mutex);
+                auto& entry = _entries[entryId];
+
                 FinalizeResource(entry);
                 entry.stagingBuffer.reset();
-                entry.state = ResourceState::Ready;
+
+                SetResourceState(entryId, ResourceState::Ready);
+
                 _version.fetch_add(1, std::memory_order_release);
-                //Info("Image '{}' is ready", entry.path);
+                Info("Image '{}' is ready", entry.path);
             },
             .needsGraphics = needsGraphics
         };
@@ -251,9 +267,11 @@ namespace Syn {
         SubmitGpuRequest(entry, std::move(request));
     }
 
-    void ImageManager::FinalizeResource(EntryType& entry) {
-        uint32_t descriptorIndex = _pathToId.at(entry.path);
+    void ImageManager::FinalizeResource(EntryType& entry) 
+    {
+        _cpuExtractor->Extract(*(entry.resource->transientGpuData), entry.resource->cpuData);
 
+        uint32_t descriptorIndex = _pathToId.at(entry.path);
         if (descriptorIndex != 0) {
             _bindlessBuffer->WriteSampledImage(
                 BINDING_TEXTURES,
@@ -261,5 +279,8 @@ namespace Syn {
                 entry.resource->image->GetView()
             );
         }
+
+        entry.resource->transientCpuData.reset();
+        entry.resource->transientGpuData.reset();
     }
 }

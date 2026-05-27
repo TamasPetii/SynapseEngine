@@ -25,14 +25,30 @@
 #include "Engine/Manager/InputManager.h"
 #include "Engine/Logger/LogUtils.h"
 #include "Engine/Scene/SceneManager.h"
-#include "Engine/Scene/TestScene.h"
-#include "Engine/Scene/NatureScene.h"
+#include "Engine/Scene/Source/Procedural/TestSceneSource.h"
+#include "Engine/Scene/Source/Procedural/NatureSceneSource.h"
+#include "Engine/Scene/Source/File/FileSceneSource.h"
 
 #include "Engine/Render/RendererFactory.h"
 #include "Engine/Physics/JoltPhysicsEngine.h"
 
 #include "Engine/Profiler/DefaultGpuProfiler.h"
 #include "Engine/Profiler/DefaultCpuProfiler.h"
+
+#include "Engine/Serialization/Serializer.h"
+#include "Engine/Serialization/Archive/DefaultArchiveRegistry.h"
+#include "Engine/Serialization/Archive/Output/Json/NlohmannJsonOutputArchive.h"
+#include "Engine/Serialization/Archive/Input/Json/NlohmannJsonInputArchive.h"
+#include "Engine/Serialization/Archive/Input/Binary/BinaryInputArchive.h"
+#include "Engine/Serialization/Archive/Output/Binary/BinaryOutputArchive.h"
+#include "Engine/Serialization/Archive/Input/Xml/TinyXmlInputArchive.h"
+#include "Engine/Serialization/Archive/Output/Xml/TinyXmlOutputArchive.h"
+#include "Engine/Serialization/Archive/Input/Yaml/YamlCppInputArchive.h"
+#include "Engine/Serialization/Archive/Output/Yaml/YamlCppOutputArchive.h"
+#include "Engine/Serialization/Archive/Input/Toml/PlusPlusTomlInputArchive.h"
+#include "Engine/Serialization/Archive/Output/Toml/PlusPlusTomlOutputArchive.h"
+#include "Engine/Scene/Writer/ManifestSceneWriter.h"
+#include "Engine/Scene/Loader/ManifestSceneLoader.h"
 
 #include <print>
 #include <filesystem>
@@ -99,10 +115,11 @@ namespace Syn
 		_inputManager = std::make_unique<InputManager>();
 		ServiceLocator::ProvideInputManager(_inputManager.get());
 
-		InitFrameContext(2);
+		InitFrameContext(1);
 		InitLogger();
 		InitVulkan(params);
 		InitTaskExecutor();
+		InitSerializer();
 		InitResourceManager();
 		InitRenderManager(params);
 		InitSceneManager();
@@ -139,7 +156,7 @@ namespace Syn
 
 	void Engine::InitResourceManager()
 	{
-		_resourceManager = std::make_unique<ResourceManager>();
+		_resourceManager = std::make_unique<ResourceManager>(_frameContext.framesInFlight);
 		ServiceLocator::ProvideResourceManager(_resourceManager.get());
 	}
 
@@ -206,12 +223,9 @@ namespace Syn
 
 	void Engine::Shutdown() 
 	{
-		_physicsEngine->Shutdown();
-		_physicsEngine.reset();
-
 		_taskExecutor.reset();
 		_inputManager.reset();
-
+		_serializer.reset();
 		_cpuProfiler.reset();
 		_gpuProfiler.reset();
 		_sceneManager.reset();
@@ -282,20 +296,51 @@ namespace Syn
 	{
 		uint32_t frames = _frameContext.framesInFlight;
 
-		_sceneManager = std::make_unique<SceneManager>();
+		auto writer = std::make_unique<ManifestSceneWriter>();
+		auto loader = std::make_unique<ManifestSceneLoader>();
+
+		_sceneManager = std::make_unique<Syn::SceneManager>(std::move(writer), std::move(loader));
 		ServiceLocator::ProvideSceneManager(_sceneManager.get());
 
 		_sceneManager->RegisterScene("TestLevel", [frames]() {
-			return std::make_unique<TestScene>(frames);
-		});
+			return std::make_unique<Scene>(frames, std::make_unique<TestSceneSource>());
+			});
+
+		_sceneManager->RegisterScene("NatureLevel", [frames]() {
+			return std::make_unique<Scene>(frames, std::make_unique<NatureSceneSource>());
+			});
 
 		_sceneManager->LoadScene("TestLevel");
 	}
 
 	void Engine::InitPhysicsEngine()
 	{
-		_physicsEngine = std::make_unique<JoltPhysicsEngine>();
-		_physicsEngine->Init();
-		ServiceLocator::ProvidePhysicsEngine(_physicsEngine.get());
+		ServiceLocator::ProvidePhysicsFactory([]() {
+			auto physicsEngine = std::make_unique<JoltPhysicsEngine>();
+			physicsEngine->Init();
+
+			return physicsEngine;
+			});
+	}
+
+	void Engine::InitSerializer()
+	{
+		auto registry = std::make_unique<DefaultArchiveRegistry>();
+		registry->RegisterOutputAuto<NlohmannJsonOutputArchive>(10);
+		registry->RegisterInputAuto<NlohmannJsonInputArchive>(10);
+		registry->RegisterOutputAuto<BinaryOutputArchive>(10);
+		registry->RegisterInputAuto<BinaryInputArchive>(10);
+		registry->RegisterOutputAuto<TinyXmlOutputArchive>(10);
+		registry->RegisterInputAuto<TinyXmlInputArchive>(10);
+		registry->RegisterOutputAuto<YamlCppOutputArchive>(10);
+		registry->RegisterInputAuto<YamlCppInputArchive>(10);
+		registry->RegisterOutputAuto<PlusPlusTomlOutputArchive>(10);
+		registry->RegisterInputAuto<PlusPlusTomlInputArchive>(10);
+
+		auto service = std::make_unique<DefaultSerializationService>(std::move(registry));
+
+		_serializer = std::make_unique<Serializer>(std::move(service));
+
+		ServiceLocator::ProvideSerializer(_serializer.get());
 	}
 }

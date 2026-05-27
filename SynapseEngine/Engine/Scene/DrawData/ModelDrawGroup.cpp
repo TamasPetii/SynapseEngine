@@ -17,7 +17,7 @@ namespace Syn
         meshletCmds.AssignZero(1);
         descriptors.AssignZero(1);
         meshAllocations.AssignZero(1);
-        modelAllocations.AssignZero(ModelManager::MAX_MODELS);
+        modelAllocations.AssignZero(1);
 
         VkBufferUsageFlags storageUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
         VkBufferUsageFlags indirectStorageUsage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
@@ -26,14 +26,14 @@ namespace Syn
         instanceBuffer.UpdateCapacityAll(1);
 
 		//VkDrawIndirectCommand + VkDrawMeshTasksIndirectCommandEXT
-        indirectBuffer.Initialize({ BufferStrategy::Hybrid_Dynamic, frameCount, sizeof(VkDrawIndirectCommand) * 4, indirectStorageUsage, 1024, 2048 });
+        indirectBuffer.Initialize({ BufferStrategy::Hybrid_Dynamic, frameCount, sizeof(VkDrawIndirectCommand) * 8, indirectStorageUsage, 1024, 2048 });
         indirectBuffer.UpdateCapacityAll(1);
 
         descriptorBuffer.Initialize({ BufferStrategy::Hybrid_Static, frameCount, sizeof(MeshDrawDescriptor), storageUsage, 1024, 2048 });
         descriptorBuffer.UpdateCapacityAll(1);
 
         modelAllocBuffer.Initialize({ BufferStrategy::Hybrid_Static, frameCount, sizeof(ModelAllocationInfo), storageUsage, 1024, 2048 });
-        modelAllocBuffer.UpdateCapacityAll(ModelManager::MAX_MODELS);
+        modelAllocBuffer.UpdateCapacityAll(1);
 
         meshAllocBuffer.Initialize({ BufferStrategy::Hybrid_Static, frameCount, sizeof(MeshAllocationInfo), storageUsage, 1024, 2048 });
         meshAllocBuffer.UpdateCapacityAll(1);

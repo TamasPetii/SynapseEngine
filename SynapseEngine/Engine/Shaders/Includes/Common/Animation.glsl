@@ -2,6 +2,7 @@
 #define SYN_INCLUDES_COMMON_ANIMATION_GLSL
 
 #include "../Core.glsl"
+#include "Mesh.glsl"
 
 struct GpuVertexSkinData {
     uvec4 boneIndices;
@@ -34,6 +35,7 @@ struct GpuAnimationAddresses {
     uint64_t frameMeshletColliders;
     uint64_t padding;
     GpuAnimationDescriptor descriptor;
+    GpuMeshCollider globalCollider;
 };
 
 layout(buffer_reference, std430) readonly restrict buffer VertexSkinDataBuffer     { GpuVertexSkinData data[]; };

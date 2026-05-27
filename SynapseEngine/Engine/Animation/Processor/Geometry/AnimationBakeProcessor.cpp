@@ -10,7 +10,7 @@
 
 namespace Syn
 {
-    void AnimationBakeProcessor::Process(CookedAnimation& inOutAnimation, const CookedModel& baseModel)
+    void AnimationBakeProcessor::Process(CookedAnimation& inOutAnimation, const CpuModelData& baseModel)
     {
         tf::Taskflow taskflow;
         tf::GuidedPartitioner partitioner(1);

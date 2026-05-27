@@ -13,7 +13,7 @@ namespace Syn
         AnimationProcessorPipeline& operator=(const AnimationProcessorPipeline&) = delete;
 
         virtual void AddProcessor(std::unique_ptr<IAnimationProcessor> processor) override;
-        virtual void Run(CookedAnimation& inOutAnimation, const CookedModel& baseModel) override;
+        virtual void Run(CookedAnimation& inOutAnimation, const CpuModelData& baseModel) override;
     private:
         std::vector<std::unique_ptr<IAnimationProcessor>> _processors;
     };

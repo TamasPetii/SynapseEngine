@@ -5,20 +5,12 @@
 
 namespace Syn {
 
-    MaterialManager::MaterialManager(TextureLoadCallback textureLoadCallback)
-        : _textureLoadCallback(std::move(textureLoadCallback))
+    MaterialManager::MaterialManager(uint32_t framesInFlight, TextureLoadCallback textureLoadCallback)
+        : AddressResourceManager<Material, GpuMaterial>(framesInFlight, 100, 1024, 2048)
+        , _textureLoadCallback(std::move(textureLoadCallback))
     {
-        _materialBuffer = Vk::BufferFactory::CreatePersistent(
-            MAX_MATERIALS * sizeof(GpuMaterial),
-            VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT
-        );
-
         Material emptyMat;
-        GpuMaterial safeDefaultMaterial(emptyMat);
-        std::vector<GpuMaterial> safeData(MAX_MATERIALS, safeDefaultMaterial);
-
-        _materialBuffer->Write(safeData.data(), safeData.size() * sizeof(GpuMaterial), 0);
-
+        WriteAddress(0, GpuMaterial(emptyMat));
         LoadDefaultMaterialSync();
     }
 
@@ -54,12 +46,18 @@ namespace Syn {
             });
     }
 
+    uint32_t MaterialManager::LoadMaterialDirect(const std::string& name, const Material& material) {
+        return InternalLoadSync(name, [this, material]() {
+            return std::make_shared<Material>(material);
+            });
+    }
+
     void MaterialManager::StartGpuUpload(EntryType& entry) {
         uint32_t entryIndex = _pathToId.at(entry.path);
         size_t offset = entryIndex * sizeof(GpuMaterial);
 
         auto materialGPU = GpuMaterial(*entry.resource);
-        _materialBuffer->Write(&materialGPU, sizeof(GpuMaterial), offset);
+        WriteAddress(entryIndex, materialGPU);
 
         if (entryIndex >= _renderTypeCache.size()) {
             _renderTypeCache.resize(entryIndex + 1, MaterialRenderType::Opaque1Sided);

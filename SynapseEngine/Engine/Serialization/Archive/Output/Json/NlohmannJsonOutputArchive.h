@@ -1,0 +1,40 @@
+#pragma once
+#include "Engine/SynApi.h"
+#include "IJsonOutputArchive.h"
+#include <nlohmann/json.hpp>
+#include <vector>
+#include <string>
+
+namespace Syn
+{
+    class SYN_API NlohmannJsonOutputArchive : public IJsonOutputArchive
+    {
+    public:
+        static std::vector<std::string> GetSupportedExtensions() { return {".json", ".jsn"}; }
+
+        explicit NlohmannJsonOutputArchive(IOutputStream& stream);
+        ~NlohmannJsonOutputArchive() override = default;
+
+        std::string ToString() const override;
+        void Serialize() override;
+
+        void EnterObject(const char* name) override;
+        void LeaveObject() override;
+        void EnterArray(const char* name, uint32_t size) override;
+        void LeaveArray() override;
+
+        void PropertyBool(const char* name, bool value) override;
+        void PropertyUint8(const char* name, uint8_t value) override;
+        void PropertyInt32(const char* name, int32_t value) override;
+        void PropertyUint32(const char* name, uint32_t value) override;
+        void PropertyInt64(const char* name, int64_t value) override;
+        void PropertyUint64(const char* name, uint64_t value) override;
+        void PropertyFloat(const char* name, float value) override;
+        void PropertyDouble(const char* name, double value) override;
+        void PropertyString(const char* name, const std::string& value) override;
+        void PropertyBytes(const char* name, const void* data, size_t size) override;
+    private:
+        nlohmann::json _root;
+        std::vector<nlohmann::json*> _stack;
+    };
+}

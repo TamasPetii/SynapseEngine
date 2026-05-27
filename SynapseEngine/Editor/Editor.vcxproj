@@ -241,9 +241,11 @@
     <ClCompile Include="Core\Windows\GlfwWindow.cpp" />
     <ClCompile Include="Dispatcher\InputDispatcher.cpp" />
     <ClCompile Include="EditorApi\RenderApiImpl.cpp" />
+    <ClCompile Include="EditorApi\SceneApiImpl.cpp" />
     <ClCompile Include="EditorApi\SelectionApiImpl.cpp" />
     <ClCompile Include="EditorApi\SettingsApiImpl.cpp" />
     <ClCompile Include="EditorApi\TransformApiImpl.cpp" />
+    <ClCompile Include="View\MainMenu\MainMenuView.cpp" />
     <ClCompile Include="Manager\GuiManager.cpp" />
     <ClCompile Include="Manager\GuiTextureManager.cpp" />
     <ClCompile Include="View\Settings\SettingsView.cpp" />
@@ -268,6 +270,7 @@
     <ClInclude Include="Core\Windows\GlfwWindow.h" />
     <ClInclude Include="EditorApi\EditorApiImpl.h" />
     <ClInclude Include="Dispatcher\InputDispatcher.h" />
+    <ClInclude Include="View\MainMenu\MainMenuView.h" />
     <ClInclude Include="Manager\GuiManager.h" />
     <ClInclude Include="Manager\GuiTextureManager.h" />
     <ClInclude Include="View\Settings\SettingsView.h" />

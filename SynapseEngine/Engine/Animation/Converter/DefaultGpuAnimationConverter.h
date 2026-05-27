@@ -9,6 +9,6 @@ namespace Syn
         DefaultGpuAnimationConverter() = default;
         ~DefaultGpuAnimationConverter() override = default;
 
-        GpuBatchedAnimation Convert(const CookedAnimation& cookedAnimation, const CookedModel& baseModel) const override;
+        GpuBatchedAnimation Convert(const CookedAnimation& cookedAnimation, const CpuModelData& baseModel) const override;
     };
 }

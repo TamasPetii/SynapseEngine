@@ -33,8 +33,8 @@ namespace Syn
         void RegisterLoader(std::shared_ptr<IAnimationLoader> loader, int priority = 0);
         void RegisterProcessor(std::unique_ptr<IAnimationProcessor> processor);
 
-        std::shared_ptr<Animation> BuildFromFile(const std::string& filePath, const CookedModel& baseModel);
-        std::shared_ptr<Animation> BuildFromSource(IAnimationSource& source, const CookedModel& baseModel);
+        std::shared_ptr<Animation> BuildFromFile(const std::string& filePath, const CpuModelData& baseModel);
+        std::shared_ptr<Animation> BuildFromSource(IAnimationSource& source, const CpuModelData& baseModel);
     private:
         std::unique_ptr<IAnimationLoaderRegistry> _registry;
         std::unique_ptr<IAnimationProcessorPipeline> _pipeline;

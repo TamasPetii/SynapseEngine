@@ -12,6 +12,8 @@
 
 #include "SceneSettings.h"
 #include "DrawData/SceneDrawData.h"
+#include "Engine/Scene/Source/ISceneSource.h"
+#include "Engine/Physics/IPhysicsEngine.h"
 
 namespace Syn
 {
@@ -27,7 +29,7 @@ namespace Syn
     class SYN_API Scene
     {
     public:
-        Scene(uint32_t frameCount);
+        Scene(uint32_t frameCount, std::unique_ptr<ISceneSource> source = nullptr, bool initSystems = true);
         virtual ~Scene();
 
         void Update(float deltaTime, uint32_t frameIndex);
@@ -40,6 +42,7 @@ namespace Syn
         EntityID GetDebugCameraEntity() const { return _debugCameraEntity; }
         ComponentBufferManager* GetComponentBufferManager() const { return _componentBufferManager.get(); }
         SceneSettings* GetSettings() const { return _sceneSettings.get(); }
+		IPhysicsEngine* GetPhysicsEngine() const { return _physicsEngine.get(); }
     private:
         void InitializeSystems();
         void InitializeComponentBuffers();
@@ -61,12 +64,13 @@ namespace Syn
         EntityID _sceneCameraEntity = NULL_ENTITY;
         EntityID _debugCameraEntity = NULL_ENTITY;
 
-        std::unique_ptr<Registry> _registry;
         std::unique_ptr<ComponentBufferManager> _componentBufferManager;
         std::vector<std::unique_ptr<ISystem>> _systems;
-
         std::unique_ptr<SceneDrawData> _sceneDrawData;
+
+        std::unique_ptr<Registry> _registry;
         std::unique_ptr<SceneSettings> _sceneSettings;
+        std::unique_ptr<IPhysicsEngine> _physicsEngine;
 
         tf::Taskflow _updateTaskflow;
         tf::Taskflow _gpuTaskflow;
@@ -74,6 +78,8 @@ namespace Syn
 
         float _currentDeltaTime = 0.0f;
         uint32_t _currentFrameIndex = 0;
+    private:
+        friend class SceneInsider;
     };
 
     template<typename T>

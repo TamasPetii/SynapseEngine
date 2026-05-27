@@ -4,8 +4,11 @@
 #include "Engine/Mesh/ModelManager.h"
 #include "BufferNames.h"
 
+#include "Engine/Scene/Source/ISceneSource.h"
+
 #include "Engine/Component/Core/TransformComponent.h"
 #include "Engine/Component/Core/CameraComponent.h"
+#include "Engine/Component/Core/TagComponent.h"
 #include "Engine/Component/Rendering/ModelComponent.h"
 #include "Engine/Component/Rendering/AnimationComponent.h"
 #include "Engine/Component/Light/Direction/DirectionLightComponent.h"
@@ -41,12 +44,15 @@
 
 namespace Syn
 {
-    Scene::Scene(uint32_t frameCount)
+    Scene::Scene(uint32_t frameCount, std::unique_ptr<ISceneSource> source, bool initSystems)
     {
         _registry = std::make_unique<Registry>();
+        _sceneSettings = std::make_unique<SceneSettings>();
+
 		_registry->EnsurePool<TransformComponent>();
-        _registry->EnsurePool<AnimationComponent>();
         _registry->EnsurePool<CameraComponent>();
+        _registry->EnsurePool<TagComponent>();
+        _registry->EnsurePool<AnimationComponent>();
         _registry->EnsurePool<ModelComponent>();
         _registry->EnsurePool<MaterialOverrideComponent>();
         _registry->EnsurePool<DirectionLightComponent>();
@@ -60,20 +66,29 @@ namespace Syn
 		_registry->EnsurePool<CapsuleColliderComponent>();
 		_registry->EnsurePool<RigidBodyComponent>();
 
-        _componentBufferManager = std::make_unique<ComponentBufferManager>(frameCount);
-        _sceneDrawData = std::make_unique<SceneDrawData>(frameCount);
-        _sceneSettings = std::make_unique<SceneSettings>();
+        _physicsEngine = ServiceLocator::GetPhysicsFactory()();
 
-        InitializeSystems();
-        InitializeComponentBuffers();
+        if(source)
+			source->Populate(*this);
 
-        BuildTaskflowGraph(_updateTaskflow, SystemPhase::Update);
-        BuildTaskflowGraph(_gpuTaskflow, SystemPhase::UploadGPU);
-        BuildTaskflowGraph(_finishTaskflow, SystemPhase::Finish);
+        if (initSystems)
+        {
+            _componentBufferManager = std::make_unique<ComponentBufferManager>(frameCount);
+            _sceneDrawData = std::make_unique<SceneDrawData>(frameCount);
+
+            InitializeSystems();
+            InitializeComponentBuffers();
+
+            BuildTaskflowGraph(_updateTaskflow, SystemPhase::Update);
+            BuildTaskflowGraph(_gpuTaskflow, SystemPhase::UploadGPU);
+            BuildTaskflowGraph(_finishTaskflow, SystemPhase::Finish);
+        }
     }
 
     Scene::~Scene()
     {
+		_physicsEngine->Shutdown();
+        _physicsEngine.reset();
         _registry.reset();
         _componentBufferManager.reset();
         _systems.clear();
@@ -287,14 +302,14 @@ namespace Syn
 
         if (_sceneCameraEntity != NULL_ENTITY && _registry->HasComponent<CameraComponent>(_sceneCameraEntity))
         {
-            _registry->GetComponent<CameraComponent>(_sceneCameraEntity).width = screenWidth;
-            _registry->GetComponent<CameraComponent>(_sceneCameraEntity).height = screenHeight;
+            _registry->GetComponent<CameraComponent>(_sceneCameraEntity).width = (float)screenWidth;
+            _registry->GetComponent<CameraComponent>(_sceneCameraEntity).height = (float)screenHeight;
         }
 
         if (_debugCameraEntity != NULL_ENTITY && _registry->HasComponent<CameraComponent>(_debugCameraEntity))
         {
-            _registry->GetComponent<CameraComponent>(_debugCameraEntity).width = screenWidth;
-            _registry->GetComponent<CameraComponent>(_debugCameraEntity).height = screenHeight;
+            _registry->GetComponent<CameraComponent>(_debugCameraEntity).width = (float)screenWidth;
+            _registry->GetComponent<CameraComponent>(_debugCameraEntity).height = (float)screenHeight;
         }
 
         ServiceLocator::GetTaskExecutor()->run(_updateTaskflow).wait();

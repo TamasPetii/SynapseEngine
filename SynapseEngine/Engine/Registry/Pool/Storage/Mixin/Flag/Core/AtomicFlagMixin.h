@@ -26,7 +26,7 @@ namespace Syn
 
     public:
         SYN_INLINE void PushFlagImpl() {
-            constexpr uint8_t mask = (1 << REGENERATE_BIT) | (1 << UPDATE_BIT) | (1 << INDEX_CHANGED_BIT);
+            constexpr uint32_t mask = (1 << REGENERATE_BIT) | (1 << UPDATE_BIT) | (1 << INDEX_CHANGED_BIT);
             _flags.emplace_back(mask);
             _state.fetch_or(mask, std::memory_order_relaxed);
         }
@@ -85,6 +85,16 @@ namespace Syn
         }
 
         SYN_INLINE void ResetAllStateBitsImpl() { _state.store(0, std::memory_order_relaxed); }
+
+        SYN_INLINE void InitializeFlagsImpl(size_t count) {
+            constexpr uint32_t mask = (1 << REGENERATE_BIT) | (1 << UPDATE_BIT) | (1 << INDEX_CHANGED_BIT);
+
+            _flags.assign(count, AtomicByte(static_cast<uint8_t>(mask)));
+
+            if (count > 0) {
+                _state.fetch_or(mask, std::memory_order_relaxed);
+            }
+        }
 
     protected:
         std::vector<AtomicByte> _flags;
