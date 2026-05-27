@@ -21,5 +21,10 @@ namespace Syn
         static size_t& GetDynamicEnd(SegmentedStorageImpl<T, F>& ss, Passkey<SegmentedStorageInsider>) {
             return ss._dynamicEnd;
         }
+
+        template<typename T, typename F>
+        static auto& GetDirtyStaticList(SegmentedStorageImpl<T, F>& ss, Passkey<SegmentedStorageInsider>) {
+            return ss._dirtyStaticList;
+        }
     };
 }

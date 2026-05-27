@@ -223,11 +223,9 @@ namespace Syn
                 transformPool->SetBit<TRANSFORM_ROT_CHANGED>(entity);
                 transformPool->SetBit<TRANSFORM_SCALE_CHANGED>(entity);
 
-                /*
-                if (!transformPool->IsStatic(entity) && !transformPool->IsDynamic(entity)) {
-                    transformPool->SetCategory(entity, StorageCategory::Static);
-                }
-                */
+                auto denseIdx = transformPool->GetMapping().Get(entity);
+                if (transformPool->GetStorage().IsStatic(denseIdx))
+                    transformPool->MarkStaticDirty(entity);
             }
         }
 

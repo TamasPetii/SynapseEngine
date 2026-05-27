@@ -60,5 +60,9 @@ namespace Syn
         SYN_INLINE void ResetAllStateBits() {
             static_cast<Derived*>(this)->ResetAllStateBitsImpl();
         }
+
+        SYN_INLINE void InitializeFlags(size_t count) {
+            static_cast<Derived*>(this)->InitializeFlagsImpl(count);
+        }
     };
 }

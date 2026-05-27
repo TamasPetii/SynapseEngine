@@ -7,6 +7,11 @@
 
 namespace Syn
 {
+    template <typename T>
+    concept InitializableFlagConstraint = requires(T mixin, size_t count) {
+        mixin.InitializeFlags(count);
+    };
+
     template<typename T, typename FlagMixinPolicy>
     struct Schema<StorageBackend<T, FlagMixinPolicy>> 
     {
@@ -30,6 +35,17 @@ namespace Syn
             }
 
             Schema<DataMixin<T>>::Invoke(ar, "components", v);
+
+            if constexpr (std::is_base_of_v<IInputArchive, Archive>)
+            {
+                if (ar.IsBinary())
+                {
+                    if constexpr (InitializableFlagConstraint<decltype(v)>)
+                    {
+                        v.InitializeFlags(entities.size());
+                    }
+                }
+            }
         }
     };
 }

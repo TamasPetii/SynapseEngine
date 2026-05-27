@@ -34,6 +34,15 @@ namespace Syn
             }
 
             Schema<StorageBackend<T, FlagMixinPolicy>>::Invoke(ar, "backend", v);
+
+            if constexpr (std::is_base_of_v<IInputArchive, Archive>)
+            {
+                if (ar.IsBinary())
+                {
+                    auto& dirtyStaticList = SegmentedStorageInsider::GetDirtyStaticList(v, SegmentedStorageInsider::GetKey());
+                    dirtyStaticList.resize(v.Size());
+                }
+            }
         }
     };
 }

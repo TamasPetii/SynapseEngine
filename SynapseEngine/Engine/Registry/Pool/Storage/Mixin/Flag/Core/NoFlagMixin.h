@@ -21,5 +21,7 @@ namespace Syn
         template<uint32_t... Bits> SYN_INLINE bool IsStateBitSet() const { return false; }
         template<uint32_t... Bits> SYN_INLINE void ResetStateBit() {}
         SYN_INLINE void ResetAllStateBits() {}
+
+        SYN_INLINE void InitializeFlagsImpl(size_t) {}
     };
 }
