@@ -16,10 +16,10 @@ namespace Syn {
 	MaterialManager* ServiceLocator::_materialManager = nullptr;
 	AnimationBuilder* ServiceLocator::_animationBuilder = nullptr;
 	AnimationManager* ServiceLocator::_animationManager = nullptr;
-	IPhysicsEngine* ServiceLocator::_physicsEngine = nullptr;
 	IGpuProfiler* ServiceLocator::_gpuProfiler = nullptr;
 	ICpuProfiler* ServiceLocator::_cpuProfiler = nullptr;
 	Serializer* ServiceLocator::_serializer = nullptr;
+	PhysicsFactory ServiceLocator::_physicsFactory = nullptr;
 
 	void ServiceLocator::Shutdown()
 	{
@@ -38,7 +38,7 @@ namespace Syn {
 		_materialManager = nullptr;
 		_animationBuilder = nullptr;
 		_animationManager = nullptr;
-		_physicsEngine = nullptr;
+		_physicsFactory = nullptr;
 		_gpuProfiler = nullptr;
 		_cpuProfiler = nullptr;
 		_serializer = nullptr;

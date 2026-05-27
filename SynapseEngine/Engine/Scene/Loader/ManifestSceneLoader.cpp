@@ -213,53 +213,32 @@ namespace Syn
 
     void ManifestSceneLoader::WakeUpEntities(Scene& scene)
     {
-        auto registry = scene.GetRegistry();
+        WakeUpHelper wakeUp;
+        wakeUp.registry = scene.GetRegistry();
 
-        auto transformPool = registry->GetPool<TransformComponent>();
-        if (transformPool) {
-            for (auto entity : transformPool->GetStorage().GetDenseEntities()) {
-                transformPool->SetBit<UPDATE_BIT>(entity);
-                transformPool->SetBit<TRANSFORM_POS_CHANGED>(entity);
-                transformPool->SetBit<TRANSFORM_ROT_CHANGED>(entity);
-                transformPool->SetBit<TRANSFORM_SCALE_CHANGED>(entity);
+        wakeUp.Run<TagComponent>();
+        wakeUp.Run<CameraComponent>();
+        wakeUp.Run<TransformComponent, TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>();
+        wakeUp.Run<ModelComponent>();
+        wakeUp.Run<MaterialOverrideComponent>();
+        wakeUp.Run<DirectionLightComponent>();
+        wakeUp.Run<DirectionLightShadowComponent>();
+        wakeUp.Run<PointLightComponent>();
+        wakeUp.Run<PointLightShadowComponent>();
+        wakeUp.Run<SpotLightComponent>();
+        wakeUp.Run<SpotLightShadowComponent>();
+        wakeUp.Run<BoxColliderComponent>();
+        wakeUp.Run<SphereColliderComponent>();
+        wakeUp.Run<CapsuleColliderComponent>();
 
-                auto denseIdx = transformPool->GetMapping().Get(entity);
-                if (transformPool->GetStorage().IsStatic(denseIdx))
-                    transformPool->MarkStaticDirty(entity);
-            }
-        }
+        wakeUp.Run<AnimationComponent>([](auto& comp, EntityID entity) {
+                comp.isReady = false;
+                comp.frameIndex = 0;
+            });
 
-        /*
-        auto dirLightPool = registry->GetPool<DirectionLightComponent>();
-        if (dirLightPool) {
-            for (auto entity : dirLightPool->GetStorage().GetDenseEntities()) {
-                dirLightPool->SetBit<UPDATE_BIT>(entity);
-                //if (!dirLightPool->IsStream(entity)) dirLightPool->SetCategory(entity, StorageCategory::Stream);
-            }
-        }
+        wakeUp.Run<RigidBodyComponent>([](auto& comp, EntityID entity) {
+            comp.bodyID = INVALID_BODY_ID;
+            });
 
-        auto pointLightPool = registry->GetPool<PointLightComponent>();
-        if (pointLightPool) {
-            for (auto entity : pointLightPool->GetStorage().GetDenseEntities()) {
-                pointLightPool->SetBit<UPDATE_BIT>(entity);
-                //if (!pointLightPool->IsStream(entity)) pointLightPool->SetCategory(entity, StorageCategory::Stream);
-            }
-        }
-
-        auto spotLightPool = registry->GetPool<SpotLightComponent>();
-        if (spotLightPool) {
-            for (auto entity : spotLightPool->GetStorage().GetDenseEntities()) {
-                spotLightPool->SetBit<UPDATE_BIT>(entity);
-                //if (!spotLightPool->IsStream(entity)) spotLightPool->SetCategory(entity, StorageCategory::Stream);
-            }
-        }
-
-        auto modelPool = registry->GetPool<ModelComponent>();
-        if (modelPool) {
-            for (auto entity : modelPool->GetStorage().GetDenseEntities()) {
-                modelPool->SetBit<UPDATE_BIT>(entity);
-            }
-        }
-        */
     }
 }

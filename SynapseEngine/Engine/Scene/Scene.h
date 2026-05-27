@@ -13,6 +13,7 @@
 #include "SceneSettings.h"
 #include "DrawData/SceneDrawData.h"
 #include "Engine/Scene/Source/ISceneSource.h"
+#include "Engine/Physics/IPhysicsEngine.h"
 
 namespace Syn
 {
@@ -41,6 +42,7 @@ namespace Syn
         EntityID GetDebugCameraEntity() const { return _debugCameraEntity; }
         ComponentBufferManager* GetComponentBufferManager() const { return _componentBufferManager.get(); }
         SceneSettings* GetSettings() const { return _sceneSettings.get(); }
+		IPhysicsEngine* GetPhysicsEngine() const { return _physicsEngine.get(); }
     private:
         void InitializeSystems();
         void InitializeComponentBuffers();
@@ -68,6 +70,7 @@ namespace Syn
 
         std::unique_ptr<Registry> _registry;
         std::unique_ptr<SceneSettings> _sceneSettings;
+        std::unique_ptr<IPhysicsEngine> _physicsEngine;
 
         tf::Taskflow _updateTaskflow;
         tf::Taskflow _gpuTaskflow;

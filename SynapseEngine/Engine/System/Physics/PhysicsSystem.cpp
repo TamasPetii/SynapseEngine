@@ -23,7 +23,7 @@ namespace Syn
         auto transformPool = registry->GetPool<TransformComponent>();
         auto rbPool = registry->GetPool<RigidBodyComponent>();
 
-        IPhysicsEngine* physicsEngine = ServiceLocator::GetPhysicsEngine();
+        IPhysicsEngine* physicsEngine = scene->GetPhysicsEngine();
 
         if (!transformPool || !rbPool || !physicsEngine) return;
 

@@ -223,8 +223,6 @@ namespace Syn
 
 	void Engine::Shutdown() 
 	{
-		_physicsEngine->Shutdown();
-		_physicsEngine.reset();
 		_taskExecutor.reset();
 		_inputManager.reset();
 		_serializer.reset();
@@ -317,9 +315,12 @@ namespace Syn
 
 	void Engine::InitPhysicsEngine()
 	{
-		_physicsEngine = std::make_unique<JoltPhysicsEngine>();
-		_physicsEngine->Init();
-		ServiceLocator::ProvidePhysicsEngine(_physicsEngine.get());
+		ServiceLocator::ProvidePhysicsFactory([]() {
+			auto physicsEngine = std::make_unique<JoltPhysicsEngine>();
+			physicsEngine->Init();
+
+			return physicsEngine;
+			});
 	}
 
 	void Engine::InitSerializer()

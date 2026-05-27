@@ -7,6 +7,42 @@
 
 namespace Syn
 {
+    struct SYN_API WakeUpHelper
+    {
+        Registry* registry;
+
+        template<typename T, uint32_t... ExtraBits, typename Func>
+        void Run(Func&& customLogic)
+        {
+            auto pool = registry->GetPool<T>();
+            if (!pool) return;
+
+            for (auto entity : pool->GetStorage().GetDenseEntities())
+            {
+                pool->template SetBit<UPDATE_BIT>(entity);
+
+                if constexpr (sizeof...(ExtraBits) > 0) {
+                    (pool->template SetBit<ExtraBits>(entity), ...);
+                }
+
+                customLogic(pool->Get(entity), entity);
+
+                if constexpr (requires { pool->GetStorage().IsStatic(0); })
+                {
+                    auto denseIdx = pool->GetMapping().Get(entity);
+                    if (pool->GetStorage().IsStatic(denseIdx))
+                        pool->MarkStaticDirty(entity);
+                }
+            }
+        }
+
+        template<typename T, uint32_t... ExtraBits>
+        void Run()
+        {
+            Run<T, ExtraBits...>([](auto&, EntityID) {});
+        }
+    };
+
     class SYN_API ManifestSceneLoader : public ISceneLoader
     {
     public:

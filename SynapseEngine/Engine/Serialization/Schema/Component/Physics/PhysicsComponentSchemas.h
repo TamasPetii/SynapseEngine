@@ -7,6 +7,8 @@
 #include "Engine/Component/Physics/CapsuleColliderComponent.h"
 #include "Engine/Component/Physics/RigidBodyComponent.h"
 
+#include "Engine/Physics/PhysicsTypes.h"
+
 #include <type_traits>
 
 namespace Syn

@@ -79,8 +79,7 @@ namespace Syn
         std::unique_ptr<InputManager> _inputManager;
         std::unique_ptr<SceneManager> _sceneManager;
 		std::unique_ptr<tf::Executor> _taskExecutor;
-        std::unique_ptr<IPhysicsEngine> _physicsEngine;
-		std::unique_ptr<IGpuProfiler> _gpuProfiler;
+        std::unique_ptr<IGpuProfiler> _gpuProfiler;
         std::unique_ptr<ICpuProfiler> _cpuProfiler;
 		std::unique_ptr<Serializer> _serializer;
 

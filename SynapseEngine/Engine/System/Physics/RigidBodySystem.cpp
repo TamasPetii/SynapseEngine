@@ -36,7 +36,7 @@ namespace Syn
         auto boxPool = registry->GetPool<BoxColliderComponent>();
         auto spherePool = registry->GetPool<SphereColliderComponent>();
         auto capsulePool = registry->GetPool<CapsuleColliderComponent>();
-        auto physicsEngine = ServiceLocator::GetPhysicsEngine();
+        auto physicsEngine = scene->GetPhysicsEngine();
 
         if (!rbPool || !physicsEngine) return;
 

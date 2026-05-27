@@ -66,6 +66,8 @@ namespace Syn
 		_registry->EnsurePool<CapsuleColliderComponent>();
 		_registry->EnsurePool<RigidBodyComponent>();
 
+        _physicsEngine = ServiceLocator::GetPhysicsFactory()();
+
         if(source)
 			source->Populate(*this);
 
@@ -85,6 +87,8 @@ namespace Syn
 
     Scene::~Scene()
     {
+		_physicsEngine->Shutdown();
+        _physicsEngine.reset();
         _registry.reset();
         _componentBufferManager.reset();
         _systems.clear();
