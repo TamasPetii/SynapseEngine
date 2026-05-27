@@ -21,13 +21,20 @@ namespace Syn
     {
         Registry& registry;
     };
+    
+    template <typename T>
+    concept SegmentedPoolConstraint = requires(T pool, EntityID entity, StorageCategory cat) {
+        pool->SetCategory(entity, cat);
+    };
 
     template <typename Archive, typename Component>
     void SerializeEntityComponent(Archive& ar, Registry& reg, EntityID entity, const char* compName)
     {
         if constexpr (std::is_base_of_v<IOutputArchive, Archive>)
         {
-            if (reg.HasComponent<Component>(entity))
+            auto pool = reg.GetPool<Component>();
+
+            if (pool->Has(entity))
             {
                 if constexpr (std::is_empty_v<Component>) {
                     ScopedArchiveObject tagObj(ar, compName);
@@ -35,20 +42,61 @@ namespace Syn
                 else {
                     auto& comp = reg.GetComponent<Component>(entity);
                     ar.Property(compName, const_cast<std::remove_const_t<Component>&>(comp));
+
+                    if constexpr (SegmentedPoolConstraint<decltype(pool)>)
+                    {
+                        auto denseIdx = pool->GetMapping().Get(entity);
+
+                        uint32_t catEnum = 2;
+                        if (pool->GetStorage().IsStatic(denseIdx))
+                            catEnum = 0;
+                        else if (pool->GetStorage().IsDynamic(denseIdx)) 
+                            catEnum = 1;
+
+                        std::string catKey = std::string(compName) + "_Category";
+                        ar.Property(catKey.c_str(), catEnum);
+                    }
                 }
             }
         }
         else
         {
-            if (ar.HasProperty(compName))
+            reg.EnsurePool<Component>();
+            auto pool = reg.GetPool<Component>();
+
+            if constexpr (std::is_empty_v<Component>) 
             {
-                if constexpr (std::is_empty_v<Component>) {
-                    reg.AddComponent<Component>(entity);
+                if (ar.HasProperty(compName))
+                {
+                    pool->Add(entity);
                 }
-                else {
-                    Component comp;
+            }
+            else
+            {
+                if (ar.HasProperty(compName))
+                {
+                    Component comp{};
                     ar.Property(compName, comp);
-                    reg.AddComponent<Component>(entity, std::move(comp));
+
+                    pool->Add(entity, std::move(comp));
+
+                    if constexpr (SegmentedPoolConstraint<decltype(pool)>)
+                    {
+                        uint32_t catEnum = 2;
+                        std::string catKey = std::string(compName) + "_Category";
+                        
+                        if (ar.HasProperty(catKey.c_str())) {
+                            ar.Property(catKey.c_str(), catEnum);
+                        }
+                        
+                        StorageCategory targetCategory = StorageCategory::Stream;
+                        if (catEnum == 0)
+                            targetCategory = StorageCategory::Static;
+                        else if (catEnum == 1)
+                            targetCategory = StorageCategory::Dynamic;
+
+                        pool->SetCategory(entity, targetCategory);
+                    }
                 }
             }
         }
