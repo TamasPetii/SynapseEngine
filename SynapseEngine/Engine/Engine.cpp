@@ -313,14 +313,6 @@ namespace Syn
 			});
 
 		_sceneManager->LoadScene("TestLevel");
-
-		_sceneManager->Finish();
-		auto activeScene = _sceneManager->GetActiveScene();
-
-		_sceneManager->SaveActiveScene("C:\\Users\\User\\Desktop\\SceneSave\\TestLevel.json");
-		_sceneManager->SaveActiveScene("C:\\Users\\User\\Desktop\\SceneSave\\TestLevel.yaml");
-		_sceneManager->SaveActiveScene("C:\\Users\\User\\Desktop\\SceneSave\\TestLevel.toml");
-		_sceneManager->SaveActiveScene("C:\\Users\\User\\Desktop\\SceneSave\\TestLevel.xml");
 	}
 
 	void Engine::InitPhysicsEngine()

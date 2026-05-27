@@ -35,6 +35,11 @@ namespace Syn {
 		// --- ISettingsAPI ---
         SceneSettings GetSceneSettings() const override;
         void SetSceneSettings(const SceneSettings& settings) override;
+
+        // --- ISceneAPI ---
+        void NewScene() override;
+        void LoadScene(const std::string& filepath = "") override;
+        void SaveScene(const std::string& filepath = "") override;
     private:
         Engine* _engine = nullptr;
         SceneManager* _sceneManager = nullptr;

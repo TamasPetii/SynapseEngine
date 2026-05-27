@@ -5,6 +5,7 @@
 #include "Engine/Scene/Source/File/FileSceneSource.h"
 #include "Engine/FrameContext.h"
 #include "Engine/ServiceLocator.h"
+#include "Engine/Vk/Context.h"
 
 namespace Syn
 {
@@ -73,6 +74,11 @@ namespace Syn
     {
         if (_isSceneChangePending)
         {
+            if (_activeScene)
+            {
+                vkDeviceWaitIdle(ServiceLocator::GetVkContext()->GetDevice()->Handle());
+            }
+
             if (_pendingScene)
             {
                 _activeScene = std::move(_pendingScene);

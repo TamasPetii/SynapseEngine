@@ -46,6 +46,12 @@ namespace Syn {
             });
     }
 
+    uint32_t MaterialManager::LoadMaterialDirect(const std::string& name, const Material& material) {
+        return InternalLoadSync(name, [this, material]() {
+            return std::make_shared<Material>(material);
+            });
+    }
+
     void MaterialManager::StartGpuUpload(EntryType& entry) {
         uint32_t entryIndex = _pathToId.at(entry.path);
         size_t offset = entryIndex * sizeof(GpuMaterial);

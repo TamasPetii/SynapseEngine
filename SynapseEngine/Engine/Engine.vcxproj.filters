@@ -2744,6 +2744,12 @@
     <ClInclude Include="Scene\Loader\ManifestSceneLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Serialization\Schema\Material\MaterialSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Component\Rendering\MaterialOverrideComponentSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Includes\Common\Animation.glsl" />

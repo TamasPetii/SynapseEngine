@@ -10,6 +10,8 @@
 
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Animation/AnimationManager.h"
+#include "Engine/Material/MaterialManager.h"
+#include "Engine/Image/ImageManager.h"
 
 namespace Syn
 {
@@ -22,12 +24,19 @@ namespace Syn
 
         std::vector<uint32_t> localToGlobalModels;
         std::vector<uint32_t> localToGlobalAnims;
+        std::vector<uint32_t> localToGlobalMats;
+        std::vector<uint32_t> localToGlobalTex;
 
         LoadAndMapModels(snapshot.modelManifest, localToGlobalModels);
         LoadAndMapAnimations(snapshot.animationManifest, localToGlobalModels, localToGlobalAnims);
+        LoadAndMapTextures(snapshot.textureManifest, localToGlobalTex);
+        RemapAndLoadMaterials(snapshot.materialManifest, localToGlobalTex, localToGlobalMats);
 
         RemapModelComponents(scene, localToGlobalModels);
         RemapAnimationComponents(scene, localToGlobalAnims);
+        RemapMaterialComponents(scene, localToGlobalMats);
+
+		WakeUpEntities(scene);
 
         Info("ManifestSceneLoader: Successfully populated scene from {}", path.string());
         return true;
@@ -58,7 +67,7 @@ namespace Syn
 
         for (const auto& modelPath : modelManifest)
         {
-            uint32_t globalId = modelManager->LoadModelSync(modelPath);
+            uint32_t globalId = modelManager->LoadModelAsync(modelPath);
             outLocalToGlobalModels.push_back(globalId);
         }
     }
@@ -78,8 +87,52 @@ namespace Syn
             }
 
             uint32_t globalModelId = localToGlobalModels[animEntry.localModelIndex];
-            uint32_t globalAnimId = animManager->LoadAnimationSync(animEntry.filePath, globalModelId);
+            uint32_t globalAnimId = animManager->LoadAnimationAsync(animEntry.filePath, globalModelId);
             outLocalToGlobalAnims.push_back(globalAnimId);
+        }
+    }
+
+    void ManifestSceneLoader::LoadAndMapTextures(const std::vector<TextureManifestEntry>& texManifest, std::vector<uint32_t>& outLocalToGlobalTex)
+    {
+        auto imageManager = ServiceLocator::GetImageManager();
+        outLocalToGlobalTex.reserve(texManifest.size());
+
+        for (const auto& entry : texManifest)
+        {
+            uint32_t globalId = imageManager->LoadImageAsync(entry.payload.path);
+            outLocalToGlobalTex.push_back(globalId);
+        }
+    }
+
+    void ManifestSceneLoader::RemapAndLoadMaterials(std::vector<MaterialManifestEntry>& matManifest, const std::vector<uint32_t>& localToGlobalTex, std::vector<uint32_t>& outLocalToGlobalMats)
+    {
+        auto matManager = ServiceLocator::GetMaterialManager();
+        outLocalToGlobalMats.reserve(matManifest.size());
+
+        auto applyRemap = [&](uint32_t& localTexIndex) {
+            if (localTexIndex != UINT32_MAX) {
+                if (localTexIndex < localToGlobalTex.size()) {
+                    localTexIndex = localToGlobalTex[localTexIndex];
+                }
+                else {
+                    Error("ManifestSceneLoader: Material has corrupt local texture index: {}", localTexIndex);
+                    localTexIndex = UINT32_MAX;
+                }
+            }
+            };
+
+        for (auto& entry : matManifest)
+        {
+            applyRemap(entry.material.albedoTexture);
+            applyRemap(entry.material.normalTexture);
+            applyRemap(entry.material.metalnessTexture);
+            applyRemap(entry.material.roughnessTexture);
+            applyRemap(entry.material.metallicRoughnessTexture);
+            applyRemap(entry.material.emissiveTexture);
+            applyRemap(entry.material.ambientOcclusionTexture);
+
+            uint32_t globalId = matManager->LoadMaterialDirect(entry.name, entry.material);
+            outLocalToGlobalMats.push_back(globalId);
         }
     }
 
@@ -91,13 +144,17 @@ namespace Syn
         for (auto entity : modelPool->GetStorage().GetDenseEntities())
         {
             auto& comp = modelPool->Get(entity);
-            if (comp.modelIndex < localToGlobalModels.size())
+
+            if (comp.modelIndex != UINT32_MAX)
             {
-                comp.modelIndex = localToGlobalModels[comp.modelIndex];
-            }
-            else
-            {
-                Error("ManifestSceneLoader: ModelComponent on entity {} has corrupt local index: {}", entity, comp.modelIndex);
+                if (comp.modelIndex < localToGlobalModels.size())
+                {
+                    comp.modelIndex = localToGlobalModels[comp.modelIndex];
+                }
+                else
+                {
+                    Error("ManifestSceneLoader: ModelComponent on entity {} has corrupt local index: {}", entity, comp.modelIndex);
+                }
             }
         }
     }
@@ -110,18 +167,101 @@ namespace Syn
         for (auto entity : animPool->GetStorage().GetDenseEntities())
         {
             auto& comp = animPool->Get(entity);
-            if (comp.animationIndex < localToGlobalAnims.size())
+
+            if (comp.animationIndex != UINT32_MAX)
             {
-                uint32_t globalAnimId = localToGlobalAnims[comp.animationIndex];
-                if (globalAnimId != UINT32_MAX)
+                if (comp.animationIndex < localToGlobalAnims.size())
                 {
-                    comp.animationIndex = globalAnimId;
+                    uint32_t globalAnimId = localToGlobalAnims[comp.animationIndex];
+                    if (globalAnimId != UINT32_MAX)
+                    {
+                        comp.animationIndex = globalAnimId;
+                    }
+                }
+                else
+                {
+                    Error("ManifestSceneLoader: AnimationComponent on entity {} has corrupt local index: {}", entity, comp.animationIndex);
+                }
+            } 
+        }
+    }
+
+    void ManifestSceneLoader::RemapMaterialComponents(Scene& scene, const std::vector<uint32_t>& localToGlobalMats)
+    {
+        auto matPool = scene.GetRegistry()->GetPool<MaterialOverrideComponent>();
+        if (!matPool) return;
+
+        for (auto entity : matPool->GetStorage().GetDenseEntities())
+        {
+            auto& comp = matPool->Get(entity);
+            for (size_t i = 0; i < comp.materials.size(); ++i)
+            {
+                uint32_t localIndex = comp.materials[i];
+
+                if (localIndex != UINT32_MAX)
+                {
+                    if (localIndex < localToGlobalMats.size()) {
+                        comp.materials[i] = localToGlobalMats[localIndex];
+                    }
+                    else {
+                        Error("ManifestSceneLoader: MaterialOverrideComponent on entity {} has corrupt local index: {}", (uint32_t)entity, localIndex);
+                    }
                 }
             }
-            else
-            {
-                Error("ManifestSceneLoader: AnimationComponent on entity {} has corrupt local index: {}", entity, comp.animationIndex);
+        }
+    }
+
+    void ManifestSceneLoader::WakeUpEntities(Scene& scene)
+    {
+        auto registry = scene.GetRegistry();
+
+        auto transformPool = registry->GetPool<TransformComponent>();
+        if (transformPool) {
+            for (auto entity : transformPool->GetStorage().GetDenseEntities()) {
+                transformPool->SetBit<UPDATE_BIT>(entity);
+                transformPool->SetBit<TRANSFORM_POS_CHANGED>(entity);
+                transformPool->SetBit<TRANSFORM_ROT_CHANGED>(entity);
+                transformPool->SetBit<TRANSFORM_SCALE_CHANGED>(entity);
+
+                /*
+                if (!transformPool->IsStatic(entity) && !transformPool->IsDynamic(entity)) {
+                    transformPool->SetCategory(entity, StorageCategory::Static);
+                }
+                */
             }
         }
+
+        /*
+        auto dirLightPool = registry->GetPool<DirectionLightComponent>();
+        if (dirLightPool) {
+            for (auto entity : dirLightPool->GetStorage().GetDenseEntities()) {
+                dirLightPool->SetBit<UPDATE_BIT>(entity);
+                //if (!dirLightPool->IsStream(entity)) dirLightPool->SetCategory(entity, StorageCategory::Stream);
+            }
+        }
+
+        auto pointLightPool = registry->GetPool<PointLightComponent>();
+        if (pointLightPool) {
+            for (auto entity : pointLightPool->GetStorage().GetDenseEntities()) {
+                pointLightPool->SetBit<UPDATE_BIT>(entity);
+                //if (!pointLightPool->IsStream(entity)) pointLightPool->SetCategory(entity, StorageCategory::Stream);
+            }
+        }
+
+        auto spotLightPool = registry->GetPool<SpotLightComponent>();
+        if (spotLightPool) {
+            for (auto entity : spotLightPool->GetStorage().GetDenseEntities()) {
+                spotLightPool->SetBit<UPDATE_BIT>(entity);
+                //if (!spotLightPool->IsStream(entity)) spotLightPool->SetCategory(entity, StorageCategory::Stream);
+            }
+        }
+
+        auto modelPool = registry->GetPool<ModelComponent>();
+        if (modelPool) {
+            for (auto entity : modelPool->GetStorage().GetDenseEntities()) {
+                modelPool->SetBit<UPDATE_BIT>(entity);
+            }
+        }
+        */
     }
 }

@@ -10,6 +10,8 @@
 #include "Engine/Serialization/Schema/Registry/StorageBackendSchema.h"
 #include "Engine/Serialization/Schema/Registry/RegistrySchema.h"
 #include "Engine/Serialization/Schema/Registry/FlatStorageImplSchema.h"
+#include "Engine/Serialization/Schema/Material/MaterialSchema.h"
+#include "Engine/Serialization/Schema/Models/MaterialInfoSchema.h"
 #include "Engine/Scene/Insiders/SceneInsider.h"
 #include "Engine/Scene/Scene.h"
 
@@ -29,8 +31,51 @@ namespace Syn
         {
             ScopedArchiveObject obj(ar, name);
             auto& entry = const_cast<std::remove_const_t<U>&>(val);
+
             ar.Property("filePath", entry.filePath);
             ar.Property("localModelIndex", entry.localModelIndex);
+        }
+    };
+
+    struct SYN_API MaterialManifestEntry {
+        std::string name;
+        std::string path;
+        Material material;
+    };
+
+    template <>
+    struct Schema<MaterialManifestEntry> {
+        static constexpr bool exists = true;
+
+        template <typename Archive, typename U>
+        static void Invoke(Archive& ar, const char* name, U& val)
+        {
+            ScopedArchiveObject obj(ar, name);
+            auto& entry = const_cast<std::remove_const_t<U>&>(val);
+
+            ar.Property("name", entry.name);
+            ar.Property("path", entry.path);
+            ar.Property("material", entry.material);
+        }
+    };
+
+    struct SYN_API TextureManifestEntry {
+        std::string name;
+        TexturePayload payload;
+    };
+
+    template <>
+    struct Schema<TextureManifestEntry> {
+        static constexpr bool exists = true;
+
+        template <typename Archive, typename U>
+        static void Invoke(Archive& ar, const char* name, U& val)
+        {
+            ScopedArchiveObject obj(ar, name);
+            auto& entry = const_cast<std::remove_const_t<U>&>(val);
+
+            ar.Property("name", entry.name);
+            ar.Property("payload", entry.payload);
         }
     };
 
@@ -40,6 +85,8 @@ namespace Syn
         Scene& scene;
         std::vector<std::string> modelManifest;
         std::vector<AnimationManifestEntry> animationManifest;
+        std::vector<MaterialManifestEntry> materialManifest;
+        std::vector<TextureManifestEntry> textureManifest;
     };
 
     template <typename... Components>
@@ -67,6 +114,8 @@ namespace Syn
 
             ar.Property("ModelManifest", snapshot.modelManifest);
             ar.Property("AnimationManifest", snapshot.animationManifest);
+            ar.Property("MaterialManifest", snapshot.materialManifest); 
+            ar.Property("TextureManifest", snapshot.textureManifest);
 
             RegistrySnapshot<Components...> regSnap{ registry };
             ar.Property("Registry", regSnap);

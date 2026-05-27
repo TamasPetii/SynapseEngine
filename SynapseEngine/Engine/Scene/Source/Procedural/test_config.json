@@ -3,7 +3,7 @@
     "base_model_path": "C:/Users/User/Desktop/Models/"
   },
   "environment": {
-    "spawn_sponza": true,
+    "spawn_sponza": false,
     "spawn_bistro": false,
     "spawn_floor": true,
     "spawn_pbr_sponza": false,
@@ -11,10 +11,10 @@
   },
   "materials": {
     "use_unique_materials": false,
-    "shared_material_count": 10
+    "shared_material_count": 25
   },
   "entities": {
-    "animated_characters": 5,
+    "animated_characters": 0,
     "static_geometry": 5,
     "physics_boxes": 5,
     "physics_spheres": 5,

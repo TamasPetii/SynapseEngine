@@ -705,9 +705,11 @@
     <ClInclude Include="Serialization\Schema\Component\Light\LightComponentSchemas.h" />
     <ClInclude Include="Serialization\Schema\Component\Light\LightShadowComponentSchemas.h" />
     <ClInclude Include="Serialization\Schema\Component\Rendering\AnimationComponentSchema.h" />
+    <ClInclude Include="Serialization\Schema\Component\Rendering\MaterialOverrideComponentSchema.h" />
     <ClInclude Include="Serialization\Schema\Component\Rendering\ModelComponentSchema.h" />
     <ClInclude Include="Serialization\Schema\Core\GlmSchema.h" />
     <ClInclude Include="Serialization\Schema\Core\VectorSchema.h" />
+    <ClInclude Include="Serialization\Schema\Material\MaterialSchema.h" />
     <ClInclude Include="Serialization\Schema\Models\GpuBatchedModelSchema.h" />
     <ClInclude Include="Serialization\Schema\Models\GpuIndexedDrawDataSchema.h" />
     <ClInclude Include="Serialization\Schema\Models\GpuMeshletDrawDataSchema.h" />

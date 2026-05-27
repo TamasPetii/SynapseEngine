@@ -6,4 +6,5 @@
 #include "Light/LightShadowComponentSchemas.h"
 #include "Rendering/ModelComponentSchema.h"
 #include "Rendering/AnimationComponentSchema.h"
+#include "Rendering/MaterialOverrideComponentSchema.h"
 #include "Physics/PhysicsComponentSchemas.h"

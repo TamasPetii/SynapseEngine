@@ -8,6 +8,7 @@
 
 #include "Engine/Component/Core/TransformComponent.h"
 #include "Engine/Component/Core/CameraComponent.h"
+#include "Engine/Component/Core/TagComponent.h"
 #include "Engine/Component/Rendering/ModelComponent.h"
 #include "Engine/Component/Rendering/AnimationComponent.h"
 #include "Engine/Component/Light/Direction/DirectionLightComponent.h"
@@ -49,8 +50,9 @@ namespace Syn
         _sceneSettings = std::make_unique<SceneSettings>();
 
 		_registry->EnsurePool<TransformComponent>();
-        _registry->EnsurePool<AnimationComponent>();
         _registry->EnsurePool<CameraComponent>();
+        _registry->EnsurePool<TagComponent>();
+        _registry->EnsurePool<AnimationComponent>();
         _registry->EnsurePool<ModelComponent>();
         _registry->EnsurePool<MaterialOverrideComponent>();
         _registry->EnsurePool<DirectionLightComponent>();

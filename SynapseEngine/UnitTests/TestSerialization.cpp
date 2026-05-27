@@ -40,6 +40,7 @@
 #include "Engine/Scene/SceneSettings.h"
 #include "Engine/Serialization/Schema/Scene/SceneSchema.h"
 #include "Engine/Serialization/Schema/Scene/SceneSettingsSchema.h"
+#include "Engine/Serialization/Schema/Material/MaterialSchema.h"
 
 #include "Engine/Component/Components.h"
 

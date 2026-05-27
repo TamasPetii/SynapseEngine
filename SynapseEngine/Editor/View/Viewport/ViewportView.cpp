@@ -13,6 +13,18 @@ namespace Syn {
         ViewportState state = vm.GetState();
 
         if (ImGui::BeginMenuBar()) {
+            ImGuiStyle& style = ImGui::GetStyle();
+
+            float width1 = ImGui::CalcTextSize("Gizmo").x + style.FramePadding.x * 2.0f;
+            float width2 = ImGui::CalcTextSize("Image").x + style.FramePadding.x * 2.0f;
+            float width3 = ImGui::CalcTextSize("Debug").x + style.FramePadding.x * 2.0f;
+            float totalWidth = width1 + width2 + width3 + style.ItemSpacing.x * 2.0f;
+            float offsetX = (ImGui::GetWindowWidth() - totalWidth) * 0.5f;
+
+            if (offsetX > 0.0f) {
+                ImGui::SetCursorPosX(offsetX);
+            }
+
             DrawGizmoMenu(vm, state);
             DrawImageMenu(vm, state);
             DrawDebugMenu(vm, state);

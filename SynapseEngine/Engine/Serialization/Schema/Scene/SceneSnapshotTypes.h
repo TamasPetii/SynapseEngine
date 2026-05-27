@@ -8,10 +8,18 @@ namespace Syn
         TransformComponent,
         CameraComponent,
         ModelComponent,
+        TagComponent,
         AnimationComponent,
         BoxColliderComponent,
         SphereColliderComponent,
         CapsuleColliderComponent,
-        RigidBodyComponent
+        RigidBodyComponent,
+		DirectionLightComponent,
+		DirectionLightShadowComponent,
+		PointLightComponent,
+		PointLightShadowComponent,
+		SpotLightComponent,
+		SpotLightShadowComponent,
+		MaterialOverrideComponent
     >;
 }
