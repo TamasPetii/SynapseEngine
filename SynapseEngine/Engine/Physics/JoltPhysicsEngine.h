@@ -88,15 +88,16 @@ namespace Syn
         PhysicsBodyID CreateBoxBody(const glm::vec3& position, const glm::quat& rotation, const glm::vec3& halfExtents, const PhysicsBodySettings& settings) override;
         PhysicsBodyID CreateSphereBody(const glm::vec3& position, const glm::quat& rotation, float radius, const PhysicsBodySettings& settings) override;
         PhysicsBodyID CreateCapsuleBody(const glm::vec3& position, const glm::quat& rotation, float halfHeight, float radius, const PhysicsBodySettings& settings) override;
-        PhysicsBodyID CreateConvexBody(const glm::vec3& position, const glm::quat& rotation, std::span<const glm::vec3> vertices, const PhysicsBodySettings& settings) override;
-        PhysicsBodyID CreateMeshBody(const glm::vec3& position, const glm::quat& rotation, std::span<const glm::vec3> vertices, std::span<const uint32_t> indices, const PhysicsBodySettings& settings) override;
+        PhysicsBodyID CreateConvexBody(const glm::vec3& position, const glm::quat& rotation, std::span<const glm::vec3> vertices, const glm::vec3& scale, const PhysicsBodySettings& settings) override;
+        PhysicsBodyID CreateMeshBody(const glm::vec3& position, const glm::quat& rotation, std::span<const glm::vec3> vertices, std::span<const uint32_t> indices, const glm::vec3& scale, const PhysicsBodySettings& settings) override;
 
         void DestroyBody(PhysicsBodyID bodyId) override;
 
         void SetBoxShape(PhysicsBodyID bodyId, const glm::vec3& newHalfExtents) override;
         void SetSphereShape(PhysicsBodyID bodyId, float newRadius) override;
         void SetCapsuleShape(PhysicsBodyID bodyId, float newHalfHeight, float newRadius) override;
-        void SetConvexShape(PhysicsBodyID bodyId, std::span<const glm::vec3> newVertices) override;
+        void SetConvexShape(PhysicsBodyID bodyId, std::span<const glm::vec3> newVertices, const glm::vec3& scale) override;
+        void SetMeshShape(PhysicsBodyID bodyId, std::span<const glm::vec3> newVertices, std::span<const uint32_t> newIndices, const glm::vec3& scale) override;
 
         void SetBodyFriction(PhysicsBodyID bodyId, float friction) override;
         void SetBodyRestitution(PhysicsBodyID bodyId, float restitution) override;

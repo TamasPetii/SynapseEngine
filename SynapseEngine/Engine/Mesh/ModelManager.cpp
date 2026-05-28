@@ -15,12 +15,10 @@ namespace Syn {
     ModelManager::ModelManager(uint32_t framesInFlight,
         std::shared_ptr<StaticMeshBuilder> builder,
         std::unique_ptr<IGpuModelUploader> uploader,
-        std::unique_ptr<ICpuModelExtractor> cpuExtractor,
         MaterialLoadCallback materialLoadCallback)
         : AddressResourceManager<StaticMesh, GpuModelAddresses>(framesInFlight, 100, 256, 512),
         _builder(builder), 
         _uploader(std::move(uploader)), 
-        _cpuExtractor(std::move(cpuExtractor)),
         _materialLoadCallback(std::move(materialLoadCallback))
     {
     }
@@ -155,15 +153,11 @@ namespace Syn {
 
     void ModelManager::FinalizeResource(EntryType& entry)
     {
-        auto& gpuData = *(entry.resource->transientGpuData);
-        auto& cpuData = entry.resource->cpuData;
-
-        _cpuExtractor->Extract(gpuData, cpuData);
-      
         uint32_t entryIndex = _pathToId.at(entry.path);
 
         GpuModelAddresses addresses{};
         const auto& hw = entry.resource->hardwareBuffers;
+        const auto& cpuData = entry.resource->cpuData;
 
         addresses.vertexPositions = hw.vertexPositions->GetDeviceAddress();
         addresses.vertexAttributes = hw.vertexAttributes->GetDeviceAddress();

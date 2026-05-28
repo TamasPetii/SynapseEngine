@@ -237,28 +237,28 @@
     <ClCompile Include="Mesh\Loader\BezierLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh\Processor\IMeshProcessor.cpp">
+    <ClCompile Include="Mesh\Processor\MeshProcessor\IMeshProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh\Processor\Lod\ILodProcessor.cpp">
+    <ClCompile Include="Mesh\Processor\MeshProcessor\Lod\ILodProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh\Processor\Geometry\NormalProcessor.cpp">
+    <ClCompile Include="Mesh\Processor\MeshProcessor\Geometry\NormalProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh\Processor\Geometry\TangentProcessor.cpp">
+    <ClCompile Include="Mesh\Processor\MeshProcessor\Geometry\TangentProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh\Processor\Meshlet\IMeshletProcessor.cpp">
+    <ClCompile Include="Mesh\Processor\MeshProcessor\Meshlet\IMeshletProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh\Processor\Lod\MeshoptimizerLodProcessor.cpp">
+    <ClCompile Include="Mesh\Processor\MeshProcessor\Lod\MeshoptimizerLodProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh\Processor\Meshlet\MeshoptimizerMeshletProcessor.cpp">
+    <ClCompile Include="Mesh\Processor\MeshProcessor\Meshlet\MeshoptimizerMeshletProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh\Processor\Geometry\ColliderProcessor.cpp">
+    <ClCompile Include="Mesh\Processor\MeshProcessor\Geometry\ColliderProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mesh\Data\Raw\RawMesh.cpp">
@@ -333,13 +333,13 @@
     <ClCompile Include="Mesh\Data\Cooked\CookedMeshlet.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh\Processor\MeshProcessorPipeline.cpp">
+    <ClCompile Include="Mesh\Processor\MeshProcessor\MeshProcessorPipeline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mesh\Builder\StaticMeshBuilder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh\Processor\IMeshProcessorPipeline.cpp">
+    <ClCompile Include="Mesh\Processor\MeshProcessor\IMeshProcessorPipeline.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mesh\Loader\IMeshLoaderRegistry.cpp">
@@ -606,10 +606,10 @@
     <ClCompile Include="System\Rendering\MaterialSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh\Processor\Optimizer\IMeshOptimizer.cpp">
+    <ClCompile Include="Mesh\Processor\MeshProcessor\Optimizer\IMeshOptimizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Mesh\Processor\Optimizer\MeshoptimizerOptimizerProcessor.cpp">
+    <ClCompile Include="Mesh\Processor\MeshProcessor\Optimizer\MeshoptimizerOptimizerProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Hiz\HizDownsamplePass.cpp">
@@ -1275,6 +1275,36 @@
     <ClCompile Include="Physics\JobSystemTaskflow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Component\Physics\ConvexColliderComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Component\Physics\MeshColliderComponent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Physics\ConvexColliderSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Physics\MeshColliderSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh\Processor\CpuModelProcessor\ICpuModelProcessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh\Processor\CpuModelProcessor\ICpuModelProcessorPipeline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh\Processor\CpuModelProcessor\CpuModelProcessorPipeline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh\Processor\CpuModelProcessor\MemoryCleanupProcessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh\Processor\CpuModelProcessor\BatchedIndicesProcessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh\Processor\CpuModelProcessor\VertexWeldingProcessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -1565,28 +1595,28 @@
     <ClInclude Include="Mesh\Loader\BezierLoader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh\Processor\IMeshProcessor.h">
+    <ClInclude Include="Mesh\Processor\MeshProcessor\IMeshProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh\Processor\Lod\ILodProcessor.h">
+    <ClInclude Include="Mesh\Processor\MeshProcessor\Lod\ILodProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh\Processor\Geometry\NormalProcessor.h">
+    <ClInclude Include="Mesh\Processor\MeshProcessor\Geometry\NormalProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh\Processor\Geometry\TangentProcessor.h">
+    <ClInclude Include="Mesh\Processor\MeshProcessor\Geometry\TangentProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh\Processor\Meshlet\IMeshletProcessor.h">
+    <ClInclude Include="Mesh\Processor\MeshProcessor\Meshlet\IMeshletProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh\Processor\Lod\MeshoptimizerLodProcessor.h">
+    <ClInclude Include="Mesh\Processor\MeshProcessor\Lod\MeshoptimizerLodProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh\Processor\Meshlet\MeshoptimizerMeshletProcessor.h">
+    <ClInclude Include="Mesh\Processor\MeshProcessor\Meshlet\MeshoptimizerMeshletProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh\Processor\Geometry\ColliderProcessor.h">
+    <ClInclude Include="Mesh\Processor\MeshProcessor\Geometry\ColliderProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mesh\Data\Raw\RawMesh.h">
@@ -1661,13 +1691,13 @@
     <ClInclude Include="Mesh\Data\Cooked\CookedMeshlet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh\Processor\MeshProcessorPipeline.h">
+    <ClInclude Include="Mesh\Processor\MeshProcessor\MeshProcessorPipeline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mesh\Builder\StaticMeshBuilder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh\Processor\MeshProcessors.h">
+    <ClInclude Include="Mesh\Processor\MeshProcessor\MeshProcessors.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mesh\Source\MeshSources.h">
@@ -1676,7 +1706,7 @@
     <ClInclude Include="Mesh\Loader\MeshLoaders.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh\Processor\IMeshProcessorPipeline.h">
+    <ClInclude Include="Mesh\Processor\MeshProcessor\IMeshProcessorPipeline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mesh\Loader\IMeshLoaderRegistry.h">
@@ -1967,10 +1997,10 @@
     <ClInclude Include="Image\SamplerNames.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh\Processor\Optimizer\IMeshOptimizer.h">
+    <ClInclude Include="Mesh\Processor\MeshProcessor\Optimizer\IMeshOptimizer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mesh\Processor\Optimizer\MeshoptimizerOptimizerProcessor.h">
+    <ClInclude Include="Mesh\Processor\MeshProcessor\Optimizer\MeshoptimizerOptimizerProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Hiz\HizDownsamplePass.h">
@@ -2754,6 +2784,45 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Physics\JobSystemTaskflow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\Physics\ConvexColliderComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Component\Physics\MeshColliderComponent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Physics\ConvexColliderSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Physics\MeshColliderSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh\Processor\CpuModelProcessor\ICpuModelProcessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh\Processor\CpuModelProcessor\ICpuModelProcessorPipeline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh\Processor\CpuModelProcessor\CpuModelProcessorPipeline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh\Processor\CpuModelProcessor\MemoryCleanupProcessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh\Processor\CpuModelProcessor\BatchedIndicesProcessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh\Processor\CpuModelProcessor\VertexWeldingProcessor.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Models\MeshDrawBlueprintSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Models\CpuModelDataSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Serialization\Schema\Models\StaticMeshSchema.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

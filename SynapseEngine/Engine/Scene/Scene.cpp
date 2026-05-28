@@ -36,6 +36,8 @@
 #include "Engine/System/Physics/BoxColliderSystem.h"
 #include "Engine/System/Physics/SphereColliderSystem.h"
 #include "Engine/System/Physics/CapsuleColliderSystem.h"
+#include "Engine/System/Physics/ConvexColliderSystem.h"
+#include "Engine/System/Physics/MeshColliderSystem.h"
 #include "Engine/System/Physics/RigidBodySystem.h"
 #include "Engine/System/Core/StaticSpatialSahSystem.h"
 #include "Engine/System/Core/TransformModelLinkSystem.h"
@@ -64,6 +66,8 @@ namespace Syn
 		_registry->EnsurePool<BoxColliderComponent>();
 		_registry->EnsurePool<SphereColliderComponent>();
 		_registry->EnsurePool<CapsuleColliderComponent>();
+        _registry->EnsurePool<ConvexColliderComponent>();
+        _registry->EnsurePool<MeshColliderComponent>();
 		_registry->EnsurePool<RigidBodyComponent>();
 
         _physicsEngine = ServiceLocator::GetPhysicsFactory()();
@@ -121,6 +125,8 @@ namespace Syn
 		RegisterSystem<BoxColliderSystem>();
 		RegisterSystem<SphereColliderSystem>();
 		RegisterSystem<CapsuleColliderSystem>();
+        RegisterSystem<ConvexColliderSystem>();
+        RegisterSystem<MeshColliderSystem>();
 		RegisterSystem<RigidBodySystem>();
     }
 
@@ -221,6 +227,13 @@ namespace Syn
 
 		RegisterComponentSparseMapBuffer<CapsuleColliderComponent>(BufferNames::CapsuleColliderSparseMap);
 		RegisterComponentBuffer<CapsuleColliderComponent, CapsuleColliderComponentGPU>(BufferNames::CapsuleColliderData);
+
+        RegisterComponentSparseMapBuffer<ConvexColliderComponent>(BufferNames::ConvexColliderSparseMap);
+        RegisterComponentBuffer<ConvexColliderComponent, ConvexColliderComponentGPU>(BufferNames::ConvexColliderData);
+
+        RegisterComponentSparseMapBuffer<MeshColliderComponent>(BufferNames::MeshColliderSparseMap);
+        RegisterComponentBuffer<MeshColliderComponent, MeshColliderComponentGPU>(BufferNames::MeshColliderData);
+
     }
 
     void Scene::BuildTaskflowGraph(tf::Taskflow& taskflow, SystemPhase phase)

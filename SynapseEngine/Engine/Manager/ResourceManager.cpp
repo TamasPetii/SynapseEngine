@@ -13,7 +13,7 @@
 #include "Engine/Mesh/Loader/MeshLoaders.h"
 #include "Engine/Mesh/Source/MeshSources.h"
 #include "Engine/Mesh/Factory/MeshFactory.h"
-#include "Engine/Mesh/Processor/MeshProcessors.h" 
+#include "Engine/Mesh/Processor/MeshProcessor/MeshProcessors.h" 
 
 #include "Engine/Image/Loader/ImageLoaderRegistry.h"
 #include "Engine/Image/Source/Memory/MemoryImageSource.h"
@@ -32,6 +32,11 @@
 #include "Engine/Animation/Processor/Geometry/AnimationBakeProcessor.h"
 #include "Engine/Animation/Processor/Geometry/AnimationColliderProcessor.h"
 #include "Engine/Animation/Uploader/DefaultGpuAnimationUploader.h"
+
+#include "Engine/Mesh/Processor/CpuModelProcessor/CpuModelProcessorPipeline.h"
+#include "Engine/Mesh/Processor/CpuModelProcessor/BatchedIndicesProcessor.h"
+#include "Engine/Mesh/Processor/CpuModelProcessor/VertexWeldingProcessor.h"
+#include "Engine/Mesh/Processor/CpuModelProcessor/MemoryCleanupProcessor.h"
 
 #include "Engine/Mesh/MeshSourceNames.h"
 
@@ -111,16 +116,23 @@ namespace Syn {
 			std::make_unique<MeshLoaderRegistry>(),
 			std::make_unique<MeshProcessorPipeline>(),
 			std::make_unique<DefaultGpuModelConverter>(),
-			std::make_unique<DefaultModelCooker>()
+			std::make_unique<DefaultModelCooker>(),
+			std::make_unique<DefaultCpuModelExtractor>(),
+			std::make_unique<CpuModelProcessorPipeline>()
 		);
 
 		_staticMeshBuilder->RegisterLoader(std::make_shared<AssimpMeshLoader>(), 1);
-		_staticMeshBuilder->RegisterProcessor(std::make_unique<NormalProcessor>());
-		_staticMeshBuilder->RegisterProcessor(std::make_unique<TangentProcessor>());
-		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerLodProcessor>());
+
+		_staticMeshBuilder->RegisterMeshProcessor(std::make_unique<NormalProcessor>());
+		_staticMeshBuilder->RegisterMeshProcessor(std::make_unique<TangentProcessor>());
+		_staticMeshBuilder->RegisterMeshProcessor(std::make_unique<MeshoptimizerLodProcessor>());
 		//_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerOptimizerProcessor>());
-		_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerMeshletProcessor>());
-		_staticMeshBuilder->RegisterProcessor(std::make_unique<ColliderProcessor>());
+		_staticMeshBuilder->RegisterMeshProcessor(std::make_unique<MeshoptimizerMeshletProcessor>());
+		_staticMeshBuilder->RegisterMeshProcessor(std::make_unique<ColliderProcessor>());
+
+		_staticMeshBuilder->RegisterCpuModelProcessor(std::make_unique<BatchedIndicesProcessor>());
+		_staticMeshBuilder->RegisterCpuModelProcessor(std::make_unique<VertexWeldingProcessor>());
+		_staticMeshBuilder->RegisterCpuModelProcessor(std::make_unique<MemoryCleanupProcessor>());
 
 		ServiceLocator::ProvideStaticMeshBuilder(_staticMeshBuilder.get());
 
@@ -128,7 +140,6 @@ namespace Syn {
 			_framesInFlight,
 			_staticMeshBuilder,
 			std::make_unique<DefaultGpuModelUploader>(),
-			std::make_unique<DefaultCpuModelExtractor>(),
 			[this](const std::string& name, const MaterialInfo& info) -> uint32_t {
 				return _materialManager->LoadMaterial(name, info);
 			}

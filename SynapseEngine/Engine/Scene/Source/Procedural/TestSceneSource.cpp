@@ -19,6 +19,8 @@
 #include "Engine/Component/Physics/BoxColliderComponent.h"
 #include "Engine/Component/Physics/SphereColliderComponent.h"
 #include "Engine/Component/Physics/CapsuleColliderComponent.h"
+#include "Engine/Component/Physics/ConvexColliderComponent.h"
+#include "Engine/Component/Physics/MeshColliderComponent.h"
 #include "Engine/Component/Physics/RigidBodyComponent.h"
 #include "Engine/Logger/SynLog.h"
 
@@ -131,13 +133,18 @@ namespace Syn
             EntityID sponzaEntity = registry.CreateEntity();
             registry.AddComponent<TransformComponent>(sponzaEntity);
             registry.AddComponent<ModelComponent>(sponzaEntity);
+            registry.AddComponent<MeshColliderComponent>(sponzaEntity);
+			registry.AddComponent<RigidBodyComponent>(sponzaEntity);
 
             registry.GetComponent<TransformComponent>(sponzaEntity).translation = glm::vec3(0.0f, 0.0f, 0.0f);
             registry.GetComponent<TransformComponent>(sponzaEntity).scale = glm::vec3(0.2f, 0.2f, 0.2f);
             registry.GetComponent<ModelComponent>(sponzaEntity).modelIndex = sponzaId;
+            registry.GetComponent<RigidBodyComponent>(sponzaEntity).motionType = PhysicsMotionType::Static;
 
             registry.GetPool<TransformComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
             registry.GetPool<ModelComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
+            registry.GetPool<RigidBodyComponent>()->SetCategory(sponzaEntity, StorageCategory::Stream);
+            registry.GetPool<MeshColliderComponent>()->SetCategory(sponzaEntity, StorageCategory::Stream);
         }
 
         if (spawnBistro)

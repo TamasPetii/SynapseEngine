@@ -15,7 +15,7 @@
 #include "Engine/Mesh/Uploader/DefaultGpuModelUploader.h"
 
 #include "Engine/Mesh/Loader/MeshLoaders.h"
-#include "Engine/Mesh/Processor/MeshProcessors.h"
+#include "Engine/Mesh/Processor/MeshProcessor/MeshProcessors.h"
 #include "Engine/Mesh/Source/MeshSources.h"
 #include "Engine/Mesh/Factory/MeshFactory.h"
 

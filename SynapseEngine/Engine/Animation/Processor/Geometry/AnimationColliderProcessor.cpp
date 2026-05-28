@@ -128,11 +128,11 @@ namespace Syn
                 uint32_t lodCount = 4;
                 frameMesh.lods.resize(lodCount);
 
-                if (model.meshletVertexIndices.has_value() && model.meshletTriangleIndices.has_value() && model.meshletDescriptors.has_value())
+                if (true /*model.meshletVertexIndices.has_value() && model.meshletTriangleIndices.has_value() && model.meshletDescriptors.has_value()*/)
                 {
-                    const auto& rawVerts = model.meshletVertexIndices.value();
-                    const auto& rawTris = model.meshletTriangleIndices.value();
-                    const auto& meshletDescs = model.meshletDescriptors.value();
+                    const auto& rawVerts = model.meshletVertexIndices;
+                    const auto& rawTris = model.meshletTriangleIndices;
+                    const auto& meshletDescs = model.meshletDescriptors;
 
                     for (size_t l = 0; l < lodCount; ++l)
                     {
