@@ -20,7 +20,7 @@ namespace Syn {
     bool SsaoPass::ShouldExecute(const RenderContext& context) const
     {
         auto settings = context.scene->GetSettings();
-        return !settings->useDebugCamera;
+        return settings->enableSsao && !settings->useDebugCamera;
     }
 
     void SsaoPass::Initialize() {

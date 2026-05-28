@@ -15,7 +15,8 @@ namespace Syn {
 #include "Engine/Shaders/Includes/PushConstants/SsaoBlurPC.glsl"
 
     bool SsaoBlurPass::ShouldExecute(const RenderContext& context) const {
-        return !context.scene->GetSettings()->useDebugCamera;
+        auto settings = context.scene->GetSettings();
+        return settings->enableSsao && !settings->useDebugCamera;
     }
 
     void SsaoBlurPass::Initialize() {
