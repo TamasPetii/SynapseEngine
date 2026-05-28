@@ -238,6 +238,7 @@
     <ClCompile Include="Animation\Data\Cpu\CpuAnimationData.cpp" />
     <ClCompile Include="Animation\Converter\ICpuAnimationExtractor.cpp" />
     <ClCompile Include="Animation\Converter\DefaultCpuAnimationExtractor.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\MortonChunkAabbWireframePass.cpp" />
     <ClCompile Include="Render\Passes\Ssao\DpHvoBlurPass.cpp" />
     <ClCompile Include="Mesh\Processor\CpuModelProcessor\BatchedIndicesProcessor.cpp" />
     <ClCompile Include="Component\Physics\ConvexColliderComponent.cpp" />
@@ -675,6 +676,7 @@
     <ClInclude Include="Animation\Data\Cpu\CpuAnimationData.h" />
     <ClInclude Include="Animation\Converter\ICpuAnimationExtractor.h" />
     <ClInclude Include="Animation\Converter\DefaultCpuAnimationExtractor.h" />
+    <ClInclude Include="Render\Passes\Wireframe\MortonChunkAabbWireframePass.h" />
     <ClInclude Include="Render\Passes\Ssao\DpHvoBlurPass.h" />
     <ClInclude Include="Mesh\Processor\CpuModelProcessor\BatchedIndicesProcessor.h" />
     <ClInclude Include="Component\Components.h" />

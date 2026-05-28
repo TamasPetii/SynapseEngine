@@ -80,6 +80,20 @@ void main() {
 
         lightColor = chunkFullyInside ? vec3(0.1, 1.0, 0.1) : vec3(1.0, 0.5, 0.0);
     }
+    else if (pc.lightDrawType == 6) {
+        uint rawChunkId = GET_VISIBLE_CHUNK(ctx.mortonChunkVisibleIndexBufferAddr, gl_InstanceIndex);
+
+        bool chunkFullyInside = (rawChunkId >> 31) != 0;
+        uint pureChunkId = rawChunkId & 0x7FFFFFFF;
+
+        StaticChunk chunk = GET_STATIC_CHUNK(ctx.mortonChunkDataBufferAddr, pureChunkId);
+
+        vec3 extents = (chunk.maxBounds - chunk.minBounds) * 0.5;
+        vec3 center = (chunk.maxBounds + chunk.minBounds) * 0.5;     
+        worldPos = center + (v.position * extents);
+        
+        lightColor = chunkFullyInside ? vec3(0.1, 1.0, 0.1) : vec3(1.0, 0.5, 0.0);
+    }
 
     uint cameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraDenseIndex);

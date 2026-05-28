@@ -20,7 +20,7 @@ namespace Syn
         dispatchCmdTemplate.z = 1;
 
         VkBufferUsageFlags storageUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
-        VkBufferUsageFlags indirectUsage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+        VkBufferUsageFlags indirectUsage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT |  VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
         //Todo: Correct BufferStrategy
 
@@ -30,11 +30,11 @@ namespace Syn
         chunkVisibilityBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(uint32_t), storageUsage });
         chunkVisibilityBuffer.UpdateCapacityAll(1);
 
-        aabbSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
-        aabbSingleCmdBuffer.UpdateCapacityAll(1);
+        chunkAabbSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
+        chunkAabbSingleCmdBuffer.UpdateCapacityAll(1);
 
-        indirectDispatchBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectUsage });
-        indirectDispatchBuffer.UpdateCapacityAll(1);
+        chunkIndirectDispatchBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectUsage });
+        chunkIndirectDispatchBuffer.UpdateCapacityAll(1);
 
         sceneAabbBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(SceneAABB), storageUsage });
         sceneAabbBuffer.UpdateCapacityAll(1);
@@ -51,9 +51,13 @@ namespace Syn
         mortonChunkVisibleIndirectDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectUsage });
         mortonChunkVisibleIndirectDispatchBuffer.UpdateCapacityAll(1);
 
+        mortonAabbSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
+        mortonAabbSingleCmdBuffer.UpdateCapacityAll(1);
+
         for (uint32_t i = 0; i < frameCount; ++i) {
-            aabbSingleCmdBuffer.GetMapped(i)->Write(&wireframeCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
-            indirectDispatchBuffer.GetMapped(i)->Write(&dispatchCmdTemplate, sizeof(VkDispatchIndirectCommand), 0);
+            chunkAabbSingleCmdBuffer.GetMapped(i)->Write(&wireframeCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            mortonAabbSingleCmdBuffer.GetMapped(i)->Write(&wireframeCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            chunkIndirectDispatchBuffer.GetMapped(i)->Write(&dispatchCmdTemplate, sizeof(VkDispatchIndirectCommand), 0);
         }
     }
 

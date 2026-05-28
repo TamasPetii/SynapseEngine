@@ -74,11 +74,10 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
         bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-        VkBuffer dispatchBuf = drawData->Chunks.indirectDispatchBuffer.GetHandle(fIdx, isGpu);
-
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_activeChunkCount, ComputeGroupSize::Buffer32D);
         vkCmdDispatch(context.cmd, groupCountX, 1, 1);
 
+        VkBuffer dispatchBuf = drawData->Chunks.chunkIndirectDispatchBuffer.GetHandle(fIdx, isGpu);
         Vk::BufferBarrierInfo cullBarrier{};
         cullBarrier.buffer = dispatchBuf;
         cullBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;

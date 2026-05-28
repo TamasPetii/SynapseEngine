@@ -30,6 +30,7 @@ namespace Syn
         , enablePointLightOcclusionCulling(true)
         , enableSpotLightOcclusionCulling(true)
         , enableStaticChunkAabbWireframe(false)
+        , enableMortonChunkAabbWireframe(false)
         , enablePointLightSphereWireframe(false)
         , enablePointLightAabbWireframe(false)
         , enableSpotLightSphereWireframe(false)

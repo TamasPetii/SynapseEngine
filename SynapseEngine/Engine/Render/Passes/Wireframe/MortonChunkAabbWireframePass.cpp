@@ -1,4 +1,4 @@
-#include "StaticChunkAabbWireframePass.h"
+#include "MortonChunkAabbWireframePass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Manager/ComponentBufferManager.h"
@@ -12,15 +12,15 @@
 
 namespace Syn {
 
-    #include "Engine/Shaders/Includes/PushConstants/WireframeDebugPC.glsl"
+#include "Engine/Shaders/Includes/PushConstants/WireframeDebugPC.glsl"
 
-    bool StaticChunkAabbWireframePass::ShouldExecute(const RenderContext& context) const
+    bool MortonChunkAabbWireframePass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableStaticChunkAabbWireframe 
-            && context.scene->GetSettings()->enableStaticBvhCulling;
+        return context.scene->GetSettings()->enableMortonChunkAabbWireframe
+            && context.scene->GetSettings()->enableMortonBvhCulling;
     }
 
-    void StaticChunkAabbWireframePass::Initialize() {
+    void MortonChunkAabbWireframePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 
         Vk::ShaderProgramConfig config;
@@ -51,7 +51,7 @@ namespace Syn {
         };
     }
 
-    void StaticChunkAabbWireframePass::PrepareFrame(const RenderContext& context) {
+    void MortonChunkAabbWireframePass::PrepareFrame(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
 
@@ -87,8 +87,8 @@ namespace Syn {
 
         if (isGpu) {
             Vk::BufferCopyInfo copyRegion{};
-            copyRegion.srcBuffer = drawData->Chunks.chunkIndirectDispatchBuffer.GetHandle(fIdx, isGpu);
-            copyRegion.dstBuffer = drawData->Chunks.chunkAabbSingleCmdBuffer.GetHandle(fIdx, isGpu);
+            copyRegion.srcBuffer = drawData->Chunks.mortonIndirectDispatchBuffer.GetHandle(fIdx, isGpu);
+            copyRegion.dstBuffer = drawData->Chunks.mortonAabbSingleCmdBuffer.GetHandle(fIdx, isGpu);
             copyRegion.srcOffset = 0;
             copyRegion.dstOffset = offsetof(VkDrawIndirectCommand, instanceCount);
             copyRegion.size = sizeof(uint32_t);
@@ -96,7 +96,7 @@ namespace Syn {
             Vk::BufferUtils::CopyBuffer(context.cmd, copyRegion);
 
             Vk::BufferBarrierInfo memBarrier{};
-            memBarrier.buffer = drawData->Chunks.chunkAabbSingleCmdBuffer.GetHandle(fIdx, isGpu);
+            memBarrier.buffer = drawData->Chunks.mortonAabbSingleCmdBuffer.GetHandle(fIdx, isGpu);
             memBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
             memBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
             memBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
@@ -106,7 +106,7 @@ namespace Syn {
         }
     }
 
-    void StaticChunkAabbWireframePass::PushConstants(const RenderContext& context) {
+    void MortonChunkAabbWireframePass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         auto modelManager = ServiceLocator::GetModelManager();
         uint32_t fIdx = context.frameIndex;
@@ -117,7 +117,7 @@ namespace Syn {
         pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
         pc.vertexPositionBufferAddr = cube->hardwareBuffers.vertexPositions->GetDeviceAddress();
         pc.indexBufferAddr = cube->hardwareBuffers.indices->GetDeviceAddress();
-        pc.lightDrawType = 5;
+        pc.lightDrawType = 6;
 
         vkCmdPushConstants(
             context.cmd,
@@ -129,13 +129,13 @@ namespace Syn {
         );
     }
 
-    void StaticChunkAabbWireframePass::Draw(const RenderContext& context) {
+    void MortonChunkAabbWireframePass::Draw(const RenderContext& context) {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
         auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-        auto indirectBuffer = drawData->Chunks.chunkAabbSingleCmdBuffer.GetHandle(fIdx, isGpu);
+        auto indirectBuffer = drawData->Chunks.mortonAabbSingleCmdBuffer.GetHandle(fIdx, isGpu);
 
         vkCmdDrawIndirect(
             context.cmd,

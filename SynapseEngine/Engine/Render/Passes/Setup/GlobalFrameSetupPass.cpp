@@ -57,7 +57,7 @@ namespace Syn {
 
 		ctx.staticChunkDataBufferAddr = drawData->Chunks.chunkDataBuffer.GetAddress(fIdx, isGpu);
         ctx.staticChunkVisibleIndexBufferAddr = drawData->Chunks.chunkVisibilityBuffer.GetAddress(fIdx, isGpu);
-        ctx.staticChunkCountBufferAddr = drawData->Chunks.indirectDispatchBuffer.GetAddress(fIdx, isGpu);
+        ctx.staticChunkCountBufferAddr = drawData->Chunks.chunkIndirectDispatchBuffer.GetAddress(fIdx, isGpu);
 
         ctx.sceneAabbBufferAddr = drawData->Chunks.sceneAabbBuffer.GetAddress(fIdx, isGpu);
         ctx.mortonChunkIndirectDispatchBufferAddr = drawData->Chunks.mortonIndirectDispatchBuffer.GetAddress(fIdx, isGpu);

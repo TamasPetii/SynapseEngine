@@ -73,6 +73,7 @@ namespace Syn
         bool enableWireframeMeshAabb;
         bool enableWireframeMeshSphere;
 
+        bool enableMortonChunkAabbWireframe;
         bool enableStaticChunkAabbWireframe;
         bool enablePointLightSphereWireframe;
         bool enablePointLightAabbWireframe;

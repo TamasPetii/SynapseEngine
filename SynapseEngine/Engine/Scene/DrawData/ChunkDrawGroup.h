@@ -23,13 +23,14 @@ namespace Syn
 
         RenderBuffer chunkDataBuffer;
         RenderBuffer chunkVisibilityBuffer;
-        RenderBuffer aabbSingleCmdBuffer;
-        RenderBuffer indirectDispatchBuffer;
+        RenderBuffer chunkAabbSingleCmdBuffer;
+        RenderBuffer chunkIndirectDispatchBuffer;
 
         RenderBuffer sceneAabbBuffer;
         RenderBuffer mortonRadixSortTempBuffer;
         RenderBuffer mortonIndirectDispatchBuffer;
         RenderBuffer mortonIndirectDrawBuffer;
+        RenderBuffer mortonAabbSingleCmdBuffer;
         RenderBuffer mortonChunkVisibleIndirectDispatchBuffer;
 
         std::vector<ChunkDataGPU> chunks;

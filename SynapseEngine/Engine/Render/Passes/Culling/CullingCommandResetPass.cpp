@@ -75,7 +75,7 @@ namespace Syn {
         }
 
         { //Chunk->model indirect command reset
-            VkBuffer dispatchBuf = drawData->Chunks.indirectDispatchBuffer.GetHandle(fIdx, isGpu);
+            VkBuffer dispatchBuf = drawData->Chunks.chunkIndirectDispatchBuffer.GetHandle(fIdx, isGpu);
 
             Vk::BufferUtils::UpdateBuffer(context.cmd, {
                 .buffer = dispatchBuf,

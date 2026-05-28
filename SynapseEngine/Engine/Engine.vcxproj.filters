@@ -1320,6 +1320,9 @@
     <ClCompile Include="Render\Passes\Ssao\DpHvoBlurPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Passes\Wireframe\MortonChunkAabbWireframePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2853,6 +2856,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Ssao\DpHvoBlurPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Wireframe\MortonChunkAabbWireframePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

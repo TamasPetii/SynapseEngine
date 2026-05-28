@@ -305,7 +305,7 @@ namespace Syn
                 {
                     uint32_t visibleCount = drawData->Chunks.visibleChunkCount.load(std::memory_order_relaxed);
 
-                    if (auto mappedCmd = drawData->Chunks.aabbSingleCmdBuffer.GetMapped(frameIndex)) {
+                    if (auto mappedCmd = drawData->Chunks.chunkIndirectDispatchBuffer.GetMapped(frameIndex)) {
                         VkDrawIndirectCommand cmd = drawData->Chunks.wireframeCmdTemplate;
                         cmd.instanceCount = visibleCount;
                         mappedCmd->Write(&cmd, sizeof(VkDrawIndirectCommand), 0);

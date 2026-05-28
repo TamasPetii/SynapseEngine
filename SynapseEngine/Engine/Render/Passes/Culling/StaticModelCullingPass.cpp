@@ -75,7 +75,7 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
         bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-        VkBuffer dispatchBuf = drawData->Chunks.indirectDispatchBuffer.GetHandle(fIdx, isGpu);
+        VkBuffer dispatchBuf = drawData->Chunks.chunkIndirectDispatchBuffer.GetHandle(fIdx, isGpu);
         vkCmdDispatchIndirect(context.cmd, dispatchBuf, 0);
 
         Vk::BufferBarrierInfo countBarrier{};
