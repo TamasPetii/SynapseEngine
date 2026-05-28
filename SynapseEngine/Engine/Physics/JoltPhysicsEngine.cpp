@@ -7,6 +7,10 @@
 #include <Jolt/Geometry/Triangle.h>
 #include <Jolt/Physics/Body/Body.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
+#include <Jolt/Core/JobSystemWithBarrier.h>
+#include "JobSystemTaskflow.h"
+#include "Engine/ServiceLocator.h"
+#include <memory>
 
 namespace Syn
 {
@@ -31,10 +35,10 @@ namespace Syn
 
         tempAllocator = std::make_unique<JPH::TempAllocatorImpl>(params.tempAllocatorSizeMB * 1024 * 1024);
 
-        jobSystem = std::make_unique<JPH::JobSystemThreadPool>(
+        jobSystem = std::make_unique<JobSystemTaskflow>(
+            *ServiceLocator::GetTaskExecutor(),
             JPH::cMaxPhysicsJobs,
-            JPH::cMaxPhysicsBarriers,
-            std::thread::hardware_concurrency() - 1
+            JPH::cMaxPhysicsBarriers
         );
 
         physicsSystem = std::make_unique<JPH::PhysicsSystem>();

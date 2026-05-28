@@ -12,6 +12,7 @@
 #include <Jolt/Physics/PhysicsSystem.h>
 #include <Jolt/Physics/Collision/ObjectLayer.h>
 #include <Jolt/Physics/Collision/BroadPhase/BroadPhaseLayer.h>
+#include <Jolt/Core/JobSystemWithBarrier.h>
 
 namespace Syn
 {
@@ -105,7 +106,7 @@ namespace Syn
     private:
         std::unique_ptr<JPH::PhysicsSystem> physicsSystem;
         std::unique_ptr<JPH::TempAllocatorImpl> tempAllocator;
-        std::unique_ptr<JPH::JobSystemThreadPool> jobSystem;
+        std::unique_ptr<JPH::JobSystem> jobSystem;
 
         BPLayerInterfaceImpl bpLayerInterface;
         ObjectVsBroadPhaseLayerFilterImpl objVsBpFilter;

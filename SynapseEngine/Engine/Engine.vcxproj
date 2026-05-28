@@ -238,6 +238,7 @@
     <ClCompile Include="Animation\Data\Cpu\CpuAnimationData.cpp" />
     <ClCompile Include="Animation\Converter\ICpuAnimationExtractor.cpp" />
     <ClCompile Include="Animation\Converter\DefaultCpuAnimationExtractor.cpp" />
+    <ClCompile Include="Physics\JobSystemTaskflow.cpp" />
     <ClCompile Include="Scene\Loader\ManifestSceneLoader.cpp" />
     <ClCompile Include="Scene\Loader\ISceneLoader.cpp" />
     <ClCompile Include="Scene\Writer\ISceneWriter.cpp" />
@@ -660,6 +661,7 @@
     <ClInclude Include="Animation\Converter\ICpuAnimationExtractor.h" />
     <ClInclude Include="Animation\Converter\DefaultCpuAnimationExtractor.h" />
     <ClInclude Include="Component\Components.h" />
+    <ClInclude Include="Physics\JobSystemTaskflow.h" />
     <ClInclude Include="Scene\Loader\ManifestSceneLoader.h" />
     <ClInclude Include="Scene\Loader\ISceneLoader.h" />
     <ClInclude Include="Serialization\Schema\Component\Physics\PhysicsComponentSchemas.h" />

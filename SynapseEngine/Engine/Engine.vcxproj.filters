@@ -1272,6 +1272,9 @@
     <ClCompile Include="Scene\Loader\ManifestSceneLoader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Physics\JobSystemTaskflow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2748,6 +2751,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Serialization\Schema\Component\Rendering\MaterialOverrideComponentSchema.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics\JobSystemTaskflow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

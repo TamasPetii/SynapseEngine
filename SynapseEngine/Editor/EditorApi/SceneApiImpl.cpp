@@ -29,10 +29,10 @@ namespace Syn {
         if (!activeScene) return;
 
         if (filepath.empty()) {
-            _sceneManager->SaveActiveScene("C:\\Users\\User\\Desktop\\SceneSave\\TestLevel.json");
-            _sceneManager->SaveActiveScene("C:\\Users\\User\\Desktop\\SceneSave\\TestLevel.yaml");
-            _sceneManager->SaveActiveScene("C:\\Users\\User\\Desktop\\SceneSave\\TestLevel.toml");
-            _sceneManager->SaveActiveScene("C:\\Users\\User\\Desktop\\SceneSave\\TestLevel.xml");
+            //_sceneManager->SaveActiveScene("C:\\Users\\User\\Desktop\\SceneSave\\TestLevel.json");
+            //_sceneManager->SaveActiveScene("C:\\Users\\User\\Desktop\\SceneSave\\TestLevel.yaml");
+            //_sceneManager->SaveActiveScene("C:\\Users\\User\\Desktop\\SceneSave\\TestLevel.toml");
+            //_sceneManager->SaveActiveScene("C:\\Users\\User\\Desktop\\SceneSave\\TestLevel.xml");
             _sceneManager->SaveActiveScene("C:\\Users\\User\\Desktop\\SceneSave\\TestLevel.bin");
 
             Syn::Info("EditorApiImpl: Scene dummy save triggered to Desktop.");
