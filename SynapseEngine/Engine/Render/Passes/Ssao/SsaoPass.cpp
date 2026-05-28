@@ -1,4 +1,4 @@
-#include "DpHvoPass.h"
+#include "SsaoPass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Scene/Scene.h"
@@ -9,37 +9,40 @@
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Vk/Image/ImageUtils.h"
+#include "Engine/Image/ImageNames.h"
 #include "Engine/Render/ComputeGroupSize.h"
 #include <glm/glm.hpp>
 
 namespace Syn {
 
-    #include "Engine/Shaders/Includes/PushConstants/DpHvoPC.glsl"
+    #include "Engine/Shaders/Includes/PushConstants/SsaoPC.glsl"
 
-    bool DpHvoPass::ShouldExecute(const RenderContext& context) const
+    bool SsaoPass::ShouldExecute(const RenderContext& context) const
     {
         auto settings = context.scene->GetSettings();
         return !settings->useDebugCamera;
     }
 
-    void DpHvoPass::Initialize() {
+    void SsaoPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
-        _shaderProgram = shaderManager->CreateProgram("DpHvoProgram", {
-            ShaderNames::DpHvoComp
+        _shaderProgram = shaderManager->CreateProgram("SsaoProgram", {
+            ShaderNames::SsaoComp
             });
     }
 
-    void DpHvoPass::PrepareFrame(const RenderContext& context) {
+    void SsaoPass::PrepareFrame(const RenderContext& context) {
 
     }
 
-    void DpHvoPass::BindDescriptors(const RenderContext& context) {
+    void SsaoPass::BindDescriptors(const RenderContext& context) {
         auto currGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         auto imageManager = ServiceLocator::GetImageManager();
 
+        auto noiseTexture = imageManager->GetResource(ImageNames::SsaoNoiseTexture);
         auto depthPyramid = currGroup->GetImage(RenderTargetNames::DepthPyramid);
-        auto ssaoAo = currGroup->GetImage(RenderTargetNames::SsaoAo);
+        auto ssaoAoIntermediate = currGroup->GetImage(RenderTargetNames::SsaoAoIntermediate);
         auto sampler = imageManager->GetSampler(SamplerNames::LinearClampEdge);
+		auto samplerRepeat = imageManager->GetSampler(SamplerNames::LinearRepeat);
 
         Vk::PushDescriptorWriter pushWriter;
 
@@ -50,31 +53,44 @@ namespace Syn {
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 
-        pushWriter.AddStorageImage(
+        pushWriter.AddCombinedImageSampler(
             1,
-            ssaoAo->GetView(Vk::ImageViewNames::Default),
+            noiseTexture->image->GetView(Vk::ImageViewNames::Default),
+            samplerRepeat->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddStorageImage(
+            2,
+            ssaoAoIntermediate->GetView(Vk::ImageViewNames::Default),
             VK_IMAGE_LAYOUT_GENERAL
         );
 
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
     }
 
-    void DpHvoPass::PushConstants(const RenderContext& context) {
+    void SsaoPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         uint32_t fIdx = context.frameIndex;
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, fIdx);
 
-        DpHvoPC pc{};
+        auto imageManager = ServiceLocator::GetImageManager();
+        auto noiseTexture = imageManager->GetResource(ImageNames::SsaoNoiseTexture);
+
+        SsaoPC pc{};
         pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
         pc.aoRadius = scene->GetSettings()->aoRadius;
         pc.aoIntensity = scene->GetSettings()->aoIntensity;
         pc.maxOcclusionDistance = scene->GetSettings()->maxOcclusionDistance;
         pc.bias = scene->GetSettings()->bias;
         pc.sampleCount = scene->GetSettings()->sampleCount;
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(DpHvoPC), &pc);
+		pc.noiseTextureWidth = static_cast<float>(noiseTexture->image->GetExtent().width);
+		pc.noiseTextureHeight = static_cast<float>(noiseTexture->image->GetExtent().height);
+
+        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(SsaoPC), &pc);
     }
 
-    void DpHvoPass::Dispatch(const RenderContext& context) {
+    void SsaoPass::Dispatch(const RenderContext& context) {
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
         uint32_t width = rtGroup->GetWidth();

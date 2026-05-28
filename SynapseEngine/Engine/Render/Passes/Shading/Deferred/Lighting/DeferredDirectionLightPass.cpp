@@ -93,11 +93,38 @@ namespace Syn {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         auto imageManager = ServiceLocator::GetImageManager();
         auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge)->Handle();
+        auto ssaoSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge)->Handle();
 
         Vk::PushDescriptorWriter pushWriter;
-        pushWriter.AddCombinedImageSampler(0, group->GetImage(RenderTargetNames::ColorMetallic)->GetView(Vk::ImageViewNames::Default), sampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-        pushWriter.AddCombinedImageSampler(1, group->GetImage(RenderTargetNames::NormalRoughness)->GetView(Vk::ImageViewNames::Default), sampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-        pushWriter.AddCombinedImageSampler(2, group->GetImage(RenderTargetNames::OpaqueDepth)->GetView(Vk::ImageViewNames::Default), sampler, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL);
+
+        pushWriter.AddCombinedImageSampler(
+            0,
+            group->GetImage(RenderTargetNames::ColorMetallic)->GetView(Vk::ImageViewNames::Default),
+            sampler,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            1, 
+            group->GetImage(RenderTargetNames::NormalRoughness)->GetView(Vk::ImageViewNames::Default),
+            sampler,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            2,
+            group->GetImage(RenderTargetNames::OpaqueDepth)->GetView(Vk::ImageViewNames::Default),
+            sampler,
+            VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            3,
+            group->GetImage(RenderTargetNames::SsaoAo)->GetView(Vk::ImageViewNames::Default),
+            ssaoSampler,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 

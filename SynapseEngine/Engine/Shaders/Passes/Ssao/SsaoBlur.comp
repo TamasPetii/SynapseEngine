@@ -1,0 +1,39 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
+#include "../../Includes/Core.glsl"
+#include "../../Includes/Common/FrameGlobalContext.glsl"
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout(set = 2, binding = 0) uniform sampler2D inAoImage;
+layout(set = 2, binding = 1, r16f) uniform writeonly image2D outAoImage;
+
+#include "../../Includes/PushConstants/SsaoBlurPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+   SsaoBlurPC pc;
+};
+
+void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+    ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
+    if (pos.x >= int(ctx.screenWidth) || pos.y >= int(ctx.screenHeight)) return;
+
+    vec2 texelSize = 1.0 / vec2(ctx.screenWidth, ctx.screenHeight);
+    vec2 uv = (vec2(pos) + vec2(0.5)) * texelSize;
+
+    float result = 0.0;
+    for (int x = -2; x < 2; ++x) {
+        for (int y = -2; y < 2; ++y) {
+            vec2 offset = vec2(float(x), float(y)) * texelSize;
+            result += textureLod(inAoImage, uv + offset, 0).r;
+        }
+    }
+    
+    float blurredAo = result / 16.0;
+
+    imageStore(outAoImage, pos, vec4(blurredAo, 0.0, 0.0, 0.0));
+}

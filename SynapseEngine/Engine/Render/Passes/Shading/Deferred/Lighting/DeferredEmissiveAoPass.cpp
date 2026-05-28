@@ -104,6 +104,7 @@ namespace Syn {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         auto imageManager = ServiceLocator::GetImageManager();
         auto nearestSampler = imageManager->GetSampler(SamplerNames::NearestClampEdge)->Handle();
+		auto ssaoSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge)->Handle();
 
         auto colorImg = group->GetImage(RenderTargetNames::ColorMetallic);
         auto emissiveAoImg = group->GetImage(RenderTargetNames::EmissiveAo);
@@ -123,6 +124,12 @@ namespace Syn {
             nearestSampler,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
+
+        pushWriter.AddCombinedImageSampler(
+            2,
+            group->GetImage(RenderTargetNames::SsaoAo)->GetView(Vk::ImageViewNames::Default),
+            ssaoSampler,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }

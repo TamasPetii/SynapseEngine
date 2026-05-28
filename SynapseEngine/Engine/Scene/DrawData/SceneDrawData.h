@@ -8,6 +8,7 @@
 #include "DirectionLightDrawGroup.h"
 #include "ForwardPlusDrawGroup.h"
 #include "ChunkDrawGroup.h"
+#include "SsaoDrawGroup.h"
 #include <atomic>
 #include "IDrawGroup.h"
 
@@ -29,6 +30,7 @@ namespace Syn
         DirectionLightDrawGroup DirectionLights;
         ForwardPlusDrawGroup ForwardPlus;
 		ChunkDrawGroup Chunks;
+		SsaoDrawGroup Ssao;
         std::atomic<uint32_t> syncFramesRemaining{ 0 };
     };
 }

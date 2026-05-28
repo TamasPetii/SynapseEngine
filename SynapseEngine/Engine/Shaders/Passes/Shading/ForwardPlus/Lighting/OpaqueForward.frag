@@ -27,6 +27,8 @@ layout(location = 3) in flat uvec3 inId; // (PackedEntity, Material, PartialPayl
 
 layout(location = 0) out vec4 outColor;
 
+layout(set = 2, binding = 1) uniform sampler2D ssaoTexture;
+
 #include "../../../../Includes/PushConstants/TraditionalMeshletPassPC.glsl"
 
 layout(push_constant) uniform PushConstants {
@@ -59,8 +61,6 @@ void main() {
     // 5. Evaluate Emissive
     vec3 finalEmissive = EvaluateEmissive(mat, finalUV);
 
-    // 6. Evaluate Ambient Occlusion
-    float finalAo = EvaluateAO(mat, finalUV);
 
     uint cameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraDenseIndex);
@@ -68,6 +68,17 @@ void main() {
     vec2 screenUV = gl_FragCoord.xy / vec2(ctx.screenWidth, ctx.screenHeight);
     float fragDepth = gl_FragCoord.z;
     vec3 worldPos = ReconstructWorldPosition(screenUV, fragDepth, camera.viewProjVulkanInv);
+
+    // 6. Evaluate Ambient Occlusion
+    float ssao = 1.0;
+    if (ctx.enableSsao == 1 || ctx.enableSsaoLight == 1) {
+        ssao = texture(ssaoTexture, screenUV).r;
+    }
+
+    float finalAo = EvaluateAO(mat, finalUV);
+    if (ctx.enableSsao == 1) {
+        finalAo *= ssao;
+    }
 
     vec4 viewPos = camera.view * vec4(worldPos, 1.0);
     float viewDepth = abs(viewPos.z);
@@ -106,6 +117,10 @@ void main() {
         uint lightDenseIndex = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, lightEntityIndex);
         
         totalRadiance += SimulateSpotLight(ctx.spotLightDataBufferAddr, lightDenseIndex, worldPos, albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness);
+    }
+
+    if (ctx.enableSsao == 1 && ctx.enableSsaoLight == 1) {
+        totalRadiance *= ssao; 
     }
 
     if(ctx.enableForwardPlusEmissiveAo == 1)

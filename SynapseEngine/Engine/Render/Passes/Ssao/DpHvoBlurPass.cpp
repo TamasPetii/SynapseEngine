@@ -27,11 +27,11 @@ namespace Syn {
     void DpHvoBlurPass::PrepareFrame(const RenderContext& context) {
         auto currGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
-        auto volumetricAo = currGroup->GetImage(RenderTargetNames::VolumetricAo);
-        auto volumetricAoInt = currGroup->GetImage(RenderTargetNames::VolumetricAoIntermediate);
+        auto ssaoAo = currGroup->GetImage(RenderTargetNames::SsaoAo);
+        auto ssaocAoInt = currGroup->GetImage(RenderTargetNames::SsaoAoIntermediate);
 
         _imageTransitions.push_back({
-            volumetricAo,
+            ssaoAo,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
             VK_ACCESS_SHADER_READ_BIT,
@@ -39,11 +39,11 @@ namespace Syn {
             });
 
         _imageTransitions.push_back({
-            volumetricAoInt,
+            ssaocAoInt,
             VK_IMAGE_LAYOUT_GENERAL,
             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
             VK_ACCESS_SHADER_WRITE_BIT,
-            true
+            false
             });
     }
 
@@ -52,8 +52,8 @@ namespace Syn {
         auto imageManager = ServiceLocator::GetImageManager();
 
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
-        auto volumetricAo = rtGroup->GetImage(RenderTargetNames::VolumetricAo);
-        auto volumetricAoInt = rtGroup->GetImage(RenderTargetNames::VolumetricAoIntermediate);
+        auto ssaoAo = rtGroup->GetImage(RenderTargetNames::SsaoAo);
+        auto ssaoAoInt = rtGroup->GetImage(RenderTargetNames::SsaoAoIntermediate);
 
         auto sampler = imageManager->GetSampler(SamplerNames::LinearClampEdge);
 
@@ -67,28 +67,28 @@ namespace Syn {
         pc.depthSharpness = context.scene->GetSettings()->depthSharpness;
 
         Vk::PushDescriptorWriter pushWriterH;
-        pushWriterH.AddCombinedImageSampler(0, volumetricAo->GetView(Vk::ImageViewNames::Default), sampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        pushWriterH.AddCombinedImageSampler(0, ssaoAo->GetView(Vk::ImageViewNames::Default), sampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         pushWriterH.AddCombinedImageSampler(1, depthPyramid->GetView(Vk::ImageViewNames::Default), sampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-        pushWriterH.AddStorageImage(2, volumetricAoInt->GetView(Vk::ImageViewNames::Default), VK_IMAGE_LAYOUT_GENERAL);  
+        pushWriterH.AddStorageImage(2, ssaoAoInt->GetView(Vk::ImageViewNames::Default), VK_IMAGE_LAYOUT_GENERAL);
         pushWriterH.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
 
         pc.blurDirection = glm::vec2(1.0f, 0.0f);
         vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(DpHvoBlurPC), &pc);
         vkCmdDispatch(context.cmd, groupCountX, groupCountY, 1);
 
-        volumetricAoInt->TransitionLayout(context.cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT);
-        volumetricAo->TransitionLayout(context.cmd, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_WRITE_BIT);
+        ssaoAoInt->TransitionLayout(context.cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT);
+        ssaoAo->TransitionLayout(context.cmd, VK_IMAGE_LAYOUT_GENERAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_WRITE_BIT);
 
         Vk::PushDescriptorWriter pushWriterV;
-        pushWriterV.AddCombinedImageSampler(0, volumetricAoInt->GetView(Vk::ImageViewNames::Default), sampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        pushWriterV.AddCombinedImageSampler(0, ssaoAoInt->GetView(Vk::ImageViewNames::Default), sampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         pushWriterV.AddCombinedImageSampler(1, depthPyramid->GetView(Vk::ImageViewNames::Default), sampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-        pushWriterV.AddStorageImage(2, volumetricAo->GetView(Vk::ImageViewNames::Default), VK_IMAGE_LAYOUT_GENERAL);
+        pushWriterV.AddStorageImage(2, ssaoAo->GetView(Vk::ImageViewNames::Default), VK_IMAGE_LAYOUT_GENERAL);
         pushWriterV.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
 
         pc.blurDirection = glm::vec2(0.0f, 1.0f);
         vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(DpHvoBlurPC), &pc);
         vkCmdDispatch(context.cmd, groupCountX, groupCountY, 1);
 
-        volumetricAo->TransitionLayout(context.cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT);
+        ssaoAo->TransitionLayout(context.cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT);
     }
 }

@@ -79,6 +79,8 @@ struct FrameGlobalContext {
     uint64_t mortonChunkVisibleIndexBufferAddr;
     uint64_t mortonChunkTransformsIndexBufferAddr;
 
+    uint64_t ssaoKernelBufferAddr;
+
     float screenWidth;
     float screenHeight;
     float ambientStrength;
@@ -131,6 +133,9 @@ struct FrameGlobalContext {
     uint tileCountY;
     float hizMipLevel;
     float sliceScaleFactor;
+
+    uint enableSsao;
+    uint enableSsaoLight;
 };
 
 #ifndef __cplusplus

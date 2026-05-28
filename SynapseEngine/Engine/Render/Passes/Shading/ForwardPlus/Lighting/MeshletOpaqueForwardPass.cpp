@@ -150,19 +150,33 @@ namespace Syn {
         auto imageManager = ServiceLocator::GetImageManager();
 
         //Using prevous frame's depth pyramid!
+		uint fIdx = context.frameIndex;
         uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, prevFrameIndex);
+        auto prevRtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, prevFrameIndex);
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, fIdx);
 
-        auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
+        auto depthPyramid = prevRtGroup->GetImage(RenderTargetNames::DepthPyramid);
         auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);
 
+		auto ssaoTexture = rtGroup->GetImage(RenderTargetNames::SsaoAo);
+		auto ssaoSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge);
+
         Vk::PushDescriptorWriter pushWriter;
+
         pushWriter.AddCombinedImageSampler(
             0,
             depthPyramid->GetView(Vk::ImageViewNames::Default),
             maxSampler->Handle(),
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
+
+        pushWriter.AddCombinedImageSampler(
+            1,
+            ssaoTexture->GetView(Vk::ImageViewNames::Default),
+            ssaoSampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
 
         auto bindlessBuffer = imageManager->GetBindlessBuffer();

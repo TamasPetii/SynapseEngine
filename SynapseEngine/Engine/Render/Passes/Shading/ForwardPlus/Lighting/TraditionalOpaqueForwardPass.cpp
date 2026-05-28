@@ -11,6 +11,8 @@
 #include "Engine/Material/MaterialManager.h"
 #include "Engine/Animation/AnimationManager.h"
 #include "Engine/Render/RenderNames.h"
+#include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
+#include "Engine/Image/SamplerNames.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <cassert>
@@ -142,6 +144,24 @@ namespace Syn {
     void TraditionalOpaqueForwardPass::BindDescriptors(const RenderContext& context)
     {
         auto imageManager = ServiceLocator::GetImageManager();
+
+        uint fIdx = context.frameIndex;
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, fIdx);
+
+        auto ssaoTexture = rtGroup->GetImage(RenderTargetNames::SsaoAo);
+        auto ssaoSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge);
+
+        Vk::PushDescriptorWriter pushWriter;
+
+        pushWriter.AddCombinedImageSampler(
+            1,
+            ssaoTexture->GetView(Vk::ImageViewNames::Default),
+            ssaoSampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
+
         auto bindlessBuffer = imageManager->GetBindlessBuffer();
         bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }

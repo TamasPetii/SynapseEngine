@@ -104,5 +104,8 @@ namespace Syn
         float depthSharpness = 0.0f;
         float bias = 0.005f;
         int sampleCount = 16;
+
+		bool enableSsao;
+        bool enableSsaoLight;
     };
 }

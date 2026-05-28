@@ -59,5 +59,7 @@ namespace Syn
         , bloomStrength(1.0f)
         , enableDebugVisibility(false)
         , debugVisibilityMode(DebugVisibilityMode::AllCombined)
+        , enableSsao(false)
+        , enableSsaoLight(false)
     {}
 }

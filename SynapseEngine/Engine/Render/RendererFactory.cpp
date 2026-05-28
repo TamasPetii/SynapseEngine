@@ -90,8 +90,10 @@
 #include "Engine/Render/Passes/Wireframe/SpotLightPyramidWireframePass.h"
 #include "Engine/Render/Passes/Wireframe/StaticChunkAabbWireframePass.h"
 
+#include "Engine/Render/Passes/Ssao/SsaoInitPass.h"
+#include "Engine/Render/Passes/Ssao/SsaoPass.h"
 #include "Engine/Render/Passes/Ssao/DpHvoPass.h"
-#include "Engine/Render/Passes/Ssao/DpHvoBlurPass.h"
+#include "Engine/Render/Passes/Ssao/SsaoBlurPass.h"
 
 #include "Engine/Render/Passes/Shading/Visibility/DebugVisibilityPass.h"
 
@@ -154,8 +156,12 @@ namespace Syn
 		//Build Hi-Z depth pyramid (Opaque|Transparent)
         pipeline->AddPass(std::make_unique<HizLinearPreparePass>());
         pipeline->AddPass(std::make_unique<HizDownsamplePass>());
-        pipeline->AddPass(std::make_unique<DpHvoPass>());
-        pipeline->AddPass(std::make_unique<DpHvoBlurPass>());
+
+		//Ssao Passes
+        pipeline->AddPass(std::make_unique<SsaoInitPass>());
+        //pipeline->AddPass(std::make_unique<DpHvoPass>());
+        pipeline->AddPass(std::make_unique<SsaoPass>());
+        pipeline->AddPass(std::make_unique<SsaoBlurPass>());
 
 		//Light Culling Passes
         pipeline->AddPass(std::make_unique<PointLightCullingPass>());
@@ -409,7 +415,7 @@ namespace Syn
         volumetricAoImageSpec.format = VK_FORMAT_R16_SFLOAT;
         volumetricAoImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
         volumetricAoImageSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::VolumetricAo, volumetricAoImageSpec);
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::SsaoAo, volumetricAoImageSpec);
 
         Vk::ImageConfig volumetricAoIntermediateImageSpec{};
         volumetricAoIntermediateImageSpec.width = initWidth;
@@ -418,7 +424,7 @@ namespace Syn
         volumetricAoIntermediateImageSpec.format = VK_FORMAT_R16_SFLOAT;
         volumetricAoIntermediateImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
         volumetricAoIntermediateImageSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::VolumetricAoIntermediate, volumetricAoIntermediateImageSpec);
+        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::SsaoAoIntermediate, volumetricAoIntermediateImageSpec);
 
         return renderManager;
     }

@@ -1083,7 +1083,7 @@
     <ClCompile Include="Render\Passes\Ssao\DpHvoPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Ssao\DpHvoBlurPass.cpp">
+    <ClCompile Include="Render\Passes\Ssao\SsaoBlurPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Manager\AddressResourceManager.cpp">
@@ -1303,6 +1303,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mesh\Processor\CpuModelProcessor\VertexWeldingProcessor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene\DrawData\SsaoDrawGroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Ssao\SsaoPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Ssao\SsaoInitPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Image\Source\Procedural\SsaoNoiseImageSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Ssao\DpHvoBlurPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -2495,7 +2510,7 @@
     <ClInclude Include="Render\Passes\Ssao\DpHvoPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Ssao\DpHvoBlurPass.h">
+    <ClInclude Include="Render\Passes\Ssao\SsaoBlurPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Manager\AddressResourceManager.h">
@@ -2825,6 +2840,21 @@
     <ClInclude Include="Serialization\Schema\Models\StaticMeshSchema.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Scene\DrawData\SsaoDrawGroup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Ssao\SsaoPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Ssao\SsaoInitPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Image\Source\Procedural\SsaoNoiseImageSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Ssao\DpHvoBlurPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Includes\Common\Animation.glsl" />
@@ -2948,5 +2978,10 @@
     <None Include="Shaders\Includes\PushConstants\DpHvoPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DpHvoBlurPC.glsl" />
     <None Include="Shaders\Passes\Ssao\DpHvoBlur.comp" />
+    <None Include="Shaders\Includes\Common\Ssao.glsl" />
+    <None Include="Shaders\Includes\PushConstants\SsaoPc.glsl" />
+    <None Include="Shaders\Passes\Ssao\Ssao.comp" />
+    <None Include="Shaders\Passes\Ssao\SsaoBlur.comp" />
+    <None Include="Shaders\Includes\PushConstants\SsaoBlurPC.glsl" />
   </ItemGroup>
 </Project>

@@ -75,5 +75,7 @@ namespace Syn
         static constexpr const char* DebugVisibilityFrag = "../Engine/Shaders/Passes/Shading/Visibility/DebugVisibility.frag";
         static constexpr const char* DpHvoComp = "../Engine/Shaders/Passes/Ssao/DpHvo.comp";
         static constexpr const char* DpHvoBlurComp = "../Engine/Shaders/Passes/Ssao/DpHvoBlur.comp";
+        static constexpr const char* SsaoComp = "../Engine/Shaders/Passes/Ssao/Ssao.comp";
+        static constexpr const char* SsaoBlurComp = "../Engine/Shaders/Passes/Ssao/SsaoBlur.comp";
     };
 }

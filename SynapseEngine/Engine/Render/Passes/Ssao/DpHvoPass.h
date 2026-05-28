@@ -6,7 +6,7 @@ namespace Syn {
     class SYN_API DpHvoPass : public ComputePass {
     public:
         std::string GetName() const override { return "DpHvoPass"; }
-        std::string GetGroup() const override { return PassGroupNames::HizPasses; }
+        std::string GetGroup() const override { return PassGroupNames::SsaoPasses; }
 
         void Initialize() override;
     protected:

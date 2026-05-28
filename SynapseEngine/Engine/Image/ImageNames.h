@@ -6,5 +6,6 @@ namespace Syn
     struct SYN_API ImageNames
     {
         static constexpr const char* Default = "Default";
+        static constexpr const char* SsaoNoiseTexture = "SsaoNoiseTexture";
     };
 }

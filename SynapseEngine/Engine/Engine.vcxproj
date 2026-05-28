@@ -238,6 +238,7 @@
     <ClCompile Include="Animation\Data\Cpu\CpuAnimationData.cpp" />
     <ClCompile Include="Animation\Converter\ICpuAnimationExtractor.cpp" />
     <ClCompile Include="Animation\Converter\DefaultCpuAnimationExtractor.cpp" />
+    <ClCompile Include="Render\Passes\Ssao\DpHvoBlurPass.cpp" />
     <ClCompile Include="Mesh\Processor\CpuModelProcessor\BatchedIndicesProcessor.cpp" />
     <ClCompile Include="Component\Physics\ConvexColliderComponent.cpp" />
     <ClCompile Include="Component\Physics\MeshColliderComponent.cpp" />
@@ -245,6 +246,10 @@
     <ClCompile Include="Mesh\Processor\CpuModelProcessor\CpuModelProcessorPipeline.cpp" />
     <ClCompile Include="Mesh\Processor\CpuModelProcessor\ICpuModelProcessorPipeline.cpp" />
     <ClCompile Include="Mesh\Processor\CpuModelProcessor\ICpuModelProcessor.cpp" />
+    <ClCompile Include="Scene\DrawData\SsaoDrawGroup.cpp" />
+    <ClCompile Include="Render\Passes\Ssao\SsaoPass.cpp" />
+    <ClCompile Include="Render\Passes\Ssao\SsaoInitPass.cpp" />
+    <ClCompile Include="Image\Source\Procedural\SsaoNoiseImageSource.cpp" />
     <ClCompile Include="System\Physics\MeshColliderSystem.cpp" />
     <ClCompile Include="System\Physics\ConvexColliderSystem.cpp" />
     <ClCompile Include="Physics\JobSystemTaskflow.cpp" />
@@ -299,7 +304,7 @@
     <ClCompile Include="Mesh\Data\Cpu\CpuModelData.cpp" />
     <ClCompile Include="Manager\AddressResourceManager.cpp" />
     <ClCompile Include="Mesh\Source\Procedural\Shape\PyramidMeshSource.cpp" />
-    <ClCompile Include="Render\Passes\Ssao\DpHvoBlurPass.cpp" />
+    <ClCompile Include="Render\Passes\Ssao\SsaoBlurPass.cpp" />
     <ClCompile Include="Render\Passes\Ssao\DpHvoPass.cpp" />
     <ClCompile Include="Render\Passes\Culling\MortonModelCullingPass.cpp" />
     <ClCompile Include="Render\Passes\Culling\MortonChunkCullingPass.cpp" />
@@ -670,6 +675,7 @@
     <ClInclude Include="Animation\Data\Cpu\CpuAnimationData.h" />
     <ClInclude Include="Animation\Converter\ICpuAnimationExtractor.h" />
     <ClInclude Include="Animation\Converter\DefaultCpuAnimationExtractor.h" />
+    <ClInclude Include="Render\Passes\Ssao\DpHvoBlurPass.h" />
     <ClInclude Include="Mesh\Processor\CpuModelProcessor\BatchedIndicesProcessor.h" />
     <ClInclude Include="Component\Components.h" />
     <ClInclude Include="Component\Physics\ConvexColliderComponent.h" />
@@ -681,6 +687,10 @@
     <ClInclude Include="Serialization\Schema\Models\CpuModelDataSchema.h" />
     <ClInclude Include="Serialization\Schema\Models\MeshDrawBlueprintSchema.h" />
     <ClInclude Include="Serialization\Schema\Models\StaticMeshSchema.h" />
+    <ClInclude Include="Scene\DrawData\SsaoDrawGroup.h" />
+    <ClInclude Include="Render\Passes\Ssao\SsaoPass.h" />
+    <ClInclude Include="Render\Passes\Ssao\SsaoInitPass.h" />
+    <ClInclude Include="Image\Source\Procedural\SsaoNoiseImageSource.h" />
     <ClInclude Include="System\Physics\MeshColliderSystem.h" />
     <ClInclude Include="System\Physics\ConvexColliderSystem.h" />
     <ClInclude Include="Physics\JobSystemTaskflow.h" />
@@ -767,7 +777,7 @@
     <ClInclude Include="Mesh\Data\Cpu\CpuModelData.h" />
     <ClInclude Include="Manager\AddressResourceManager.h" />
     <ClInclude Include="Mesh\Source\Procedural\Shape\PyramidMeshSource.h" />
-    <ClInclude Include="Render\Passes\Ssao\DpHvoBlurPass.h" />
+    <ClInclude Include="Render\Passes\Ssao\SsaoBlurPass.h" />
     <ClInclude Include="Render\Passes\Ssao\DpHvoPass.h" />
     <ClInclude Include="Render\Passes\Culling\MortonModelCullingPass.h" />
     <ClInclude Include="Render\Passes\Culling\MortonChunkCullingPass.h" />
@@ -1190,6 +1200,7 @@
     <None Include="Shaders\Includes\Common\Model.glsl" />
     <None Include="Shaders\Includes\Common\PointLight.glsl" />
     <None Include="Shaders\Includes\Common\SpotLight.glsl" />
+    <None Include="Shaders\Includes\Common\Ssao.glsl" />
     <None Include="Shaders\Includes\Common\StaticChunk.glsl" />
     <None Include="Shaders\Includes\Common\Texture.glsl" />
     <None Include="Shaders\Includes\Common\Transform.glsl" />
@@ -1218,6 +1229,8 @@
     <None Include="Shaders\Includes\PushConstants\DpHvoPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\HizDownSamplePC.glsl" />
     <None Include="Shaders\Includes\PushConstants\HizLinearizeDepthPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\SsaoBlurPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\SsaoPc.glsl" />
     <None Include="Shaders\Includes\PushConstants\TraditionalMeshletPassPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\ModelMeshCullingPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\PointLightCullingPC.glsl" />
@@ -1292,6 +1305,8 @@
     <None Include="Shaders\Passes\PostProcess\BloomUpsample.comp" />
     <None Include="Shaders\Passes\Ssao\DpHvo.comp" />
     <None Include="Shaders\Passes\Ssao\DpHvoBlur.comp" />
+    <None Include="Shaders\Passes\Ssao\Ssao.comp" />
+    <None Include="Shaders\Passes\Ssao\SsaoBlur.comp" />
     <None Include="Shaders\Passes\Wireframe\Wireframe.frag" />
     <None Include="Shaders\Passes\Wireframe\Wireframe.vert" />
     <None Include="Shaders\Passes\Wireframe\WireframeDebug.vert" />

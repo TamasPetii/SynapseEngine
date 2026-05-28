@@ -168,8 +168,9 @@ namespace Syn {
             }
             EndSection(isCullingOpen);
 
-            bool isBloomOpen = BeginSection("Post-Processing (Bloom)");
+            bool isBloomOpen = BeginSection("Post-Processing");
             if (isBloomOpen) {
+				ImGui::SeparatorText("Bloom");
                 changed |= ImGui::Checkbox("Enable Bloom", &settings.enableBloom);
                 if (settings.enableBloom) {
                     changed |= ImGui::DragFloat("Threshold", &settings.bloomThreshold, 0.01f, 0.0f, 10.0f);
@@ -178,6 +179,12 @@ namespace Syn {
                     changed |= ImGui::DragFloat("Exposure", &settings.bloomExposure, 0.01f, 0.1f, 10.0f);
                     changed |= ImGui::DragFloat("Strength", &settings.bloomStrength, 0.01f, 0.0f, 5.0f);
                 }
+
+				ImGui::SeparatorText("SSAO");
+				changed |= ImGui::Checkbox("Enable SSAO", &settings.enableSsao);
+				if (settings.enableSsao) {
+					changed |= ImGui::Checkbox("Enable Light SSAO", &settings.enableSsaoLight);
+				}
             }
             EndSection(isBloomOpen);
 

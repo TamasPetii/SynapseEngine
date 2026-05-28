@@ -114,6 +114,10 @@ namespace Syn {
         ctx.wireframeMeshAabbIndirectCommandBufferAddr = drawData->Debug.modelAabbIndirectBuffer.GetAddress(fIdx, true);
         ctx.wireframeMeshSphereIndirectCommandBufferAddr = drawData->Debug.modelSphereIndirectBuffer.GetAddress(fIdx, true);
 
+		ctx.ssaoKernelBufferAddr = drawData->Ssao.kernelBuffer.GetAddress(fIdx, true);
+		ctx.enableSsao = settings->enableSsao ? 1 : 0;
+		ctx.enableSsaoLight = settings->enableSsaoLight ? 1 : 0;
+
         ctx.screenWidth = static_cast<float>(rtGroup->GetWidth());
         ctx.screenHeight = static_cast<float>(rtGroup->GetHeight());
         ctx.ambientStrength = settings->ambientStrength;

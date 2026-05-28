@@ -21,6 +21,7 @@ layout(location = 0) out vec4 outColor;
 layout(set = 2, binding = 0) uniform sampler2D colorMetallicTexture;
 layout(set = 2, binding = 1) uniform sampler2D normalRoughnessTexture;
 layout(set = 2, binding = 2) uniform sampler2D depthTexture;
+layout(set = 2, binding = 3) uniform sampler2D ssaoTexture;
 
 #include "../../../../Includes/PushConstants/DeferredDirectionLightPC.glsl"
 
@@ -52,5 +53,10 @@ void main()
     vec3 viewDir = normalize(camera.eye.xyz - position);  
     vec3 radiance = SimulateDirectionalLight(ctx.directionLightDataBufferAddr, inLightDenseIndex, albedo, normal, viewDir, roughness, metallic);
  
+    if (ctx.enableSsao == 1 && ctx.enableSsaoLight == 1) {
+        float ssao = texture(ssaoTexture, inUV).r;
+        radiance *= ssao;
+    }
+
     outColor = vec4(radiance, 1.0);
 }
