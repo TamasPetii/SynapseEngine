@@ -39,7 +39,7 @@ namespace Syn {
 
     Renderer::~Renderer() {
         auto device = ServiceLocator::GetVkContext()->GetDevice();
-        vkDeviceWaitIdle(device->Handle());
+        device->WaitIdle();
     }
 
     void Renderer::WaitForFrame(uint32_t frameIndex) {

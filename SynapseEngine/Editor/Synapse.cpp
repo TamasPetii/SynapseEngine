@@ -23,6 +23,14 @@ Synapse::Synapse(const Syn::ApplicationConfig& config)
 }
 
 Synapse::~Synapse() {
+    if (_engine && _engine->GetVkContext() && _engine->GetVkContext()->GetDevice()) {
+        _engine->GetVkContext()->GetDevice()->WaitIdle();
+    }
+
+    _editorApi.reset();
+    _inputDispatcher.reset();
+    _guiManager.reset();
+    _engine.reset();
 }
 
 void Synapse::OnInit() {
@@ -49,14 +57,13 @@ void Synapse::OnInit() {
         };
 
     params.onGuiFlushCallback = [&](uint32_t frameIndex) {
-        Syn::GuiTextureManager::Get().FlushQueue(frameIndex);
+        _guiManager->GetTextureManager()->FlushQueue(frameIndex);
         };
 #endif
 
     _engine = std::make_unique<Syn::Engine>(params);
 
 #ifndef SYN_PERFORMANCE
-    _editorApi = std::make_unique<Syn::EditorApiImpl>(_engine.get());
 
     auto vkContext = _engine->GetVkContext();
     GLFWwindow* nativeWindow = static_cast<GLFWwindow*>(GetWindow().GetNativePointer());
@@ -71,6 +78,8 @@ void Synapse::OnInit() {
         vkContext->GetSwapChain()->GetImageCount(),
         vkContext->GetSwapChain()->GetImageFormat()
     );
+
+    _editorApi = std::make_unique<Syn::EditorApiImpl>(_engine.get(), _guiManager->GetTextureManager());
 
     using TransformWin = Syn::EditorWindow<Syn::TransformView, Syn::TransformViewModel>;
     _guiManager->AddWindow<TransformWin>(

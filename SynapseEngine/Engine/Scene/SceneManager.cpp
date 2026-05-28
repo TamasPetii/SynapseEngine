@@ -76,7 +76,7 @@ namespace Syn
         {
             if (_activeScene)
             {
-                vkDeviceWaitIdle(ServiceLocator::GetVkContext()->GetDevice()->Handle());
+                ServiceLocator::GetVkContext()->GetDevice()->WaitIdle();
             }
 
             if (_pendingScene)

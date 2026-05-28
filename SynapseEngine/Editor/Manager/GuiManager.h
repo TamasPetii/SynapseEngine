@@ -4,12 +4,15 @@
 #include <vector>
 #include <memory>
 #include "Editor/View/IGuiWindow.h"
+#include "GuiTextureManager.h"
 
 struct GLFWwindow;
 
 namespace Syn {
     class GuiManager {
     public:
+        ~GuiManager();
+
         void Init(GLFWwindow* window, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue graphicsQueue, uint32_t imageCount, VkFormat colorFormat);
         void Shutdown();
 
@@ -30,6 +33,8 @@ namespace Syn {
         void AddWindow(Args&&... args) {
             _windows.push_back(std::make_unique<TWindow>(std::forward<Args>(args)...));
         }
+
+        GuiTextureManager* GetTextureManager() const { return _textureManager.get(); }
     private:
         void SetStyle();
     private:
@@ -38,5 +43,6 @@ namespace Syn {
         VkDevice _device = VK_NULL_HANDLE;
         VkDescriptorPool _imguiPool = VK_NULL_HANDLE;
         std::vector<std::unique_ptr<IGuiWindow>> _windows;
+        std::unique_ptr<GuiTextureManager> _textureManager;
     };
 }

@@ -40,7 +40,7 @@ namespace Syn {
 
         if (_frameNeedsResize[frameIndex]) 
         {
-            vkDeviceWaitIdle(ServiceLocator::GetVkContext()->GetDevice()->Handle());
+            ServiceLocator::GetVkContext()->GetDevice()->WaitIdle();
             _renderTargetManager->Resize(frameIndex, _newWidth, _newHeight);
             _frameNeedsResize[frameIndex] = false;
         }

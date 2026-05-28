@@ -198,4 +198,8 @@ namespace Syn::Vk {
 
         SYN_VK_ASSERT_MSG(vmaCreateAllocator(&allocatorInfo, &_allocator), "Failed to create VMA Allocator");
     }
+
+    void Device::WaitIdle() const {
+        vkDeviceWaitIdle(_handle);
+    }
 }

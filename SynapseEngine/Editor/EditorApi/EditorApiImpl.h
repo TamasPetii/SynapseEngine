@@ -5,11 +5,12 @@
 #include "Engine/Scene/SceneManager.h"
 #include "Engine/Engine.h"
 #include <unordered_map>
+#include "Editor/Manager/GuiTextureManager.h"
 
 namespace Syn {
     class EditorApiImpl : public IEditorAPI {
     public:
-        EditorApiImpl(Engine* engine) : _engine(engine), _sceneManager(engine->GetSceneManager()) {}
+        EditorApiImpl(Engine* engine, GuiTextureManager* textureManager) : _engine(engine), _sceneManager(engine->GetSceneManager()), _textureManager(textureManager) {}
 
         // --- ISelectionAPI ---
         EntityID GetSelectedEntity() const override;
@@ -43,8 +44,9 @@ namespace Syn {
     private:
         Engine* _engine = nullptr;
         SceneManager* _sceneManager = nullptr;
-        EntityID _selectedEntity = NULL_ENTITY;
+        GuiTextureManager* _textureManager = nullptr;
 
+        EntityID _selectedEntity = NULL_ENTITY;
         std::unordered_map<std::string, TextureHandle> _viewportTextures;
     };
 }

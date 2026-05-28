@@ -8,7 +8,8 @@
 namespace Syn {
     class GuiTextureManager {
     public:
-        static GuiTextureManager& Get() { static GuiTextureManager instance; return instance; }
+        GuiTextureManager() = default;
+        ~GuiTextureManager();
 
         TextureHandle RegisterTexture(VkImageView imageView, VkSampler sampler);
         ImTextureID GetImGuiTextureID(TextureHandle handle);
@@ -17,9 +18,7 @@ namespace Syn {
         void SetCurrentFrame(uint32_t currentFrameIndex);
         void FlushQueue(uint32_t frameIndex);
         void Cleanup();
-
     private:
-        GuiTextureManager() = default;
         TextureHandle _nextHandle = 1;
         uint32_t _currentFrameIndex = 0;
 

@@ -10,10 +10,15 @@
 #include "Engine/FrameContext.h"
 
 namespace Syn {
+    GuiManager::~GuiManager() {
+        Shutdown();
+    }
+
     void GuiManager::Init(GLFWwindow* window, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue graphicsQueue, uint32_t imageCount, VkFormat colorFormat) {
         _device = device;
         _windowHandle = window;
         _colorFormat = colorFormat;
+		_textureManager = std::make_unique<GuiTextureManager>();
 
         volkInitialize();
         volkLoadInstance(instance);
@@ -57,17 +62,26 @@ namespace Syn {
 
     void GuiManager::Shutdown() {
         vkDeviceWaitIdle(_device);
-        GuiTextureManager::Get().Cleanup();
+
+        _textureManager.reset();
+
         ImGui_ImplVulkan_Shutdown();
+
+        if (_imguiPool != VK_NULL_HANDLE) {
+            vkDestroyDescriptorPool(_device, _imguiPool, nullptr);
+            _imguiPool = VK_NULL_HANDLE;
+        }
+
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
-        vkDestroyDescriptorPool(_device, _imguiPool, nullptr);
+
+        _device = VK_NULL_HANDLE; 
     }
 
     void GuiManager::BeginFrame() {
         
         if (auto frameCtx = ServiceLocator::GetFrameContext())
-            GuiTextureManager::Get().SetCurrentFrame(frameCtx->currentFrameIndex);
+            _textureManager->SetCurrentFrame(frameCtx->currentFrameIndex);
 
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();

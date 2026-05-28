@@ -4,6 +4,10 @@
 #include "Engine/FrameContext.h"
 
 namespace Syn {
+    GuiTextureManager::~GuiTextureManager() {
+        Cleanup();
+    }
+
     TextureHandle GuiTextureManager::RegisterTexture(VkImageView imageView, VkSampler sampler) {
         VkDescriptorSet ds = ImGui_ImplVulkan_AddTexture(sampler, imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         TextureHandle handle = _nextHandle++;

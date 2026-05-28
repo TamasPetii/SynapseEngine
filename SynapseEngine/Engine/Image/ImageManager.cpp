@@ -23,6 +23,15 @@ namespace Syn {
         InitializeBindlessSetup();
     }
 
+    ImageManager::~ImageManager() {
+        auto device = ServiceLocator::GetVkContext()->GetDevice()->Handle();
+
+        if (_bindlessLayout != VK_NULL_HANDLE) {
+            vkDestroyDescriptorSetLayout(device, _bindlessLayout, nullptr);
+            _bindlessLayout = VK_NULL_HANDLE;
+        }
+    }
+
     void ImageManager::InitializeBindlessSetup()
     {
         Vk::DescriptorLayoutBuilder layoutBuilder;

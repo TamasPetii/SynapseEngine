@@ -50,6 +50,8 @@
 #include "Engine/Scene/Writer/ManifestSceneWriter.h"
 #include "Engine/Scene/Loader/ManifestSceneLoader.h"
 
+#include "Engine/Vk/Descriptor/DescriptorUtils.h"
+
 #include <print>
 #include <filesystem>
 
@@ -223,17 +225,20 @@ namespace Syn
 
 	void Engine::Shutdown() 
 	{
-		_taskExecutor.reset();
-		_inputManager.reset();
-		_serializer.reset();
-		_cpuProfiler.reset();
-		_gpuProfiler.reset();
+		_vkContext->GetDevice()->WaitIdle();
+
 		_sceneManager.reset();
 		_renderManager.reset();
+		_inputManager.reset();
+		_gpuProfiler.reset();
+		_cpuProfiler.reset();
 		_resourceManager.reset();
 		_gpuUploader.reset();
-		_vkContext.reset(); //This has to be the last one!
+		_taskExecutor.reset();
+		_serializer.reset();
 		ServiceLocator::Shutdown();
+		Vk::DescriptorUtils::Cleanup();
+		_vkContext.reset(); //This has to be the last one!
 	}
 
 	void Engine::WindowResizeEvent(uint32_t width, uint32_t height) {

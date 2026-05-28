@@ -14,6 +14,7 @@ namespace Syn::Vk {
         ThreadSafeQueue* GetGraphicsQueue() const { return _graphicsQueue.get(); }
         ThreadSafeQueue* GetComputeQueue() const { return _computeQueue.get(); }
         ThreadSafeQueue* GetTransferQueue() const { return _transferQueue.get(); }
+		void WaitIdle() const;
     private:
         void InitVMA(VkInstance instance, const PhysicalDevice& physicalDevice);
     private:

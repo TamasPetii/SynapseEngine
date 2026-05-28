@@ -37,11 +37,11 @@ namespace Syn
             if (!view) return InvalidTextureHandle;
 
             auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::NearestClampEdge);
-            TextureHandle handle = GuiTextureManager::Get().RegisterTexture(image->GetView(viewName), sampler->Handle());
+            TextureHandle handle = _textureManager->RegisterTexture(image->GetView(viewName), sampler->Handle());
             _viewportTextures[cacheKey] = handle;
         }
 
-        return GuiTextureManager::Get().GetImGuiTextureID(_viewportTextures[cacheKey]);
+        return _textureManager->GetImGuiTextureID(_viewportTextures[cacheKey]);
     }
 
     void EditorApiImpl::ResizeRenderTargets(uint32_t width, uint32_t height) {
@@ -51,7 +51,7 @@ namespace Syn
             renderManager->OnResize(width, height);
 
             for (auto& pair : _viewportTextures) {
-                GuiTextureManager::Get().MarkForDeletion(pair.second);
+                _textureManager->MarkForDeletion(pair.second);
             }
 
             _viewportTextures.clear();
