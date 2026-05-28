@@ -5,7 +5,7 @@
   "environment": {
     "spawn_sponza": false,
     "spawn_bistro": false,
-    "spawn_floor": false,
+    "spawn_floor": true,
     "spawn_pbr_sponza": false,
     "spawn_monkey": true
   },
@@ -16,9 +16,9 @@
   "entities": {
     "animated_characters": 1,
     "static_geometry": 1,
-    "physics_boxes": 1,
-    "physics_spheres": 1,
-    "physics_capsules": 1
+    "physics_boxes": 500,
+    "physics_spheres": 500,
+    "physics_capsules": 500
   },
   "lights": {
     "directional_count": 1,

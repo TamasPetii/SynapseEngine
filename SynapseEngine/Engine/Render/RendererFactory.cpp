@@ -79,17 +79,20 @@
 #include "Engine/Render/Passes/Shading/Wboit/TransparentCompositeTransitionPass.h"
 #include "Engine/Render/Passes/Shading/Wboit/TransparentCompositePass.h"
 
-#include "Engine/Render/Passes/Wireframe/WireframeMeshSetupPass.h"
-#include "Engine/Render/Passes/Wireframe/WireframeMeshAabbPass.h"
-#include "Engine/Render/Passes/Wireframe/WireframeMeshSpherePass.h"
-#include "Engine/Render/Passes/Wireframe/PointLightAabbWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/PointLightSphereWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/SpotLightAabbWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/SpotLightSphereWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/SpotLightConeWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/SpotLightPyramidWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/StaticChunkAabbWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/MortonChunkAabbWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/Mesh/WireframeMeshSetupPass.h"
+#include "Engine/Render/Passes/Wireframe/Mesh/WireframeMeshAabbPass.h"
+#include "Engine/Render/Passes/Wireframe/Mesh/WireframeMeshSpherePass.h"
+#include "Engine/Render/Passes/Wireframe/Light/PointLightAabbWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/Light/PointLightSphereWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/Light/SpotLightAabbWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/Light/SpotLightSphereWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/Light/SpotLightConeWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/Light/SpotLightPyramidWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/Chunk/StaticChunkAabbWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/Chunk/MortonChunkAabbWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/Collider/BoxColliderWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/Collider/SphereColliderWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/Collider/CapsuleColliderWireframePass.h"
 
 #include "Engine/Render/Passes/Ssao/SsaoInitPass.h"
 #include "Engine/Render/Passes/Ssao/SsaoPass.h"
@@ -206,7 +209,10 @@ namespace Syn
         pipeline->AddPass(std::make_unique<SpotLightPyramidWireframePass>());
         pipeline->AddPass(std::make_unique<StaticChunkAabbWireframePass>());
         pipeline->AddPass(std::make_unique<MortonChunkAabbWireframePass>());
-        
+        pipeline->AddPass(std::make_unique<BoxColliderWireframePass>());
+        pipeline->AddPass(std::make_unique<SphereColliderWireframePass>());
+        pipeline->AddPass(std::make_unique<CapsuleColliderWireframePass>());
+
         //Billboard Passes
         pipeline->AddPass(std::make_unique<BillboardTransitionPass>());
         pipeline->AddPass(std::make_unique<CameraBillboardPass>());

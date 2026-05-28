@@ -15,12 +15,12 @@ namespace Syn
 
 	struct SYN_API CapsuleColliderComponentGPU
 	{
-		CapsuleColliderComponentGPU(const CapsuleColliderComponent& component);
+		CapsuleColliderComponentGPU(const CapsuleColliderComponent& component, uint32_t entityIndex);
 
 		glm::vec3 localOffset;
 		float radius;
 		float halfHeight;
-		float _pad0;
+		uint32_t entityIndex;
 		float _pad1;
 		float _pad2;
 	};

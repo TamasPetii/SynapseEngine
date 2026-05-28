@@ -14,11 +14,11 @@ namespace Syn
 
 	struct SYN_API BoxColliderComponentGPU
 	{
-		BoxColliderComponentGPU(const BoxColliderComponent& component);
+		BoxColliderComponentGPU(const BoxColliderComponent& component, uint32_t entityIndex);
 
 		glm::vec3 halfExtents;
-		float padding0;
+		uint32_t entityIndex;
 		glm::vec3 localOffset;
-		float padding1;
+		float pad0;
 	};
 }

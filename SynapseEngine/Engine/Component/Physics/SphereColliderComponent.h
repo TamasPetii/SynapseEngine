@@ -14,9 +14,13 @@ namespace Syn
 
 	struct SYN_API SphereColliderComponentGPU
 	{
-		SphereColliderComponentGPU(const SphereColliderComponent& component);
+		SphereColliderComponentGPU(const SphereColliderComponent& component, uint32_t entityIndex);
 
 		glm::vec3 localOffset;
 		float radius;
+		uint32_t entityIndex;
+		float pad0;
+		float pad1;
+		float pad2;
 	};
 }

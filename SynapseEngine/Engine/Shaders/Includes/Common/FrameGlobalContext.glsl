@@ -81,6 +81,13 @@ struct FrameGlobalContext {
 
     uint64_t ssaoKernelBufferAddr;
 
+    uint64_t boxColliderSparseMapBufferAddr;
+    uint64_t boxColliderDataBufferAddr;
+    uint64_t sphereColliderSparseMapBufferAddr;
+    uint64_t sphereColliderDataBufferAddr;
+    uint64_t capsuleColliderSparseMapBufferAddr;
+    uint64_t capsuleColliderDataBufferAddr;
+
     float screenWidth;
     float screenHeight;
     float ambientStrength;

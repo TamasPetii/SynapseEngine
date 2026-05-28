@@ -115,6 +115,14 @@ namespace Syn {
         ctx.wireframeMeshSphereIndirectCommandBufferAddr = drawData->Debug.modelSphereIndirectBuffer.GetAddress(fIdx, true);
 
 		ctx.ssaoKernelBufferAddr = drawData->Ssao.kernelBuffer.GetAddress(fIdx, true);
+
+        ctx.boxColliderSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::BoxColliderSparseMap, fIdx);
+        ctx.boxColliderDataBufferAddr = compManager->GetBufferAddr(BufferNames::BoxColliderData, fIdx);
+        ctx.sphereColliderSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::SphereColliderSparseMap, fIdx);
+        ctx.sphereColliderDataBufferAddr = compManager->GetBufferAddr(BufferNames::SphereColliderData, fIdx);
+        ctx.capsuleColliderSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CapsuleColliderSparseMap, fIdx);
+        ctx.capsuleColliderDataBufferAddr = compManager->GetBufferAddr(BufferNames::CapsuleColliderData, fIdx);
+
 		ctx.enableSsao = settings->enableSsao ? 1 : 0;
 		ctx.enableSsaoLight = settings->enableSsaoLight ? 1 : 0;
 

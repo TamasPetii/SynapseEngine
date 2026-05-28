@@ -227,6 +227,11 @@ namespace Syn {
                 changed |= ImGui::Checkbox("Mesh Sphere", &settings.enableWireframeMeshSphere);
                 changed |= ImGui::Checkbox("Static Chunk AABB", &settings.enableStaticChunkAabbWireframe);
                 changed |= ImGui::Checkbox("Morton Chunk AABB", &settings.enableMortonChunkAabbWireframe);
+
+                ImGui::SeparatorText("Collider Wireframes");
+                changed |= ImGui::Checkbox("Box Collider", &settings.enableBoxColliderWireframe);
+                changed |= ImGui::Checkbox("Sphere Collider", &settings.enableSphereColliderWireframe);
+                changed |= ImGui::Checkbox("Capsule Collider", &settings.enableCapsuleColliderWireframe);
             }
             EndSection(isDebugOpen);
 

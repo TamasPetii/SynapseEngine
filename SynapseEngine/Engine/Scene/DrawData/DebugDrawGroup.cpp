@@ -10,6 +10,7 @@ namespace Syn
         auto modelManager = ServiceLocator::GetModelManager();
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
         auto sphere = modelManager->GetResource(MeshSourceNames::Sphere);
+		auto capsule = modelManager->GetResource(MeshSourceNames::Capsule);
 
         modelAabbCmdTemplate.vertexCount = cube->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;
         modelAabbCmdTemplate.instanceCount = 0;
@@ -20,6 +21,21 @@ namespace Syn
         modelSphereCmdTemplate.instanceCount = 0;
         modelSphereCmdTemplate.firstVertex = sphere->cpuData.baseDrawCommands[0].traditionalCmd.firstVertex;
         modelSphereCmdTemplate.firstInstance = 0;
+
+        boxColliderCmdTemplate.vertexCount = cube->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;
+        boxColliderCmdTemplate.instanceCount = 0;
+        boxColliderCmdTemplate.firstVertex = cube->cpuData.baseDrawCommands[0].traditionalCmd.firstVertex;
+        boxColliderCmdTemplate.firstInstance = 0;
+
+        sphereColliderCmdTemplate.vertexCount = sphere->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;
+        sphereColliderCmdTemplate.instanceCount = 0;
+        sphereColliderCmdTemplate.firstVertex = sphere->cpuData.baseDrawCommands[0].traditionalCmd.firstVertex;
+        sphereColliderCmdTemplate.firstInstance = 0;
+
+        capsuleColliderCmdTemplate.vertexCount = capsule->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;
+        capsuleColliderCmdTemplate.instanceCount = 0;
+        capsuleColliderCmdTemplate.firstVertex = capsule->cpuData.baseDrawCommands[0].traditionalCmd.firstVertex;
+        capsuleColliderCmdTemplate.firstInstance = 0;
 
         modelAabbCmds.data.assign(1, modelAabbCmdTemplate);
         modelSphereCmds.data.assign(1, modelSphereCmdTemplate);
@@ -32,6 +48,21 @@ namespace Syn
 
         modelSphereIndirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand) * 8, indirectUsage, 1024, 2048 });
         modelSphereIndirectBuffer.UpdateCapacityAll(1);
+
+        boxColliderIndirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
+        boxColliderIndirectBuffer.UpdateCapacityAll(1);
+
+        sphereColliderIndirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
+        sphereColliderIndirectBuffer.UpdateCapacityAll(1);
+
+        capsuleColliderIndirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
+        capsuleColliderIndirectBuffer.UpdateCapacityAll(1);
+
+        for (uint32_t i = 0; i < frameCount; ++i) {
+            boxColliderIndirectBuffer.GetMapped(i)->Write(&boxColliderCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            sphereColliderIndirectBuffer.GetMapped(i)->Write(&sphereColliderCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            capsuleColliderIndirectBuffer.GetMapped(i)->Write(&capsuleColliderCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+        }
 
         //Todo: Meshlet visibility buffer?
     }

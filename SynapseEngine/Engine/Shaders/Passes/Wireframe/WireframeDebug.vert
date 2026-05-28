@@ -9,7 +9,9 @@
 #include "../../Includes/Common/Mesh.glsl"
 #include "../../Includes/Common/PointLight.glsl"
 #include "../../Includes/Common/SpotLight.glsl"
+#include "../../Includes/Common/Transform.glsl"
 #include "../../Includes/Common/StaticChunk.glsl"
+#include "../../Includes/Common/Collider.glsl"
 
 layout(location = 0) out vec4 outColor;
 
@@ -93,6 +95,41 @@ void main() {
         worldPos = center + (v.position * extents);
         
         lightColor = chunkFullyInside ? vec3(0.1, 1.0, 0.1) : vec3(1.0, 0.5, 0.0);
+    }
+    else if (pc.lightDrawType == 7) {
+        BoxColliderComponent collider = GET_BOX_COLLIDER(ctx.boxColliderDataBufferAddr, gl_InstanceIndex);
+
+        uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, collider.entityIndex);
+        TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
+
+        vec3 localPos = (v.position * collider.halfExtents) + collider.localOffset;
+        worldPos = (transform.transform * vec4(localPos, 1.0)).xyz;
+
+        lightColor = vec3(0.0, 1.0, 0.0);
+    }
+    else if (pc.lightDrawType == 8) {
+        SphereColliderComponent collider = GET_SPHERE_COLLIDER(ctx.sphereColliderDataBufferAddr, gl_InstanceIndex);
+
+        uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, collider.entityIndex);
+        TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
+
+        vec3 localPos = (v.position * collider.radius) + collider.localOffset;
+        worldPos = (transform.transform * vec4(localPos, 1.0)).xyz;
+        
+        lightColor = vec3(0.0, 1.0, 1.0);
+    }
+    else if (pc.lightDrawType == 9) {
+        CapsuleColliderComponent collider = GET_CAPSULE_COLLIDER(ctx.capsuleColliderDataBufferAddr, gl_InstanceIndex);
+
+        uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, collider.entityIndex);
+        TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
+
+        vec3 unitPos = v.position * 2.0;
+        vec3 scale = vec3(collider.radius, collider.halfHeight, collider.radius);
+        vec3 localPos = (unitPos * scale) + collider.localOffset;
+        worldPos = (transform.transform * vec4(localPos, 1.0)).xyz;
+
+        lightColor = vec3(1.0, 0.5, 0.0);
     }
 
     uint cameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);

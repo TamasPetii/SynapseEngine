@@ -7,8 +7,9 @@ namespace Syn
 		localOffset(glm::vec3(0.f))
 	{}
 
-	BoxColliderComponentGPU::BoxColliderComponentGPU(const BoxColliderComponent& component) :
+	BoxColliderComponentGPU::BoxColliderComponentGPU(const BoxColliderComponent& component, uint32_t entityIndex) :
 		halfExtents(component.halfExtents),
-		localOffset(component.localOffset)
+		localOffset(component.localOffset),
+		entityIndex(entityIndex)
 	{}
 }

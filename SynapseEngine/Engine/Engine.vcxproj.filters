@@ -621,7 +621,7 @@
     <ClCompile Include="Render\Passes\Present\CompositePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshAabbPass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\Mesh\WireframeMeshAabbPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Component\Rendering\MaterialOverrideComponent.cpp">
@@ -639,10 +639,10 @@
     <ClCompile Include="Render\Passes\Bloom\BloomCompositePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshSpherePass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\Mesh\WireframeMeshSpherePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Wireframe\WireframeMeshSetupPass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\Mesh\WireframeMeshSetupPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Animation\Loader\IAnimationLoader.cpp">
@@ -855,16 +855,16 @@
     <ClCompile Include="Render\Passes\Culling\SpotLightCullingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Wireframe\PointLightSphereWireframePass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\Light\PointLightSphereWireframePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Wireframe\PointLightAabbWireframePass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\Light\PointLightAabbWireframePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Wireframe\SpotLightSphereWireframePass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\Light\SpotLightSphereWireframePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Wireframe\SpotLightAabbWireframePass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\Light\SpotLightAabbWireframePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Scene\SceneSettings.cpp">
@@ -1029,10 +1029,10 @@
     <ClCompile Include="Render\Passes\Shading\Visibility\DebugVisibilityPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Wireframe\SpotLightConeWireframePass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\Light\SpotLightConeWireframePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Wireframe\SpotLightPyramidWireframePass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\Light\SpotLightPyramidWireframePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="System\Core\StaticSpatialSahSystem.cpp">
@@ -1050,7 +1050,7 @@
     <ClCompile Include="Render\Passes\Culling\StaticModelCullingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Wireframe\StaticChunkAabbWireframePass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\Chunk\StaticChunkAabbWireframePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterDispatchSetupPass.cpp">
@@ -1320,7 +1320,16 @@
     <ClCompile Include="Render\Passes\Ssao\DpHvoBlurPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Wireframe\MortonChunkAabbWireframePass.cpp">
+    <ClCompile Include="Render\Passes\Wireframe\Chunk\MortonChunkAabbWireframePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Wireframe\Collider\BoxColliderWireframePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Wireframe\Collider\SphereColliderWireframePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Wireframe\Collider\CapsuleColliderWireframePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -2033,7 +2042,7 @@
     <ClInclude Include="Render\Passes\Present\CompositePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshAabbPass.h">
+    <ClInclude Include="Render\Passes\Wireframe\Mesh\WireframeMeshAabbPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Component\Rendering\MaterialOverrideComponent.h">
@@ -2051,13 +2060,13 @@
     <ClInclude Include="Render\Passes\Bloom\BloomCompositePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshSpherePass.h">
+    <ClInclude Include="Render\Passes\Wireframe\Mesh\WireframeMeshSpherePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Image\ImageNames.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Wireframe\WireframeMeshSetupPass.h">
+    <ClInclude Include="Render\Passes\Wireframe\Mesh\WireframeMeshSetupPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Animation\Loader\IAnimationLoader.h">
@@ -2273,16 +2282,16 @@
     <ClInclude Include="Render\Passes\Culling\SpotLightCullingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Wireframe\PointLightSphereWireframePass.h">
+    <ClInclude Include="Render\Passes\Wireframe\Light\PointLightSphereWireframePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Wireframe\PointLightAabbWireframePass.h">
+    <ClInclude Include="Render\Passes\Wireframe\Light\PointLightAabbWireframePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Wireframe\SpotLightSphereWireframePass.h">
+    <ClInclude Include="Render\Passes\Wireframe\Light\SpotLightSphereWireframePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Wireframe\SpotLightAabbWireframePass.h">
+    <ClInclude Include="Render\Passes\Wireframe\Light\SpotLightAabbWireframePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Scene\SceneSettings.h">
@@ -2453,10 +2462,10 @@
     <ClInclude Include="Render\Passes\Shading\Visibility\DebugVisibilityPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Wireframe\SpotLightConeWireframePass.h">
+    <ClInclude Include="Render\Passes\Wireframe\Light\SpotLightConeWireframePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Wireframe\SpotLightPyramidWireframePass.h">
+    <ClInclude Include="Render\Passes\Wireframe\Light\SpotLightPyramidWireframePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="System\Core\StaticSpatialSahSystem.h">
@@ -2480,7 +2489,7 @@
     <ClInclude Include="Render\PassGroupNames.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Wireframe\StaticChunkAabbWireframePass.h">
+    <ClInclude Include="Render\Passes\Wireframe\Chunk\StaticChunkAabbWireframePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterDispatchSetupPass.h">
@@ -2858,7 +2867,16 @@
     <ClInclude Include="Render\Passes\Ssao\DpHvoBlurPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Wireframe\MortonChunkAabbWireframePass.h">
+    <ClInclude Include="Render\Passes\Wireframe\Chunk\MortonChunkAabbWireframePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Wireframe\Collider\BoxColliderWireframePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Wireframe\Collider\SphereColliderWireframePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Wireframe\Collider\CapsuleColliderWireframePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -2989,5 +3007,6 @@
     <None Include="Shaders\Passes\Ssao\Ssao.comp" />
     <None Include="Shaders\Passes\Ssao\SsaoBlur.comp" />
     <None Include="Shaders\Includes\PushConstants\SsaoBlurPC.glsl" />
+    <None Include="Shaders\Includes\Common\Collider.glsl" />
   </ItemGroup>
 </Project>

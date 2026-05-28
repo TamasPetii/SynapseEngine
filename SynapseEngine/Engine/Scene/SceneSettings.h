@@ -81,6 +81,9 @@ namespace Syn
         bool enableSpotLightAabbWireframe;
 		bool enableSpotLightConeWireframe;
         bool enableSpotLightPyramidWireframe;
+        bool enableBoxColliderWireframe;
+        bool enableSphereColliderWireframe;
+        bool enableCapsuleColliderWireframe;
 
         bool enableBillboardCameras;
 		bool enableBillboardPointLights;

@@ -7,8 +7,9 @@ namespace Syn
 		localOffset(glm::vec3(0.f))
 	{}
 
-	SphereColliderComponentGPU::SphereColliderComponentGPU(const SphereColliderComponent& component) :
+	SphereColliderComponentGPU::SphereColliderComponentGPU(const SphereColliderComponent& component, uint32_t entityIndex) :
 		radius(component.radius),
-		localOffset(component.localOffset)
+		localOffset(component.localOffset),
+		entityIndex(entityIndex)
 	{}
 }

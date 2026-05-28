@@ -81,7 +81,7 @@ namespace Syn
             if (componentBuffer.versions[boxIndex] != box.version)
             {
                 componentBuffer.versions[boxIndex] = box.version;
-                bufferHandler[boxIndex] = BoxColliderComponentGPU(box);
+                bufferHandler[boxIndex] = BoxColliderComponentGPU(box, entity);
             }
             };
 
