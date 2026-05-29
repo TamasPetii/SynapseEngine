@@ -163,16 +163,16 @@ namespace Syn {
 		auto [modelPool, directionLightPool, pointLightPool, spotLightPool, cameraPool, transformPool] = scene->GetRegistry()->GetPools<ModelComponent, DirectionLightComponent, PointLightComponent, SpotLightComponent, CameraComponent, TransformComponent>();
 
 		ctx.staticChunkCount = drawData->Chunks.chunkCounter.load(std::memory_order_relaxed);
-        ctx.modelCount = modelPool->Size();
-        ctx.directionLightCount = directionLightPool->Size();
-        ctx.pointLightCount = pointLightPool->Size();
-        ctx.spotLightCount = spotLightPool->Size();
+        ctx.modelCount = static_cast<uint32_t>(modelPool->Size());
+        ctx.directionLightCount = static_cast<uint32_t>(directionLightPool->Size());
+        ctx.pointLightCount = static_cast<uint32_t>(pointLightPool->Size());
+        ctx.spotLightCount = static_cast<uint32_t>(spotLightPool->Size());
 
         ctx.enableStaticBvhCulling = scene->GetSettings()->enableStaticBvhCulling || context.scene->GetSettings()->enableMortonBvhCulling ? 1 : 0;
-        ctx.allTransformCount = transformPool->Size();
-        ctx.staticTransformCount = transformPool->GetStaticEntities().size();
-        ctx.dynamicTransformCount = transformPool->GetDynamicEntities().size();
-        ctx.streamTransformCount = transformPool->GetStreamEntities().size();
+        ctx.allTransformCount = static_cast<uint32_t>(transformPool->Size());
+        ctx.staticTransformCount = static_cast<uint32_t>(transformPool->GetStaticEntities().size());
+        ctx.dynamicTransformCount = static_cast<uint32_t>(transformPool->GetDynamicEntities().size());
+        ctx.streamTransformCount = static_cast<uint32_t>(transformPool->GetStreamEntities().size());
         ctx.nonStaticTransformCount = ctx.allTransformCount - ctx.staticTransformCount;
 
         ctx.tileSize = scene->GetSettings()->tileSize;

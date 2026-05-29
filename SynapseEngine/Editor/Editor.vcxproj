@@ -235,18 +235,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\External\imgui-node-editor\crude_json.cpp" />
+    <ClCompile Include="..\..\External\imgui-node-editor\imgui_canvas.cpp" />
+    <ClCompile Include="..\..\External\imgui-node-editor\imgui_node_editor.cpp" />
+    <ClCompile Include="..\..\External\imgui-node-editor\imgui_node_editor_api.cpp" />
     <ClCompile Include="..\..\External\ImGuiFileDialog\ImGuiFileDialog.cpp" />
     <ClCompile Include="Backends\imgui_impl_glfw.cpp" />
     <ClCompile Include="Backends\imgui_impl_vulkan.cpp" />
     <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Core\Windows\GlfwWindow.cpp" />
     <ClCompile Include="Dispatcher\InputDispatcher.cpp" />
+    <ClCompile Include="EditorApi\MaterialApiImpl.cpp" />
     <ClCompile Include="EditorApi\RenderApiImpl.cpp" />
     <ClCompile Include="EditorApi\SceneApiImpl.cpp" />
     <ClCompile Include="EditorApi\SelectionApiImpl.cpp" />
     <ClCompile Include="EditorApi\SettingsApiImpl.cpp" />
     <ClCompile Include="EditorApi\TransformApiImpl.cpp" />
     <ClCompile Include="FileDialog\ImGuiFileDialogImpl.cpp" />
+    <ClCompile Include="View\MaterialGraph\MaterialGraphView.cpp" />
     <ClCompile Include="View\MainMenu\MainMenuView.cpp" />
     <ClCompile Include="Manager\GuiManager.cpp" />
     <ClCompile Include="Manager\GuiTextureManager.cpp" />
@@ -273,6 +279,7 @@
     <ClInclude Include="EditorApi\EditorApiImpl.h" />
     <ClInclude Include="Dispatcher\InputDispatcher.h" />
     <ClInclude Include="FileDialog\ImGuiFileDialogImpl.h" />
+    <ClInclude Include="View\MaterialGraph\MaterialGraphView.h" />
     <ClInclude Include="View\MainMenu\MainMenuView.h" />
     <ClInclude Include="Manager\GuiManager.h" />
     <ClInclude Include="Manager\GuiTextureManager.h" />

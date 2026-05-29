@@ -23,6 +23,8 @@ namespace Syn {
 	class IGpuProfiler;
     class ICpuProfiler;
     class Serializer;
+    class MaterialManager;
+    class ImageManager;
 }
 
 namespace Syn
@@ -54,6 +56,9 @@ namespace Syn
         void OnMouseMove(float x, float y);
 		void OnScroll(float xOffset, float yOffset);
         void SetInputEnabled(bool enabled) { _inputEnabled = enabled; }
+    public:
+        MaterialManager* GetMaterialManager();
+        ImageManager* GetImageManager();
     private:
         void Init(const EngineInitParams& params);
         void InitLogger();

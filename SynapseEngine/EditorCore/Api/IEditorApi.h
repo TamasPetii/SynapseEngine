@@ -4,6 +4,7 @@
 #include "IRenderAPI.h"
 #include "ISettingsApi.h"
 #include "ISceneAPI.h"
+#include "IMaterialAPI.h"
 
 namespace Syn {
     class IEditorAPI :
@@ -11,7 +12,8 @@ namespace Syn {
         public ITransformAPI,
         public IRenderAPI,
         public ISettingsAPI,
-        public ISceneAPI
+        public ISceneAPI,
+        public IMaterialAPI
     {
     public:
         virtual ~IEditorAPI() = default;

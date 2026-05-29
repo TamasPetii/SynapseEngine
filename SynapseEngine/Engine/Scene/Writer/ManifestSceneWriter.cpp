@@ -55,7 +55,7 @@ namespace Syn
         if (!modelPool) return;
 
         auto modelManager = ServiceLocator::GetModelManager();
-        uint32_t maxModelId = modelManager->GetResourceCount();
+        uint32_t maxModelId = static_cast<uint32_t>(modelManager->GetResourceCount());
 
         std::vector<uint8_t> usedModels(maxModelId, 0);
         for (auto entity : modelPool->GetStorage().GetDenseEntities())

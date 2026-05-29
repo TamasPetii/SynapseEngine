@@ -354,4 +354,11 @@ namespace Syn
 
 		ServiceLocator::ProvideSerializer(_serializer.get());
 	}
+
+	MaterialManager* Engine::GetMaterialManager() {
+		return ServiceLocator::GetMaterialManager();
+	}
+	ImageManager* Engine::GetImageManager() {
+		return ServiceLocator::GetImageManager();
+	}
 }

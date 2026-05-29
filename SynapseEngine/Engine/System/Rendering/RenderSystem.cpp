@@ -207,7 +207,7 @@ namespace Syn
         uint32_t totalBlueprints = 0;
         for (uint32_t modelId = 0; modelId < _modelCapacities.size(); ++modelId) {
             if (_modelCapacities[modelId] > 0 && modelId < modelSnapshots.size() && modelSnapshots[modelId].resource) {
-                totalBlueprints += modelSnapshots[modelId].resource->cpuData.baseDrawCommands.size();
+                totalBlueprints += static_cast<uint32_t>(modelSnapshots[modelId].resource->cpuData.baseDrawCommands.size());
             }
         }
 

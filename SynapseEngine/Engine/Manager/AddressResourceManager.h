@@ -13,7 +13,7 @@ namespace Syn
     };
 
     template <typename TResource, typename TAddressStruct>
-    class SYN_API AddressResourceManager : public BaseResourceManager<TResource> {
+    class AddressResourceManager : public BaseResourceManager<TResource> {
     public:
         AddressResourceManager(uint32_t framesInFlight, uint32_t initialCapacity, uint32_t upWindow, uint32_t downWindow);
         virtual ~AddressResourceManager() = default;
@@ -39,7 +39,7 @@ namespace Syn
         config.allocationFlags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
         config.useDeviceAddress = true;
 
-        _addressBuffer = std::make_unique<WindowedBuffer>(config, sizeof(TAddressStruct), upWindow, downWindow);
+        _addressBuffer = std::make_unique<WindowedBuffer>(config, static_cast<uint32_t>(sizeof(TAddressStruct)), upWindow, downWindow);
         _addressBuffer->UpdateCapacity(initialCapacity);
     }
 

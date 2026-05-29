@@ -15,6 +15,9 @@
 #include "Editor/View/MainMenu/MainMenuView.h"
 #include "EditorCore/ViewModels/MainMenu/MainMenuViewModel.h"
 
+#include "Editor/View/MaterialGraph/MaterialGraphView.h"
+#include "EditorCore/ViewModels/MaterialGraph/MaterialGraphViewModel.h"
+
 #include "Manager/GuiTextureManager.h"
 
 Synapse::Synapse(const Syn::ApplicationConfig& config)
@@ -116,10 +119,19 @@ void Synapse::OnInit() {
 			_guiManager->GetFileDialog()
         }
     );
+
+    using MaterialGraphWin = Syn::EditorWindow<Syn::MaterialGraphView, Syn::MaterialGraphViewModel>;
+    _guiManager->AddWindow<MaterialGraphWin>(
+        Syn::MaterialGraphView{},
+        Syn::MaterialGraphViewModel{
+            _editorApi.get()
+        }
+    );
 #endif
 
     _inputDispatcher = std::make_unique<Syn::InputDispatcher>(_guiManager.get(), _engine.get());
 }
+
 
 void Synapse::OnUpdate(float dt) {
 #ifndef SYN_PERFORMANCE

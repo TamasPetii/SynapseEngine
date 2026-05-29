@@ -7,3 +7,6 @@
 [submodule "External/ImGuiFileDialog"]
 	path = External/ImGuiFileDialog
 	url = https://github.com/aiekick/ImGuiFileDialog
+[submodule "External/imgui-node-editor"]
+	path = External/imgui-node-editor
+	url = https://github.com/thedmd/imgui-node-editor.git

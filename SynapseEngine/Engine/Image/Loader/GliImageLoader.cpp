@@ -86,7 +86,7 @@ namespace Syn
         rawImage.height = texture.extent().y;
         rawImage.depth = 1;
         rawImage.format = GliFormatToVulkan(texture.format());
-        rawImage.mipLevels = texture.levels();
+        rawImage.mipLevels = static_cast<uint32_t>(texture.levels());
         rawImage.isCompressed = gli::is_compressed(texture.format());
 
         if (rawImage.format == VK_FORMAT_UNDEFINED) {
@@ -103,7 +103,7 @@ namespace Syn
             MipLevelInfo mipInfo{};
             mipInfo.width = texture.extent(level).x;
             mipInfo.height = texture.extent(level).y;
-            mipInfo.size = texture.size(level);
+            mipInfo.size = static_cast<uint32_t>(texture.size(level));
             mipInfo.offset = currentOffset;
 
             rawImage.mipData.push_back(mipInfo);

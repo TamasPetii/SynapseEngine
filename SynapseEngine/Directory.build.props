@@ -12,6 +12,8 @@
 
     <VcpkgTriplet>x64-windows-static-md</VcpkgTriplet>
     <VcpkgConfiguration Condition="'$(Configuration)'=='Dist' OR '$(Configuration)'=='Performance'">Release</VcpkgConfiguration>
+
+	<ExternalDir>$(MSBuildThisFileDirectory)..\External\</ExternalDir>
   </PropertyGroup>
 
   <Import Project="$(VcpkgRoot)\scripts\buildsystems\msbuild\vcpkg.props"
@@ -22,8 +24,15 @@
       <LanguageStandard>$(CppStandardVersion)</LanguageStandard>
       <LanguageStandard_C>$(CStandardVersion)</LanguageStandard_C>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-		<AdditionalIncludeDirectories>$(SolutionDir);$(MSBuildThisFileDirectory)..\External\vulkan_radix_sort\include;$(MSBuildThisFileDirectory)..\External\ImGuiFileDialog;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
 
+		<AdditionalIncludeDirectories>
+			$(SolutionDir);
+			$(ExternalDir)vulkan_radix_sort\include;
+			$(ExternalDir)ImGuiFileDialog;
+			$(ExternalDir)imgui-node-editor;
+			%(AdditionalIncludeDirectories)
+		</AdditionalIncludeDirectories>
+		
       <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
 
       <WarningLevel>Level4</WarningLevel>
@@ -32,6 +41,7 @@
       <BuildStlModules>false</BuildStlModules>
 
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Debug'">
+		  _SILENCE_CXX23_ALIGNED_STORAGE_DEPRECATION_WARNING;
 		  USE_STD_FILESYSTEM;
 		  VK_ENABLE_BETA_EXTENSIONS;
 		  SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
@@ -47,6 +57,7 @@
       <RuntimeLibrary Condition="'$(Configuration)'=='Debug'">MultiThreadedDebugDLL</RuntimeLibrary>
 
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Release'">
+		  _SILENCE_CXX23_ALIGNED_STORAGE_DEPRECATION_WARNING;
 		  USE_STD_FILESYSTEM;
 		  VK_ENABLE_BETA_EXTENSIONS;
 		  SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
@@ -61,6 +72,7 @@
       <RuntimeLibrary Condition="'$(Configuration)'=='Release'">MultiThreadedDLL</RuntimeLibrary>
 
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Dist'">
+		  _SILENCE_CXX23_ALIGNED_STORAGE_DEPRECATION_WARNING;
 		  USE_STD_FILESYSTEM;
 		  VK_ENABLE_BETA_EXTENSIONS;
 		  SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
@@ -78,6 +90,7 @@
       <DebugInformationFormat Condition="'$(Configuration)'=='Dist'">None</DebugInformationFormat>
 
       <PreprocessorDefinitions Condition="'$(Configuration)'=='Performance'">
+		  _SILENCE_CXX23_ALIGNED_STORAGE_DEPRECATION_WARNING;
 		  USE_STD_FILESYSTEM;
 		  VK_ENABLE_BETA_EXTENSIONS;
 		  SPIRV_REFLECT_USE_SYSTEM_SPIRV_H;
