@@ -117,7 +117,7 @@ namespace Syn
 		_inputManager = std::make_unique<InputManager>();
 		ServiceLocator::ProvideInputManager(_inputManager.get());
 
-		InitFrameContext(2);
+		InitFrameContext(1);
 		InitLogger();
 		InitVulkan(params);
 		InitTaskExecutor();
@@ -295,6 +295,12 @@ namespace Syn
 	{
 		if (!_inputEnabled) return;
 		_inputManager->SetMousePosition(x, y);
+	}
+
+	void Engine::OnScroll(float xOffset, float yOffset)
+	{
+		//if (!_inputEnabled) return;
+		//_inputManager->SetScrollOffset(xOffset, yOffset);
 	}
 
 	void Engine::InitSceneManager()

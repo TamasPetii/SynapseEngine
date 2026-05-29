@@ -19,7 +19,7 @@ public:
     void OnMouseButton(int button, int action, int mods) override;
     void OnMouseMove(float x, float y) override;
     void OnResize(uint32_t width, uint32_t height) override;
-
+    void OnScroll(float xOffset, float yOffset) override;
 private:
     std::unique_ptr<Syn::Engine> _engine;
     std::unique_ptr<Syn::GuiManager> _guiManager;

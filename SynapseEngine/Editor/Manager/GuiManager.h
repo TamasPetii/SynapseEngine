@@ -5,6 +5,7 @@
 #include <memory>
 #include "Editor/View/IGuiWindow.h"
 #include "GuiTextureManager.h"
+#include "EditorCore/Api/IFileDialogAPI.h"
 
 struct GLFWwindow;
 
@@ -35,6 +36,7 @@ namespace Syn {
         }
 
         GuiTextureManager* GetTextureManager() const { return _textureManager.get(); }
+        IFileDialogAPI* GetFileDialog() const { return _fileDialog.get(); }
     private:
         void SetStyle();
     private:
@@ -44,5 +46,6 @@ namespace Syn {
         VkDescriptorPool _imguiPool = VK_NULL_HANDLE;
         std::vector<std::unique_ptr<IGuiWindow>> _windows;
         std::unique_ptr<GuiTextureManager> _textureManager;
+        std::unique_ptr<IFileDialogAPI> _fileDialog;
     };
 }

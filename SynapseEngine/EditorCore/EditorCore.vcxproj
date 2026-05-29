@@ -237,6 +237,7 @@
     <ClCompile Include="Api\IEditorApi.cpp" />
     <ClCompile Include="Api\ISelectionAPI.cpp" />
     <ClCompile Include="Api\ITransformAPI.cpp" />
+    <ClCompile Include="Api\IFileDialogAPI.cpp" />
     <ClCompile Include="Interaction\DragInteraction.cpp" />
     <ClCompile Include="Api\IRenderAPI.cpp" />
     <ClCompile Include="Api\ISettingsAPI.cpp" />
@@ -264,6 +265,7 @@
     <ClInclude Include="Api\IEditorApi.h" />
     <ClInclude Include="Api\ISelectionAPI.h" />
     <ClInclude Include="Api\ITransformAPI.h" />
+    <ClInclude Include="Api\IFileDialogAPI.h" />
     <ClInclude Include="Interaction\DragInteraction.h" />
     <ClInclude Include="Api\IRenderAPI.h" />
     <ClInclude Include="Api\ISettingsAPI.h" />

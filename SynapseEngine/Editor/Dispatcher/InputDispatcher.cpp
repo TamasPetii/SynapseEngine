@@ -31,6 +31,15 @@ namespace Syn {
         }
     }
 
+    void InputDispatcher::DispatchScroll(float xOffset, float yOffset) {
+        if (_gui)
+            _gui->OnScroll(xOffset, yOffset);
+
+        if (_engine && !IsGuiCapturingMouse()) {
+            _engine->OnScroll(xOffset, yOffset);
+        }
+    }
+
     bool InputDispatcher::IsGuiCapturingMouse() const {
         return false;
         return _gui && _gui->WantsCaptureMouse();

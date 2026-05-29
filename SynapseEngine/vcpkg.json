@@ -27,6 +27,7 @@
     "joltphysics",
     "tinyxml2",
     "yaml-cpp",
-    "tomlplusplus"
+    "tomlplusplus",
+    "nativefiledialog-extended"
   ]
 }

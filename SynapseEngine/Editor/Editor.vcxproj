@@ -235,6 +235,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\External\ImGuiFileDialog\ImGuiFileDialog.cpp" />
     <ClCompile Include="Backends\imgui_impl_glfw.cpp" />
     <ClCompile Include="Backends\imgui_impl_vulkan.cpp" />
     <ClCompile Include="Core\Application.cpp" />
@@ -245,6 +246,7 @@
     <ClCompile Include="EditorApi\SelectionApiImpl.cpp" />
     <ClCompile Include="EditorApi\SettingsApiImpl.cpp" />
     <ClCompile Include="EditorApi\TransformApiImpl.cpp" />
+    <ClCompile Include="FileDialog\ImGuiFileDialogImpl.cpp" />
     <ClCompile Include="View\MainMenu\MainMenuView.cpp" />
     <ClCompile Include="Manager\GuiManager.cpp" />
     <ClCompile Include="Manager\GuiTextureManager.cpp" />
@@ -270,6 +272,7 @@
     <ClInclude Include="Core\Windows\GlfwWindow.h" />
     <ClInclude Include="EditorApi\EditorApiImpl.h" />
     <ClInclude Include="Dispatcher\InputDispatcher.h" />
+    <ClInclude Include="FileDialog\ImGuiFileDialogImpl.h" />
     <ClInclude Include="View\MainMenu\MainMenuView.h" />
     <ClInclude Include="Manager\GuiManager.h" />
     <ClInclude Include="Manager\GuiTextureManager.h" />

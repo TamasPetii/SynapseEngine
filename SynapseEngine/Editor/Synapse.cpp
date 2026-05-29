@@ -112,7 +112,8 @@ void Synapse::OnInit() {
     _guiManager->AddWindow<MainMenuWin>(
         Syn::MainMenuView{},
         Syn::MainMenuViewModel{
-            _editorApi.get()
+            _editorApi.get(),
+			_guiManager->GetFileDialog()
         }
     );
 #endif
@@ -153,6 +154,10 @@ void Synapse::OnMouseButton(int button, int action, int mods) {
 
 void Synapse::OnMouseMove(float x, float y) {
     _inputDispatcher->DispatchMouseMove(x, y);
+}
+
+void Synapse::OnScroll(float xOffset, float yOffset) {
+    _inputDispatcher->DispatchScroll(xOffset, yOffset);
 }
 
 void Synapse::OnResize(uint32_t width, uint32_t height) {

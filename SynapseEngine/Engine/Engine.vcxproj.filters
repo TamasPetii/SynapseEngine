@@ -2693,9 +2693,6 @@
     <ClInclude Include="Serialization\Archive\Input\Toml\PlusPlusTomlInputArchive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Insiders\EngineKey.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Passkey.h">
       <Filter>Header Files</Filter>
     </ClInclude>

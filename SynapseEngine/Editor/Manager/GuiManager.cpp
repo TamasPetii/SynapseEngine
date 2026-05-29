@@ -8,6 +8,7 @@
 #include <print>
 #include "Engine/ServiceLocator.h"
 #include "Engine/FrameContext.h"
+#include "Editor/FileDialog/ImGuiFileDialogImpl.h"
 
 namespace Syn {
     GuiManager::~GuiManager() {
@@ -19,6 +20,7 @@ namespace Syn {
         _windowHandle = window;
         _colorFormat = colorFormat;
 		_textureManager = std::make_unique<GuiTextureManager>();
+        _fileDialog = std::make_unique<ImGuiFileDialogImpl>();
 
         volkInitialize();
         volkLoadInstance(instance);
@@ -63,6 +65,7 @@ namespace Syn {
     void GuiManager::Shutdown() {
         vkDeviceWaitIdle(_device);
 
+        _fileDialog.reset();
         _textureManager.reset();
 
         ImGui_ImplVulkan_Shutdown();
@@ -92,6 +95,10 @@ namespace Syn {
     void GuiManager::UpdateAndDraw() {
         for (auto& window : _windows) {
             window->UpdateAndDraw();
+        }
+
+        if (_fileDialog) {
+            _fileDialog->Draw();
         }
     }
 

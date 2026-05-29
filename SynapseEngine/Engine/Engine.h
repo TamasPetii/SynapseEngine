@@ -52,6 +52,7 @@ namespace Syn
         void OnKey(int key, int scancode, int action, int mods);
         void OnMouseButton(int button, int action, int mods);
         void OnMouseMove(float x, float y);
+		void OnScroll(float xOffset, float yOffset);
         void SetInputEnabled(bool enabled) { _inputEnabled = enabled; }
     private:
         void Init(const EngineInitParams& params);

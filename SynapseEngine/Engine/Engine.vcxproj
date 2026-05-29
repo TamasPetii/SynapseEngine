@@ -715,7 +715,6 @@
     <ClInclude Include="Serialization\Schema\Animation\GpuBatchedAnimationSchema.h" />
     <ClInclude Include="Scene\Source\Procedural\NatureSceneSource.h" />
     <ClInclude Include="Scene\Source\File\FileSceneSource.h" />
-    <ClInclude Include="Insiders\EngineKey.h" />
     <ClInclude Include="Scene\Source\ISceneSource.h" />
     <ClInclude Include="Passkey.h" />
     <ClInclude Include="Registry\Insiders\RegistryInsider.h" />

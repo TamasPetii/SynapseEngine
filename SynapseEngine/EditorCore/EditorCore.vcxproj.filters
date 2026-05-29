@@ -90,6 +90,9 @@
     <ClCompile Include="ViewModels\MainMenu\MainMenuViewModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Api\IFileDialogAPI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Command\ICommand.h">
@@ -165,6 +168,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ViewModels\MainMenu\MainMenuViewModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Api\IFileDialogAPI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
