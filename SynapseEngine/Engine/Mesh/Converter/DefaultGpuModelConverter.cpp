@@ -6,7 +6,6 @@
 namespace Syn
 {
     constexpr uint32_t MAX_LODS = 4;
-    constexpr float GLOBAL_LOD_DISTANCES[MAX_LODS] = { 10.0f, 25.0f, 50.0f, 100.0f };
 
     GpuBatchedModel DefaultGpuModelConverter::Convert(const CookedModel& cookedModel) const
     {
@@ -37,7 +36,6 @@ namespace Syn
         if (result.indexedData.lodDescriptors.empty()) {
             for (uint32_t i = 0; i < MAX_LODS; ++i) {
                 GpuMeshLodDescriptor desc{};
-                desc.distanceThreshold = GLOBAL_LOD_DISTANCES[i];
                 result.indexedData.lodDescriptors.push_back(desc);
             }
         }

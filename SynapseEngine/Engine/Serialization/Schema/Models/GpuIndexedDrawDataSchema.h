@@ -52,7 +52,6 @@ namespace Syn
             ar.Property("meshCount", d.meshCount);
             ar.Property("indexOffset", d.indexOffset); 
             ar.Property("indexCount", d.indexCount);
-            ar.Property("distanceThreshold", d.distanceThreshold);
         }
     };
 

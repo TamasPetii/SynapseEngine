@@ -108,7 +108,7 @@ namespace Syn {
         pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
         pc.vertexPositionBufferAddr = capsule->hardwareBuffers.vertexPositions->GetDeviceAddress();
         pc.indexBufferAddr = capsule->hardwareBuffers.indices->GetDeviceAddress();
-        pc.lightDrawType = 9;
+        pc.shapeDrawType = WIREFRAME_DEBUG_SHAPE_TYPE_CAPSULE_COLLIDER;
 
         vkCmdPushConstants(
             context.cmd,

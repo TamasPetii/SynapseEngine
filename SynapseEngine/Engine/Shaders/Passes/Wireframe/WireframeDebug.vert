@@ -30,10 +30,9 @@ void main() {
     vec3 worldPos = vec3(0.0);
     vec3 lightColor = vec3(1.0);
 
-    //Todo: constexpr 0-5
-
-    // 0: Point Sphere, 1: Point Aabb
-    if (pc.lightDrawType <= 1) {
+    if (pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_POINT_LIGHT_SPHERE ||
+        pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_POINT_LIGHT_AABB
+    ) {
         uint entityId = GET_VISIBLE_POINT_LIGHT(ctx.pointLightVisibleIndexBufferAddr, gl_InstanceIndex);
         uint denseIdx = GET_SPARSE_INDEX(ctx.pointLightSparseMapBufferAddr, entityId);
         PointLightColliderGPU col = GET_POINT_LIGHT_COLLIDER(ctx.pointLightColliderBufferAddr, denseIdx);
@@ -42,8 +41,10 @@ void main() {
         worldPos = col.center + (v.position * col.radius);
         lightColor = light.color;
     } 
-    // Spot Light
-    else if (pc.lightDrawType >= 2 && pc.lightDrawType <= 4) {
+    else if (pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_SPOT_LIGHT_SPHERE ||
+             pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_SPOT_LIGHT_AABB ||
+             pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_SPOT_LIGHT_CONE
+    ) {
         uint entityId = GET_VISIBLE_SPOT_LIGHT(ctx.spotLightVisibleIndexBufferAddr, gl_InstanceIndex);
         uint denseIdx = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, entityId);
         SpotLightColliderGPU col = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, denseIdx);
@@ -51,24 +52,21 @@ void main() {
         
         lightColor = light.color;
 
-        // 2: Spot Sphere
-        if (pc.lightDrawType == 2) { 
+        if (pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_SPOT_LIGHT_SPHERE) { 
             worldPos = col.center + (v.position * col.radius);
         } 
-        // 3: Spot Aabb Box
-        else if(pc.lightDrawType == 3)
+        else if(pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_SPOT_LIGHT_AABB)
         { 
             vec3 extents = (col.aabbMax - col.aabbMin) * 0.5;
             vec3 center = (col.aabbMax + col.aabbMin) * 0.5;
             worldPos = center + (v.position * extents);
         }
-        // 4: Spot Cone
-        else if(pc.lightDrawType == 4) 
+        else if(pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_SPOT_LIGHT_CONE) 
         {
             worldPos = (light.transform * vec4(v.position, 1.0)).xyz;
         }
     }
-    else if (pc.lightDrawType == 5) {
+    else if (pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_STATIC_CHUNK) {
         uint rawChunkId = GET_VISIBLE_CHUNK(ctx.staticChunkVisibleIndexBufferAddr, gl_InstanceIndex);
         
         bool chunkFullyInside = (rawChunkId >> 31) != 0;
@@ -82,7 +80,7 @@ void main() {
 
         lightColor = chunkFullyInside ? vec3(0.1, 1.0, 0.1) : vec3(1.0, 0.5, 0.0);
     }
-    else if (pc.lightDrawType == 6) {
+    else if (pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_MORTON_CHUNK) {
         uint rawChunkId = GET_VISIBLE_CHUNK(ctx.mortonChunkVisibleIndexBufferAddr, gl_InstanceIndex);
 
         bool chunkFullyInside = (rawChunkId >> 31) != 0;
@@ -96,7 +94,7 @@ void main() {
         
         lightColor = chunkFullyInside ? vec3(0.1, 1.0, 0.1) : vec3(1.0, 0.5, 0.0);
     }
-    else if (pc.lightDrawType == 7) {
+    else if (pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_BOX_COLLIDER) {
         BoxColliderComponent collider = GET_BOX_COLLIDER(ctx.boxColliderDataBufferAddr, gl_InstanceIndex);
 
         uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, collider.entityIndex);
@@ -107,7 +105,7 @@ void main() {
 
         lightColor = vec3(0.0, 1.0, 0.0);
     }
-    else if (pc.lightDrawType == 8) {
+    else if (pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_SPHERE_COLLIDER) {
         SphereColliderComponent collider = GET_SPHERE_COLLIDER(ctx.sphereColliderDataBufferAddr, gl_InstanceIndex);
 
         uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, collider.entityIndex);
@@ -118,7 +116,7 @@ void main() {
         
         lightColor = vec3(0.0, 1.0, 1.0);
     }
-    else if (pc.lightDrawType == 9) {
+    else if (pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_CAPSULE_COLLIDER) {
         CapsuleColliderComponent collider = GET_CAPSULE_COLLIDER(ctx.capsuleColliderDataBufferAddr, gl_InstanceIndex);
 
         uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, collider.entityIndex);

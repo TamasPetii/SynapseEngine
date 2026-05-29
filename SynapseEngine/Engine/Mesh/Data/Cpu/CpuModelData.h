@@ -19,6 +19,7 @@ namespace Syn
         std::vector<GpuMeshCollider> meshColliders;
         std::vector<GpuMeshDescriptor> meshDescriptors;
         std::vector<GpuMeshletDrawDescriptor> meshletDrawDescriptors;
+        std::vector<GpuMeshLodDescriptor> lodDescriptors;
 
         std::vector<MeshDrawBlueprint> baseDrawCommands;
         std::vector<uint32_t> meshMaterialIndices;
@@ -32,8 +33,8 @@ namespace Syn
 		std::vector<uint8_t> meshletTriangleIndices;     
         std::vector<GpuMeshletDescriptor> meshletDescriptors;
 
-        std::vector<std::vector<uint32_t>> batchedIndicesPerLod;
         std::vector<glm::vec3> physicsVertices;
+        std::vector<std::vector<uint32_t>> batchedIndicesPerLod;
         std::vector<std::vector<uint32_t>> physicsIndicesPerLod;
     };
 }

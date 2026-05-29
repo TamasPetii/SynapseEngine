@@ -1332,6 +1332,18 @@
     <ClCompile Include="Render\Passes\Wireframe\Collider\CapsuleColliderWireframePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Passes\Wireframe\Meshlet\WireframeMeshletAabbPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Wireframe\Meshlet\WireframeMeshletSpherePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Wireframe\Meshlet\WireframeMeshletConePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh\Source\Procedural\Shape\IcoSphereMeshSource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2879,6 +2891,18 @@
     <ClInclude Include="Render\Passes\Wireframe\Collider\CapsuleColliderWireframePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Passes\Wireframe\Meshlet\WireframeMeshletAabbPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Wireframe\Meshlet\WireframeMeshletSpherePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Wireframe\Meshlet\WireframeMeshletConePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh\Source\Procedural\Shape\IcoSphereMeshSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Includes\Common\Animation.glsl" />
@@ -2911,7 +2935,7 @@
     <None Include="Shaders\Includes\PushConstants\PointLightCullingPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\SpotLightCullingPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframeDebugPC.glsl" />
-    <None Include="Shaders\Includes\PushConstants\WireframePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\WireframeMeshPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframeSetupPC.glsl" />
     <None Include="Shaders\Includes\Utils\ColorMath.glsl" />
     <None Include="Shaders\Includes\Utils\CullingMath.glsl" />
@@ -2942,7 +2966,7 @@
     <None Include="Shaders\Passes\PostProcess\BloomPrefilter.comp" />
     <None Include="Shaders\Passes\PostProcess\BloomUpsample.comp" />
     <None Include="Shaders\Passes\Wireframe\Wireframe.frag" />
-    <None Include="Shaders\Passes\Wireframe\Wireframe.vert" />
+    <None Include="Shaders\Passes\Wireframe\WireframeMesh.vert" />
     <None Include="Shaders\Passes\Wireframe\WireframeDebug.vert" />
     <None Include="Shaders\Passes\Wireframe\WireframeSetup.comp" />
     <None Include="Shaders\Passes\Shading\Deferred\Lighting\DeferredDirectionLight.frag" />
@@ -3008,5 +3032,7 @@
     <None Include="Shaders\Passes\Ssao\SsaoBlur.comp" />
     <None Include="Shaders\Includes\PushConstants\SsaoBlurPC.glsl" />
     <None Include="Shaders\Includes\Common\Collider.glsl" />
+    <None Include="Shaders\Passes\Wireframe\WireframeMeshlet.mesh" />
+    <None Include="Shaders\Includes\PushConstants\WireframeMeshletPC.glsl" />
   </ItemGroup>
 </Project>

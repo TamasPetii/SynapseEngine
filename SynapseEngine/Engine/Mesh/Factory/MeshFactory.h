@@ -17,6 +17,8 @@ namespace Syn
 
         static std::shared_ptr<StaticMesh> CreateCone(float radius = 1.0f, float height = 2.0f, uint32_t radialSegments = 32, uint32_t heightSegments = 1);
 
+        static std::shared_ptr<StaticMesh> CreateProxyCone(float radius = 1.0f, float height = 2.0f, uint32_t radialSegments = 10, uint32_t heightSegments = 1);
+
         static std::shared_ptr<StaticMesh> CreateCube(float size = 2.0f);
 
         static std::shared_ptr<StaticMesh> CreateCylinder(float bottomRadius = 1.0f, float topRadius = 1.0f, float height = 2.0f, uint32_t radialSegments = 32, uint32_t heightSegments = 1);
@@ -35,6 +37,12 @@ namespace Syn
 
         static std::shared_ptr<StaticMesh> CreateSphere(float radius = 1.0f, uint32_t sectors = 32, uint32_t stacks = 32);
 
+        static std::shared_ptr<StaticMesh> CreateProxySphere(float radius = 1.0f, uint32_t sectors = 4, uint32_t stacks = 4);
+
         static std::shared_ptr<StaticMesh> CreateTorus(float mainRadius = 1.0f, float tubeRadius = 0.3f, uint32_t mainSegments = 48, uint32_t tubeSegments = 24);
+    
+        static std::shared_ptr<StaticMesh> CreateIcoSphere(float radius = 1.0f, uint32_t subdivisions = 3);
+
+        static std::shared_ptr<StaticMesh> CreateProxyIcoSphere(float radius = 1.0f, uint32_t subdivisions = 1);
     };
 }

@@ -11,7 +11,7 @@
 
 namespace Syn {
 
-    #include "Engine/Shaders/Includes/PushConstants/WireframePC.glsl"
+    #include "Engine/Shaders/Includes/PushConstants/WireframeMeshPC.glsl"
 
     bool WireframeMeshSpherePass::ShouldExecute(const RenderContext& context) const
     {
@@ -22,7 +22,7 @@ namespace Syn {
         auto shaderManager = ServiceLocator::GetShaderManager();
 
         _shaderProgram = shaderManager->CreateProgram("WireframeProgram", {
-            ShaderNames::WireframeVert,
+            ShaderNames::WireframeMeshVert,
             ShaderNames::WireframeFrag
             });
 
@@ -97,13 +97,13 @@ namespace Syn {
         auto sphere = modelManager->GetResource(MeshSourceNames::Sphere);
 		auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-        WireframePC pc{};
+        WireframeMeshPC pc{};
 		pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
 		pc.vertexPositionBufferAddr = sphere->hardwareBuffers.vertexPositions->GetDeviceAddress();
 		pc.indexBufferAddr = sphere->hardwareBuffers.indices->GetDeviceAddress();
-		pc.isSphere = 1;
+        pc.shapeType = WIREFRAME_MESH_SHAPE_TYPE_SPHERE;
 
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(WireframePC), &pc);
+        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(WireframeMeshPC), &pc);
     }
 
     void WireframeMeshSpherePass::Draw(const RenderContext& context) {

@@ -238,6 +238,7 @@
     <ClCompile Include="Animation\Data\Cpu\CpuAnimationData.cpp" />
     <ClCompile Include="Animation\Converter\ICpuAnimationExtractor.cpp" />
     <ClCompile Include="Animation\Converter\DefaultCpuAnimationExtractor.cpp" />
+    <ClCompile Include="Mesh\Source\Procedural\Shape\IcoSphereMeshSource.cpp" />
     <ClCompile Include="Render\Passes\Wireframe\Collider\CapsuleColliderWireframePass.cpp" />
     <ClCompile Include="Render\Passes\Wireframe\Collider\BoxColliderWireframePass.cpp" />
     <ClCompile Include="Render\Passes\Wireframe\Chunk\MortonChunkAabbWireframePass.cpp" />
@@ -674,11 +675,15 @@
     <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
     <ClCompile Include="Serialization\Archive\Output\Yaml\YamlCppOutputArchive.cpp" />
     <ClCompile Include="Serialization\Archive\Input\Yaml\YamlCppInputArchive.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\Meshlet\WireframeMeshletAabbPass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\Meshlet\WireframeMeshletSpherePass.cpp" />
+    <ClCompile Include="Render\Passes\Wireframe\Meshlet\WireframeMeshletConePass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Animation\Data\Cpu\CpuAnimationData.h" />
     <ClInclude Include="Animation\Converter\ICpuAnimationExtractor.h" />
     <ClInclude Include="Animation\Converter\DefaultCpuAnimationExtractor.h" />
+    <ClInclude Include="Mesh\Source\Procedural\Shape\IcoSphereMeshSource.h" />
     <ClInclude Include="Render\Passes\Wireframe\Collider\CapsuleColliderWireframePass.h" />
     <ClInclude Include="Render\Passes\Wireframe\Collider\BoxColliderWireframePass.h" />
     <ClInclude Include="Render\Passes\Wireframe\Chunk\MortonChunkAabbWireframePass.h" />
@@ -1191,6 +1196,9 @@
     <ClInclude Include="Render\Passes\Culling\WorkGraphCullingPass.h" />
     <ClInclude Include="Serialization\Archive\Output\Yaml\YamlCppOutputArchive.h" />
     <ClInclude Include="Serialization\Archive\Input\Yaml\YamlCppInputArchive.h" />
+    <ClInclude Include="Render\Passes\Wireframe\Meshlet\WireframeMeshletAabbPass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\Meshlet\WireframeMeshletSpherePass.h" />
+    <ClInclude Include="Render\Passes\Wireframe\Meshlet\WireframeMeshletConePass.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scene\Source\Procedural\nature_config.json" />
@@ -1245,7 +1253,8 @@
     <None Include="Shaders\Includes\PushConstants\PointLightCullingPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\SpotLightCullingPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframeDebugPC.glsl" />
-    <None Include="Shaders\Includes\PushConstants\WireframePC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\WireframeMeshletPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\WireframeMeshPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\WireframeSetupPC.glsl" />
     <None Include="Shaders\Includes\SharedGpuTypes.glsl" />
     <None Include="Shaders\Includes\Utils\AtomicFloatUtils.glsl" />
@@ -1317,8 +1326,9 @@
     <None Include="Shaders\Passes\Ssao\Ssao.comp" />
     <None Include="Shaders\Passes\Ssao\SsaoBlur.comp" />
     <None Include="Shaders\Passes\Wireframe\Wireframe.frag" />
-    <None Include="Shaders\Passes\Wireframe\Wireframe.vert" />
+    <None Include="Shaders\Passes\Wireframe\WireframeMesh.vert" />
     <None Include="Shaders\Passes\Wireframe\WireframeDebug.vert" />
+    <None Include="Shaders\Passes\Wireframe\WireframeMeshlet.mesh" />
     <None Include="Shaders\Passes\Wireframe\WireframeSetup.comp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

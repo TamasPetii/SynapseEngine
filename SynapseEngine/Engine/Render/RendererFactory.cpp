@@ -93,6 +93,9 @@
 #include "Engine/Render/Passes/Wireframe/Collider/BoxColliderWireframePass.h"
 #include "Engine/Render/Passes/Wireframe/Collider/SphereColliderWireframePass.h"
 #include "Engine/Render/Passes/Wireframe/Collider/CapsuleColliderWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletAabbPass.h"
+#include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletSpherePass.h"
+#include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletConePass.h"
 
 #include "Engine/Render/Passes/Ssao/SsaoInitPass.h"
 #include "Engine/Render/Passes/Ssao/SsaoPass.h"
@@ -201,6 +204,9 @@ namespace Syn
         pipeline->AddPass(std::make_unique<WireframeMeshSetupPass>());
         pipeline->AddPass(std::make_unique<WireframeMeshAabbPass>());
         pipeline->AddPass(std::make_unique<WireframeMeshSpherePass>());
+        pipeline->AddPass(std::make_unique<WireframeMeshletAabbPass>());
+        pipeline->AddPass(std::make_unique<WireframeMeshletSpherePass>());
+        pipeline->AddPass(std::make_unique<WireframeMeshletConePass>());
         pipeline->AddPass(std::make_unique<PointLightAabbWireframePass>());
         pipeline->AddPass(std::make_unique<PointLightSphereWireframePass>());
         pipeline->AddPass(std::make_unique<SpotLightAabbWireframePass>());

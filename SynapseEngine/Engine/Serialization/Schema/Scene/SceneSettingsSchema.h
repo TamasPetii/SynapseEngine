@@ -65,6 +65,12 @@ namespace Syn
             // Wireframe Debug Toggles
             ar.Property("enableWireframeMeshAabb", settings.enableWireframeMeshAabb);
             ar.Property("enableWireframeMeshSphere", settings.enableWireframeMeshSphere);
+
+            ar.Property("enableWireframeMeshletAabb", settings.enableWireframeMeshletAabb);
+            ar.Property("enableWireframeMeshletSphere", settings.enableWireframeMeshletSphere);
+            ar.Property("enableWireframeMeshletCone", settings.enableWireframeMeshletCone);
+
+            ar.Property("enableMortonChunkAabbWireframe", settings.enableMortonChunkAabbWireframe);
             ar.Property("enableStaticChunkAabbWireframe", settings.enableStaticChunkAabbWireframe);
             ar.Property("enablePointLightSphereWireframe", settings.enablePointLightSphereWireframe);
             ar.Property("enablePointLightAabbWireframe", settings.enablePointLightAabbWireframe);
@@ -72,6 +78,9 @@ namespace Syn
             ar.Property("enableSpotLightAabbWireframe", settings.enableSpotLightAabbWireframe);
             ar.Property("enableSpotLightConeWireframe", settings.enableSpotLightConeWireframe);
             ar.Property("enableSpotLightPyramidWireframe", settings.enableSpotLightPyramidWireframe);
+            ar.Property("enableBoxColliderWireframe", settings.enableBoxColliderWireframe);
+            ar.Property("enableSphereColliderWireframe", settings.enableSphereColliderWireframe);
+            ar.Property("enableCapsuleColliderWireframe", settings.enableCapsuleColliderWireframe);
 
             // Billboard Toggles
             ar.Property("enableBillboardCameras", settings.enableBillboardCameras);
@@ -101,6 +110,9 @@ namespace Syn
             ar.Property("depthSharpness", settings.depthSharpness);
             ar.Property("bias", settings.bias);
             ar.Property("sampleCount", settings.sampleCount);
+
+            ar.Property("enableSsao", settings.enableSsao);
+            ar.Property("enableSsaoLight", settings.enableSsaoLight);
         }
     };
 }

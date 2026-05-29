@@ -16,10 +16,10 @@
 
 layout(location = 0) out vec4 outColor;
 
-#include "../../Includes/PushConstants/WireframePC.glsl"
+#include "../../Includes/PushConstants/WireframeMeshPC.glsl"
 
 layout(push_constant) uniform PushConstants {
-    WireframePC pc;
+    WireframeMeshPC pc;
 };
 
 void main() {
@@ -53,9 +53,10 @@ void main() {
 
     // 4. Calculate Local Position
     vec3 localPos;
-    if (pc.isSphere == 1) {
+    if (pc.shapeType == WIREFRAME_MESH_SHAPE_TYPE_SPHERE) {
         localPos = collider.center + (v.position * collider.radius);
-    } else {
+    } 
+    else if (pc.shapeType == WIREFRAME_MESH_SHAPE_TYPE_CUBE) {
         vec3 localExtents = (collider.aabbMax - collider.aabbMin) * 0.5;
         vec3 localCenter = (collider.aabbMax + collider.aabbMin) * 0.5;
         localPos = localCenter + (v.position * localExtents); 

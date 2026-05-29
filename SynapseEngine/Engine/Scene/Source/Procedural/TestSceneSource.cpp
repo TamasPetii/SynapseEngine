@@ -308,7 +308,7 @@ namespace Syn
         }
 
         uint32_t cubeMeshId = modelManager->GetResourceIndex(MeshSourceNames::Cube);
-        uint32_t sphereMeshId = modelManager->GetResourceIndex(MeshSourceNames::Sphere);
+        uint32_t sphereMeshId = modelManager->GetResourceIndex(MeshSourceNames::IcoSphere);
         uint32_t capsuleMeshId = modelManager->GetResourceIndex(MeshSourceNames::Capsule);
 
         for (int i = 0; i < physBoxCount; i++) {

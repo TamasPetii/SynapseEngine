@@ -13,6 +13,7 @@ namespace Syn
 
         size_t totalLodCount = gpuData.indexedData.meshDescriptors.size();
 
+		outCpuData.lodDescriptors = gpuData.indexedData.lodDescriptors;
         outCpuData.globalCollider = gpuData.globalCollider;
         outCpuData.meshColliders = gpuData.indexedData.meshColliders;
         outCpuData.meshDescriptors = gpuData.indexedData.meshDescriptors;

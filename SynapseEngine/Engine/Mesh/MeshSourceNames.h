@@ -7,15 +7,19 @@ namespace Syn
     {
         static constexpr const char* Cube = "Cube";
         static constexpr const char* Sphere = "Sphere";
+        static constexpr const char* ProxySphere = "ProxySphere";
         static constexpr const char* Quad = "Quad";
         static constexpr const char* ScreenQuad = "ScreenQuad";
         static constexpr const char* Cylinder = "Cylinder";
         static constexpr const char* Cone = "Cone";
+        static constexpr const char* ProxyCone = "ProxyCone";
         static constexpr const char* Capsule = "Capsule";
         static constexpr const char* Hemisphere = "Hemisphere";
         static constexpr const char* Pyramid = "Pyramid";
         static constexpr const char* ProxyPyramid = "ProxyPyramid";
         static constexpr const char* Grid = "Grid";
         static constexpr const char* Torus = "Torus";
+        static constexpr const char* IcoSphere = "IcoSphere";
+        static constexpr const char* ProxyIcoSphere = "ProxyIcoSphere";
     };
 }

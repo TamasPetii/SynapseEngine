@@ -68,7 +68,8 @@ namespace Syn
         static constexpr const char* TransparentForwardFrag = "../Engine/Shaders/Passes/Shading/Wboit/TransparentForward.frag";
 
         static constexpr const char* WireframeSetup = "../Engine/Shaders/Passes/Wireframe/WireframeSetup.comp";
-        static constexpr const char* WireframeVert = "../Engine/Shaders/Passes/Wireframe/Wireframe.vert";
+        static constexpr const char* WireframeMeshVert = "../Engine/Shaders/Passes/Wireframe/WireframeMesh.vert";
+        static constexpr const char* WireframeMeshletMesh = "../Engine/Shaders/Passes/Wireframe/WireframeMeshlet.mesh";
         static constexpr const char* WireframeFrag = "../Engine/Shaders/Passes/Wireframe/Wireframe.frag";
         static constexpr const char* WireframeDebugVert = "../Engine/Shaders/Passes/Wireframe/WireframeDebug.vert";
 

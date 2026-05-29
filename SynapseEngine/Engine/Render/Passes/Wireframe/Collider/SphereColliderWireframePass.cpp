@@ -108,7 +108,7 @@ namespace Syn {
         pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
         pc.vertexPositionBufferAddr = sphere->hardwareBuffers.vertexPositions->GetDeviceAddress();
         pc.indexBufferAddr = sphere->hardwareBuffers.indices->GetDeviceAddress();
-        pc.lightDrawType = 8;
+        pc.shapeDrawType = WIREFRAME_DEBUG_SHAPE_TYPE_SPHERE_COLLIDER;
 
         vkCmdPushConstants(
             context.cmd,
