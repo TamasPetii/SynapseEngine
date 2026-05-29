@@ -3,9 +3,9 @@
     "base_model_path": "C:/Users/User/Desktop/Models/"
   },
   "environment": {
-    "spawn_sponza": true,
+    "spawn_sponza": false,
     "spawn_bistro": false,
-    "spawn_floor": false,
+    "spawn_floor": true,
     "spawn_pbr_sponza": false,
     "spawn_monkey": true
   },
@@ -14,17 +14,17 @@
     "shared_material_count": 100
   },
   "entities": {
-    "animated_characters": 1000,
-    "static_geometry": 1,
-    "physics_boxes": 500,
-    "physics_spheres": 500,
-    "physics_capsules": 500
+    "animated_characters": 5,
+    "static_geometry": 5,
+    "physics_boxes": 100,
+    "physics_spheres": 100,
+    "physics_capsules": 100
   },
   "lights": {
     "directional_count": 1,
-    "point_count": 1,
+    "point_count": 64,
     "point_shadow_count": 0,
-    "spot_count": 1,
+    "spot_count": 64,
     "spot_shadow_count": 0
   }
 }
