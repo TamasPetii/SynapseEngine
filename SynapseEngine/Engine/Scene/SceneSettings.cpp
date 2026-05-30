@@ -7,7 +7,7 @@ namespace Syn
 		: pipelineType(PipelineType::ForwardPlus)
         , tileSize(ComputeGroupSize::Image64D)
         , useDebugCamera(false)
-        , enableGeometryGpuCulling(true)
+        , enableGeometryGpuCulling(false)
         , enablePointLightGpuCulling(true)
         , enableSpotLightGpuCulling(true)
         , enableStaticBvhCulling(false)

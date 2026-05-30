@@ -8,10 +8,11 @@ namespace Syn
         Debug(frameCount),
         PointLights(frameCount),
         SpotLights(frameCount),
-        DirectionLights(frameCount),
         ForwardPlus(frameCount),
         Chunks(frameCount),
-		Ssao(frameCount)
+		Ssao(frameCount),
+        DirectionLights(frameCount),
+        DirectionLightShadow(frameCount)
     {
         VkBufferUsageFlags contextUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
         frameContextBuffer.Initialize({ BufferStrategy::Hybrid_Static, frameCount, sizeof(FrameGlobalContext), contextUsage, 1, 1});
@@ -40,6 +41,7 @@ namespace Syn
         ForwardPlus.CoherentToGpuBufferSync(cmd, frameIndex);
 		Chunks.CoherentToGpuBufferSync(cmd, frameIndex);
 		Ssao.CoherentToGpuBufferSync(cmd, frameIndex);
+        DirectionLightShadow.CoherentToGpuBufferSync(cmd, frameIndex);
 
         Vk::GlobalBarrierInfo barrierInfo{};
         barrierInfo.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;

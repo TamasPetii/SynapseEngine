@@ -28,10 +28,10 @@ namespace Syn
         DebugDrawGroup Debug;
         PointLightDrawGroup PointLights;
         SpotLightDrawGroup SpotLights;
-        DirectionLightDrawGroup DirectionLights;
         ForwardPlusDrawGroup ForwardPlus;
 		ChunkDrawGroup Chunks;
 		SsaoDrawGroup Ssao;
+        DirectionLightDrawGroup DirectionLights;
         DirectionLightShadowDrawGroup DirectionLightShadow;
 
         std::atomic<uint32_t> syncFramesRemaining{ 0 };

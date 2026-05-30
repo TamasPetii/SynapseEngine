@@ -24,6 +24,25 @@
 
 namespace Syn
 {
+    struct LightVis {
+        bool isVisible = false;
+        std::array<IntersectionType, CASCADES_PER_LIGHT> cascadeVis;
+    };
+
+    struct EntityCullData
+    {
+        EntityID entity;
+        const glm::mat4& transform;
+        GpuMeshCollider globalWorldCollider;
+        uint32_t meshCount;
+        const StaticMesh* modelResource;
+        const ModelAllocationInfo* modelAlloc;
+        bool hasAnimation;
+        uint32_t animFrameIndex;
+        const Animation* animResource;
+        std::span<const uint32_t> materialOverrides;
+    };
+
     std::vector<TypeID> DirectionLightShadowCullingSystem::GetReadDependencies() const {
         return {
             TypeInfo<DirectionLightShadowRenderSystem>::ID,
@@ -43,6 +62,7 @@ namespace Syn
         auto drawData = scene->GetSceneDrawData();
         auto settings = scene->GetSettings();
 
+        // Reset CPU counters
         tf::Task initTask = this->EmplaceTask(subflow, "Update Init", [drawData]() {
             auto& shadowGroup = drawData->DirectionLightShadow;
             auto& mainGroup = drawData->Models;
@@ -57,9 +77,11 @@ namespace Syn
             }
             });
 
+        // Skip CPU processing if GPU culling is enabled
         if (settings->enableGeometryGpuCulling) {
             return;
         }
+
         auto registry = scene->GetRegistry();
         auto modelPool = registry->GetPool<ModelComponent>();
         auto transformPool = registry->GetPool<TransformComponent>();
@@ -87,167 +109,207 @@ namespace Syn
         auto animSnapshot = animationManager->GetResourceSnapshot();
         auto matTypeSnapshot = materialManager->GetRenderTypeSnapshot();
 
-        auto cullFunc = [settings, drawData, modelPool, transformPool, modelSnapshot, animPool, animSnapshot, matTypeSnapshot, overridePool, shadowPool, cameraComp, screenRes, activeShadowLightCount]
-        (EntityID entity, const std::span<IntersectionType> chunkVisibilitie) {
+        // Extract entity properties (runs exactly once per entity)
+        auto withEntityData = [modelPool, transformPool, animPool, overridePool, modelSnapshot, animSnapshot, drawData]
+            (EntityID entity, auto&& nextFunc) {
+                if (!modelPool->Has(entity))
+                    return;
 
-            if (!modelPool->Has(entity)) 
-                return;
+                const auto& modelComp = modelPool->Get(entity);
+                if (modelComp.modelIndex == NULL_INDEX || modelComp.modelIndex >= drawData->Models.modelAllocations.Size())
+                    return;
 
-            const auto& modelComp = modelPool->Get(entity);
-            if (modelComp.modelIndex == NULL_INDEX || modelComp.modelIndex >= drawData->Models.modelAllocations.Size()) 
-                return;
+                const auto& snapshotEntry = modelSnapshot[modelComp.modelIndex];
+                if (snapshotEntry.resource == nullptr || snapshotEntry.state != ResourceState::Ready)
+                    return;
 
-            const auto& snapshotEntry = modelSnapshot[modelComp.modelIndex];
-            if (snapshotEntry.resource == nullptr || snapshotEntry.state != ResourceState::Ready) 
-                return;
+                const auto& transformComp = transformPool->Get(entity);
+                const auto& modelAlloc = drawData->Models.modelAllocations[modelComp.modelIndex];
 
-            auto resource = snapshotEntry.resource;
-            const auto& transformComp = transformPool->Get(entity);
-            const auto& modelAlloc = drawData->Models.modelAllocations[modelComp.modelIndex];
-            uint32_t meshCount = modelAlloc.meshAllocationCount / 4;
-            const glm::mat4& transform = transformComp.transform;
+                bool hasAnimation = false;
+                uint32_t animFrameIndex = 0;
+                const Animation* animResource = nullptr;
 
-            bool hasAnimation = false;
-            uint32_t animFrameIndex = 0;
-            std::shared_ptr<Animation> animResource = nullptr;
-
-            if (animPool && animPool->Has(entity)) {
-                const auto& animComp = animPool->Get(entity);
-                if (animComp.isReady && animComp.animationIndex != NULL_INDEX && animComp.animationIndex < animSnapshot.size()) {
-                    const auto& aSnapshotEntry = animSnapshot[animComp.animationIndex];
-                    if (aSnapshotEntry.resource != nullptr && aSnapshotEntry.state == ResourceState::Ready) {
-                        hasAnimation = true;
-                        animFrameIndex = animComp.frameIndex;
-                        animResource = aSnapshotEntry.resource;
+                if (animPool && animPool->Has(entity)) {
+                    const auto& animComp = animPool->Get(entity);
+                    if (animComp.isReady && animComp.animationIndex != NULL_INDEX && animComp.animationIndex < animSnapshot.size()) {
+                        const auto& aSnapshotEntry = animSnapshot[animComp.animationIndex];
+                        if (aSnapshotEntry.resource != nullptr && aSnapshotEntry.state == ResourceState::Ready) {
+                            hasAnimation = true;
+                            animFrameIndex = animComp.frameIndex;
+                            animResource = static_cast<const Animation*>(aSnapshotEntry.resource.get());
+                        }
                     }
                 }
-            }
 
-            GpuMeshCollider globalLocalCollider = resource->cpuData.globalCollider;
+                std::span<const uint32_t> overrides;
+                if (overridePool && overridePool->Has(entity)) {
+                    overrides = overridePool->Get(entity).materials;
+                }
 
-            if (hasAnimation) {
-                globalLocalCollider = animResource->cpuData.frameGlobalColliders[animFrameIndex];
-            }
+                const StaticMesh* modelResource = static_cast<const StaticMesh*>(snapshotEntry.resource.get());
 
-            GpuMeshCollider globalWorldCollider = MeshUtils::TransformCollider(globalLocalCollider, transform);
+                // Calculate Global World Collider
+                GpuMeshCollider globalLocalCollider = modelResource->cpuData.globalCollider;
+                if (hasAnimation) {
+                    globalLocalCollider = animResource->cpuData.frameGlobalColliders[animFrameIndex];
+                }
+                GpuMeshCollider worldCollider = MeshUtils::TransformCollider(globalLocalCollider, transformComp.transform);
 
-            std::span<const uint32_t> overrides;
-            if (overridePool && overridePool->Has(entity)) {
-                overrides = overridePool->Get(entity).materials;
-            }
+                EntityCullData data{
+                    .entity = entity,
+                    .transform = transformComp.transform,
+                    .globalWorldCollider = worldCollider,
+                    .meshCount = modelAlloc.meshAllocationCount / 4,
+                    .modelResource = modelResource,
+                    .modelAlloc = &modelAlloc,
+                    .hasAnimation = hasAnimation,
+                    .animFrameIndex = animFrameIndex,
+                    .animResource = animResource,
+                    .materialOverrides = overrides
+                };
 
-            for (uint32_t lightIndex = 0; lightIndex < activeShadowLightCount; ++lightIndex)
+                nextFunc(data);
+            };
+
+
+        //Mesh-level culling and indirect command dispatch
+        auto cullMeshes = [settings, drawData, matTypeSnapshot, cameraComp, screenRes]
+        (const EntityCullData& data, uint32_t lightIndex, uint32_t cascadeIdx, const FrustumCollider& frustum, bool parentFullyInside) {
+            for (uint32_t m = 0; m < data.meshCount; ++m)
             {
-                EntityID lightEntity = drawData->DirectionLightShadow.visibleLights[lightIndex];
-                const auto& shadowComp = shadowPool->Get(lightEntity);
+                uint32_t matIdx = data.modelResource->cpuData.meshMaterialIndices[m];
+                if (!data.materialOverrides.empty() && m < data.materialOverrides.size() && data.materialOverrides[m] != UINT32_MAX)
+                    matIdx = data.materialOverrides[m];
 
-                for (uint32_t cascadeIdx = 0; cascadeIdx < 4; ++cascadeIdx)
+                MaterialRenderType matType = (matIdx < matTypeSnapshot.size()) ? matTypeSnapshot[matIdx] : MaterialRenderType::Opaque1Sided;
+
+                // Process opaque materials only
+                if (matType != MaterialRenderType::Opaque1Sided && matType != MaterialRenderType::Opaque2Sided) {
+                    continue;
+                }
+
+                bool isVisible = true;
+                GpuMeshCollider worldCollider;
+
+                if (data.meshCount > 1)
                 {
-                    const FrustumCollider& frustum = shadowComp.cascadeFrustums[cascadeIdx];
+                    GpuMeshCollider localCollider;
 
-                    IntersectionType visibility = chunkVisibilitie[cascadeIdx];
-                    if (visibility == IntersectionType::Intersect && settings->enableFrustumCulling && settings->enableModelFrustumCulling) {
-                        visibility = CollisionTester::IsInFrustumIntersectionType(globalWorldCollider, frustum);
-
-                        if (visibility == IntersectionType::Outside) 
-                            continue;
+                    if (data.hasAnimation) {
+                        uint32_t frameOffset = data.animFrameIndex * data.animResource->cpuData.descriptor.globalMeshCount;
+                        localCollider = data.animResource->cpuData.frameMeshColliders[frameOffset + m];
                     }
-                    else if (visibility == IntersectionType::Outside) {
+                    else {
+                        localCollider = data.modelResource->cpuData.meshColliders[m];
+                    }
+
+                    worldCollider = MeshUtils::TransformCollider(localCollider, data.transform);
+
+                    if (!parentFullyInside && settings->enableFrustumCulling && settings->enableMeshFrustumCulling)
+                        isVisible = CollisionTester::IsInFrustum(worldCollider, frustum);
+                }
+                else {
+                    worldCollider = data.globalWorldCollider;
+                }
+
+                if (isVisible)
+                {
+                    // LOD computed from main camera view to save vertex processing in shadows
+                    float screenSizePixels = CollisionTester::CalculateSphereScreenSize(
+                        worldCollider.center, worldCollider.radius,
+                        cameraComp.view, cameraComp.proj, cameraComp.nearPlane, screenRes);
+
+                    if (screenSizePixels < 1.0f)
                         continue;
-                    }
 
-                    bool parentFullyInside = (visibility == IntersectionType::Inside);
+                    uint32_t lod = CollisionTester::CalculateLodFromScreenSize(screenSizePixels);
+                    lod = std::min(lod + SHADOW_LOD_BIAS, 3u);
 
-                    for (uint32_t m = 0; m < meshCount; ++m)
+                    uint32_t allocIndex = data.modelAlloc->meshAllocationOffset + (m * 4) + lod;
+                    const auto& meshAlloc = drawData->Models.meshAllocations[allocIndex];
+
+                    if (meshAlloc.activeTypes[matType])
                     {
-                        uint32_t matIdx = resource->cpuData.meshMaterialIndices[m];
-                        if (!overrides.empty() && m < overrides.size() && overrides[m] != UINT32_MAX) 
-                            matIdx = overrides[m];
+                        uint32_t slotIndex = 0;
+                        uint32_t indirectIdx = meshAlloc.indirectIndices[matType];
 
-                        MaterialRenderType matType = (matIdx < matTypeSnapshot.size()) ? matTypeSnapshot[matIdx] : MaterialRenderType::Opaque1Sided;
-
-                        if (matType != MaterialRenderType::Opaque1Sided && matType != MaterialRenderType::Opaque2Sided) {
-                            continue;
-                        }
-
-                        bool isVisible = true;
-                        GpuMeshCollider worldCollider;
-
-                        if (meshCount > 1) 
-                        {
-                            GpuMeshCollider localCollider;
-
-                            if (hasAnimation) {
-                                uint32_t frameOffset = animFrameIndex * animResource->cpuData.descriptor.globalMeshCount;
-                                localCollider = animResource->cpuData.frameMeshColliders[frameOffset + m];                           
-                            }
-                            else {
-                                localCollider = resource->cpuData.meshColliders[m];
-                            }
-
-                            worldCollider = MeshUtils::TransformCollider(localCollider, transform);
-
-                            if (!parentFullyInside && settings->enableFrustumCulling && settings->enableMeshFrustumCulling)
-                                isVisible = CollisionTester::IsInFrustum(worldCollider, frustum);
+                        // Increment atomic padded counters
+                        if (meshAlloc.isMeshletPipeline == MeshDrawBlueprint::PIPELINE_MESHLET) {
+                            std::atomic_ref<uint32_t> countRef(drawData->DirectionLightShadow.paddedMeshletCounts[indirectIdx * 16]);
+                            slotIndex = countRef.fetch_add(1, std::memory_order_relaxed);
                         }
                         else {
-                            worldCollider = globalWorldCollider;
+                            std::atomic_ref<uint32_t> countRef(drawData->DirectionLightShadow.paddedTraditionalCounts[indirectIdx * 16]);
+                            slotIndex = countRef.fetch_add(1, std::memory_order_relaxed);
                         }
 
-                        if (isVisible)
+                        // Write Bit-Packed Payload
+                        uint32_t bufferIndex = (meshAlloc.instanceOffsets[matType] * SHADOW_MULTIPLIER) + slotIndex;
+                        if (bufferIndex < drawData->DirectionLightShadow.instances.Size())
                         {
-                            float screenSizePixels = CollisionTester::CalculateSphereScreenSize(
-                                worldCollider.center, worldCollider.radius,
-                                cameraComp.view, cameraComp.proj, cameraComp.nearPlane, screenRes);
+                            // [Bit 31: FullyInside (1 bit)] [Bits 28-30: LightIdx (3 bit)] [Bits 26-27: CascadeIdx (2 bit)] [Bits 0-25: EntityID (26 bit)]
 
-                            if (screenSizePixels < 1.0f) 
-                                continue;
+                            uint32_t payload = static_cast<uint32_t>(data.entity) & 0x3FFFFFF;
+                            payload |= (cascadeIdx & 0x3) << 26;
+                            payload |= (lightIndex & 0x7) << 28;
 
-                            uint32_t lod = CollisionTester::CalculateLodFromScreenSize(screenSizePixels);
-                            lod = std::min(lod + SHADOW_LOD_BIAS, 3u);
-
-                            uint32_t allocIndex = modelAlloc.meshAllocationOffset + (m * 4) + lod;
-                            const auto& meshAlloc = drawData->Models.meshAllocations[allocIndex];
-
-                            if (meshAlloc.activeTypes[matType])
-                            {
-                                uint32_t slotIndex = 0;
-                                uint32_t indirectIdx = meshAlloc.indirectIndices[matType];
-
-                                if (meshAlloc.isMeshletPipeline == MeshDrawBlueprint::PIPELINE_MESHLET) {
-                                    std::atomic_ref<uint32_t> countRef(drawData->DirectionLightShadow.paddedMeshletCounts[indirectIdx * 16]);
-                                    slotIndex = countRef.fetch_add(1, std::memory_order_relaxed);
-                                }
-                                else {
-                                    std::atomic_ref<uint32_t> countRef(drawData->DirectionLightShadow.paddedTraditionalCounts[indirectIdx * 16]);
-                                    slotIndex = countRef.fetch_add(1, std::memory_order_relaxed);
-                                }
-
-                                uint32_t bufferIndex = (meshAlloc.instanceOffsets[matType] * SHADOW_MULTIPLIER) + slotIndex;
-                                if (bufferIndex < drawData->DirectionLightShadow.instances.Size())
-                                {
-                                    // BIT-PACKED PAYLOAD: 
-                                    // [Bit 31: FullyInside (1 bit)] [Bits 28-30: LightIdx (3 bit)] [Bits 26-27: CascadeIdx (2 bit)] [Bits 0-25: EntityID (26 bit)]
-
-                                    uint32_t payload = static_cast<uint32_t>(entity) & 0x3FFFFFF;
-                                    payload |= (cascadeIdx & 0x3) << 26;
-                                    payload |= (lightIndex & 0x7) << 28;
-
-                                    if (parentFullyInside) {
-                                        payload |= (1u << 31);
-                                    }
-                                    else {
-                                        payload &= ~(1u << 31);
-                                    }
-
-                                    drawData->DirectionLightShadow.instances[bufferIndex] = payload;
-                                }
+                            if (parentFullyInside) {
+                                payload |= (1u << 31);
                             }
+                            else {
+                                payload &= ~(1u << 31);
+                            }
+
+                            drawData->DirectionLightShadow.instances[bufferIndex] = payload;
                         }
                     }
                 }
             }
             };
+
+
+        //Process the 4 cascades for a specific light
+        auto cullLightCascades = [settings, drawData, shadowPool, cullMeshes]
+        (const EntityCullData& data, uint32_t lightIndex, const std::span<IntersectionType> chunkVisibilities) {
+            EntityID lightEntity = drawData->DirectionLightShadow.visibleLights[lightIndex];
+            const auto& shadowComp = shadowPool->Get(lightEntity);
+
+            for (uint32_t cascadeIdx = 0; cascadeIdx < 4; ++cascadeIdx)
+            {
+                IntersectionType visibility = chunkVisibilities[cascadeIdx];
+
+                if (visibility == IntersectionType::Intersect && settings->enableFrustumCulling && settings->enableModelFrustumCulling) {
+                    visibility = CollisionTester::IsInFrustumIntersectionType(data.globalWorldCollider, shadowComp.cascadeFrustums[cascadeIdx]);
+
+                    if (visibility == IntersectionType::Outside)
+                        continue;
+                }
+                else if (visibility == IntersectionType::Outside) {
+                    continue;
+                }
+
+                bool parentFullyInside = (visibility == IntersectionType::Inside);
+
+                cullMeshes(data, lightIndex, cascadeIdx, shadowComp.cascadeFrustums[cascadeIdx], parentFullyInside);
+            }
+            };
+
+
+        //Fallback for streaming, dynamic, or unchunked entities
+        auto fallbackCull = [withEntityData, cullLightCascades, activeShadowLightCount]
+        (EntityID entity) {
+            withEntityData(entity, [&](const EntityCullData& data) {
+
+                std::array<IntersectionType, 4> defaultVis;
+                defaultVis.fill(IntersectionType::Intersect);
+
+                for (uint32_t lightIdx = 0; lightIdx < activeShadowLightCount; ++lightIdx) {
+                    cullLightCascades(data, lightIdx, defaultVis);
+                }
+                });
+            };
+
 
         const auto& staticEntities = transformPool->GetStorage().GetStaticEntities();
         const auto& dynamicEntities = transformPool->GetStorage().GetDynamicEntities();
@@ -257,6 +319,8 @@ namespace Syn
         auto chunkGroup = &drawData->Chunks;
 
         uint32_t activeChunks = chunkGroup->chunkCounter.load(std::memory_order_relaxed);
+
+        //// BVH Chunk Culling Execution
         if (settings->enableStaticBvhCulling && activeChunks > 0)
         {
             if (drawData->DirectionLightShadow.visibleChunkIds.Size() < activeChunks) {
@@ -266,17 +330,17 @@ namespace Syn
             drawData->DirectionLightShadow.visibleChunkCount.store(0, std::memory_order_relaxed);
 
             staticTask = this->ForEachIndex(uint32_t(0), activeChunks, uint32_t(1), subflow, "Update Static Shadow Chunks",
-                [settings, chunkGroup, staticEntities, cullFunc, drawData, shadowPool, activeShadowLightCount](uint32_t chunkIdx) {
+                [settings, chunkGroup, staticEntities, drawData, shadowPool, activeShadowLightCount, withEntityData, cullLightCascades](uint32_t chunkIdx) {
                     const auto& chunk = chunkGroup->chunks[chunkIdx];
+
+                    // Allocate light visibilities purely for the hot path of this specific chunk
+                    std::array<LightVis, MAX_DIR_LIGHTS> lightVisibilities;
                     bool isVisibleInAnyLight = false;
+
                     for (uint32_t lightIdx = 0; lightIdx < activeShadowLightCount; ++lightIdx)
                     {
                         EntityID lightEntity = drawData->DirectionLightShadow.visibleLights[lightIdx];
                         const auto& shadowComp = shadowPool->Get(lightEntity);
-
-                        std::array<IntersectionType, CASCADES_PER_LIGHT * 4> chunkVisibilities;
-                        chunkVisibilities.fill(IntersectionType::Intersect);
-                        bool isVisibleInAnyCascade = false;
 
                         for (uint32_t cascadeIdx = 0; cascadeIdx < 4; ++cascadeIdx)
                         {
@@ -287,52 +351,46 @@ namespace Syn
                                 visibility = CollisionTester::TestAabbFrustumIntersectionType(chunk.minBounds, chunk.maxBounds, shadowComp.cascadeFrustums[cascadeIdx]);
                             }
 
-                            chunkVisibilities[cascadeIdx] = visibility;
+                            lightVisibilities[lightIdx].cascadeVis[cascadeIdx] = visibility;
 
                             if (visibility != IntersectionType::Outside) {
-                                isVisibleInAnyCascade = true;
-                            }
-                        }
-
-                        if (isVisibleInAnyCascade)
-                        {
-                            isVisibleInAnyLight = true;
-
-                            for (uint32_t i = 0; i < chunk.entityCount; ++i) {
-                                EntityID entity = staticEntities[chunk.firstEntityIndex + i];
-                                cullFunc(entity, lightIdx, chunkVisibilities);
+                                lightVisibilities[lightIdx].isVisible = true;
+                                isVisibleInAnyLight = true;
                             }
                         }
                     }
 
-                    if (isVisibleInAnyLight)
-                    {
-                        uint32_t slot = drawData->DirectionLightShadow.visibleChunkCount.fetch_add(1, std::memory_order_relaxed);
-                        uint32_t packedId = chunkIdx;
-                        drawData->DirectionLightShadow.visibleChunkIds[slot] = packedId;
+                    // Prune chunk entirely if no directional light cascade intersects it
+                    if (!isVisibleInAnyLight) 
+                        return;
+
+                    /*
+                    // Register chunk as visible for shadow pass
+                    uint32_t slot = drawData->DirectionLightShadow.visibleChunkCount.fetch_add(1, std::memory_order_relaxed);
+                    uint32_t packedId = chunkIdx;
+                    drawData->DirectionLightShadow.visibleChunkIds[slot] = packedId;
+                    */
+
+                    for (uint32_t i = 0; i < chunk.entityCount; ++i) {
+                        EntityID entity = staticEntities[chunk.firstEntityIndex + i];
+
+                        withEntityData(entity, [&](const EntityCullData& data) {
+                            for (uint32_t lightIdx = 0; lightIdx < activeShadowLightCount; ++lightIdx) {
+                                if (lightVisibilities[lightIdx].isVisible) {
+                                    cullLightCascades(data, lightIdx, lightVisibilities[lightIdx].cascadeVis);
+                                }
+                            }
+                            });
                     }
                 });
         }
         else
         {
-            staticTask = this->ForEach(staticEntities, subflow, "Update Static Shadow",
-                [cullFunc, activeShadowLightCount](EntityID entity) {
-                    std::vector<IntersectionType> defaultVis(activeShadowLightCount * 4, IntersectionType::Intersect);
-                    cullFunc(entity, defaultVis);
-                });
+            staticTask = this->ForEach(staticEntities, subflow, "Update Static Shadow", fallbackCull);
         }
 
-        auto dynamicTask = this->ForEach(dynamicEntities, subflow, "Update Dynamic Shadow",
-            [cullFunc, activeShadowLightCount](EntityID entity) {
-                std::vector<IntersectionType> defaultVis(activeShadowLightCount * 4, IntersectionType::Intersect);
-                cullFunc(entity, defaultVis);
-            });
-
-        auto streamTask = this->ForEach(streamEntities, subflow, "Update Stream Shadow",
-            [cullFunc, activeShadowLightCount](EntityID entity) {
-                std::vector<IntersectionType> defaultVis(activeShadowLightCount * 4, IntersectionType::Intersect);
-                cullFunc(entity, defaultVis);
-            });
+        auto dynamicTask = this->ForEach(dynamicEntities, subflow, "Update Dynamic Shadow", fallbackCull);
+        auto streamTask = this->ForEach(streamEntities, subflow, "Update Stream Shadow", fallbackCull);
 
         if (staticTask.has_value()) initTask.precede(staticTask.value());
         if (dynamicTask.has_value()) initTask.precede(dynamicTask.value());
@@ -352,6 +410,7 @@ namespace Syn
 
             if (!settings->enableGeometryGpuCulling)
             {
+                // Sync CPU counters to indirect commands
                 for (uint32_t i = 0; i < mainGroup.activeTraditionalCount; ++i) {
                     shadowGroup.traditionalCmds[i].instanceCount = shadowGroup.paddedTraditionalCounts[i * 16];
                 }
@@ -360,6 +419,7 @@ namespace Syn
                     shadowGroup.meshletCmds[i].groupCountX = shadowGroup.paddedMeshletCounts[i * 16];
                 }
 
+                // Upload instances
                 size_t instanceSize = mainGroup.totalAllocatedInstances * SHADOW_MULTIPLIER * sizeof(uint32_t);
                 if (instanceSize > 0) {
                     if (auto mappedInstance = shadowGroup.instanceBuffer.GetMapped(frameIndex)) {
@@ -375,6 +435,7 @@ namespace Syn
 
             if (needsCommandUpload)
             {
+                // Upload base draw commands (indirect data)
                 if (auto mappedIndirect = shadowGroup.indirectBuffer.GetMapped(frameIndex)) {
                     size_t tradSize = mainGroup.activeTraditionalCount * sizeof(VkDrawIndirectCommand);
                     if (tradSize > 0) {

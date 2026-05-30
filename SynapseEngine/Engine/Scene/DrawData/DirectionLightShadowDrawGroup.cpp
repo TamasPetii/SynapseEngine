@@ -26,6 +26,7 @@ namespace Syn
         computeCountBuffer.UpdateCapacityAll(1);
     }
 
-    void DirectionLightShadowDrawGroup::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex)
+    void DirectionLightShadowDrawGroup::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) {
+
     }
 }
