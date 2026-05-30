@@ -4,7 +4,7 @@ namespace Syn
 {
     DirectionLightShadowComponent::DirectionLightShadowComponent() :
         shadowFarPlane(200.0f),
-        cascadeSplits(glm::vec4(0.0f))
+        cascadeSplits(glm::vec4(0.075f, 0.20f, 0.50f, 1.0f))
     {
         cascadeViews.fill(glm::mat4(1.0f));
         cascadeProjs.fill(glm::mat4(1.0f));

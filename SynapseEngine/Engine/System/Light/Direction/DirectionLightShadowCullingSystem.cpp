@@ -24,6 +24,8 @@
 
 namespace Syn
 {
+	constexpr bool ENABLE_DEBUG_LOGGING = true;
+
     struct LightVis {
         bool isVisible = false;
         std::array<IntersectionType, CASCADES_PER_LIGHT> cascadeVis;
@@ -151,9 +153,11 @@ namespace Syn
 
                 // Calculate Global World Collider
                 GpuMeshCollider globalLocalCollider = modelResource->cpuData.globalCollider;
+
                 if (hasAnimation) {
                     globalLocalCollider = animResource->cpuData.frameGlobalColliders[animFrameIndex];
                 }
+
                 GpuMeshCollider worldCollider = MeshUtils::TransformCollider(globalLocalCollider, transformComp.transform);
 
                 EntityCullData data{
@@ -262,6 +266,11 @@ namespace Syn
                             }
 
                             drawData->DirectionLightShadow.instances[bufferIndex] = payload;
+
+                            if constexpr (ENABLE_DEBUG_LOGGING) {
+                                Info("Shadow Cull - Entity: {}, LightIdx: {}, CascadeIdx: {}, LOD: {}, ScreenSize: {:.2f}, BufferIndex: {}",
+                                    static_cast<uint32_t>(data.entity), lightIndex, cascadeIdx, lod, screenSizePixels, bufferIndex);
+                            }
                         }
                     }
                 }

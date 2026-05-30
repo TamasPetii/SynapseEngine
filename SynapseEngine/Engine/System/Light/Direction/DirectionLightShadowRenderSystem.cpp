@@ -11,12 +11,14 @@
 
 namespace Syn
 {
+    constexpr bool ENABLE_DEBUG_LOGGING = false;
+
     std::vector<TypeID> DirectionLightShadowRenderSystem::GetReadDependencies() const
     {
         return {
             TypeInfo<RenderSystem>::ID,
-			TypeInfo< DirectionLightShadowSystem>::ID,
-			TypeInfo< DirectionLightCullingSystem>::ID,
+			TypeInfo<DirectionLightShadowSystem>::ID,
+			TypeInfo<DirectionLightCullingSystem>::ID,
         };
     }
 
@@ -34,15 +36,20 @@ namespace Syn
         this->EmplaceTask(subflow, SystemPhaseNames::Update, [this, scene, drawData]() {
             uint32_t currentMainInstances = drawData->Models.totalAllocatedInstances;
 
-            //Todo: RenderSystem frameUpload 3???
+            // Check if the main pass allocated instance count changed
             if (_lastMainAllocatedInstances != currentMainInstances || currentMainInstances == 0) {
                 _needsRebuild = true;
                 _lastMainAllocatedInstances = currentMainInstances;
+
+                if constexpr (ENABLE_DEBUG_LOGGING) {
+                    Info("[DirectionLightShadowRenderSystem] Capacity change detected. Main Instances: {}", currentMainInstances);
+                }
             }
 
             if (_needsRebuild) {
                 RebuildShadowBuffers(scene);
 
+                // Ensure the GPU buffers are synced for all frames in flight
                 uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
                 this->SetFramesToUpload(framesInFlight);
             }
@@ -55,10 +62,16 @@ namespace Syn
         auto& mainGroup = drawData->Models;
         auto& shadowGroup = drawData->DirectionLightShadow;
 
+        // Shadow instances require scaling by the number of active cascades and lights
         uint32_t shadowTotalInstances = mainGroup.totalAllocatedInstances * SHADOW_MULTIPLIER;
 
         if (shadowTotalInstances > 0 && shadowGroup.instances.Size() < shadowTotalInstances) {
             shadowGroup.instances.Resize(shadowTotalInstances);
+        }
+
+        if constexpr  (ENABLE_DEBUG_LOGGING) {
+            Info("[DirectionLightShadowRenderSystem] Rebuilding Buffers. Shadow Instances: {}, Traditional Cmds: {}, Meshlet Cmds: {}",
+                shadowTotalInstances, mainGroup.activeTraditionalCount, mainGroup.activeMeshletCount);
         }
 
         if (mainGroup.activeTraditionalCount > 0 && shadowGroup.traditionalCmds.Size() < mainGroup.activeTraditionalCount) {
@@ -69,6 +82,7 @@ namespace Syn
             shadowGroup.meshletCmds.Resize(mainGroup.activeMeshletCount);
         }
 
+        // Copy base command blueprints from the main model pass
         if (mainGroup.activeTraditionalCount > 0) {
             std::memcpy(
                 shadowGroup.traditionalCmds.Data(),
@@ -107,27 +121,16 @@ namespace Syn
             uint32_t shadowTotalInstances = mainGroup.totalAllocatedInstances * SHADOW_MULTIPLIER;
             size_t indirectCount = mainGroup.activeTraditionalCount + mainGroup.activeMeshletCount;
 
+            // Update GPU buffer capacities based on the newly calculated requirements
             if (shadowTotalInstances > 0)
                 shadowGroup.instanceBuffer.UpdateCapacity(frameIndex, shadowTotalInstances);
 
             if (indirectCount > 0)
                 shadowGroup.indirectBuffer.UpdateCapacity(frameIndex, indirectCount);
 
-            /*
-            if (auto mappedIndirect = shadowGroup.indirectBuffer.GetMapped(frameIndex); mappedIndirect && indirectCount > 0)
-            {
-                size_t tradSize = mainGroup.activeTraditionalCount * sizeof(VkDrawIndirectCommand);
-                if (tradSize > 0) {
-                    mappedIndirect->Write(mainGroup.traditionalCmds.Data(), tradSize, 0);
-                }
-
-                size_t meshletSize = mainGroup.activeMeshletCount * sizeof(VkDrawMeshTasksIndirectCommandEXT);
-                if (meshletSize > 0) {
-                    size_t meshletGpuOffset = tradSize;
-                    mappedIndirect->Write(mainGroup.meshletCmds.Data(), meshletSize, meshletGpuOffset);
-                }
+            if constexpr (ENABLE_DEBUG_LOGGING) {
+                Info("[DirectionLightShadowRenderSystem] GPU Buffers Capacity Updated for Frame {}.", frameIndex);
             }
-            */
             });
     }
 
