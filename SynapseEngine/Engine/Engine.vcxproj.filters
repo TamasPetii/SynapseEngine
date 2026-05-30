@@ -1344,6 +1344,15 @@
     <ClCompile Include="Mesh\Source\Procedural\Shape\IcoSphereMeshSource.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Scene\DrawData\DirectionLightShadowDrawGroup.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Light\Direction\DirectionLightShadowRenderSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="System\Light\Direction\DirectionLightShadowCullingSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2898,6 +2907,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Mesh\Source\Procedural\Shape\IcoSphereMeshSource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene\DrawData\DirectionLightShadowDrawGroup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Light\Direction\DirectionLightShadowRenderSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="System\Light\Direction\DirectionLightShadowCullingSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

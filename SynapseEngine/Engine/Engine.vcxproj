@@ -238,6 +238,9 @@
     <ClCompile Include="Animation\Data\Cpu\CpuAnimationData.cpp" />
     <ClCompile Include="Animation\Converter\ICpuAnimationExtractor.cpp" />
     <ClCompile Include="Animation\Converter\DefaultCpuAnimationExtractor.cpp" />
+    <ClCompile Include="System\Light\Direction\DirectionLightShadowCullingSystem.cpp" />
+    <ClCompile Include="System\Light\Direction\DirectionLightShadowRenderSystem.cpp" />
+    <ClCompile Include="Scene\DrawData\DirectionLightShadowDrawGroup.cpp" />
     <ClCompile Include="Mesh\Source\Procedural\Shape\IcoSphereMeshSource.cpp" />
     <ClCompile Include="Render\Passes\Wireframe\Collider\CapsuleColliderWireframePass.cpp" />
     <ClCompile Include="Render\Passes\Wireframe\Collider\BoxColliderWireframePass.cpp" />
@@ -683,6 +686,9 @@
     <ClInclude Include="Animation\Data\Cpu\CpuAnimationData.h" />
     <ClInclude Include="Animation\Converter\ICpuAnimationExtractor.h" />
     <ClInclude Include="Animation\Converter\DefaultCpuAnimationExtractor.h" />
+    <ClInclude Include="System\Light\Direction\DirectionLightShadowCullingSystem.h" />
+    <ClInclude Include="System\Light\Direction\DirectionLightShadowRenderSystem.h" />
+    <ClInclude Include="Scene\DrawData\DirectionLightShadowDrawGroup.h" />
     <ClInclude Include="Mesh\Source\Procedural\Shape\IcoSphereMeshSource.h" />
     <ClInclude Include="Render\Passes\Wireframe\Collider\CapsuleColliderWireframePass.h" />
     <ClInclude Include="Render\Passes\Wireframe\Collider\BoxColliderWireframePass.h" />

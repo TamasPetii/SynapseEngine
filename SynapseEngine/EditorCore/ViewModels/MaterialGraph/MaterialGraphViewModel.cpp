@@ -1,4 +1,3 @@
-// EditorCore/ViewModels/MaterialGraph/MaterialGraphViewModel.cpp
 #include "MaterialGraphViewModel.h"
 
 namespace Syn {
@@ -10,8 +9,7 @@ namespace Syn {
     }
 
     void MaterialGraphViewModel::SyncWithEngine() {
-        // Opcionális: Ha az engine-ben más úton (pl. property panelen) 
-        // megváltozott egy material, itt újra lehet építeni a gráfot.
+
     }
 
     void MaterialGraphViewModel::Dispatch(const MaterialGraphIntent& intent) {

@@ -11,6 +11,8 @@ namespace Syn
         cascadeViewProjs.fill(glm::mat4(1.0f));
 		cascadeViewProjsVulkan.fill(glm::mat4(1.0f));
         cascadeAtlasRects.fill(glm::vec4(0.0f));
+        cascadeAabbMin.fill(glm::vec3(0.0f));
+        cascadeAabbMax.fill(glm::vec3(0.0f));
     }
 
     DirectionLightShadowGPU::DirectionLightShadowGPU(const DirectionLightShadowComponent& component) :
@@ -32,6 +34,9 @@ namespace Syn
             {
                 cascades[i].planes[p] = component.cascadeFrustums[i].planes[p];
             }
+
+            cascades[i].aabbMin = glm::vec4(component.cascadeAabbMin[i], 1.0f);
+            cascades[i].aabbMax = glm::vec4(component.cascadeAabbMax[i], 1.0f);
         }
     }
 }

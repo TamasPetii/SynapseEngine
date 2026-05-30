@@ -11,6 +11,7 @@
 #include "SsaoDrawGroup.h"
 #include <atomic>
 #include "IDrawGroup.h"
+#include "DirectionLightShadowDrawGroup.h"
 
 namespace Syn
 {
@@ -31,6 +32,8 @@ namespace Syn
         ForwardPlusDrawGroup ForwardPlus;
 		ChunkDrawGroup Chunks;
 		SsaoDrawGroup Ssao;
+        DirectionLightShadowDrawGroup DirectionLightShadow;
+
         std::atomic<uint32_t> syncFramesRemaining{ 0 };
     };
 }

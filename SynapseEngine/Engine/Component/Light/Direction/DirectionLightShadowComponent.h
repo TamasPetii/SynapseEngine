@@ -20,10 +20,13 @@ namespace Syn
         std::array<glm::mat4, 4> cascadeViewProjsVulkan;
         std::array<glm::vec4, 4> cascadeAtlasRects;
     private:
+        std::array<glm::vec3, 4> cascadeAabbMin;
+        std::array<glm::vec3, 4> cascadeAabbMax;
         std::array<FrustumCollider, 4> cascadeFrustums;
 
         friend struct DirectionLightShadowColliderGPU;
         friend class DirectionLightShadowSystem;
+        friend class DirectionLightShadowCullingSystem;
     };
 
     struct SYN_API DirectionLightShadowGPU
@@ -41,6 +44,8 @@ namespace Syn
 
         struct CascadeCollider {
             glm::vec4 planes[6];
+            glm::vec4 aabbMin;
+            glm::vec4 aabbMax;
         } cascades[4];
 
         uint32_t entityIndex;

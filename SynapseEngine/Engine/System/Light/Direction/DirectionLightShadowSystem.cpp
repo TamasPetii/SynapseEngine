@@ -111,6 +111,9 @@ namespace Syn
                         if (maxOrtho.z < 0) maxOrtho.z /= zMult;
                         else maxOrtho.z *= zMult;
 
+                        shadowComp.cascadeAabbMin[i] = minOrtho;
+                        shadowComp.cascadeAabbMax[i] = maxOrtho;
+
                         glm::mat4 orthoProj = glm::ortho(minOrtho.x, maxOrtho.x, minOrtho.y, maxOrtho.y, minOrtho.z, maxOrtho.z);
                         glm::mat4 viewProj = orthoProj * lightView;
                         shadowComp.cascadeViews[i] = lightView;

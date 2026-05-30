@@ -33,10 +33,10 @@ namespace Syn
         RenderBuffer mortonAabbSingleCmdBuffer;
         RenderBuffer mortonChunkVisibleIndirectDispatchBuffer;
 
-        std::vector<ChunkDataGPU> chunks;
         std::vector<uint32_t> visibleChunkIds;
-
         std::atomic<uint32_t> visibleChunkCount{ 0 };
+
+        std::vector<ChunkDataGPU> chunks;
         std::atomic<uint32_t> chunkCounter{ 0 };
 
         VkDrawIndirectCommand wireframeCmdTemplate{};

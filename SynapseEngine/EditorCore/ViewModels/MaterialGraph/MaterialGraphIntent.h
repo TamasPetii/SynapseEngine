@@ -4,7 +4,6 @@
 
 namespace Syn 
 {
-
     struct CreateLinkIntent {
         GraphID startPinId;
         GraphID endPinId;
