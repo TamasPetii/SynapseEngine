@@ -158,8 +158,6 @@ namespace Syn {
 
                 ImGui::SeparatorText("Mipchain Textures");
 
-                ImGui::Separator();
-
                 int maxMipIndex = 0;
                 if (state.width > 0 && state.height > 0) {
                     maxMipIndex = static_cast<int>(Vk::ImageUtils::CalculateMipLevels(state.width, state.height)) - 1;
@@ -210,6 +208,10 @@ namespace Syn {
                     }
                     ImGui::Unindent();
                 }
+
+                ImGui::SeparatorText("Shadow Passes");
+
+                RadioButton("Direction Light Shadow Atlas", RenderTargetGroupNames::Deferred, RenderTargetNames::DirectionLightShadowAtlas, Vk::ImageViewNames::Default);
 
                 ImGui::EndChild();
             }

@@ -3,7 +3,7 @@
     "base_model_path": "C:/Users/User/Desktop/Models/"
   },
   "environment": {
-    "spawn_sponza": false,
+    "spawn_sponza": true,
     "spawn_bistro": false,
     "spawn_floor": false,
     "spawn_pbr_sponza": false,
@@ -15,7 +15,7 @@
   },
   "entities": {
     "animated_characters": 0,
-    "static_geometry": 0,
+    "static_geometry": 100000,
     "physics_boxes": 0,
     "physics_spheres": 0,
     "physics_capsules": 0

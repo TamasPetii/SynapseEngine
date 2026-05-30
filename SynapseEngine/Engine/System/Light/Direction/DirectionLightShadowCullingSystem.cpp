@@ -24,7 +24,7 @@
 
 namespace Syn
 {
-	constexpr bool ENABLE_DEBUG_LOGGING = true;
+	constexpr bool ENABLE_DEBUG_LOGGING = false;
 
     struct LightVis {
         bool isVisible = false;

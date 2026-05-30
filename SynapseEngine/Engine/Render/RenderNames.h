@@ -29,6 +29,8 @@ namespace Syn
         static constexpr const char* TransparentDepth = "TransparentDepth";
         static constexpr const char* SsaoAo = "SsaoAo";
         static constexpr const char* SsaoAoIntermediate = "SsaoAoIntermediate";
+
+		static constexpr const char* DirectionLightShadowAtlas = "DirectionLightShadowAtlas";
     };
 
     struct SYN_API RenderTargetViewNames

@@ -1353,6 +1353,15 @@
     <ClCompile Include="System\Light\Direction\DirectionLightShadowCullingSystem.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="System\Light\Direction\DirectionLightShadowAtlasSystem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Shadow\Direction\DirectionLightShadowTraditionalOpaquePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Shadow\Direction\DirectionLightShadowInitPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2918,6 +2927,15 @@
     <ClInclude Include="System\Light\Direction\DirectionLightShadowCullingSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="System\Light\Direction\DirectionLightShadowAtlasSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Shadow\Direction\DirectionLightShadowTraditionalOpaquePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Shadow\Direction\DirectionLightShadowInitPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Includes\Common\Animation.glsl" />
@@ -3049,5 +3067,8 @@
     <None Include="Shaders\Includes\Common\Collider.glsl" />
     <None Include="Shaders\Passes\Wireframe\WireframeMeshlet.mesh" />
     <None Include="Shaders\Includes\PushConstants\WireframeMeshletPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\DirectionLightShadowTraditionalMeshletPassPC.glsl" />
+    <None Include="Shaders\Passes\Shadow\Direction\DirectionLightShadow.frag" />
+    <None Include="Shaders\Passes\Shadow\Direction\DirectionLightShadowTraditional.vert" />
   </ItemGroup>
 </Project>

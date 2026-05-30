@@ -238,6 +238,9 @@
     <ClCompile Include="Animation\Data\Cpu\CpuAnimationData.cpp" />
     <ClCompile Include="Animation\Converter\ICpuAnimationExtractor.cpp" />
     <ClCompile Include="Animation\Converter\DefaultCpuAnimationExtractor.cpp" />
+    <ClCompile Include="Render\Passes\Shadow\Direction\DirectionLightShadowInitPass.cpp" />
+    <ClCompile Include="Render\Passes\Shadow\Direction\DirectionLightShadowTraditionalOpaquePass.cpp" />
+    <ClCompile Include="System\Light\Direction\DirectionLightShadowAtlasSystem.cpp" />
     <ClCompile Include="System\Light\Direction\DirectionLightShadowCullingSystem.cpp" />
     <ClCompile Include="System\Light\Direction\DirectionLightShadowRenderSystem.cpp" />
     <ClCompile Include="Scene\DrawData\DirectionLightShadowDrawGroup.cpp" />
@@ -686,6 +689,9 @@
     <ClInclude Include="Animation\Data\Cpu\CpuAnimationData.h" />
     <ClInclude Include="Animation\Converter\ICpuAnimationExtractor.h" />
     <ClInclude Include="Animation\Converter\DefaultCpuAnimationExtractor.h" />
+    <ClInclude Include="Render\Passes\Shadow\Direction\DirectionLightShadowInitPass.h" />
+    <ClInclude Include="Render\Passes\Shadow\Direction\DirectionLightShadowTraditionalOpaquePass.h" />
+    <ClInclude Include="System\Light\Direction\DirectionLightShadowAtlasSystem.h" />
     <ClInclude Include="System\Light\Direction\DirectionLightShadowCullingSystem.h" />
     <ClInclude Include="System\Light\Direction\DirectionLightShadowRenderSystem.h" />
     <ClInclude Include="Scene\DrawData\DirectionLightShadowDrawGroup.h" />
@@ -1247,6 +1253,7 @@
     <None Include="Shaders\Includes\PushConstants\DeferredEmissiveAoPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredPointLightPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DeferredSpotLightPC.glsl" />
+    <None Include="Shaders\Includes\PushConstants\DirectionLightShadowTraditionalMeshletPassPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DpHvoBlurPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DpHvoPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\HizDownSamplePC.glsl" />
@@ -1326,6 +1333,8 @@
     <None Include="Shaders\Passes\PostProcess\BloomDownsample.comp" />
     <None Include="Shaders\Passes\PostProcess\BloomPrefilter.comp" />
     <None Include="Shaders\Passes\PostProcess\BloomUpsample.comp" />
+    <None Include="Shaders\Passes\Shadow\Direction\DirectionLightShadow.frag" />
+    <None Include="Shaders\Passes\Shadow\Direction\DirectionLightShadowTraditional.vert" />
     <None Include="Shaders\Passes\Ssao\DpHvo.comp" />
     <None Include="Shaders\Passes\Ssao\DpHvoBlur.comp" />
     <None Include="Shaders\Passes\Ssao\Ssao.comp" />

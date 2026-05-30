@@ -6,6 +6,7 @@
 #include "Engine/Scene/Scene.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include "Engine/Logger/SynLog.h"
+#include "DirectionLightShadowAtlasSystem.h"
 
 namespace Syn
 {
@@ -15,6 +16,7 @@ namespace Syn
     {
         return {
             TypeInfo<DirectionLightSystem>::ID,
+            TypeInfo<DirectionLightShadowAtlasSystem>::ID,
             TypeInfo<CameraSystem>::ID
         };
     }

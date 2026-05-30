@@ -23,5 +23,6 @@ namespace Syn
         static constexpr const char* WireframePasses = "WireframePasses";
         static constexpr const char* MortonPasses = "MortonPasses";
         static constexpr const char* SsaoPasses = "SsaoPasses";
+		static constexpr const char* ShadowPasses = "ShadowPasses";
     };
 }

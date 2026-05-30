@@ -18,6 +18,8 @@ struct DirectionLightShadowComponent {
 
 struct CascadeCollider {
     vec4 planes[6]; // Near, Far, Left, Right, Top, Bottom
+    vec4 aabbMin;
+    vec4 aabbMax;
 };
 
 struct DirectionLightShadowColliderGPU {
@@ -30,10 +32,12 @@ layout(buffer_reference, std430) readonly restrict buffer DirectionLightDataBuff
 layout(buffer_reference, std430) readonly restrict buffer DirectionLightShadowDataBuffer { DirectionLightShadowComponent data[]; };
 layout(buffer_reference, std430) readonly restrict buffer DirectionLightShadowColliderDataBuffer { DirectionLightShadowColliderGPU data[]; };
 layout(buffer_reference, std430) readonly restrict buffer VisibleDirectionLightBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer VisibleShadowDirectionLightBuffer { uint data[]; };
 
 #define GET_DIRECTION_LIGHT(addr, idx)                 DirectionLightDataBuffer(addr).data[idx]
 #define GET_DIRECTION_LIGHT_SHADOW(addr, idx)          DirectionLightShadowDataBuffer(addr).data[idx]
 #define GET_DIRECTION_LIGHT_SHADOW_COLLIDER(addr, idx) DirectionLightShadowColliderDataBuffer(addr).data[idx]
 #define GET_VISIBLE_DIRECTION_LIGHT(addr, idx)         VisibleDirectionLightBuffer(addr).data[idx]
+#define GET_VISIBLE_SHADOW_DIRECTION_LIGHT(addr, idx)  VisibleShadowDirectionLightBuffer(addr).data[idx]
 
 #endif

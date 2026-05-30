@@ -25,20 +25,30 @@ namespace Syn
         std::string cacheKey = std::format("{}_{}_{}_{}", groupName, targetName, viewName, currentFrame);
 
         if (_viewportTextures.find(cacheKey) == _viewportTextures.end()) {
-            auto rtManager = renderManager->GetRenderTargetManager();
+            
+            if(targetName == RenderTargetNames::DirectionLightShadowAtlas) {
+				auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
+                auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::NearestClampEdge);
+                TextureHandle handle = _textureManager->RegisterTexture(drawData->DirectionLightShadow.shadowAtlas[currentFrame]->GetView(viewName), sampler->Handle());
+                _viewportTextures[cacheKey] = handle;
+            }
+            else
+            {
+                auto rtManager = renderManager->GetRenderTargetManager();
 
-            auto group = rtManager->GetGroup(groupName, currentFrame);
-            if (!group) return InvalidTextureHandle;
+                auto group = rtManager->GetGroup(groupName, currentFrame);
+                if (!group) return InvalidTextureHandle;
 
-            auto image = group->GetImage(targetName);
-            if (!image) return InvalidTextureHandle;
+                auto image = group->GetImage(targetName);
+                if (!image) return InvalidTextureHandle;
 
-            auto view = image->GetView(viewName);
-            if (!view) return InvalidTextureHandle;
+                auto view = image->GetView(viewName);
+                if (!view) return InvalidTextureHandle;
 
-            auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::NearestClampEdge);
-            TextureHandle handle = _textureManager->RegisterTexture(image->GetView(viewName), sampler->Handle());
-            _viewportTextures[cacheKey] = handle;
+                auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::NearestClampEdge);
+                TextureHandle handle = _textureManager->RegisterTexture(image->GetView(viewName), sampler->Handle());
+                _viewportTextures[cacheKey] = handle;
+            }
         }
 
         return _textureManager->GetImGuiTextureID(_viewportTextures[cacheKey]);

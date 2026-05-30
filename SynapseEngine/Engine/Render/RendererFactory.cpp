@@ -96,6 +96,8 @@
 #include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletAabbPass.h"
 #include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletSpherePass.h"
 #include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletConePass.h"
+#include "Engine/Render/Passes/Shadow/Direction/DirectionLightShadowInitPass.h"
+#include "Engine/Render/Passes/Shadow/Direction/DirectionLightShadowTraditionalOpaquePass.h"
 
 #include "Engine/Render/Passes/Ssao/SsaoInitPass.h"
 #include "Engine/Render/Passes/Ssao/SsaoPass.h"
@@ -135,6 +137,13 @@ namespace Syn
         pipeline->AddPass(std::make_unique<StaticModelCullingPass>());
         pipeline->AddPass(std::make_unique<ModelCullingPass>());
         pipeline->AddPass(std::make_unique<MeshCullingPass>());
+
+        //Todo - Gpu Driven Direction Light Culling
+
+        //DirectionLight Shadow Passes
+        pipeline->AddPass(std::make_unique<DirectionLightShadowInitPass>());
+        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque1Sided));
+        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
 
 		//Forward+ Depth Opaque Prepasses
 		pipeline->AddPass(std::make_unique<OpaqueDepthTransitionPrepass>());

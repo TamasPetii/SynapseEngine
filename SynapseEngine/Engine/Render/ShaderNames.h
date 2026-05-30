@@ -78,5 +78,8 @@ namespace Syn
         static constexpr const char* DpHvoBlurComp = "../Engine/Shaders/Passes/Ssao/DpHvoBlur.comp";
         static constexpr const char* SsaoComp = "../Engine/Shaders/Passes/Ssao/Ssao.comp";
         static constexpr const char* SsaoBlurComp = "../Engine/Shaders/Passes/Ssao/SsaoBlur.comp";
+
+        static constexpr const char* DirectionLightShadowFarg = "../Engine/Shaders/Passes/Shadow/Direction/DirectionLightShadow.frag";
+        static constexpr const char* DirectionLightShadowTraditionalVert = "../Engine/Shaders/Passes/Shadow/Direction/DirectionLightShadowTraditional.vert";
     };
 }

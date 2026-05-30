@@ -35,6 +35,7 @@
 #include "Engine/System/Light/Direction/DirectionLightCullingSystem.h"
 #include "Engine/System/Light/Direction/DirectionLightShadowRenderSystem.h"
 #include "Engine/System/Light/Direction/DirectionLightShadowCullingSystem.h"
+#include "Engine/System/Light/Direction/DirectionLightShadowAtlasSystem.h"
 #include "Engine/System/Physics/BoxColliderSystem.h"
 #include "Engine/System/Physics/SphereColliderSystem.h"
 #include "Engine/System/Physics/CapsuleColliderSystem.h"
@@ -125,6 +126,7 @@ namespace Syn
         RegisterSystem<DirectionLightShadowSystem>();
         RegisterSystem<DirectionLightShadowRenderSystem>();
         RegisterSystem<DirectionLightShadowCullingSystem>();
+        RegisterSystem<DirectionLightShadowAtlasSystem>();
         RegisterSystem<PhysicsSystem>();
 		RegisterSystem<BoxColliderSystem>();
 		RegisterSystem<SphereColliderSystem>();

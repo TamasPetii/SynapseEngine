@@ -5,6 +5,7 @@
 #include "Engine/Mesh/MeshDrawDescriptor.h"
 #include "Engine/Material/MaterialRenderType.h"
 #include "IDrawGroup.h"
+#include "Engine/Vk/Image/Image.h"
 
 namespace Syn
 {
@@ -12,6 +13,10 @@ namespace Syn
     constexpr uint32_t MAX_DIR_LIGHTS = 1;
     constexpr uint32_t CASCADES_PER_LIGHT = 4;
     constexpr uint32_t SHADOW_MULTIPLIER = MAX_DIR_LIGHTS * CASCADES_PER_LIGHT;
+
+    constexpr uint32_t SHADOW_ATLAS_SIZE = 256;
+    constexpr uint32_t SHADOW_MIN_BLOCK_SIZE = 128;
+    constexpr uint32_t SHADOW_GRID_SIZE = SHADOW_ATLAS_SIZE / SHADOW_MIN_BLOCK_SIZE;
 
     struct SYN_API DirectionLightShadowDrawGroup : public IDrawGroup
     {
@@ -45,5 +50,7 @@ namespace Syn
         std::atomic<uint32_t> visibleChunkCount{ 0 };
 
         VkDispatchIndirectCommand dispatchCmdTemplate{};
+
+        std::vector<std::unique_ptr<Vk::Image>> shadowAtlas;
     };
 }

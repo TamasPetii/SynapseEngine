@@ -1,0 +1,145 @@
+#include "DirectionLightShadowTraditionalOpaquePass.h"
+#include "Engine/ServiceLocator.h"
+#include "Engine/Vk/Context.h"
+#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Vk/Image/ImageFactory.h"
+#include "Engine/Scene/BufferNames.h"
+#include "Engine/Manager/ComponentBufferManager.h"
+#include "Engine/Scene/Scene.h"
+#include "Engine/Vk/Image/ImageViewNames.h"
+
+namespace Syn {
+
+    #include "Engine/Shaders/Includes/PushConstants/DirectionLightShadowTraditionalMeshletPassPC.glsl"
+    
+    bool DirectionLightShadowTraditionalOpaquePass::ShouldExecute(const RenderContext& context) const
+    {
+        return true;
+    }
+
+    DirectionLightShadowTraditionalOpaquePass::DirectionLightShadowTraditionalOpaquePass(MaterialRenderType renderType)
+        : _renderType(renderType)
+    {
+        assert(_renderType == MaterialRenderType::Opaque1Sided || _renderType == MaterialRenderType::Opaque2Sided);
+
+        if (_renderType == MaterialRenderType::Opaque1Sided) {
+            _passName = "DirectionLightShadowTraditionalOpaquePass1Sided";
+        }
+        else {
+            _passName = "DirectionLightShadowTraditionalOpaquePass2Sided";
+        }
+    }
+
+    void DirectionLightShadowTraditionalOpaquePass::Initialize() {
+        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto imageManager = ServiceLocator::GetImageManager();
+
+        Vk::ShaderProgramConfig config;
+        config.useDescriptorBuffers = false;
+
+        _shaderProgram = shaderManager->CreateProgram("DirectionLightShadowProgram", {
+            ShaderNames::DirectionLightShadowTraditionalVert,
+            ShaderNames::DirectionLightShadowFarg
+            }, config);
+
+        VkCullModeFlags cullMode = (_renderType == MaterialRenderType::Opaque2Sided) ? VK_CULL_MODE_NONE : VK_CULL_MODE_BACK_BIT;
+
+        _graphicsState = {
+            .raster = {
+                .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+                .cullMode = cullMode,
+                .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
+                .polygonMode = VK_POLYGON_MODE_FILL,
+                .lineWidth = 1.0f
+                /* .depthBiasEnable = VK_TRUE,*/
+            },
+            .depth = {
+                .testEnable = VK_TRUE,
+                .writeEnable = VK_TRUE,
+                .compareOp = VK_COMPARE_OP_LESS
+            },
+            .blendStates = {},
+            .colorAttachmentCount = 0,
+            .renderArea = std::nullopt
+        };
+    }
+
+    void DirectionLightShadowTraditionalOpaquePass::PrepareFrame(const RenderContext& context) {
+        auto drawData = context.scene->GetSceneDrawData();
+        auto& shadowGroup = drawData->DirectionLightShadow;
+		auto fIdx = context.frameIndex;
+
+        VkExtent2D extent = { SHADOW_ATLAS_SIZE, SHADOW_ATLAS_SIZE };
+        _graphicsState.renderArea = extent;
+
+        _depthAttachment = Vk::RenderUtils::CreateAttachment({
+                .imageView = shadowGroup.shadowAtlas[fIdx]->GetView(Vk::ImageViewNames::Default),
+                .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+                .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+                .storeOp = VK_ATTACHMENT_STORE_OP_STORE
+            });
+
+        _renderInfo = Vk::RenderingInfoConfig{
+            .renderArea = extent,
+            .colorAttachments = {},
+            .depthAttachment = &_depthAttachment.value(),
+            .layerCount = 1
+        };
+    }
+
+    void DirectionLightShadowTraditionalOpaquePass::PushConstants(const RenderContext& context) {
+        auto scene = context.scene;
+        if (!scene) return;
+
+        uint32_t fIdx = context.frameIndex;
+        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
+        auto drawData = scene->GetSceneDrawData();
+
+        DirectionLightShadowTraditionalMeshletPassPC pc{};
+        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc.baseDescriptorOffset = drawData->Models.traditionalCmdOffsets[_renderType];
+        pc.materialRenderType = static_cast<uint32_t>(_renderType);
+        pc.shadowMultiplier = SHADOW_MULTIPLIER;
+
+        vkCmdPushConstants(
+            context.cmd,
+            _shaderProgram->GetLayout(),
+            VK_SHADER_STAGE_ALL,
+            0,
+            sizeof(DirectionLightShadowTraditionalMeshletPassPC),
+            &pc
+        );
+    }
+
+    void DirectionLightShadowTraditionalOpaquePass::BindDescriptors(const RenderContext& context)
+    {
+    
+    }
+
+    void DirectionLightShadowTraditionalOpaquePass::Draw(const RenderContext& context)
+    {
+        auto scene = context.scene;
+        auto drawData = scene->GetSceneDrawData();
+        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
+
+        auto indirectBuffer = drawData->DirectionLightShadow.indirectBuffer.GetHandle(context.frameIndex, isGpu);
+        auto countBuffer = drawData->Models.drawCountBuffer.GetHandle(context.frameIndex, isGpu);
+
+        uint32_t commandOffset = drawData->Models.traditionalCmdOffsets[_renderType];
+        uint32_t maxCommandCount = drawData->Models.traditionalCmdCounts[_renderType];
+
+        if (maxCommandCount > 0) {
+            VkDeviceSize countBufferOffset = _renderType * sizeof(uint32_t);
+
+            vkCmdDrawIndirectCount(
+                context.cmd,
+                indirectBuffer,
+                commandOffset * sizeof(VkDrawIndirectCommand),
+                countBuffer,
+                countBufferOffset,
+                maxCommandCount,
+                sizeof(VkDrawIndirectCommand)
+            );
+        }
+    }
+}

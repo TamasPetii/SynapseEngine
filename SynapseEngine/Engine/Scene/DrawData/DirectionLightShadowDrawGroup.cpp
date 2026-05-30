@@ -24,6 +24,17 @@ namespace Syn
 
         computeCountBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
         computeCountBuffer.UpdateCapacityAll(1);
+
+        Vk::ImageConfig atlasSpec{};
+        atlasSpec.width = SHADOW_ATLAS_SIZE;
+        atlasSpec.height = SHADOW_ATLAS_SIZE;
+        atlasSpec.type = VK_IMAGE_TYPE_2D;
+        atlasSpec.format = VK_FORMAT_D32_SFLOAT;
+        atlasSpec.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        atlasSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+
+        for(int i = 0; i < frameCount; ++i)
+            shadowAtlas.push_back(std::make_unique<Vk::Image>(atlasSpec));
     }
 
     void DirectionLightShadowDrawGroup::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) {

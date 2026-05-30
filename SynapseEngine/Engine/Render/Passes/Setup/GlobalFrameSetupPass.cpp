@@ -88,6 +88,8 @@ namespace Syn {
         ctx.directionLightSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightSparseMap, fIdx);
         ctx.directionLightShadowSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightShadowSparseMap, fIdx);
         ctx.directionLightShadowDataBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightShadowData, fIdx);
+		ctx.directionLightShadowColliderDataBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightShadowColliderData, fIdx);
+		ctx.directionLightShadowInstanceBufferAddr = drawData->DirectionLightShadow.instanceBuffer.GetAddress(fIdx, isGpu);
 
         ctx.pointLightIndirectCommandBufferAddr = drawData->PointLights.indirectBuffer.GetAddress(fIdx, isGpu);
         ctx.pointLightVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightVisibleData, fIdx);
