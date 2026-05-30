@@ -125,17 +125,28 @@ namespace Syn
                             maxOrtho = glm::max(maxOrtho, trf);
                         }
 
+                        float zNear = -maxOrtho.z;
+                        float zFar = -minOrtho.z;
+
+                        zNear -= 200.0f;
+                        zFar += 200.0f;
+
+                        minOrtho.z = -zFar;
+                        maxOrtho.z = -zNear;
+
+                        /*
                         float zMult = 10.0f;
                         if (minOrtho.z < 0) minOrtho.z *= zMult;
                         else minOrtho.z /= zMult;
                         if (maxOrtho.z < 0) maxOrtho.z /= zMult;
                         else maxOrtho.z *= zMult;
+                        */
 
                         shadowComp.cascadeAabbMin[i] = minOrtho;
                         shadowComp.cascadeAabbMax[i] = maxOrtho;
 
                         // Create projection and view-projection matrices
-                        glm::mat4 orthoProj = glm::ortho(minOrtho.x, maxOrtho.x, minOrtho.y, maxOrtho.y, minOrtho.z, maxOrtho.z);
+                        glm::mat4 orthoProj = glm::orthoZO(minOrtho.x, maxOrtho.x, minOrtho.y, maxOrtho.y, minOrtho.z, maxOrtho.z);
                         glm::mat4 viewProj = orthoProj * lightView;
                         shadowComp.cascadeViews[i] = lightView;
                         shadowComp.cascadeProjs[i] = orthoProj;

@@ -29,6 +29,7 @@ namespace Syn
         static constexpr const char* DirectionLightSparseMap = "DirectionLightSparseMap";
         static constexpr const char* DirectionLightData = "DirectionLightData";
         static constexpr const char* DirectionLightVisibleData = "DirectionLightVisibleData";
+        static constexpr const char* DirectionLightVisibleShadowData = "DirectionLightVisibleShadowData";
 
         static constexpr const char* DirectionLightShadowSparseMap = "DirectionLightShadowSparseMap";
         static constexpr const char* DirectionLightShadowData = "DirectionLightShadowData";

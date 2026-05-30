@@ -21,6 +21,8 @@
 #include "Engine/Mesh/Utils/MeshUtils.h"
 #include <atomic>
 #include "DirectionLightCullingSystem.h"
+#include "DirectionLightShadowAtlasSystem.h"
+#include "DirectionLightShadowSystem.h"
 
 namespace Syn
 {
@@ -49,6 +51,8 @@ namespace Syn
         return {
             TypeInfo<DirectionLightShadowRenderSystem>::ID,
             TypeInfo<DirectionLightCullingSystem>::ID,
+            TypeInfo<DirectionLightShadowAtlasSystem>::ID,
+            TypeInfo<DirectionLightShadowSystem>::ID,
             TypeInfo<TransformSystem>::ID,
             TypeInfo<ModelSystem>::ID,
             TypeInfo<RenderSystem>::ID,

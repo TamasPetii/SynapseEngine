@@ -93,15 +93,22 @@ void main() {
     }
 
     // 8. Resolve Directional Light Shadow component 
-    mat4 viewProj = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightIdx).cascadeViewProjsVulkan[cascadeIdx];
+    uint lightEntity = GET_VISIBLE_SHADOW_DIRECTION_LIGHT(ctx.directionLightVisibleShadowIndexBufferAddr, lightIdx);
+    uint lightShadowDenseIndex = GET_SPARSE_INDEX(ctx.directionLightShadowSparseMapBufferAddr, lightEntity);
+    mat4 viewProj = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeViewProjsVulkan[cascadeIdx];
 
     // 9. Calculate Final World Position and Outputs
     gl_Position = viewProj * transform.transform * finalModelMat * vec4(v.position, 1.0);
-    
+
+    gl_ClipDistance[0] = gl_Position.w + gl_Position.x;
+    gl_ClipDistance[1] = gl_Position.w - gl_Position.x;
+    gl_ClipDistance[2] = gl_Position.w + gl_Position.y;
+    gl_ClipDistance[3] = gl_Position.w - gl_Position.y;
+
     vec4 rect = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightIdx).cascadeAtlasRects[cascadeIdx];
     vec2 scale = rect.zw; 
     vec2 offset = rect.xy * 2.0 + rect.zw - 1.0; 
-    
+
     // Atlas Positioning
     gl_Position.xy = gl_Position.xy * scale + offset * gl_Position.w;
 }

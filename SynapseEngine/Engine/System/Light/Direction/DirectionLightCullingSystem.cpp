@@ -95,6 +95,11 @@ namespace Syn
                 instanceBufferView.buffer->Write(drawData->DirectionLights.instances.Data(), count * sizeof(uint32_t), 0);
             }
 
+            auto visibleShadowBufferView = bufferManager->GetComponentBuffer(BufferNames::DirectionLightVisibleShadowData, frameIndex);
+            if (count > 0 && visibleShadowBufferView.buffer) {
+                visibleShadowBufferView.buffer->Write(drawData->DirectionLightShadow.visibleLights.Data(), count * sizeof(uint32_t), 0);
+            }
+
             if (auto mapped = drawData->DirectionLights.indirectBuffer.GetMapped(frameIndex)) {
                 mapped->Write(&drawData->DirectionLights.cmdTemplate, sizeof(VkDrawIndirectCommand), 0);
             }

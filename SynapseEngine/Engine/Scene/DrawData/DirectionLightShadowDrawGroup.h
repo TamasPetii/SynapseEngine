@@ -14,7 +14,7 @@ namespace Syn
     constexpr uint32_t CASCADES_PER_LIGHT = 4;
     constexpr uint32_t SHADOW_MULTIPLIER = MAX_DIR_LIGHTS * CASCADES_PER_LIGHT;
 
-    constexpr uint32_t SHADOW_ATLAS_SIZE = 256;
+    constexpr uint32_t SHADOW_ATLAS_SIZE = 1024;
     constexpr uint32_t SHADOW_MIN_BLOCK_SIZE = 128;
     constexpr uint32_t SHADOW_GRID_SIZE = SHADOW_ATLAS_SIZE / SHADOW_MIN_BLOCK_SIZE;
 

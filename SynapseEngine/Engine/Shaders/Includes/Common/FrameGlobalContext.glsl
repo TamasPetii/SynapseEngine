@@ -45,6 +45,7 @@ struct FrameGlobalContext {
     uint64_t directionLightShadowDataBufferAddr;
     uint64_t directionLightShadowColliderDataBufferAddr;
     uint64_t directionLightShadowInstanceBufferAddr;
+    uint64_t directionLightVisibleShadowIndexBufferAddr;
 
     uint64_t pointLightIndirectCommandBufferAddr;
     uint64_t pointLightVisibleIndexBufferAddr;

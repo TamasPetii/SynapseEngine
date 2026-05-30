@@ -220,6 +220,7 @@ namespace Syn
         RegisterComponentSparseMapBuffer<DirectionLightComponent>(BufferNames::DirectionLightSparseMap);
         RegisterComponentBuffer<DirectionLightComponent, DirectionLightComponentGPU>(BufferNames::DirectionLightData);
         RegisterComponentBuffer<DirectionLightComponent, uint32_t>(BufferNames::DirectionLightVisibleData);
+        RegisterComponentBuffer<DirectionLightComponent, uint32_t>(BufferNames::DirectionLightVisibleShadowData);
 
         RegisterComponentSparseMapBuffer<DirectionLightShadowComponent>(BufferNames::DirectionLightShadowSparseMap);
         RegisterComponentBuffer<DirectionLightShadowComponent, DirectionLightShadowGPU>(BufferNames::DirectionLightShadowData);
