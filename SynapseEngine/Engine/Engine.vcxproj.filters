@@ -588,10 +588,10 @@
     <ClCompile Include="Collision\Tester\CollisionTester.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Culling\ModelCullingPass.cpp">
+    <ClCompile Include="Render\Passes\Culling\Geometry\GeometryModelCullingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Culling\MeshCullingPass.cpp">
+    <ClCompile Include="Render\Passes\Culling\Geometry\GeometryMeshCullingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Material\MaterialManager.cpp">
@@ -891,9 +891,6 @@
     <ClCompile Include="Profiler\DefaultGpuProfiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Profiler\ICpuProfiler.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -909,7 +906,7 @@
     <ClCompile Include="Render\Passes\Shading\Wboit\TransparentCompositeTransitionPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Culling\CullingCommandResetPass.cpp">
+    <ClCompile Include="Render\Passes\Culling\Geometry\GeometryCullingCommandResetPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Utils\RenderBuffer.cpp">
@@ -1044,10 +1041,10 @@
     <ClCompile Include="Scene\DrawData\ChunkDrawGroup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Culling\StaticChunkCullingPass.cpp">
+    <ClCompile Include="Render\Passes\Culling\Geometry\GeometryStaticChunkCullingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Culling\StaticModelCullingPass.cpp">
+    <ClCompile Include="Render\Passes\Culling\Geometry\GeometryStaticModelCullingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Wireframe\Chunk\StaticChunkAabbWireframePass.cpp">
@@ -1074,10 +1071,10 @@
     <ClCompile Include="Render\Passes\Morton\ChunkBuilderPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Culling\MortonChunkCullingPass.cpp">
+    <ClCompile Include="Render\Passes\Culling\Geometry\GeometryMortonChunkCullingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Culling\MortonModelCullingPass.cpp">
+    <ClCompile Include="Render\Passes\Culling\Geometry\GeometryMortonModelCullingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Ssao\DpHvoPass.cpp">
@@ -1366,6 +1363,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowMortonModelCulling.comp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Culling\Geometry\GeometryWorkGraphCullingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -2036,10 +2036,10 @@
     <ClInclude Include="System\SystemPhaseNames.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Culling\ModelCullingPass.h">
+    <ClInclude Include="Render\Passes\Culling\Geometry\GeometryModelCullingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Culling\MeshCullingPass.h">
+    <ClInclude Include="Render\Passes\Culling\Geometry\GeometryMeshCullingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Material\MaterialManager.h">
@@ -2354,9 +2354,6 @@
     <ClInclude Include="Profiler\DefaultGpuProfiler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Culling\WorkGraphCullingPass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Profiler\ICpuProfiler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -2372,7 +2369,7 @@
     <ClInclude Include="Render\Passes\Shading\Wboit\TransparentCompositeTransitionPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Culling\CullingCommandResetPass.h">
+    <ClInclude Include="Render\Passes\Culling\Geometry\GeometryCullingCommandResetPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Utils\RenderBuffer.h">
@@ -2513,10 +2510,10 @@
     <ClInclude Include="Scene\DrawData\ChunkDrawGroup.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Culling\StaticChunkCullingPass.h">
+    <ClInclude Include="Render\Passes\Culling\Geometry\GeometryStaticChunkCullingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Culling\StaticModelCullingPass.h">
+    <ClInclude Include="Render\Passes\Culling\Geometry\GeometryStaticModelCullingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="System\SystemGroupNames.h">
@@ -2549,10 +2546,10 @@
     <ClInclude Include="Render\Passes\Morton\ChunkBuilderPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Culling\MortonChunkCullingPass.h">
+    <ClInclude Include="Render\Passes\Culling\Geometry\GeometryMortonChunkCullingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Culling\MortonModelCullingPass.h">
+    <ClInclude Include="Render\Passes\Culling\Geometry\GeometryMortonModelCullingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Ssao\DpHvoPass.h">
@@ -2943,6 +2940,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Shadow\Direction\DirectionLightShadowMeshletOpaquePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Culling\Geometry\GeometryWorkGraphCullingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

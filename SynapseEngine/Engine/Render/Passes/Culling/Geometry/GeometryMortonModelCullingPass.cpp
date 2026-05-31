@@ -1,9 +1,11 @@
-#include "StaticModelCullingPass.h"
+#include "GeometryMortonModelCullingPass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Scene/Scene.h"
-#include "Engine/Scene/BufferNames.h"
+#include "Engine/Component/Core/TransformComponent.h"
 #include "Engine/Vk/Buffer/BufferUtils.h"
+#include "Engine/Scene/BufferNames.h"
+#include "Engine/Render/ComputeGroupSize.h"
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Render/RenderNames.h"
@@ -12,41 +14,34 @@
 
 namespace Syn {
 
-    #include "Engine/Shaders/Includes/PushConstants/ModelMeshCullingPC.glsl"
+#include "Engine/Shaders/Includes/PushConstants/ModelMeshCullingPC.glsl"
 
-    bool StaticModelCullingPass::ShouldExecute(const RenderContext& context) const
-    {
-        return context.scene->GetSettings()->enableGeometryGpuCulling
-            && context.scene->GetSettings()->enableStaticBvhCulling;
-    }
-
-    void StaticModelCullingPass::Initialize() {
+    void GeometryMortonModelCullingPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("StaticModelCullingProgram", {
-            ShaderNames::StaticModelCulling
+        _shaderProgram = shaderManager->CreateProgram("GeometryMortonModelCullingProgram", {
+            ShaderNames::GeometryMortonModelCullingComp
             }, config);
     }
 
-    void StaticModelCullingPass::PushConstants(const RenderContext& context) {
+    bool GeometryMortonModelCullingPass::ShouldExecute(const RenderContext& context) const {
+        auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
+        return context.scene->GetSettings()->enableMortonBvhCulling && pool && !pool->GetStorage().GetStaticEntities().empty();
+    }
+
+    void GeometryMortonModelCullingPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
-        auto drawData = scene->GetSceneDrawData();
-
-        uint32_t activeChunks = drawData->Chunks.chunkCounter.load(std::memory_order_relaxed);
-        if (activeChunks == 0) return;
-
-        uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
+        _staticCount = static_cast<uint32_t>(scene->GetRegistry()->GetPool<TransformComponent>()->GetStorage().GetStaticEntities().size());
 
         ModelMeshCullingPC pc{};
-        pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex, scene->GetSettings()->enableGeometryGpuCulling);
 
         vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ModelMeshCullingPC), &pc);
     }
 
-    void StaticModelCullingPass::BindDescriptors(const RenderContext& context) {
+    void GeometryMortonModelCullingPass::BindDescriptors(const RenderContext& context) {
         auto imageManager = ServiceLocator::GetImageManager();
 
         uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
@@ -65,18 +60,17 @@ namespace Syn {
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
     }
 
-    void StaticModelCullingPass::Dispatch(const RenderContext& context) {
+    void GeometryMortonModelCullingPass::Dispatch(const RenderContext& context) {
+        if (_staticCount == 0) return;
+
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
-
-        if (drawData->Chunks.chunkCounter.load(std::memory_order_relaxed) == 0) return;
-
         uint32_t fIdx = context.frameIndex;
         bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-        VkBuffer dispatchBuf = drawData->Chunks.chunkIndirectDispatchBuffer.GetHandle(fIdx, isGpu);
-        vkCmdDispatchIndirect(context.cmd, dispatchBuf, 0);
+        VkBuffer indirectBuffer = drawData->Chunks.mortonChunkVisibleIndirectDispatchBuffer.GetHandle(fIdx, isGpu);
+        vkCmdDispatchIndirect(context.cmd, indirectBuffer, 0);
 
         Vk::BufferBarrierInfo countBarrier{};
         countBarrier.buffer = drawData->Models.computeCountBuffer.GetHandle(fIdx, isGpu);

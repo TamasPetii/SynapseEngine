@@ -16,15 +16,6 @@ namespace Syn
         static constexpr const char* BloomDownsample = "../Engine/Shaders/Passes/PostProcess/BloomDownsample.comp";
         static constexpr const char* BloomComposite = "../Engine/Shaders/Passes/PostProcess/BloomComposite.comp";
 
-        static constexpr const char* CullingCommandReset = "../Engine/Shaders/Passes/Culling/CullingCommandReset.comp";
-        static constexpr const char* MeshCulling = "../Engine/Shaders/Passes/Culling/MeshCulling.comp";
-        static constexpr const char* ModelCulling = "../Engine/Shaders/Passes/Culling/ModelCulling.comp";
-        static constexpr const char* StaticChunkCulling = "../Engine/Shaders/Passes/Culling/StaticChunkCulling.comp";
-        static constexpr const char* StaticModelCulling = "../Engine/Shaders/Passes/Culling/StaticModelCulling.comp";
-
-        static constexpr const char* MortonChunkCulling = "../Engine/Shaders/Passes/Culling/MortonChunkCulling.comp";
-        static constexpr const char* MortonModelCulling = "../Engine/Shaders/Passes/Culling/MortonModelCulling.comp";
-
         static constexpr const char* StaticSceneAABB = "../Engine/Shaders/Passes/Morton/StaticSceneAABB.comp";
         static constexpr const char* MortonGenerator = "../Engine/Shaders/Passes/Morton/MortonGenerator.comp";
         static constexpr const char* ChunkBuilder = "../Engine/Shaders/Passes/Morton/ChunkBuilder.comp";
@@ -83,5 +74,20 @@ namespace Syn
         static constexpr const char* DirectionLightShadowTraditionalVert = "../Engine/Shaders/Passes/Shadow/Direction/DirectionLightShadowTraditional.vert";
 		static constexpr const char* DirectionLightShadowMeshletTask = "../Engine/Shaders/Passes/Shadow/Direction/DirectionLightShadowMeshlet.task";
 		static constexpr const char* DirectionLightShadowMeshletMesh = "../Engine/Shaders/Passes/Shadow/Direction/DirectionLightShadowMeshlet.mesh";
+   
+        static constexpr const char* GeometryCullingCommandResetComp = "../Engine/Shaders/Passes/Culling/Geometry/GeometryCullingCommandReset.comp";
+        static constexpr const char* GeometryMeshCullingComp = "../Engine/Shaders/Passes/Culling/Geometry/GeometryMeshCulling.comp";
+        static constexpr const char* GeometryModelCullingComp = "../Engine/Shaders/Passes/Culling/Geometry/GeometryModelCulling.comp";
+        static constexpr const char* GeometryStaticChunkCullingComp = "../Engine/Shaders/Passes/Culling/Geometry/GeometryStaticChunkCulling.comp";
+        static constexpr const char* GeometryStaticModelCullingComp = "../Engine/Shaders/Passes/Culling/Geometry/GeometryStaticModelCulling.comp";
+        static constexpr const char* GeometryMortonChunkCullingComp = "../Engine/Shaders/Passes/Culling/Geometry/GeometryMortonChunkCulling.comp";
+        static constexpr const char* GeometryMortonModelCullingComp = "../Engine/Shaders/Passes/Culling/Geometry/GeometryMortonModelCulling.comp";
+    
+        static constexpr const char* GeometryWorkGraphModelCullingComp = "../Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphModelCulling.comp";
+        static constexpr const char* GeometryWorkGraphStaticChunkCullingComp = "../Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphStaticChunkCulling.comp";
+		static constexpr const char* GeometryWorkGraphStaticModelCullingComp = "../Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphStaticModelCulling.comp";
+		static constexpr const char* GeometryWorkGraphMortonChunkCullingComp = "../Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphMortonChunkCulling.comp";
+		static constexpr const char* GeometryWorkGraphMortonModelCullingComp = "../Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphMortonModelCulling.comp";
+		static constexpr const char* GeometryWorkGraphMeshCullingComp = "../Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphMeshCulling.comp";
     };
 }

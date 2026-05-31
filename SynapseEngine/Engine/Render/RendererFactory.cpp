@@ -12,15 +12,15 @@
 #include "Engine/Render/Passes/Bloom/BloomDownsamplePass.h"
 #include "Engine/Render/Passes/Bloom/BloomCompositePass.h"
 
-#include "Engine/Render/Passes/Culling/ModelCullingPass.h"
-#include "Engine/Render/Passes/Culling/StaticModelCullingPass.h"
-#include "Engine/Render/Passes/Culling/StaticChunkCullingPass.h"
-#include "Engine/Render/Passes/Culling/MortonModelCullingPass.h"
-#include "Engine/Render/Passes/Culling/MortonChunkCullingPass.h"
-#include "Engine/Render/Passes/Culling/MeshCullingPass.h"
 #include "Engine/Render/Passes/Culling/PointLightCullingPass.h"
 #include "Engine/Render/Passes/Culling/SpotLightCullingPass.h"
-#include "Engine/Render/Passes/Culling/CullingCommandResetPass.h"
+#include "Engine/Render/Passes/Culling/Geometry/GeometryModelCullingPass.h"
+#include "Engine/Render/Passes/Culling/Geometry/GeometryStaticModelCullingPass.h"
+#include "Engine/Render/Passes/Culling/Geometry/GeometryStaticChunkCullingPass.h"
+#include "Engine/Render/Passes/Culling/Geometry/GeometryMortonModelCullingPass.h"
+#include "Engine/Render/Passes/Culling/Geometry/GeometryMortonChunkCullingPass.h"
+#include "Engine/Render/Passes/Culling/Geometry/GeometryMeshCullingPass.h"
+#include "Engine/Render/Passes/Culling/Geometry/GeometryCullingCommandResetPass.h"
 
 #include "Engine/Render/Passes/Morton/ChunkBuilderPass.h"
 #include "Engine/Render/Passes/Morton/MortonGeneratorPass.h"
@@ -131,13 +131,13 @@ namespace Syn
         pipeline->AddPass(std::make_unique<ChunkBuilderPass>());
 
 		//Geometry Culling Passes
-		pipeline->AddPass(std::make_unique<CullingCommandResetPass>());
-        pipeline->AddPass(std::make_unique<MortonChunkCullingPass>());
-        pipeline->AddPass(std::make_unique<MortonModelCullingPass>());
-        pipeline->AddPass(std::make_unique<StaticChunkCullingPass>());
-        pipeline->AddPass(std::make_unique<StaticModelCullingPass>());
-        pipeline->AddPass(std::make_unique<ModelCullingPass>());
-        pipeline->AddPass(std::make_unique<MeshCullingPass>());
+		pipeline->AddPass(std::make_unique<GeometryCullingCommandResetPass>());
+        pipeline->AddPass(std::make_unique<GeometryMortonChunkCullingPass>());
+        pipeline->AddPass(std::make_unique<GeometryMortonModelCullingPass>());
+        pipeline->AddPass(std::make_unique<GeometryStaticChunkCullingPass>());
+        pipeline->AddPass(std::make_unique<GeometryStaticModelCullingPass>());
+        pipeline->AddPass(std::make_unique<GeometryModelCullingPass>());
+        pipeline->AddPass(std::make_unique<GeometryMeshCullingPass>());
 
         //Todo - Gpu Driven Direction Light Culling
 

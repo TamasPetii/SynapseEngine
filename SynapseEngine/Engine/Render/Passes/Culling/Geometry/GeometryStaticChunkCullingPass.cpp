@@ -1,4 +1,4 @@
-#include "StaticChunkCullingPass.h"
+#include "GeometryStaticChunkCullingPass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Scene/Scene.h"
@@ -15,23 +15,23 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/ModelMeshCullingPC.glsl"
 
-    bool StaticChunkCullingPass::ShouldExecute(const RenderContext& context) const
+    bool GeometryStaticChunkCullingPass::ShouldExecute(const RenderContext& context) const
     {
         return context.scene->GetSettings()->enableGeometryGpuCulling
             && context.scene->GetSettings()->enableStaticBvhCulling;
     }
 
-    void StaticChunkCullingPass::Initialize() {
+    void GeometryStaticChunkCullingPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("StaticChunkCullingProgram", {
-            ShaderNames::StaticChunkCulling
+        _shaderProgram = shaderManager->CreateProgram("GeometryStaticChunkCullingProgram", {
+            ShaderNames::GeometryStaticChunkCullingComp
             }, config);
     }
 
-    void StaticChunkCullingPass::PushConstants(const RenderContext& context) {
+    void GeometryStaticChunkCullingPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
 
@@ -47,7 +47,7 @@ namespace Syn {
         vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ModelMeshCullingPC), &pc);
     }
 
-    void StaticChunkCullingPass::BindDescriptors(const RenderContext& context) {
+    void GeometryStaticChunkCullingPass::BindDescriptors(const RenderContext& context) {
         auto imageManager = ServiceLocator::GetImageManager();
 
         uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
@@ -66,7 +66,7 @@ namespace Syn {
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
     }
 
-    void StaticChunkCullingPass::Dispatch(const RenderContext& context) {
+    void GeometryStaticChunkCullingPass::Dispatch(const RenderContext& context) {
         if (_activeChunkCount == 0) return;
 
         auto scene = context.scene;

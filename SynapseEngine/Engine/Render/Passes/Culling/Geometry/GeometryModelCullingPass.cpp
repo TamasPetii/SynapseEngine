@@ -1,4 +1,4 @@
-#include "ModelCullingPass.h"
+#include "GeometryModelCullingPass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Mesh/ModelManager.h"
@@ -21,23 +21,23 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/ModelMeshCullingPC.glsl"
 
-    bool ModelCullingPass::ShouldExecute(const RenderContext& context) const
+    bool GeometryModelCullingPass::ShouldExecute(const RenderContext& context) const
     {
         return context.scene->GetSettings()->enableGeometryGpuCulling;
     }
 
-    void ModelCullingPass::Initialize() {
+    void GeometryModelCullingPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("ModelCullingProgram", {
-            ShaderNames::ModelCulling
+        _shaderProgram = shaderManager->CreateProgram("GeometryModelCullingProgram", {
+            ShaderNames::GeometryModelCullingComp
             }, config);
     }
 
-    void ModelCullingPass::PushConstants(const RenderContext& context) {
+    void GeometryModelCullingPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
 
         auto registry = scene->GetRegistry();
@@ -72,7 +72,7 @@ namespace Syn {
         vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ModelMeshCullingPC), &pc);
     }
 
-    void ModelCullingPass::BindDescriptors(const RenderContext& context) {
+    void GeometryModelCullingPass::BindDescriptors(const RenderContext& context) {
         auto imageManager = ServiceLocator::GetImageManager();
 
         //Using prevous frame's depth pyramid!
@@ -93,7 +93,7 @@ namespace Syn {
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
     }
 
-    void ModelCullingPass::Dispatch(const RenderContext& context) {
+    void GeometryModelCullingPass::Dispatch(const RenderContext& context) {
         auto scene = context.scene;
         if (_totalModelsToTest == 0) return;
 

@@ -8,7 +8,10 @@ namespace Syn
         static constexpr const char* UndefinedPasses = "UndefinedPasses";
         static constexpr const char* BillboardPasses = "BillboardPasses";
         static constexpr const char* BloomPasses = "BloomPasses";
-        static constexpr const char* CullingPasses = "CullingPasses";
+        static constexpr const char* DirectionalLightCullingPasses = "DirectionalLightCullingPasses";
+        static constexpr const char* PointLightCullingPasses = "PointLightCullingPasses";
+        static constexpr const char* SpotLightCullingPasses = "SpotLightCullingPasses";
+        static constexpr const char* GeometryCullingPasses = "GeometryCullingPasses";
         static constexpr const char* HizPasses = "HizPasses";
         static constexpr const char* PresentPasses = "PresentPasses";
         static constexpr const char* InitSetupPasses = "InitSetupPasses";

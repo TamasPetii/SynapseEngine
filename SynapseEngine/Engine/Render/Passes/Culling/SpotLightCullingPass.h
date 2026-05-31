@@ -6,7 +6,7 @@ namespace Syn {
     class SYN_API SpotLightCullingPass : public ComputePass {
     public:
         std::string GetName() const override { return "SpotLightCullingPass"; }
-        std::string GetGroup() const override { return PassGroupNames::CullingPasses; }
+        std::string GetGroup() const override { return PassGroupNames::SpotLightCullingPasses; }
 
         void Initialize() override;
     protected:

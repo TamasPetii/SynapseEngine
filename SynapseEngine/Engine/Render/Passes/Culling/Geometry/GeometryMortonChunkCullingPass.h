@@ -3,10 +3,10 @@
 #include "Engine/Render/Passes/ComputePass.h"
 
 namespace Syn {
-    class SYN_API MortonModelCullingPass : public ComputePass {
+    class SYN_API GeometryMortonChunkCullingPass : public ComputePass {
     public:
-        std::string GetName() const override { return "MortonModelCullingPass"; }
-        std::string GetGroup() const override { return PassGroupNames::CullingPasses; }
+        std::string GetName() const override { return "GeometryMortonChunkCullingPass"; }
+        std::string GetGroup() const override { return PassGroupNames::GeometryCullingPasses; }
 
         void Initialize() override;
     protected:

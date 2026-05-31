@@ -238,10 +238,10 @@
     <ClCompile Include="Animation\Data\Cpu\CpuAnimationData.cpp" />
     <ClCompile Include="Animation\Converter\ICpuAnimationExtractor.cpp" />
     <ClCompile Include="Animation\Converter\DefaultCpuAnimationExtractor.cpp" />
+    <ClCompile Include="Render\Passes\Culling\Geometry\GeometryWorkGraphCullingPass.cpp" />
     <ClCompile Include="Render\Passes\Shadow\Direction\DirectionLightShadowMeshletOpaquePass.cpp" />
     <ClCompile Include="Render\Passes\Shadow\Direction\DirectionLightShadowInitPass.cpp" />
     <ClCompile Include="Render\Passes\Shadow\Direction\DirectionLightShadowTraditionalOpaquePass.cpp" />
-    <ClCompile Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowMortonModelCulling.comp" />
     <ClCompile Include="System\Light\Direction\DirectionLightShadowAtlasSystem.cpp" />
     <ClCompile Include="System\Light\Direction\DirectionLightShadowCullingSystem.cpp" />
     <ClCompile Include="System\Light\Direction\DirectionLightShadowRenderSystem.cpp" />
@@ -319,8 +319,8 @@
     <ClCompile Include="Mesh\Source\Procedural\Shape\PyramidMeshSource.cpp" />
     <ClCompile Include="Render\Passes\Ssao\SsaoBlurPass.cpp" />
     <ClCompile Include="Render\Passes\Ssao\DpHvoPass.cpp" />
-    <ClCompile Include="Render\Passes\Culling\MortonModelCullingPass.cpp" />
-    <ClCompile Include="Render\Passes\Culling\MortonChunkCullingPass.cpp" />
+    <ClCompile Include="Render\Passes\Culling\Geometry\GeometryMortonModelCullingPass.cpp" />
+    <ClCompile Include="Render\Passes\Culling\Geometry\GeometryMortonChunkCullingPass.cpp" />
     <ClCompile Include="Render\Passes\Morton\ChunkBuilderPass.cpp" />
     <ClCompile Include="Render\Passes\Morton\MortonRadixSortPass.cpp" />
     <ClCompile Include="Render\Passes\Morton\MortonGeneratorPass.cpp" />
@@ -353,8 +353,8 @@
     <ClCompile Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSetupPass.cpp" />
     <ClCompile Include="Render\Passes\Wireframe\Light\SpotLightConeWireframePass.cpp" />
     <ClCompile Include="Render\Passes\Wireframe\Light\SpotLightPyramidWireframePass.cpp" />
-    <ClCompile Include="Render\Passes\Culling\StaticChunkCullingPass.cpp" />
-    <ClCompile Include="Render\Passes\Culling\StaticModelCullingPass.cpp" />
+    <ClCompile Include="Render\Passes\Culling\Geometry\GeometryStaticChunkCullingPass.cpp" />
+    <ClCompile Include="Render\Passes\Culling\Geometry\GeometryStaticModelCullingPass.cpp" />
     <ClCompile Include="Render\Passes\Wireframe\Chunk\StaticChunkAabbWireframePass.cpp" />
     <ClCompile Include="Serialization\Stream\Output\StringOutputStream.cpp" />
     <ClCompile Include="Serialization\Stream\Input\StringInputStream.cpp" />
@@ -381,7 +381,7 @@
     <ClCompile Include="Serialization\Archive\Input\Xml\TinyXmlInputArchive.cpp" />
     <ClCompile Include="Scene\Source\Procedural\TestSceneSource.cpp" />
     <ClCompile Include="Utils\RenderBuffer.cpp" />
-    <ClCompile Include="Render\Passes\Culling\CullingCommandResetPass.cpp" />
+    <ClCompile Include="Render\Passes\Culling\Geometry\GeometryCullingCommandResetPass.cpp" />
     <ClCompile Include="Render\Passes\Shading\Wboit\TransparentCompositeTransitionPass.cpp" />
     <ClCompile Include="Render\Passes\Shading\Deferred\Lighting\DeferredLightTransitionPass.cpp" />
     <ClCompile Include="Profiler\IProfiler.cpp" />
@@ -480,8 +480,8 @@
     <ClCompile Include="Material\MaterialManager.cpp" />
     <ClCompile Include="System\Rendering\MaterialSystem.cpp" />
     <ClCompile Include="Material\Material.cpp" />
-    <ClCompile Include="Render\Passes\Culling\MeshCullingPass.cpp" />
-    <ClCompile Include="Render\Passes\Culling\ModelCullingPass.cpp" />
+    <ClCompile Include="Render\Passes\Culling\Geometry\GeometryMeshCullingPass.cpp" />
+    <ClCompile Include="Render\Passes\Culling\Geometry\GeometryModelCullingPass.cpp" />
     <ClCompile Include="Render\RendererFactory.cpp" />
     <ClCompile Include="Render\RenderTargetManager.cpp" />
     <ClCompile Include="System\Rendering\ModelFrustumCullingSystem.cpp" />
@@ -680,7 +680,6 @@
     <ClCompile Include="Render\Passes\Wireframe\Mesh\WireframeMeshAabbPass.cpp" />
     <ClCompile Include="Render\Passes\Wireframe\Mesh\WireframeMeshSpherePass.cpp" />
     <ClCompile Include="Render\Passes\Wireframe\Mesh\WireframeMeshSetupPass.cpp" />
-    <ClCompile Include="Render\Passes\Culling\WorkGraphCullingPass.cpp" />
     <ClCompile Include="Serialization\Archive\Output\Yaml\YamlCppOutputArchive.cpp" />
     <ClCompile Include="Serialization\Archive\Input\Yaml\YamlCppInputArchive.cpp" />
     <ClCompile Include="Render\Passes\Wireframe\Meshlet\WireframeMeshletAabbPass.cpp" />
@@ -691,6 +690,7 @@
     <ClInclude Include="Animation\Data\Cpu\CpuAnimationData.h" />
     <ClInclude Include="Animation\Converter\ICpuAnimationExtractor.h" />
     <ClInclude Include="Animation\Converter\DefaultCpuAnimationExtractor.h" />
+    <ClInclude Include="Render\Passes\Culling\Geometry\GeometryWorkGraphCullingPass.h" />
     <ClInclude Include="Render\Passes\Shadow\Direction\DirectionLightShadowMeshletOpaquePass.h" />
     <ClInclude Include="Render\Passes\Shadow\Direction\DirectionLightShadowInitPass.h" />
     <ClInclude Include="Render\Passes\Shadow\Direction\DirectionLightShadowTraditionalOpaquePass.h" />
@@ -806,8 +806,8 @@
     <ClInclude Include="Mesh\Source\Procedural\Shape\PyramidMeshSource.h" />
     <ClInclude Include="Render\Passes\Ssao\SsaoBlurPass.h" />
     <ClInclude Include="Render\Passes\Ssao\DpHvoPass.h" />
-    <ClInclude Include="Render\Passes\Culling\MortonModelCullingPass.h" />
-    <ClInclude Include="Render\Passes\Culling\MortonChunkCullingPass.h" />
+    <ClInclude Include="Render\Passes\Culling\Geometry\GeometryMortonModelCullingPass.h" />
+    <ClInclude Include="Render\Passes\Culling\Geometry\GeometryMortonChunkCullingPass.h" />
     <ClInclude Include="Render\Passes\Morton\ChunkBuilderPass.h" />
     <ClInclude Include="Render\Passes\Morton\MortonRadixSortPass.h" />
     <ClInclude Include="Render\Passes\Morton\MortonGeneratorPass.h" />
@@ -841,8 +841,8 @@
     <ClInclude Include="Render\Passes\Shading\ForwardPlus\Clustering\ClusterSetupPass.h" />
     <ClInclude Include="Render\Passes\Wireframe\Light\SpotLightConeWireframePass.h" />
     <ClInclude Include="Render\Passes\Wireframe\Light\SpotLightPyramidWireframePass.h" />
-    <ClInclude Include="Render\Passes\Culling\StaticChunkCullingPass.h" />
-    <ClInclude Include="Render\Passes\Culling\StaticModelCullingPass.h" />
+    <ClInclude Include="Render\Passes\Culling\Geometry\GeometryStaticChunkCullingPass.h" />
+    <ClInclude Include="Render\Passes\Culling\Geometry\GeometryStaticModelCullingPass.h" />
     <ClInclude Include="Render\Passes\Wireframe\Chunk\StaticChunkAabbWireframePass.h" />
     <ClInclude Include="Serialization\Stream\Output\StringOutputStream.h" />
     <ClInclude Include="Serialization\Stream\Input\StringInputStream.h" />
@@ -872,7 +872,7 @@
     <ClInclude Include="Serialization\Archive\Input\Xml\TinyXmlInputArchive.h" />
     <ClInclude Include="Scene\Source\Procedural\TestSceneSource.h" />
     <ClInclude Include="Utils\RenderBuffer.h" />
-    <ClInclude Include="Render\Passes\Culling\CullingCommandResetPass.h" />
+    <ClInclude Include="Render\Passes\Culling\Geometry\GeometryCullingCommandResetPass.h" />
     <ClInclude Include="Render\Passes\Shading\Wboit\TransparentCompositeTransitionPass.h" />
     <ClInclude Include="Render\Passes\Shading\Deferred\Lighting\DeferredLightTransitionPass.h" />
     <ClInclude Include="Profiler\IProfiler.h" />
@@ -976,8 +976,8 @@
     <ClInclude Include="Material\MaterialNames.h" />
     <ClInclude Include="System\Rendering\MaterialSystem.h" />
     <ClInclude Include="Material\Material.h" />
-    <ClInclude Include="Render\Passes\Culling\MeshCullingPass.h" />
-    <ClInclude Include="Render\Passes\Culling\ModelCullingPass.h" />
+    <ClInclude Include="Render\Passes\Culling\Geometry\GeometryMeshCullingPass.h" />
+    <ClInclude Include="Render\Passes\Culling\Geometry\GeometryModelCullingPass.h" />
     <ClInclude Include="Mesh\MeshSourceNames.h" />
     <ClInclude Include="Render\RendererFactory.h" />
     <ClInclude Include="Render\RenderTargetManager.h" />
@@ -1207,7 +1207,6 @@
     <ClInclude Include="Render\Passes\Wireframe\Mesh\WireframeMeshAabbPass.h" />
     <ClInclude Include="Render\Passes\Wireframe\Mesh\WireframeMeshSpherePass.h" />
     <ClInclude Include="Render\Passes\Wireframe\Mesh\WireframeMeshSetupPass.h" />
-    <ClInclude Include="Render\Passes\Culling\WorkGraphCullingPass.h" />
     <ClInclude Include="Serialization\Archive\Output\Yaml\YamlCppOutputArchive.h" />
     <ClInclude Include="Serialization\Archive\Input\Yaml\YamlCppInputArchive.h" />
     <ClInclude Include="Render\Passes\Wireframe\Meshlet\WireframeMeshletAabbPass.h" />

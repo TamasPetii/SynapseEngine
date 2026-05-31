@@ -1,4 +1,4 @@
-#include "CullingCommandResetPass.h"
+#include "GeometryCullingCommandResetPass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Scene/Scene.h"
@@ -9,22 +9,22 @@ namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/CullingCommandResetPC.glsl"
 
-    bool CullingCommandResetPass::ShouldExecute(const RenderContext& context) const {
+    bool GeometryCullingCommandResetPass::ShouldExecute(const RenderContext& context) const {
         return context.scene->GetSettings()->enableGeometryGpuCulling;
     }
 
-    void CullingCommandResetPass::Initialize() {
+    void GeometryCullingCommandResetPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("CommandResetProgram", {
-            ShaderNames::CullingCommandReset
+        _shaderProgram = shaderManager->CreateProgram("GeometryCullingCommandResetProgram", {
+            ShaderNames::GeometryCullingCommandResetComp
             }, config);
     }
 
-    void CullingCommandResetPass::PushConstants(const RenderContext& context) {
+    void GeometryCullingCommandResetPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         auto drawData = context.scene->GetSceneDrawData();
 
@@ -39,7 +39,7 @@ namespace Syn {
         vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(),VK_SHADER_STAGE_ALL, 0, sizeof(CullingCommandResetPC), &pc);
     }
 
-    void CullingCommandResetPass::Dispatch(const RenderContext& context) {
+    void GeometryCullingCommandResetPass::Dispatch(const RenderContext& context) {
 		auto drawData = context.scene->GetSceneDrawData();
         bool isGpu = context.scene->GetSettings()->enableGeometryGpuCulling;
         uint32_t fIdx = context.frameIndex;
