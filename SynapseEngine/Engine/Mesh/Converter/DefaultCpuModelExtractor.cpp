@@ -42,7 +42,7 @@ namespace Syn
             blueprint.meshletCmd.groupCountY = groupCountY;
             blueprint.meshletCmd.groupCountZ = 1;
 
-            blueprint.isMeshletPipeline = true ? MeshDrawBlueprint::PIPELINE_MESHLET : MeshDrawBlueprint::PIPELINE_TRADITIONAL;
+            blueprint.isMeshletPipeline = rand() % 2 ? MeshDrawBlueprint::PIPELINE_MESHLET : MeshDrawBlueprint::PIPELINE_TRADITIONAL;
 
             outCpuData.baseDrawCommands.push_back(blueprint);
         }

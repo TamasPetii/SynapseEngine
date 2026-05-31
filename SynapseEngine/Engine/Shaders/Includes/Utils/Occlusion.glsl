@@ -24,6 +24,18 @@ bool ProjectSphere(vec3 viewCenter, float radius, mat4 proj, float near, out vec
     return true;
 }
 
+float CalculateSphereScreenSize(vec3 worldCenter, float radius, mat4 view, mat4 proj, float near, vec2 screenRes) {
+    vec3 viewCenter = (view * vec4(worldCenter, 1.0)).xyz;
+    vec4 uvBounds;
+    
+    if (ProjectSphere(viewCenter, radius, proj, near, uvBounds)) {
+        vec2 sizeInPixels = (vec2(uvBounds.zw) - vec2(uvBounds.xy)) * screenRes;
+        return max(sizeInPixels.x, sizeInPixels.y);
+    }
+    
+    return 99999.0;
+}
+
 bool ProjectSphereOrtho(vec3 worldCenter, float worldRadius, mat4 viewProj, out vec4 cascadeUVBounds, out float closestZ) {
     vec4 clipCenter = viewProj * vec4(worldCenter, 1.0);
     

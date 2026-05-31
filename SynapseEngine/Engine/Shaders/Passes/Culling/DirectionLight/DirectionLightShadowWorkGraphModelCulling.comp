@@ -1,0 +1,182 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_KHR_shader_subgroup_basic : require
+#extension GL_KHR_shader_subgroup_arithmetic : require
+#extension GL_KHR_shader_subgroup_ballot : require
+#extension GL_AMDX_shader_enqueue : require
+
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Camera.glsl"
+#include "../../../Includes/Common/Transform.glsl"
+#include "../../../Includes/Common/Model.glsl"
+#include "../../../Includes/Common/Mesh.glsl"
+#include "../../../Includes/Common/Animation.glsl"
+#include "../../../Includes/Common/Material.glsl"
+#include "../../../Includes/Common/Culling.glsl"
+#include "../../../Includes/Common/DirectionLight.glsl"
+#include "../../../Includes/Utils/CullingMath.glsl"
+#include "../../../Includes/Utils/Occlusion.glsl"
+#include "../../../Includes/Payload/WorkGraphCullingPayload.glsl"
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../../Includes/PushConstants/DirectionLightShadowCullingPC.glsl"
+layout(push_constant) uniform PushConstants {
+    DirectionLightShadowCullingPC pc;
+};
+
+// Depth pyramid (HZB) for the shadow atlas occlusion culling
+layout(set = 2, binding = 0) uniform sampler2D shadowDepthPyramid;
+
+// Output node targeting the unified Shadow Mesh Culling level
+layout(coalescing_node_amdx) out node_type DirectionLightShadowWorkGraphMeshCullingNode;
+layout(location = 0) out MeshCullingPayload payloadOut;
+
+void main() 
+{
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    // Resolve dense transform index handling static/dynamic offsets
+    uint offset = ctx.staticTransformCount * ctx.enableStaticBvhCulling;
+    uint transformDenseIndex = gl_GlobalInvocationID.x + offset;
+    uint transformCount = ctx.allTransformCount - offset;
+
+    // Thread mapping: X = Model, Y = Light Index, Z = Cascade Index
+    uint lightIdx = gl_GlobalInvocationID.y;
+    uint cascadeIdx = gl_GlobalInvocationID.z;
+
+    // 1. Thread Bounds Checking
+    if (gl_GlobalInvocationID.x >= transformCount) return;
+    if (lightIdx >= ctx.activeDirectionLightShadowCount) return; 
+    if (cascadeIdx >= 4) return;
+
+    // 2. Resolve Entity and Model Data
+    TransformModelLink link = GET_TRANSFORM_MODEL_LINK(ctx.transformModelLinkBufferAddr, transformDenseIndex);
+    if (link.modelDenseIndex == INVALID_INDEX) return;
+
+    uint entityId = link.entityIndex;
+    ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, link.modelDenseIndex);
+    if (modelComp.modelIndex == INVALID_INDEX) return;
+
+    // 3. Resolve Transform and Main Camera (Camera is required for LOD calculations)
+    TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
+    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
+
+    // 4. Resolve Model Allocation and Global Collider
+    ModelAllocationInfo mAlloc = GET_MODEL_ALLOC(ctx.globalModelAllocationBufferAddr, modelComp.modelIndex);
+    GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, modelComp.modelIndex);
+    GpuMeshCollider localGlobalCollider = addrs.globalCollider;
+    
+    // Evaluate Animation frame collider if the entity is skinned
+    if(ctx.animationSparseMapBufferAddr != 0) {
+        uint animSparseIndex = GET_SPARSE_INDEX(ctx.animationSparseMapBufferAddr, entityId);
+        if (animSparseIndex != INVALID_INDEX) {
+            AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animSparseIndex);
+            if (animComp.animationIndex != INVALID_INDEX) {
+                GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
+                localGlobalCollider = GET_MESH_COLLIDER(animAddrs.frameGlobalColliders, animComp.frameIndex);
+            }
+        }
+    }
+    
+    // Transform global collider to world space
+    GpuMeshCollider worldCollider = TransformCollider(localGlobalCollider, transform.transform);
+
+    // 5. Resolve Directional Light Shadow and Cascade Data
+    uint lightEntity = GET_VISIBLE_SHADOW_DIRECTION_LIGHT(ctx.directionLightVisibleShadowIndexBufferAddr, lightIdx);
+    uint lightShadowDenseIndex = GET_SPARSE_INDEX(ctx.directionLightShadowSparseMapBufferAddr, lightEntity);
+    DirectionLightShadowColliderGPU shadowCollider = GET_DIRECTION_LIGHT_SHADOW_COLLIDER(ctx.directionLightShadowColliderDataBufferAddr, lightShadowDenseIndex);
+    CascadeCollider cascade = shadowCollider.cascades[cascadeIdx];
+
+    // 6. Frustum Culling against Light Cascade
+    uint visibility = INTERSECTION_INTERSECT;
+    if(ctx.enableModelFrustumCulling == 1) {
+        visibility = TestFrustum(worldCollider.center, worldCollider.radius, worldCollider.aabbMin, worldCollider.aabbMax, cascade);
+        if (visibility == INTERSECTION_OUTSIDE) return;
+    }
+
+    // 7. Calculate LOD based on Main Camera screen size
+    float mainCamScreenSize = 0.0;
+    float cameraNear = GET_CAMERA_NEAR(camera);
+    vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);  
+    mainCamScreenSize = CalculateSphereScreenSize(worldCollider.center, worldCollider.radius, camera.view, camera.proj, cameraNear, screenRes);
+    
+    // Zero Triangle Culling: Discard models that are too small to be visible from the main camera
+    if (mainCamScreenSize < 1.0) return;
+
+    // 8. Occlusion Culling using Directional Light HZB
+    if (ctx.enableModelOcclusionCulling == 1) {
+        mat4 shadowViewProj = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeViewProjsVulkan[cascadeIdx];
+        vec4 shadowAtlasRect = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeAtlasRects[cascadeIdx];
+        
+        float shadowScreenSizePixels = 0.0;  
+        if (IsSphereOccludedDirLightShadow(worldCollider.center, worldCollider.radius, shadowViewProj, shadowAtlasRect, shadowDepthPyramid, float(ctx.directionLightShadowAtlasSize), shadowScreenSizePixels)) {
+            return;
+        }
+    }
+
+    // 9. Encode Payload: [Bit 31: Inside Frustum] [Bits 28-30: LightIdx] [Bits 26-27: CascadeIdx] [Bits 0-25: EntityID]
+    uint payload = (entityId & 0x3FFFFFFu);
+    payload |= ((cascadeIdx & 0x3u) << 26);
+    payload |= ((lightIdx & 0x7u) << 28);
+    payload = SET_BIT_TO(payload, 31, visibility == INTERSECTION_INSIDE);
+
+    const uint MAX_MESH_COUNT = 16u;
+    const uint MAX_VERTEX_COUNT = 25000u;
+    uint safeMeshCount = mAlloc.meshAllocationCount / 4;
+
+    // 10. Fast-Path: Process models with low mesh/vertex counts directly
+    if (safeMeshCount <= MAX_MESH_COUNT && addrs.vertexCount < MAX_VERTEX_COUNT) {
+        
+        // Map screen size to base LOD and apply shadow bias
+        uint rawLod = (mainCamScreenSize > 512.0) ? 0 :
+                      (mainCamScreenSize > 256.0) ? 1 :
+                      (mainCamScreenSize > 128.0) ? 2 : 3;
+
+        uint lod = min(rawLod + ctx.directionLightShadowLodBias, 3u);
+        
+        for(uint m = 0; m < safeMeshCount; ++m) {
+            uint matIdx = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, modelComp.materialOffset + m);
+            Material mat = GET_MATERIAL(ctx.materialBufferAddr, matIdx);
+
+            uint matType = 0;
+            if (IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat))       matType = 3;
+            else if (IS_TRANSPARENT(mat) && !IS_DOUBLE_SIDED(mat)) matType = 2;
+            else if (!IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat)) matType = 1;
+
+            // Shadows are only cast by Opaque materials
+            if (matType > 1) 
+                continue;
+
+            MeshAllocationInfo meshAlloc = GET_MESH_ALLOC(ctx.globalMeshAllocationBufferAddr, mAlloc.meshAllocationOffset + (m * 4) + lod);
+            
+            if (meshAlloc.activeTypes[matType] == 1) {
+                uint slotIndex = 0;
+                uint indirectIdx = meshAlloc.indirectIndices[matType];
+
+                // Append instance to the appropriate indirect draw command using atomic additions
+                if (meshAlloc.isMeshletPipeline == PIPELINE_MESHLET) {
+                    uint64_t meshletBaseAddr = ctx.directionLightIndirectCommandBufferAddr + (ctx.globalTraditionalCommandsCount * 16ul);
+                    slotIndex = atomicAdd(GET_MESHLET_CMD(meshletBaseAddr, indirectIdx).groupCountX, 1);
+                } else {
+                    slotIndex = atomicAdd(GET_TRADITIONAL_CMD(ctx.directionLightIndirectCommandBufferAddr, indirectIdx).instanceCount, 1);
+                }
+
+                // Write the encoded payload to the instance buffer
+                uint bufferIndex = (meshAlloc.instanceOffsets[matType] * ctx.directionLightShadowMultiplier) + slotIndex;
+                GET_INSTANCE(ctx.directionLightShadowInstanceBufferAddr, bufferIndex) = payload;
+            }
+        }
+        return;
+    }
+
+    // 11. Slow-Path: WORK GRAPH ENQUEUE (Delegate to Mesh Node)
+    allocateNodeRecordAMDX(DirectionLightShadowWorkGraphMeshCullingNode, 1);
+    
+    payloadOut.entityId = payload;
+    payloadOut.modelIndex = modelComp.modelIndex;
+    
+    submitNodeRecordAMDX(DirectionLightShadowWorkGraphMeshCullingNode);
+}

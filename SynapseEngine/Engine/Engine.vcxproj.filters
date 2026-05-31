@@ -1365,6 +1365,9 @@
     <ClCompile Include="Render\Passes\Shadow\Direction\DirectionLightShadowMeshletOpaquePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowMortonModelCulling.comp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="SynApi.h">
@@ -2989,12 +2992,10 @@
     <None Include="Shaders\Passes\Common\Composite.frag" />
     <None Include="Shaders\Passes\Common\Fullscreen.vert" />
     <None Include="Shaders\Passes\Shading\Wboit\TransparentComposite.frag" />
-    <None Include="Shaders\Passes\Culling\MeshCulling.comp" />
-    <None Include="Shaders\Passes\Culling\ModelCulling.comp" />
+    <None Include="Shaders\Passes\Culling\Geometry\GeometryMeshCulling.comp" />
+    <None Include="Shaders\Passes\Culling\Geometry\GeometryModelCulling.comp" />
     <None Include="Shaders\Passes\Culling\PointLightCulling.comp" />
     <None Include="Shaders\Passes\Culling\SpotLightCulling.comp" />
-    <None Include="Shaders\Passes\Culling\WorkGraphMeshCulling.comp" />
-    <None Include="Shaders\Passes\Culling\WorkGraphModelCulling.comp" />
     <None Include="Shaders\Passes\Shading\Deferred\GBuffer\OpaqueDeferred.frag" />
     <None Include="Shaders\Passes\Shading\Common\Meshlet.task" />
     <None Include="Shaders\Passes\Shading\Common\Traditional.vert" />
@@ -3015,7 +3016,7 @@
     <None Include="Shaders\Passes\Shading\Deferred\Lighting\DeferredPointLight.vert" />
     <None Include="Shaders\Passes\Shading\Deferred\Lighting\DeferredSpotLight.frag" />
     <None Include="Shaders\Passes\Shading\Deferred\Lighting\DeferredSpotLight.vert" />
-    <None Include="Shaders\Passes\Culling\CullingCommandReset.comp" />
+    <None Include="Shaders\Passes\Culling\Geometry\GeometryCullingCommandReset.comp" />
     <None Include="Shaders\Includes\PushConstants\CullingCommandResetPC.glsl" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSetup.comp" />
     <None Include="Shaders\Includes\PushConstants\ClusterSetupPC.glsl" />
@@ -3044,8 +3045,8 @@
     <None Include="Shaders\Passes\Shading\Visibility\DebugVisibility.frag" />
     <None Include="Shaders\Includes\PushConstants\DebugVisibilityPC.glsl" />
     <None Include="Shaders\Includes\Common\StaticChunk.glsl" />
-    <None Include="Shaders\Passes\Culling\StaticChunkCulling.comp" />
-    <None Include="Shaders\Passes\Culling\StaticModelCulling.comp" />
+    <None Include="Shaders\Passes\Culling\Geometry\GeometryStaticChunkCulling.comp" />
+    <None Include="Shaders\Passes\Culling\Geometry\GeometryStaticModelCulling.comp" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightCount.comp" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterSpotLightWrite.comp" />
     <None Include="Shaders\Passes\Shading\ForwardPlus\Clustering\ClusterPointLightSingle.comp" />
@@ -3059,8 +3060,8 @@
     <None Include="Shaders\Passes\Morton\ChunkBuilder.comp" />
     <None Include="Shaders\Includes\Utils\MortonUtils.glsl" />
     <None Include="Shaders\Includes\PushConstants\ChunkBuilderPC.glsl" />
-    <None Include="Shaders\Passes\Culling\MortonChunkCulling.comp" />
-    <None Include="Shaders\Passes\Culling\MortonModelCulling.comp" />
+    <None Include="Shaders\Passes\Culling\Geometry\GeometryMortonChunkCulling.comp" />
+    <None Include="Shaders\Passes\Culling\Geometry\GeometryMortonModelCulling.comp" />
     <None Include="Shaders\Passes\Ssao\DpHvo.comp" />
     <None Include="Shaders\Includes\PushConstants\DpHvoPC.glsl" />
     <None Include="Shaders\Includes\PushConstants\DpHvoBlurPC.glsl" />
@@ -3079,5 +3080,24 @@
     <None Include="Shaders\Includes\Payload\ShadowTaskPayload.glsl" />
     <None Include="Shaders\Passes\Shadow\Direction\DirectionLightShadowMeshlet.task" />
     <None Include="Shaders\Passes\Shadow\Direction\DirectionLightShadowMeshlet.mesh" />
+    <None Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowModelCulling.comp" />
+    <None Include="Shaders\Includes\PushConstants\DirectionLightShadowCullingPC.glsl" />
+    <None Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowMeshCulling.comp" />
+    <None Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowCullingCommandReset.comp" />
+    <None Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowStaticChunkCulling.comp" />
+    <None Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowStaticModelCulling.comp" />
+    <None Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowMortonChunkCulling.comp" />
+    <None Include="Shaders\Passes\Culling\Geometry\GeometryWorkGraphModelCulling.comp" />
+    <None Include="Shaders\Passes\Culling\Geometry\GeometryWorkGraphMeshCulling.comp" />
+    <None Include="Shaders\Passes\Culling\Geometry\GeometryWorkGraphStaticChunkCulling.comp" />
+    <None Include="Shaders\Passes\Culling\Geometry\GeometryWorkGraphStaticModelCulling.comp" />
+    <None Include="Shaders\Passes\Culling\Geometry\GeometryWorkGraphMortonChunkCulling.comp" />
+    <None Include="Shaders\Passes\Culling\Geometry\GeometryWorkGraphMortonModelCulling.comp" />
+    <None Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowWorkGraphModelCulling.comp" />
+    <None Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowWorkGraphMeshCulling.comp" />
+    <None Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowWorkGraphStaticChunkCulling.comp" />
+    <None Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowWorkGraphStaticModelCulling.comp" />
+    <None Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowWorkGraphMortonChunkCulling.comp" />
+    <None Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowWorkGraphMortonModelCulling.comp" />
   </ItemGroup>
 </Project>

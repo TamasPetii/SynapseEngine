@@ -46,6 +46,12 @@ struct FrameGlobalContext {
     uint64_t directionLightShadowColliderDataBufferAddr;
     uint64_t directionLightShadowInstanceBufferAddr;
     uint64_t directionLightVisibleShadowIndexBufferAddr;
+    uint64_t directionLightShadowModelCountBufferAddr;
+    uint64_t directionLightShadowModelVisibleIndexBufferAddr;
+    uint64_t directionLightShadowChunkCountBufferAddr;
+    uint64_t directionLightShadowChunkVisibleIndexBufferAddr;
+    uint64_t directionLightShadowMortonChunkCountBufferAddr;
+    uint64_t directionLightShadowMortonChunkVisibleIndexBufferAddr;
 
     uint64_t pointLightIndirectCommandBufferAddr;
     uint64_t pointLightVisibleIndexBufferAddr;
@@ -128,6 +134,7 @@ struct FrameGlobalContext {
     uint staticChunkCount;
     uint modelCount;
     uint directionLightCount;
+    uint activeDirectionLightShadowCount;
     uint pointLightCount;
     uint spotLightCount;
 
