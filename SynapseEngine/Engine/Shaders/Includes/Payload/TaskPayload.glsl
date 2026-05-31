@@ -3,7 +3,9 @@
 
 struct TaskPayload {
     uint drawId;
-    uint instanceId;
+    uint entityId;
+    uint transformDenseIdx;
+    uint activeCameraDenseIdx;
     uint meshletIndices[32];
 };
 

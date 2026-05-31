@@ -42,20 +42,28 @@ void main() {
     uint cascadeIdx = (rawEntityData >> 26) & 0x3u;
     uint lightIdx   = (rawEntityData >> 28) & 0x7u;
 
+    uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
+    uint lightEntity = GET_VISIBLE_SHADOW_DIRECTION_LIGHT(ctx.directionLightVisibleShadowIndexBufferAddr, lightIdx);
+    uint lightShadowDenseIdx = GET_SPARSE_INDEX(ctx.directionLightShadowSparseMapBufferAddr, lightEntity);
+    uint lightDenseIdx = GET_SPARSE_INDEX(ctx.directionLightSparseMapBufferAddr, lightEntity);
+
     // 2. Initialize payload and shared memory
     if (threadIdx == 0) {
         survivingMeshletCount = 0;
         payload.drawId = gl_DrawID;
-        payload.instanceId = localInstanceID;
+        payload.entityId = entityId;
+        payload.transformDenseIdx = transformDenseIndex;
+        payload.lightShadowDenseIdx = lightShadowDenseIdx;
         payload.cascadeIdx = cascadeIdx;
-        payload.lightIdx = lightIdx;
     }
 
     barrier();
 
-    // 3. Resolve transforms and meshlet data
-    uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
+    // 3. Resolve transforms, light and meshlet data
     TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
+    DirectionLightComponent lightComp = GET_DIRECTION_LIGHT(ctx.directionLightDataBufferAddr, lightDenseIdx);
+    DirectionLightShadowColliderGPU shadowCollider = GET_DIRECTION_LIGHT_SHADOW_COLLIDER(ctx.directionLightShadowColliderDataBufferAddr, lightShadowDenseIdx);
+    CascadeCollider cascade = shadowCollider.cascades[cascadeIdx];
 
     GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, desc.modelIndex);
     uint flatLodIndex = (desc.meshIndex * 4) + desc.lodIndex;
@@ -63,6 +71,10 @@ void main() {
 
     uint currentMeshletIdx = meshletGroupOffset + threadIdx;
     bool isVisible = (currentMeshletIdx < submeshData.meshletCount);
+
+    if (transformDenseIndex == INVALID_INDEX || lightShadowDenseIdx == INVALID_INDEX || lightDenseIdx == INVALID_INDEX) {
+        isVisible = false;
+    }
 
     if (isVisible) {
         uint globalMeshletIdx = submeshData.meshletOffset + currentMeshletIdx;
@@ -83,25 +95,16 @@ void main() {
 
         // 5. Transform collider to world space
         GpuMeshletCollider worldCollider = TransformCollider(localCollider, transform.transform, transform.transformIT);
-        
-        // 6. Fetch Light Data
-        uint lightEntity = GET_VISIBLE_SHADOW_DIRECTION_LIGHT(ctx.directionLightVisibleShadowIndexBufferAddr, lightIdx);
-        uint lightDenseIdx = GET_SPARSE_INDEX(ctx.directionLightSparseMapBufferAddr, lightEntity);
-        DirectionLightComponent lightComp = GET_DIRECTION_LIGHT(ctx.directionLightDataBufferAddr, lightDenseIdx);
-        
-        // 7. Fetch Cascade Frustum Planes
-        DirectionLightShadowColliderGPU shadowCollider = GET_DIRECTION_LIGHT_SHADOW_COLLIDER(ctx.directionLightShadowColliderDataBufferAddr, lightDenseIdx);
-        CascadeCollider cascade = shadowCollider.cascades[cascadeIdx];
 
         // 8. Backface Cone Culling for Directional Light
-        if (pc.disableConeCulling == 0 && ctx.enableMeshletConeCulling == 1) {
+        if (false && pc.disableConeCulling == 0 && ctx.enableMeshletConeCulling == 1) {
             if (TestConeCulling(worldCollider, lightComp.direction)) {
                 isVisible = false;
             }
         }
 
         // 9. Frustum Culling against Cascade Planes
-        if (isVisible && !isParentFullyInside && ctx.enableMeshletFrustumCulling == 1) {
+        if (false && isVisible && !isParentFullyInside && ctx.enableMeshletFrustumCulling == 1) {
             if (TestFrustum(worldCollider.center, worldCollider.radius, worldCollider.aabbMin, worldCollider.aabbMax, cascade) == INTERSECTION_OUTSIDE) {
                 isVisible = false;
             }
@@ -109,9 +112,10 @@ void main() {
 
         // 10. Occlusion Culling using Cascade Depth Pyramid (HZB)
         float screenSizePixels = 0.0;
-        if (isVisible && ctx.enableMeshletOcclusionCulling == 1) {
-            mat4 viewProj = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightDenseIdx).cascadeViewProjsVulkan[cascadeIdx];
-            vec4 rect = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightDenseIdx).cascadeAtlasRects[cascadeIdx];
+        if (false && isVisible && ctx.enableMeshletOcclusionCulling == 1) {
+
+            mat4 viewProj = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIdx).cascadeViewProjsVulkan[cascadeIdx];
+            vec4 rect = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIdx).cascadeAtlasRects[cascadeIdx];
             bool enableDepthOcclusion = (ctx.enableMeshletOcclusionCulling == 1); //Todo, integrate + Hiz Texture
 
             /*

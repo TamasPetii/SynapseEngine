@@ -32,30 +32,32 @@ void main() {
     uint localInstanceID = gl_WorkGroupID.x;  // Entity
     uint meshletGroupOffset = gl_WorkGroupID.y * 32;// Meshlet Block
 
-    // 1. Initialize shared memory and payload
-    if (threadIdx == 0) {
-        survivingMeshletCount = 0;
-        payload.drawId = gl_DrawID;
-        payload.instanceId = localInstanceID;
-    }
-    barrier();
-
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
     // 2. Fetch Draw Descriptor and Instance Data
     MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.globalIndirectCommandDescriptorBufferAddr, pc.baseDescriptorOffset + gl_DrawID);
-    uint rawEntityData = GET_INSTANCE(ctx.globalInstanceIndexBufferAddr, desc.instanceOffset + localInstanceID);
-    
+    uint rawEntityData = GET_INSTANCE(ctx.globalInstanceIndexBufferAddr, desc.instanceOffset + localInstanceID);   
     bool isParentFullyInside = HAS_FLAG(rawEntityData, 31);
     uint entityId = rawEntityData & ~(1u << 31);
 
-    // 3. Resolve Camera and Transform
     uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
-    TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
-    
-    uint cameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
-    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraDenseIndex);
+    uint mainCameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
+    uint activeCameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
 
+    // 1. Initialize shared memory and payload
+    if (threadIdx == 0) {
+        survivingMeshletCount = 0;
+        payload.drawId = gl_DrawID;
+        payload.entityId = entityId;
+        payload.transformDenseIdx = transformDenseIndex;
+        payload.activeCameraDenseIdx = activeCameraDenseIndex;
+    }
+
+    barrier();
+
+    // 3. Resolve Camera and Transform
+    TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, mainCameraDenseIndex);
     GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, desc.modelIndex);
 
     // 4. Resolve Meshlet range for this group
@@ -64,6 +66,10 @@ void main() {
 
     uint currentMeshletIdx = meshletGroupOffset + threadIdx;
     bool isVisible = (currentMeshletIdx < submeshData.meshletCount);
+
+    if (transformDenseIndex == INVALID_INDEX || mainCameraDenseIndex == INVALID_INDEX) {
+        isVisible = false;
+    }
 
     if (isVisible) {
         uint globalMeshletIdx = submeshData.meshletOffset + currentMeshletIdx;

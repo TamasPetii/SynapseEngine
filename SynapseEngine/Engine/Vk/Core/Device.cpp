@@ -92,7 +92,8 @@ namespace Syn::Vk {
         deviceFeatures.features.geometryShader = VK_TRUE;
         deviceFeatures.features.pipelineStatisticsQuery = VK_TRUE;
         deviceFeatures.features.shaderInt64 = VK_TRUE;
-
+		deviceFeatures.features.shaderClipDistance = VK_TRUE;
+        
         deviceFeatures.pNext = &features11;
         features11.pNext = &features12;
         features12.pNext = &features13;

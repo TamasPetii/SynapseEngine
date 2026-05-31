@@ -3,9 +3,10 @@
 
 struct ShadowTaskPayload {
     uint drawId;
-    uint instanceId;
+    uint entityId;
+    uint transformDenseIdx;
+    uint lightShadowDenseIdx;
     uint cascadeIdx;
-    uint lightIdx;
     uint meshletIndices[32];
 };
 

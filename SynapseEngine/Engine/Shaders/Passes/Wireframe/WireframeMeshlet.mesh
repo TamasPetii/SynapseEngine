@@ -30,23 +30,19 @@ layout(push_constant) uniform PushConstants {
 
 void main() {
     uint threadIdx = gl_LocalInvocationID.x;
-    uint localInstanceID = payload.instanceId;
     uint localMeshletID = payload.meshletIndices[gl_WorkGroupID.x];
 
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+    MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.globalIndirectCommandDescriptorBufferAddr, pc.baseDescriptorOffset + payload.drawId);
 
     // Resolve Instance and Model info
-    MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.globalIndirectCommandDescriptorBufferAddr, pc.baseDescriptorOffset + payload.drawId);
-    
-    uint rawEntityData = GET_INSTANCE(ctx.globalInstanceIndexBufferAddr, desc.instanceOffset + localInstanceID);
-    uint entityId = rawEntityData & ~(1u << 31);
-    
-    uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
+    uint entityId = payload.entityId;
+    uint transformDenseIndex = payload.transformDenseIdx;
+    uint cameraDenseIndex = payload.activeCameraDenseIdx;
+
+    // Resolve Instance and Model info
     TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
-
-    uint cameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraDenseIndex);
-
     GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, desc.modelIndex);
 
     // Resolve specific Meshlet

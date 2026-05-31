@@ -98,17 +98,19 @@ void main() {
     mat4 viewProj = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeViewProjsVulkan[cascadeIdx];
 
     // 9. Calculate Final World Position and Outputs
-    gl_Position = viewProj * transform.transform * finalModelMat * vec4(v.position, 1.0);
+    vec4 clipPos = viewProj * transform.transform * finalModelMat * vec4(v.position, 1.0);
 
-    gl_ClipDistance[0] = gl_Position.w + gl_Position.x;
-    gl_ClipDistance[1] = gl_Position.w - gl_Position.x;
-    gl_ClipDistance[2] = gl_Position.w + gl_Position.y;
-    gl_ClipDistance[3] = gl_Position.w - gl_Position.y;
+    gl_ClipDistance[0] = clipPos.w + clipPos.x;
+    gl_ClipDistance[1] = clipPos.w - clipPos.x;
+    gl_ClipDistance[2] = clipPos.w + clipPos.y;
+    gl_ClipDistance[3] = clipPos.w - clipPos.y;
 
-    vec4 rect = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightIdx).cascadeAtlasRects[cascadeIdx];
+    vec4 rect = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeAtlasRects[cascadeIdx];
     vec2 scale = rect.zw; 
     vec2 offset = rect.xy * 2.0 + rect.zw - 1.0; 
 
+    clipPos.xy = clipPos.xy * scale + offset * clipPos.w;
+
     // Atlas Positioning
-    gl_Position.xy = gl_Position.xy * scale + offset * gl_Position.w;
+    gl_Position = clipPos;
 }

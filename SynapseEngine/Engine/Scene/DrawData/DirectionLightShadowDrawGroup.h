@@ -10,7 +10,7 @@
 namespace Syn
 {
     constexpr uint32_t SHADOW_LOD_BIAS = 1;
-    constexpr uint32_t MAX_DIR_LIGHTS = 1;
+    constexpr uint32_t MAX_DIR_LIGHTS = 4;
     constexpr uint32_t CASCADES_PER_LIGHT = 4;
     constexpr uint32_t SHADOW_MULTIPLIER = MAX_DIR_LIGHTS * CASCADES_PER_LIGHT;
 

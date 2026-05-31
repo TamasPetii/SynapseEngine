@@ -27,18 +27,17 @@ void main() {
     
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
     MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.globalIndirectCommandDescriptorBufferAddr, pc.baseDescriptorOffset + payload.drawId);
-    
-    // 1. Resolve entity from shadow payload
-    uint shadowInstanceOffset = (desc.instanceOffset * ctx.directionLightShadowMultiplier) + payload.instanceId;
-    uint rawEntityData = GET_INSTANCE(ctx.directionLightShadowInstanceBufferAddr, shadowInstanceOffset);
-    uint entityId = rawEntityData & 0x3FFFFFFu;
-
-    // 2. Fetch transforms
-    uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
-    TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
-
     GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, desc.modelIndex);
     
+    // 1. Resolve entity from shadow payload
+    uint entityId = payload.entityId;
+    uint transformDenseIndex = payload.transformDenseIdx;
+    uint lightShadowDenseIndex = payload.lightShadowDenseIdx;
+    uint cascadeIdx = payload.cascadeIdx;
+
+    // 2. Fetch transforms
+    TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
+ 
     // 3. Resolve active meshlet
     uint flatLodIndex = (desc.meshIndex * 4) + desc.lodIndex; 
     GpuMeshletDrawDescriptor submeshDraw = GET_MESHLET_DRAW_DESC(addrs.meshletDrawDescriptors, flatLodIndex);
@@ -48,11 +47,8 @@ void main() {
     SetMeshOutputsEXT(uint(meshlet.vertexCount), uint(meshlet.triangleCount));
 
     // 4. Fetch cascade matrices and atlas parameters
-    uint lightEntity = GET_VISIBLE_SHADOW_DIRECTION_LIGHT(ctx.directionLightVisibleShadowIndexBufferAddr, payload.lightIdx);
-    uint lightShadowDenseIndex = GET_SPARSE_INDEX(ctx.directionLightShadowSparseMapBufferAddr, lightEntity);
-    mat4 viewProj = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeViewProjsVulkan[payload.cascadeIdx];
-    
-    vec4 rect = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeAtlasRects[payload.cascadeIdx];
+    mat4 viewProj = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeViewProjsVulkan[cascadeIdx];
+    vec4 rect = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeAtlasRects[cascadeIdx];
     vec2 scale = rect.zw; 
     vec2 offset = rect.xy * 2.0 + rect.zw - 1.0;
 
@@ -90,16 +86,18 @@ void main() {
             }
         }
 
+        vec4 clipPos = viewProj * transform.transform * finalMat * vec4(v.position, 1.0);
+
         // Project to cascade view-projection
-        gl_MeshVerticesEXT[i].gl_Position = viewProj * transform.transform * finalMat * vec4(v.position, 1.0);
-        
-        gl_MeshVerticesEXT[i].gl_ClipDistance[0] = gl_MeshVerticesEXT[i].gl_Position.w + gl_MeshVerticesEXT[i].gl_Position.x;
-        gl_MeshVerticesEXT[i].gl_ClipDistance[1] = gl_MeshVerticesEXT[i].gl_Position.w - gl_MeshVerticesEXT[i].gl_Position.x;
-        gl_MeshVerticesEXT[i].gl_ClipDistance[2] = gl_MeshVerticesEXT[i].gl_Position.w + gl_MeshVerticesEXT[i].gl_Position.y;
-        gl_MeshVerticesEXT[i].gl_ClipDistance[3] = gl_MeshVerticesEXT[i].gl_Position.w - gl_MeshVerticesEXT[i].gl_Position.y;
+        gl_MeshVerticesEXT[i].gl_ClipDistance[0] = clipPos.w + clipPos.x;
+        gl_MeshVerticesEXT[i].gl_ClipDistance[1] = clipPos.w - clipPos.x;
+        gl_MeshVerticesEXT[i].gl_ClipDistance[2] = clipPos.w + clipPos.y;
+        gl_MeshVerticesEXT[i].gl_ClipDistance[3] = clipPos.w - clipPos.y;
+
+        clipPos.xy = clipPos.xy * scale + offset * clipPos.w;
 
         // Map into specific shadow atlas region
-        gl_MeshVerticesEXT[i].gl_Position.xy = gl_MeshVerticesEXT[i].gl_Position.xy * scale + offset * gl_MeshVerticesEXT[i].gl_Position.w;
+        gl_MeshVerticesEXT[i].gl_Position = clipPos;
    }
 
     // 6. Process primitive indices
