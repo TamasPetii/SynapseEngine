@@ -135,6 +135,14 @@ namespace Syn {
         ctx.emissiveStrength = settings->emissiveStrength;
         ctx.alphaLimitDiscard = 0.025f;
 
+		ctx.directionLightShadowLodBias = SHADOW_LOD_BIAS;
+		ctx.directionLightShadowMaxDirLights = MAX_DIR_LIGHTS;
+		ctx.directionLightShadowMaxCascades = CASCADES_PER_LIGHT;
+		ctx.directionLightShadowMultiplier = SHADOW_MULTIPLIER;
+		ctx.directionLightShadowAtlasSize = SHADOW_ATLAS_SIZE;
+		ctx.directionLightShadowMinBlockSize = SHADOW_MIN_BLOCK_SIZE;
+		ctx.directionLightShadowGridSize = SHADOW_GRID_SIZE;
+
         ctx.enableMeshletConeCulling = settings->enableMeshletConeCulling ? 1 : 0;
 
         ctx.enableChunkFrustumCulling = settings->enableFrustumCulling && settings->enableChunkFrustumCulling ? 1 : 0;

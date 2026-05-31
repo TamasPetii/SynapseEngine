@@ -26,7 +26,7 @@ void main() {
     MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.globalIndirectCommandDescriptorBufferAddr, pc.baseDescriptorOffset + gl_DrawIDARB);
 
     // 2. Fetch Instance and Entity ID
-    uint shadowInstanceOffset = (desc.instanceOffset * pc.shadowMultiplier) + gl_InstanceIndex;
+    uint shadowInstanceOffset = (desc.instanceOffset * ctx.directionLightShadowMultiplier) + gl_InstanceIndex;
     uint payload = GET_INSTANCE(ctx.directionLightShadowInstanceBufferAddr, shadowInstanceOffset);
 
     uint entityId   = payload & 0x3FFFFFFu;

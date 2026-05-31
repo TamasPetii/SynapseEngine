@@ -2,21 +2,38 @@
 #define SYN_INCLUDES_UTILS_CULLING_MATH_GLSL
 
 #include "../Common/Camera.glsl"
+#include "../Common/DirectionLight.glsl"
 #include "../Common/Mesh.glsl"
 
 #define INTERSECTION_OUTSIDE   0u
 #define INTERSECTION_INTERSECT 1u
 #define INTERSECTION_INSIDE    2u
 
+// Cone Culling 
+
 bool TestConeCulling(vec3 apex, vec3 axis, float cutoff, vec3 cameraEye) {
     vec3 view = normalize(apex - cameraEye);
     return dot(view, axis) >= cutoff;
 }
 
-uint TestSphereFrustum(vec3 center, float radius, CameraComponent camera) {
+bool TestConeCulling(GpuMeshletCollider collider, vec3 cameraEye) {
+    return TestConeCulling(collider.apex, collider.axis, collider.cutoff, cameraEye);
+}
+
+bool TestConeCulling(vec3 axis, float cutoff, vec3 lightDir) {
+    return dot(lightDir, axis) >= cutoff;
+}
+
+bool TestConeCullingLight(GpuMeshletCollider collider, vec3 lightDir) {
+    return TestConeCulling(collider.axis, collider.cutoff, lightDir);
+}
+
+//Frustum Culling (Frustum, Aabb, Sphere, Cone)
+
+uint TestSphereFrustum(vec3 center, float radius, vec4 planes[6]) {
     bool isIntersecting = false;
     for(int i = 0; i < 6; ++i) {
-        vec4 plane = camera.frustum[i];
+        vec4 plane = planes[i];
         float dist = dot(plane.xyz, center) - plane.w;
         
         if(dist < -radius) return INTERSECTION_OUTSIDE;
@@ -25,13 +42,13 @@ uint TestSphereFrustum(vec3 center, float radius, CameraComponent camera) {
     return isIntersecting ? INTERSECTION_INTERSECT : INTERSECTION_INSIDE;
 }
 
-uint TestAABBFrustum(vec3 aabbMin, vec3 aabbMax, CameraComponent camera) {
+uint TestAABBFrustum(vec3 aabbMin, vec3 aabbMax, vec4 planes[6]) {
     vec3 extents = (aabbMax - aabbMin) * 0.5;
     vec3 center = (aabbMax + aabbMin) * 0.5;
 
     bool isIntersecting = false;
     for(int i = 0; i < 6; ++i) {
-        vec4 plane = camera.frustum[i];
+        vec4 plane = planes[i];
         float r = dot(extents, abs(plane.xyz));
         float dist = dot(plane.xyz, center) - plane.w;
         
@@ -56,30 +73,43 @@ bool TestSphereAABB(vec3 sphereCenter, float sphereRadius, vec3 aabbMin, vec3 aa
     return dot(diff, diff) <= (sphereRadius * sphereRadius);
 }
 
-uint TestSphereFrustum(GpuMeshCollider collider, CameraComponent camera) {
-    return TestSphereFrustum(collider.center, collider.radius, camera);
+uint TestSphereFrustum(GpuMeshCollider collider, vec4 planes[6]) {
+    return TestSphereFrustum(collider.center, collider.radius, planes);
 }
 
-uint TestAABBFrustum(GpuMeshCollider collider, CameraComponent camera) {
-    return TestAABBFrustum(collider.aabbMin, collider.aabbMax, camera);
+uint TestAABBFrustum(GpuMeshCollider collider, vec4 planes[6]) {
+    return TestAABBFrustum(collider.aabbMin, collider.aabbMax, planes);
 }
 
-bool TestConeCulling(GpuMeshletCollider collider, vec3 cameraEye) {
-    return TestConeCulling(collider.apex, collider.axis, collider.cutoff, cameraEye);
-}
-
-uint TestFrustum(GpuMeshCollider collider, CameraComponent camera) {
-    uint sphereResult = TestSphereFrustum(collider, camera);
+uint TestFrustum(GpuMeshCollider collider, vec4 planes[6]) {
+    uint sphereResult = TestSphereFrustum(collider, planes);
     if (sphereResult != INTERSECTION_INTERSECT) return sphereResult;
-    return TestAABBFrustum(collider, camera);
+    return TestAABBFrustum(collider, planes);
 }
 
-uint TestFrustum(vec3 center, float radius, vec3 aabbMin, vec3 aabbMax, CameraComponent camera) {
-    uint sphereResult = TestSphereFrustum(center, radius, camera);
+uint TestFrustum(vec3 center, float radius, vec3 aabbMin, vec3 aabbMax, vec4 planes[6]) {
+    uint sphereResult = TestSphereFrustum(center, radius, planes);
     if (sphereResult != INTERSECTION_INTERSECT) return sphereResult;
     
-    return TestAABBFrustum(aabbMin, aabbMax, camera);
+    return TestAABBFrustum(aabbMin, aabbMax, planes);
 }
+
+//Paper: https://bartwronski.com/2017/04/13/cull-that-cone/
+bool TestConeSphere(vec3 conePos, vec3 coneDir, float coneRange, float coneCosAngle, float coneSinAngle, vec3 sphereCenter, float sphereRadius) {
+    vec3 v = sphereCenter - conePos;
+    float lenSq = dot(v, v);
+    float v1Len = dot(v, coneDir);
+
+    float distanceClosestPoint = coneCosAngle * sqrt(max(lenSq - v1Len * v1Len, 0.0)) - v1Len * coneSinAngle;
+
+    bool angleCull = distanceClosestPoint > sphereRadius;
+    bool frontCull = v1Len > sphereRadius + coneRange;
+    bool backCull  = v1Len < -sphereRadius;
+
+    return !(angleCull || frontCull || backCull);
+}
+
+//Transform Collider
 
 void TransformSphere(vec3 localCenter, float localRadius, mat4 transform, out vec3 worldCenter, out float worldRadius) {
     worldCenter = (transform * vec4(localCenter, 1.0)).xyz;
@@ -120,19 +150,60 @@ GpuMeshletCollider TransformCollider(GpuMeshletCollider local, mat4 transform, m
     return world;
 }
 
-//Paper: https://bartwronski.com/2017/04/13/cull-that-cone/
-bool TestConeSphere(vec3 conePos, vec3 coneDir, float coneRange, float coneCosAngle, float coneSinAngle, vec3 sphereCenter, float sphereRadius) {
-    vec3 v = sphereCenter - conePos;
-    float lenSq = dot(v, v);
-    float v1Len = dot(v, coneDir);
+// Camera Wrapper Overloads 
 
-    float distanceClosestPoint = coneCosAngle * sqrt(max(lenSq - v1Len * v1Len, 0.0)) - v1Len * coneSinAngle;
+uint TestSphereFrustum(vec3 center, float radius, CameraComponent camera) {
+    return TestSphereFrustum(center, radius, camera.frustum);
+}
 
-    bool angleCull = distanceClosestPoint > sphereRadius;
-    bool frontCull = v1Len > sphereRadius + coneRange;
-    bool backCull  = v1Len < -sphereRadius;
+uint TestAABBFrustum(vec3 aabbMin, vec3 aabbMax, CameraComponent camera) {
+    return TestAABBFrustum(aabbMin, aabbMax, camera.frustum);
+}
 
-    return !(angleCull || frontCull || backCull);
+uint TestFrustum(vec3 center, float radius, vec3 aabbMin, vec3 aabbMax, CameraComponent camera) {
+    return TestFrustum(center, radius, aabbMin, aabbMax, camera.frustum);
+}
+
+uint TestSphereFrustum(GpuMeshCollider collider, CameraComponent camera) {
+    return TestSphereFrustum(collider.center, collider.radius, camera.frustum);
+}
+
+uint TestAABBFrustum(GpuMeshCollider collider, CameraComponent camera) {
+    return TestAABBFrustum(collider.aabbMin, collider.aabbMax, camera.frustum);
+}
+
+uint TestFrustum(GpuMeshCollider collider, CameraComponent camera) {
+    uint sphereResult = TestSphereFrustum(collider.center, collider.radius, camera.frustum);
+    if (sphereResult != INTERSECTION_INTERSECT) return sphereResult;
+    return TestAABBFrustum(collider.aabbMin, collider.aabbMax, camera.frustum);
+}
+
+// Dirlight Wrapper Overloads 
+
+uint TestSphereFrustum(vec3 center, float radius, CascadeCollider cascade) {
+    return TestSphereFrustum(center, radius, cascade.planes);
+}
+
+uint TestAABBFrustum(vec3 aabbMin, vec3 aabbMax, CascadeCollider cascade) {
+    return TestAABBFrustum(aabbMin, aabbMax, cascade.planes);
+}
+
+uint TestFrustum(vec3 center, float radius, vec3 aabbMin, vec3 aabbMax, CascadeCollider cascade) {
+    return TestFrustum(center, radius, aabbMin, aabbMax, cascade.planes);
+}
+
+uint TestSphereFrustum(GpuMeshCollider collider, CascadeCollider cascade) {
+    return TestSphereFrustum(collider.center, collider.radius, cascade.planes);
+}
+
+uint TestAABBFrustum(GpuMeshCollider collider, CascadeCollider cascade) {
+    return TestAABBFrustum(collider.aabbMin, collider.aabbMax, cascade.planes);
+}
+
+uint TestFrustum(GpuMeshCollider collider, CascadeCollider cascade) {
+    uint sphereResult = TestSphereFrustum(collider.center, collider.radius, cascade.planes);
+    if (sphereResult != INTERSECTION_INTERSECT) return sphereResult;
+    return TestAABBFrustum(collider.aabbMin, collider.aabbMax, cascade.planes);
 }
 
 #endif

@@ -238,6 +238,7 @@
     <ClCompile Include="Animation\Data\Cpu\CpuAnimationData.cpp" />
     <ClCompile Include="Animation\Converter\ICpuAnimationExtractor.cpp" />
     <ClCompile Include="Animation\Converter\DefaultCpuAnimationExtractor.cpp" />
+    <ClCompile Include="Render\Passes\Shadow\Direction\DirectionLightShadowMeshletOpaquePass.cpp" />
     <ClCompile Include="Render\Passes\Shadow\Direction\DirectionLightShadowInitPass.cpp" />
     <ClCompile Include="Render\Passes\Shadow\Direction\DirectionLightShadowTraditionalOpaquePass.cpp" />
     <ClCompile Include="System\Light\Direction\DirectionLightShadowAtlasSystem.cpp" />
@@ -689,6 +690,7 @@
     <ClInclude Include="Animation\Data\Cpu\CpuAnimationData.h" />
     <ClInclude Include="Animation\Converter\ICpuAnimationExtractor.h" />
     <ClInclude Include="Animation\Converter\DefaultCpuAnimationExtractor.h" />
+    <ClInclude Include="Render\Passes\Shadow\Direction\DirectionLightShadowMeshletOpaquePass.h" />
     <ClInclude Include="Render\Passes\Shadow\Direction\DirectionLightShadowInitPass.h" />
     <ClInclude Include="Render\Passes\Shadow\Direction\DirectionLightShadowTraditionalOpaquePass.h" />
     <ClInclude Include="System\Light\Direction\DirectionLightShadowAtlasSystem.h" />
@@ -1234,6 +1236,7 @@
     <None Include="Shaders\Includes\Common\Transform.glsl" />
     <None Include="Shaders\Includes\Common\Visibility.glsl" />
     <None Include="Shaders\Includes\Core.glsl" />
+    <None Include="Shaders\Includes\Payload\ShadowTaskPayload.glsl" />
     <None Include="Shaders\Includes\Payload\TaskPayload.glsl" />
     <None Include="Shaders\Includes\Payload\WorkGraphCullingPayload.glsl" />
     <None Include="Shaders\Includes\PushConstants\BillboardPC.glsl" />
@@ -1334,6 +1337,8 @@
     <None Include="Shaders\Passes\PostProcess\BloomPrefilter.comp" />
     <None Include="Shaders\Passes\PostProcess\BloomUpsample.comp" />
     <None Include="Shaders\Passes\Shadow\Direction\DirectionLightShadow.frag" />
+    <None Include="Shaders\Passes\Shadow\Direction\DirectionLightShadowMeshlet.mesh" />
+    <None Include="Shaders\Passes\Shadow\Direction\DirectionLightShadowMeshlet.task" />
     <None Include="Shaders\Passes\Shadow\Direction\DirectionLightShadowTraditional.vert" />
     <None Include="Shaders\Passes\Ssao\DpHvo.comp" />
     <None Include="Shaders\Passes\Ssao\DpHvoBlur.comp" />

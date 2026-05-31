@@ -8,7 +8,6 @@ struct DirectionLightShadowTraditionalMeshletPassPC {
     uint baseDescriptorOffset;
     uint materialRenderType;
     uint disableConeCulling;
-    uint shadowMultiplier;
 };
 
 #endif

@@ -146,6 +146,14 @@ struct FrameGlobalContext {
 
     uint enableSsao;
     uint enableSsaoLight;
+
+    uint directionLightShadowLodBias;
+    uint directionLightShadowMaxDirLights;
+    uint directionLightShadowMaxCascades;
+    uint directionLightShadowMultiplier;
+    uint directionLightShadowAtlasSize;
+    uint directionLightShadowMinBlockSize;
+    uint directionLightShadowGridSize;
 };
 
 #ifndef __cplusplus

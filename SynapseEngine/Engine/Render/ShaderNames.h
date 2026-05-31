@@ -81,5 +81,7 @@ namespace Syn
 
         static constexpr const char* DirectionLightShadowFarg = "../Engine/Shaders/Passes/Shadow/Direction/DirectionLightShadow.frag";
         static constexpr const char* DirectionLightShadowTraditionalVert = "../Engine/Shaders/Passes/Shadow/Direction/DirectionLightShadowTraditional.vert";
+		static constexpr const char* DirectionLightShadowMeshletTask = "../Engine/Shaders/Passes/Shadow/Direction/DirectionLightShadowMeshlet.task";
+		static constexpr const char* DirectionLightShadowMeshletMesh = "../Engine/Shaders/Passes/Shadow/Direction/DirectionLightShadowMeshlet.mesh";
     };
 }

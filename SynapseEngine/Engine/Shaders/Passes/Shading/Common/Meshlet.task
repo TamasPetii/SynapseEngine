@@ -85,8 +85,10 @@ void main() {
         GpuMeshletCollider worldCollider = TransformCollider(localCollider, transform.transform, transform.transformIT);
 
         // 7. Backface Cone Culling
-        if ((pc.disableConeCulling == 0 && ctx.enableMeshletConeCulling == 1) && TestConeCulling(worldCollider, camera.eye.xyz)) {
-            isVisible = false;
+        if ((pc.disableConeCulling == 0 && ctx.enableMeshletConeCulling == 1)) {
+            if(TestConeCulling(worldCollider, camera.eye.xyz)) {
+                isVisible = false;
+            }
         }
 
         // 8. Frustum Culling (Skip if parent model is already fully inside)

@@ -24,6 +24,27 @@ bool ProjectSphere(vec3 viewCenter, float radius, mat4 proj, float near, out vec
     return true;
 }
 
+bool ProjectSphereOrtho(vec3 worldCenter, float worldRadius, mat4 viewProj, out vec4 cascadeUVBounds, out float closestZ) {
+    vec4 clipCenter = viewProj * vec4(worldCenter, 1.0);
+    
+    // Scale radius using orthographic projection matrix extents
+    float radiusNDC_X = worldRadius * abs(viewProj[0][0]);
+    float radiusNDC_Y = worldRadius * abs(viewProj[1][1]);
+    float maxRadiusNDC = max(radiusNDC_X, radiusNDC_Y);
+
+    vec2 ndcMin = clipCenter.xy - maxRadiusNDC;
+    vec2 ndcMax = clipCenter.xy + maxRadiusNDC;
+
+    // Map NDC [-1, 1] to UV [0, 1]
+    cascadeUVBounds = vec4(ndcMin * 0.5 + 0.5, ndcMax * 0.5 + 0.5);
+
+    // Calculate closest Z (Vulkan: 0.0 near, 1.0 far)
+    float radiusNDC_Z = worldRadius * abs(viewProj[2][2]);
+    closestZ = clipCenter.z - radiusNDC_Z;
+
+    return true;
+}
+
 bool IsSphereOccluded(vec3 worldCenter, float radius, CameraComponent camera, sampler2D depthPyramid, vec2 screenRes, bool enableDepthOcclusion, out float outScreenSizePixels) {
     vec3 viewCenter = (camera.view * vec4(worldCenter, 1.0)).xyz;
     vec4 uv;
@@ -53,5 +74,45 @@ bool IsSphereOccluded(vec3 worldCenter, float radius, CameraComponent camera, sa
 
     return false;
 }
+
+bool IsSphereOccludedDirLightShadow(vec3 worldCenter, float radius, mat4 viewProj, vec4 atlasRect, sampler2D shadowDepthPyramid, float atlasSize, out float outScreenSizePixels) {
+    vec4 cascadeUVBounds;
+    float closestZ;
+    
+    outScreenSizePixels = 99999.0;
+
+    if (ProjectSphereOrtho(worldCenter, radius, viewProj, cascadeUVBounds, closestZ)) 
+    {
+        // Map local cascade UVs to global atlas UVs
+        vec2 atlasUV_min = atlasRect.xy + cascadeUVBounds.xy * atlasRect.zw;
+        vec2 atlasUV_max = atlasRect.xy + cascadeUVBounds.zw * atlasRect.zw;
+
+        // Strict clamp to prevent bleeding into adjacent cascades during HZB sampling
+        vec2 atlasLimitMin = atlasRect.xy;
+        vec2 atlasLimitMax = atlasRect.xy + atlasRect.zw;
+        atlasUV_min = clamp(atlasUV_min, atlasLimitMin, atlasLimitMax);
+        atlasUV_max = clamp(atlasUV_max, atlasLimitMin, atlasLimitMax);
+
+        vec2 sizeInPixels = (atlasUV_max - atlasUV_min) * atlasSize;
+        outScreenSizePixels = max(sizeInPixels.x, sizeInPixels.y);
+
+        // Sub-pixel culling
+        if (outScreenSizePixels < 1.0) {
+            return true;
+        }
+
+        // Calculate HZB LOD (scaled to fit footprint into a 2x2 texel quad)
+        float lod = max(0.0, ceil(log2(outScreenSizePixels * 0.5)));
+        vec2 centerUV = (atlasUV_min + atlasUV_max) * 0.5;
+        float maxDepth = textureLod(shadowDepthPyramid, centerUV, lod).r;
+
+        // Occluded if the closest sphere point is behind the maximum recorded depth
+        return closestZ > maxDepth;
+    }
+
+    return false;
+}
+
+
 
 #endif

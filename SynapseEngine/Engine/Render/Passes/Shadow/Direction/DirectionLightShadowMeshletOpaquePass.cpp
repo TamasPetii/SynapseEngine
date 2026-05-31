@@ -1,4 +1,4 @@
-#include "DirectionLightShadowTraditionalOpaquePass.h"
+#include "DirectionLightShadowMeshletOpaquePass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
 #include "Engine/Manager/ShaderManager.h"
@@ -10,35 +10,35 @@
 
 namespace Syn {
 
-    #include "Engine/Shaders/Includes/PushConstants/DirectionLightShadowTraditionalMeshletPassPC.glsl"
-    
-    bool DirectionLightShadowTraditionalOpaquePass::ShouldExecute(const RenderContext& context) const
+#include "Engine/Shaders/Includes/PushConstants/DirectionLightShadowTraditionalMeshletPassPC.glsl"
+
+    bool DirectionLightShadowMeshletOpaquePass::ShouldExecute(const RenderContext& context) const
     {
         return true;
     }
 
-    DirectionLightShadowTraditionalOpaquePass::DirectionLightShadowTraditionalOpaquePass(MaterialRenderType renderType)
+    DirectionLightShadowMeshletOpaquePass::DirectionLightShadowMeshletOpaquePass(MaterialRenderType renderType)
         : _renderType(renderType)
     {
         assert(_renderType == MaterialRenderType::Opaque1Sided || _renderType == MaterialRenderType::Opaque2Sided);
 
         if (_renderType == MaterialRenderType::Opaque1Sided) {
-            _passName = "DirectionLightShadowTraditionalOpaquePass1Sided";
+            _passName = "DirectionLightShadowMeshletOpaquePass1Sided";
         }
         else {
-            _passName = "DirectionLightShadowTraditionalOpaquePass2Sided";
+            _passName = "DirectionLightShadowMeshletOpaquePass2Sided";
         }
     }
 
-    void DirectionLightShadowTraditionalOpaquePass::Initialize() {
+    void DirectionLightShadowMeshletOpaquePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
-        auto imageManager = ServiceLocator::GetImageManager();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("DirectionLightShadowProgram", {
-            ShaderNames::DirectionLightShadowTraditionalVert,
+        _shaderProgram = shaderManager->CreateProgram("DirectionLightShadowMeshletProgram", {
+            ShaderNames::DirectionLightShadowMeshletTask,
+            ShaderNames::DirectionLightShadowMeshletMesh,
             ShaderNames::DirectionLightShadowFarg
             }, config);
 
@@ -51,7 +51,7 @@ namespace Syn {
                 .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
                 .polygonMode = VK_POLYGON_MODE_FILL,
                 .lineWidth = 1.0f
-                /* .depthBiasEnable = VK_TRUE,*/
+                /* .depthBiasEnable = VK_TRUE,*/ // Érdemes bekapcsolni az árnyékokhoz!
             },
             .depth = {
                 .testEnable = VK_TRUE,
@@ -64,10 +64,10 @@ namespace Syn {
         };
     }
 
-    void DirectionLightShadowTraditionalOpaquePass::PrepareFrame(const RenderContext& context) {
+    void DirectionLightShadowMeshletOpaquePass::PrepareFrame(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
         auto& shadowGroup = drawData->DirectionLightShadow;
-		auto fIdx = context.frameIndex;
+        auto fIdx = context.frameIndex;
 
         VkExtent2D extent = { SHADOW_ATLAS_SIZE, SHADOW_ATLAS_SIZE };
         _graphicsState.renderArea = extent;
@@ -87,17 +87,14 @@ namespace Syn {
         };
     }
 
-    void DirectionLightShadowTraditionalOpaquePass::PushConstants(const RenderContext& context) {
+    void DirectionLightShadowMeshletOpaquePass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
-        if (!scene) return;
-
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
         auto drawData = scene->GetSceneDrawData();
 
         DirectionLightShadowTraditionalMeshletPassPC pc{};
         pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-        pc.baseDescriptorOffset = drawData->Models.traditionalCmdOffsets[_renderType];
+        pc.baseDescriptorOffset = drawData->Models.meshletCmdOffsets[_renderType];
         pc.materialRenderType = static_cast<uint32_t>(_renderType);
 
         vkCmdPushConstants(
@@ -110,12 +107,12 @@ namespace Syn {
         );
     }
 
-    void DirectionLightShadowTraditionalOpaquePass::BindDescriptors(const RenderContext& context)
+    void DirectionLightShadowMeshletOpaquePass::BindDescriptors(const RenderContext& context)
     {
-    
+        // Todo: Hiz Occlusion
     }
 
-    void DirectionLightShadowTraditionalOpaquePass::Draw(const RenderContext& context)
+    void DirectionLightShadowMeshletOpaquePass::Draw(const RenderContext& context)
     {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
@@ -124,20 +121,22 @@ namespace Syn {
         auto indirectBuffer = drawData->DirectionLightShadow.indirectBuffer.GetHandle(context.frameIndex, isGpu);
         auto countBuffer = drawData->Models.drawCountBuffer.GetHandle(context.frameIndex, isGpu);
 
-        uint32_t commandOffset = drawData->Models.traditionalCmdOffsets[_renderType];
-        uint32_t maxCommandCount = drawData->Models.traditionalCmdCounts[_renderType];
+        uint32_t commandOffsetIdx = drawData->Models.meshletCmdOffsets[_renderType];
+        uint32_t maxCommandCount = drawData->Models.meshletCmdCounts[_renderType];
 
         if (maxCommandCount > 0) {
-            VkDeviceSize countBufferOffset = _renderType * sizeof(uint32_t);
+            VkDeviceSize traditionalBytes = drawData->Models.activeTraditionalCount * sizeof(VkDrawIndirectCommand);
+            VkDeviceSize indirectOffset = traditionalBytes + (commandOffsetIdx * sizeof(VkDrawMeshTasksIndirectCommandEXT));
+            VkDeviceSize countOffset = (MaterialRenderType::Count + _renderType) * sizeof(uint32_t);
 
-            vkCmdDrawIndirectCount(
+            vkCmdDrawMeshTasksIndirectCountEXT(
                 context.cmd,
                 indirectBuffer,
-                commandOffset * sizeof(VkDrawIndirectCommand),
+                indirectOffset,
                 countBuffer,
-                countBufferOffset,
+                countOffset,
                 maxCommandCount,
-                sizeof(VkDrawIndirectCommand)
+                sizeof(VkDrawMeshTasksIndirectCommandEXT)
             );
         }
     }
