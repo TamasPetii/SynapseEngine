@@ -36,6 +36,13 @@ namespace Syn
         RenderBuffer indirectBuffer;
         RenderBuffer computeCountBuffer;
 
+        RenderBuffer modelCountBuffer;
+        RenderBuffer modelVisibleIndexBuffer;
+        RenderBuffer staticChunkCountBuffer;
+		RenderBuffer staticChunkVisibleIndexBuffer;
+        RenderBuffer mortonChunkCountBuffer;
+		RenderBuffer mortonChunkVisibleIndexBuffer;
+
         CpuData<VkDrawIndirectCommand> traditionalCmds;
         CpuData<VkDrawMeshTasksIndirectCommandEXT> meshletCmds;
 

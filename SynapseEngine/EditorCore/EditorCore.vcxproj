@@ -234,15 +234,11 @@
   <ItemGroup>
     <ClCompile Include="Command\CommandRegistry.cpp" />
     <ClCompile Include="Command\ICommand.cpp" />
-    <ClCompile Include="Api\IEditorApi.cpp" />
-    <ClCompile Include="Api\ISelectionAPI.cpp" />
-    <ClCompile Include="Api\ITransformAPI.cpp" />
-    <ClCompile Include="Api\IFileDialogAPI.cpp" />
-    <ClCompile Include="Api\IMaterialAPI.cpp" />
+    <ClCompile Include="ViewModels\ContentBrowser\ContentBrowserViewModel.cpp" />
+    <ClCompile Include="ViewModels\ContentBrowser\ContentBrowserIntent.cpp" />
+    <ClCompile Include="Types\FileEntry.cpp" />
+    <ClCompile Include="ViewModels\ContentBrowser\ContentBrowserState.cpp" />
     <ClCompile Include="Interaction\DragInteraction.cpp" />
-    <ClCompile Include="Api\IRenderAPI.cpp" />
-    <ClCompile Include="Api\ISettingsAPI.cpp" />
-    <ClCompile Include="Api\ISceneAPI.cpp" />
     <ClCompile Include="ViewModels\MaterialGraph\MaterialGraphViewModel.cpp" />
     <ClCompile Include="ViewModels\MaterialGraph\MaterialGraphIntent.cpp" />
     <ClCompile Include="ViewModels\MaterialGraph\MaterialGraphState.cpp" />
@@ -264,6 +260,7 @@
     <ClCompile Include="ViewModels\Viewport\ViewportViewModel.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Api\IFileSystemAPI.h" />
     <ClInclude Include="Command\CommandRegistry.h" />
     <ClInclude Include="Command\ICommand.h" />
     <ClInclude Include="Api\IEditorApi.h" />
@@ -271,6 +268,10 @@
     <ClInclude Include="Api\ITransformAPI.h" />
     <ClInclude Include="Api\IFileDialogAPI.h" />
     <ClInclude Include="Api\IMaterialAPI.h" />
+    <ClInclude Include="ViewModels\ContentBrowser\ContentBrowserViewModel.h" />
+    <ClInclude Include="ViewModels\ContentBrowser\ContentBrowserIntent.h" />
+    <ClInclude Include="Types\FileEntry.h" />
+    <ClInclude Include="ViewModels\ContentBrowser\ContentBrowserState.h" />
     <ClInclude Include="Interaction\DragInteraction.h" />
     <ClInclude Include="Api\IRenderAPI.h" />
     <ClInclude Include="Api\ISettingsAPI.h" />

@@ -2,6 +2,7 @@
 #include "Engine/SynMacro.h"
 #include "Engine/Vk/Context.h"
 #include <GLFW/glfw3.h>
+#include <filesystem>
 
 #include "Editor/View/Transform/TransformView.h"
 #include "EditorCore/ViewModels/Transform/TransformViewModel.h"
@@ -18,7 +19,11 @@
 #include "Editor/View/MaterialGraph/MaterialGraphView.h"
 #include "EditorCore/ViewModels/MaterialGraph/MaterialGraphViewModel.h"
 
+#include "Editor/View/ContentBrowser/ContentBrowserView.h"
+#include "EditorCore/ViewModels/ContentBrowser/ContentBrowserViewModel.h"
+
 #include "Manager/GuiTextureManager.h"
+#include "Manager/EditorIcons.h"
 
 Synapse::Synapse(const Syn::ApplicationConfig& config)
     : Syn::Application(config)
@@ -31,6 +36,7 @@ Synapse::~Synapse() {
     }
 
     _editorApi.reset();
+    _iconManager.reset();
     _inputDispatcher.reset();
     _guiManager.reset();
     _engine.reset();
@@ -84,6 +90,17 @@ void Synapse::OnInit() {
 
     _editorApi = std::make_unique<Syn::EditorApiImpl>(_engine.get(), _guiManager->GetTextureManager());
 
+    _iconManager = std::make_unique<Syn::IconManager>(
+        _engine->GetImageManager(),
+        _guiManager->GetTextureManager()
+    );
+
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->AddFontDefault();
+    _iconManager->InitializeFontAwesome(io, FONT_PATH, 16.0f);
+    _guiManager->CreateFontTexture();
+    _iconManager->LoadEngineIcons(ICON_PATH);
+
     using TransformWin = Syn::EditorWindow<Syn::TransformView, Syn::TransformViewModel>;
     _guiManager->AddWindow<TransformWin>(
         Syn::TransformView{
@@ -126,6 +143,14 @@ void Synapse::OnInit() {
         Syn::MaterialGraphViewModel{
             _editorApi.get()
         }
+    );
+
+    std::string absoluteAssetsPath = std::filesystem::absolute(ASSET_PATH).generic_string();
+
+    using ContentBrowserWin = Syn::EditorWindow<Syn::ContentBrowserView, Syn::ContentBrowserViewModel>;
+    _guiManager->AddWindow<ContentBrowserWin>(
+        Syn::ContentBrowserView{ _iconManager.get() },
+        Syn::ContentBrowserViewModel{ _editorApi.get(), absoluteAssetsPath }
     );
 #endif
 

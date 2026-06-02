@@ -36,16 +36,7 @@
     <ClCompile Include="ViewModels\Transform\TransformViewModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Api\IEditorApi.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ViewModels\Transform\TransformCommands.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Api\ISelectionAPI.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Api\ITransformAPI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Types\EntityHandle.cpp">
@@ -63,12 +54,6 @@
     <ClCompile Include="ViewModels\Viewport\ViewportViewModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Api\IRenderAPI.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Api\ISettingsAPI.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ViewModels\Settings\SettingsState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -76,9 +61,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ViewModels\Settings\SettingsViewModel.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Api\ISceneAPI.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="ViewModels\MainMenu\MainMenuState.cpp">
@@ -90,9 +72,6 @@
     <ClCompile Include="ViewModels\MainMenu\MainMenuViewModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Api\IFileDialogAPI.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="ViewModels\MaterialGraph\MaterialGraphState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -102,7 +81,16 @@
     <ClCompile Include="ViewModels\MaterialGraph\MaterialGraphViewModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Api\IMaterialAPI.cpp">
+    <ClCompile Include="ViewModels\ContentBrowser\ContentBrowserState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Types\FileEntry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewModels\ContentBrowser\ContentBrowserIntent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewModels\ContentBrowser\ContentBrowserViewModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -195,6 +183,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Api\IMaterialAPI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Api\IFileSystemAPI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewModels\ContentBrowser\ContentBrowserState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Types\FileEntry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewModels\ContentBrowser\ContentBrowserIntent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewModels\ContentBrowser\ContentBrowserViewModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

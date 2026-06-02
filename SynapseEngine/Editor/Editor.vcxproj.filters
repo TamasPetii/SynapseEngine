@@ -102,6 +102,18 @@
     <ClCompile Include="..\..\External\imgui-node-editor\imgui_node_editor_api.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="View\ContentBrowser\ContentBrowserView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\IconManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Manager\IIconManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EditorApi\FileSystemApiImpl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Windows\Window.h">
@@ -156,6 +168,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="View\MaterialGraph\MaterialGraphView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="View\ContentBrowser\ContentBrowserView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\IconManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\EditorIcons.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Manager\IIconManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

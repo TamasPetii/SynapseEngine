@@ -30,6 +30,7 @@
 			$(ExternalDir)vulkan_radix_sort\include;
 			$(ExternalDir)ImGuiFileDialog;
 			$(ExternalDir)imgui-node-editor;
+			$(ExternalDir)IconFontCppHeaders;
 			%(AdditionalIncludeDirectories)
 		</AdditionalIncludeDirectories>
 		

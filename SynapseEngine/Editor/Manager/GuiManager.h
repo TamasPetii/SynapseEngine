@@ -37,6 +37,7 @@ namespace Syn {
 
         GuiTextureManager* GetTextureManager() const { return _textureManager.get(); }
         IFileDialogAPI* GetFileDialog() const { return _fileDialog.get(); }
+        void CreateFontTexture();
     private:
         void SetStyle();
     private:

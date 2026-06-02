@@ -10,3 +10,6 @@
 [submodule "External/imgui-node-editor"]
 	path = External/imgui-node-editor
 	url = https://github.com/thedmd/imgui-node-editor.git
+[submodule "External/IconFontCppHeaders"]
+	path = External/IconFontCppHeaders
+	url = https://github.com/juliettef/IconFontCppHeaders.git

@@ -47,6 +47,11 @@ namespace Syn {
         std::vector<TextureApiDesc> GetAllTextures() const override;
         void LinkTextureToMaterial(uint32_t materialId, uint32_t textureType, uint32_t textureId) override;
         void UnlinkTextureFromMaterial(uint32_t materialId, uint32_t textureType) override;
+
+        // --- IFileSystemAPI ---
+        std::vector<FileEntry> GetEntries(const std::string& directoryPath) const override;
+        std::string GetParentPath(const std::string& path) const override;
+        bool IsValidPath(const std::string& path) const override;
     private:
         Engine* _engine = nullptr;
         SceneManager* _sceneManager = nullptr;

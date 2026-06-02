@@ -21,7 +21,7 @@
     "physics_capsules": 100
   },
   "lights": {
-    "directional_count": 4,
+    "directional_count": 1,
     "point_count": 5,
     "point_shadow_count": 0,
     "spot_count": 5,

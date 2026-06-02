@@ -4,6 +4,7 @@
 #include "Manager/GuiManager.h"
 #include "Dispatcher/InputDispatcher.h"
 #include "EditorApi/EditorApiImpl.h"
+#include "Editor/Manager/IconManager.h"
 #include <memory>
 
 class Synapse : public Syn::Application {
@@ -25,4 +26,5 @@ private:
     std::unique_ptr<Syn::GuiManager> _guiManager;
     std::unique_ptr<Syn::EditorApiImpl> _editorApi;
     std::unique_ptr<Syn::InputDispatcher> _inputDispatcher;
+    std::unique_ptr<Syn::IconManager> _iconManager;
 };

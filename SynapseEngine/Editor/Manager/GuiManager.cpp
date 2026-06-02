@@ -57,7 +57,6 @@ namespace Syn {
         init_info.PipelineRenderingCreateInfo.pColorAttachmentFormats = &_colorFormat;
 
         ImGui_ImplVulkan_Init(&init_info);
-        ImGui_ImplVulkan_CreateFontsTexture();
 
         SetStyle();
     }
@@ -216,5 +215,9 @@ namespace Syn {
         colors[ImGuiCol_NavHighlight] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
         colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
         colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
+    }
+
+    void GuiManager::CreateFontTexture() {
+        ImGui_ImplVulkan_CreateFontsTexture();
     }
 }

@@ -242,6 +242,10 @@
     <ClCompile Include="..\..\External\ImGuiFileDialog\ImGuiFileDialog.cpp" />
     <ClCompile Include="Backends\imgui_impl_glfw.cpp" />
     <ClCompile Include="Backends\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="EditorApi\FileSystemApiImpl.cpp" />
+    <ClCompile Include="Manager\IIconManager.cpp" />
+    <ClCompile Include="Manager\IconManager.cpp" />
+    <ClCompile Include="View\ContentBrowser\ContentBrowserView.cpp" />
     <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Core\Windows\GlfwWindow.cpp" />
     <ClCompile Include="Dispatcher\InputDispatcher.cpp" />
@@ -273,6 +277,10 @@
   <ItemGroup>
     <ClInclude Include="Backends\imgui_impl_glfw.h" />
     <ClInclude Include="Backends\imgui_impl_vulkan.h" />
+    <ClInclude Include="Manager\IIconManager.h" />
+    <ClInclude Include="Manager\EditorIcons.h" />
+    <ClInclude Include="Manager\IconManager.h" />
+    <ClInclude Include="View\ContentBrowser\ContentBrowserView.h" />
     <ClInclude Include="Core\Application.h" />
     <ClInclude Include="Core\Windows\Window.h" />
     <ClInclude Include="Core\Windows\GlfwWindow.h" />
