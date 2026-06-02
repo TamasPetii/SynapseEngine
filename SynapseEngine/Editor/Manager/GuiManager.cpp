@@ -149,7 +149,7 @@ namespace Syn {
         style.ItemSpacing = ImVec2(8.0f, 4.0f);
         style.ItemInnerSpacing = ImVec2(4.0f, 4.0f);
         style.TouchExtraPadding = ImVec2(0.0f, 0.0f);
-        style.IndentSpacing = 21.0f;
+        style.IndentSpacing = 12.0f;
         style.ScrollbarSize = 14.0f;
         style.GrabMinSize = 10.0f;
         style.WindowBorderSize = 1.0f;

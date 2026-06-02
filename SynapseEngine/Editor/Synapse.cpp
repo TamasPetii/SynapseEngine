@@ -22,6 +22,9 @@
 #include "Editor/View/ContentBrowser/ContentBrowserView.h"
 #include "EditorCore/ViewModels/ContentBrowser/ContentBrowserViewModel.h"
 
+#include "Editor/View/Hierarchy/HierarchyView.h"
+#include "EditorCore/ViewModels/Hierarchy/HierarchyViewModel.h"
+
 #include "Manager/GuiTextureManager.h"
 #include "Manager/EditorIcons.h"
 
@@ -152,6 +155,16 @@ void Synapse::OnInit() {
         Syn::ContentBrowserView{ _iconManager.get() },
         Syn::ContentBrowserViewModel{ _editorApi.get(), absoluteAssetsPath }
     );
+
+    using HierarchyWin = Syn::EditorWindow<Syn::HierarchyView, Syn::HierarchyViewModel>;
+    _guiManager->AddWindow<HierarchyWin>(
+        Syn::HierarchyView{},
+        Syn::HierarchyViewModel{
+            _editorApi.get(),
+            _editorApi.get()
+        }
+    );
+
 #endif
 
     _inputDispatcher = std::make_unique<Syn::InputDispatcher>(_guiManager.get(), _engine.get());

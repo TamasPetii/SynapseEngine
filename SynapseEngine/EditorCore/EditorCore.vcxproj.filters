@@ -93,6 +93,15 @@
     <ClCompile Include="ViewModels\ContentBrowser\ContentBrowserViewModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ViewModels\Hierarchy\HierarchyState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewModels\Hierarchy\HierarchyIntent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewModels\Hierarchy\HierarchyViewModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Command\ICommand.h">
@@ -198,6 +207,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ViewModels\ContentBrowser\ContentBrowserViewModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Api\IHierarchyAPI.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewModels\Hierarchy\HierarchyState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewModels\Hierarchy\HierarchyIntent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewModels\Hierarchy\HierarchyViewModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

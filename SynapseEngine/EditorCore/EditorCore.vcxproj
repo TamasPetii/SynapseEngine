@@ -234,6 +234,9 @@
   <ItemGroup>
     <ClCompile Include="Command\CommandRegistry.cpp" />
     <ClCompile Include="Command\ICommand.cpp" />
+    <ClCompile Include="ViewModels\Hierarchy\HierarchyViewModel.cpp" />
+    <ClCompile Include="ViewModels\Hierarchy\HierarchyIntent.cpp" />
+    <ClCompile Include="ViewModels\Hierarchy\HierarchyState.cpp" />
     <ClCompile Include="ViewModels\ContentBrowser\ContentBrowserViewModel.cpp" />
     <ClCompile Include="ViewModels\ContentBrowser\ContentBrowserIntent.cpp" />
     <ClCompile Include="Types\FileEntry.cpp" />
@@ -261,6 +264,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Api\IFileSystemAPI.h" />
+    <ClInclude Include="Api\IHierarchyAPI.h" />
     <ClInclude Include="Command\CommandRegistry.h" />
     <ClInclude Include="Command\ICommand.h" />
     <ClInclude Include="Api\IEditorApi.h" />
@@ -268,6 +272,9 @@
     <ClInclude Include="Api\ITransformAPI.h" />
     <ClInclude Include="Api\IFileDialogAPI.h" />
     <ClInclude Include="Api\IMaterialAPI.h" />
+    <ClInclude Include="ViewModels\Hierarchy\HierarchyViewModel.h" />
+    <ClInclude Include="ViewModels\Hierarchy\HierarchyIntent.h" />
+    <ClInclude Include="ViewModels\Hierarchy\HierarchyState.h" />
     <ClInclude Include="ViewModels\ContentBrowser\ContentBrowserViewModel.h" />
     <ClInclude Include="ViewModels\ContentBrowser\ContentBrowserIntent.h" />
     <ClInclude Include="Types\FileEntry.h" />
