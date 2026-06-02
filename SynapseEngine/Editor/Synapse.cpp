@@ -25,6 +25,9 @@
 #include "Editor/View/Hierarchy/HierarchyView.h"
 #include "EditorCore/ViewModels/Hierarchy/HierarchyViewModel.h"
 
+#include "Editor/View/Benchmark/BenchmarkView.h"
+#include "EditorCore/ViewModels/Benchmark/BenchmarkViewModel.h"
+
 #include "Manager/GuiTextureManager.h"
 #include "Manager/EditorIcons.h"
 
@@ -163,6 +166,12 @@ void Synapse::OnInit() {
             _editorApi.get(),
             _editorApi.get()
         }
+    );
+
+    using BenchmarkWin = Syn::EditorWindow<Syn::BenchmarkView, Syn::BenchmarkViewModel>;
+    _guiManager->AddWindow<BenchmarkWin>(
+        Syn::BenchmarkView{},
+        Syn::BenchmarkViewModel{}
     );
 
 #endif

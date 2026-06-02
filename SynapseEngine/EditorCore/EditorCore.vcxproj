@@ -232,6 +232,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ViewModels\Benchmark\BenchmarkViewModel.cpp" />
+    <ClCompile Include="ViewModels\Benchmark\BenchmarkIntent.cpp" />
+    <ClCompile Include="ViewModels\Benchmark\BenchmarkState.cpp" />
     <ClCompile Include="Command\CommandRegistry.cpp" />
     <ClCompile Include="Command\ICommand.cpp" />
     <ClCompile Include="ViewModels\Hierarchy\HierarchyViewModel.cpp" />
@@ -265,6 +268,9 @@
   <ItemGroup>
     <ClInclude Include="Api\IFileSystemAPI.h" />
     <ClInclude Include="Api\IHierarchyAPI.h" />
+    <ClInclude Include="ViewModels\Benchmark\BenchmarkViewModel.h" />
+    <ClInclude Include="ViewModels\Benchmark\BenchmarkIntent.h" />
+    <ClInclude Include="ViewModels\Benchmark\BenchmarkState.h" />
     <ClInclude Include="Command\CommandRegistry.h" />
     <ClInclude Include="Command\ICommand.h" />
     <ClInclude Include="Api\IEditorApi.h" />

@@ -53,7 +53,7 @@ namespace Syn {
                 if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_DRAG")) {
                     EntityID droppedEntity = *(EntityID*)payload->Data;
                     if (droppedEntity != NULL_ENTITY) {
-                        vm.Dispatch(ReparentEntityIntent{ droppedEntity, NULL_ENTITY });
+                        vm.Dispatch(HierarchyReparentEntityIntent{ droppedEntity, NULL_ENTITY });
                     }
                 }
                 ImGui::EndDragDropTarget();
@@ -65,7 +65,7 @@ namespace Syn {
             }
 
             if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && ImGui::IsWindowHovered()) {
-                vm.Dispatch(SelectEntityIntent{ NULL_ENTITY });
+                vm.Dispatch(HierarchySelectEntityIntent{ NULL_ENTITY });
             }
         }
 
@@ -83,13 +83,13 @@ namespace Syn {
 
         ImGui::SameLine();
         if (ImGui::Button(SYN_ICON_EXPAND_ALL)) {
-            vm.Dispatch(ExpandAllIntent{});
+            vm.Dispatch(HierarchyExpandAllIntent{});
         }
         if (ImGui::IsItemHovered()) ImGui::SetTooltip("Expand All");
 
         ImGui::SameLine();
         if (ImGui::Button(SYN_ICON_COLLAPSE_ALL)) {
-            vm.Dispatch(CollapseAllIntent{});
+            vm.Dispatch(HierarchyCollapseAllIntent{});
         }
         if (ImGui::IsItemHovered()) ImGui::SetTooltip("Collapse All");
 
@@ -108,7 +108,7 @@ namespace Syn {
         searchBuffer[sizeof(searchBuffer) - 1] = '\0';
 
         if (ImGui::InputTextWithHint("##SearchEntities", "Search...", searchBuffer, IM_ARRAYSIZE(searchBuffer))) {
-            vm.Dispatch(SetSearchQueryIntent{ std::string(searchBuffer) });
+            vm.Dispatch(HierarchySetSearchQueryIntent{ std::string(searchBuffer) });
         }
 
         if (ImGui::BeginPopup("AddEntityPopup")) {
@@ -142,11 +142,11 @@ namespace Syn {
         ImGui::Unindent(node.depth * indentStep);
 
         if (ImGui::IsItemClicked(ImGuiMouseButton_Left) && !ImGui::IsItemToggledOpen()) {
-            vm.Dispatch(SelectEntityIntent{ node.id });
+            vm.Dispatch(HierarchySelectEntityIntent{ node.id });
         }
 
         if (ImGui::IsItemToggledOpen()) {
-            vm.Dispatch(ToggleExpandIntent{ node.id, !node.isExpanded });
+            vm.Dispatch(HierarchyToggleExpandIntent{ node.id, !node.isExpanded });
         }
 
         HandleDragAndDrop(vm, node.id);
@@ -173,7 +173,7 @@ namespace Syn {
         ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (columnWidth - iconWidth) * 0.5f - 4.0f);
 
         if (ImGui::Button(eyeIcon)) {
-            vm.Dispatch(ToggleVisibilityIntent{ node.id, !node.isVisible });
+            vm.Dispatch(HierarchyToggleVisibilityIntent{ node.id, !node.isVisible });
         }
 
         ImGui::PopStyleColor(2);
@@ -191,7 +191,7 @@ namespace Syn {
             if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_DRAG")) {
                 EntityID droppedEntity = *(EntityID*)payload->Data;
                 if (droppedEntity != entity) {
-                    vm.Dispatch(ReparentEntityIntent{ droppedEntity, entity });
+                    vm.Dispatch(HierarchyReparentEntityIntent{ droppedEntity, entity });
                 }
             }
             ImGui::EndDragDropTarget();
@@ -200,19 +200,19 @@ namespace Syn {
 
     void HierarchyView::RenderContextMenu(HierarchyViewModel& vm, EntityID contextEntity) {
         if (ImGui::MenuItem(SYN_ICON_CUBE " Empty Entity")) {
-            vm.Dispatch(CreateEntityIntent{ "Empty Entity", contextEntity });
+            vm.Dispatch(HierarchyCreateEntityIntent{ "Empty Entity", contextEntity });
         }
 
         ImGui::Separator();
 
         if (ImGui::MenuItem(SYN_ICON_VIDEO " Camera")) {
-            vm.Dispatch(CreateEntityIntent{ "Camera", contextEntity });
+            vm.Dispatch(HierarchyCreateEntityIntent{ "Camera", contextEntity });
         }
 
         if (contextEntity != NULL_ENTITY) {
             ImGui::Separator();
             if (ImGui::MenuItem(SYN_ICON_TRASH " Delete")) {
-                vm.Dispatch(DestroyEntityIntent{ contextEntity });
+                vm.Dispatch(HierarchyDestroyEntityIntent{ contextEntity });
             }
         }
     }

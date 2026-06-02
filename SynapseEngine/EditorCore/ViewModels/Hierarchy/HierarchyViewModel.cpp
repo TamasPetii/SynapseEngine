@@ -24,25 +24,25 @@ namespace Syn {
         std::visit([this](auto&& arg) {
             using T = std::decay_t<decltype(arg)>;
 
-            if constexpr (std::is_same_v<T, SelectEntityIntent>) {
+            if constexpr (std::is_same_v<T, HierarchySelectEntityIntent>) {
                 _selectionApi->SetSelectedEntity(arg.entity);
                 _state.selectedEntity = arg.entity;
             }
-            else if constexpr (std::is_same_v<T, ToggleExpandIntent>) {
+            else if constexpr (std::is_same_v<T, HierarchyToggleExpandIntent>) {
                 if (arg.expand) _expandedNodes.insert(arg.entity);
                 else _expandedNodes.erase(arg.entity);
 
                 RebuildFlatList();
             }
-            else if constexpr (std::is_same_v<T, ToggleVisibilityIntent>) {
+            else if constexpr (std::is_same_v<T, HierarchyToggleVisibilityIntent>) {
                 _hierarchyApi->SetEntityVisibility(arg.entity, arg.visible);
                 RebuildFlatList();
             }
-            else if constexpr (std::is_same_v<T, ReparentEntityIntent>) {
+            else if constexpr (std::is_same_v<T, HierarchyReparentEntityIntent>) {
                 _hierarchyApi->SetParent(arg.child, arg.newParent);
                 RebuildFlatList();
             }
-            else if constexpr (std::is_same_v<T, CreateEntityIntent>) {
+            else if constexpr (std::is_same_v<T, HierarchyCreateEntityIntent>) {
                 EntityID newEnt = _hierarchyApi->CreateEntity(arg.name, arg.parent);
                 if (arg.parent != NULL_ENTITY) {
                     _expandedNodes.insert(arg.parent);
@@ -51,7 +51,7 @@ namespace Syn {
 
                 RebuildFlatList();
             }
-            else if constexpr (std::is_same_v<T, DestroyEntityIntent>) {
+            else if constexpr (std::is_same_v<T, HierarchyDestroyEntityIntent>) {
                 _hierarchyApi->DestroyEntity(arg.entity);
                 if (_state.selectedEntity == arg.entity) {
                     _selectionApi->SetSelectedEntity(NULL_ENTITY);
@@ -59,20 +59,20 @@ namespace Syn {
 
                 RebuildFlatList();
             }
-            else if constexpr (std::is_same_v<T, RefreshHierarchyIntent>) {
+            else if constexpr (std::is_same_v<T, HierarchyRefreshHierarchyIntent>) {
                 RebuildFlatList();
             }
-            else if constexpr (std::is_same_v<T, SetSearchQueryIntent>) {
+            else if constexpr (std::is_same_v<T, HierarchySetSearchQueryIntent>) {
                 _state.searchQuery = arg.query;
                 RebuildFlatList();
             }
-            else if constexpr (std::is_same_v<T, ExpandAllIntent>) {
+            else if constexpr (std::is_same_v<T, HierarchyExpandAllIntent>) {
                 for (EntityID root : _hierarchyApi->GetRootEntities()) {
                     ExpandAllNodes(root);
                 }
                 RebuildFlatList();
             }
-            else if constexpr (std::is_same_v<T, CollapseAllIntent>) {
+            else if constexpr (std::is_same_v<T, HierarchyCollapseAllIntent>) {
                 _expandedNodes.clear();
                 RebuildFlatList();
             }

@@ -242,6 +242,7 @@
     <ClCompile Include="..\..\External\ImGuiFileDialog\ImGuiFileDialog.cpp" />
     <ClCompile Include="Backends\imgui_impl_glfw.cpp" />
     <ClCompile Include="Backends\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="View\Benchmark\BenchmarkView.cpp" />
     <ClCompile Include="EditorApi\FileSystemApiImpl.cpp" />
     <ClCompile Include="EditorApi\HierarchyApiImpl.cpp" />
     <ClCompile Include="View\Hierarchy\HierarchyView.cpp" />
@@ -279,6 +280,7 @@
   <ItemGroup>
     <ClInclude Include="Backends\imgui_impl_glfw.h" />
     <ClInclude Include="Backends\imgui_impl_vulkan.h" />
+    <ClInclude Include="View\Benchmark\BenchmarkView.h" />
     <ClInclude Include="View\Hierarchy\HierarchyView.h" />
     <ClInclude Include="Manager\IIconManager.h" />
     <ClInclude Include="Manager\EditorIcons.h" />

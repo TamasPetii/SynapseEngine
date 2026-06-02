@@ -6,57 +6,57 @@
 
 namespace Syn 
 {
-    struct SelectEntityIntent { 
+    struct HierarchySelectEntityIntent { 
         EntityID entity;
     };
 
-    struct ToggleExpandIntent { 
+    struct HierarchyToggleExpandIntent {
         EntityID entity;
         bool expand;
     };
 
-    struct ToggleVisibilityIntent { 
+    struct HierarchyToggleVisibilityIntent {
         EntityID entity;
         bool visible;
     };
 
-    struct ReparentEntityIntent { 
+    struct HierarchyReparentEntityIntent {
         EntityID child;
         EntityID newParent;
     };
 
-    struct CreateEntityIntent { 
+    struct HierarchyCreateEntityIntent {
         std::string name; 
         EntityID parent;
     };
 
-    struct DestroyEntityIntent { 
+    struct HierarchyDestroyEntityIntent {
         EntityID entity;
     };
 
-    struct RefreshHierarchyIntent {
+    struct HierarchyRefreshHierarchyIntent {
     };
 
-    struct SetSearchQueryIntent {
+    struct HierarchySetSearchQueryIntent {
         std::string query;
     };
 
-    struct ExpandAllIntent {
+    struct HierarchyExpandAllIntent {
     };
 
-    struct CollapseAllIntent {
+    struct HierarchyCollapseAllIntent {
     };
 
     using HierarchyIntent = std::variant<
-        SelectEntityIntent,
-        ToggleExpandIntent,
-        ToggleVisibilityIntent,
-        ReparentEntityIntent,
-        CreateEntityIntent,
-        DestroyEntityIntent,
-        RefreshHierarchyIntent,
-        SetSearchQueryIntent,
-        ExpandAllIntent,
-        CollapseAllIntent
+        HierarchySelectEntityIntent,
+        HierarchyToggleExpandIntent,
+        HierarchyToggleVisibilityIntent,
+        HierarchyReparentEntityIntent,
+        HierarchyCreateEntityIntent,
+        HierarchyDestroyEntityIntent,
+        HierarchyRefreshHierarchyIntent,
+        HierarchySetSearchQueryIntent,
+        HierarchyExpandAllIntent,
+        HierarchyCollapseAllIntent
     >;
 }
