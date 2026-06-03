@@ -59,6 +59,10 @@ namespace Syn {
         uint32_t mode;
     };
 
+    struct PlaySimulationIntent {};
+    struct PauseSimulationIntent {};
+    struct StopSimulationIntent {};
+
     using ViewportIntent = std::variant<
         ResizeViewportIntent,
         ChangeTargetIntent,
@@ -71,6 +75,9 @@ namespace Syn {
         ChangeDebugVisibilityModeIntent,
         ChangeSnapTranslateIntent,
         ChangeSnapRotateIntent,
-        ChangeSnapScaleIntent
+        ChangeSnapScaleIntent,
+        PlaySimulationIntent,
+        PauseSimulationIntent,
+        StopSimulationIntent
     >;
 }

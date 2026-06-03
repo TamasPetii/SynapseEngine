@@ -1,68 +1,98 @@
 #include "HierarchyView.h"
 #include "Editor/Manager/EditorIcons.h"
+#include "Editor/Widgets/CardWidget.h"
 #include <imgui.h>
 
 namespace Syn {
-
     void HierarchyView::Draw(HierarchyViewModel& vm) {
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
+        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 
-        if (ImGui::Begin(SYN_ICON_LIST " Scene Hierarchy")) {
-            RenderTopBar(vm);
+        if (ImGui::Begin(SYN_ICON_LIST " Scene Hierarchy", nullptr, windowFlags)) {
 
-            const auto& state = vm.GetState();
+            auto getCardState = [this](const char* name) -> bool& {
+                std::string key(name);
+                if (_cardStates.find(key) == _cardStates.end()) _cardStates[key] = true;
+                return _cardStates[key];
+                };
 
-            if (ImGui::BeginTable("HierarchyTable", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable)) {
+            float mainContentBottomY = ImGui::GetWindowPos().y + ImGui::GetWindowContentRegionMax().y;
+            constexpr const char* CardEntitiesTitle = "EntitiesCard";
+            if (Syn::UI::BeginCard(CardEntitiesTitle, SYN_ICON_CUBE, getCardState(CardEntitiesTitle))) {
 
-                ImGui::TableSetupScrollFreeze(0, 1);
-                ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
-                ImGui::TableSetupColumn("Vis", ImGuiTableColumnFlags_WidthFixed, 32.0f);
+                RenderTopBar(vm);
 
-                ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
-                for (int column = 0; column < 2; column++) {
-                    ImGui::TableSetColumnIndex(column);
-                    const char* columnName = ImGui::TableGetColumnName(column);
+                const auto& state = vm.GetState();
 
-                    ImGui::PushID(column);
-                    if (column == 0) {
-                        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 8.0f);
-                        ImGui::TableHeader(columnName);
-                    }
-                    else {
-                        float textWidth = ImGui::CalcTextSize(columnName).x;
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.08f, 0.08f, 0.08f, 0.6f));
+                ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+                float currentY = ImGui::GetCursorScreenPos().y;
+                float tableHeight = mainContentBottomY - currentY - 12.0f;
+                if (tableHeight < 100.0f) tableHeight = 100.0f;
+
+                ImGui::BeginChild("HierarchyTableContainer", ImVec2(0, tableHeight), ImGuiChildFlags_Borders, ImGuiWindowFlags_NoScrollbar);
+
+                if (ImGui::BeginTable("HierarchyTable", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable)) {
+
+                    ImGui::TableSetupScrollFreeze(0, 1);
+                    ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
+                    ImGui::TableSetupColumn("Vis", ImGuiTableColumnFlags_WidthFixed, 32.0f);
+
+                    ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
+                    for (int column = 0; column < 2; column++) {
+                        ImGui::TableSetColumnIndex(column);
+                        const char* columnName = ImGui::TableGetColumnName(column);
+
+                        ImGui::PushID(column);
+
                         float cellWidth = ImGui::GetColumnWidth();
-                        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (cellWidth - textWidth) * 0.5f);
-                        ImGui::TableHeader(columnName);
+                        float textWidth = ImGui::CalcTextSize(columnName).x;
+                        ImVec2 startPos = ImGui::GetCursorPos();
+
+                        ImGui::TableHeader("");
+
+                        ImGui::SetCursorPos(ImVec2(startPos.x + (cellWidth - textWidth) * 0.5f, startPos.y + 3.0f));
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                        ImGui::Text("%s", columnName);
+                        ImGui::PopStyleColor();
+
+                        ImGui::PopID();
                     }
-                    ImGui::PopID();
+
+                    ImGuiListClipper clipper;
+                    clipper.Begin(static_cast<int>(state.flatNodes.size()));
+
+                    while (clipper.Step()) {
+                        for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; ++row) {
+                            RenderEntityRow(vm, state.flatNodes[row]);
+                        }
+                    }
+
+                    ImGui::EndTable();
+                }
+                ImGui::EndChild();
+                ImGui::PopStyleVar(2);
+                ImGui::PopStyleColor();
+
+                if (ImGui::BeginDragDropTarget()) {
+                    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_DRAG")) {
+                        EntityID droppedEntity = *(EntityID*)payload->Data;
+                        if (droppedEntity != NULL_ENTITY) {
+                            vm.Dispatch(HierarchyReparentEntityIntent{ droppedEntity, NULL_ENTITY });
+                        }
+                    }
+                    ImGui::EndDragDropTarget();
                 }
 
-                ImGuiListClipper clipper;
-                clipper.Begin(static_cast<int>(state.flatNodes.size()));
-
-                while (clipper.Step()) {
-                    for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; ++row) {
-                        RenderEntityRow(vm, state.flatNodes[row]);
-                    }
+                if (ImGui::BeginPopupContextWindow("HierarchyContext", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems)) {
+                    RenderContextMenu(vm, NULL_ENTITY);
+                    ImGui::EndPopup();
                 }
 
-                ImGui::EndTable();
             }
-
-            if (ImGui::BeginDragDropTarget()) {
-                if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ENTITY_DRAG")) {
-                    EntityID droppedEntity = *(EntityID*)payload->Data;
-                    if (droppedEntity != NULL_ENTITY) {
-                        vm.Dispatch(HierarchyReparentEntityIntent{ droppedEntity, NULL_ENTITY });
-                    }
-                }
-                ImGui::EndDragDropTarget();
-            }
-
-            if (ImGui::BeginPopupContextWindow("HierarchyContext", ImGuiPopupFlags_MouseButtonRight | ImGuiPopupFlags_NoOpenOverItems)) {
-                RenderContextMenu(vm, NULL_ENTITY);
-                ImGui::EndPopup();
-            }
+            Syn::UI::EndCard();
 
             if (ImGui::IsMouseDown(ImGuiMouseButton_Left) && ImGui::IsWindowHovered()) {
                 vm.Dispatch(HierarchySelectEntityIntent{ NULL_ENTITY });
@@ -74,8 +104,10 @@ namespace Syn {
     }
 
     void HierarchyView::RenderTopBar(HierarchyViewModel& vm) {
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
-        ImGui::BeginChild("TopBar", ImVec2(0, 36), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_AlwaysUseWindowPadding);
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 6));
+
+        float barHeight = ImGui::GetFrameHeight();
+        ImGui::BeginChild("TopBar", ImVec2(0, barHeight), false, ImGuiWindowFlags_NoScrollbar);
 
         if (ImGui::Button(SYN_ICON_PLUS " Add")) {
             ImGui::OpenPopup("AddEntityPopup");
@@ -97,6 +129,7 @@ namespace Syn {
         ImGui::Dummy(ImVec2(8.0f, 0.0f));
         ImGui::SameLine();
 
+        ImGui::AlignTextToFramePadding();
         ImGui::TextDisabled(SYN_ICON_SEARCH);
         ImGui::SameLine();
 
@@ -118,6 +151,8 @@ namespace Syn {
 
         ImGui::EndChild();
         ImGui::PopStyleVar();
+
+        ImGui::Spacing();
     }
 
     void HierarchyView::RenderEntityRow(HierarchyViewModel& vm, const HierarchyNode& node) {

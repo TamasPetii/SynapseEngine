@@ -132,6 +132,10 @@ namespace Syn {
             }
         }
 
+        std::sort(result.begin(), result.end(), [](const UiProfilerGroup& a, const UiProfilerGroup& b) {
+            return a.name < b.name;
+            });
+
         return result;
     }
 

@@ -7,27 +7,13 @@
 namespace Syn {
     class SettingsViewModel : public IViewModel<SettingsState, SettingsIntent> {
     public:
-        SettingsViewModel(ISettingsAPI* api) : _api(api) {}
+        SettingsViewModel(ISettingsAPI* api);
+        ~SettingsViewModel() override = default;
 
-        const SettingsState& GetState() const override { return _state; }
+        const SettingsState& GetState() const override;
 
-        void SyncWithEngine() override {
-            if (_api) {
-                _state.sceneSettings = _api->GetSceneSettings();
-            }
-        }
-
-        void Dispatch(const SettingsIntent& intent) override {
-            std::visit([this](auto&& arg) {
-                using T = std::decay_t<decltype(arg)>;
-                if constexpr (std::is_same_v<T, UpdateSceneSettingsIntent>)
-                {
-                    if (_api) {
-                        _api->SetSceneSettings(arg.newSettings);
-                    }
-                }
-                }, intent);
-        }
+        void SyncWithEngine() override;
+        void Dispatch(const SettingsIntent& intent) override;
 
     private:
         ISettingsAPI* _api = nullptr;

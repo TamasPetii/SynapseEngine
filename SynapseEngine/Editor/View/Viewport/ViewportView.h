@@ -9,9 +9,13 @@ namespace Syn {
     public:
         void Draw(ViewportViewModel& vm) override;
     private:
-        void DrawGizmoMenu(ViewportViewModel& vm, const ViewportState& state);
-        void DrawImageMenu(ViewportViewModel& vm, const ViewportState& state);
-        void DrawDebugMenu(ViewportViewModel& vm, const ViewportState& state);
+        void RenderFloatingToolbar(ViewportViewModel& vm, const ViewportState& state, ImVec2 startPos, ImVec2 size);
+        void RenderSimulationToolbar(ViewportViewModel& vm, const ViewportState& state, ImVec2 startPos, ImVec2 size);
+
+        void DrawGizmoPopup(ViewportViewModel& vm, const ViewportState& state);
+        void DrawImagePopup(ViewportViewModel& vm, const ViewportState& state);
+        void DrawDebugPopup(ViewportViewModel& vm, const ViewportState& state);
+
         void DrawGizmo(ViewportViewModel& vm, const ViewportState& state, ImVec2 startPos, ImVec2 size);
         void HandleShortcuts(ViewportViewModel& vm);
     };

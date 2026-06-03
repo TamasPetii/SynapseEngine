@@ -1,9 +1,12 @@
 #include "BenchmarkView.h"
 #include "Editor/Manager/EditorIcons.h"
-#include "EditorCore/ViewModels/Benchmark/BenchmarkViewModel.h"
+#include "Editor/Widgets/CardWidget.h"
+#include "Editor/Widgets/ToggleWidget.h"
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <format>
+
+#include "EditorCore/ViewModels/Benchmark/BenchmarkViewModel.h"
 
 namespace Syn {
 
@@ -11,41 +14,59 @@ namespace Syn {
         const BenchmarkState& state = vm.GetState();
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
-        if (ImGui::Begin(SYN_ICON_TACHOMETER " Performance Profiler")) 
+
+        if (ImGui::Begin(SYN_ICON_TACHOMETER " Performance Profiler"))
         {
-            ImGui::BeginChild("TopPanel", ImVec2(0, 115), true, ImGuiWindowFlags_NoScrollbar);
-            RenderTopBar(state);
-            ImGui::EndChild();
+            auto getCardState = [this](const char* name) -> bool& {
+                std::string key(name);
+                if (_cardStates.find(key) == _cardStates.end()) _cardStates[key] = true;
+                return _cardStates[key];
+                };
 
-            ImGui::Spacing();
-
-            ImGui::BeginChild("BottomPanel", ImVec2(0, 0), true);
-
-            RenderFilterBar(vm, state);
-
-            if (ImGui::BeginTabBar("ProfilerTabs")) {
-                if (ImGui::BeginTabItem(SYN_ICON_MICROCHIP " CPU Profiler")) {
-                    if (state.activeTab != ProfilerTab::CPU) vm.Dispatch(BenchmarkSwitchTabIntent{ ProfilerTab::CPU });
-                    RenderProfilerTable(state.cpuTimings, state.totalCpuTimeMs, state);
-                    ImGui::EndTabItem();
-                }
-
-                if (ImGui::BeginTabItem(SYN_ICON_DESKTOP " GPU Profiler")) {
-                    if (state.activeTab != ProfilerTab::GPU) vm.Dispatch(BenchmarkSwitchTabIntent{ ProfilerTab::GPU });
-                    RenderProfilerTable(state.gpuTimings, state.totalGpuTimeMs, state);
-                    ImGui::EndTabItem();
-                }
-                ImGui::EndTabBar();
+            constexpr const char* CardOverviewTitle = "Performance Overview";
+            if (Syn::UI::BeginCard(CardOverviewTitle, SYN_ICON_TACHOMETER, getCardState(CardOverviewTitle))) {
+                RenderTopBar(state);
             }
-            ImGui::EndChild();
+            Syn::UI::EndCard();
+
+
+            constexpr const char* CardTasksTitle = "Task Timings";
+            if (Syn::UI::BeginCard(CardTasksTitle, SYN_ICON_MICROCHIP, getCardState(CardTasksTitle))) {
+
+                float spacing = ImGui::GetStyle().ItemSpacing.x;
+                float halfWidth = (ImGui::GetContentRegionAvail().x - spacing) * 0.5f;
+
+                ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
+                if (Syn::UI::ToggleButton(SYN_ICON_MICROCHIP " CPU Profiler", state.activeTab == ProfilerTab::CPU, ImVec2(halfWidth, 32.0f))) {
+                    vm.Dispatch(BenchmarkSwitchTabIntent{ ProfilerTab::CPU });
+                }
+                ImGui::SameLine();
+                if (Syn::UI::ToggleButton(SYN_ICON_DESKTOP " GPU Profiler", state.activeTab == ProfilerTab::GPU, ImVec2(halfWidth, 32.0f))) {
+                    vm.Dispatch(BenchmarkSwitchTabIntent{ ProfilerTab::GPU });
+                }
+                ImGui::PopStyleVar();
+
+                ImGui::Spacing();
+                ImGui::Separator();
+                ImGui::Spacing();
+
+                RenderFilterBar(vm, state);
+
+                if (state.activeTab == ProfilerTab::CPU) {
+                    RenderProfilerTable(vm, state.cpuTimings, state.totalCpuTimeMs, state);
+                }
+                else {
+                    RenderProfilerTable(vm, state.gpuTimings, state.totalGpuTimeMs, state);
+                }
+            }
+            Syn::UI::EndCard();
+
         }
         ImGui::End();
         ImGui::PopStyleVar();
     }
 
     void BenchmarkView::RenderTopBar(const BenchmarkState& state) {
-        ImGui::TextDisabled("FPS Graph");
-
         std::string overlay = std::format("Cur: {:.1f} FPS | Avg: {:.1f} FPS", state.currentFps, state.averageFps);
 
         ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(0.26f, 0.59f, 0.98f, 1.0f));
@@ -62,14 +83,15 @@ namespace Syn {
         ImGui::PopStyleColor(2);
 
         ImGui::Spacing();
-        ImGui::Text(SYN_ICON_MICROCHIP " Global CPU Time: %.3f ms", state.totalCpuTimeMs);
+        ImGui::Text(SYN_ICON_MICROCHIP " CPU Time: %.3f ms", state.totalCpuTimeMs);
         ImGui::SameLine(ImGui::GetWindowWidth() * 0.5f);
-        ImGui::Text(SYN_ICON_DESKTOP " Global GPU Time: %.3f ms", state.totalGpuTimeMs);
+        ImGui::Text(SYN_ICON_DESKTOP " GPU Time: %.3f ms", state.totalGpuTimeMs);
     }
 
     void BenchmarkView::RenderFilterBar(BenchmarkViewModel& vm, const BenchmarkState& state) {
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4, 4));
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 6));
 
+        ImGui::AlignTextToFramePadding();
         ImGui::TextDisabled(SYN_ICON_SEARCH);
         ImGui::SameLine();
 
@@ -77,39 +99,77 @@ namespace Syn {
         strncpy(searchBuffer, state.filters.searchQuery.c_str(), sizeof(searchBuffer));
         searchBuffer[sizeof(searchBuffer) - 1] = '\0';
 
-        ImGui::SetNextItemWidth(200.0f);
+        ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
         if (ImGui::InputTextWithHint("##ProfilerSearch", "Filter tasks...", searchBuffer, IM_ARRAYSIZE(searchBuffer))) {
             vm.Dispatch(BenchmarkSetSearchQueryIntent{ std::string(searchBuffer) });
         }
 
-        bool showUpdate = state.filters.showUpdate;
-        if (ImGui::Checkbox(SystemPhaseNames::Update, &showUpdate)) vm.Dispatch(BenchmarkTogglePhaseFilterIntent{ SystemPhaseNames::Update, showUpdate });
-
-        ImGui::SameLine(0, 16.0f);
-        bool showUpload = state.filters.showUploadGPU;
-        if (ImGui::Checkbox(SystemPhaseNames::UploadGPU, &showUpload)) vm.Dispatch(BenchmarkTogglePhaseFilterIntent{ SystemPhaseNames::UploadGPU, showUpload });
-
-        ImGui::SameLine(0, 16.0f);
-        bool showFinish = state.filters.showFinish;
-        if (ImGui::Checkbox(SystemPhaseNames::Finish, &showFinish)) vm.Dispatch(BenchmarkTogglePhaseFilterIntent{ SystemPhaseNames::Finish, showFinish });
-
         ImGui::PopStyleVar();
-        ImGui::Spacing();
-        ImGui::Separator();
         ImGui::Spacing();
     }
 
-    void BenchmarkView::RenderProfilerTable(const std::vector<UiProfilerGroup>& timings, float totalTime, const BenchmarkState& state) {
+    void BenchmarkView::RenderProfilerTable(BenchmarkViewModel& vm, const std::vector<UiProfilerGroup>& timings, float totalTime, const BenchmarkState& state) {
         ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(4, 4));
         ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 16.0f);
 
-        if (ImGui::BeginTable("ProfilerTable", 3, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollY)) {
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.08f, 0.08f, 0.08f, 0.6f));
+        ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+
+        ImGui::BeginChild("TableContainer", ImVec2(0, 350.0f), ImGuiChildFlags_Borders, ImGuiWindowFlags_NoScrollbar);
+
+        if (ImGui::BeginTable("ProfilerTable", 3, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollY)) {
 
             ImGui::TableSetupScrollFreeze(0, 1);
             ImGui::TableSetupColumn("System / Pass", ImGuiTableColumnFlags_WidthStretch, 0.5f);
             ImGui::TableSetupColumn("Time (ms)", ImGuiTableColumnFlags_WidthFixed, 80.0f);
             ImGui::TableSetupColumn("Cost (%)", ImGuiTableColumnFlags_WidthStretch, 0.5f);
-            ImGui::TableHeadersRow();
+
+            ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
+            for (int i = 0; i < 3; ++i) {
+                ImGui::TableSetColumnIndex(i);
+                ImGui::PushID(i);
+
+                const char* columnName = ImGui::TableGetColumnName(i);
+                float cellWidth = ImGui::GetColumnWidth();
+                float textWidth = ImGui::CalcTextSize(columnName).x;
+                ImVec2 startPos = ImGui::GetCursorPos();
+
+                ImGui::TableHeader("");
+
+                ImGui::SetCursorPos(ImVec2(startPos.x + (cellWidth - textWidth) * 0.5f, startPos.y + 3.0f));
+                ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                ImGui::Text("%s", columnName);
+                ImGui::PopStyleColor();
+
+                if (i == 0 && state.activeTab == ProfilerTab::CPU) {
+                    ImGui::SetCursorPos(ImVec2(startPos.x + cellWidth - 26.0f, startPos.y + 1.0f));
+
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.6f, 0.6f, 0.6f, 1.0f));
+                    if (ImGui::Button(SYN_ICON_FILTER)) {
+                        ImGui::OpenPopup("PhaseFilterPopup");
+                    }
+                    ImGui::PopStyleColor(2);
+
+                    if (ImGui::BeginPopup("PhaseFilterPopup")) {
+                        ImGui::TextDisabled("Filter Phases");
+                        ImGui::Separator();
+
+                        bool showUpdate = state.filters.showUpdate;
+                        if (ImGui::Checkbox("Update", &showUpdate)) vm.Dispatch(BenchmarkTogglePhaseFilterIntent{ SystemPhaseNames::Update, showUpdate });
+
+                        bool showUpload = state.filters.showUploadGPU;
+                        if (ImGui::Checkbox("Upload GPU", &showUpload)) vm.Dispatch(BenchmarkTogglePhaseFilterIntent{ SystemPhaseNames::UploadGPU, showUpload });
+
+                        bool showFinish = state.filters.showFinish;
+                        if (ImGui::Checkbox("Finish", &showFinish)) vm.Dispatch(BenchmarkTogglePhaseFilterIntent{ SystemPhaseNames::Finish, showFinish });
+
+                        ImGui::EndPopup();
+                    }
+                }
+                ImGui::PopID();
+            }
 
             for (const auto& group : timings) {
                 RenderGroupRow(group, totalTime, state);
@@ -117,7 +177,10 @@ namespace Syn {
 
             ImGui::EndTable();
         }
-        ImGui::PopStyleVar(2);
+        ImGui::EndChild();
+
+        ImGui::PopStyleVar(4);
+        ImGui::PopStyleColor();
     }
 
     void BenchmarkView::RenderGroupRow(const UiProfilerGroup& group, float globalTotalTime, const BenchmarkState& state) {

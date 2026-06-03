@@ -9,6 +9,12 @@
 #include "Engine/Render/RenderNames.h"
 
 namespace Syn {
+    enum class SimulationState {
+        Stopped,
+        Playing,
+        Paused
+    };
+
     struct ViewportState {
         uint32_t width = 0;
         uint32_t height = 0;
@@ -38,5 +44,7 @@ namespace Syn {
 
         bool enableDebugVisibility = false;
         uint32_t debugVisibilityMode = 0;
+
+        SimulationState simState = SimulationState::Stopped;
     };
 }

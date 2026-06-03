@@ -1,6 +1,8 @@
 #pragma once
 #include "Editor/View/IView.h"
 #include "EditorCore/ViewModels/Hierarchy/HierarchyViewModel.h"
+#include <unordered_map>
+#include <string>
 
 namespace Syn {
     class HierarchyView : public IView<HierarchyViewModel> {
@@ -11,5 +13,7 @@ namespace Syn {
         void RenderEntityRow(HierarchyViewModel& vm, const HierarchyNode& node);
         void HandleDragAndDrop(HierarchyViewModel& vm, EntityID entity);
         void RenderContextMenu(HierarchyViewModel& vm, EntityID contextEntity);
+    private:
+        std::unordered_map<std::string, bool> _cardStates;
     };
 }
