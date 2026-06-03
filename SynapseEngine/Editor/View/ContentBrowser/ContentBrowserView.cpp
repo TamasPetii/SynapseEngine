@@ -1,6 +1,8 @@
 #include "ContentBrowserView.h"
 #include "Editor/Manager/EditorIcons.h"
+#include "Editor/Widgets/CardWidget.h"
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <sstream>
 #include <algorithm>
 
@@ -12,53 +14,127 @@ namespace Syn {
     void ContentBrowserView::Draw(ContentBrowserViewModel& vm) {
         const ContentBrowserState& state = vm.GetState();
 
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0.11f, 0.11f, 0.11f, 1.00f));
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
 
-        if (ImGui::Begin(SYN_ICON_FOLDER_OPEN " Content Browser", nullptr, ImGuiWindowFlags_NoScrollbar)) {
+        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+
+        if (ImGui::Begin(SYN_ICON_FOLDER_OPEN " Content Browser", nullptr, windowFlags)) {
+
+            auto getCardState = [this](const char* name) -> bool& {
+                std::string key(name);
+                if (_cardStates.find(key) == _cardStates.end()) _cardStates[key] = true;
+                return _cardStates[key];
+                };
+
             RenderTopBar(vm, state);
-            RenderContentArea(vm, state);
+
+            ImGui::Spacing();
+
+            float mainContentBottomY = ImGui::GetWindowPos().y + ImGui::GetWindowContentRegionMax().y;
+            float currentY = ImGui::GetCursorScreenPos().y;
+            float panelHeight = mainContentBottomY - currentY - 8.0f;
+            if (panelHeight < 150.0f) panelHeight = 150.0f;
+
+            ImGui::BeginChild("LeftPanelContainer", ImVec2(_leftPanelWidth, panelHeight), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+            constexpr const char* CardFoldersTitle = "Folders";
+            if (Syn::UI::BeginCard(CardFoldersTitle, SYN_ICON_FOLDER, getCardState(CardFoldersTitle))) {
+
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.08f, 0.08f, 0.08f, 0.6f));
+                ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
+
+                float treeHeight = mainContentBottomY - ImGui::GetCursorScreenPos().y - 12.0f;
+                if (treeHeight < 50.0f) treeHeight = 50.0f;
+
+                ImGui::BeginChild("FolderTreeScroll", ImVec2(0, treeHeight), ImGuiChildFlags_Borders, ImGuiWindowFlags_AlwaysUseWindowPadding);
+                RenderFolderTree(vm, state);
+                ImGui::EndChild();
+
+                ImGui::PopStyleVar(2);
+                ImGui::PopStyleColor();
+            }
+            Syn::UI::EndCard();
+            ImGui::EndChild();
+
+            ImGui::SameLine(0, 0);
+
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(0.3f, 0.3f, 0.3f, 0.5f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(0.4f, 0.4f, 0.4f, 0.8f));
+
+            ImGui::Button("##Splitter", ImVec2(6.0f, panelHeight));
+            if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
+            if (ImGui::IsItemActive()) {
+                _leftPanelWidth += ImGui::GetIO().MouseDelta.x;
+                _leftPanelWidth = std::clamp(_leftPanelWidth, 150.0f, 600.0f);
+            }
+
+            ImGui::PopStyleColor(3);
+
+            ImGui::SameLine(0, 0);
+
+            ImGui::BeginChild("RightPanelContainer", ImVec2(0, panelHeight), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
+
+            constexpr const char* CardFilesTitle = "Content";
+            if (Syn::UI::BeginCard(CardFilesTitle, SYN_ICON_FILE, getCardState(CardFilesTitle))) {
+
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.08f, 0.08f, 0.08f, 0.6f));
+                ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
+                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
+
+                float gridHeight = mainContentBottomY - ImGui::GetCursorScreenPos().y - 12.0f;
+                if (gridHeight < 50.0f) gridHeight = 50.0f;
+
+                ImGui::BeginChild("ContentGridScroll", ImVec2(0, gridHeight), ImGuiChildFlags_Borders, ImGuiWindowFlags_AlwaysUseWindowPadding);
+                RenderContentArea(vm, state);
+                ImGui::EndChild();
+
+                ImGui::PopStyleVar(2);
+                ImGui::PopStyleColor();
+            }
+            Syn::UI::EndCard();
+            ImGui::EndChild();
         }
 
         ImGui::End();
-        ImGui::PopStyleColor();
         ImGui::PopStyleVar();
     }
 
     void ContentBrowserView::RenderTopBar(ContentBrowserViewModel& vm, const ContentBrowserState& state) {
-        float topBarHeight = 40.0f;
-        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.15f, 0.15f, 0.15f, 1.00f));
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 6));
 
-        if (ImGui::BeginChild("##TopBar", ImVec2(0, topBarHeight), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse)) {
-            ImGui::SetCursorPos(ImVec2(8, 8));
+        float barHeight = ImGui::GetFrameHeight();
+        ImGui::BeginChild("TopBar", ImVec2(0, barHeight), false, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse);
 
-            if (ImGui::Button(SYN_ICON_ARROW_UP)) {
-                std::string parentPath = GetParentDirectory(state.currentPath);
-                if (!parentPath.empty()) {
-                    vm.Dispatch(ChangeDirectoryIntent{ parentPath });
-                }
-            }
-
-            ImGui::SameLine();
-            ImGui::Dummy(ImVec2(1.0f, ImGui::GetFrameHeight()));
-            ImGui::SameLine(0, 0);
-
-            RenderBreadCrumbs(vm, state.currentPath);
-
-            float sliderWidth = 120.0f;
-            float avail = ImGui::GetContentRegionAvail().x;
-            if (avail > sliderWidth + 20) {
-                ImGui::SameLine(ImGui::GetWindowWidth() - sliderWidth - 10);
-                ImGui::SetNextItemWidth(sliderWidth);
-
-                float currentScale = state.thumbnailSize;
-                if (ImGui::SliderFloat("##Scale", &currentScale, 48.0f, 196.0f, "Zoom")) {
-                    vm.Dispatch(SetThumbnailSizeIntent{ currentScale });
-                }
+        if (ImGui::Button(SYN_ICON_ARROW_UP)) {
+            std::string parentPath = GetParentDirectory(state.currentPath);
+            if (!parentPath.empty()) {
+                vm.Dispatch(ChangeDirectoryIntent{ parentPath });
             }
         }
+        if (ImGui::IsItemHovered()) ImGui::SetTooltip("Up to parent directory");
+
+        ImGui::SameLine();
+        ImGui::Dummy(ImVec2(8.0f, 0.0f));
+        ImGui::SameLine();
+
+        RenderBreadCrumbs(vm, state.currentPath);
+
+        float sliderWidth = 120.0f;
+        float avail = ImGui::GetContentRegionAvail().x;
+        if (avail > sliderWidth + 20) {
+            ImGui::SameLine(ImGui::GetWindowWidth() - sliderWidth - 8.0f);
+            ImGui::SetNextItemWidth(sliderWidth);
+
+            float currentScale = state.thumbnailSize;
+            if (ImGui::SliderFloat("##Scale", &currentScale, 48.0f, 196.0f, " %.0f")) {
+                vm.Dispatch(SetThumbnailSizeIntent{ currentScale });
+            }
+        }
+
         ImGui::EndChild();
-        ImGui::PopStyleColor();
+        ImGui::PopStyleVar();
     }
 
     void ContentBrowserView::RenderBreadCrumbs(ContentBrowserViewModel& vm, const std::string& currentPath) {
@@ -67,6 +143,7 @@ namespace Syn {
         auto parts = SplitPath(pathStr, '/');
 
         std::string currentBuildPath = "";
+
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
 
         for (size_t i = 0; i < parts.size(); ++i) {
@@ -81,19 +158,71 @@ namespace Syn {
             ImGui::PopID();
 
             if (i < parts.size() - 1) {
-                ImGui::SameLine();
+                ImGui::SameLine(0, 4.0f);
                 ImGui::TextDisabled(SYN_ICON_CHEVRON_RIGHT);
-                ImGui::SameLine();
+                ImGui::SameLine(0, 4.0f);
                 currentBuildPath += "/";
             }
         }
         ImGui::PopStyleColor();
     }
 
-    void ContentBrowserView::RenderContentArea(ContentBrowserViewModel& vm, const ContentBrowserState& state) {
-        ImGui::BeginChild("##ContentArea", ImVec2(0, 0), false, ImGuiWindowFlags_AlwaysUseWindowPadding);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
+    void ContentBrowserView::RenderFolderTree(ContentBrowserViewModel& vm, const ContentBrowserState& state) {
+        std::string pathStr = state.currentPath;
+        std::replace(pathStr.begin(), pathStr.end(), '\\', '/');
+        auto parts = SplitPath(pathStr, '/');
 
+        if (parts.empty()) return;
+
+        std::string buildPath = "";
+        int depth = 0;
+
+        for (size_t i = 0; i < parts.size(); ++i) {
+            buildPath += parts[i];
+
+            ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_DefaultOpen;
+
+            if (i == parts.size() - 1) {
+                flags |= ImGuiTreeNodeFlags_Selected;
+            }
+
+            std::string label = std::string(SYN_ICON_FOLDER_OPEN) + " " + parts[i];
+            bool isOpen = ImGui::TreeNodeEx(buildPath.c_str(), flags, "%s", label.c_str());
+
+            if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
+                vm.Dispatch(ChangeDirectoryIntent{ buildPath });
+            }
+
+            buildPath += "/";
+
+            if (!isOpen) {
+                break;
+            }
+            depth++;
+        }
+
+        if (depth == parts.size()) {
+            for (const auto& entry : state.currentEntries) {
+                if (entry.isDirectory) {
+                    ImGuiTreeNodeFlags leafFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_Leaf;
+                    std::string label = std::string(SYN_ICON_FOLDER) + " " + entry.name;
+
+                    ImGui::TreeNodeEx(entry.path.c_str(), leafFlags, "%s", label.c_str());
+
+                    if (ImGui::IsItemClicked() && !ImGui::IsItemToggledOpen()) {
+                        vm.Dispatch(ChangeDirectoryIntent{ entry.path });
+                    }
+                    ImGui::TreePop();
+                }
+            }
+        }
+
+        for (int i = 0; i < depth; ++i) {
+            ImGui::TreePop();
+        }
+    }
+
+    void ContentBrowserView::RenderContentArea(ContentBrowserViewModel& vm, const ContentBrowserState& state) {
         float panelWidth = ImGui::GetContentRegionAvail().x;
         float padding = 16.0f;
         float cellSize = state.thumbnailSize + padding;
@@ -107,8 +236,6 @@ namespace Syn {
         }
 
         ImGui::Columns(1);
-        ImGui::PopStyleVar();
-        ImGui::EndChild();
     }
 
     void ContentBrowserView::RenderFileCard(ContentBrowserViewModel& vm, const ContentBrowserState& state, const FileEntry& entry) {
@@ -153,13 +280,44 @@ namespace Syn {
             ImGui::Image(iconID, ImVec2(cardSize, cardSize));
         }
 
-        float textWidth = ImGui::CalcTextSize(entry.name.c_str()).x;
-        float textIndent = std::max(0.0f, (cardSize - textWidth) * 0.5f);
+        float currentY = itemMin.y + cardSize + 2.0f;
+        float lineHeight = ImGui::GetTextLineHeight();
 
-        ImGui::SetCursorScreenPos(ImVec2(itemMin.x + textIndent, itemMin.y + cardSize));
-        ImGui::PushTextWrapPos(ImGui::GetCursorPos().x + (cardSize - textIndent));
-        ImGui::TextUnformatted(entry.name.c_str());
-        ImGui::PopTextWrapPos();
+        const char* text = entry.name.c_str();
+        const char* textEnd = text + entry.name.length();
+        const char* lineStart = text;
+
+        float maxTextWidth = cardSize - 4.0f;
+
+        int lineCount = 0;
+        while (lineStart < textEnd && lineCount < 2) {
+            const char* lineEnd = lineStart;
+
+            while (lineEnd < textEnd) {
+                float w = ImGui::CalcTextSize(lineStart, lineEnd + 1).x;
+                if (w > maxTextWidth) {
+                    break;
+                }
+                lineEnd++;
+            }
+
+            if (lineEnd == lineStart) lineEnd++;
+
+            float lineWidth = ImGui::CalcTextSize(lineStart, lineEnd).x;
+            float textIndent = std::max(0.0f, (cardSize - lineWidth) * 0.5f);
+
+            ImGui::SetCursorScreenPos(ImVec2(itemMin.x + textIndent, currentY));
+            ImGui::TextUnformatted(lineStart, lineEnd);
+
+            currentY += lineHeight;
+            lineStart = lineEnd;
+
+            if (lineStart < textEnd && *lineStart == ' ') {
+                lineStart++;
+            }
+
+            lineCount++;
+        }
 
         ImGui::PopStyleVar();
         ImGui::PopStyleColor(3);
@@ -210,5 +368,4 @@ namespace Syn {
         }
         return tokens;
     }
-
 }

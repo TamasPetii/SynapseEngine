@@ -121,7 +121,7 @@ namespace Syn {
         if (ImGui::BeginTable("ProfilerTable", 3, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollY)) {
 
             ImGui::TableSetupScrollFreeze(0, 1);
-            ImGui::TableSetupColumn("System / Pass", ImGuiTableColumnFlags_WidthStretch, 0.5f);
+            ImGui::TableSetupColumn("Pass", ImGuiTableColumnFlags_WidthStretch, 0.5f);
             ImGui::TableSetupColumn("Time (ms)", ImGuiTableColumnFlags_WidthFixed, 80.0f);
             ImGui::TableSetupColumn("Cost (%)", ImGuiTableColumnFlags_WidthStretch, 0.5f);
 

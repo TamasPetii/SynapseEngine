@@ -63,7 +63,6 @@ namespace Syn {
 
             constexpr const char* CardCullingTitle = "Culling & Optimization";
             if (Syn::UI::BeginCard(CardCullingTitle, SYN_ICON_CROP, getCardState(CardCullingTitle))) {
-
                 ImGui::TextDisabled("Spatial Acceleration");
                 changed |= ImGui::Checkbox("Static BVH", &settings.enableStaticBvhCulling);
                 ImGui::SameLine(200.0f);

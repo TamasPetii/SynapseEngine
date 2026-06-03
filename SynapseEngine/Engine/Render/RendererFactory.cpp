@@ -142,11 +142,13 @@ namespace Syn
         //Todo - Gpu Driven Direction Light Culling
 
         //DirectionLight Shadow Passes
+        /*
         pipeline->AddPass(std::make_unique<DirectionLightShadowInitPass>());
         pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
         pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
+        */
 
 		//Forward+ Depth Opaque Prepasses
 		pipeline->AddPass(std::make_unique<OpaqueDepthTransitionPrepass>());

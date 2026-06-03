@@ -104,7 +104,7 @@ namespace Syn {
     }
 
     void HierarchyView::RenderTopBar(HierarchyViewModel& vm) {
-        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6, 6));
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(8, 6));
 
         float barHeight = ImGui::GetFrameHeight();
         ImGui::BeginChild("TopBar", ImVec2(0, barHeight), false, ImGuiWindowFlags_NoScrollbar);
