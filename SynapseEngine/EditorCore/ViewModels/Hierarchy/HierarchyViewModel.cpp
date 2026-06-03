@@ -4,8 +4,8 @@
 
 namespace Syn {
 
-    HierarchyViewModel::HierarchyViewModel(IHierarchyAPI* hierarchyApi, ISelectionAPI* selectionApi)
-        : _hierarchyApi(hierarchyApi), _selectionApi(selectionApi)
+    HierarchyViewModel::HierarchyViewModel(IHierarchyAPI* hierarchyApi, ISelectionAPI* selectionApi, ITagAPI* tagApi)
+        : _hierarchyApi(hierarchyApi), _selectionApi(selectionApi), _tagApi(tagApi)
     {      
     }
 
@@ -35,7 +35,7 @@ namespace Syn {
                 RebuildFlatList();
             }
             else if constexpr (std::is_same_v<T, HierarchyToggleVisibilityIntent>) {
-                _hierarchyApi->SetEntityVisibility(arg.entity, arg.visible);
+                _tagApi->SetEntityEnabled(arg.entity, !_tagApi->IsEntityEnabled(arg.entity));
                 RebuildFlatList();
             }
             else if constexpr (std::is_same_v<T, HierarchyReparentEntityIntent>) {
@@ -100,7 +100,7 @@ namespace Syn {
     }
 
     bool HierarchyViewModel::TraverseAndFlatten(EntityID entity, int depth) {
-        std::string name = _hierarchyApi->GetEntityName(entity);
+        std::string name = _tagApi->GetEntityName(entity);
 
         bool matchesSearch = _state.searchQuery.empty() ||
             std::search(name.begin(), name.end(), _state.searchQuery.begin(), _state.searchQuery.end(),
@@ -118,7 +118,7 @@ namespace Syn {
             depth,
             hasChildren,
             isExpanded,
-            _hierarchyApi->IsEntityVisible(entity)
+            _tagApi->IsEntityEnabled(entity)
             });
 
         bool anyChildMatches = false;

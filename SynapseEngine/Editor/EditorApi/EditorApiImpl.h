@@ -57,16 +57,21 @@ namespace Syn {
         std::vector<EntityID> GetRootEntities() const override;
         std::vector<EntityID> GetChildren(EntityID entity) const override;
 
-        std::string GetEntityName(EntityID entity) const override;
         std::string GetEntityIcon(EntityID entity) const override;
-        bool IsEntityVisible(EntityID entity) const override;
         bool HasChildren(EntityID entity) const override;
 
-        void SetEntityVisibility(EntityID entity, bool visible) override;
         void SetParent(EntityID child, EntityID parent) override;
 
         EntityID CreateEntity(const std::string& name, EntityID parent = NULL_ENTITY) override;
         void DestroyEntity(EntityID entity) override;
+
+        // --- ITagAPI ---
+        std::string GetEntityName(EntityID entity) const override;
+        void SetEntityName(EntityID entity, const std::string& name) override;
+        bool IsEntityEnabled(EntityID entity) const override;
+        void SetEntityEnabled(EntityID entity, bool enabled) override;
+        std::string GetEntityTag(EntityID entity) const override;
+        void SetEntityTag(EntityID entity, const std::string& tag) override;
     private:
         Engine* _engine = nullptr;
         SceneManager* _sceneManager = nullptr;
@@ -74,6 +79,5 @@ namespace Syn {
 
         EntityID _selectedEntity = NULL_ENTITY;
         std::unordered_map<std::string, TextureHandle> _viewportTextures;
-        std::unordered_set<EntityID> _hiddenEntities;
     };
 }

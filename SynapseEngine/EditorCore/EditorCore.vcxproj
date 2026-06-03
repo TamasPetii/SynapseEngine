@@ -232,6 +232,12 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ViewModels\Component\Core\Tag\TagIntent.cpp" />
+    <ClCompile Include="ViewModels\Component\Core\Tag\TagState.cpp" />
+    <ClCompile Include="ViewModels\Component\Core\Tag\TagViewModel.cpp" />
+    <ClCompile Include="ViewModels\Component\ComponentIntent.cpp" />
+    <ClCompile Include="ViewModels\Component\ComponentState.cpp" />
+    <ClCompile Include="ViewModels\Component\ComponentViewModel.cpp" />
     <ClCompile Include="ViewModels\Benchmark\BenchmarkViewModel.cpp" />
     <ClCompile Include="ViewModels\Benchmark\BenchmarkIntent.cpp" />
     <ClCompile Include="ViewModels\Benchmark\BenchmarkState.cpp" />
@@ -255,10 +261,10 @@
     <ClCompile Include="ViewModels\Settings\SettingsIntent.cpp" />
     <ClCompile Include="ViewModels\Settings\SettingsState.cpp" />
     <ClCompile Include="Types\EntityHandle.cpp" />
-    <ClCompile Include="ViewModels\Transform\TransformCommands.cpp" />
-    <ClCompile Include="ViewModels\Transform\TransformViewModel.cpp" />
-    <ClCompile Include="ViewModels\Transform\TransformIntent.cpp" />
-    <ClCompile Include="ViewModels\Transform\TransformState.cpp" />
+    <ClCompile Include="ViewModels\Component\Core\Transform\TransformCommands.cpp" />
+    <ClCompile Include="ViewModels\Component\Core\Transform\TransformViewModel.cpp" />
+    <ClCompile Include="ViewModels\Component\Core\Transform\TransformIntent.cpp" />
+    <ClCompile Include="ViewModels\Component\Core\Transform\TransformState.cpp" />
     <ClCompile Include="Types\TextureHandle.cpp" />
     <ClCompile Include="ViewModels\IViewModel.cpp" />
     <ClCompile Include="ViewModels\Viewport\ViewportState.cpp" />
@@ -268,6 +274,13 @@
   <ItemGroup>
     <ClInclude Include="Api\IFileSystemAPI.h" />
     <ClInclude Include="Api\IHierarchyAPI.h" />
+    <ClInclude Include="Api\ITagAPI.h" />
+    <ClInclude Include="ViewModels\Component\Core\Tag\TagIntent.h" />
+    <ClInclude Include="ViewModels\Component\Core\Tag\TagState.h" />
+    <ClInclude Include="ViewModels\Component\Core\Tag\TagViewModel.h" />
+    <ClInclude Include="ViewModels\Component\ComponentIntent.h" />
+    <ClInclude Include="ViewModels\Component\ComponentState.h" />
+    <ClInclude Include="ViewModels\Component\ComponentViewModel.h" />
     <ClInclude Include="ViewModels\Benchmark\BenchmarkViewModel.h" />
     <ClInclude Include="ViewModels\Benchmark\BenchmarkIntent.h" />
     <ClInclude Include="ViewModels\Benchmark\BenchmarkState.h" />
@@ -299,10 +312,10 @@
     <ClInclude Include="ViewModels\Settings\SettingsIntent.h" />
     <ClInclude Include="ViewModels\Settings\SettingsState.h" />
     <ClInclude Include="Types\EntityHandle.h" />
-    <ClInclude Include="ViewModels\Transform\TransformCommands.h" />
-    <ClInclude Include="ViewModels\Transform\TransformViewModel.h" />
-    <ClInclude Include="ViewModels\Transform\TransformIntent.h" />
-    <ClInclude Include="ViewModels\Transform\TransformState.h" />
+    <ClInclude Include="ViewModels\Component\Core\Transform\TransformCommands.h" />
+    <ClInclude Include="ViewModels\Component\Core\Transform\TransformViewModel.h" />
+    <ClInclude Include="ViewModels\Component\Core\Transform\TransformIntent.h" />
+    <ClInclude Include="ViewModels\Component\Core\Transform\TransformState.h" />
     <ClInclude Include="Types\TextureHandle.h" />
     <ClInclude Include="ViewModels\IViewModel.h" />
     <ClInclude Include="ViewModels\Viewport\ViewportState.h" />

@@ -7,6 +7,7 @@
 #include "IMaterialAPI.h"
 #include "IFileSystemAPI.h"
 #include "IHierarchyAPI.h"
+#include "ITagAPI.h"
 
 namespace Syn {
     class IEditorAPI :
@@ -17,7 +18,8 @@ namespace Syn {
         public ISceneAPI,
         public IMaterialAPI,
         public IFileSystemAPI,
-        public IHierarchyAPI
+        public IHierarchyAPI,
+        public ITagAPI
     {
     public:
         virtual ~IEditorAPI() = default;

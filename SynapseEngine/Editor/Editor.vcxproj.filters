@@ -39,9 +39,6 @@
     <ClCompile Include="Manager\GuiTextureManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="View\Transform\TransformView.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Manager\GuiManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -129,6 +126,15 @@
     <ClCompile Include="Widgets\ToggleWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="EditorApi\TagApiImpl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="View\Component\ComponentView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Widgets\Vector3Widget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Core\Windows\Window.h">
@@ -150,9 +156,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Manager\GuiTextureManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="View\Transform\TransformView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Manager\GuiManager.h">
@@ -207,6 +210,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Widgets\ToggleWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="View\Component\ComponentView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Widgets\Vector3Widget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

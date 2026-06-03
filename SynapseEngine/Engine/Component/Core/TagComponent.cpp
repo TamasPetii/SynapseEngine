@@ -4,7 +4,8 @@ namespace Syn
 {
 	TagComponent::TagComponent() :
 		name("Entity"),
-		tag("Untagged")
+		tag("Untagged"),
+		enabled(true)
 	{}
 
 	TagComponent::TagComponent(const std::string& name, const std::string& tag) :

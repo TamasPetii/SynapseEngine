@@ -4,8 +4,8 @@
 #include <GLFW/glfw3.h>
 #include <filesystem>
 
-#include "Editor/View/Transform/TransformView.h"
-#include "EditorCore/ViewModels/Transform/TransformViewModel.h"
+#include "Editor/View/Component/ComponentView.h"
+#include "EditorCore/ViewModels/Component/ComponentViewModel.h"
 
 #include "Editor/View/Viewport/ViewportView.h"
 #include "EditorCore/ViewModels/Viewport/ViewportViewModel.h"
@@ -107,13 +107,14 @@ void Synapse::OnInit() {
     _guiManager->CreateFontTexture();
     _iconManager->LoadEngineIcons(ICON_PATH);
 
-    using TransformWin = Syn::EditorWindow<Syn::TransformView, Syn::TransformViewModel>;
-    _guiManager->AddWindow<TransformWin>(
-        Syn::TransformView{
+    using ComponentWin = Syn::EditorWindow<Syn::ComponentView, Syn::ComponentViewModel>;
+    _guiManager->AddWindow<ComponentWin>(
+        Syn::ComponentView{
         },
-        Syn::TransformViewModel{
+        Syn::ComponentViewModel{
             _editorApi.get(),
-            _editorApi.get()
+            _editorApi.get(),
+            _editorApi.get(),
         });
 
     using ViewportWin = Syn::EditorWindow<Syn::ViewportView, Syn::ViewportViewModel>;
@@ -164,7 +165,8 @@ void Synapse::OnInit() {
         Syn::HierarchyView{},
         Syn::HierarchyViewModel{
             _editorApi.get(),
-            _editorApi.get()
+            _editorApi.get(),
+            _editorApi.get(),
         }
     );
 

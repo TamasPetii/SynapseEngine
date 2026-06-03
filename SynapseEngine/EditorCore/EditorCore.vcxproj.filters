@@ -27,16 +27,16 @@
     <ClCompile Include="Types\TextureHandle.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ViewModels\Transform\TransformState.cpp">
+    <ClCompile Include="ViewModels\Component\Core\Transform\TransformState.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ViewModels\Transform\TransformIntent.cpp">
+    <ClCompile Include="ViewModels\Component\Core\Transform\TransformIntent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ViewModels\Transform\TransformViewModel.cpp">
+    <ClCompile Include="ViewModels\Component\Core\Transform\TransformViewModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ViewModels\Transform\TransformCommands.cpp">
+    <ClCompile Include="ViewModels\Component\Core\Transform\TransformCommands.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Types\EntityHandle.cpp">
@@ -111,6 +111,24 @@
     <ClCompile Include="ViewModels\Benchmark\BenchmarkViewModel.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ViewModels\Component\ComponentViewModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewModels\Component\ComponentState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewModels\Component\ComponentIntent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewModels\Component\Core\Tag\TagViewModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewModels\Component\Core\Tag\TagState.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ViewModels\Component\Core\Tag\TagIntent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Command\ICommand.h">
@@ -125,19 +143,19 @@
     <ClInclude Include="Types\TextureHandle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ViewModels\Transform\TransformState.h">
+    <ClInclude Include="ViewModels\Component\Core\Transform\TransformState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ViewModels\Transform\TransformIntent.h">
+    <ClInclude Include="ViewModels\Component\Core\Transform\TransformIntent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ViewModels\Transform\TransformViewModel.h">
+    <ClInclude Include="ViewModels\Component\Core\Transform\TransformViewModel.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Api\IEditorApi.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ViewModels\Transform\TransformCommands.h">
+    <ClInclude Include="ViewModels\Component\Core\Transform\TransformCommands.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Api\ISelectionAPI.h">
@@ -237,6 +255,27 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ViewModels\Benchmark\BenchmarkViewModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewModels\Component\ComponentViewModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewModels\Component\ComponentState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewModels\Component\ComponentIntent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewModels\Component\Core\Tag\TagViewModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewModels\Component\Core\Tag\TagState.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ViewModels\Component\Core\Tag\TagIntent.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Api\ITagAPI.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

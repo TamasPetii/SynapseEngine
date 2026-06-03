@@ -11,12 +11,9 @@ namespace Syn {
         virtual std::vector<EntityID> GetRootEntities() const = 0;
         virtual std::vector<EntityID> GetChildren(EntityID entity) const = 0;
 
-        virtual std::string GetEntityName(EntityID entity) const = 0;
         virtual std::string GetEntityIcon(EntityID entity) const = 0;
-        virtual bool IsEntityVisible(EntityID entity) const = 0;
         virtual bool HasChildren(EntityID entity) const = 0;
 
-        virtual void SetEntityVisibility(EntityID entity, bool visible) = 0;
         virtual void SetParent(EntityID child, EntityID parent) = 0;
 
         virtual EntityID CreateEntity(const std::string& name, EntityID parent = NULL_ENTITY) = 0;

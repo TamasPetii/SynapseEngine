@@ -25,14 +25,6 @@ namespace Syn {
         return {};
     }
 
-    std::string EditorApiImpl::GetEntityName(EntityID entity) const {
-        auto scene = _sceneManager->GetActiveScene();
-        if (scene && scene->GetRegistry() && scene->GetRegistry()->HasComponent<TagComponent>(entity)) {
-            return scene->GetRegistry()->GetComponent<TagComponent>(entity).name;
-        }
-        return "Entity " + std::to_string(entity);
-    }
-
     std::string EditorApiImpl::GetEntityIcon(EntityID entity) const {
         auto scene = _sceneManager->GetActiveScene();
         if (!scene || !scene->GetRegistry()) return SYN_ICON_CUBE;
@@ -49,23 +41,8 @@ namespace Syn {
         return SYN_ICON_CUBE;
     }
 
-    bool EditorApiImpl::IsEntityVisible(EntityID entity) const {
-        return !_hiddenEntities.contains(entity);
-    }
-
     bool EditorApiImpl::HasChildren(EntityID entity) const {
         return false;
-    }
-
-    void EditorApiImpl::SetEntityVisibility(EntityID entity, bool visible) {
-        if (visible) {
-            _hiddenEntities.erase(entity);
-        }
-        else {
-            _hiddenEntities.insert(entity);
-        }
-
-        //Todo
     }
 
     void EditorApiImpl::SetParent(EntityID child, EntityID parent) {
@@ -101,7 +78,6 @@ namespace Syn {
             _selectedEntity = NULL_ENTITY;
         }
 
-        _hiddenEntities.erase(entity);
         scene->GetRegistry()->DestroyEntity(entity);
     }
 }
