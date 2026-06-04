@@ -1,5 +1,6 @@
 #include "DirectionLightShadowDrawGroup.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
+#include "Engine/Render/RenderNames.h"
 
 namespace Syn
 {
@@ -49,11 +50,22 @@ namespace Syn
         hizSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         hizSpec.mipLevels = SHADOW_HIZ_MIP_LEVELS;
 
-		//Need to generate mip views, but we have fix mip count, so we can just set up the configs here!
-        Syn::Vk::ImageViewConfig hizDefaultView{};
-        hizDefaultView.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        hizDefaultView.perMipViews = true;
-        hizSpec.imageViewConfigs[Syn::Vk::ImageViewNames::Default] = hizDefaultView;
+        hizSpec.AddView(Vk::ImageViewNames::Default, Vk::ImageViewConfig{
+                    .viewType = VK_IMAGE_VIEW_TYPE_2D,
+                    .perMipViews = true
+            });
+
+        hizSpec.AddView(RenderTargetViewNames::DirectionLightShadowDepthPyramidMax, Vk::ImageViewConfig{
+                    .viewType = VK_IMAGE_VIEW_TYPE_2D,
+                    .swizzle = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_ONE },
+                    .perMipViews = true
+            });
+
+        hizSpec.AddView(RenderTargetViewNames::DirectionLightShadowDepthPyramidMin, Vk::ImageViewConfig{
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .swizzle = { VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_ONE },
+            .perMipViews = true
+            });
 
         for (int i = 0; i < frameCount; ++i) {
             shadowAtlas.push_back(std::make_unique<Vk::Image>(atlasSpec));

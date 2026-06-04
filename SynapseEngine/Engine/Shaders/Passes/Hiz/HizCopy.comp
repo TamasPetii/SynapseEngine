@@ -1,6 +1,7 @@
 #version 460
 
 #include "../../Includes/Core.glsl"
+#include "../../Includes/Common/FrameGlobalContext.glsl"
 
 layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
 
@@ -17,8 +18,6 @@ void main() {
     ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
     if (pos.x >= int(pc.outImageSize.x) || pos.y >= int(pc.outImageSize.y)) return;
 
-    vec2 uv = (vec2(pos) + vec2(0.5)) / pc.outImageSize;
-    float depth = texture(inDepth, uv).x;
-    
+    float depth = texelFetch(inDepth, pos, 0).r;    
     imageStore(outImage, pos, vec4(depth, depth, 0.0, 0.0));
 }

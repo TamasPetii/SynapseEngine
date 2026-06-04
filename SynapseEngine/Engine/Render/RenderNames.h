@@ -31,6 +31,7 @@ namespace Syn
         static constexpr const char* SsaoAoIntermediate = "SsaoAoIntermediate";
 
 		static constexpr const char* DirectionLightShadowAtlas = "DirectionLightShadowAtlas";
+        static constexpr const char* DirectionLightShadowDepthPyramid = "DirectionLightShadowDepthPyramid";
     };
 
     struct SYN_API RenderTargetViewNames
@@ -44,5 +45,8 @@ namespace Syn
 
 		static constexpr const char* DepthOpaqueMax = "DepthOpaqueMax";
 		static constexpr const char* DepthTransparentMin = "DepthTransparentMin";
+
+        static constexpr const char* DirectionLightShadowDepthPyramidMin = "DirectionLightShadowDepthPyramidMin";
+        static constexpr const char* DirectionLightShadowDepthPyramidMax = "DirectionLightShadowDepthPyramidMax";
     };
 }

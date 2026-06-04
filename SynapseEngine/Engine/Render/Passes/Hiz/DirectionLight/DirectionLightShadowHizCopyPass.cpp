@@ -20,6 +20,8 @@ namespace Syn {
 
     bool DirectionLightShadowHizCopyPass::ShouldExecute(const RenderContext& context) const
     {
+        return true;
+
         auto pool = context.scene->GetRegistry()->GetPool<DirectionLightComponent>();
         return context.scene->GetSettings()->enableGeometryGpuCulling && pool && pool->Size() > 0;
     }
@@ -96,8 +98,8 @@ namespace Syn {
     }
 
     void DirectionLightShadowHizCopyPass::Dispatch(const RenderContext& context) {
-        uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(SHADOW_ATLAS_SIZE, ComputeGroupSize::Image16D);
-        uint32_t groupCountY = ComputeGroupSize::CalculateDispatchCount(SHADOW_ATLAS_SIZE, ComputeGroupSize::Image16D);
+        constexpr uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(SHADOW_ATLAS_SIZE, ComputeGroupSize::Image16D);
+        constexpr uint32_t groupCountY = ComputeGroupSize::CalculateDispatchCount(SHADOW_ATLAS_SIZE, ComputeGroupSize::Image16D);
 
         vkCmdDispatch(context.cmd, groupCountX, groupCountY, 1);
 

@@ -19,6 +19,8 @@ namespace Syn {
 
     bool DirectionLightShadowHizDownsamplePass::ShouldExecute(const RenderContext& context) const
     {
+        return true;
+
         auto pool = context.scene->GetRegistry()->GetPool<DirectionLightComponent>();
         return context.scene->GetSettings()->enableGeometryGpuCulling && pool && pool->Size() > 0;
     }

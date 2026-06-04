@@ -5,6 +5,7 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <glm/gtc/type_ptr.hpp>
+#include "Engine/Scene/DrawData/SceneDrawData.h"
 
 namespace Syn {
 
@@ -275,8 +276,38 @@ namespace Syn {
                 }
 
                 ImGui::SeparatorText("Shadow Passes");
-                RadioButton("Direction Light Shadow Atlas", RenderTargetGroupNames::Deferred, RenderTargetNames::DirectionLightShadowAtlas, Vk::ImageViewNames::Default);
 
+                static int shadowHzbMaxMip = 0;
+                shadowHzbMaxMip = std::clamp(shadowHzbMaxMip, 0, int(SHADOW_HIZ_MIP_LEVELS - 1));
+                std::string shadowMaxBaseView = RenderTargetViewNames::DirectionLightShadowDepthPyramidMax;
+                std::string shadowMaxView = shadowMaxBaseView + Vk::ImageViewNames::Mip + std::to_string(shadowHzbMaxMip);
+
+                RadioButton("DirLight HZB Max (R)", RenderTargetGroupNames::Deferred, RenderTargetNames::DirectionLightShadowDepthPyramid, shadowMaxView);
+
+                if (state.currentView.contains(shadowMaxBaseView)) {
+                    ImGui::Indent();
+                    if (ImGui::SliderInt("Mip##ShadowHzbMax", &shadowHzbMaxMip, 0, SHADOW_HIZ_MIP_LEVELS - 1)) {
+                        shadowMaxView = shadowMaxBaseView + Vk::ImageViewNames::Mip + std::to_string(shadowHzbMaxMip);
+                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::DirectionLightShadowDepthPyramid, shadowMaxView });
+                    }
+                    ImGui::Unindent();
+                }
+
+                static int shadowHzbMinMip = 0;
+                shadowHzbMinMip = std::clamp(shadowHzbMinMip, 0, int(SHADOW_HIZ_MIP_LEVELS - 1));
+                std::string shadowMinBaseView = RenderTargetViewNames::DirectionLightShadowDepthPyramidMin;
+                std::string shadowMinView = shadowMinBaseView + Vk::ImageViewNames::Mip + std::to_string(shadowHzbMinMip);
+
+                RadioButton("DirLight HZB Min (G)", RenderTargetGroupNames::Deferred, RenderTargetNames::DirectionLightShadowDepthPyramid, shadowMinView);
+
+                if (state.currentView.contains(shadowMinBaseView)) {
+                    ImGui::Indent();
+                    if (ImGui::SliderInt("Mip##ShadowHzbMin", &shadowHzbMinMip, 0, SHADOW_HIZ_MIP_LEVELS - 1)) {
+                        shadowMinView = shadowMinBaseView + Vk::ImageViewNames::Mip + std::to_string(shadowHzbMinMip);
+                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::DirectionLightShadowDepthPyramid, shadowMinView });
+                    }
+                    ImGui::Unindent();
+                }
             }
             ImGui::EndChild();
             ImGui::EndPopup();

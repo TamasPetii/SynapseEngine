@@ -26,10 +26,14 @@ namespace Syn
 
         if (_viewportTextures.find(cacheKey) == _viewportTextures.end()) {
             
-            if(targetName == RenderTargetNames::DirectionLightShadowAtlas) {
-				auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
+            if (targetName == RenderTargetNames::DirectionLightShadowDepthPyramid) {
+                auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
                 auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::NearestClampEdge);
-                TextureHandle handle = _textureManager->RegisterTexture(drawData->DirectionLightShadow.shadowAtlas[currentFrame]->GetView(viewName), sampler->Handle());
+
+                TextureHandle handle = _textureManager->RegisterTexture(
+                    drawData->DirectionLightShadow.shadowDepthPyramid[currentFrame]->GetView(viewName),
+                    sampler->Handle()
+                );
                 _viewportTextures[cacheKey] = handle;
             }
             else
