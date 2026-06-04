@@ -1,5 +1,5 @@
 #include "DirectionLightShadowDrawGroup.h"
-
+#include "Engine/Vk/Image/ImageViewNames.h"
 
 namespace Syn
 {
@@ -49,9 +49,16 @@ namespace Syn
         hizSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         hizSpec.mipLevels = SHADOW_HIZ_MIP_LEVELS;
 
-        for(int i = 0; i < frameCount; ++i)
+		//Need to generate mip views, but we have fix mip count, so we can just set up the configs here!
+        Syn::Vk::ImageViewConfig hizDefaultView{};
+        hizDefaultView.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        hizDefaultView.perMipViews = true;
+        hizSpec.imageViewConfigs[Syn::Vk::ImageViewNames::Default] = hizDefaultView;
+
+        for (int i = 0; i < frameCount; ++i) {
             shadowAtlas.push_back(std::make_unique<Vk::Image>(atlasSpec));
             shadowDepthPyramid.push_back(std::make_unique<Vk::Image>(hizSpec));
+        }
     }
 
     void DirectionLightShadowDrawGroup::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) {
