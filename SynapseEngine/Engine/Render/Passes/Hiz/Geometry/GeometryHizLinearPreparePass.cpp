@@ -1,4 +1,4 @@
-#include "HizLinearPreparePass.h"
+#include "GeometryHizLinearPreparePass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Scene/Scene.h"
@@ -11,25 +11,26 @@
 #include "Engine/Vk/Image/ImageUtils.h" 
 #include "Engine/Render/ComputeGroupSize.h"
 #include <glm/glm.hpp>
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
     
     #include "Engine/Shaders/Includes/PushConstants/HizLinearizeDepthPC.glsl"
 
-    bool HizLinearPreparePass::ShouldExecute(const RenderContext& context) const
+    bool GeometryHizLinearPreparePass::ShouldExecute(const RenderContext& context) const
     {
         auto settings = context.scene->GetSettings();
         return !settings->useDebugCamera;
     }
 
-    void HizLinearPreparePass::Initialize() {
+    void GeometryHizLinearPreparePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
         _shaderProgram = shaderManager->CreateProgram("HizLinearizeDepthProgram", {
             ShaderNames::HizLinearizeDepth
             });
     }
 
-    void HizLinearPreparePass::PrepareFrame(const RenderContext& context) {
+    void GeometryHizLinearPreparePass::PrepareFrame(const RenderContext& context) {
         auto scene = context.scene;
 
         auto currGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
@@ -63,7 +64,7 @@ namespace Syn {
             });
     }
 
-    void HizLinearPreparePass::BindDescriptors(const RenderContext& context) {
+    void GeometryHizLinearPreparePass::BindDescriptors(const RenderContext& context) {
         auto scene = context.scene;
 
         uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
@@ -106,21 +107,20 @@ namespace Syn {
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
     }
 
-    void HizLinearPreparePass::PushConstants(const RenderContext& context) {
+    void GeometryHizLinearPreparePass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
 
         uint32_t fIdx = context.frameIndex;
         auto compManager = scene->GetComponentBufferManager();
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, fIdx);
 
-        HizLinearizeDepthPC pc{};
-		pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-        pc.outImageSize = glm::vec2(rtGroup->GetWidth(), rtGroup->GetHeight());
-        
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(HizLinearizeDepthPC), &pc);
+        Vk::PushConstant<HizLinearizeDepthPC> pc;
+		pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->outImageSize = glm::vec2(rtGroup->GetWidth(), rtGroup->GetHeight());    
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
-    void HizLinearPreparePass::Dispatch(const RenderContext& context) {
+    void GeometryHizLinearPreparePass::Dispatch(const RenderContext& context) {
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
         uint32_t width = rtGroup->GetWidth();

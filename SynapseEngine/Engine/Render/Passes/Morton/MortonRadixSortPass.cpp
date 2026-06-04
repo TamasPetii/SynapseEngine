@@ -6,6 +6,7 @@
 #include "Engine/Vk/Context.h"
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Scene/BufferNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 #include <volk.h>
 #define VRDX_IMPLEMENTATION

@@ -612,10 +612,10 @@
     <ClCompile Include="Mesh\Processor\MeshProcessor\Optimizer\MeshoptimizerOptimizerProcessor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Hiz\HizDownsamplePass.cpp">
+    <ClCompile Include="Render\Passes\Hiz\Geometry\GeometryHizDownsamplePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Hiz\HizLinearPreparePass.cpp">
+    <ClCompile Include="Render\Passes\Hiz\Geometry\GeometryHizLinearPreparePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Present\CompositePass.cpp">
@@ -1020,7 +1020,7 @@
     <ClCompile Include="Render\Passes\Present\PresentationTransitionPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Setup\HizInitPass.cpp">
+    <ClCompile Include="Render\Passes\Hiz\HizInitPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Render\Passes\Shading\Visibility\DebugVisibilityPass.cpp">
@@ -1362,10 +1362,40 @@
     <ClCompile Include="Render\Passes\Shadow\Direction\DirectionLightShadowMeshletOpaquePass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowMortonModelCulling.comp">
+    <ClCompile Include="Render\Passes\Culling\Geometry\GeometryWorkGraphCullingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Passes\Culling\Geometry\GeometryWorkGraphCullingPass.cpp">
+    <ClCompile Include="Render\Passes\Culling\DirectionLight\DirectionLightShadowCullingCommandResetPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Culling\DirectionLight\DirectionLightShadowMortonChunkCullingPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Culling\DirectionLight\DirectionLightShadowMortonModelCullingPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Culling\DirectionLight\DirectionLightShadowStaticChunkCullingPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Culling\DirectionLight\DirectionLightShadowStaticModelCullingPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Culling\DirectionLight\DirectionLightShadowModelCullingPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Culling\DirectionLight\DirectionLightShadowMeshCullingPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Hiz\DirectionLight\DirectionLightShadowHizCopyPass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Hiz\DirectionLight\DirectionLightShadowHizDownsamplePass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Vk\Rendering\PushConstant.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Render\Passes\Culling\DirectionLight\DirectionLightShadowWorkGraphCullingPass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -2066,10 +2096,10 @@
     <ClInclude Include="Mesh\Processor\MeshProcessor\Optimizer\MeshoptimizerOptimizerProcessor.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Hiz\HizDownsamplePass.h">
+    <ClInclude Include="Render\Passes\Hiz\Geometry\GeometryHizDownsamplePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Hiz\HizLinearPreparePass.h">
+    <ClInclude Include="Render\Passes\Hiz\Geometry\GeometryHizLinearPreparePass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\ComputeGroupSize.h">
@@ -2489,7 +2519,7 @@
     <ClInclude Include="Render\Passes\Present\PresentationTransitionPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Passes\Setup\HizInitPass.h">
+    <ClInclude Include="Render\Passes\Hiz\HizInitPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Render\Passes\Shading\Visibility\DebugVisibilityPass.h">
@@ -2945,6 +2975,39 @@
     <ClInclude Include="Render\Passes\Culling\Geometry\GeometryWorkGraphCullingPass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Render\Passes\Culling\DirectionLight\DirectionLightShadowCullingCommandResetPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Culling\DirectionLight\DirectionLightShadowMortonChunkCullingPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Culling\DirectionLight\DirectionLightShadowMortonModelCullingPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Culling\DirectionLight\DirectionLightShadowStaticChunkCullingPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Culling\DirectionLight\DirectionLightShadowStaticModelCullingPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Culling\DirectionLight\DirectionLightShadowModelCullingPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Culling\DirectionLight\DirectionLightShadowMeshCullingPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Hiz\DirectionLight\DirectionLightShadowHizCopyPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Hiz\DirectionLight\DirectionLightShadowHizDownsamplePass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Vk\Rendering\PushConstant.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Render\Passes\Culling\DirectionLight\DirectionLightShadowWorkGraphCullingPass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Includes\Common\Animation.glsl" />
@@ -3099,5 +3162,7 @@
     <None Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowWorkGraphStaticModelCulling.comp" />
     <None Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowWorkGraphMortonChunkCulling.comp" />
     <None Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowWorkGraphMortonModelCulling.comp" />
+    <None Include="Shaders\Passes\Culling\DirectionLight\DirectionLightShadowMortonModelCulling.comp" />
+    <None Include="Shaders\Passes\Hiz\HizCopy.comp" />
   </ItemGroup>
 </Project>

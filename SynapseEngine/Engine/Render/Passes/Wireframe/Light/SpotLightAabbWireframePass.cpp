@@ -9,6 +9,7 @@
 #include "Engine/Vk/Buffer/BufferUtils.h"
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -111,20 +112,12 @@ namespace Syn {
 
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
 
-        WireframeDebugPC pc{};
-		pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-		pc.vertexPositionBufferAddr = cube->hardwareBuffers.vertexPositions->GetDeviceAddress();
-		pc.indexBufferAddr = cube->hardwareBuffers.indices->GetDeviceAddress();
-        pc.shapeDrawType = WIREFRAME_DEBUG_SHAPE_TYPE_SPOT_LIGHT_AABB;
-
-        vkCmdPushConstants(
-            context.cmd,
-            _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL,
-            0,
-            sizeof(WireframeDebugPC),
-            &pc
-        );
+        Vk::PushConstant<WireframeDebugPC> pc{};
+		pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+		pc->vertexPositionBufferAddr = cube->hardwareBuffers.vertexPositions->GetDeviceAddress();
+		pc->indexBufferAddr = cube->hardwareBuffers.indices->GetDeviceAddress();
+        pc->shapeDrawType = WIREFRAME_DEBUG_SHAPE_TYPE_SPOT_LIGHT_AABB;
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void SpotLightAabbWireframePass::Draw(const RenderContext& context) {

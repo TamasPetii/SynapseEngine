@@ -4,6 +4,7 @@
 #include "Engine/Scene/Scene.h"
 #include "Engine/Vk/Buffer/BufferUtils.h"
 #include "Engine/Render/ComputeGroupSize.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -33,10 +34,9 @@ namespace Syn {
 
         _totalCommands = drawData->Models.activeTraditionalCount + drawData->Models.activeMeshletCount;
 
-        CullingCommandResetPC pc{};
-        pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(),VK_SHADER_STAGE_ALL, 0, sizeof(CullingCommandResetPC), &pc);
+        Vk::PushConstant<CullingCommandResetPC> pc;
+        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void GeometryCullingCommandResetPass::Dispatch(const RenderContext& context) {

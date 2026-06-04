@@ -161,6 +161,7 @@ struct FrameGlobalContext {
     uint directionLightShadowAtlasSize;
     uint directionLightShadowMinBlockSize;
     uint directionLightShadowGridSize;
+    uint directionLightShadowHizMipLevels;
 };
 
 #ifndef __cplusplus

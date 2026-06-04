@@ -16,6 +16,7 @@
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "Engine/Vk/Context.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -154,10 +155,9 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
         bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-        ModelMeshCullingPC pc{};
-        pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ModelMeshCullingPC), &pc);
+        Vk::PushConstant<ModelMeshCullingPC> pc;
+        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void GeometryWorkGraphCullingPass::BindDescriptors(const RenderContext& context) {

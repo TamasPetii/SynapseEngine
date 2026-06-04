@@ -12,6 +12,7 @@ namespace Syn
         static constexpr const char* PointLightCullingPasses = "PointLightCullingPasses";
         static constexpr const char* SpotLightCullingPasses = "SpotLightCullingPasses";
         static constexpr const char* GeometryCullingPasses = "GeometryCullingPasses";
+        static constexpr const char* DirectionLightShadowCullingPasses = "DirectionLightShadowCullingPasses";
         static constexpr const char* HizPasses = "HizPasses";
         static constexpr const char* PresentPasses = "PresentPasses";
         static constexpr const char* InitSetupPasses = "InitSetupPasses";

@@ -11,6 +11,7 @@
 #include "Engine/Vk/Buffer/BufferUtils.h"
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
 #include "Engine/Component/Light/Direction/DirectionLightComponent.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/BillboardPC.glsl"
@@ -148,12 +149,11 @@ namespace Syn {
         auto compManager = scene->GetComponentBufferManager();
         uint32_t fIdx = context.frameIndex;
 
-        BillboardPC pc{};
-        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-        pc.visibleEntitiesAddr = compManager->GetBufferAddr(BufferNames::DirectionLightVisibleData, fIdx);
-        pc.baseScale = 1.0f;
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(BillboardPC), &pc);
+        Vk::PushConstant<BillboardPC> pc;
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->visibleEntitiesAddr = compManager->GetBufferAddr(BufferNames::DirectionLightVisibleData, fIdx);
+        pc->baseScale = 1.0f;
+		pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void DirectionLightBillboardPass::Draw(const RenderContext& context) {

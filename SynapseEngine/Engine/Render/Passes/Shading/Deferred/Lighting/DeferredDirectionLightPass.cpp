@@ -9,6 +9,7 @@
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Scene/BufferNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -83,10 +84,9 @@ namespace Syn {
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         uint32_t fIdx = context.frameIndex;
 
-        DeferredDirectionLightPC pc{};
-		pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(DeferredDirectionLightPC), &pc);
+        Vk::PushConstant<DeferredDirectionLightPC> pc;
+		pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void DeferredDirectionLightPass::BindDescriptors(const RenderContext& context) {

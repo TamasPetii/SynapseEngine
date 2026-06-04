@@ -10,6 +10,7 @@
 #include "Engine/Image/ImageManager.h"
 #include <glm/glm.hpp>
 #include <algorithm>
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -84,9 +85,9 @@ namespace Syn {
 
             pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
 
-            BloomDownSamplePC pc{};
-            pc.texelSize = 1.0f / currentInSize;
-            vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(BloomDownSamplePC), &pc);
+            Vk::PushConstant<BloomDownSamplePC> pc;
+            pc->texelSize = 1.0f / currentInSize;
+            pc.Push(context.cmd, _shaderProgram->GetLayout());
 
             uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount((uint32_t)currentOutSize.x, ComputeGroupSize::Image8D);
             uint32_t groupCountY = ComputeGroupSize::CalculateDispatchCount((uint32_t)currentOutSize.y, ComputeGroupSize::Image8D);

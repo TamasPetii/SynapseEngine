@@ -12,6 +12,7 @@
 #include "Engine/Image/ImageNames.h"
 #include "Engine/Render/ComputeGroupSize.h"
 #include <glm/glm.hpp>
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -77,17 +78,16 @@ namespace Syn {
         auto imageManager = ServiceLocator::GetImageManager();
         auto noiseTexture = imageManager->GetResource(ImageNames::SsaoNoiseTexture);
 
-        SsaoPC pc{};
-        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-        pc.aoRadius = scene->GetSettings()->aoRadius;
-        pc.aoIntensity = scene->GetSettings()->aoIntensity;
-        pc.maxOcclusionDistance = scene->GetSettings()->maxOcclusionDistance;
-        pc.bias = scene->GetSettings()->bias;
-        pc.sampleCount = scene->GetSettings()->sampleCount;
-		pc.noiseTextureWidth = static_cast<float>(noiseTexture->image->GetExtent().width);
-		pc.noiseTextureHeight = static_cast<float>(noiseTexture->image->GetExtent().height);
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(SsaoPC), &pc);
+        Vk::PushConstant<SsaoPC> pc{};
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->aoRadius = scene->GetSettings()->aoRadius;
+        pc->aoIntensity = scene->GetSettings()->aoIntensity;
+        pc->maxOcclusionDistance = scene->GetSettings()->maxOcclusionDistance;
+        pc->bias = scene->GetSettings()->bias;
+        pc->sampleCount = scene->GetSettings()->sampleCount;
+		pc->noiseTextureWidth = static_cast<float>(noiseTexture->image->GetExtent().width);
+		pc->noiseTextureHeight = static_cast<float>(noiseTexture->image->GetExtent().height);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void SsaoPass::Dispatch(const RenderContext& context) {

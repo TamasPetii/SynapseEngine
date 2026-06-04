@@ -14,6 +14,7 @@
 
 #include "Engine/Render/Passes/Culling/PointLightCullingPass.h"
 #include "Engine/Render/Passes/Culling/SpotLightCullingPass.h"
+
 #include "Engine/Render/Passes/Culling/Geometry/GeometryModelCullingPass.h"
 #include "Engine/Render/Passes/Culling/Geometry/GeometryStaticModelCullingPass.h"
 #include "Engine/Render/Passes/Culling/Geometry/GeometryStaticChunkCullingPass.h"
@@ -22,14 +23,24 @@
 #include "Engine/Render/Passes/Culling/Geometry/GeometryMeshCullingPass.h"
 #include "Engine/Render/Passes/Culling/Geometry/GeometryCullingCommandResetPass.h"
 
+#include "Engine/Render/Passes/Culling/DirectionLight/DirectionLightShadowModelCullingPass.h"
+#include "Engine/Render/Passes/Culling/DirectionLight/DirectionLightShadowStaticModelCullingPass.h"
+#include "Engine/Render/Passes/Culling/DirectionLight/DirectionLightShadowStaticChunkCullingPass.h"
+#include "Engine/Render/Passes/Culling/DirectionLight/DirectionLightShadowMortonModelCullingPass.h"
+#include "Engine/Render/Passes/Culling/DirectionLight/DirectionLightShadowMortonChunkCullingPass.h"
+#include "Engine/Render/Passes/Culling/DirectionLight/DirectionLightShadowMeshCullingPass.h"
+#include "Engine/Render/Passes/Culling/DirectionLight/DirectionLightShadowCullingCommandResetPass.h"
+
 #include "Engine/Render/Passes/Morton/ChunkBuilderPass.h"
 #include "Engine/Render/Passes/Morton/MortonGeneratorPass.h"
 #include "Engine/Render/Passes/Morton/MortonRadixSortPass.h"
 #include "Engine/Render/Passes/Morton/SceneAabbPass.h"
 
-#include "Engine/Render/Passes/Setup/HizInitPass.h"
-#include "Engine/Render/Passes/Hiz/HizLinearPreparePass.h"
-#include "Engine/Render/Passes/Hiz/HizDownsamplePass.h"
+#include "Engine/Render/Passes/Hiz/HizInitPass.h"
+#include "Engine/Render/Passes/Hiz/Geometry/GeometryHizLinearPreparePass.h"
+#include "Engine/Render/Passes/Hiz/Geometry/GeometryHizDownsamplePass.h"
+#include "Engine/Render/Passes/Hiz/DirectionLight/DirectionLightShadowHizCopyPass.h"
+#include "Engine/Render/Passes/Hiz/DirectionLight/DirectionLightShadowHizDownsamplePass.h"
 
 #include "Engine/Render/Passes/Present/GuiPass.h"
 #include "Engine/Render/Passes/Present/CompositePass.h"
@@ -140,15 +151,20 @@ namespace Syn
         pipeline->AddPass(std::make_unique<GeometryMeshCullingPass>());
 
         //Todo - Gpu Driven Direction Light Culling
+        pipeline->AddPass(std::make_unique<DirectionLightShadowCullingCommandResetPass>());
+        pipeline->AddPass(std::make_unique<DirectionLightShadowMortonChunkCullingPass>());
+        pipeline->AddPass(std::make_unique<DirectionLightShadowMortonModelCullingPass>());
+        pipeline->AddPass(std::make_unique<DirectionLightShadowStaticChunkCullingPass>());
+        pipeline->AddPass(std::make_unique<DirectionLightShadowStaticModelCullingPass>());
+        pipeline->AddPass(std::make_unique<DirectionLightShadowModelCullingPass>());
+        pipeline->AddPass(std::make_unique<DirectionLightShadowMeshCullingPass>());
 
         //DirectionLight Shadow Passes
-        /*
         pipeline->AddPass(std::make_unique<DirectionLightShadowInitPass>());
         pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
         pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
-        */
 
 		//Forward+ Depth Opaque Prepasses
 		pipeline->AddPass(std::make_unique<OpaqueDepthTransitionPrepass>());
@@ -175,8 +191,10 @@ namespace Syn
         pipeline->AddPass(std::make_unique<TraditionalTransparentDepthPrepass>(MaterialRenderType::Transparent2Sided));
 
 		//Build Hi-Z depth pyramid (Opaque|Transparent)
-        pipeline->AddPass(std::make_unique<HizLinearPreparePass>());
-        pipeline->AddPass(std::make_unique<HizDownsamplePass>());
+        pipeline->AddPass(std::make_unique<GeometryHizLinearPreparePass>());
+        pipeline->AddPass(std::make_unique<GeometryHizDownsamplePass>());
+        pipeline->AddPass(std::make_unique<DirectionLightShadowHizCopyPass>());
+        pipeline->AddPass(std::make_unique<DirectionLightShadowHizDownsamplePass>());
 
 		//Ssao Passes
         pipeline->AddPass(std::make_unique<SsaoInitPass>());

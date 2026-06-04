@@ -8,6 +8,7 @@
 #include "Engine/Render/ComputeGroupSize.h"
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Image/ImageManager.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -85,12 +86,12 @@ namespace Syn {
         uint32_t width = rt->GetWidth();
         uint32_t height = rt->GetHeight();
 
-        BloomPrefilterPC pc{};
-        pc.knee = scene->GetSettings()->bloomKnee;
-        pc.threshold = scene->GetSettings()->bloomThreshold;
-        pc.texelSize = 1.0f / glm::vec2(width, height);
+        Vk::PushConstant<BloomPrefilterPC> pc;
+        pc->knee = scene->GetSettings()->bloomKnee;
+        pc->threshold = scene->GetSettings()->bloomThreshold;
+        pc->texelSize = 1.0f / glm::vec2(width, height);
 
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(BloomPrefilterPC), &pc);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void BloomPrefilterPass::Dispatch(const RenderContext& context) {

@@ -10,6 +10,7 @@
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Image/ImageManager.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -97,18 +98,17 @@ namespace Syn {
 
         auto shape = modelManager->GetResource(MeshSourceNames::ProxyIcoSphere);
 
-        WireframeMeshletPC pc{};
-        pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
-        pc.vertexPositionBufferAddr = shape->hardwareBuffers.vertexPositions->GetDeviceAddress();
-        pc.indexBufferAddr = shape->hardwareBuffers.indices->GetDeviceAddress();
-        pc.baseDescriptorOffset = drawData->Models.activeTraditionalCount;
-        pc.vertexCount = shape->cpuData.globalVertexCount;
-        pc.indexCount = shape->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;
-        pc.shapeType = WIREFRAME_MESHLET_SHAPE_TYPE_SPHERE;
-        pc.materialRenderType = 0;
-        pc.disableConeCulling = 0;
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(WireframeMeshletPC), &pc);
+        Vk::PushConstant<WireframeMeshletPC> pc{};
+        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+        pc->vertexPositionBufferAddr = shape->hardwareBuffers.vertexPositions->GetDeviceAddress();
+        pc->indexBufferAddr = shape->hardwareBuffers.indices->GetDeviceAddress();
+        pc->baseDescriptorOffset = drawData->Models.activeTraditionalCount;
+        pc->vertexCount = shape->cpuData.globalVertexCount;
+        pc->indexCount = shape->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;
+        pc->shapeType = WIREFRAME_MESHLET_SHAPE_TYPE_SPHERE;
+        pc->materialRenderType = 0;
+        pc->disableConeCulling = 0;
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void WireframeMeshletSpherePass::BindDescriptors(const RenderContext& context) {

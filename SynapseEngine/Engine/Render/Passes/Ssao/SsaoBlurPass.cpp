@@ -9,6 +9,7 @@
 #include "Engine/Vk/Image/ImageUtils.h"
 #include "Engine/Render/ComputeGroupSize.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -50,10 +51,9 @@ namespace Syn {
 
     void SsaoBlurPass::PushConstants(const RenderContext& context)
     {
-        SsaoBlurPC pc{};
-        pc.frameGlobalContextBufferAddr = context.scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex, true);
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(SsaoBlurPC), &pc);
+        Vk::PushConstant<SsaoBlurPC> pc{};
+        pc->frameGlobalContextBufferAddr = context.scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex, true);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void SsaoBlurPass::BindDescriptors(const RenderContext& context) {

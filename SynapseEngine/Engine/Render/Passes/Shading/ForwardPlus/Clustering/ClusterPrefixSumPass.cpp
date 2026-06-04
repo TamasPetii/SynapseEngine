@@ -3,6 +3,7 @@
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Vk/Buffer/BufferUtils.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn 
 {
@@ -23,10 +24,9 @@ namespace Syn
         auto drawData = context.scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
 
-        ClusterPrefixSumPC pc{};
-		pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, true);
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ClusterPrefixSumPC), &pc);
+        Vk::PushConstant<ClusterPrefixSumPC> pc;
+		pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, true);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void ClusterPrefixSumPass::Dispatch(const RenderContext& context) {

@@ -3,13 +3,14 @@
 #include "Engine/Render/Passes/ComputePass.h"
 
 namespace Syn {
-    class SYN_API HizLinearPreparePass : public ComputePass {
+    class SYN_API DirectionLightShadowHizCopyPass : public ComputePass {
     public:
-        std::string GetName() const override { return "HizLinearPreparePass"; }
+        std::string GetName() const override { return "DirectionLightShadowHizCopyPass"; }
         std::string GetGroup() const override { return PassGroupNames::HizPasses; }
+
         void Initialize() override;
     protected:
-		bool ShouldExecute(const RenderContext& context) const override;
+        bool ShouldExecute(const RenderContext& context) const override;
         void PrepareFrame(const RenderContext& context) override;
         void BindDescriptors(const RenderContext& context) override;
         void PushConstants(const RenderContext& context) override;

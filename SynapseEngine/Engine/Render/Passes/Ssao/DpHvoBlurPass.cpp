@@ -9,6 +9,7 @@
 #include "Engine/Vk/Image/ImageUtils.h"
 #include "Engine/Render/ComputeGroupSize.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -62,9 +63,9 @@ namespace Syn {
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(width, ComputeGroupSize::Image8D);
         uint32_t groupCountY = ComputeGroupSize::CalculateDispatchCount(height, ComputeGroupSize::Image8D);
 
-        DpHvoBlurPC pc{};
-        pc.frameGlobalContextBufferAddr = context.scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex, true);
-        pc.depthSharpness = context.scene->GetSettings()->depthSharpness;
+        Vk::PushConstant<DpHvoBlurPC> pc{};
+        pc->frameGlobalContextBufferAddr = context.scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex, true);
+        pc->depthSharpness = context.scene->GetSettings()->depthSharpness;
 
         Vk::PushDescriptorWriter pushWriterH;
         pushWriterH.AddCombinedImageSampler(0, ssaoAo->GetView(Vk::ImageViewNames::Default), sampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -72,8 +73,8 @@ namespace Syn {
         pushWriterH.AddStorageImage(2, ssaoAoInt->GetView(Vk::ImageViewNames::Default), VK_IMAGE_LAYOUT_GENERAL);
         pushWriterH.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
 
-        pc.blurDirection = glm::vec2(1.0f, 0.0f);
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(DpHvoBlurPC), &pc);
+        pc->blurDirection = glm::vec2(1.0f, 0.0f);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
         vkCmdDispatch(context.cmd, groupCountX, groupCountY, 1);
 
         ssaoAoInt->TransitionLayout(context.cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT);
@@ -85,8 +86,8 @@ namespace Syn {
         pushWriterV.AddStorageImage(2, ssaoAo->GetView(Vk::ImageViewNames::Default), VK_IMAGE_LAYOUT_GENERAL);
         pushWriterV.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
 
-        pc.blurDirection = glm::vec2(0.0f, 1.0f);
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(DpHvoBlurPC), &pc);
+        pc->blurDirection = glm::vec2(0.0f, 1.0f);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
         vkCmdDispatch(context.cmd, groupCountX, groupCountY, 1);
 
         ssaoAo->TransitionLayout(context.cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT);

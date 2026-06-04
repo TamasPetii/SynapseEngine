@@ -2,6 +2,7 @@
 #include "Engine/ServiceLocator.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Scene/Scene.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/ClusterDispatchSetupPC.glsl"
@@ -20,11 +21,10 @@ namespace Syn {
         auto drawData = context.scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
 
-        ClusterDispatchSetupPC pc{};
-        pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, true);
-        pc.dispatchArgsBufferAddr = drawData->ForwardPlus.dispatchArgsBuffer.GetAddress(fIdx, true);
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ClusterDispatchSetupPC), &pc);
+        Vk::PushConstant<ClusterDispatchSetupPC> pc;
+        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, true);
+        pc->dispatchArgsBufferAddr = drawData->ForwardPlus.dispatchArgsBuffer.GetAddress(fIdx, true);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void ClusterDispatchSetupPass::Dispatch(const RenderContext& context) {

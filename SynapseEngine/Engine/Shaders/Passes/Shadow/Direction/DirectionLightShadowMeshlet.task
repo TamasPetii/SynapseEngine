@@ -25,6 +25,9 @@ layout(push_constant) uniform PushConstants {
    DirectionLightShadowTraditionalMeshletPassPC pc;
 };
 
+// Depth pyramid (HZB) for the shadow atlas occlusion culling
+layout(set = 2, binding = 0) uniform sampler2D shadowDepthPyramid;
+
 void main() {
     uint threadIdx = gl_LocalInvocationID.x;
     uint localInstanceID = gl_WorkGroupID.x;  
@@ -112,17 +115,15 @@ void main() {
 
         // 10. Occlusion Culling using Cascade Depth Pyramid (HZB)
         float screenSizePixels = 0.0;
-        if (false && isVisible && ctx.enableMeshletOcclusionCulling == 1) {
-
-            mat4 viewProj = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIdx).cascadeViewProjsVulkan[cascadeIdx];
-            vec4 rect = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIdx).cascadeAtlasRects[cascadeIdx];
-            bool enableDepthOcclusion = (ctx.enableMeshletOcclusionCulling == 1); //Todo, integrate + Hiz Texture
-
-            /*
-            if (IsSphereOccludedDirLightShadow(worldCollider.center, worldCollider.radius, viewProj, rect, shadowDepthPyramid, float(ctx.directionLightShadowAtlasSize), screenSizePixels)) {
-                isVisible = false;
+        if (isVisible && ctx.enableMeshletOcclusionCulling == 1) {
+            mat4 shadowViewProj = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIdx).cascadeViewProjsVulkan[cascadeIdx];
+            vec4 shadowAtlasRect = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIdx).cascadeAtlasRects[cascadeIdx];
+            bool enableDepthOcclusion = (ctx.enableMeshletOcclusionCulling == 1);
+                        
+            float shadowScreenSizePixels = 0.0;
+            if (IsSphereOccludedDirLightShadow(worldCollider.center, worldCollider.radius, shadowViewProj, shadowAtlasRect, shadowDepthPyramid, float(ctx.directionLightShadowAtlasSize), ctx.directionLightShadowHizMipLevels, shadowScreenSizePixels)) {
+               isVisible = false;
             }
-            */
         }
 
         // 11. Emit surviving meshlets

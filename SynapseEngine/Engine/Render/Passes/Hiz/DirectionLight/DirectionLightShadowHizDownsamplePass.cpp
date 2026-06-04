@@ -1,4 +1,4 @@
-#include "HizDownsamplePass.h"
+#include "DirectionLightShadowHizDownsamplePass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Render/RenderNames.h"
@@ -10,30 +10,32 @@
 #include "Engine/Image/ImageManager.h"
 #include <glm/glm.hpp>
 #include <algorithm>
+#include "Engine/Component/Light/Direction/DirectionLightComponent.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/HizDownSamplePC.glsl"
 
-    bool HizDownsamplePass::ShouldExecute(const RenderContext& context) const
+    bool DirectionLightShadowHizDownsamplePass::ShouldExecute(const RenderContext& context) const
     {
-		auto settings = context.scene->GetSettings();
-        return !settings->useDebugCamera;
+        auto pool = context.scene->GetRegistry()->GetPool<DirectionLightComponent>();
+        return context.scene->GetSettings()->enableGeometryGpuCulling && pool && pool->Size() > 0;
     }
 
-    void HizDownsamplePass::Initialize() {
+    void DirectionLightShadowHizDownsamplePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
-        _shaderProgram = shaderManager->CreateProgram("HizDownsampleProgram", {
+        _shaderProgram = shaderManager->CreateProgram("DirectionLightShadowHizDownsampleProgram", {
             ShaderNames::HizDownsample
             });
     }
 
-    void HizDownsamplePass::PrepareFrame(const RenderContext& context) {
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
-        auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
+    void DirectionLightShadowHizDownsamplePass::PrepareFrame(const RenderContext& context) {
+        auto drawData = context.scene->GetSceneDrawData();
+        auto& depthPyramid = drawData->DirectionLightShadow.shadowDepthPyramid[context.frameIndex];
 
         _imageTransitions.push_back({
-            depthPyramid,
+            depthPyramid.get(),
             VK_IMAGE_LAYOUT_GENERAL,
             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
             VK_ACCESS_SHADER_WRITE_BIT,
@@ -41,19 +43,19 @@ namespace Syn {
             });
     }
 
-    void HizDownsamplePass::Dispatch(const RenderContext& context) {
+    void DirectionLightShadowHizDownsamplePass::Dispatch(const RenderContext& context) {
         auto imageManager = ServiceLocator::GetImageManager();
         auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge);
 
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
-        auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
+        auto drawData = context.scene->GetSceneDrawData();
+        auto& depthPyramid = drawData->DirectionLightShadow.shadowDepthPyramid[context.frameIndex];
 
         uint32_t mipLevels = depthPyramid->GetConfig().mipLevels;
-        glm::vec2 currentInSize = glm::vec2(rtGroup->GetWidth(), rtGroup->GetHeight());
+        glm::vec2 currentInSize = glm::vec2(SHADOW_ATLAS_SIZE, SHADOW_ATLAS_SIZE);
 
         Vk::PushDescriptorWriter pushWriter;
 
-        //Skip 0 -> HizLinearPrepass already done it!
+        // Skip 0 -> DirectionLightShadowHizCopyPass already done it!
         for (uint32_t i = 1; i < mipLevels; ++i) {
 
             glm::vec2 currentOutSize = glm::vec2(
@@ -61,13 +63,8 @@ namespace Syn {
                 std::max(1.0f, std::floor(currentInSize.y / 2.0f))
             );
 
-            std::string parentMipName = std::string(Vk::ImageViewNames::Default) +
-                                        std::string(Vk::ImageViewNames::Mip) +
-                                        std::to_string(i - 1);
-
-            std::string currentMipName = std::string(Vk::ImageViewNames::Default) +
-                                         std::string(Vk::ImageViewNames::Mip) +
-                                         std::to_string(i);
+            std::string parentMipName = std::string(Vk::ImageViewNames::Default) + std::string(Vk::ImageViewNames::Mip) + std::to_string(i - 1);
+            std::string currentMipName = std::string(Vk::ImageViewNames::Default) + std::string(Vk::ImageViewNames::Mip) + std::to_string(i);
 
             pushWriter.AddCombinedImageSampler(
                 0,
@@ -84,10 +81,10 @@ namespace Syn {
 
             pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
 
-            HizDownSamplePC pc{};
-            pc.inImageSize = currentInSize;
-            pc.outImageSize = currentOutSize;
-            vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(HizDownSamplePC), &pc);
+            Vk::PushConstant<HizDownSamplePC> pc;
+            pc->inImageSize = currentInSize;
+            pc->outImageSize = currentOutSize;
+            pc.Push(context.cmd, _shaderProgram->GetLayout());
 
             uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount((uint32_t)currentOutSize.x, ComputeGroupSize::Image16D);
             uint32_t groupCountY = ComputeGroupSize::CalculateDispatchCount((uint32_t)currentOutSize.y, ComputeGroupSize::Image16D);

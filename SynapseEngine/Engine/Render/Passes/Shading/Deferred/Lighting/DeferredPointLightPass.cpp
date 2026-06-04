@@ -13,6 +13,7 @@
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Mesh/MeshSourceNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -97,19 +98,11 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
 
-        DeferredPointLightPC pc{};
-        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);  
-        pc.indexBufferAddr = cube->hardwareBuffers.indices->GetDeviceAddress();
-        pc.vertexPositionBufferAddr = cube->hardwareBuffers.vertexPositions->GetDeviceAddress();
-
-        vkCmdPushConstants(
-            context.cmd,
-            _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL,
-            0,
-            sizeof(DeferredPointLightPC),
-            &pc
-        );
+        Vk::PushConstant<DeferredPointLightPC> pc;
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->indexBufferAddr = cube->hardwareBuffers.indices->GetDeviceAddress();
+        pc->vertexPositionBufferAddr = cube->hardwareBuffers.vertexPositions->GetDeviceAddress();
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void DeferredPointLightPass::BindDescriptors(const RenderContext& context) {

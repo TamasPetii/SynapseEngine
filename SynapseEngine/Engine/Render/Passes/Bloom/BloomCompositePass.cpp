@@ -8,6 +8,7 @@
 #include "Engine/Render/ComputeGroupSize.h"
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Image/ImageManager.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -76,18 +77,10 @@ namespace Syn {
     }
 
     void BloomCompositePass::PushConstants(const RenderContext& context) {
-        BloomCompositePC pc{};
-        pc.exposure = context.scene->GetSettings()->bloomExposure;
-        pc.bloomStrength = context.scene->GetSettings()->bloomStrength;
-
-        vkCmdPushConstants(
-            context.cmd,
-            _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL,
-            0,
-            sizeof(BloomCompositePC),
-            &pc
-        );
+        Vk::PushConstant<BloomCompositePC> pc;
+        pc->exposure = context.scene->GetSettings()->bloomExposure;
+        pc->bloomStrength = context.scene->GetSettings()->bloomStrength;
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void BloomCompositePass::Dispatch(const RenderContext& context) {

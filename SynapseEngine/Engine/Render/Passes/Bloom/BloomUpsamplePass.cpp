@@ -10,6 +10,7 @@
 #include "Engine/Image/ImageManager.h"
 #include <glm/glm.hpp>
 #include <algorithm>
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -89,10 +90,10 @@ namespace Syn {
 
             pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
 
-            BloomUpSamplePC pc{};
-            pc.texelSize = 1.0f / sourceSize;
-            pc.filterRadius = context.scene->GetSettings()->bloomFilterRadius;
-            vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(BloomUpSamplePC), &pc);
+            Vk::PushConstant<BloomUpSamplePC> pc;
+            pc->texelSize = 1.0f / sourceSize;
+            pc->filterRadius = context.scene->GetSettings()->bloomFilterRadius;
+            pc.Push(context.cmd, _shaderProgram->GetLayout());
 
             uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount((uint32_t)targetSize.x, ComputeGroupSize::Image8D);
             uint32_t groupCountY = ComputeGroupSize::CalculateDispatchCount((uint32_t)targetSize.y, ComputeGroupSize::Image8D);

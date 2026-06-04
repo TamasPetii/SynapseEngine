@@ -25,7 +25,8 @@ namespace Syn
 
         static constexpr const char* HizLinearizeDepth = "../Engine/Shaders/Passes/Hiz/HizLinearizeDepth.comp";
         static constexpr const char* HizDownsample = "../Engine/Shaders/Passes/Hiz/HizDownsample.comp";
-
+        static constexpr const char* HizCopyComp = "../Engine/Shaders/Passes/Hiz/HizCopy.comp";
+        
         static constexpr const char* MeshletTask = "../Engine/Shaders/Passes/Shading/Common/Meshlet.task";
         static constexpr const char* MeshletMesh = "../Engine/Shaders/Passes/Shading/Common/Meshlet.mesh";
         static constexpr const char* TraditionalVert = "../Engine/Shaders/Passes/Shading/Common/Traditional.vert";
@@ -89,5 +90,21 @@ namespace Syn
 		static constexpr const char* GeometryWorkGraphMortonChunkCullingComp = "../Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphMortonChunkCulling.comp";
 		static constexpr const char* GeometryWorkGraphMortonModelCullingComp = "../Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphMortonModelCulling.comp";
 		static constexpr const char* GeometryWorkGraphMeshCullingComp = "../Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphMeshCulling.comp";
+    
+        static constexpr const char* DirectionLightShadowCullingCommandResetComp = "../Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowCullingCommandReset.comp";
+        static constexpr const char* DirectionLightShadowMeshCullingComp = "../Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowMeshCulling.comp";
+        static constexpr const char* DirectionLightShadowModelCullingComp = "../Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowModelCulling.comp";
+        static constexpr const char* DirectionLightShadowStaticChunkCullingComp = "../Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowStaticChunkCulling.comp";
+        static constexpr const char* DirectionLightShadowStaticModelCullingComp = "../Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowStaticModelCulling.comp";
+        static constexpr const char* DirectionLightShadowMortonChunkCullingComp = "../Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowMortonChunkCulling.comp";
+        static constexpr const char* DirectionLightShadowMortonModelCullingComp = "../Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowMortonModelCulling.comp";
+
+        static constexpr const char* DirectionLightShadowWorkGraphModelCullingComp = "../Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphModelCulling.comp";
+        static constexpr const char* DirectionLightShadowWorkGraphStaticChunkCullingComp = "../Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphStaticChunkCulling.comp";
+        static constexpr const char* DirectionLightShadowWorkGraphStaticModelCullingComp = "../Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphStaticModelCulling.comp";
+        static constexpr const char* DirectionLightShadowWorkGraphMortonChunkCullingComp = "../Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphMortonChunkCulling.comp";
+        static constexpr const char* DirectionLightShadowWorkGraphMortonModelCullingComp = "../Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphMortonModelCulling.comp";
+        static constexpr const char* DirectionLightShadowWorkGraphMeshCullingComp = "../Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphMeshCulling.comp";
+
     };
 }

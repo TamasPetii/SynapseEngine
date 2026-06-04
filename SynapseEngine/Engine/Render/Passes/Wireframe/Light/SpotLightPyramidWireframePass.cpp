@@ -9,6 +9,7 @@
 #include "Engine/Vk/Buffer/BufferUtils.h"
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 #include "Engine/Shaders/Includes/PushConstants/WireframeDebugPC.glsl"
@@ -110,20 +111,12 @@ namespace Syn {
 
         auto pyramid = modelManager->GetResource(MeshSourceNames::ProxyPyramid);
 
-        WireframeDebugPC pc{};
-        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-        pc.vertexPositionBufferAddr = pyramid->hardwareBuffers.vertexPositions->GetDeviceAddress();
-        pc.indexBufferAddr = pyramid->hardwareBuffers.indices->GetDeviceAddress();
-        pc.shapeDrawType = WIREFRAME_DEBUG_SHAPE_TYPE_SPOT_LIGHT_CONE;
-
-        vkCmdPushConstants(
-            context.cmd,
-            _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL,
-            0,
-            sizeof(WireframeDebugPC),
-            &pc
-        );
+        Vk::PushConstant<WireframeDebugPC> pc{};
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->vertexPositionBufferAddr = pyramid->hardwareBuffers.vertexPositions->GetDeviceAddress();
+        pc->indexBufferAddr = pyramid->hardwareBuffers.indices->GetDeviceAddress();
+        pc->shapeDrawType = WIREFRAME_DEBUG_SHAPE_TYPE_SPOT_LIGHT_CONE;
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void SpotLightPyramidWireframePass::Draw(const RenderContext& context) {

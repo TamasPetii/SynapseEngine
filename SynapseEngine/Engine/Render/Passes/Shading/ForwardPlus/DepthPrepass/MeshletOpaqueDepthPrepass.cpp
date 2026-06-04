@@ -16,6 +16,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <cassert>
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -135,20 +136,12 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
         bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-        TraditionalMeshletPassPC pc{};
-		pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true); 
-        pc.baseDescriptorOffset = drawData->Models.activeTraditionalCount + drawData->Models.meshletCmdOffsets[_renderType];
-        pc.materialRenderType = static_cast<uint32_t>(_renderType);
-        pc.disableConeCulling = 0;
-
-        vkCmdPushConstants(
-            context.cmd,
-            _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL,
-            0,
-            sizeof(TraditionalMeshletPassPC),
-            &pc
-        );
+        Vk::PushConstant<TraditionalMeshletPassPC> pc;
+		pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true); 
+        pc->baseDescriptorOffset = drawData->Models.activeTraditionalCount + drawData->Models.meshletCmdOffsets[_renderType];
+        pc->materialRenderType = static_cast<uint32_t>(_renderType);
+        pc->disableConeCulling = 0;
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void MeshletOpaqueDepthPrepass::BindDescriptors(const RenderContext& context)

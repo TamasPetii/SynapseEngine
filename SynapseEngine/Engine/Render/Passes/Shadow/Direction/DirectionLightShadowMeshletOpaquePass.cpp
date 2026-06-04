@@ -7,6 +7,11 @@
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
+#include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
+#include "Engine/Image/SamplerNames.h"
+#include "Engine/Render/RenderNames.h"
+#include "Engine/Image/ImageManager.h"
 
 namespace Syn {
 
@@ -92,24 +97,31 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
         auto drawData = scene->GetSceneDrawData();
 
-        DirectionLightShadowTraditionalMeshletPassPC pc{};
-        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-        pc.baseDescriptorOffset = drawData->Models.activeTraditionalCount + drawData->Models.meshletCmdOffsets[_renderType];
-        pc.materialRenderType = static_cast<uint32_t>(_renderType);
-
-        vkCmdPushConstants(
-            context.cmd,
-            _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL,
-            0,
-            sizeof(DirectionLightShadowTraditionalMeshletPassPC),
-            &pc
-        );
+        Vk::PushConstant<DirectionLightShadowTraditionalMeshletPassPC> pc{};
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->baseDescriptorOffset = drawData->Models.activeTraditionalCount + drawData->Models.meshletCmdOffsets[_renderType];
+        pc->materialRenderType = static_cast<uint32_t>(_renderType);
+		pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void DirectionLightShadowMeshletOpaquePass::BindDescriptors(const RenderContext& context)
     {
-        // Todo: Hiz Occlusion
+        auto imageManager = ServiceLocator::GetImageManager();
+
+        uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
+        auto depthPyramid = context.scene->GetSceneDrawData()->DirectionLightShadow.shadowDepthPyramid[prevFrameIndex].get();
+        auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);
+
+        Vk::PushDescriptorWriter pushWriter;
+
+        pushWriter.AddCombinedImageSampler(
+            0,
+            depthPyramid->GetView(Vk::ImageViewNames::Default),
+            maxSampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
     }
 
     void DirectionLightShadowMeshletOpaquePass::Draw(const RenderContext& context)

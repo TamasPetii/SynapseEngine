@@ -240,6 +240,47 @@ namespace Syn
 
         RegisterComponentSparseMapBuffer<MeshColliderComponent>(BufferNames::MeshColliderSparseMap);
         RegisterComponentBuffer<MeshColliderComponent, MeshColliderComponentGPU>(BufferNames::MeshColliderData);
+
+        RegisterGenericBuffer<VisibleModelData>(BufferNames::DirectionLightShadowModelVisibleData,
+            [this]() -> uint32_t {
+                auto pool = _registry->GetPool<ModelComponent>();
+                return pool ? static_cast<uint32_t>(pool->Size()) * SHADOW_MULTIPLIER : 0;
+            },
+            [this]() -> bool {
+                auto pool = _registry->GetPool<ModelComponent>();
+                return pool && pool->Size() > 0;
+            },
+            ComponentMemoryType::GpuOnly);
+
+        RegisterGenericBuffer<uint32_t>(BufferNames::DirectionLightShadowMortonChunkVisibleIndex,
+            [this]() -> uint32_t {
+                auto pool = _registry->GetPool<TransformComponent>();
+                if (!pool) return 0;
+
+                uint32_t chunkCount = ComputeGroupSize::CalculateDispatchCount(static_cast<uint32_t>(pool->Size()), ComputeGroupSize::Buffer32D);
+                return chunkCount * SHADOW_MULTIPLIER;
+            },
+            [this]() -> bool {
+                auto pool = _registry->GetPool<TransformComponent>();
+                return pool && pool->Size() > 0;
+            },
+            ComponentMemoryType::GpuOnly);
+
+        RegisterGenericBuffer<uint32_t>(BufferNames::DirectionLightShadowStaticChunkVisibleIndex,
+            [this]() -> uint32_t {
+                auto pool = _registry->GetPool<TransformComponent>();
+                if (!pool) return 0;
+
+                uint32_t staticCount = static_cast<uint32_t>(pool->GetStorage().GetStaticEntities().size());
+                uint32_t chunkCount = ComputeGroupSize::CalculateDispatchCount(staticCount, ComputeGroupSize::Buffer32D);
+
+                return chunkCount * SHADOW_MULTIPLIER;
+            },
+            [this]() -> bool {
+                auto pool = _registry->GetPool<TransformComponent>();
+                return pool && !pool->GetStorage().GetStaticEntities().empty();
+            },
+            ComponentMemoryType::GpuOnly);
     }
 
     void Scene::BuildTaskflowGraph(tf::Taskflow& taskflow, SystemPhase phase)

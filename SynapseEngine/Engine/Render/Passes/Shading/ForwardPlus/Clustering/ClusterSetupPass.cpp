@@ -13,6 +13,7 @@
 #include "Engine/Component/Core/CameraComponent.h"
 #include "Engine/Render/ComputeGroupSize.h"
 #include "Engine/Scene/DrawData/ForwardPlusDrawGroup.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -40,10 +41,9 @@ namespace Syn {
         uint32_t cameraEntity = scene->GetSceneCameraEntity();
         const auto& camera = scene->GetRegistry()->GetComponent<CameraComponent>(cameraEntity);
 
-        ClusterSetupPC pc{};
-		pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, true);
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ClusterSetupPC), &pc);
+        Vk::PushConstant<ClusterSetupPC> pc;
+		pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, true);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void ClusterSetupPass::BindDescriptors(const RenderContext& context) {

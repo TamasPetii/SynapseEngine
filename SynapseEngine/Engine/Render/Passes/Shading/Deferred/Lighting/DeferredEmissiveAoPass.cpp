@@ -8,6 +8,7 @@
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/SamplerNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -87,17 +88,9 @@ namespace Syn {
         auto scene = context.scene;
         uint32_t fIdx = context.frameIndex;
 
-        DeferredEmissiveAoPC pc{};
-        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-
-        vkCmdPushConstants(
-            context.cmd,
-            _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL,
-            0,
-            sizeof(DeferredEmissiveAoPC),
-            &pc
-        );
+        Vk::PushConstant<DeferredEmissiveAoPC> pc;
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void DeferredEmissiveAoPass::BindDescriptors(const RenderContext& context) {

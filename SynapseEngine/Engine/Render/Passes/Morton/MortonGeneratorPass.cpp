@@ -7,6 +7,7 @@
 #include "Engine/Render/ComputeGroupSize.h"
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Manager/ComponentBufferManager.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -31,10 +32,9 @@ namespace Syn {
         auto scene = context.scene;
         _staticCount = static_cast<uint32_t>(scene->GetRegistry()->GetPool<TransformComponent>()->GetStorage().GetStaticEntities().size());
 
-        ChunkBuilderPC pc{};
-        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex, scene->GetSettings()->enableGeometryGpuCulling);
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ChunkBuilderPC), &pc);
+        Vk::PushConstant<ChunkBuilderPC> pc;
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex, scene->GetSettings()->enableGeometryGpuCulling);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void MortonGeneratorPass::Dispatch(const RenderContext& context) {

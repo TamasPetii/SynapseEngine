@@ -10,6 +10,7 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "Engine/Component/Physics/CapsuleColliderComponent.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -104,20 +105,12 @@ namespace Syn {
 
         auto capsule = modelManager->GetResource(MeshSourceNames::Capsule);
 
-        WireframeDebugPC pc{};
-        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-        pc.vertexPositionBufferAddr = capsule->hardwareBuffers.vertexPositions->GetDeviceAddress();
-        pc.indexBufferAddr = capsule->hardwareBuffers.indices->GetDeviceAddress();
-        pc.shapeDrawType = WIREFRAME_DEBUG_SHAPE_TYPE_CAPSULE_COLLIDER;
-
-        vkCmdPushConstants(
-            context.cmd,
-            _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL,
-            0,
-            sizeof(WireframeDebugPC),
-            &pc
-        );
+        Vk::PushConstant<WireframeDebugPC> pc{};
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->vertexPositionBufferAddr = capsule->hardwareBuffers.vertexPositions->GetDeviceAddress();
+        pc->indexBufferAddr = capsule->hardwareBuffers.indices->GetDeviceAddress();
+        pc->shapeDrawType = WIREFRAME_DEBUG_SHAPE_TYPE_CAPSULE_COLLIDER;
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void CapsuleColliderWireframePass::Draw(const RenderContext& context) {

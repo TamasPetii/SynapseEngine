@@ -91,6 +91,12 @@ namespace Syn {
 		ctx.directionLightShadowColliderDataBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightShadowColliderData, fIdx);
 		ctx.directionLightShadowInstanceBufferAddr = drawData->DirectionLightShadow.instanceBuffer.GetAddress(fIdx, isGpu);
 		ctx.directionLightVisibleShadowIndexBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightVisibleShadowData, fIdx);
+		ctx.directionLightShadowModelCountBufferAddr = drawData->DirectionLightShadow.modelDispatchBuffer.GetAddress(fIdx, isGpu);
+		ctx.directionLightShadowModelVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightShadowModelVisibleData, fIdx);
+		ctx.directionLightShadowChunkCountBufferAddr = drawData->DirectionLightShadow.staticChunkDispatchBuffer.GetAddress(fIdx, isGpu);
+		ctx.directionLightShadowChunkVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightShadowStaticChunkVisibleIndex, fIdx);
+        ctx.directionLightShadowMortonChunkCountBufferAddr = drawData->DirectionLightShadow.mortonChunkDispatchBuffer.GetAddress(fIdx, isGpu);
+        ctx.directionLightShadowMortonChunkVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightShadowMortonChunkVisibleIndex, fIdx);
 
         ctx.pointLightIndirectCommandBufferAddr = drawData->PointLights.indirectBuffer.GetAddress(fIdx, isGpu);
         ctx.pointLightVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightVisibleData, fIdx);
@@ -142,6 +148,7 @@ namespace Syn {
 		ctx.directionLightShadowAtlasSize = SHADOW_ATLAS_SIZE;
 		ctx.directionLightShadowMinBlockSize = SHADOW_MIN_BLOCK_SIZE;
 		ctx.directionLightShadowGridSize = SHADOW_GRID_SIZE;
+        ctx.directionLightShadowHizMipLevels = SHADOW_HIZ_MIP_LEVELS;
 
         ctx.enableMeshletConeCulling = settings->enableMeshletConeCulling ? 1 : 0;
 

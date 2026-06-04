@@ -7,6 +7,7 @@
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
 #include "Engine/Render/RenderNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 

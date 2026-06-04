@@ -5,6 +5,7 @@
 #include "Engine/Component/Core/TransformComponent.h"
 #include "Engine/Vk/Buffer/BufferUtils.h"
 #include "Engine/Render/ComputeGroupSize.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -32,10 +33,9 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
         bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-        ChunkBuilderPC pc{};
-        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, isGpu);
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ChunkBuilderPC), &pc);
+        Vk::PushConstant<ChunkBuilderPC> pc;
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, isGpu);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void SceneAabbPass::Dispatch(const RenderContext& context) {

@@ -87,7 +87,7 @@ bool IsSphereOccluded(vec3 worldCenter, float radius, CameraComponent camera, sa
     return false;
 }
 
-bool IsSphereOccludedDirLightShadow(vec3 worldCenter, float radius, mat4 viewProj, vec4 atlasRect, sampler2D shadowDepthPyramid, float atlasSize, out float outScreenSizePixels) {
+bool IsSphereOccludedDirLightShadow(vec3 worldCenter, float radius, mat4 viewProj, vec4 atlasRect, sampler2D shadowDepthPyramid, float atlasSize, uint maxHizMipLevel, out float outScreenSizePixels) {
     vec4 cascadeUVBounds;
     float closestZ;
     
@@ -115,6 +115,8 @@ bool IsSphereOccludedDirLightShadow(vec3 worldCenter, float radius, mat4 viewPro
 
         // Calculate HZB LOD (scaled to fit footprint into a 2x2 texel quad)
         float lod = max(0.0, ceil(log2(outScreenSizePixels * 0.5)));
+        lod = clamp(lod, 0.0, maxHizMipLevel);
+
         vec2 centerUV = (atlasUV_min + atlasUV_max) * 0.5;
         float maxDepth = textureLod(shadowDepthPyramid, centerUV, lod).r;
 

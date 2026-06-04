@@ -1,5 +1,6 @@
 #include "OpaqueDepthTransitionPrepass.h"
 #include "Engine/Render/RenderNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 

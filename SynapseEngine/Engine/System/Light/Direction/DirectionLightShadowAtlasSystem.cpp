@@ -50,8 +50,8 @@ namespace Syn
 
             //Finds contiguous free blocks in the 2D grid and reserves them
             auto AllocateBlock = [&](uint32_t size, uint32_t& outX, uint32_t& outY) -> bool {
-                for (uint32_t y = 0; y <= SHADOW_GRID_SIZE - size; ++y) {
-                    for (uint32_t x = 0; x <= SHADOW_GRID_SIZE - size; ++x) {
+                for (uint32_t y = 0; y <= SHADOW_GRID_SIZE - size; y += size) {
+                    for (uint32_t x = 0; x <= SHADOW_GRID_SIZE - size; x += size) {
 
                         // Check if the required NxN area is entirely free
                         bool free = true;

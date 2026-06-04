@@ -1,5 +1,6 @@
 #include "PresentationTransitionPass.h"
 #include "Engine/Render/RenderNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
     void PresentationTransitionPass::PrepareFrame(const RenderContext& context) {

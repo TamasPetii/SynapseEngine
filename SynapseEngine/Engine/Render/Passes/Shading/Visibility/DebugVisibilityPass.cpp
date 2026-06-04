@@ -9,6 +9,7 @@
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
 #include "Engine/Render/RenderNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn
 {
@@ -112,18 +113,10 @@ namespace Syn
         auto scene = context.scene;
         uint32_t fIdx = context.frameIndex;
 
-        DebugVisibilityPC pc{};
-        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-        pc.debugMode = scene->GetSettings()->debugVisibilityMode;
-
-        vkCmdPushConstants(
-            context.cmd,
-            _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL,
-            0,
-            sizeof(DebugVisibilityPC),
-            &pc
-        );
+        Vk::PushConstant<DebugVisibilityPC> pc;
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->debugMode = scene->GetSettings()->debugVisibilityMode;
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void DebugVisibilityPass::BindDescriptors(const RenderContext& context)

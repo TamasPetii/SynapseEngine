@@ -8,6 +8,7 @@
 #include "Engine/Mesh/MeshSourceNames.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "Engine/Animation/AnimationManager.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -96,13 +97,12 @@ namespace Syn {
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
 		auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-        WireframeMeshPC pc{};
-		pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
-		pc.vertexPositionBufferAddr = cube->hardwareBuffers.vertexPositions->GetDeviceAddress();
-		pc.indexBufferAddr = cube->hardwareBuffers.indices->GetDeviceAddress();
-        pc.shapeType = WIREFRAME_MESH_SHAPE_TYPE_CUBE;
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(WireframeMeshPC), &pc);
+        Vk::PushConstant<WireframeMeshPC> pc{};
+		pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+		pc->vertexPositionBufferAddr = cube->hardwareBuffers.vertexPositions->GetDeviceAddress();
+		pc->indexBufferAddr = cube->hardwareBuffers.indices->GetDeviceAddress();
+        pc->shapeType = WIREFRAME_MESH_SHAPE_TYPE_CUBE;
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void WireframeMeshAabbPass::Draw(const RenderContext& context) {

@@ -11,6 +11,7 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -35,10 +36,9 @@ namespace Syn {
         auto scene = context.scene;
         _staticCount = static_cast<uint32_t>(scene->GetRegistry()->GetPool<TransformComponent>()->GetStorage().GetStaticEntities().size());
 
-        ModelMeshCullingPC pc{};
-        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex, scene->GetSettings()->enableGeometryGpuCulling);
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ModelMeshCullingPC), &pc);
+        Vk::PushConstant<ModelMeshCullingPC> pc;
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex, scene->GetSettings()->enableGeometryGpuCulling);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void GeometryMortonModelCullingPass::BindDescriptors(const RenderContext& context) {

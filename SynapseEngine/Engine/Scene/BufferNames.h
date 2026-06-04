@@ -34,6 +34,9 @@ namespace Syn
         static constexpr const char* DirectionLightShadowSparseMap = "DirectionLightShadowSparseMap";
         static constexpr const char* DirectionLightShadowData = "DirectionLightShadowData";
         static constexpr const char* DirectionLightShadowColliderData = "DirectionLightShadowColliderData";
+        static constexpr const char* DirectionLightShadowModelVisibleData = "DirectionLightShadowModelVisibleData";
+        static constexpr const char* DirectionLightShadowMortonChunkVisibleIndex = "DirectionLightShadowMortonChunkVisibleIndex";
+        static constexpr const char* DirectionLightShadowStaticChunkVisibleIndex = "DirectionLightShadowStaticChunkVisibleIndex";
 
         static constexpr const char* PointLightSparseMap = "PointLightSparseMap";
         static constexpr const char* PointLightData = "PointLightData";

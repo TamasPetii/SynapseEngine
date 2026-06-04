@@ -11,6 +11,7 @@
 #include "Engine/Vk/Image/ImageUtils.h"
 #include "Engine/Render/ComputeGroupSize.h"
 #include <glm/glm.hpp>
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -64,14 +65,14 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, fIdx);
 
-        DpHvoPC pc{};
-        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-        pc.aoRadius = scene->GetSettings()->aoRadius;
-        pc.aoIntensity = scene->GetSettings()->aoIntensity;
-        pc.maxOcclusionDistance = scene->GetSettings()->maxOcclusionDistance;
-        pc.bias = scene->GetSettings()->bias;
-        pc.sampleCount = scene->GetSettings()->sampleCount;
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(DpHvoPC), &pc);
+        Vk::PushConstant<DpHvoPC> pc{};
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->aoRadius = scene->GetSettings()->aoRadius;
+        pc->aoIntensity = scene->GetSettings()->aoIntensity;
+        pc->maxOcclusionDistance = scene->GetSettings()->maxOcclusionDistance;
+        pc->bias = scene->GetSettings()->bias;
+        pc->sampleCount = scene->GetSettings()->sampleCount;
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void DpHvoPass::Dispatch(const RenderContext& context) {

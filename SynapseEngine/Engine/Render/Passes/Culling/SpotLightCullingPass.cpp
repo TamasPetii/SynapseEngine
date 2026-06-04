@@ -12,6 +12,7 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -43,10 +44,9 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
         bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-        SpotLightCullingPC pc{};
-		pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(SpotLightCullingPC), &pc);
+        Vk::PushConstant<SpotLightCullingPC> pc;
+		pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void SpotLightCullingPass::BindDescriptors(const RenderContext& context) {

@@ -7,6 +7,7 @@
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -95,19 +96,11 @@ namespace Syn {
         bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
         auto drawData = scene->GetSceneDrawData();
 
-        DirectionLightShadowTraditionalMeshletPassPC pc{};
-        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-        pc.baseDescriptorOffset = drawData->Models.traditionalCmdOffsets[_renderType];
-        pc.materialRenderType = static_cast<uint32_t>(_renderType);
-
-        vkCmdPushConstants(
-            context.cmd,
-            _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL,
-            0,
-            sizeof(DirectionLightShadowTraditionalMeshletPassPC),
-            &pc
-        );
+        Vk::PushConstant<DirectionLightShadowTraditionalMeshletPassPC> pc{};
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->baseDescriptorOffset = drawData->Models.traditionalCmdOffsets[_renderType];
+        pc->materialRenderType = static_cast<uint32_t>(_renderType);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void DirectionLightShadowTraditionalOpaquePass::BindDescriptors(const RenderContext& context)

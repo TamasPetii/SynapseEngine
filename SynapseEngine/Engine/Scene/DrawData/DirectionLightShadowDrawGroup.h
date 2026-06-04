@@ -6,6 +6,7 @@
 #include "Engine/Material/MaterialRenderType.h"
 #include "IDrawGroup.h"
 #include "Engine/Vk/Image/Image.h"
+#include <bit>
 
 namespace Syn
 {
@@ -17,6 +18,7 @@ namespace Syn
     constexpr uint32_t SHADOW_ATLAS_SIZE = 1024;
     constexpr uint32_t SHADOW_MIN_BLOCK_SIZE = 128;
     constexpr uint32_t SHADOW_GRID_SIZE = SHADOW_ATLAS_SIZE / SHADOW_MIN_BLOCK_SIZE;
+    constexpr uint32_t SHADOW_HIZ_MIP_LEVELS = std::countr_zero(SHADOW_MIN_BLOCK_SIZE) + 1;
 
     struct SYN_API DirectionLightShadowDrawGroup : public IDrawGroup
     {
@@ -34,14 +36,10 @@ namespace Syn
 
         RenderBuffer instanceBuffer;
         RenderBuffer indirectBuffer;
-        RenderBuffer computeCountBuffer;
 
-        RenderBuffer modelCountBuffer;
-        RenderBuffer modelVisibleIndexBuffer;
-        RenderBuffer staticChunkCountBuffer;
-		RenderBuffer staticChunkVisibleIndexBuffer;
-        RenderBuffer mortonChunkCountBuffer;
-		RenderBuffer mortonChunkVisibleIndexBuffer;
+        RenderBuffer modelDispatchBuffer;
+        RenderBuffer staticChunkDispatchBuffer;
+        RenderBuffer mortonChunkDispatchBuffer;
 
         CpuData<VkDrawIndirectCommand> traditionalCmds;
         CpuData<VkDrawMeshTasksIndirectCommandEXT> meshletCmds;
@@ -59,5 +57,6 @@ namespace Syn
         VkDispatchIndirectCommand dispatchCmdTemplate{};
 
         std::vector<std::unique_ptr<Vk::Image>> shadowAtlas;
+        std::vector<std::unique_ptr<Vk::Image>> shadowDepthPyramid;
     };
 }

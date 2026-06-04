@@ -62,7 +62,7 @@ void main() {
         vec4 shadowAtlasRect = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeAtlasRects[cascadeIdx];
         
         float shadowScreenSizePixels = 0.0;
-        if (IsSphereOccludedDirLightShadow(sphereCenter, sphereRadius, shadowViewProj, shadowAtlasRect, shadowDepthPyramid, float(ctx.directionLightShadowAtlasSize), shadowScreenSizePixels)) {
+        if (IsSphereOccludedDirLightShadow(sphereCenter, sphereRadius, shadowViewProj, shadowAtlasRect, shadowDepthPyramid, float(ctx.directionLightShadowAtlasSize), ctx.directionLightShadowHizMipLevels, shadowScreenSizePixels)) {
             return;
         }
     }
