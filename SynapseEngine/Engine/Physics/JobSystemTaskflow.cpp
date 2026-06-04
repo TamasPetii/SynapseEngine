@@ -1,4 +1,5 @@
 #include "JobSystemTaskflow.h"
+#include <new>
 
 namespace Syn
 {
@@ -46,7 +47,7 @@ namespace Syn
             std::terminate();
         }
 
-        new (job) Job(inName, inColor, this, inJobFunction, inNumDependencies);
+        ::new (job) Job(inName, inColor, this, inJobFunction, inNumDependencies);
         return JPH::JobHandle(job);
     }
 

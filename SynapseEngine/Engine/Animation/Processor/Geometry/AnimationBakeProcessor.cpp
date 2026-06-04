@@ -1,6 +1,7 @@
 #include "AnimationBakeProcessor.h"
 #include "Engine/ServiceLocator.h"
 
+#include <chrono>
 #include <taskflow/taskflow.hpp>
 #include <taskflow/algorithm/for_each.hpp>
 

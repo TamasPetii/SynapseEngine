@@ -7,6 +7,7 @@
 #include <string>
 #include <optional>
 
+#include <chrono>
 #include <taskflow/taskflow.hpp>
 #include <taskflow/algorithm/for_each.hpp>
 #include "Engine/Scene/Scene.h"

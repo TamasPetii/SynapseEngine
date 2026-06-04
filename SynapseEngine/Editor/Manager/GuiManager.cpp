@@ -56,6 +56,10 @@ namespace Syn {
         init_info.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
         init_info.PipelineRenderingCreateInfo.pColorAttachmentFormats = &_colorFormat;
 
+        ImGui_ImplVulkan_LoadFunctions(VK_API_VERSION_1_3, [](const char* function_name, void* user_data) {
+            return vkGetInstanceProcAddr(reinterpret_cast<VkInstance>(user_data), function_name);
+            }, instance);
+
         ImGui_ImplVulkan_Init(&init_info);
 
         SetStyle();

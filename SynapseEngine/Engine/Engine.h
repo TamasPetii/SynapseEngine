@@ -6,6 +6,7 @@
 #include <span>
 #include <memory>
 
+#include <chrono>
 #include <taskflow/taskflow.hpp>
 
 namespace Syn::Vk { 

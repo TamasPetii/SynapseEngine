@@ -68,7 +68,7 @@ namespace Syn {
             .colorAttachmentCount = 2
         };
 
-        _iconTexture = ServiceLocator::GetImageManager()->LoadImageSync("../Assets/SpotLightIcon.png");
+        _iconTexture = ServiceLocator::GetImageManager()->LoadImageSync("Assets/SpotLightIcon.png");
     }
 
     void SpotLightBillboardPass::PrepareFrame(const RenderContext& context) {

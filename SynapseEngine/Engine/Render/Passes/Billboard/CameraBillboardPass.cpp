@@ -69,7 +69,7 @@ namespace Syn {
             .colorAttachmentCount = 2
         };
 
-        _iconTexture = ServiceLocator::GetImageManager()->LoadImageSync("../Assets/CameraIcon.png");
+        _iconTexture = ServiceLocator::GetImageManager()->LoadImageSync("Assets/CameraIcon.png");
     }
 
     void CameraBillboardPass::PrepareFrame(const RenderContext& context) {

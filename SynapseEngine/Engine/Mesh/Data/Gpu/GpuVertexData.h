@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include <glm/glm.hpp>
+#include <vector>
 
 /// <summary>
 /// - Vertex Position and Attributes are stored in separate buffers for depth only rendering, and normal rendering.

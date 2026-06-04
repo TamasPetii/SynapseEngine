@@ -5,6 +5,7 @@
 #include <queue>
 #include <iostream>
 
+#include <chrono>
 #include <taskflow/taskflow.hpp>
 #include <taskflow/algorithm/for_each.hpp>
 

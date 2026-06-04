@@ -1,9 +1,9 @@
 #pragma once
 #include <IconsFontAwesome5.h>
 
-constexpr const char* FONT_PATH = "../Assets/Editor/Fonts/Font Awesome 5 Free-Solid-900.otf";
-constexpr const char* ICON_PATH = "../Assets/Editor/Icons";
-constexpr const char* ASSET_PATH = "../Assets";
+constexpr const char* FONT_PATH = "Assets/Editor/Fonts/Font Awesome 5 Free-Solid-900.otf";
+constexpr const char* ICON_PATH = "Assets/Editor/Icons";
+constexpr const char* ASSET_PATH = "Assets";
 
 //FileSystem icons
 #define SYN_ICON_FOLDER        ICON_FA_FOLDER

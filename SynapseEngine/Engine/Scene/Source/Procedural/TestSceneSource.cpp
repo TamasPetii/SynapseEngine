@@ -43,7 +43,7 @@ namespace Syn
         auto materialManager = ServiceLocator::GetMaterialManager();
 
         json config;
-        std::ifstream configFile("../Engine/Scene/Source/Procedural/test_config.json");
+        std::ifstream configFile("Engine/Scene/Source/Procedural/test_config.json");
         if (configFile.is_open())
         {
             try {

@@ -68,7 +68,7 @@ namespace Syn {
             .colorAttachmentCount = 2
         };
 
-        _iconTexture = ServiceLocator::GetImageManager()->LoadImageSync("../Assets/DirectionLightIcon.png");
+        _iconTexture = ServiceLocator::GetImageManager()->LoadImageSync("Assets/DirectionLightIcon.png");
     }
 
     void DirectionLightBillboardPass::PrepareFrame(const RenderContext& context) {

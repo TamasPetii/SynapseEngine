@@ -12,7 +12,7 @@ namespace Syn {
     void ViewportView::Draw(ViewportViewModel& vm) {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 
-        ImGui::Begin(SYN_ICON_GAMEPAD " Viewport", nullptr, ImGuiWindowFlags_NoTitleBar);
+        ImGui::Begin(SYN_ICON_GAMEPAD " Viewport", nullptr);
 
         ViewportState state = vm.GetState();
 

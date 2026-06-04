@@ -1,6 +1,8 @@
 #include "TangentProcessor.h"
 #include <glm/glm.hpp>
 #include "Engine/ServiceLocator.h"
+
+#include <chrono>
 #include <taskflow/taskflow.hpp>
 #include <taskflow/algorithm/for_each.hpp>
 

@@ -1,6 +1,8 @@
 #pragma once
 #include <Jolt/Jolt.h>
 #include <Jolt/Core/JobSystemWithBarrier.h>
+
+#include <chrono>
 #include <taskflow/taskflow.hpp>
 
 #include <vector>

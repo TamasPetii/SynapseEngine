@@ -1,6 +1,8 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include "../IMeshProcessor.h"
+
+#include <chrono>
 #include <taskflow/taskflow.hpp>
 
 namespace Syn

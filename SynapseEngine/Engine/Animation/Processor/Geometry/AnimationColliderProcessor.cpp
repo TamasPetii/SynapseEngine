@@ -3,6 +3,7 @@
 #include <limits>
 
 #include <meshoptimizer.h>
+#include <chrono>
 #include <taskflow/taskflow.hpp>
 #include <taskflow/algorithm/for_each.hpp>
 

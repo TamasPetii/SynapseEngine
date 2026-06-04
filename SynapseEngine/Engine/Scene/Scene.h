@@ -4,6 +4,8 @@
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Vk/Buffer/Buffer.h"
 #include "Engine/Vk/Buffer/BufferFactory.h"
+
+#include <chrono>
 #include <taskflow/taskflow.hpp>
 #include <memory>
 #include <vector>

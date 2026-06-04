@@ -41,7 +41,7 @@ namespace Syn
         auto materialManager = ServiceLocator::GetMaterialManager();
 
         json config;
-        std::ifstream configFile("../Engine/Scene/Source/Procedural/nature_config.json");
+        std::ifstream configFile("Engine/Scene/Source/Procedural/nature_config.json");
         if (configFile.is_open())
         {
             try {
