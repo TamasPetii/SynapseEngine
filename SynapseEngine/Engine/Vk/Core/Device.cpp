@@ -195,7 +195,7 @@ namespace Syn::Vk {
         allocatorInfo.instance = instance;
         allocatorInfo.flags = VMA_ALLOCATOR_CREATE_BUFFER_DEVICE_ADDRESS_BIT;
         allocatorInfo.pVulkanFunctions = &vulkanFunctions;
-        allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_3;
+        allocatorInfo.vulkanApiVersion = VK_API_VERSION_1_4;
 
         SYN_VK_ASSERT_MSG(vmaCreateAllocator(&allocatorInfo, &_allocator), "Failed to create VMA Allocator");
     }

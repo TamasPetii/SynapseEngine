@@ -114,7 +114,7 @@ namespace Syn::Vk {
         shaderc::Compiler compiler;
         shaderc::CompileOptions options;
 
-        options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_3);
+        options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_4);
         options.SetTargetSpirv(shaderc_spirv_version_1_6);
         options.SetIncluder(std::make_unique<ShaderIncluder>());
 
