@@ -1,6 +1,8 @@
 set_project("SynapseEngine")
 set_version("1.0.0")
 
+set_config("vcpkg", os.projectdir() .. "/../External/vcpkg")
+
 set_allowedmodes("debug", "release", "dist", "performance")
 add_rules("mode.debug", "mode.release")
 
