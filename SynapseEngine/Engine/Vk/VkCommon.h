@@ -1,5 +1,9 @@
 #pragma once
+#ifdef VK_NO_PROTOTYPES
 #include <volk.h>
+#else
+#include <vulkan/vulkan.h>
+#endif
 
 #if __has_include(<vma/vk_mem_alloc.h>)
     #include <vma/vk_mem_alloc.h>

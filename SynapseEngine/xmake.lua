@@ -18,6 +18,7 @@ if is_plat("windows") then
     add_cxflags("/GR-") 
 elseif is_plat("linux") then
     add_cxflags("-fno-rtti")
+    add_cxflags("-std=c++23", {force = true})
 end
 
 add_includedirs(
@@ -33,7 +34,6 @@ add_defines(
     "VK_ENABLE_BETA_EXTENSIONS",
     "SPIRV_REFLECT_USE_SYSTEM_SPIRV_H",
     "GLM_FORCE_DEPTH_ZERO_TO_ONE",
-    "VK_NO_PROTOTYPES",
     "JPH_OBJECT_STREAM",
     "JPH_FLOATING_POINT_EXCEPTIONS_ENABLED",
     "NOMINMAX",
@@ -64,7 +64,7 @@ end
 local vcpkg_packages = {
     "vcpkg::glm",
     "vcpkg::glfw3",
-    "vcpkg::imgui[docking-experimental]",
+    "vcpkg::imgui[docking-experimental,glfw-binding,vulkan-binding]",
     "vcpkg::vulkan-headers",
     "vcpkg::vulkan-memory-allocator",
     "vcpkg::shaderc",
@@ -108,6 +108,7 @@ target("Engine")
     add_files("Engine/**.cpp")
     add_headerfiles("Engine/**.h", "Engine/**.hpp")
     add_defines("SYN_BUILD_DLL")
+    add_defines("VK_NO_PROTOTYPES")
 
 target("EditorCore")
     set_kind("static")

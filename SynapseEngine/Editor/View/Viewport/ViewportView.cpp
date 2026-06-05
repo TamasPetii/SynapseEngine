@@ -26,6 +26,9 @@ namespace Syn {
 
         ImVec2 imageStartPos = ImGui::GetCursorScreenPos();
 
+        if (viewportPanelSize.x <= 0.0f) viewportPanelSize.x = 1.0f;
+        if (viewportPanelSize.y <= 0.0f) viewportPanelSize.y = 1.0f;
+
         if (state.textureId && !isResizing) {
             ImGui::Image(state.textureId, viewportPanelSize);
         }

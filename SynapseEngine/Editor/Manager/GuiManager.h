@@ -14,7 +14,7 @@ namespace Syn {
     public:
         ~GuiManager();
 
-        void Init(GLFWwindow* window, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue graphicsQueue, uint32_t imageCount, VkFormat colorFormat);
+        void Init(GLFWwindow* window, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue graphicsQueue, uint32_t graphicsQueueFamily, uint32_t imageCount, VkFormat colorFormat);
         void Shutdown();
 
         void BeginFrame();

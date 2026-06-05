@@ -1,5 +1,5 @@
 #include "GuiTextureManager.h"
-#include "Editor/Backends/imgui_impl_vulkan.h"
+#include <imgui_impl_vulkan.h>
 #include "Engine/ServiceLocator.h"
 #include "Engine/FrameContext.h"
 

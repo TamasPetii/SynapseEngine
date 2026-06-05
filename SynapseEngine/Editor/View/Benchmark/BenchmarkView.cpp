@@ -72,13 +72,18 @@ namespace Syn {
         ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(0.26f, 0.59f, 0.98f, 1.0f));
         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.0f, 0.0f, 0.0f, 0.3f));
 
+        float plotWidth = ImGui::GetContentRegionAvail().x;
+        if (plotWidth <= 0.0f) {
+            plotWidth = 1.0f;
+        }
+
         ImGui::PlotLines("##FPSGraph",
             state.fpsHistory.data(),
             BenchmarkState::FPS_HISTORY_SIZE,
             state.fpsHistoryOffset,
             overlay.c_str(),
             0.0f, 1500.0f,
-            ImVec2(ImGui::GetContentRegionAvail().x, 50.0f)
+            ImVec2(plotWidth, 50.0f)
         );
         ImGui::PopStyleColor(2);
 

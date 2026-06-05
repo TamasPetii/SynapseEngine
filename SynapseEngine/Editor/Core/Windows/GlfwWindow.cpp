@@ -11,7 +11,7 @@
 #pragma comment(lib, "Dwmapi.lib")
 #endif
 
-#include <volk.h>
+#include <vulkan/vulkan.h>
 
 namespace Syn {
 

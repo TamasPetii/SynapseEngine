@@ -1,9 +1,9 @@
 #include "GuiManager.h"
-#include <volk.h>
+#include <vulkan/vulkan.h>
 #include <imgui.h>
 
-#include "Editor/Backends/imgui_impl_glfw.h"
-#include "Editor/Backends/imgui_impl_vulkan.h"
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_vulkan.h>
 #include "GuiTextureManager.h"
 #include <print>
 #include "Engine/ServiceLocator.h"
@@ -15,16 +15,12 @@ namespace Syn {
         Shutdown();
     }
 
-    void GuiManager::Init(GLFWwindow* window, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue graphicsQueue, uint32_t imageCount, VkFormat colorFormat) {
+    void GuiManager::Init(GLFWwindow* window, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue graphicsQueue, uint32_t graphicsQueueFamily, uint32_t imageCount, VkFormat colorFormat) {
         _device = device;
         _windowHandle = window;
         _colorFormat = colorFormat;
 		_textureManager = std::make_unique<GuiTextureManager>();
         _fileDialog = std::make_unique<ImGuiFileDialogImpl>();
-
-        volkInitialize();
-        volkLoadInstance(instance);
-        volkLoadDevice(device);
 
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -47,6 +43,7 @@ namespace Syn {
         init_info.PhysicalDevice = physicalDevice;
         init_info.Device = device;
         init_info.Queue = graphicsQueue;
+        init_info.QueueFamily = graphicsQueueFamily;
         init_info.DescriptorPool = _imguiPool;
         init_info.MinImageCount = imageCount;
         init_info.ImageCount = imageCount;

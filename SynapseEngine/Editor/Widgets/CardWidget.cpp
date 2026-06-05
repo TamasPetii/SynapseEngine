@@ -25,6 +25,10 @@ namespace Syn::UI {
         ImVec2 startPos = ImGui::GetCursorPos();
         float availX = ImGui::GetContentRegionAvail().x;
 
+        if (availX <= 0.0f) {
+            availX = 1.0f;
+        }
+
         if (ImGui::InvisibleButton(childId.c_str(), ImVec2(availX, textHeight))) {
             isOpen = !isOpen;
         }

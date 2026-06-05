@@ -90,6 +90,7 @@ void Synapse::OnInit() {
         vkContext->GetPhysicalDevice()->Handle(),
         vkContext->GetDevice()->Handle(),
         vkContext->GetDevice()->GetGraphicsQueue()->Handle(),
+        vkContext->GetDevice()->GetGraphicsQueue()->GetFamilyIndex(),
         vkContext->GetSwapChain()->GetImageCount(),
         vkContext->GetSwapChain()->GetImageFormat()
     );
