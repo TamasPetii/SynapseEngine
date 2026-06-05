@@ -43,19 +43,19 @@ add_defines(
 
 if is_mode("debug") then
     add_defines("SYN_DEBUG", "_DEBUG")
-    set_runtimes("MDd")
+    if is_plat("windows") then set_runtimes("MDd") end
 elseif is_mode("release") then
     add_defines("SYN_RELEASE", "NDEBUG")
-    set_runtimes("MD")
+    if is_plat("windows") then set_runtimes("MD") end
 elseif is_mode("dist") then
     add_defines("SYN_DIST", "NDEBUG")
-    set_runtimes("MD")
+    if is_plat("windows") then set_runtimes("MD") end
     set_optimize("fastest")
     set_symbols("none")
     set_policy("build.optimization.lto", true)
 elseif is_mode("performance") then
     add_defines("SYN_PERFORMANCE", "SYN_DIST", "NDEBUG")
-    set_runtimes("MD")
+    if is_plat("windows") then set_runtimes("MD") end
     set_optimize("fastest")
     set_symbols("none")
     set_policy("build.optimization.lto", true)
