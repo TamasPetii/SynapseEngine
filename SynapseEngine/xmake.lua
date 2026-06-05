@@ -117,6 +117,11 @@ target("EditorCore")
 
 target("Editor")
     set_kind("binary")
+
+    if is_plat("windows") then
+        add_syslinks("gdi32", "user32", "shell32")
+    end
+
     add_files("Editor/**.cpp")
     add_headerfiles("Editor/**.h", "Editor/**.hpp")
     add_files("../External/ImGuiFileDialog/*.cpp")
