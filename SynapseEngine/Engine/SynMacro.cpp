@@ -16,8 +16,6 @@ namespace Syn {
     }
 
     void HandleVkAssert(int result, const char* expr, const char* file, int line) {
-        return;
-
         if (result != 0) {
             std::string message = std::format("VULKAN ERROR: {} (Code: {})", expr, result);
             LogAndAbort(message, file, line);
@@ -27,8 +25,6 @@ namespace Syn {
     }
 
     void HandleVkAssertMsg(int result, const char* expr, const char* msg, const char* file, int line) {
-        return;
-        
         if (result != 0) {
             std::string message = std::format("VULKAN ERROR: {}\n\tExpression: {} (Code: {})", msg, expr, result);
             LogAndAbort(message, file, line);

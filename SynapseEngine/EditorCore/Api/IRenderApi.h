@@ -6,9 +6,9 @@
 #include "EditorCore/Types/EntityHandle.h"
 
 namespace Syn {
-    class IRenderAPI {
+    class IRenderApi {
     public:
-        virtual ~IRenderAPI() = default;
+        virtual ~IRenderApi() = default;
 
         virtual void ResizeRenderTargets(uint32_t width, uint32_t height) = 0;
         virtual TextureHandle GetViewportTexture(const std::string& groupName, const std::string& targetName, const std::string& viewName) = 0;

@@ -2,6 +2,8 @@
 #include "IDrawGroup.h"
 #include <glm/glm.hpp>
 #include "Engine/Registry/Entity.h"
+#include <vector>
+#include <atomic>
 
 namespace Syn
 {

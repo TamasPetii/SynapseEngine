@@ -8,7 +8,7 @@
 namespace Syn {
     class ComponentViewModel : public IViewModel<ComponentState, ComponentIntent> {
     public:
-        ComponentViewModel(ISelectionAPI* selectionApi, ITagAPI* tagApi, ITransformAPI* transformApi);
+        ComponentViewModel(ISelectionApi* selectionApi, ITagApi* tagApi, ITransformApi* transformApi);
         ~ComponentViewModel() override = default;
 
         const ComponentState& GetState() const override;
@@ -18,7 +18,7 @@ namespace Syn {
         TagViewModel& GetTagVM();
         TransformViewModel& GetTransformVM();
     private:
-        ISelectionAPI* _selectionApi = nullptr;
+        ISelectionApi* _selectionApi = nullptr;
         ComponentState _state;
 
         TagViewModel _tagVM;

@@ -7,6 +7,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <cstdint>
 
 #include "RenderContext.h"
 #include "ShaderNames.h"

@@ -4,9 +4,9 @@
 #include "EditorCore/Types/EntityHandle.h"
 
 namespace Syn {
-    class IHierarchyAPI {
+    class IHierarchyApi {
     public:
-        virtual ~IHierarchyAPI() = default;
+        virtual ~IHierarchyApi() = default;
 
         virtual std::vector<EntityID> GetRootEntities() const = 0;
         virtual std::vector<EntityID> GetChildren(EntityID entity) const = 0;

@@ -18,7 +18,7 @@ namespace Syn {
             auto archive = _registry->CreateInput(extension, stream);
             if (archive) {
                 archive->Deserialize();
-                Schema<T>::template Invoke(*archive, "Root", outData);
+                Schema<T>::Invoke(*archive, "Root", outData);
             }
         }
 
@@ -26,7 +26,7 @@ namespace Syn {
         void SaveImpl(IOutputStream& stream, const std::string& extension, const T& data) {
             auto archive = _registry->CreateOutput(extension, stream);
             if (archive) {
-                Schema<std::remove_cvref_t<T>>::template Invoke(*archive, "Root", data);
+                Schema<std::remove_cvref_t<T>>::Invoke(*archive, "Root", data);
                 archive->Serialize();
             }
         }

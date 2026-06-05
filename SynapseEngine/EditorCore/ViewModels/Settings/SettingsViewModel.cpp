@@ -2,7 +2,7 @@
 
 namespace Syn {
 
-    SettingsViewModel::SettingsViewModel(ISettingsAPI* api)
+    SettingsViewModel::SettingsViewModel(ISettingsApi* api)
         : _api(api)
     {}
 

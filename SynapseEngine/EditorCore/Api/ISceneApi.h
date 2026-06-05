@@ -2,9 +2,9 @@
 #include <string>
 
 namespace Syn {
-    class ISceneAPI {
+    class ISceneApi {
     public:
-        virtual ~ISceneAPI() = default;
+        virtual ~ISceneApi() = default;
 
         virtual void NewScene() = 0;
         virtual void LoadScene(const std::string& filepath = "") = 0;

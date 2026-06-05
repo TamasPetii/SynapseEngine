@@ -1,6 +1,7 @@
 #include "SsaoNoiseImageSource.h"
 #include "Engine/Image/ImageNames.h"
 #include <random>
+#include <cstring>
 
 namespace Syn
 {
@@ -29,7 +30,7 @@ namespace Syn
         }
        
 		image.pixels.resize(pixelData.size() * sizeof(uint16_t));
-        std::memcpy(image.pixels.data(), pixelData.data(), image.pixels.size());
+        memcpy(image.pixels.data(), pixelData.data(), image.pixels.size());
 
         MipLevelInfo mip0{};
         mip0.width = 1;

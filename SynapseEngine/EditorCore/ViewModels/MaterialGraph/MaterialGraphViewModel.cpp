@@ -1,8 +1,9 @@
 #include "MaterialGraphViewModel.h"
+#include <algorithm>
 
 namespace Syn {
 
-    MaterialGraphViewModel::MaterialGraphViewModel(IMaterialAPI* materialApi)
+    MaterialGraphViewModel::MaterialGraphViewModel(IMaterialApi* materialApi)
         : _materialApi(materialApi)
     {
         BuildGraphFromEngine();

@@ -2,15 +2,15 @@
 #include "EditorCore/ViewModels/IViewModel.h"
 #include "ViewportState.h"
 #include "ViewportIntent.h"
-#include "EditorCore/API/IRenderAPI.h"
-#include "EditorCore/API/ISelectionAPI.h"
-#include "EditorCore/API/ITransformAPI.h"
-#include "EditorCore/API/ISettingsAPI.h"
+#include "EditorCore/Api/IRenderApi.h"
+#include "EditorCore/Api/ISelectionApi.h"
+#include "EditorCore/Api/ITransformApi.h"
+#include "EditorCore/Api/ISettingsApi.h"
 
 namespace Syn {
     class ViewportViewModel : public IViewModel<ViewportState, ViewportIntent> {
     public:
-        ViewportViewModel(IRenderAPI* renderApi, ISelectionAPI* selectionApi, ITransformAPI* transformApi, ISettingsAPI* settingsApi);
+        ViewportViewModel(IRenderApi* renderApi, ISelectionApi* selectionApi, ITransformApi* transformApi, ISettingsApi* settingsApi);
         ~ViewportViewModel() override = default;
 
         const ViewportState& GetState() const override;
@@ -27,10 +27,10 @@ namespace Syn {
         void HandleChangeDebugVisibilityMode(const ChangeDebugVisibilityModeIntent& intent);
 
     private:
-        IRenderAPI* _renderApi = nullptr;
-        ISelectionAPI* _selectionApi = nullptr;
-        ITransformAPI* _transformApi = nullptr;
-        ISettingsAPI* _settingsApi = nullptr;
+        IRenderApi* _renderApi = nullptr;
+        ISelectionApi* _selectionApi = nullptr;
+        ITransformApi* _transformApi = nullptr;
+        ISettingsApi* _settingsApi = nullptr;
         ViewportState _state;
     };
 }

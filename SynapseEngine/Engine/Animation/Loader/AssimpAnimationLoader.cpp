@@ -1,7 +1,7 @@
 #include "AssimpAnimationLoader.h"
 #include "Engine/Utils/AssimpUtils.h"
 #include "Engine/ServiceLocator.h"
-#include <Assimp/Importer.hpp>
+#include <assimp/Importer.hpp>
 #include <queue>
 #include <iostream>
 

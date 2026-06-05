@@ -7,6 +7,8 @@
 #include "IDrawGroup.h"
 #include "Engine/Vk/Image/Image.h"
 #include <bit>
+#include <vector>
+#include <atomic>
 
 namespace Syn
 {

@@ -10,9 +10,9 @@ namespace Syn {
         std::string DefaultPath;
     };
 
-    class IFileDialogAPI {
+    class IFileDialogApi {
     public:
-        virtual ~IFileDialogAPI() = default;
+        virtual ~IFileDialogApi() = default;
 
         virtual void OpenFile(const FileDialogArgs& args, std::function<void(const std::string&)> onResult) = 0;
         virtual void SaveFile(const FileDialogArgs& args, std::function<void(const std::string&)> onResult) = 0;

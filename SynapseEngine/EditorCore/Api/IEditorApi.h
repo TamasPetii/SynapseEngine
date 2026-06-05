@@ -1,27 +1,27 @@
 #pragma once
-#include "ISelectionAPI.h"
-#include "ITransformAPI.h"
-#include "IRenderAPI.h"
+#include "ISelectionApi.h"
+#include "ITransformApi.h"
+#include "IRenderApi.h"
 #include "ISettingsApi.h"
-#include "ISceneAPI.h"
-#include "IMaterialAPI.h"
-#include "IFileSystemAPI.h"
-#include "IHierarchyAPI.h"
-#include "ITagAPI.h"
+#include "ISceneApi.h"
+#include "IMaterialApi.h"
+#include "IFileSystemApi.h"
+#include "IHierarchyApi.h"
+#include "ITagApi.h"
 
 namespace Syn {
-    class IEditorAPI :
-        public ISelectionAPI,
-        public ITransformAPI,
-        public IRenderAPI,
-        public ISettingsAPI,
-        public ISceneAPI,
-        public IMaterialAPI,
-        public IFileSystemAPI,
-        public IHierarchyAPI,
-        public ITagAPI
+    class IEditorApi :
+        public ISelectionApi,
+        public ITransformApi,
+        public IRenderApi,
+        public ISettingsApi,
+        public ISceneApi,
+        public IMaterialApi,
+        public IFileSystemApi,
+        public IHierarchyApi,
+        public ITagApi
     {
     public:
-        virtual ~IEditorAPI() = default;
+        virtual ~IEditorApi() = default;
     };
 }

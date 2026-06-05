@@ -1,9 +1,9 @@
 #include "AssimpMeshLoader.h"
 #include "Engine/Utils/AssimpUtils.h"
 #include "Engine/Mesh/Utils/MeshUtils.h"
-#include <Assimp/Importer.hpp>
-#include <Assimp/postprocess.h>
-#include <Assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <ranges>
 #include <queue>
 #include <execution>

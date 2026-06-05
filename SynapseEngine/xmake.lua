@@ -13,6 +13,9 @@ set_objectdir("Intermediates/$(os)-$(arch)/$(mode)/$(name)")
 
 if is_plat("windows") then
     add_cxflags("/bigobj")
+    add_cxflags("/GR-") 
+elseif is_plat("linux") then
+    add_cxflags("-fno-rtti")
 end
 
 add_includedirs(
@@ -77,15 +80,22 @@ local vcpkg_packages = {
     "vcpkg::joltphysics",
     "vcpkg::tinyxml2",
     "vcpkg::yaml-cpp",
-    "vcpkg::tomlplusplus",
-    "vcpkg::nativefiledialog-extended"
+    "vcpkg::tomlplusplus"
 }
 
 for _, pkg in ipairs(vcpkg_packages) do
-    if is_mode("debug") then
-        add_requires(pkg, {configs = {shared = false, debug = true, runtimes = "MDd"}})
+    if is_plat("windows") then
+        if is_mode("debug") then
+            add_requires(pkg, {configs = {shared = false, debug = true, runtimes = "MDd"}})
+        else
+            add_requires(pkg, {configs = {shared = false, runtimes = "MD"}})
+        end
     else
-        add_requires(pkg, {configs = {shared = false, runtimes = "MD"}})
+        if is_mode("debug") then
+            add_requires(pkg, {configs = {shared = false, debug = true}})
+        else
+            add_requires(pkg, {configs = {shared = false}})
+        end
     end
 end
 

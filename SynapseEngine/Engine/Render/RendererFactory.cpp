@@ -46,7 +46,7 @@
 #include "Engine/Render/Passes/Present/CompositePass.h"
 #include "Engine/Render/Passes/Present/PresentationTransitionPass.h"
 
-#include "Engine/Render/Passes/Setup/GLobalFrameSetupPass.h"
+#include "Engine/Render/Passes/Setup/GlobalFrameSetupPass.h"
 
 #include "Engine/Render/Passes/Shading/Common/DepthCopyPass.h"
 #include "Engine/Render/Passes/Shading/Common/OpaqueInitPass.h"

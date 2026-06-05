@@ -1,10 +1,10 @@
 #pragma once
-#include "EditorCore/Api/IFileDialogAPI.h"
+#include "EditorCore/Api/IFileDialogApi.h"
 #include "../External/ImGuiFileDialog/ImGuiFileDialog.h"
 
 namespace Syn 
 {
-    class ImGuiFileDialogImpl : public IFileDialogAPI {
+    class ImGuiFileDialogImpl : public IFileDialogApi {
     public:
         void OpenFile(const FileDialogArgs& args, std::function<void(const std::string&)> onResult) override {
             _onResult = onResult;

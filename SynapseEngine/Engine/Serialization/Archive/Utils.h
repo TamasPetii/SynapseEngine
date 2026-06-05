@@ -1,5 +1,7 @@
 #pragma once
 #include "Engine/SynApi.h"
+#include <cstdint>
+#include <cstddef>
 
 namespace Syn
 {

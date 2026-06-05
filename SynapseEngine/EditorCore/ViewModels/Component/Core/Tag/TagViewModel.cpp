@@ -3,7 +3,7 @@
 
 namespace Syn {
 
-    TagViewModel::TagViewModel(ISelectionAPI* selectionApi, ITagAPI* tagApi)
+    TagViewModel::TagViewModel(ISelectionApi* selectionApi, ITagApi* tagApi)
         : _selectionApi(selectionApi), _tagApi(tagApi)
     {}
 

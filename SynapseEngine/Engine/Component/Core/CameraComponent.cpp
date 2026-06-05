@@ -1,4 +1,5 @@
 #include "CameraComponent.h"
+#include <cstring>
 
 namespace Syn
 {

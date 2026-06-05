@@ -54,7 +54,7 @@ namespace Syn
             Property(name, static_cast<std::underlying_type_t<T>>(value));
         }
         else if constexpr (has_schema<T, std::remove_reference_t<decltype(*this)>>) {
-            Schema<std::remove_cvref_t<T>>::template Invoke(*this, name, value);
+            Schema<std::remove_cvref_t<T>>::Invoke(*this, name, value);
         }
         else static_assert(has_schema<T>, "Serialization Error: Type has no defined Schema specialization!");
     }

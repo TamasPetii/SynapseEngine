@@ -2,12 +2,12 @@
 #include "EditorCore/ViewModels/IViewModel.h"
 #include "ContentBrowserState.h"
 #include "ContentBrowserIntent.h"
-#include "EditorCore/API/IFileSystemAPI.h"
+#include "EditorCore/Api/IFileSystemApi.h"
 
 namespace Syn {
     class ContentBrowserViewModel : public IViewModel<ContentBrowserState, ContentBrowserIntent> {
     public:
-        ContentBrowserViewModel(IFileSystemAPI* fileSystemApi, const std::string& initialPath)
+        ContentBrowserViewModel(IFileSystemApi* fileSystemApi, const std::string& initialPath)
             : _fileSystemApi(fileSystemApi)
         {
             _state.currentPath = initialPath;
@@ -52,7 +52,7 @@ namespace Syn {
         }
 
     private:
-        IFileSystemAPI* _fileSystemApi = nullptr;
+        IFileSystemApi* _fileSystemApi = nullptr;
         ContentBrowserState _state;
     };
 }

@@ -59,7 +59,7 @@ namespace Syn
             value = static_cast<T>(val);
         }
         else if constexpr (has_schema<T, std::remove_reference_t<decltype(*this)>>) {
-            Schema<std::remove_cvref_t<T>>::template Invoke(*this, name, value);
+            Schema<std::remove_cvref_t<T>>::Invoke(*this, name, value);
         }
         else {
             static_assert(sizeof(T) == 0, "Nincs Schema specializacio erre a tipusra!");

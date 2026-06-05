@@ -4,7 +4,7 @@
 
 namespace Syn {
 
-    ViewportViewModel::ViewportViewModel(IRenderAPI* renderApi, ISelectionAPI* selectionApi, ITransformAPI* transformApi, ISettingsAPI* settingsApi)
+    ViewportViewModel::ViewportViewModel(IRenderApi* renderApi, ISelectionApi* selectionApi, ITransformApi* transformApi, ISettingsApi* settingsApi)
         : _renderApi(renderApi), _selectionApi(selectionApi), _transformApi(transformApi), _settingsApi(settingsApi) {}
 
     const ViewportState& ViewportViewModel::GetState() const {

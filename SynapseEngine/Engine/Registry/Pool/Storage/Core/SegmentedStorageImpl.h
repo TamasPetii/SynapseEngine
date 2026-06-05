@@ -8,6 +8,7 @@
 #include <vector>
 #include <atomic>
 #include <span>
+#include <cstring>
 
 namespace Syn
 {
@@ -314,7 +315,7 @@ namespace Syn
 
         if constexpr (std::is_trivially_copyable_v<U>)
         {
-            std::memcpy(&this->Get(0), sortedData.data(), _staticEnd * sizeof(U));
+            memcpy(&this->Get(0), sortedData.data(), _staticEnd * sizeof(U));
         }
         else
         {
@@ -327,10 +328,10 @@ namespace Syn
     SYN_INLINE void SegmentedStorageImpl<T, FlagMixinPolicy>::UpdateStaticEntities(std::span<const EntityID> sortedEntities)
     {
         SYN_ASSERT(sortedEntities.size() == _staticEnd, "Error: Sorted entity array size does not match the static region size!");
-        std::memcpy(Base::_entities.data(), sortedEntities.data(), _staticEnd * sizeof(EntityID));
+        memcpy(Base::_entities.data(), sortedEntities.data(), _staticEnd * sizeof(EntityID));
         
         [[unlikely]]
         if(_dynamicEnd != 0)
-            Base::SetBit<INDEX_CHANGED_BIT>(0);
+            Base::template SetBit<INDEX_CHANGED_BIT>(0);
     }
 }

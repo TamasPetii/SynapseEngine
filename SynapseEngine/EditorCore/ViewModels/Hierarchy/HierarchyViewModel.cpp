@@ -4,7 +4,7 @@
 
 namespace Syn {
 
-    HierarchyViewModel::HierarchyViewModel(IHierarchyAPI* hierarchyApi, ISelectionAPI* selectionApi, ITagAPI* tagApi)
+    HierarchyViewModel::HierarchyViewModel(IHierarchyApi* hierarchyApi, ISelectionApi* selectionApi, ITagApi* tagApi)
         : _hierarchyApi(hierarchyApi), _selectionApi(selectionApi), _tagApi(tagApi)
     {      
     }

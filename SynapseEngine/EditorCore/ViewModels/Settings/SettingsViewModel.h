@@ -2,12 +2,12 @@
 #include "EditorCore/ViewModels/IViewModel.h"
 #include "SettingsState.h"
 #include "SettingsIntent.h"
-#include "EditorCore/API/ISettingsAPI.h"
+#include "EditorCore/Api/ISettingsApi.h"
 
 namespace Syn {
     class SettingsViewModel : public IViewModel<SettingsState, SettingsIntent> {
     public:
-        SettingsViewModel(ISettingsAPI* api);
+        SettingsViewModel(ISettingsApi* api);
         ~SettingsViewModel() override = default;
 
         const SettingsState& GetState() const override;
@@ -16,7 +16,7 @@ namespace Syn {
         void Dispatch(const SettingsIntent& intent) override;
 
     private:
-        ISettingsAPI* _api = nullptr;
+        ISettingsApi* _api = nullptr;
         SettingsState _state;
     };
 }

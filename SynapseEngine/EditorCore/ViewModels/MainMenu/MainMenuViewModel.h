@@ -2,13 +2,13 @@
 #include "EditorCore/ViewModels/IViewModel.h"
 #include "MainMenuState.h"
 #include "MainMenuIntent.h"
-#include "EditorCore/Api/ISceneAPI.h"
-#include "EditorCore/Api/IFileDialogAPI.h"
+#include "EditorCore/Api/ISceneApi.h"
+#include "EditorCore/Api/IFileDialogApi.h"
 
 namespace Syn {
     class MainMenuViewModel : public IViewModel<MainMenuState, MainMenuIntent> {
     public:
-        MainMenuViewModel(ISceneAPI* sceneApi, IFileDialogAPI* fileDialogApi) 
+        MainMenuViewModel(ISceneApi* sceneApi, IFileDialogApi* fileDialogApi) 
             : _sceneApi(sceneApi), _fileDialogApi(fileDialogApi) {}
 
         const MainMenuState& GetState() const override { 
@@ -43,8 +43,8 @@ namespace Syn {
         }
 
     private:
-        ISceneAPI* _sceneApi = nullptr;
-        IFileDialogAPI* _fileDialogApi = nullptr;
+        ISceneApi* _sceneApi = nullptr;
+        IFileDialogApi* _fileDialogApi = nullptr;
         MainMenuState _state;
     };
 }

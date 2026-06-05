@@ -4,13 +4,13 @@
 #include "TransformState.h"
 #include "TransformIntent.h"
 #include "TransformCommands.h"
-#include "EditorCore/API/ISelectionAPI.h"
-#include "EditorCore/API/ITransformAPI.h"
+#include "EditorCore/Api/ISelectionApi.h"
+#include "EditorCore/Api/ITransformApi.h"
 
 namespace Syn {
     class TransformViewModel : public IViewModel<TransformState, TransformIntent> {
     public:
-        TransformViewModel(ISelectionAPI* selectionApi, ITransformAPI* transformApi);
+        TransformViewModel(ISelectionApi* selectionApi, ITransformApi* transformApi);
         ~TransformViewModel() override = default;
 
         const TransformState& GetState() const override;
@@ -22,8 +22,8 @@ namespace Syn {
         void HandleSetRotation(const SetRotationIntent& intent);
         void HandleSetScale(const SetScaleIntent& intent);
     private:
-        ISelectionAPI* _selectionApi = nullptr;
-        ITransformAPI* _transformApi = nullptr;
+        ISelectionApi* _selectionApi = nullptr;
+        ITransformApi* _transformApi = nullptr;
         TransformState _state;
 
         DragInteraction<glm::vec3> _positionDrag;

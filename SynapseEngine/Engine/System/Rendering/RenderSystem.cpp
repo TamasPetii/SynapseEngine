@@ -6,7 +6,7 @@
 #include "Engine/Material/MaterialManager.h"
 #include "Engine/System/Rendering/ModelSystem.h"
 #include "Engine/ServiceLocator.h"
-#include "Engine/FrameCOntext.h"
+#include "Engine/FrameContext.h"
 #include "MaterialSystem.h"
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
 

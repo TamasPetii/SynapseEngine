@@ -1,4 +1,5 @@
 #pragma once
+#include <cstring>
 #include "../VkCommon.h"
 
 namespace Syn::Vk {

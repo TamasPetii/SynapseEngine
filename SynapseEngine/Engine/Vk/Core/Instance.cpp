@@ -51,7 +51,7 @@ namespace Syn::Vk {
 
     void Instance::SetupVolk()
     {
-        SYN_VK_ASSERT_MSG(volkInitialize(), "Failed to initialize volk");
+        SYN_VK_ASSERT_MSG(volkInitialize(), "Failed to initialize volk! Vulkan loader not found.");
     }
 
     void Instance::CreateInstance(std::span<const char*> windowExtensions)
@@ -61,7 +61,7 @@ namespace Syn::Vk {
         appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
         appInfo.pEngineName = "Synapse";
         appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-        appInfo.apiVersion = VK_API_VERSION_1_4;
+        appInfo.apiVersion = VK_API_VERSION_1_3;
 
         std::vector<const char*> extensions(windowExtensions.begin(), windowExtensions.end());
         extensions.push_back(VK_KHR_GET_SURFACE_CAPABILITIES_2_EXTENSION_NAME);

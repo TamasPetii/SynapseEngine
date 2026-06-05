@@ -3,9 +3,9 @@
 #include "EditorCore/Types/EntityHandle.h"
 
 namespace Syn {
-    class ITransformAPI {
+    class ITransformApi {
     public:
-        virtual ~ITransformAPI() = default;
+        virtual ~ITransformApi() = default;
 
         virtual glm::vec3 GetEntityPosition(EntityID entity) const = 0;
         virtual glm::vec3 GetEntityRotation(EntityID entity) const = 0;

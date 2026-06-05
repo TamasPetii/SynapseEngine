@@ -2,11 +2,11 @@
 #include <print>
 
 #define GLFW_INCLUDE_VULKAN
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 
 #ifdef _WIN32
 #define GLFW_EXPOSE_NATIVE_WIN32
-#include <glfw/glfw3native.h>
+#include <GLFW/glfw3native.h>
 #include <dwmapi.h>
 #pragma comment(lib, "Dwmapi.lib")
 #endif

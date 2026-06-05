@@ -2,13 +2,13 @@
 #include "EditorCore/ViewModels/IViewModel.h"
 #include "MaterialGraphState.h"
 #include "MaterialGraphIntent.h"
-#include "EditorCore/Api/IMaterialAPI.h"
+#include "EditorCore/Api/IMaterialApi.h"
 
 
 namespace Syn {
     class MaterialGraphViewModel : public IViewModel<MaterialGraphState, MaterialGraphIntent> {
     public:
-        MaterialGraphViewModel(IMaterialAPI* materialApi);
+        MaterialGraphViewModel(IMaterialApi* materialApi);
 
         const MaterialGraphState& GetState() const override { return _state; }
 
@@ -19,7 +19,7 @@ namespace Syn {
         void HandleCreateLink(const CreateLinkIntent& intent);
         void HandleDeleteLink(const DeleteLinkIntent& intent);
     private:
-        IMaterialAPI* _materialApi = nullptr;
+        IMaterialApi* _materialApi = nullptr;
         MaterialGraphState _state;
     };
 }

@@ -1,14 +1,14 @@
 #pragma once
 #include "EditorCore/ViewModels/IViewModel.h"
-#include "EditorCore/API/ISelectionAPI.h"
-#include "EditorCore/API/ITagAPI.h"
+#include "EditorCore/Api/ISelectionApi.h"
+#include "EditorCore/Api/ITagApi.h"
 #include "TagState.h"
 #include "TagIntent.h"
 
 namespace Syn {
     class TagViewModel : public IViewModel<TagState, TagIntent> {
     public:
-        TagViewModel(ISelectionAPI* selectionApi, ITagAPI* tagApi);
+        TagViewModel(ISelectionApi* selectionApi, ITagApi* tagApi);
         ~TagViewModel() override = default;
 
         const TagState& GetState() const override;
@@ -16,8 +16,8 @@ namespace Syn {
         void Dispatch(const TagIntent& intent) override;
 
     private:
-        ISelectionAPI* _selectionApi = nullptr;
-        ITagAPI* _tagApi = nullptr;
+        ISelectionApi* _selectionApi = nullptr;
+        ITagApi* _tagApi = nullptr;
         TagState _state;
     };
 }

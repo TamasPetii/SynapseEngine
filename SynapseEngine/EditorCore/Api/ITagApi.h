@@ -3,9 +3,9 @@
 #include "EditorCore/Types/EntityHandle.h"
 
 namespace Syn {
-    class ITagAPI {
+    class ITagApi {
     public:
-        virtual ~ITagAPI() = default;
+        virtual ~ITagApi() = default;
 
         virtual std::string GetEntityName(EntityID entity) const = 0;
         virtual void SetEntityName(EntityID entity, const std::string& name) = 0;

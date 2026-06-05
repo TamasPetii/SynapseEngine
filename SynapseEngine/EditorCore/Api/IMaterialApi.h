@@ -15,9 +15,9 @@ namespace Syn
         std::string name;
     };
 
-    class IMaterialAPI {
+    class IMaterialApi {
     public:
-        virtual ~IMaterialAPI() = default;
+        virtual ~IMaterialApi() = default;
 
         virtual std::vector<MaterialApiDesc> GetAllMaterials() const = 0;
         virtual std::vector<TextureApiDesc> GetAllTextures() const = 0;

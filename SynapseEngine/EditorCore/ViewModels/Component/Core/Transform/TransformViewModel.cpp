@@ -3,7 +3,7 @@
 
 namespace Syn {
 
-    TransformViewModel::TransformViewModel(ISelectionAPI* selectionApi, ITransformAPI* transformApi)
+    TransformViewModel::TransformViewModel(ISelectionApi* selectionApi, ITransformApi* transformApi)
         : _selectionApi(selectionApi), _transformApi(transformApi)
     {}
 

@@ -1,13 +1,13 @@
 #pragma once
 #include "EditorCore/Command/ICommand.h"
-#include "EditorCore/Api/ITransformAPI.h"
+#include "EditorCore/Api/ITransformApi.h"
 #include <glm/glm.hpp>
 
 namespace Syn 
 {
     class ChangePositionCommand : public ICommand {
     public:
-        ChangePositionCommand(ITransformAPI* api, EntityID entity, const glm::vec3& oldPos, const glm::vec3& newPos)
+        ChangePositionCommand(ITransformApi* api, EntityID entity, const glm::vec3& oldPos, const glm::vec3& newPos)
             : _api(api), _entity(entity), _oldPos(oldPos), _newPos(newPos) {}
 
         void Execute() override {
@@ -19,7 +19,7 @@ namespace Syn
         }
 
     private:
-        ITransformAPI* _api;
+        ITransformApi* _api;
         EntityID _entity;
         glm::vec3 _oldPos;
         glm::vec3 _newPos;
@@ -27,7 +27,7 @@ namespace Syn
 
     class ChangeRotationCommand : public ICommand {
     public:
-        ChangeRotationCommand(ITransformAPI* api, EntityID entity, const glm::vec3& oldRot, const glm::vec3& newRot)
+        ChangeRotationCommand(ITransformApi* api, EntityID entity, const glm::vec3& oldRot, const glm::vec3& newRot)
             : _api(api), _entity(entity), _oldRot(oldRot), _newRot(newRot) {}
 
         void Execute() override {
@@ -39,7 +39,7 @@ namespace Syn
         }
 
     private:
-        ITransformAPI* _api;
+        ITransformApi* _api;
         EntityID _entity;
         glm::vec3 _oldRot;
         glm::vec3 _newRot;
@@ -47,7 +47,7 @@ namespace Syn
 
     class ChangeScaleCommand : public ICommand {
     public:
-        ChangeScaleCommand(ITransformAPI* api, EntityID entity, const glm::vec3& oldScale, const glm::vec3& newScale)
+        ChangeScaleCommand(ITransformApi* api, EntityID entity, const glm::vec3& oldScale, const glm::vec3& newScale)
             : _api(api), _entity(entity), _oldScale(oldScale), _newScale(newScale) {}
 
         void Execute() override {
@@ -59,7 +59,7 @@ namespace Syn
         }
 
     private:
-        ITransformAPI* _api;
+        ITransformApi* _api;
         EntityID _entity;
         glm::vec3 _oldScale;
         glm::vec3 _newScale;

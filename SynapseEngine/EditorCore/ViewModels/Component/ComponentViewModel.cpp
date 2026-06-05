@@ -2,7 +2,7 @@
 
 namespace Syn 
 {
-    ComponentViewModel::ComponentViewModel(ISelectionAPI* selectionApi, ITagAPI* tagApi, ITransformAPI* transformApi)
+    ComponentViewModel::ComponentViewModel(ISelectionApi* selectionApi, ITagApi* tagApi, ITransformApi* transformApi)
         : _selectionApi(selectionApi),
         _tagVM(selectionApi, tagApi),
         _transformVM(selectionApi, transformApi)
