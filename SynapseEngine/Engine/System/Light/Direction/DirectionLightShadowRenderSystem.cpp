@@ -82,6 +82,8 @@ namespace Syn
             shadowGroup.meshletCmds.Resize(mainGroup.activeMeshletCount);
         }
 
+		shadowGroup.totalCommandCount = mainGroup.activeTraditionalCount + mainGroup.activeMeshletCount;
+
         // Copy base command blueprints from the main model pass
         if (mainGroup.activeTraditionalCount > 0) {
             std::memcpy(

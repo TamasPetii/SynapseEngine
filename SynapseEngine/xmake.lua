@@ -112,7 +112,18 @@ add_packages(imgui_name, table.unpack(vcpkg_packages))
 target("Engine")
     set_kind("shared")
     add_files("Engine/**.cpp")
-    add_headerfiles("Engine/**.h", "Engine/**.hpp")
+    add_headerfiles(
+        "Engine/**.h",
+        "Engine/**.hpp",
+        "Engine/**.glsl",
+        "Engine/**.vert",
+        "Engine/**.frag",
+        "Engine/**.comp",
+        "Engine/**.geom",
+        "Engine/**.mesh",
+        "Engine/**.task",
+        "Engine/**.json"
+    )
     add_defines("SYN_BUILD_DLL", "VK_NO_PROTOTYPES")
 
 target("EditorCore")

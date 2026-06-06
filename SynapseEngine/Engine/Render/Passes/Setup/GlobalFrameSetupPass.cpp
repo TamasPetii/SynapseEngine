@@ -86,6 +86,8 @@ namespace Syn {
         ctx.directionLightVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightVisibleData, fIdx);
         ctx.directionLightDataBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightData, fIdx);
         ctx.directionLightSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightSparseMap, fIdx);
+        
+        ctx.directionLightShadowIndirectGeometryCommandBufferAddr = drawData->DirectionLightShadow.indirectBuffer.GetAddress(fIdx, isGpu);
         ctx.directionLightShadowSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightShadowSparseMap, fIdx);
         ctx.directionLightShadowDataBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightShadowData, fIdx);
 		ctx.directionLightShadowColliderDataBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightShadowColliderData, fIdx);
@@ -141,6 +143,7 @@ namespace Syn {
         ctx.emissiveStrength = settings->emissiveStrength;
         ctx.alphaLimitDiscard = 0.025f;
 
+        ctx.activeDirectionLightShadowCount = drawData->DirectionLightShadow.visibleLightCount;
 		ctx.directionLightShadowLodBias = SHADOW_LOD_BIAS;
 		ctx.directionLightShadowMaxDirLights = MAX_DIR_LIGHTS;
 		ctx.directionLightShadowMaxCascades = CASCADES_PER_LIGHT;

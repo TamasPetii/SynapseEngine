@@ -53,7 +53,7 @@ namespace Syn {
         }
 
         _totalModelsToTest = static_cast<uint32_t>(transformPool->Size());
-        _activeLights = static_cast<uint32_t>(lightPool->Size());
+        _activeLights = context.scene->GetSceneDrawData()->DirectionLightShadow.visibleLightCount;
 
         if (scene->GetSettings()->enableStaticBvhCulling || scene->GetSettings()->enableMortonBvhCulling) {
             uint32_t staticCount = static_cast<uint32_t>(transformPool->GetStorage().GetStaticEntities().size());
@@ -97,26 +97,24 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
         auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-        //Todo: Previouse direction light shadow pyramid!!
-
         // 3D Grid Dispatch: X = Dynamics, Y = Lights, Z = Cascades
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_totalModelsToTest, ComputeGroupSize::Buffer32D);
         vkCmdDispatch(context.cmd, groupCountX, _activeLights, CASCADES_PER_LIGHT);
 
-        Vk::BufferBarrierInfo countBarrier{};
-        countBarrier.buffer = drawData->DirectionLightShadow.modelDispatchBuffer.GetHandle(fIdx, isGpu);
-        countBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        countBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
-        countBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        countBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
-        Vk::BufferUtils::InsertBarrier(context.cmd, countBarrier);
+        Vk::BufferBarrierInfo indirectBarrier{};
+        indirectBarrier.buffer = drawData->DirectionLightShadow.indirectBuffer.GetHandle(fIdx, isGpu);
+        indirectBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        indirectBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        indirectBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        indirectBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT | VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, indirectBarrier);
 
-        Vk::BufferBarrierInfo listBarrier{};
-        listBarrier.buffer = compManager->GetComponentBuffer(BufferNames::DirectionLightShadowModelVisibleData, fIdx).buffer->Handle();
-        listBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        listBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
-        listBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        listBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
-        Vk::BufferUtils::InsertBarrier(context.cmd, listBarrier);
+        Vk::BufferBarrierInfo instanceBarrier{};
+        instanceBarrier.buffer = drawData->DirectionLightShadow.instanceBuffer.GetHandle(fIdx, isGpu);
+        instanceBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        instanceBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        instanceBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        instanceBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, instanceBarrier);
     }
 }

@@ -24,11 +24,11 @@ void main() {
 
     // 2. Reset Traditional Pipeline Commands
     if (id < ctx.globalTraditionalCommandsCount) {
-        GET_VK_DRAW_CMD(ctx.directionLightIndirectCommandBufferAddr, id).instanceCount = 0;
+        GET_VK_DRAW_CMD(ctx.directionLightShadowIndirectGeometryCommandBufferAddr, id).instanceCount = 0;
     } 
     // 3. Reset Meshlet Pipeline Commands
     else {
-        uint64_t meshletBaseAddr = ctx.directionLightIndirectCommandBufferAddr + (ctx.globalTraditionalCommandsCount * 16ul);
+        uint64_t meshletBaseAddr = ctx.directionLightShadowIndirectGeometryCommandBufferAddr + (ctx.globalTraditionalCommandsCount * 16ul);
         uint localCmdIndex = id - ctx.globalTraditionalCommandsCount;
         
         GET_VK_MESH_TASKS_CMD(meshletBaseAddr, localCmdIndex).groupCountX = 0;

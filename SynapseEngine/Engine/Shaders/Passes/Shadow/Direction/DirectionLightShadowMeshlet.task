@@ -100,14 +100,14 @@ void main() {
         GpuMeshletCollider worldCollider = TransformCollider(localCollider, transform.transform, transform.transformIT);
 
         // 8. Backface Cone Culling for Directional Light
-        if (false && pc.disableConeCulling == 0 && ctx.enableMeshletConeCulling == 1) {
+        if (pc.disableConeCulling == 0 && ctx.enableMeshletConeCulling == 1) {
             if (TestConeCulling(worldCollider, lightComp.direction)) {
                 isVisible = false;
             }
         }
 
         // 9. Frustum Culling against Cascade Planes
-        if (false && isVisible && !isParentFullyInside && ctx.enableMeshletFrustumCulling == 1) {
+        if (isVisible && !isParentFullyInside && ctx.enableMeshletFrustumCulling == 1) {
             if (TestFrustum(worldCollider.center, worldCollider.radius, worldCollider.aabbMin, worldCollider.aabbMax, cascade) == INTERSECTION_OUTSIDE) {
                 isVisible = false;
             }

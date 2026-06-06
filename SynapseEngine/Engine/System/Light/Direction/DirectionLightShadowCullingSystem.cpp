@@ -426,7 +426,6 @@ namespace Syn
                 // Sync CPU counters to indirect commands
                 for (uint32_t i = 0; i < mainGroup.activeTraditionalCount; ++i) {
                     shadowGroup.traditionalCmds[i].instanceCount = shadowGroup.paddedTraditionalCounts[i * 16];
-                    shadowGroup.traditionalCmds[i].firstInstance = 0;
                 }
 
                 for (uint32_t i = 0; i < mainGroup.activeMeshletCount; ++i) {

@@ -156,10 +156,10 @@ void main() {
                     uint indirectIdx = meshAlloc.indirectIndices[matType];
 
                     if (meshAlloc.isMeshletPipeline == PIPELINE_MESHLET) {
-                        uint64_t meshletBaseAddr = ctx.directionLightIndirectCommandBufferAddr + (ctx.globalTraditionalCommandsCount * 16ul);
+                        uint64_t meshletBaseAddr = ctx.directionLightShadowIndirectGeometryCommandBufferAddr + (ctx.globalTraditionalCommandsCount * 16ul);
                         slotIndex = atomicAdd(GET_MESHLET_CMD(meshletBaseAddr, indirectIdx).groupCountX, 1);
                     } else {
-                        slotIndex = atomicAdd(GET_TRADITIONAL_CMD(ctx.directionLightIndirectCommandBufferAddr, indirectIdx).instanceCount, 1);
+                        slotIndex = atomicAdd(GET_TRADITIONAL_CMD(ctx.directionLightShadowIndirectGeometryCommandBufferAddr, indirectIdx).instanceCount, 1);
                     }
 
                     uint bufferIndex = (meshAlloc.instanceOffsets[matType] * ctx.directionLightShadowMultiplier) + slotIndex;
