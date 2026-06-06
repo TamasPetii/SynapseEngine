@@ -14,11 +14,9 @@ set_targetdir("Binaries/$(os)-$(arch)/$(mode)")
 set_objectdir("Intermediates/$(os)-$(arch)/$(mode)/$(name)")
 
 if is_plat("windows") then
-    add_cxflags("/bigobj")
-    add_cxflags("/GR-") 
+    add_cxflags("/bigobj", "/GR-")
 elseif is_plat("linux") then
-    add_cxflags("-fno-rtti")
-    add_cxflags("-std=c++23", {force = true})
+    add_cxflags("-fno-rtti", "-std=c++23", {force = true})
 end
 
 add_includedirs(
@@ -28,6 +26,7 @@ add_includedirs(
     "../External/imgui-node-editor",
     "../External/IconFontCppHeaders"
 )
+
 add_defines(
     "_SILENCE_CXX23_ALIGNED_STORAGE_DEPRECATION_WARNING",
     "USE_STD_FILESYSTEM",
@@ -61,13 +60,25 @@ elseif is_mode("performance") then
     set_policy("build.optimization.lto", true)
 end
 
+local imgui_name = "vcpkg::imgui[docking-experimental,glfw-binding,vulkan-binding]"
+
+local imgui_cfg = {
+    shared = false,
+    debug = is_mode("debug"),
+    runtimes = (is_plat("windows") and (is_mode("debug") and "MDd" or "MD")) or nil
+}
+
+add_requires(imgui_name, {configs = imgui_cfg})
+
 local vcpkg_packages = {
     "vcpkg::glm",
     "vcpkg::glfw3",
-    "vcpkg::imgui[docking-experimental,glfw-binding,vulkan-binding]",
     "vcpkg::vulkan-headers",
     "vcpkg::vulkan-memory-allocator",
     "vcpkg::shaderc",
+    "vcpkg::glslang",
+    "vcpkg::spirv-tools",
+    "vcpkg::vulkan-loader",
     "vcpkg::volk",
     "vcpkg::assimp",
     "vcpkg::meshoptimizer",
@@ -82,33 +93,27 @@ local vcpkg_packages = {
     "vcpkg::joltphysics",
     "vcpkg::tinyxml2",
     "vcpkg::yaml-cpp",
-    "vcpkg::tomlplusplus"
+    "vcpkg::tomlplusplus",
 }
 
 for _, pkg in ipairs(vcpkg_packages) do
-    if is_plat("windows") then
-        if is_mode("debug") then
-            add_requires(pkg, {configs = {shared = false, debug = true, runtimes = "MDd"}})
-        else
-            add_requires(pkg, {configs = {shared = false, runtimes = "MD"}})
-        end
+    local cfg = {shared = false}
+    if is_mode("debug") then
+        cfg.debug = true
+        if is_plat("windows") then cfg.runtimes = "MDd" end
     else
-        if is_mode("debug") then
-            add_requires(pkg, {configs = {shared = false, debug = true}})
-        else
-            add_requires(pkg, {configs = {shared = false}})
-        end
+        if is_plat("windows") then cfg.runtimes = "MD" end
     end
+    add_requires(pkg, {configs = cfg})
 end
 
-add_packages(table.unpack(vcpkg_packages))
+add_packages(imgui_name, table.unpack(vcpkg_packages))
 
 target("Engine")
     set_kind("shared")
     add_files("Engine/**.cpp")
     add_headerfiles("Engine/**.h", "Engine/**.hpp")
-    add_defines("SYN_BUILD_DLL")
-    add_defines("VK_NO_PROTOTYPES")
+    add_defines("SYN_BUILD_DLL", "VK_NO_PROTOTYPES")
 
 target("EditorCore")
     set_kind("static")
@@ -121,12 +126,12 @@ target("Editor")
 
     if is_plat("windows") then
         add_syslinks("gdi32", "user32", "shell32")
+    elseif is_plat("linux") then
+        add_syslinks("pthread", "dl", "m")
     end
 
-    add_files("Editor/**.cpp")
+    add_files("Editor/**.cpp", "../External/ImGuiFileDialog/*.cpp", "../External/imgui-node-editor/*.cpp")
     add_headerfiles("Editor/**.h", "Editor/**.hpp")
-    add_files("../External/ImGuiFileDialog/*.cpp")
-    add_files("../External/imgui-node-editor/*.cpp")
     add_deps("Engine", "EditorCore")
     set_rundir("$(projectdir)")
 
