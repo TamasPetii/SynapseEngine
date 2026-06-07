@@ -38,6 +38,12 @@ namespace Syn
             return;
         }
 
+        /*
+        if (!scene->GetSettings()->enableStaticBvhCulling) {
+            return;
+        }
+        */
+
 		auto animPool = registry->GetPool<AnimationComponent>();
         auto chunkGroup = &scene->GetSceneDrawData()->Chunks;
 

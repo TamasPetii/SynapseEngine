@@ -1,11 +1,31 @@
 #include "HierarchyManager.h"
 #include <queue>
+#include "Engine/Logger/SynLog.h"
 
 namespace Syn
 {
     HierarchyManager::HierarchyManager(Registry* registry)
         : _registry(registry)
     {}
+
+    bool HierarchyManager::CanAttach(EntityID parent, EntityID child) const
+    {
+        if (parent == child) return false;
+
+        auto hierarchyPool = _registry->GetPool<HierarchyComponent>();
+        if (!hierarchyPool) return false;
+
+        EntityID ancestor = parent;
+        while (ancestor != NULL_ENTITY)
+        {
+            if (ancestor == child) return false;
+
+            if (!hierarchyPool->Has(ancestor)) break;
+            ancestor = hierarchyPool->Get(ancestor).parent;
+        }
+
+        return true;
+    }
 
     void HierarchyManager::RebuildTopologicalArray()
     {
@@ -139,6 +159,12 @@ namespace Syn
 
     void HierarchyManager::AttachChild(EntityID parent, EntityID child)
     {
+        if (!CanAttach(parent, child))
+        {
+            Warning("Hierarchy cycle prevented: Cannot attach entity {} to {}", child, parent);
+            return;
+        }
+
         auto hierarchyPool = _registry->GetPool<HierarchyComponent>();
 
         // Ensure both entities have the hierarchy component

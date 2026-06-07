@@ -21,6 +21,7 @@ namespace Syn
 
         void AttachChild(EntityID parent, EntityID child);
         void DetachChild(EntityID child);
+        bool CanAttach(EntityID parent, EntityID child) const;
 
         void OnEntityCreated(EntityID entity);
         void OnEntityDestroyed(EntityID entity);
@@ -34,6 +35,7 @@ namespace Syn
         void RemoveFromLevel(EntityID entity);
         void RebuildTopologicalArray();
         void UpdateSubtreeLevels(EntityID root, int32_t levelDelta);
+
     private:
         Registry* _registry;
         std::vector<EntityID> _topologicalArray;
