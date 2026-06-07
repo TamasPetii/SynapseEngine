@@ -12,6 +12,7 @@
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
 #include "Engine/Component/Light/Direction/DirectionLightComponent.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
+#include "Engine/Utils/PathUtils.h"
 
 namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/BillboardPC.glsl"
@@ -68,7 +69,7 @@ namespace Syn {
             .colorAttachmentCount = 2
         };
 
-        _iconTexture = ServiceLocator::GetImageManager()->LoadImageSync("Assets/DirectionLightIcon.png");
+        _iconTexture = ServiceLocator::GetImageManager()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/DirectionLightIcon.png"));
     }
 
     void DirectionLightBillboardPass::PrepareFrame(const RenderContext& context) {

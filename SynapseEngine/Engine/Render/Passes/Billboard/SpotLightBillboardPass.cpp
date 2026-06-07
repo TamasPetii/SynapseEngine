@@ -12,6 +12,7 @@
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
 #include "Engine/Component/Light/Spot/SpotLightComponent.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
+#include "Engine/Utils/PathUtils.h"
 
 namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/BillboardPC.glsl"
@@ -68,7 +69,7 @@ namespace Syn {
             .colorAttachmentCount = 2
         };
 
-        _iconTexture = ServiceLocator::GetImageManager()->LoadImageSync("Assets/SpotLightIcon.png");
+        _iconTexture = ServiceLocator::GetImageManager()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/SpotLightIcon.png"));
     }
 
     void SpotLightBillboardPass::PrepareFrame(const RenderContext& context) {

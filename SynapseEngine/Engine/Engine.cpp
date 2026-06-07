@@ -59,6 +59,7 @@ namespace Syn
 {
 	Engine::Engine(const EngineInitParams& params)
 	{
+		srand(time(0));
 		Init(params);
 	}
 

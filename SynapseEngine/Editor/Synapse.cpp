@@ -31,6 +31,8 @@
 #include "Manager/GuiTextureManager.h"
 #include "Manager/EditorIcons.h"
 
+#include "Engine/Utils/PathUtils.h"
+
 Synapse::Synapse(const Syn::ApplicationConfig& config)
     : Syn::Application(config)
 {
@@ -104,9 +106,9 @@ void Synapse::OnInit() {
 
     ImGuiIO& io = ImGui::GetIO();
     io.Fonts->AddFontDefault();
-    _iconManager->InitializeFontAwesome(io, FONT_PATH, 16.0f);
+    _iconManager->InitializeFontAwesome(io, Syn::PathUtils::GetAbsolutePathString(FONT_PATH), 16.0f);
     _guiManager->CreateFontTexture();
-    _iconManager->LoadEngineIcons(ICON_PATH);
+    _iconManager->LoadEngineIcons(Syn::PathUtils::GetAbsolutePathString(ICON_PATH));
 
     using ComponentWin = Syn::EditorWindow<Syn::ComponentView, Syn::ComponentViewModel>;
     _guiManager->AddWindow<ComponentWin>(

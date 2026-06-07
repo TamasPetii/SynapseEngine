@@ -377,12 +377,9 @@ namespace Syn
                     if (!isVisibleInAnyLight) 
                         return;
 
-                    /*
                     // Register chunk as visible for shadow pass
                     uint32_t slot = drawData->DirectionLightShadow.visibleChunkCount.fetch_add(1, std::memory_order_relaxed);
-                    uint32_t packedId = chunkIdx;
-                    drawData->DirectionLightShadow.visibleChunkIds[slot] = packedId;
-                    */
+                    drawData->DirectionLightShadow.visibleChunkIds[slot] = chunkIdx;
 
                     for (uint32_t i = 0; i < chunk.entityCount; ++i) {
                         EntityID entity = staticEntities[chunk.firstEntityIndex + i];
@@ -442,7 +439,24 @@ namespace Syn
 
                 if (settings->enableStaticBvhCulling)
                 {
-                    /*Todo*/
+                    /*
+                    uint32_t visibleCount = shadowGroup.visibleChunkCount.load(std::memory_order_relaxed);
+
+                    if (auto mappedCmd = shadowGroup.staticChunkDispatchBuffer.GetMapped(frameIndex)) {
+                        VkDispatchIndirectCommand cmd = shadowGroup.dispatchCmdTemplate;
+                        cmd.x = visibleCount > 0 ? ((visibleCount + 31) / 32) : 0;
+                        cmd.y = 1;
+                        cmd.z = 1;
+                        mappedCmd->Write(&cmd, sizeof(VkDispatchIndirectCommand), 0);
+                    }
+
+                    // 2. Visible Chunk ID-k feltöltése
+                    if (visibleCount > 0) {
+                        if (auto mappedVis = shadowGroup.staticChunkVisibleBuffer.GetMapped(frameIndex)) {
+                            mappedVis->Write(shadowGroup.visibleChunkIds.Data(), visibleCount * sizeof(uint32_t), 0);
+                        }
+                    }
+                    */
                 }
             }
 

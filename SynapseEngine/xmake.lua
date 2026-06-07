@@ -27,6 +27,8 @@ add_includedirs(
     "../External/IconFontCppHeaders"
 )
 
+add_defines('SYN_PROJECT_ROOT="' .. os.projectdir():gsub('\\', '/') .. '"')
+
 add_defines(
     "_SILENCE_CXX23_ALIGNED_STORAGE_DEPRECATION_WARNING",
     "USE_STD_FILESYSTEM",

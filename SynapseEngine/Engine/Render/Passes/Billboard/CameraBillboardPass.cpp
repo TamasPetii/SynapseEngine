@@ -12,6 +12,7 @@
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
 #include "Engine/Component/Core/CameraComponent.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
+#include "Engine/Utils/PathUtils.h"
 
 namespace Syn {
 
@@ -69,7 +70,7 @@ namespace Syn {
             .colorAttachmentCount = 2
         };
 
-        _iconTexture = ServiceLocator::GetImageManager()->LoadImageSync("Assets/CameraIcon.png");
+        _iconTexture = ServiceLocator::GetImageManager()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/CameraIcon.png"));
     }
 
     void CameraBillboardPass::PrepareFrame(const RenderContext& context) {

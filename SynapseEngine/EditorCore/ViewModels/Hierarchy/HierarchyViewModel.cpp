@@ -92,11 +92,13 @@ namespace Syn {
         if (!_hierarchyApi) return;
 
         _state.flatNodes.clear();
+        /*
         auto rootEntities = _hierarchyApi->GetRootEntities();
 
         for (EntityID root : rootEntities) {
             TraverseAndFlatten(root, 0);
         }
+        */
     }
 
     bool HierarchyViewModel::TraverseAndFlatten(EntityID entity, int depth) {

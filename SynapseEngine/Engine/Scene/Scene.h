@@ -16,6 +16,7 @@
 #include "DrawData/SceneDrawData.h"
 #include "Engine/Scene/Source/ISceneSource.h"
 #include "Engine/Physics/IPhysicsEngine.h"
+#include "HierarchyManager.h"
 
 namespace Syn
 {
@@ -38,6 +39,9 @@ namespace Syn
         void UpdateGPU(uint32_t frameIndex);
         void Finish();
 
+        EntityID CreateEntity();
+        void DestroyEntity(EntityID entity);
+
         Registry* GetRegistry() const { return _registry.get(); }
         SceneDrawData* GetSceneDrawData() const { return _sceneDrawData.get(); }
         EntityID GetSceneCameraEntity() const { return _sceneCameraEntity; }
@@ -45,6 +49,7 @@ namespace Syn
         ComponentBufferManager* GetComponentBufferManager() const { return _componentBufferManager.get(); }
         SceneSettings* GetSettings() const { return _sceneSettings.get(); }
 		IPhysicsEngine* GetPhysicsEngine() const { return _physicsEngine.get(); }
+        HierarchyManager* GetHierarchyManager() const { return _hierarchyManager.get(); }
     private:
         void InitializeSystems();
         void InitializeComponentBuffers();
@@ -69,6 +74,7 @@ namespace Syn
         std::unique_ptr<ComponentBufferManager> _componentBufferManager;
         std::vector<std::unique_ptr<ISystem>> _systems;
         std::unique_ptr<SceneDrawData> _sceneDrawData;
+        std::unique_ptr<HierarchyManager> _hierarchyManager;
 
         std::unique_ptr<Registry> _registry;
         std::unique_ptr<SceneSettings> _sceneSettings;

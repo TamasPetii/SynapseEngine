@@ -2,6 +2,7 @@
 #include "EditorIcons.h"
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
+#include "Engine/Utils/PathUtils.h"
 
 namespace Syn {
     IconManager::IconManager(ImageManager* imageManager, GuiTextureManager* guiTextureManager)
@@ -24,7 +25,7 @@ namespace Syn {
         if (!sampler) return;
 
         auto loadAndRegister = [&](EditorIconType type, const std::string& fileName) {
-            std::string fullPath = iconDirectory + "/" + fileName;
+            std::string fullPath = PathUtils::GetAbsolutePathString(iconDirectory + "/" + fileName);
 
             uint32_t imageId = _imageManager->LoadImageSync(fullPath);
             auto texture = _imageManager->GetResource(imageId);

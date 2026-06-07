@@ -49,6 +49,18 @@
 
 namespace Syn
 {
+    EntityID Scene::CreateEntity() {
+        EntityID entity = _registry->CreateEntity();
+        _hierarchyManager->OnEntityCreated(entity);
+        return entity;
+    }
+
+    void Scene::DestroyEntity(EntityID entity) {
+        if (!_registry->IsValid(entity)) return;
+        _hierarchyManager->OnEntityDestroyed(entity);
+        _registry->DestroyEntity(entity);
+    }
+
     Scene::Scene(uint32_t frameCount, std::unique_ptr<ISceneSource> source, bool initSystems)
     {
         _registry = std::make_unique<Registry>();
@@ -72,8 +84,11 @@ namespace Syn
         _registry->EnsurePool<ConvexColliderComponent>();
         _registry->EnsurePool<MeshColliderComponent>();
 		_registry->EnsurePool<RigidBodyComponent>();
+		_registry->EnsurePool<HierarchyComponent>();
 
         _physicsEngine = ServiceLocator::GetPhysicsFactory()();
+
+        _hierarchyManager = std::make_unique<HierarchyManager>(_registry.get());
 
         if(source)
 			source->Populate(*this);
