@@ -132,8 +132,9 @@ namespace Syn
 
 	void Engine::InitLogger()
 	{
+		_memorySink = std::make_shared<Syn::MemorySink>();
+		Logger::Get().AddSink(_memorySink);
 		Logger::Get().AddSink(std::make_shared<Syn::ConsoleSink>());
-		Logger::Get().AddSink(std::make_shared<Syn::MemorySink>());
 		Logger::Get().AddSink(std::make_shared<Syn::FileSink>());
 	}
 

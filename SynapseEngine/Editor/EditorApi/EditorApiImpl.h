@@ -74,6 +74,10 @@ namespace Syn {
         void SetEntityTag(EntityID entity, const std::string& tag) override;
 
 		uint64_t GetVersion() const override;
+
+        // --- ILoggerApi ---
+        const std::vector<LogMessage>& GetLogs() const override;
+        void ClearLogs() override;
     private:
         Engine* _engine = nullptr;
         SceneManager* _sceneManager = nullptr;

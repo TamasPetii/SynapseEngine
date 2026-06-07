@@ -18,7 +18,7 @@ namespace Syn
         static Logger& Get();
 
         void AddSink(std::shared_ptr<ISink> sink);
-        void Dispatch(LogLevel level, std::string_view msg, const char* file, int line);
+        void Dispatch(LogLevel level, const std::string& msg, const char* file, int line);
     private:
         Logger() = default;
         std::vector<std::shared_ptr<ISink>> _sinks;

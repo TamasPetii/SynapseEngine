@@ -28,6 +28,9 @@
 #include "Editor/View/Benchmark/BenchmarkView.h"
 #include "EditorCore/ViewModels/Benchmark/BenchmarkViewModel.h"
 
+#include "Editor/View/Logger/LoggerView.h"
+#include "EditorCore/ViewModels/Logger/LoggerViewModel.h"
+
 #include "Manager/GuiTextureManager.h"
 #include "Manager/EditorIcons.h"
 
@@ -177,6 +180,14 @@ void Synapse::OnInit() {
     _guiManager->AddWindow<BenchmarkWin>(
         Syn::BenchmarkView{},
         Syn::BenchmarkViewModel{}
+    );
+
+    using LoggerWin = Syn::EditorWindow<Syn::LoggerView, Syn::LoggerViewModel>;
+    _guiManager->AddWindow<LoggerWin>(
+        Syn::LoggerView{},
+        Syn::LoggerViewModel{
+            _editorApi.get()
+        }
     );
 
 #endif

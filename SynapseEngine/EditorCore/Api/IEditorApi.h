@@ -8,6 +8,7 @@
 #include "IFileSystemApi.h"
 #include "IHierarchyApi.h"
 #include "ITagApi.h"
+#include "ILoggerApi.h"
 
 namespace Syn {
     class IEditorApi :
@@ -19,7 +20,8 @@ namespace Syn {
         public IMaterialApi,
         public IFileSystemApi,
         public IHierarchyApi,
-        public ITagApi
+        public ITagApi,
+		public ILoggerApi
     {
     public:
         virtual ~IEditorApi() = default;

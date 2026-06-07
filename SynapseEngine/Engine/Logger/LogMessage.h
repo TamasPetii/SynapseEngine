@@ -16,8 +16,8 @@ namespace Syn
 
     struct SYN_API LogMessage {
         LogLevel level;
-        std::string_view message;
-        std::string_view file;
+        std::string message;
+        std::string file;
         int line;
         std::chrono::system_clock::time_point time;
 

@@ -5,7 +5,7 @@
 
 namespace Syn {
 
-    static void LogAndAbort(std::string_view formattedMsg, const char* file, int line) {
+    static void LogAndAbort(const std::string& formattedMsg, const char* file, int line) {
         Logger::Get().Dispatch(LogLevel::Error, formattedMsg, file, line);
         std::abort();
     }

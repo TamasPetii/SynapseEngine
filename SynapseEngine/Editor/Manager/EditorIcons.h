@@ -54,3 +54,5 @@ constexpr const char* ASSET_PATH = "Assets";
 
 #define SYN_ICON_INFO_CIRCLE    ICON_FA_INFO_CIRCLE
 #define SYN_ICON_TAG            ICON_FA_TAG
+
+#define SYN_ICON_TERMINAL       ICON_FA_TERMINAL
