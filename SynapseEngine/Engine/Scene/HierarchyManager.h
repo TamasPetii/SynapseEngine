@@ -28,6 +28,7 @@ namespace Syn
         std::span<const EntityID> GetEntitiesInLevel(uint32_t level) const;
         uint32_t GetMaxActiveLevel() const { return static_cast<uint32_t>(_levels.size()); }
 		const std::span<const HierarchyLevelData> GetLevels() const { return std::span<const HierarchyLevelData>(_levels.data(), _levels.size()); }
+        uint64_t GetVersion() const { return _version; }
     private:
         void InsertIntoLevel(EntityID entity, uint32_t level);
         void RemoveFromLevel(EntityID entity);
@@ -37,5 +38,6 @@ namespace Syn
         Registry* _registry;
         std::vector<EntityID> _topologicalArray;
         std::vector<HierarchyLevelData> _levels;
+        uint64_t _version = 0;
     };
 }

@@ -9,20 +9,38 @@
 #include "Engine/Component/Light/Spot/SpotLightComponent.h"
 #include "Engine/Component/Rendering/AnimationComponent.h"
 
-namespace Syn {
+namespace Syn 
+{
+    uint64_t EditorApiImpl::GetVersion() const {
+        auto scene = _sceneManager->GetActiveScene();
+        if (!scene || !scene->GetHierarchyManager()) return 0;
+        return scene->GetHierarchyManager()->GetVersion();
+    }
 
     std::vector<EntityID> EditorApiImpl::GetRootEntities() const {
+        auto scene = _sceneManager->GetActiveScene();
+        if (!scene || !scene->GetHierarchyManager()) return {};
+
+        auto rootSpan = scene->GetHierarchyManager()->GetEntitiesInLevel(0);
+        return std::vector<EntityID>(rootSpan.begin(), rootSpan.end());
+    }
+
+    std::vector<EntityID> EditorApiImpl::GetChildren(EntityID entity) const {
         auto scene = _sceneManager->GetActiveScene();
         if (!scene || !scene->GetRegistry()) return {};
 
         auto registry = scene->GetRegistry();
+        if (!registry->HasComponent<HierarchyComponent>(entity)) return {};
 
-        const auto& denseEntities = registry->GetActiveEntities().GetDenseEntities();
-        return std::vector<EntityID>(denseEntities.begin(), denseEntities.end());
-    }
+        std::vector<EntityID> children;
+        EntityID currChild = registry->GetComponent<HierarchyComponent>(entity).firstChild;
 
-    std::vector<EntityID> EditorApiImpl::GetChildren(EntityID entity) const {
-        return {};
+        while (currChild != NULL_ENTITY) {
+            children.push_back(currChild);
+            currChild = registry->GetComponent<HierarchyComponent>(currChild).nextSibling;
+        }
+
+        return children;
     }
 
     std::string EditorApiImpl::GetEntityIcon(EntityID entity) const {
@@ -42,32 +60,43 @@ namespace Syn {
     }
 
     bool EditorApiImpl::HasChildren(EntityID entity) const {
-        return false;
+        auto scene = _sceneManager->GetActiveScene();
+        if (!scene || !scene->GetRegistry()) return false;
+
+        auto registry = scene->GetRegistry();
+        if (!registry->HasComponent<HierarchyComponent>(entity)) return false;
+
+        return registry->GetComponent<HierarchyComponent>(entity).firstChild != NULL_ENTITY;
     }
 
     void EditorApiImpl::SetParent(EntityID child, EntityID parent) {
-        // TODO: SetParent
+        auto scene = _sceneManager->GetActiveScene();
+        if (!scene || !scene->GetHierarchyManager()) return;
+
+        if (parent == NULL_ENTITY) {
+            scene->GetHierarchyManager()->DetachChild(child);
+        }
+        else {
+            scene->GetHierarchyManager()->AttachChild(parent, child);
+        }
     }
 
     EntityID EditorApiImpl::CreateEntity(const std::string& name, EntityID parent) {
         auto scene = _sceneManager->GetActiveScene();
         if (!scene || !scene->GetRegistry()) return NULL_ENTITY;
 
-        /*
         auto registry = scene->GetRegistry();
-        EntityID newEntity = registry->CreateEntity();
+        EntityID newEntity = scene->CreateEntity();
 
-        registry->AddComponents<TagComponent>(newEntity, { name });
-        registry->AddComponents<TransformComponent>(newEntity);
+        registry->AddComponent<TagComponent>(newEntity);
+        registry->GetComponent<TagComponent>(newEntity).name = name;
+        registry->AddComponent<TransformComponent>(newEntity);
 
         if (parent != NULL_ENTITY) {
             SetParent(newEntity, parent);
         }
 
         return newEntity;
-        */
-
-		return NULL_ENTITY;
     }
 
     void EditorApiImpl::DestroyEntity(EntityID entity) {
@@ -78,6 +107,6 @@ namespace Syn {
             _selectedEntity = NULL_ENTITY;
         }
 
-        scene->GetRegistry()->DestroyEntity(entity);
+        scene->DestroyEntity(entity);
     }
 }

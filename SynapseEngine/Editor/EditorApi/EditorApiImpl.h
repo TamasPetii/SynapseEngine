@@ -72,6 +72,8 @@ namespace Syn {
         void SetEntityEnabled(EntityID entity, bool enabled) override;
         std::string GetEntityTag(EntityID entity) const override;
         void SetEntityTag(EntityID entity, const std::string& tag) override;
+
+		uint64_t GetVersion() const override;
     private:
         Engine* _engine = nullptr;
         SceneManager* _sceneManager = nullptr;

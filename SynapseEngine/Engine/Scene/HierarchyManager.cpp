@@ -182,6 +182,8 @@ namespace Syn
 
         int32_t levelDelta = static_cast<int32_t>(newLevel) - static_cast<int32_t>(oldLevel);
         UpdateSubtreeLevels(child, levelDelta);
+
+        _version++;
     }
 
     void HierarchyManager::DetachChild(EntityID child)
@@ -220,6 +222,8 @@ namespace Syn
 
         int32_t levelDelta = static_cast<int32_t>(newLevel) - static_cast<int32_t>(oldLevel);
         UpdateSubtreeLevels(child, levelDelta);
+
+        _version++;
     }
 
     std::span<const EntityID> HierarchyManager::GetEntitiesInLevel(uint32_t level) const
@@ -241,6 +245,8 @@ namespace Syn
         }
 
         InsertIntoLevel(entity, 0);
+
+		_version++;
     }
 
     void HierarchyManager::OnEntityDestroyed(EntityID entity)
@@ -261,5 +267,7 @@ namespace Syn
         }
 
         RemoveFromLevel(entity);
+
+        _version++;
     }
 }

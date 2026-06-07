@@ -18,5 +18,7 @@ namespace Syn {
 
         virtual EntityID CreateEntity(const std::string& name, EntityID parent = NULL_ENTITY) = 0;
         virtual void DestroyEntity(EntityID entity) = 0;
+
+        virtual uint64_t GetVersion() const = 0;
     };
 }

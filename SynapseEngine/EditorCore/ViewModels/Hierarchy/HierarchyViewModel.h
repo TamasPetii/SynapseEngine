@@ -29,5 +29,8 @@ namespace Syn {
 
         HierarchyState _state;
         std::unordered_set<EntityID> _expandedNodes;
+
+		bool _isDirty = true;
+        uint64_t _lastEngineVersion = 0;
     };
 }

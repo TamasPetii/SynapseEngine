@@ -10,14 +10,23 @@ namespace Syn {
     }
 
     void HierarchyViewModel::SyncWithEngine() {
-        if (!_selectionApi) return;
+        if (!_selectionApi || !_hierarchyApi) return;
 
         EntityID activeEntity = _selectionApi->GetSelectedEntity();
         if (_state.selectedEntity != activeEntity) {
             _state.selectedEntity = activeEntity;
         }
 
-        RebuildFlatList();
+        uint64_t currentEngineVersion = _hierarchyApi->GetVersion();
+        if (_lastEngineVersion != currentEngineVersion) {
+            _isDirty = true;
+            _lastEngineVersion = currentEngineVersion;
+        }
+
+        if (_isDirty) {
+            RebuildFlatList();
+            _isDirty = false;
+        }
     }
 
     void HierarchyViewModel::Dispatch(const HierarchyIntent& intent) {
@@ -31,16 +40,14 @@ namespace Syn {
             else if constexpr (std::is_same_v<T, HierarchyToggleExpandIntent>) {
                 if (arg.expand) _expandedNodes.insert(arg.entity);
                 else _expandedNodes.erase(arg.entity);
-
-                RebuildFlatList();
+                _isDirty = true;
             }
             else if constexpr (std::is_same_v<T, HierarchyToggleVisibilityIntent>) {
                 _tagApi->SetEntityEnabled(arg.entity, !_tagApi->IsEntityEnabled(arg.entity));
-                RebuildFlatList();
+                _isDirty = true;
             }
             else if constexpr (std::is_same_v<T, HierarchyReparentEntityIntent>) {
                 _hierarchyApi->SetParent(arg.child, arg.newParent);
-                RebuildFlatList();
             }
             else if constexpr (std::is_same_v<T, HierarchyCreateEntityIntent>) {
                 EntityID newEnt = _hierarchyApi->CreateEntity(arg.name, arg.parent);
@@ -48,33 +55,31 @@ namespace Syn {
                     _expandedNodes.insert(arg.parent);
                 }
                 _selectionApi->SetSelectedEntity(newEnt);
-
-                RebuildFlatList();
             }
             else if constexpr (std::is_same_v<T, HierarchyDestroyEntityIntent>) {
                 _hierarchyApi->DestroyEntity(arg.entity);
                 if (_state.selectedEntity == arg.entity) {
                     _selectionApi->SetSelectedEntity(NULL_ENTITY);
                 }
-
-                RebuildFlatList();
             }
             else if constexpr (std::is_same_v<T, HierarchyRefreshHierarchyIntent>) {
-                RebuildFlatList();
+                _isDirty = true;
             }
             else if constexpr (std::is_same_v<T, HierarchySetSearchQueryIntent>) {
-                _state.searchQuery = arg.query;
-                RebuildFlatList();
+                if (_state.searchQuery != arg.query) {
+                    _state.searchQuery = arg.query;
+                    _isDirty = true;
+                }
             }
             else if constexpr (std::is_same_v<T, HierarchyExpandAllIntent>) {
                 for (EntityID root : _hierarchyApi->GetRootEntities()) {
                     ExpandAllNodes(root);
                 }
-                RebuildFlatList();
+                _isDirty = true;
             }
             else if constexpr (std::is_same_v<T, HierarchyCollapseAllIntent>) {
                 _expandedNodes.clear();
-                RebuildFlatList();
+                _isDirty = true;
             }
             }, intent);
     }
@@ -92,13 +97,12 @@ namespace Syn {
         if (!_hierarchyApi) return;
 
         _state.flatNodes.clear();
-        /*
+
         auto rootEntities = _hierarchyApi->GetRootEntities();
 
         for (EntityID root : rootEntities) {
             TraverseAndFlatten(root, 0);
         }
-        */
     }
 
     bool HierarchyViewModel::TraverseAndFlatten(EntityID entity, int depth) {
