@@ -59,6 +59,7 @@ namespace Syn
 
         auto mainImage = group->GetImage(RenderTargetNames::Main);
         auto entityImage = group->GetImage(RenderTargetNames::EntityIndex);
+        auto depthImage = group->GetImage(RenderTargetNames::DepthPyramid);
 
         _imageTransitions.push_back({
             .image = mainImage,
@@ -70,6 +71,14 @@ namespace Syn
 
         _imageTransitions.push_back({
             .image = entityImage,
+            .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            .dstStage = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
+            .dstAccess = VK_ACCESS_2_SHADER_READ_BIT,
+            .discardContent = false
+            });
+
+        _imageTransitions.push_back({
+            .image = depthImage,
             .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
             .dstStage = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
             .dstAccess = VK_ACCESS_2_SHADER_READ_BIT,
@@ -108,14 +117,25 @@ namespace Syn
     void SelectionOutlinePass::BindDescriptors(const RenderContext& context)
     {
         auto imageManager = ServiceLocator::GetImageManager();
-        auto entityTexture = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex)->GetImage(RenderTargetNames::EntityIndex);
+ 
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto entityTexture = rtGroup->GetImage(RenderTargetNames::EntityIndex);
+        auto depthTexture = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
+        auto nearestSampler = imageManager->GetSampler(SamplerNames::NearestClampEdge);
 
         Vk::PushDescriptorWriter pushWriter;
 
         pushWriter.AddCombinedImageSampler(
             0,
             entityTexture->GetView(Vk::ImageViewNames::Default),
-            imageManager->GetSampler(SamplerNames::NearestClampEdge)->Handle(),
+            nearestSampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            1,
+            depthTexture->GetView(RenderTargetViewNames::DepthTransparentMin),
+            nearestSampler->Handle(),
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 
