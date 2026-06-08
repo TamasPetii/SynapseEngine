@@ -68,5 +68,8 @@ namespace Syn
 
         static constexpr const char* MeshColliderSparseMap = "MeshColliderSparseMap";
         static constexpr const char* MeshColliderData = "MeshColliderData";
+
+        static constexpr const char* SelectionOutlineData = "SelectionOutlineData";
+        static constexpr const char* HierarchySparseMap = "HierarchySparseMap";
     };
 }

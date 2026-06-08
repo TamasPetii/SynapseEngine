@@ -99,6 +99,9 @@ struct FrameGlobalContext {
     uint64_t capsuleColliderSparseMapBufferAddr;
     uint64_t capsuleColliderDataBufferAddr;
 
+    uint64_t hierarchySparseMapBufferAddr;
+    uint64_t selectionOutlineBufferAddr;
+
     float screenWidth;
     float screenHeight;
     float ambientStrength;

@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine/SynApi.h"
+#include <glm/glm.hpp>
 #include <cstdint>
 
 namespace Syn
@@ -115,5 +116,11 @@ namespace Syn
 
 		bool enableSsao;
         bool enableSsaoLight;
+
+        bool enableSelectedOutline;
+        bool enableSelectedHierarchyOutline;
+        glm::vec4 outlinePrimaryColor;
+        glm::vec4 outlineSecondaryColor;
+        float outlineThickness;
     };
 }

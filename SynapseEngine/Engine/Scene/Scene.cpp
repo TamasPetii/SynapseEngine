@@ -17,6 +17,8 @@
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
 
 #include "Engine/System/Core/TransformSystem.h"
+#include "Engine/System/Core/HierarchySystem.h"
+#include "Engine/System/Core/SelectionOutlineSystem.h"
 #include "Engine/System/Rendering/RenderSystem.h"
 #include "Engine/System/Core/CameraSystem.h"
 #include "Engine/System/Rendering/ModelSystem.h"
@@ -52,6 +54,7 @@ namespace Syn
     EntityID Scene::CreateEntity() {
         EntityID entity = _registry->CreateEntity();
         _hierarchyManager->OnEntityCreated(entity);
+		_registry->GetPool<HierarchyComponent>()->SetCategory(entity, StorageCategory::Static);
         return entity;
     }
 
@@ -149,6 +152,8 @@ namespace Syn
         RegisterSystem<ConvexColliderSystem>();
         RegisterSystem<MeshColliderSystem>();
 		RegisterSystem<RigidBodySystem>();
+		RegisterSystem<HierarchySystem>();
+        RegisterSystem<SelectionOutlineSystem>();
     }
 
     void Scene::InitializeComponentBuffers()
@@ -200,6 +205,9 @@ namespace Syn
                 return pool && pool->Size() > 0;
             },
             ComponentMemoryType::GpuOnly);
+
+        RegisterComponentSparseMapBuffer<HierarchyComponent>(BufferNames::HierarchySparseMap);
+        RegisterComponentBuffer<HierarchyComponent, uint32_t>(BufferNames::SelectionOutlineData);
 
         RegisterComponentSparseMapBuffer<TransformComponent>(BufferNames::TransformSparseMap);
         RegisterComponentBuffer<TransformComponent, TransformComponentGPU>(BufferNames::TransformData);   

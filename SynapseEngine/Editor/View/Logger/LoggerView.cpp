@@ -176,7 +176,7 @@ namespace Syn {
                         ImGui::Text("%s:%d", filenameStr.c_str(), log.line);
 
                         ImGui::TableNextColumn();
-                        ImGui::TextUnformatted(log.message.data(), log.message.data() + log.message.length());
+                        ImGui::TextWrapped("%.*s", static_cast<int>(log.message.length()), log.message.data());
 
                         ImGui::PopStyleColor();
                     }

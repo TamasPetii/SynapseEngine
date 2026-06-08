@@ -128,14 +128,14 @@ namespace Syn::Vk {
 #else
         options.SetOptimizationLevel(shaderc_optimization_level_performance);
 #endif
-        std::string source = LoadFile(filepath);
+        std::string source = LoadFile(sourcePath.string());
         shaderc_shader_kind kind = MapStageToKind(stage);
 
-        shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(source, kind, filepath.c_str(), options);
+        shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(source, kind, sourcePath.string().c_str(), options);
 
         if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
             std::string errorMsg = result.GetErrorMessage();
-            Error("Shader compile Error in {}:\n{}", filepath, errorMsg);
+            Error("Shader compile Error in {}:\n{}", sourcePath.string(), errorMsg);
             SYN_ASSERT(false, "Shader compilation failed!");
         }
 
@@ -147,7 +147,7 @@ namespace Syn::Vk {
             outFile.close();
         }
 
-        Info("Compiled and cached shader: {}", filepath);
+        Info("Compiled and cached shader: {}", sourcePath.string());
         return spirv;
     }
 

@@ -161,7 +161,7 @@ namespace Syn
                 }
 
                 if (!extractTexture(aiTextureType_NORMALS, matInfo.normal)) {
-                    //...
+                    extractTexture(aiTextureType_HEIGHT, matInfo.normal);
                 }
 
                 if (!extractTexture(aiTextureType_METALNESS, matInfo.metallicRoughness)) {
@@ -169,7 +169,6 @@ namespace Syn
                 }
 
                 if (!extractTexture(aiTextureType_EMISSIVE, matInfo.emissive)) {
-                    //...
                 }
 
                 if (!extractTexture(aiTextureType_LIGHTMAP, matInfo.ambientOcclusion)) {

@@ -50,6 +50,9 @@ namespace Syn
         SceneSettings* GetSettings() const { return _sceneSettings.get(); }
 		IPhysicsEngine* GetPhysicsEngine() const { return _physicsEngine.get(); }
         HierarchyManager* GetHierarchyManager() const { return _hierarchyManager.get(); }
+
+		EntityID GetSelectedEntity() const { return _selectedEntity; }
+		void SetSelectedEntity(EntityID entity) { _selectedEntity = entity; }
     private:
         void InitializeSystems();
         void InitializeComponentBuffers();
@@ -70,6 +73,7 @@ namespace Syn
     protected:
         EntityID _sceneCameraEntity = NULL_ENTITY;
         EntityID _debugCameraEntity = NULL_ENTITY;
+        EntityID _selectedEntity = NULL_ENTITY;
 
         std::unique_ptr<ComponentBufferManager> _componentBufferManager;
         std::vector<std::unique_ptr<ISystem>> _systems;

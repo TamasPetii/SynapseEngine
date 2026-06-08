@@ -83,7 +83,6 @@ namespace Syn {
         SceneManager* _sceneManager = nullptr;
         GuiTextureManager* _textureManager = nullptr;
 
-        EntityID _selectedEntity = NULL_ENTITY;
         std::unordered_map<std::string, TextureHandle> _viewportTextures;
     };
 }

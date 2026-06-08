@@ -127,6 +127,9 @@ namespace Syn {
 
 		ctx.ssaoKernelBufferAddr = drawData->Ssao.kernelBuffer.GetAddress(fIdx, true);
 
+        ctx.hierarchySparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::HierarchySparseMap, fIdx);
+        ctx.selectionOutlineBufferAddr = compManager->GetBufferAddr(BufferNames::SelectionOutlineData, fIdx);
+
         ctx.boxColliderSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::BoxColliderSparseMap, fIdx);
         ctx.boxColliderDataBufferAddr = compManager->GetBufferAddr(BufferNames::BoxColliderData, fIdx);
         ctx.sphereColliderSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::SphereColliderSparseMap, fIdx);

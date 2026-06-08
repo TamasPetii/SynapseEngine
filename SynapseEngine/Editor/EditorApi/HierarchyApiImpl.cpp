@@ -103,8 +103,8 @@ namespace Syn
         auto scene = _sceneManager->GetActiveScene();
         if (!scene || !scene->GetRegistry()) return;
 
-        if (_selectedEntity == entity) {
-            _selectedEntity = NULL_ENTITY;
+        if (scene->GetSelectedEntity() == entity) {
+            scene->SetSelectedEntity(NULL_ENTITY);
         }
 
         scene->DestroyEntity(entity);

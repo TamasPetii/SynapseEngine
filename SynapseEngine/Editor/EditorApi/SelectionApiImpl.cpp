@@ -2,10 +2,20 @@
 
 namespace Syn {
     EntityID EditorApiImpl::GetSelectedEntity() const {
-        return _selectedEntity;
+        auto scene = _sceneManager->GetActiveScene();
+
+        if (scene == nullptr)
+            return NULL_ENTITY;
+
+        return scene->GetSelectedEntity();
     }
 
     void EditorApiImpl::SetSelectedEntity(EntityID entity) {
-        _selectedEntity = entity;
+        auto scene = _sceneManager->GetActiveScene();
+
+        if (scene == nullptr)
+            return;
+
+        scene->SetSelectedEntity(entity);
     }
 };

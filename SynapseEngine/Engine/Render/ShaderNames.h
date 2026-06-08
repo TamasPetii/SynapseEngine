@@ -11,10 +11,12 @@ namespace Syn
         static constexpr const char* BillboardVert = "Engine/Shaders/Passes/Billboard/Billboard.vert";
         static constexpr const char* BillboardFrag = "Engine/Shaders/Passes/Billboard/Billboard.frag";
 
-        static constexpr const char* BloomPrefilter = "Engine/Shaders/Passes/PostProcess/BloomPrefilter.comp";
-        static constexpr const char* BloomUpsample = "Engine/Shaders/Passes/PostProcess/BloomUpsample.comp";
-        static constexpr const char* BloomDownsample = "Engine/Shaders/Passes/PostProcess/BloomDownsample.comp";
-        static constexpr const char* BloomComposite = "Engine/Shaders/Passes/PostProcess/BloomComposite.comp";
+        static constexpr const char* BloomPrefilter = "Engine/Shaders/Passes/PostProcess/Bloom/BloomPrefilter.comp";
+        static constexpr const char* BloomUpsample = "Engine/Shaders/Passes/PostProcess/Bloom/BloomUpsample.comp";
+        static constexpr const char* BloomDownsample = "Engine/Shaders/Passes/PostProcess/Bloom/BloomDownsample.comp";
+        static constexpr const char* BloomComposite = "Engine/Shaders/Passes/PostProcess/Bloom/BloomComposite.comp";
+
+        static constexpr const char* SelectionOutlineFrag = "Engine/Shaders/Passes/PostProcess/Outline/SelectionOutline.frag";
 
         static constexpr const char* StaticSceneAABB = "Engine/Shaders/Passes/Morton/StaticSceneAABB.comp";
         static constexpr const char* MortonGenerator = "Engine/Shaders/Passes/Morton/MortonGenerator.comp";
@@ -105,6 +107,5 @@ namespace Syn
         static constexpr const char* DirectionLightShadowWorkGraphMortonChunkCullingComp = "Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphMortonChunkCulling.comp";
         static constexpr const char* DirectionLightShadowWorkGraphMortonModelCullingComp = "Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphMortonModelCulling.comp";
         static constexpr const char* DirectionLightShadowWorkGraphMeshCullingComp = "Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphMeshCulling.comp";
-
     };
 }

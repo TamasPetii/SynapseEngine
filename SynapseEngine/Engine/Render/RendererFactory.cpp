@@ -7,10 +7,11 @@
 #include "Engine/Render/Passes/Billboard/PointLightBillboardPass.h"
 #include "Engine/Render/Passes/Billboard/SpotLightBillboardPass.h"
 
-#include "Engine/Render/Passes/Bloom/BloomPrefilterPass.h"
-#include "Engine/Render/Passes/Bloom/BloomUpsamplePass.h"
-#include "Engine/Render/Passes/Bloom/BloomDownsamplePass.h"
-#include "Engine/Render/Passes/Bloom/BloomCompositePass.h"
+#include "Engine/Render/Passes/PostProcess/Bloom/BloomPrefilterPass.h"
+#include "Engine/Render/Passes/PostProcess/Bloom/BloomUpsamplePass.h"
+#include "Engine/Render/Passes/PostProcess/Bloom/BloomDownsamplePass.h"
+#include "Engine/Render/Passes/PostProcess/Bloom/BloomCompositePass.h"
+#include "Engine/Render/Passes/PostProcess/Outline/SelectionOutlinePass.h"
 
 #include "Engine/Render/Passes/Culling/PointLightCullingPass.h"
 #include "Engine/Render/Passes/Culling/SpotLightCullingPass.h"
@@ -274,6 +275,9 @@ namespace Syn
         pipeline->AddPass(std::make_unique<BloomDownsamplePass>());
         pipeline->AddPass(std::make_unique<BloomUpsamplePass>());
         pipeline->AddPass(std::make_unique<BloomCompositePass>());
+
+		//Outline Post-processing Pass
+        pipeline->AddPass(std::make_unique<SelectionOutlinePass>());
 
 		//Debug Visibility Pass
         pipeline->AddPass(std::make_unique<DebugVisibilityPass>());     

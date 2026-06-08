@@ -68,5 +68,10 @@ namespace Syn
         , debugVisibilityMode(DebugVisibilityMode::AllCombined)
         , enableSsao(false)
         , enableSsaoLight(false)
+        , enableSelectedOutline(true)
+        , enableSelectedHierarchyOutline(true)
+        , outlinePrimaryColor(glm::vec4(1.0f, 0.60f, 0.0f, 1.0f))
+        , outlineSecondaryColor(glm::vec4(1.0f, 0.85f, 0.0f, 1.0f))
+        , outlineThickness(2.0f)
     {}
 }
