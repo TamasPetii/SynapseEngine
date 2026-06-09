@@ -14,9 +14,20 @@ set_targetdir("Binaries/$(os)-$(arch)/$(mode)")
 set_objectdir("Intermediates/$(os)-$(arch)/$(mode)/$(name)")
 
 if is_plat("windows") then
-    add_cxflags("/bigobj", "/GR-")
+    add_cxflags("/bigobj", "/GR-", "/arch:AVX2")
 elseif is_plat("linux") then
-    add_cxflags("-fno-rtti", "-std=c++23", {force = true})
+    add_cxflags(
+        "-fno-rtti", 
+        "-std=c++23", 
+        "-mavx2", 
+        "-mbmi", 
+        "-mpopcnt", 
+        "-mlzcnt", 
+        "-mf16c", 
+        "-mfma", 
+        "-mfpmath=sse", 
+        {force = true}
+    )
 end
 
 add_includedirs(
@@ -35,12 +46,23 @@ add_defines(
     "VK_ENABLE_BETA_EXTENSIONS",
     "SPIRV_REFLECT_USE_SYSTEM_SPIRV_H",
     "GLM_FORCE_DEPTH_ZERO_TO_ONE",
-    "JPH_OBJECT_STREAM",
-    "JPH_FLOATING_POINT_EXCEPTIONS_ENABLED",
     "NOMINMAX",
     "WIN32_LEAN_AND_MEAN",
-    "_CRT_SECURE_NO_WARNINGS"
+    "_CRT_SECURE_NO_WARNINGS",
+    "JPH_OBJECT_STREAM",
+    "JPH_USE_AVX2",
+    "JPH_USE_AVX",
+    "JPH_USE_SSE4_1",
+    "JPH_USE_SSE4_2",
+    "JPH_USE_LZCNT",
+    "JPH_USE_TZCNT",
+    "JPH_USE_F16C",
+    "JPH_USE_FMADD"
 )
+
+if is_plat("windows") then
+    add_defines("JPH_FLOATING_POINT_EXCEPTIONS_ENABLED")
+end
 
 if is_mode("debug") then
     add_defines("SYN_DEBUG", "_DEBUG")

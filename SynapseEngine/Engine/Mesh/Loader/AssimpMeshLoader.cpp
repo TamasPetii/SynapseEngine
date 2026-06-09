@@ -161,7 +161,11 @@ namespace Syn
                 }
 
                 if (!extractTexture(aiTextureType_NORMALS, matInfo.normal)) {
-                    extractTexture(aiTextureType_HEIGHT, matInfo.normal);
+                    if (!extractTexture(aiTextureType_HEIGHT, matInfo.normal)) {
+						if(!extractTexture(aiTextureType_DISPLACEMENT, matInfo.normal)) {
+	                        
+						}
+                    }
                 }
 
                 if (!extractTexture(aiTextureType_METALNESS, matInfo.metallicRoughness)) {
