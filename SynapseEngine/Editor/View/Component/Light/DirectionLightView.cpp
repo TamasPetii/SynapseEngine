@@ -11,7 +11,7 @@ namespace Syn {
         if (!state.hasComponent) return;
 
         constexpr const char* CardTitle = "Directional Light";
-        if (Syn::UI::BeginCard(CardTitle, SYN_ICON_LIGHTBULB, _isCardOpen)) 
+        if (Syn::UI::BeginCard(CardTitle, SYN_ICON_SUN, _isCardOpen))
         {
             bool isDeactivated = false;
 

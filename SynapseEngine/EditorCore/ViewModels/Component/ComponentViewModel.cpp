@@ -2,11 +2,19 @@
 
 namespace Syn 
 {
-    ComponentViewModel::ComponentViewModel(ISelectionApi* selectionApi, ITagApi* tagApi, ITransformApi* transformApi, IDirectionLightApi* directionLightApi, IHierarchyApi* hierarchyApi)
-        : _selectionApi(selectionApi),
+    ComponentViewModel::ComponentViewModel(
+        ISelectionApi* selectionApi,
+        ITagApi* tagApi,
+        ITransformApi* transformApi,
+        IHierarchyApi* hierarchyApi, 
+        IDirectionLightApi* directionLightApi,
+        IPointLightApi* pointLightApi)
+        : 
+        _selectionApi(selectionApi),
         _tagViewModel(selectionApi, tagApi),
         _transformViewModel(selectionApi, transformApi, hierarchyApi),
-        _directionLightViewModel(selectionApi, directionLightApi)
+        _directionLightViewModel(selectionApi, directionLightApi),
+        _pointLightViewModel(selectionApi, pointLightApi)
     {}
 
     const ComponentState& ComponentViewModel::GetState() const {
@@ -25,6 +33,7 @@ namespace Syn
             _tagViewModel.SyncWithEngine();
             _transformViewModel.SyncWithEngine();
             _directionLightViewModel.SyncWithEngine();
+            _pointLightViewModel.SyncWithEngine();
         }
     }
 
@@ -40,6 +49,9 @@ namespace Syn
             }
             else if constexpr (std::is_same_v<T, DirectionLightIntent>) {
                 _directionLightViewModel.Dispatch(arg);
+            }
+            else if constexpr (std::is_same_v<T, PointLightIntent>) {
+                _pointLightViewModel.Dispatch(arg);
             }
             }, intent);
     }

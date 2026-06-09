@@ -7,6 +7,7 @@
 #include "Core/TagView.h"
 #include "Core/TransformView.h"
 #include "Light/DirectionLightView.h"
+#include "Light/PointLightView.h"
 
 namespace Syn {
     class ComponentView : public IView<ComponentViewModel> {
@@ -16,5 +17,6 @@ namespace Syn {
         TagView _tagView;
 		TransformView _transformView;  
         DirectionLightView _directionLightView;
+        PointLightView _pointLightView;
     };
 }

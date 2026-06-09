@@ -38,10 +38,10 @@ namespace Syn {
 
     std::string HierarchyApiImpl::GetEntityIcon(EntityID entity) const {
         if (EditorApiUtils::HasComponent<CameraComponent>(_sceneManager, entity)) return SYN_ICON_VIDEO;
-        if (EditorApiUtils::HasComponent<DirectionLightComponent>(_sceneManager, entity)) return ICON_FA_SUN;
-        if (EditorApiUtils::HasComponent<PointLightComponent>(_sceneManager, entity)) return ICON_FA_LIGHTBULB;
-        if (EditorApiUtils::HasComponent<SpotLightComponent>(_sceneManager, entity)) return ICON_FA_LIGHTBULB;
-        if (EditorApiUtils::HasComponent<AnimationComponent>(_sceneManager, entity)) return ICON_FA_RUNNING;
+        if (EditorApiUtils::HasComponent<DirectionLightComponent>(_sceneManager, entity)) return SYN_ICON_SUN;
+        if (EditorApiUtils::HasComponent<PointLightComponent>(_sceneManager, entity)) return SYN_ICON_LIGHTBULB;
+        if (EditorApiUtils::HasComponent<SpotLightComponent>(_sceneManager, entity)) return SYN_ICON_SPOTLIGHT;
+        if (EditorApiUtils::HasComponent<AnimationComponent>(_sceneManager, entity)) return SYN_ICON_RUNNING;
         if (EditorApiUtils::HasComponent<ModelComponent>(_sceneManager, entity)) return SYN_ICON_CUBE;
         return SYN_ICON_CUBE;
     }

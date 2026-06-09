@@ -6,16 +6,26 @@
 #include "Core/Tag/TagViewModel.h"
 #include "Core/Transform/TransformViewModel.h"
 #include "Light/DirectionLight/DirectionLightViewModel.h"
+#include "Light/PointLight/PointLightViewModel.h"
 
 #include "EditorCore/Api/ISelectionApi.h"
 #include "EditorCore/Api/ITagApi.h"
 #include "EditorCore/Api/ITransformApi.h"
 #include "EditorCore/Api/IDirectionLightApi.h"
+#include "EditorCore/Api/IPointLightApi.h"
 
 namespace Syn {
     class ComponentViewModel : public IViewModel<ComponentState, ComponentIntent> {
     public:
-        ComponentViewModel(ISelectionApi* selectionApi, ITagApi* tagApi, ITransformApi* transformApi, IDirectionLightApi* directionLightApi, IHierarchyApi* hierarchyApi);
+        ComponentViewModel(
+            ISelectionApi* selectionApi,
+            ITagApi* tagApi,
+            ITransformApi* transformApi,
+            IHierarchyApi* hierarchyApi,
+            IDirectionLightApi* directionLightApi,
+            IPointLightApi* pointLightApi
+            );
+
         ~ComponentViewModel() override = default;
 
         const ComponentState& GetState() const override;
@@ -25,6 +35,7 @@ namespace Syn {
 		TagViewModel& GetTagViewModel() { return _tagViewModel; }
 		TransformViewModel& GetTransformViewModel() { return _transformViewModel; }
 		DirectionLightViewModel& GetDirectionLightViewModel() { return _directionLightViewModel; }
+        PointLightViewModel& GetPointLightViewModel() { return _pointLightViewModel; }
     private:
 		ISelectionApi* _selectionApi = nullptr;
         ComponentState _state;
@@ -32,5 +43,6 @@ namespace Syn {
         TagViewModel _tagViewModel;;
         TransformViewModel _transformViewModel;
         DirectionLightViewModel _directionLightViewModel;
+        PointLightViewModel _pointLightViewModel;
     };
 }

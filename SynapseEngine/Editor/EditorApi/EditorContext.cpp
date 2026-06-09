@@ -2,7 +2,6 @@
 #include "Impl/DirectionLightApiImpl.h"
 #include "Impl/TagApiImpl.h"
 #include "Impl/TransformApiImpl.h"
-#include "Impl/DirectionLightApiImpl.h"
 #include "Impl/FileSystemApiImpl.h"
 #include "Impl/HierarchyApiImpl.h"
 #include "Impl/LoggerApiImpl.h"
@@ -11,6 +10,7 @@
 #include "Impl/SceneApiImpl.h"
 #include "Impl/SettingsApiImpl.h"
 #include "Impl/SelectionApiImpl.h"
+#include "Impl/PointLightApiImpl.h"
 
 namespace Syn {
     EditorContext::EditorContext(Engine* engine, GuiTextureManager* textureManager) {
@@ -27,6 +27,7 @@ namespace Syn {
         _renderApi = std::make_unique<RenderApiImpl>(engine, textureManager, sm);
         _sceneApi = std::make_unique<SceneApiImpl>(sm);
         _settingsApi = std::make_unique<SettingsApiImpl>(sm);
+        _pointLightApi = std::make_unique<PointLightApiImpl>(sm);
     }
 
     EditorContext::~EditorContext() = default;

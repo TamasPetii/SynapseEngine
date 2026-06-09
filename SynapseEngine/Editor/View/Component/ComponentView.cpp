@@ -30,6 +30,9 @@ namespace Syn {
             //DirectionLight
             _directionLightView.Draw(vm.GetDirectionLightViewModel());
 
+            //PointLight
+            _pointLightView.Draw(vm.GetPointLightViewModel());
+
             ImGui::Spacing();
             ImGui::Separator();
             ImGui::Spacing();

@@ -120,8 +120,9 @@ void Synapse::OnInit() {
             _editorContext->GetSelectionApi(),
             _editorContext->GetTagApi(),
             _editorContext->GetTransformApi(),
+            _editorContext->GetHierarchyApi(),
             _editorContext->GetDirectionLightApi(),
-            _editorContext->GetHierarchyApi()
+            _editorContext->GetPointLightApi()
         }
     );
 

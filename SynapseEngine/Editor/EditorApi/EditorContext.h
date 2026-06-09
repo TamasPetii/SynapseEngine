@@ -14,6 +14,7 @@
 #include "EditorCore/Api/IRenderApi.h"
 #include "EditorCore/Api/ISceneApi.h"
 #include "EditorCore/Api/ISettingsApi.h"
+#include "EditorCore/Api/IPointLightApi.h"
 
 namespace Syn {
     class EditorContext {
@@ -32,12 +33,11 @@ namespace Syn {
         IRenderApi* GetRenderApi() const { return _renderApi.get(); }
         ISceneApi* GetSceneApi() const { return _sceneApi.get(); }
         ISettingsApi* GetSettingsApi() const { return _settingsApi.get(); }
-
+        IPointLightApi* GetPointLightApi() const { return _pointLightApi.get(); }
     private:
         std::unique_ptr<ISelectionApi> _selectionApi;
         std::unique_ptr<ITagApi> _tagApi;
         std::unique_ptr<ITransformApi> _transformApi;
-        std::unique_ptr<IDirectionLightApi> _directionLightApi;
         std::unique_ptr<IFileSystemApi> _fileSystemApi;
         std::unique_ptr<IHierarchyApi> _hierarchyApi;
         std::unique_ptr<ILoggerApi> _loggerApi;
@@ -45,5 +45,7 @@ namespace Syn {
         std::unique_ptr<IRenderApi> _renderApi;
         std::unique_ptr<ISceneApi> _sceneApi;
         std::unique_ptr<ISettingsApi> _settingsApi;
+        std::unique_ptr<IDirectionLightApi> _directionLightApi;
+        std::unique_ptr<IPointLightApi> _pointLightApi;
     };
 }

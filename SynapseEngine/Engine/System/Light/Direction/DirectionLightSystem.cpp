@@ -63,25 +63,25 @@ namespace Syn
 
         auto mathTasks = ParallelForEachIf<UPDATE_BIT>(lightPool, subflow, SystemPhaseNames::Update,
             [lightPool, transformPool, registry](EntityID entity) {
+                auto& lightComp = lightPool->Get(entity);
+
                 if (transformPool->Has(entity) && transformPool->IsBitSet<TRANSFORM_ROT_CHANGED>(entity))
                 {
-                    auto& transformComp = transformPool->Get(entity);
-                    auto& lightComp = lightPool->Get(entity);
-
+                    auto& transformComp = transformPool->Get(entity);             
                     lightComp.direction = glm::normalize(glm::vec3(-transformComp.transform[2]));
+                }
 
-                    if (lightPool->IsDynamic(entity))
-                        lightPool->SetBit<CHANGED_BIT>(entity);
+                if (lightPool->IsDynamic(entity))
+                    lightPool->SetBit<CHANGED_BIT>(entity);
 
-                    lightComp.version++;
+                lightComp.version++;
 
-                    auto currentShadowPool = registry->GetPool<DirectionLightShadowComponent>();
-                    if (currentShadowPool && currentShadowPool->Has(entity)) {
-                        if (currentShadowPool->IsStatic(entity))
-                            currentShadowPool->MarkStaticDirty(entity);
-                        else if (currentShadowPool->IsDynamic(entity))
-                            currentShadowPool->SetBit<UPDATE_BIT>(entity);
-                    }
+                auto currentShadowPool = registry->GetPool<DirectionLightShadowComponent>();
+                if (currentShadowPool && currentShadowPool->Has(entity)) {
+                    if (currentShadowPool->IsStatic(entity))
+                        currentShadowPool->MarkStaticDirty(entity);
+                    else if (currentShadowPool->IsDynamic(entity))
+                        currentShadowPool->SetBit<UPDATE_BIT>(entity);
                 }
             });
 
