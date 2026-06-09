@@ -4,11 +4,17 @@
 #include <unordered_map>
 #include <string>
 
+#include "Core/TagView.h"
+#include "Core/TransformView.h"
+#include "Light/DirectionLightView.h"
+
 namespace Syn {
     class ComponentView : public IView<ComponentViewModel> {
     public:
         void Draw(ComponentViewModel& vm) override;
     private:
-        std::unordered_map<std::string, bool> _cardStates;
+        TagView _tagView;
+		TransformView _transformView;  
+        DirectionLightView _directionLightView;
     };
 }

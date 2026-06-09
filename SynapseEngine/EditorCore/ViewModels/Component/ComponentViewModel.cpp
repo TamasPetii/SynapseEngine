@@ -2,10 +2,11 @@
 
 namespace Syn 
 {
-    ComponentViewModel::ComponentViewModel(ISelectionApi* selectionApi, ITagApi* tagApi, ITransformApi* transformApi)
+    ComponentViewModel::ComponentViewModel(ISelectionApi* selectionApi, ITagApi* tagApi, ITransformApi* transformApi, IDirectionLightApi* directionLightApi, IHierarchyApi* hierarchyApi)
         : _selectionApi(selectionApi),
-        _tagVM(selectionApi, tagApi),
-        _transformVM(selectionApi, transformApi)
+        _tagViewModel(selectionApi, tagApi),
+        _transformViewModel(selectionApi, transformApi, hierarchyApi),
+        _directionLightViewModel(selectionApi, directionLightApi)
     {}
 
     const ComponentState& ComponentViewModel::GetState() const {
@@ -21,8 +22,9 @@ namespace Syn
         _state.hasSelection = (activeEntity != NULL_ENTITY);
 
         if (_state.hasSelection) {
-            _tagVM.SyncWithEngine();
-            _transformVM.SyncWithEngine();
+            _tagViewModel.SyncWithEngine();
+            _transformViewModel.SyncWithEngine();
+            _directionLightViewModel.SyncWithEngine();
         }
     }
 
@@ -31,20 +33,14 @@ namespace Syn
             using T = std::decay_t<decltype(arg)>;
 
             if constexpr (std::is_same_v<T, TagIntent>) {
-                _tagVM.Dispatch(arg);
+                _tagViewModel.Dispatch(arg);
             }
             else if constexpr (std::is_same_v<T, TransformIntent>) {
-                _transformVM.Dispatch(arg);
+                _transformViewModel.Dispatch(arg);
+            }
+            else if constexpr (std::is_same_v<T, DirectionLightIntent>) {
+                _directionLightViewModel.Dispatch(arg);
             }
             }, intent);
     }
-
-    TagViewModel& ComponentViewModel::GetTagVM() {
-        return _tagVM;
-    }
-
-    TransformViewModel& ComponentViewModel::GetTransformVM() {
-        return _transformVM;
-    }
-
 }

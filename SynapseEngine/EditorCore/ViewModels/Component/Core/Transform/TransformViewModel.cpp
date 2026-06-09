@@ -3,8 +3,8 @@
 
 namespace Syn {
 
-    TransformViewModel::TransformViewModel(ISelectionApi* selectionApi, ITransformApi* transformApi)
-        : _selectionApi(selectionApi), _transformApi(transformApi)
+    TransformViewModel::TransformViewModel(ISelectionApi* selectionApi, ITransformApi* transformApi, IHierarchyApi* hierarchyApi)
+        : _selectionApi(selectionApi), _transformApi(transformApi), _hierarchyApi(hierarchyApi)
     {}
 
     const TransformState& TransformViewModel::GetState() const {

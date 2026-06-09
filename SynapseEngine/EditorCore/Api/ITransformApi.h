@@ -16,6 +16,5 @@ namespace Syn {
         virtual void SetEntityScale(EntityID entity, const glm::vec3& scale) = 0;
 
         virtual glm::mat4 GetEntityWorldMatrix(EntityID entity) const = 0;
-        virtual EntityID GetEntityParent(EntityID entity) const = 0;
     };
 }

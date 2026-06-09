@@ -1,11 +1,10 @@
-#include "EditorApiImpl.h"
+#include "FileSystemApiImpl.h"
 #include <filesystem>
 #include <algorithm>
 #include <system_error>
 
 namespace Syn {
-
-    std::vector<FileEntry> EditorApiImpl::GetEntries(const std::string& directoryPath) const {
+    std::vector<FileEntry> FileSystemApiImpl::GetEntries(const std::string& directoryPath) const {
         std::vector<FileEntry> entries;
         std::error_code ec;
 
@@ -18,7 +17,6 @@ namespace Syn {
 
             FileEntry fileEntry;
             const auto& path = entry.path();
-
             fileEntry.name = path.filename().string();
             fileEntry.path = path.generic_string();
             fileEntry.extension = path.extension().string();
@@ -28,23 +26,19 @@ namespace Syn {
         }
 
         std::sort(entries.begin(), entries.end(), [](const FileEntry& a, const FileEntry& b) {
-            if (a.isDirectory != b.isDirectory) {
-                return a.isDirectory > b.isDirectory;
-            }
+            if (a.isDirectory != b.isDirectory) return a.isDirectory > b.isDirectory;
             return a.name < b.name;
-            });
+        });
 
         return entries;
     }
 
-    std::string EditorApiImpl::GetParentPath(const std::string& path) const {
-        std::filesystem::path p(path);
-        return p.parent_path().generic_string();
+    std::string FileSystemApiImpl::GetParentPath(const std::string& path) const {
+        return std::filesystem::path(path).parent_path().generic_string();
     }
 
-    bool EditorApiImpl::IsValidPath(const std::string& path) const {
+    bool FileSystemApiImpl::IsValidPath(const std::string& path) const {
         std::error_code ec;
         return std::filesystem::exists(path, ec) && std::filesystem::is_directory(path, ec);
     }
-
 }

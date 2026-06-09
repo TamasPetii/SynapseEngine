@@ -4,8 +4,8 @@
 
 namespace Syn {
 
-    ViewportViewModel::ViewportViewModel(IRenderApi* renderApi, ISelectionApi* selectionApi, ITransformApi* transformApi, ISettingsApi* settingsApi)
-        : _renderApi(renderApi), _selectionApi(selectionApi), _transformApi(transformApi), _settingsApi(settingsApi) {}
+    ViewportViewModel::ViewportViewModel(IRenderApi* renderApi, ISelectionApi* selectionApi, ITransformApi* transformApi, ISettingsApi* settingsApi, IHierarchyApi* hierarchyApi)
+        : _renderApi(renderApi), _selectionApi(selectionApi), _transformApi(transformApi), _settingsApi(settingsApi), _hierarchyApi(hierarchyApi) {}
 
     const ViewportState& ViewportViewModel::GetState() const {
         return _state;
@@ -24,7 +24,7 @@ namespace Syn {
         if (_state.activeEntity != NULL_ENTITY) {
             _state.entityWorldTransform = _transformApi->GetEntityWorldMatrix(_state.activeEntity);
 
-            EntityID parentId = _transformApi->GetEntityParent(_state.activeEntity);
+            EntityID parentId = _hierarchyApi->GetParent(_state.activeEntity);
             if (parentId != NULL_ENTITY) {
                 _state.hasParent = true;
                 _state.parentWorldTransform = _transformApi->GetEntityWorldMatrix(parentId);

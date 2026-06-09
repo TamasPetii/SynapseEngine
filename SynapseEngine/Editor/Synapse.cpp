@@ -46,7 +46,7 @@ Synapse::~Synapse() {
         _engine->GetVkContext()->GetDevice()->WaitIdle();
     }
 
-    _editorApi.reset();
+    _editorContext.reset();
     _iconManager.reset();
     _inputDispatcher.reset();
     _guiManager.reset();
@@ -100,7 +100,7 @@ void Synapse::OnInit() {
         vkContext->GetSwapChain()->GetImageFormat()
     );
 
-    _editorApi = std::make_unique<Syn::EditorApiImpl>(_engine.get(), _guiManager->GetTextureManager());
+    _editorContext = std::make_unique<Syn::EditorContext>(_engine.get(), _guiManager->GetTextureManager());
 
     _iconManager = std::make_unique<Syn::IconManager>(
         _engine->GetImageManager(),
@@ -115,22 +115,25 @@ void Synapse::OnInit() {
 
     using ComponentWin = Syn::EditorWindow<Syn::ComponentView, Syn::ComponentViewModel>;
     _guiManager->AddWindow<ComponentWin>(
-        Syn::ComponentView{
-        },
+        Syn::ComponentView{},
         Syn::ComponentViewModel{
-            _editorApi.get(),
-            _editorApi.get(),
-            _editorApi.get(),
-        });
+            _editorContext->GetSelectionApi(),
+            _editorContext->GetTagApi(),
+            _editorContext->GetTransformApi(),
+            _editorContext->GetDirectionLightApi(),
+            _editorContext->GetHierarchyApi()
+        }
+    );
 
     using ViewportWin = Syn::EditorWindow<Syn::ViewportView, Syn::ViewportViewModel>;
     _guiManager->AddWindow<ViewportWin>(
         Syn::ViewportView{},
         Syn::ViewportViewModel{
-            _editorApi.get(),
-            _editorApi.get(),
-            _editorApi.get(),
-            _editorApi.get()
+            _editorContext->GetRenderApi(),
+            _editorContext->GetSelectionApi(),
+            _editorContext->GetTransformApi(),
+            _editorContext->GetSettingsApi(),
+            _editorContext->GetHierarchyApi()
         }
     );
 
@@ -138,15 +141,15 @@ void Synapse::OnInit() {
     _guiManager->AddWindow<SettingsWin>(
         Syn::SettingsView{},
         Syn::SettingsViewModel{
-            _editorApi.get()
+            _editorContext->GetSettingsApi()
         });
 
     using MainMenuWin = Syn::EditorWindow<Syn::MainMenuView, Syn::MainMenuViewModel>;
     _guiManager->AddWindow<MainMenuWin>(
         Syn::MainMenuView{},
         Syn::MainMenuViewModel{
-            _editorApi.get(),
-			_guiManager->GetFileDialog()
+            _editorContext->GetSceneApi(),
+            _guiManager->GetFileDialog()
         }
     );
 
@@ -154,7 +157,7 @@ void Synapse::OnInit() {
     _guiManager->AddWindow<MaterialGraphWin>(
         Syn::MaterialGraphView{},
         Syn::MaterialGraphViewModel{
-            _editorApi.get()
+            _editorContext->GetMaterialApi()
         }
     );
 
@@ -163,16 +166,19 @@ void Synapse::OnInit() {
     using ContentBrowserWin = Syn::EditorWindow<Syn::ContentBrowserView, Syn::ContentBrowserViewModel>;
     _guiManager->AddWindow<ContentBrowserWin>(
         Syn::ContentBrowserView{ _iconManager.get() },
-        Syn::ContentBrowserViewModel{ _editorApi.get(), absoluteAssetsPath }
+        Syn::ContentBrowserViewModel{ 
+            _editorContext->GetFileSystemApi(), 
+            absoluteAssetsPath 
+        }
     );
 
     using HierarchyWin = Syn::EditorWindow<Syn::HierarchyView, Syn::HierarchyViewModel>;
     _guiManager->AddWindow<HierarchyWin>(
         Syn::HierarchyView{},
         Syn::HierarchyViewModel{
-            _editorApi.get(),
-            _editorApi.get(),
-            _editorApi.get(),
+            _editorContext->GetHierarchyApi(),
+            _editorContext->GetSelectionApi(),
+            _editorContext->GetTagApi()
         }
     );
 
@@ -186,7 +192,7 @@ void Synapse::OnInit() {
     _guiManager->AddWindow<LoggerWin>(
         Syn::LoggerView{},
         Syn::LoggerViewModel{
-            _editorApi.get()
+            _editorContext->GetLoggerApi()
         }
     );
 
