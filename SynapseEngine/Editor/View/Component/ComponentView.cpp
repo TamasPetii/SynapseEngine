@@ -33,6 +33,9 @@ namespace Syn {
             //PointLight
             _pointLightView.Draw(vm.GetPointLightViewModel());
 
+            //SpotLight
+            _spotLightView.Draw(vm.GetSpotLightViewModel());
+
             ImGui::Spacing();
             ImGui::Separator();
             ImGui::Spacing();

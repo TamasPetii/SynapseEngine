@@ -8,6 +8,7 @@
 #include "Core/TransformView.h"
 #include "Light/DirectionLightView.h"
 #include "Light/PointLightView.h"
+#include "Light/SpotLightView.h"
 
 namespace Syn {
     class ComponentView : public IView<ComponentViewModel> {
@@ -18,5 +19,6 @@ namespace Syn {
 		TransformView _transformView;  
         DirectionLightView _directionLightView;
         PointLightView _pointLightView;
+        SpotLightView _spotLightView;
     };
 }

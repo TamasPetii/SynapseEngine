@@ -1,6 +1,7 @@
 #pragma once
 
-namespace Syn {
+namespace Syn
+{
     class ICommand {
     public:
         virtual ~ICommand() = default;

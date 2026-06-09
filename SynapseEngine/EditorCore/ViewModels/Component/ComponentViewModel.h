@@ -7,6 +7,7 @@
 #include "Core/Transform/TransformViewModel.h"
 #include "Light/DirectionLight/DirectionLightViewModel.h"
 #include "Light/PointLight/PointLightViewModel.h"
+#include "Light/SpotLight/SpotLightViewModel.h"
 
 #include "EditorCore/Api/ISelectionApi.h"
 #include "EditorCore/Api/ITagApi.h"
@@ -23,7 +24,8 @@ namespace Syn {
             ITransformApi* transformApi,
             IHierarchyApi* hierarchyApi,
             IDirectionLightApi* directionLightApi,
-            IPointLightApi* pointLightApi
+            IPointLightApi* pointLightApi,
+            ISpotLightApi* spotLightApi
             );
 
         ~ComponentViewModel() override = default;
@@ -36,6 +38,7 @@ namespace Syn {
 		TransformViewModel& GetTransformViewModel() { return _transformViewModel; }
 		DirectionLightViewModel& GetDirectionLightViewModel() { return _directionLightViewModel; }
         PointLightViewModel& GetPointLightViewModel() { return _pointLightViewModel; }
+        SpotLightViewModel& GetSpotLightViewModel() { return _spotLightViewModel; }
     private:
 		ISelectionApi* _selectionApi = nullptr;
         ComponentState _state;
@@ -44,5 +47,6 @@ namespace Syn {
         TransformViewModel _transformViewModel;
         DirectionLightViewModel _directionLightViewModel;
         PointLightViewModel _pointLightViewModel;
+        SpotLightViewModel _spotLightViewModel;
     };
 }

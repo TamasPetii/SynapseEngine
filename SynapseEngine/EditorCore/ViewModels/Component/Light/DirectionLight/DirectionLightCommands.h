@@ -1,5 +1,5 @@
 #pragma once
-#include "EditorCore/Command/ICommand.h"
+#include "EditorCore/Command/ComponentChangeCommand.h"
 #include "EditorCore/Api/IDirectionLightApi.h"
 #include <glm/glm.hpp>
 

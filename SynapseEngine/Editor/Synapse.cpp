@@ -122,7 +122,8 @@ void Synapse::OnInit() {
             _editorContext->GetTransformApi(),
             _editorContext->GetHierarchyApi(),
             _editorContext->GetDirectionLightApi(),
-            _editorContext->GetPointLightApi()
+            _editorContext->GetPointLightApi(),
+            _editorContext->GetSpotLightApi()
         }
     );
 

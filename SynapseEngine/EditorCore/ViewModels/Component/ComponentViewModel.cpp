@@ -8,13 +8,15 @@ namespace Syn
         ITransformApi* transformApi,
         IHierarchyApi* hierarchyApi, 
         IDirectionLightApi* directionLightApi,
-        IPointLightApi* pointLightApi)
+        IPointLightApi* pointLightApi,
+        ISpotLightApi* spotLightApi)
         : 
         _selectionApi(selectionApi),
         _tagViewModel(selectionApi, tagApi),
         _transformViewModel(selectionApi, transformApi, hierarchyApi),
         _directionLightViewModel(selectionApi, directionLightApi),
-        _pointLightViewModel(selectionApi, pointLightApi)
+        _pointLightViewModel(selectionApi, pointLightApi),
+        _spotLightViewModel(selectionApi, spotLightApi)
     {}
 
     const ComponentState& ComponentViewModel::GetState() const {
@@ -34,6 +36,7 @@ namespace Syn
             _transformViewModel.SyncWithEngine();
             _directionLightViewModel.SyncWithEngine();
             _pointLightViewModel.SyncWithEngine();
+            _spotLightViewModel.SyncWithEngine();
         }
     }
 
@@ -52,6 +55,9 @@ namespace Syn
             }
             else if constexpr (std::is_same_v<T, PointLightIntent>) {
                 _pointLightViewModel.Dispatch(arg);
+            }
+            else if constexpr (std::is_same_v<T, SpotLightIntent>) {
+                _spotLightViewModel.Dispatch(arg);
             }
             }, intent);
     }
