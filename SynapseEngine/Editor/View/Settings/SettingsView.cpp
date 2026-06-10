@@ -86,12 +86,12 @@ namespace Syn {
 
                     changed |= Syn::UI::PropertyCheckbox("Global Frustum Culling", settings.enableFrustumCulling);
                     if (settings.enableFrustumCulling) {
-                        changed |= Syn::UI::PropertyCheckbox("Chunk Level", settings.enableChunkFrustumCulling, 1);
-                        changed |= Syn::UI::PropertyCheckbox("Model Level", settings.enableModelFrustumCulling, 1);
-                        changed |= Syn::UI::PropertyCheckbox("Mesh Level", settings.enableMeshFrustumCulling, 1);
-                        changed |= Syn::UI::PropertyCheckbox("Meshlet Level", settings.enableMeshletFrustumCulling, 1);
-                        changed |= Syn::UI::PropertyCheckbox("Point Lights", settings.enablePointLightFrustumCulling, 1);
-                        changed |= Syn::UI::PropertyCheckbox("Spot Lights", settings.enableSpotLightFrustumCulling, 1);
+                        changed |= Syn::UI::PropertyCheckbox("Chunk Level##Frustum", settings.enableChunkFrustumCulling, 1);
+                        changed |= Syn::UI::PropertyCheckbox("Model Level##Frustum", settings.enableModelFrustumCulling, 1);
+                        changed |= Syn::UI::PropertyCheckbox("Mesh Level##Frustum", settings.enableMeshFrustumCulling, 1);
+                        changed |= Syn::UI::PropertyCheckbox("Meshlet Level##Frustum", settings.enableMeshletFrustumCulling, 1);
+                        changed |= Syn::UI::PropertyCheckbox("Point Lights##Frustum", settings.enablePointLightFrustumCulling, 1);
+                        changed |= Syn::UI::PropertyCheckbox("Spot Lights##Frustum", settings.enableSpotLightFrustumCulling, 1);
                     }
 
                     Syn::UI::PropertySeparator();
@@ -99,12 +99,12 @@ namespace Syn {
                     changed |= Syn::UI::PropertyCheckbox("Global Occlusion Culling (Hi-Z)", settings.enableOcclusionCulling);
                     if (settings.enableOcclusionCulling) {
                         changed |= Syn::UI::PropertyCheckbox("Build Hi-Z Depth Pyramid", settings.enableHiz, 1);
-                        changed |= Syn::UI::PropertyCheckbox("Chunk Level", settings.enableChunkOcclusionCulling, 1);
-                        changed |= Syn::UI::PropertyCheckbox("Model Level", settings.enableModelOcclusionCulling, 1);
-                        changed |= Syn::UI::PropertyCheckbox("Mesh Level", settings.enableMeshOcclusionCulling, 1);
-                        changed |= Syn::UI::PropertyCheckbox("Meshlet Level", settings.enableMeshletOcclusionCulling, 1);
-                        changed |= Syn::UI::PropertyCheckbox("Point Lights", settings.enablePointLightOcclusionCulling, 1);
-                        changed |= Syn::UI::PropertyCheckbox("Spot Lights", settings.enableSpotLightOcclusionCulling, 1);
+                        changed |= Syn::UI::PropertyCheckbox("Chunk Level##Occlusion", settings.enableChunkOcclusionCulling, 1);
+                        changed |= Syn::UI::PropertyCheckbox("Model Level##Occlusion", settings.enableModelOcclusionCulling, 1);
+                        changed |= Syn::UI::PropertyCheckbox("Mesh Level##Occlusion", settings.enableMeshOcclusionCulling, 1);
+                        changed |= Syn::UI::PropertyCheckbox("Meshlet Level##Occlusion", settings.enableMeshletOcclusionCulling, 1);
+                        changed |= Syn::UI::PropertyCheckbox("Point Lights##Occlusion", settings.enablePointLightOcclusionCulling, 1);
+                        changed |= Syn::UI::PropertyCheckbox("Spot Lights##Occlusion", settings.enableSpotLightOcclusionCulling, 1);
                     }
 
                     Syn::UI::PropertySeparator();

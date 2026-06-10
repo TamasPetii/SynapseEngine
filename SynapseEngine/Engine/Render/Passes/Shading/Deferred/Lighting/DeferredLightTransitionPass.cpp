@@ -14,7 +14,8 @@ namespace Syn {
         std::vector<std::string> gBufferTargets = {
             RenderTargetNames::ColorMetallic,
             RenderTargetNames::NormalRoughness,
-            RenderTargetNames::EmissiveAo
+            RenderTargetNames::EmissiveAo,
+            RenderTargetNames::SsaoAo
         };
 
         for (const auto& target : gBufferTargets) {

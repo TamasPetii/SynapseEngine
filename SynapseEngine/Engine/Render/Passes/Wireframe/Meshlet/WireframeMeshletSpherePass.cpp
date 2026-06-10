@@ -107,7 +107,7 @@ namespace Syn {
         pc->indexCount = shape->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;
         pc->shapeType = WIREFRAME_MESHLET_SHAPE_TYPE_SPHERE;
         pc->materialRenderType = 0;
-        pc->disableConeCulling = 0;
+        pc->disableConeCulling = 1;
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
