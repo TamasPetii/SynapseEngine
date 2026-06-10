@@ -23,6 +23,8 @@ namespace Syn {
                 return _cardStates[key];
                 };
 
+            float mainContentBottomY = ImGui::GetWindowPos().y + ImGui::GetWindowContentRegionMax().y;
+
             constexpr const char* CardOverviewTitle = "Performance Overview";
             if (Syn::UI::BeginCard(CardOverviewTitle, SYN_ICON_TACHOMETER, getCardState(CardOverviewTitle))) {
                 RenderTopBar(state);
@@ -53,10 +55,10 @@ namespace Syn {
                 RenderFilterBar(vm, state);
 
                 if (state.activeTab == ProfilerTab::CPU) {
-                    RenderProfilerTable(vm, state.cpuTimings, state.totalCpuTimeMs, state);
+                    RenderProfilerTable(vm, state.cpuTimings, state.totalCpuTimeMs, state, mainContentBottomY);
                 }
                 else {
-                    RenderProfilerTable(vm, state.gpuTimings, state.totalGpuTimeMs, state);
+                    RenderProfilerTable(vm, state.gpuTimings, state.totalGpuTimeMs, state, mainContentBottomY);
                 }
             }
             Syn::UI::EndCard();
@@ -113,7 +115,7 @@ namespace Syn {
         ImGui::Spacing();
     }
 
-    void BenchmarkView::RenderProfilerTable(BenchmarkViewModel& vm, const std::vector<UiProfilerGroup>& timings, float totalTime, const BenchmarkState& state) {
+    void BenchmarkView::RenderProfilerTable(BenchmarkViewModel& vm, const std::vector<UiProfilerGroup>& timings, float totalTime, const BenchmarkState& state, float mainContentBottomY) {
         ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(4, 4));
         ImGui::PushStyleVar(ImGuiStyleVar_IndentSpacing, 16.0f);
 
@@ -121,7 +123,18 @@ namespace Syn {
         ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
-        ImGui::BeginChild("TableContainer", ImVec2(0, 350.0f), ImGuiChildFlags_Borders, ImGuiWindowFlags_NoScrollbar);
+        float currentY = ImGui::GetCursorScreenPos().y;
+        float tableHeight = mainContentBottomY - currentY - 12.0f;
+
+        if (tableHeight < 100.0f)
+            tableHeight = 100.0f;
+
+        ImGui::BeginChild(
+            "TableContainer",
+            ImVec2(0, tableHeight),
+            ImGuiChildFlags_Borders,
+            ImGuiWindowFlags_NoScrollbar
+        );
 
         if (ImGui::BeginTable("ProfilerTable", 3, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollY)) {
 

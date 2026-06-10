@@ -11,7 +11,7 @@ namespace Syn {
     private:
         void RenderTopBar(const BenchmarkState& state);
         void RenderFilterBar(BenchmarkViewModel& vm, const BenchmarkState& state);
-        void RenderProfilerTable(BenchmarkViewModel& vm, const std::vector<UiProfilerGroup>& timings, float totalTime, const BenchmarkState& state);
+        void RenderProfilerTable(BenchmarkViewModel& vm, const std::vector<UiProfilerGroup>& timings, float totalTime, const BenchmarkState& state, float mainContentBottomY);
         void RenderGroupRow(const UiProfilerGroup& group, float globalTotalTime, const BenchmarkState& state);
         void RenderProgressBar(float timeMs, float referenceTimeMs, const BenchmarkState& state);
         void ImGuiColorBasedOnTime(float timeMs, const BenchmarkState& state);
