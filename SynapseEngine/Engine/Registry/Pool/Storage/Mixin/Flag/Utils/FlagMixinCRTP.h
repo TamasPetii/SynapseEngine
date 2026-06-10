@@ -48,6 +48,11 @@ namespace Syn
         }
 
         template<uint32_t... Bits>
+        SYN_INLINE void SetStateBitSet() const {
+            static_cast<const Derived*>(this)->template SetStateBitSetImpl<Bits...>();
+        }
+
+        template<uint32_t... Bits>
         SYN_INLINE bool IsStateBitSet() const {
             return static_cast<const Derived*>(this)->template IsStateBitSetImpl<Bits...>();
         }

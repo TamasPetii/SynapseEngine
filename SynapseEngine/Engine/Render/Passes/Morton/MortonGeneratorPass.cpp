@@ -25,7 +25,20 @@ namespace Syn {
 
     bool MortonGeneratorPass::ShouldExecute(const RenderContext& context) const {
         auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
-        return context.scene->GetSettings()->enableMortonBvhCulling && pool && !pool->GetStorage().GetStaticEntities().empty();
+        bool isEnabled = context.scene->GetSettings()->enableMortonBvhCulling;
+
+        if (!isEnabled || !pool || pool->GetStorage().GetStaticEntities().empty()) {
+            _wasEnabled = false;
+            return false;
+        }
+
+        if (!_wasEnabled) {
+            _needsRebuild = true;
+        }
+        _wasEnabled = true;
+
+        bool hasDirty = !pool->GetStorage().GetDirtyStatics().empty();
+        return hasDirty || _needsRebuild || (_countdown > 0);
     }
 
     void MortonGeneratorPass::PushConstants(const RenderContext& context) {
@@ -38,6 +51,18 @@ namespace Syn {
     }
 
     void MortonGeneratorPass::Dispatch(const RenderContext& context) {
+        auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
+        bool hasDirty = !pool->GetStorage().GetDirtyStatics().empty();
+
+        if (hasDirty || _needsRebuild) {
+            _countdown = context.framesInFlight;
+            _needsRebuild = false;
+        }
+
+        if (_countdown > 0) {
+            _countdown--;
+        }
+
         if (_staticCount == 0) return;
 
         auto scene = context.scene;

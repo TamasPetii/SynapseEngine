@@ -15,5 +15,8 @@ namespace Syn {
         void Dispatch(const RenderContext& context) override;
     private:
         uint32_t _staticCount = 0;
+        mutable bool _wasEnabled = false;
+        mutable bool _needsRebuild = true;
+        uint32_t _countdown = 0;
     };
 }

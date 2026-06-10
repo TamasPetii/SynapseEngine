@@ -19,5 +19,8 @@ namespace Syn {
     private:
         uint32_t _staticCount = 0;
         VrdxSorter _radixSorter = VK_NULL_HANDLE;
+        mutable bool _wasEnabled = false;
+        mutable bool _needsRebuild = true;
+        uint32_t _countdown = 0;
     };
 }

@@ -62,6 +62,9 @@ namespace Syn
         SYN_INLINE void ResetBit(EntityID entity);
 
         template<uint32_t... Bits>
+        SYN_INLINE void SetStateBitSet() const;
+
+        template<uint32_t... Bits>
         SYN_INLINE bool IsStateBitSet() const;
 
         template<uint32_t... Bits>
@@ -212,6 +215,14 @@ namespace Syn
     SYN_INLINE size_t Pool<T, StoragePolicy, MappingPolicy>::Size() const
     {
         return _storage.Size();
+    }
+
+    template<typename T, typename StoragePolicy, typename MappingPolicy>
+        requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
+    template<uint32_t... Bits>
+    SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::SetStateBitSet() const
+    {
+        _storage.template SetStateBitSet<Bits...>();
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>

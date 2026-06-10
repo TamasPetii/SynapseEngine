@@ -69,6 +69,12 @@ namespace Syn
         }
 
         template<uint32_t... Bits>
+        SYN_INLINE void SetStateBitSetImpl() const {
+            constexpr uint32_t mask = ((1 << Bits) | ...);
+            _state.fetch_or(mask, std::memory_order_relaxed);
+        }
+
+        template<uint32_t... Bits>
         SYN_INLINE bool IsStateBitSetImpl() const {
             constexpr uint32_t mask = ((1 << Bits) | ...);
             return (_state.load(std::memory_order_relaxed) & mask) == mask;
@@ -96,6 +102,6 @@ namespace Syn
         }
     protected:
         std::vector<uint32_t> _flags;
-        std::atomic<uint32_t> _state{ 0 };
+        mutable std::atomic<uint32_t> _state{ 0 };
     };
 }

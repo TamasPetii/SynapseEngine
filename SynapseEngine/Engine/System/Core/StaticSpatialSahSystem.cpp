@@ -38,17 +38,19 @@ namespace Syn
             return;
         }
 
-        /*
-        if (!scene->GetSettings()->enableStaticBvhCulling) {
+        bool isEnabled = scene->GetSettings()->enableStaticBvhCulling;
+        bool toggledOn = (isEnabled && !_wasEnabled);
+        _wasEnabled = isEnabled;
+
+        if (!isEnabled) {
             return;
         }
-        */
 
 		auto animPool = registry->GetPool<AnimationComponent>();
         auto chunkGroup = &scene->GetSceneDrawData()->Chunks;
 
         bool hasDirtyStatics = !transformPool->GetStorage().GetDirtyStatics().empty();
-        if (!hasDirtyStatics && !chunkGroup->chunks.empty()) {
+        if (!hasDirtyStatics && !toggledOn && !chunkGroup->chunks.empty()) {
             return;
         }
 
@@ -72,7 +74,7 @@ namespace Syn
         chunkGroup->chunkCounter.store(0, std::memory_order_relaxed);
         uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
         this->SetFramesToUpload(framesInFlight);
-
+        
         auto gatherTaskOpt = this->ForEachIndex(size_t(0), staticEntities.size(), size_t(1), subflow, "GatherSpatialItems",
             [this, staticEntities, transformPool, modelPool, modelSnapshot, animPool, animSnapshot](size_t i) {
                 EntityID entity = staticEntities[i];
@@ -153,6 +155,8 @@ namespace Syn
             transformPool->RebuildStaticIndices(std::span<const EntityID>(sortedEntities));
 
             transformPool->IncrementMappingVersion();
+
+            transformPool->SetStateBitSet<FORCE_STATIC_GPU_UPLOAD>();
             });
 
         if (gatherTaskOpt) {
