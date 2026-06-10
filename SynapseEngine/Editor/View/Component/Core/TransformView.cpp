@@ -2,6 +2,7 @@
 #include "Editor/Manager/EditorIcons.h"
 #include "Editor/Widgets/CardWidget.h"
 #include "Editor/Widgets/Vector3Widget.h"
+#include "Editor/Widgets/PropertyGrid.h"
 #include <imgui.h>
 
 namespace Syn {
@@ -15,21 +16,30 @@ namespace Syn {
             bool changed = false;
             bool deactivated = false;
 
-            changed = Syn::UI::DrawVec3Control("Position", tState.position, 0.0f, deactivated);
-            if (changed || deactivated) {
-                vm.Dispatch(SetPositionIntent{ tState.position, !deactivated });
-            }
+            if (Syn::UI::BeginPropertyGrid("TransformGrid")) {
 
-            changed = Syn::UI::DrawVec3Control("Rotation", tState.rotation, 0.0f, deactivated);
-            if (changed || deactivated) {
-                vm.Dispatch(SetRotationIntent{ tState.rotation, !deactivated });
-            }
+                Syn::UI::BeginProperty("Position");
+                changed = Syn::UI::DrawVec3Control("##Pos", tState.position, 0.0f, deactivated);
+                if (changed || deactivated) {
+                    vm.Dispatch(SetPositionIntent{ tState.position, !deactivated });
+                }
 
-            changed = Syn::UI::DrawVec3Control("Scale", tState.scale, 1.0f, deactivated);
-            if (changed || deactivated) {
-                vm.Dispatch(SetScaleIntent{ tState.scale, !deactivated });
+                Syn::UI::BeginProperty("Rotation");
+                changed = Syn::UI::DrawVec3Control("##Rot", tState.rotation, 0.0f, deactivated);
+                if (changed || deactivated) {
+                    vm.Dispatch(SetRotationIntent{ tState.rotation, !deactivated });
+                }
+
+                Syn::UI::BeginProperty("Scale");
+                changed = Syn::UI::DrawVec3Control("##Scale", tState.scale, 1.0f, deactivated);
+                if (changed || deactivated) {
+                    vm.Dispatch(SetScaleIntent{ tState.scale, !deactivated });
+                }
+
+                Syn::UI::EndPropertyGrid();
             }
         }
+
         Syn::UI::EndCard();
     }
 }

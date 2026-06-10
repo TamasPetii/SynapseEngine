@@ -2,6 +2,7 @@
 #include "Editor/Manager/EditorIcons.h"
 #include "Editor/Widgets/CardWidget.h"
 #include "Editor/Manager/EditorIcons.h"
+#include "Editor/Widgets/PropertyGrid.h"
 #include <imgui.h>
 
 namespace Syn {
@@ -13,35 +14,36 @@ namespace Syn {
 
             TagState tagState = vm.GetState();
 
-            ImGui::TextDisabled("Entity ID: %d", _entityId);
-            ImGui::Spacing();
+            if (Syn::UI::BeginPropertyGrid("TagPropsGrid")) {
 
-            bool isEnabled = tagState.isEnabled;
-            if (ImGui::Checkbox("##EntityActive", &isEnabled)) {
-                vm.Dispatch(ToggleEntityIntent{ isEnabled });
-            }
-            ImGui::SameLine();
+                Syn::UI::BeginProperty("Entity ID");
+                ImGui::TextDisabled("%d", _entityId);
 
-            char nameBuffer[256];
-            strncpy(nameBuffer, tagState.name.c_str(), sizeof(nameBuffer));
-            nameBuffer[sizeof(nameBuffer) - 1] = '\0';
-            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-            if (ImGui::InputTextWithHint("##EntityName", "Entity Name", nameBuffer, IM_ARRAYSIZE(nameBuffer))) {
-                vm.Dispatch(SetEntityNameIntent{ std::string(nameBuffer) });
-            }
+                bool isEnabled = tagState.isEnabled;
+                if (Syn::UI::PropertyCheckbox("Is Active", isEnabled)) {
+                    vm.Dispatch(ToggleEntityIntent{ isEnabled });
+                }
 
-            ImGui::AlignTextToFramePadding();
-            ImGui::Text("Tag");
-            ImGui::SameLine(48.0f);
+                Syn::UI::BeginProperty("Name");
+                char nameBuffer[256];
+                strncpy(nameBuffer, tagState.name.c_str(), sizeof(nameBuffer));
+                nameBuffer[sizeof(nameBuffer) - 1] = '\0';
+                if (ImGui::InputTextWithHint("##EntityName", "Entity Name", nameBuffer, IM_ARRAYSIZE(nameBuffer))) {
+                    vm.Dispatch(SetEntityNameIntent{ std::string(nameBuffer) });
+                }
 
-            char tagBuffer[256];
-            strncpy(tagBuffer, tagState.tag.c_str(), sizeof(tagBuffer));
-            tagBuffer[sizeof(tagBuffer) - 1] = '\0';
-            ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x);
-            if (ImGui::InputTextWithHint("##EntityTag", "Untagged", tagBuffer, IM_ARRAYSIZE(tagBuffer))) {
-                vm.Dispatch(SetEntityTagIntent{ std::string(tagBuffer) });
+                Syn::UI::BeginProperty("Tag");
+                char tagBuffer[256];
+                strncpy(tagBuffer, tagState.tag.c_str(), sizeof(tagBuffer));
+                tagBuffer[sizeof(tagBuffer) - 1] = '\0';
+                if (ImGui::InputTextWithHint("##EntityTag", "Untagged", tagBuffer, IM_ARRAYSIZE(tagBuffer))) {
+                    vm.Dispatch(SetEntityTagIntent{ std::string(tagBuffer) });
+                }
+
+                Syn::UI::EndPropertyGrid();
             }
         }
+
         Syn::UI::EndCard();
     }
 }
