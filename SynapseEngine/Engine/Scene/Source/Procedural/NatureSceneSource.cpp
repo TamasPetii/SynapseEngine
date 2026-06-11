@@ -21,6 +21,7 @@
 #include "Engine/Component/Physics/CapsuleColliderComponent.h"
 #include "Engine/Component/Physics/RigidBodyComponent.h"
 #include "Engine/Logger/SynLog.h"
+#include "Engine/Utils/PathUtils.h"
 
 #include <random>
 #include <fstream>
@@ -41,7 +42,9 @@ namespace Syn
         auto materialManager = ServiceLocator::GetMaterialManager();
 
         json config;
-        std::ifstream configFile("Engine/Scene/Source/Procedural/nature_config.json");
+        std::string path = PathUtils::GetAbsolutePathString("Engine/Scene/Source/Procedural/nature_config.json");
+        std::ifstream configFile(path);
+
         if (configFile.is_open())
         {
             try {

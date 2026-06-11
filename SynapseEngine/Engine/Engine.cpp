@@ -118,7 +118,7 @@ namespace Syn
 		_inputManager = std::make_unique<InputManager>();
 		ServiceLocator::ProvideInputManager(_inputManager.get());
 
-		InitFrameContext(2);
+		InitFrameContext(1);
 		InitLogger();
 		InitVulkan(params);
 		InitTaskExecutor();
@@ -319,9 +319,11 @@ namespace Syn
 			return std::make_unique<Scene>(frames, std::make_unique<TestSceneSource>());
 			});
 
+		/*
 		_sceneManager->RegisterScene("NatureLevel", [frames]() {
 			return std::make_unique<Scene>(frames, std::make_unique<NatureSceneSource>());
 			});
+		*/
 
 		_sceneManager->LoadScene("TestLevel");
 	}

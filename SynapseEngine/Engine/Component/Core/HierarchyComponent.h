@@ -13,6 +13,6 @@ namespace Syn
         EntityID prevSibling = NULL_ENTITY;
 
         uint32_t depthLevel = 0;
-        uint32_t topoIndex = 0xFFFFFFFF;
+        uint32_t topoIndex = NULL_INDEX;
     };
 }

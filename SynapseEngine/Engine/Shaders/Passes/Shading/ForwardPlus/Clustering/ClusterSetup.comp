@@ -39,10 +39,17 @@ void main() {
         float near = GET_CAMERA_NEAR(camera);
         float far  = GET_CAMERA_FAR(camera);
 
+        /*
+        //DO NOT USE THIS: TILE VISIBLILITY PROBLEMS!!! NEED PIXEL PERFECT SAMPLING
         vec2 halfTile = vec2(float(ctx.tileSize) * 0.5);
         vec2 uv = (vec2(tileId * ctx.tileSize) + halfTile) / vec2(ctx.screenWidth, ctx.screenHeight);
         vec2 hizValue = textureLod(hizDepth, uv, ctx.hizMipLevel).xy;
-        
+        */
+
+        ivec2 mipSize = textureSize(hizDepth, int(ctx.hizMipLevel));
+        ivec2 texelCoord = min(tileId, mipSize - 1);
+        vec2 hizValue = texelFetch(hizDepth, texelCoord, int(ctx.hizMipLevel)).xy;
+
         float zMax = near + hizValue.x * (far - near);
         float zMin = near + hizValue.y * (far - near);
 
