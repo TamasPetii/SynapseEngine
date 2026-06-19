@@ -11,12 +11,11 @@ namespace Syn
     enum class SYN_API BufferStrategy {
         MappedOnly,
         GpuOnly,
-        Hybrid_Dynamic,
-        Hybrid_Static
+        Hybrid
     };
 
     struct SYN_API RenderBufferConfig {
-        BufferStrategy strategy = BufferStrategy::Hybrid_Dynamic;
+        BufferStrategy strategy = BufferStrategy::Hybrid;
         uint32_t frames = 0;
         uint32_t elementSize = 0;
         VkBufferUsageFlags usage = 0;
@@ -38,16 +37,24 @@ namespace Syn
         void Initialize(const RenderBufferConfig& config);
         bool UpdateCapacity(uint32_t frameIndex, uint64_t requiredElements);
         bool UpdateCapacityAll(uint64_t requiredElements);
+
+        void RecordSync(VkCommandBuffer cmd, uint32_t frameIndex);
         void RecordSync(VkCommandBuffer cmd, uint32_t frameIndex, size_t copySizeElements);
 
         Vk::Buffer* GetMapped(uint32_t frameIndex) const;
         Vk::Buffer* GetGpu(uint32_t frameIndex) const;
 
-        VkBuffer GetHandle(uint32_t frameIndex, bool useGpuDriven) const;
-        VkDeviceAddress GetAddress(uint32_t frameIndex, bool useGpuDriven) const;
+        VkBuffer GetHandle(uint32_t frameIndex) const;
+        VkDeviceAddress GetAddress(uint32_t frameIndex) const;
+
+        void Write(uint32_t frameIndex, const void* data, size_t size, size_t offset = 0);
+        void MarkDirty(uint32_t frameIndex);
     private:
         RenderBufferConfig _config;
         std::vector<std::unique_ptr<WindowedBuffer>> _mapped;
         std::vector<std::unique_ptr<WindowedBuffer>> _gpu;
+
+        std::vector<uint32_t> _mappedVersions;
+        std::vector<uint32_t> _gpuVersions;
     };
 }

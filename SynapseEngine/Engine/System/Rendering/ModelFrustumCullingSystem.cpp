@@ -57,7 +57,7 @@ namespace Syn
             drawData->Debug.modelSphereCmdTemplate.instanceCount = 0;
             });
 
-        if (settings->enableGeometryGpuCulling) {
+        if (settings->culling.geometryCullingDevice == CullingDeviceType::GPU) {
             return;
         }
 
@@ -130,7 +130,7 @@ namespace Syn
             GpuMeshCollider globalWorldCollider = MeshUtils::TransformCollider(globalLocalCollider, transform);
 
             IntersectionType visibility = chunkVisibility;
-            if (visibility == IntersectionType::Intersect && settings->enableFrustumCulling && settings->enableModelFrustumCulling) {
+            if (visibility == IntersectionType::Intersect && settings->culling.enableFrustumCulling && settings->culling.enableModelFrustumCulling) {
                 visibility = CollisionTester::IsInFrustumIntersectionType(globalWorldCollider, frustum);
                 if (visibility == IntersectionType::Outside) return;
             }
@@ -161,7 +161,7 @@ namespace Syn
 
                     worldCollider = MeshUtils::TransformCollider(localCollider, transform);
 
-                    if (!parentFullyInside && settings->enableFrustumCulling && settings->enableMeshFrustumCulling)
+                    if (!parentFullyInside && settings->culling.enableFrustumCulling && settings->culling.enableMeshFrustumCulling)
                         isVisible = CollisionTester::IsInFrustum(worldCollider, frustum);
                 }
                 else {
@@ -196,7 +196,6 @@ namespace Syn
 
                         if (meshAlloc.isMeshletPipeline == MeshDrawBlueprint::PIPELINE_MESHLET)
                         {
-                            // Minden számláló 16 uint32_t-re (64 bájtra) van egymástól!
                             std::atomic_ref<uint32_t> countRef(drawData->Models.paddedMeshletCounts[indirectIdx * 16]);
                             slotIndex = countRef.fetch_add(1, std::memory_order_relaxed);
                         }
@@ -231,7 +230,7 @@ namespace Syn
         std::optional<tf::Task> staticTask;
         auto chunkGroup = &drawData->Chunks;
 
-        if (settings->enableStaticBvhCulling && chunkGroup->chunkCounter.load(std::memory_order_relaxed) > 0)
+        if (settings->culling.spotLightShadowSpatialAcceleration == SpatialAccelerationType::StaticBvh && chunkGroup->chunkCounter.load(std::memory_order_relaxed) > 0)
         {
             chunkGroup->visibleChunkCount.store(0, std::memory_order_relaxed);
 
@@ -243,7 +242,7 @@ namespace Syn
 
                     IntersectionType visibility = IntersectionType::Intersect;
 
-                    if (settings->enableFrustumCulling && settings->enableChunkFrustumCulling)
+                    if (settings->culling.enableFrustumCulling && settings->culling.enableChunkFrustumCulling)
                     {
                         visibility = CollisionTester::TestAabbFrustumIntersectionType(chunk.minBounds, chunk.maxBounds, cameraComp.frustum);
                         if (visibility == IntersectionType::Outside) return;
@@ -282,9 +281,9 @@ namespace Syn
             auto drawData = scene->GetSceneDrawData();
             auto settings = scene->GetSettings();
 
-            bool needsCommandUpload = (!settings->enableGeometryGpuCulling) || (drawData->syncFramesRemaining.load(std::memory_order_relaxed) > 0);
+            bool needsCommandUpload = (settings->culling.geometryCullingDevice == CullingDeviceType::CPU) || (drawData->syncFramesRemaining.load(std::memory_order_relaxed) > 0);
 
-            if (!settings->enableGeometryGpuCulling)
+            if (settings->culling.geometryCullingDevice == CullingDeviceType::CPU)
             {
                 for (uint32_t i = 0; i < drawData->Models.activeTraditionalCount; ++i) {
                     drawData->Models.traditionalCmds[i].instanceCount = drawData->Models.paddedTraditionalCounts[i * 16];
@@ -296,54 +295,38 @@ namespace Syn
 
                 size_t instanceSize = drawData->Models.totalAllocatedInstances * sizeof(uint32_t);
                 if (instanceSize > 0) {
-                    if (auto mappedInstance = drawData->Models.instanceBuffer.GetMapped(frameIndex)) {
-                        mappedInstance->Write(drawData->Models.instances.Data(), instanceSize, 0);
-                    }
+                    drawData->Models.instanceBuffer.Write(frameIndex, drawData->Models.instances.Data(), instanceSize, 0);
                 }
 
-                if (settings->enableStaticBvhCulling)
+                if (settings->culling.spotLightShadowSpatialAcceleration == SpatialAccelerationType::StaticBvh)
                 {
                     uint32_t visibleCount = drawData->Chunks.visibleChunkCount.load(std::memory_order_relaxed);
+                    VkDrawIndirectCommand cmd = drawData->Chunks.wireframeCmdTemplate;
+                    cmd.instanceCount = visibleCount;
 
-                    if (auto mappedCmd = drawData->Chunks.chunkIndirectDispatchBuffer.GetMapped(frameIndex)) {
-                        VkDrawIndirectCommand cmd = drawData->Chunks.wireframeCmdTemplate;
-                        cmd.instanceCount = visibleCount;
-                        mappedCmd->Write(&cmd, sizeof(VkDrawIndirectCommand), 0);
-                    }
-
-                    if (visibleCount > 0) {
-                        if (auto mappedVis = drawData->Chunks.chunkVisibilityBuffer.GetMapped(frameIndex)) {
-                            mappedVis->Write(drawData->Chunks.visibleChunkIds.data(), visibleCount * sizeof(uint32_t), 0);
-                        }
-                    }
+                    drawData->Chunks.chunkIndirectDispatchBuffer.Write(frameIndex, &cmd, sizeof(VkDrawIndirectCommand), 0);
+                    drawData->Chunks.chunkVisibilityBuffer.Write(frameIndex, drawData->Chunks.visibleChunkIds.data(), visibleCount * sizeof(uint32_t), 0);
                 }
             }
 
             if (needsCommandUpload)
             {
-                if (auto mappedIndirect = drawData->Models.indirectBuffer.GetMapped(frameIndex)) {
-                    size_t tradSize = drawData->Models.activeTraditionalCount * sizeof(VkDrawIndirectCommand);
-                    if (tradSize > 0) {
-                        mappedIndirect->Write(drawData->Models.traditionalCmds.Data(), tradSize, 0);
-                    }
+                size_t tradSize = drawData->Models.activeTraditionalCount * sizeof(VkDrawIndirectCommand);
+                if (tradSize > 0) {
+                    drawData->Models.indirectBuffer.Write(frameIndex, drawData->Models.traditionalCmds.Data(), tradSize, 0);
+                }
 
-                    size_t meshletSize = drawData->Models.activeMeshletCount * sizeof(VkDrawMeshTasksIndirectCommandEXT);
-                    if (meshletSize > 0) {
-                        size_t meshletGpuOffset = tradSize;
-                        mappedIndirect->Write(drawData->Models.meshletCmds.Data(), meshletSize, meshletGpuOffset);
-                    }
+                size_t meshletSize = drawData->Models.activeMeshletCount * sizeof(VkDrawMeshTasksIndirectCommandEXT);
+                if (meshletSize > 0) {
+                    size_t meshletGpuOffset = tradSize;
+                    drawData->Models.indirectBuffer.Write(frameIndex, drawData->Models.meshletCmds.Data(), meshletSize, meshletGpuOffset);
                 }
 
 				auto totalCommandCount = drawData->Models.activeTraditionalCount + drawData->Models.activeMeshletCount;
                 if (totalCommandCount > 0)
                 {
-                    if (auto mappedAabb = drawData->Debug.modelAabbIndirectBuffer.GetMapped(frameIndex)) {
-                        mappedAabb->Write(drawData->Debug.modelAabbCmds.Data(), totalCommandCount * sizeof(VkDrawIndirectCommand), 0);
-                    }
-
-                    if (auto mappedSphere = drawData->Debug.modelSphereIndirectBuffer.GetMapped(frameIndex)) {
-                        mappedSphere->Write(drawData->Debug.modelSphereCmds.Data(), totalCommandCount * sizeof(VkDrawIndirectCommand), 0);
-                    }
+                    drawData->Debug.modelAabbIndirectBuffer.Write(frameIndex, drawData->Debug.modelAabbCmds.Data(), totalCommandCount * sizeof(VkDrawIndirectCommand), 0);
+                    drawData->Debug.modelSphereIndirectBuffer.Write(frameIndex, drawData->Debug.modelSphereCmds.Data(), totalCommandCount * sizeof(VkDrawIndirectCommand), 0);
                 }
             }
             });

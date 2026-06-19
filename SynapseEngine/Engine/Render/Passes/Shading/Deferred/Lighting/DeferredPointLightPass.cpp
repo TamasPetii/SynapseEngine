@@ -21,9 +21,9 @@ namespace Syn {
 
     bool DeferredPointLightPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->pipelineType == PipelineType::Deferred 
-            && context.scene->GetSettings()->enableDeferredPointLights
-            && !context.scene->GetSettings()->enableDebugVisibility;
+        return context.scene->GetSettings()->lighting.pipelineType == PipelineType::Deferred
+            && context.scene->GetSettings()->lighting.enableDeferredPointLights
+            && !context.scene->GetSettings()->debug.enableDebugVisibility;
     }
 
     void DeferredPointLightPass::Initialize() {
@@ -99,7 +99,7 @@ namespace Syn {
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
 
         Vk::PushConstant<DeferredPointLightPC> pc;
-        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
         pc->indexBufferAddr = cube->hardwareBuffers.indices->GetDeviceAddress();
         pc->vertexPositionBufferAddr = cube->hardwareBuffers.vertexPositions->GetDeviceAddress();
         pc.Push(context.cmd, _shaderProgram->GetLayout());
@@ -147,9 +147,8 @@ namespace Syn {
     void DeferredPointLightPass::Draw(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
 		auto fIdx = context.frameIndex;
-		auto isGpu = context.scene->GetSettings()->enableGeometryGpuCulling;
 
-		auto indirectBuffer = drawData->PointLights.indirectBuffer.GetHandle(fIdx, isGpu);
+		auto indirectBuffer = drawData->PointLights.indirectBuffer.GetHandle(fIdx);
 
         vkCmdDrawIndirect(
             context.cmd,

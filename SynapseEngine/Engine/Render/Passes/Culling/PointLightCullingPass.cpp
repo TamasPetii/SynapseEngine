@@ -20,7 +20,7 @@ namespace Syn {
 
     bool PointLightCullingPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enablePointLightGpuCulling;
+        return context.scene->GetSettings()->culling.pointLightCullingDevice == CullingDeviceType::GPU;
     }
 
     void PointLightCullingPass::Initialize() {
@@ -47,10 +47,9 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::PushConstant<PointLightCullingPC> pc;
-		pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+		pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -81,13 +80,12 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_totalLightsToTest, ComputeGroupSize::Buffer32D);
         vkCmdDispatch(context.cmd, groupCountX, 1, 1);
 
         Vk::BufferBarrierInfo cmdBarrier{};
-        cmdBarrier.buffer = drawData->PointLights.indirectBuffer.GetHandle(fIdx, isGpu);
+        cmdBarrier.buffer = drawData->PointLights.indirectBuffer.GetHandle(fIdx);
         cmdBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         cmdBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         cmdBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_TRANSFER_BIT;

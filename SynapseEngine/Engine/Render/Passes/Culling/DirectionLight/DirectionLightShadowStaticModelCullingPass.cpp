@@ -19,8 +19,12 @@ namespace Syn {
     bool DirectionLightShadowStaticModelCullingPass::ShouldExecute(const RenderContext& context) const
     {
         auto pool = context.scene->GetRegistry()->GetPool<DirectionLightComponent>();
-        return context.scene->GetSettings()->enableGeometryGpuCulling
-            && context.scene->GetSettings()->enableStaticBvhCulling && pool && pool->Size() > 0;
+        auto settings = context.scene->GetSettings();
+
+        return settings->culling.directionLightShadowCullingDevice == CullingDeviceType::GPU 
+            && settings->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::StaticBvh
+            && pool && pool->Size() > 0;
+
     }
 
     void DirectionLightShadowStaticModelCullingPass::Initialize() {
@@ -41,10 +45,9 @@ namespace Syn {
         if (activeChunks == 0) return;
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::PushConstant<DirectionLightShadowCullingPC> pc;
-        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -74,13 +77,12 @@ namespace Syn {
         if (drawData->Chunks.chunkCounter.load(std::memory_order_relaxed) == 0) return;
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-        VkBuffer dispatchBuf = drawData->DirectionLightShadow.staticChunkDispatchBuffer.GetHandle(fIdx, isGpu);
+        VkBuffer dispatchBuf = drawData->DirectionLightShadow.staticChunkDispatchBuffer.GetHandle(fIdx);
         vkCmdDispatchIndirect(context.cmd, dispatchBuf, 0);
 
         Vk::BufferBarrierInfo countBarrier{};
-        countBarrier.buffer = drawData->DirectionLightShadow.modelDispatchBuffer.GetHandle(fIdx, isGpu);
+        countBarrier.buffer = drawData->DirectionLightShadow.modelDispatchBuffer.GetHandle(fIdx);
         countBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         countBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         countBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;

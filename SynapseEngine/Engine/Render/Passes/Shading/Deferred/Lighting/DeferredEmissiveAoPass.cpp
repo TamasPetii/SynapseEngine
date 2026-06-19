@@ -16,9 +16,9 @@ namespace Syn {
 
     bool DeferredEmissiveAoPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->pipelineType == PipelineType::Deferred 
-            && context.scene->GetSettings()->enableDeferredEmissiveAo
-            && !context.scene->GetSettings()->enableDebugVisibility;
+        return context.scene->GetSettings()->lighting.pipelineType == PipelineType::Deferred
+            && context.scene->GetSettings()->lighting.enableDeferredEmissiveAo
+            && !context.scene->GetSettings()->debug.enableDebugVisibility;
     }
 
     void DeferredEmissiveAoPass::Initialize() {
@@ -89,7 +89,7 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
 
         Vk::PushConstant<DeferredEmissiveAoPC> pc;
-        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 

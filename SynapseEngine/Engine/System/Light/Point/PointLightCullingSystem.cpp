@@ -1,4 +1,4 @@
-#include "PointLightFrustumCullingSystem.h"
+#include "PointLightCullingSystem.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Component/Light/Point/PointLightComponent.h"
 #include "Engine/Component/Core/CameraComponent.h"
@@ -11,20 +11,20 @@
 
 namespace Syn
 {
-    std::vector<TypeID> PointLightFrustumCullingSystem::GetReadDependencies() const {
+    std::vector<TypeID> PointLightCullingSystem::GetReadDependencies() const {
         return { 
             TypeInfo<PointLightSystem>::ID,
             TypeInfo<CameraSystem>::ID
         };
     }
 
-    std::vector<TypeID> PointLightFrustumCullingSystem::GetWriteDependencies() const {
+    std::vector<TypeID> PointLightCullingSystem::GetWriteDependencies() const {
         return { 
-            TypeInfo<PointLightFrustumCullingSystem>::ID
+            TypeInfo<PointLightCullingSystem>::ID
         };
     }
 
-    void PointLightFrustumCullingSystem::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
+    void PointLightCullingSystem::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
     {
 		auto settings = scene->GetSettings();
         auto drawData = scene->GetSceneDrawData();
@@ -45,7 +45,7 @@ namespace Syn
             }
             });
 
-        if (settings->enablePointLightGpuCulling) {
+        if (settings->culling.pointLightCullingDevice == CullingDeviceType::GPU) {
             return;
         }
 
@@ -56,7 +56,7 @@ namespace Syn
 
             bool visibility = true;
 
-            if (settings->enableFrustumCulling && settings->enablePointLightFrustumCulling)
+            if (settings->culling.enableFrustumCulling && settings->culling.enablePointLightFrustumCulling)
                 visibility = CollisionTester::TestSphereFrustum(lightComp.position, lightComp.radius, cameraComp.frustum);
 
             if (visibility)
@@ -86,7 +86,7 @@ namespace Syn
         if (statTask) initTask.precede(*statTask);
     }
 
-    void PointLightFrustumCullingSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
+    void PointLightCullingSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
     {
         this->EmplaceTask(subflow, SystemPhaseNames::UploadGPU, [this, scene, frameIndex]() {
             auto bufferManager = scene->GetComponentBufferManager();
@@ -94,16 +94,14 @@ namespace Syn
             auto settings = scene->GetSettings();
             uint32_t count = drawData->PointLights.cmdTemplate.instanceCount;
 
-            if (!settings->enablePointLightGpuCulling) {
+            if (settings->culling.pointLightCullingDevice == CullingDeviceType::CPU) {
                 auto instanceBufferView = bufferManager->GetComponentBuffer(BufferNames::PointLightVisibleData, frameIndex);
                 if (count > 0 && instanceBufferView.buffer) {
                     instanceBufferView.buffer->Write(drawData->PointLights.instances.Data(), count * sizeof(uint32_t), 0);
                 }
             }
 
-            if (auto mapped = drawData->PointLights.indirectBuffer.GetMapped(frameIndex)) {
-                mapped->Write(&drawData->PointLights.cmdTemplate, sizeof(VkDrawIndirectCommand), 0);
-            }
+            drawData->PointLights.indirectBuffer.Write(frameIndex, &drawData->PointLights.cmdTemplate, sizeof(VkDrawIndirectCommand), 0);
             });
     }
 }

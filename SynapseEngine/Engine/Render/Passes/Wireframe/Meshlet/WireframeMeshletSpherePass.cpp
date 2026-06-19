@@ -17,7 +17,7 @@ namespace Syn {
 #include "Engine/Shaders/Includes/PushConstants/WireframeMeshletPC.glsl"
 
     bool WireframeMeshletSpherePass::ShouldExecute(const RenderContext& context) const {
-        return context.scene->GetSettings()->enableWireframeMeshletSphere;
+        return context.scene->GetSettings()->debug.enableWireframeMeshletSphere;
     }
 
     void WireframeMeshletSpherePass::Initialize() {
@@ -94,12 +94,12 @@ namespace Syn {
 
         auto modelManager = ServiceLocator::GetModelManager();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
+        
 
         auto shape = modelManager->GetResource(MeshSourceNames::ProxyIcoSphere);
 
         Vk::PushConstant<WireframeMeshletPC> pc{};
-        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
         pc->vertexPositionBufferAddr = shape->hardwareBuffers.vertexPositions->GetDeviceAddress();
         pc->indexBufferAddr = shape->hardwareBuffers.indices->GetDeviceAddress();
         pc->baseDescriptorOffset = drawData->Models.activeTraditionalCount;
@@ -135,8 +135,8 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         if (drawData->Models.activeMeshletCount == 0) return;
 
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
-        auto indirectBuffer = drawData->Models.indirectBuffer.GetHandle(context.frameIndex, isGpu);
+        
+        auto indirectBuffer = drawData->Models.indirectBuffer.GetHandle(context.frameIndex);
 
         VkDeviceSize traditionalBytes = drawData->Models.activeTraditionalCount * sizeof(VkDrawIndirectCommand);
 

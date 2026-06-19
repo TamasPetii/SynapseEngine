@@ -16,7 +16,7 @@ namespace Syn {
 
     bool WireframeMeshAabbPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableWireframeMeshAabb;
+        return context.scene->GetSettings()->debug.enableWireframeMeshAabb;
     }
 
     void WireframeMeshAabbPass::Initialize() {
@@ -95,10 +95,9 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
 
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
-		auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::PushConstant<WireframeMeshPC> pc{};
-		pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+		pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
 		pc->vertexPositionBufferAddr = cube->hardwareBuffers.vertexPositions->GetDeviceAddress();
 		pc->indexBufferAddr = cube->hardwareBuffers.indices->GetDeviceAddress();
         pc->shapeType = WIREFRAME_MESH_SHAPE_TYPE_CUBE;
@@ -109,12 +108,11 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t totalCommands = drawData->Models.activeTraditionalCount + drawData->Models.activeMeshletCount;
-		auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 		auto fIdx = context.frameIndex;
 
         if (totalCommands == 0) return;
 
-        auto indirectBuffer = drawData->Debug.modelAabbIndirectBuffer.GetHandle(fIdx, isGpu);
+        auto indirectBuffer = drawData->Debug.modelAabbIndirectBuffer.GetHandle(fIdx);
 
         vkCmdDrawIndirect(
             context.cmd,

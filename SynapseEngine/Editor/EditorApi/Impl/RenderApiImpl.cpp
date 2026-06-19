@@ -71,7 +71,7 @@ namespace Syn {
         auto scene = _sceneManager->GetActiveScene();
         if (!scene) return glm::mat4(1.0f);
         auto settings = scene->GetSettings();
-        EntityID cameraEntity = (settings && settings->useDebugCamera) ? scene->GetDebugCameraEntity() : scene->GetSceneCameraEntity();
+        EntityID cameraEntity = (settings && settings->debug.useDebugCamera) ? scene->GetDebugCameraEntity() : scene->GetSceneCameraEntity();
         
         return EditorApiUtils::ReadComponent<CameraComponent>(_sceneManager, cameraEntity, [](const auto& c) { return c.view; }, glm::mat4(1.0f));
     }
@@ -80,7 +80,7 @@ namespace Syn {
         auto scene = _sceneManager->GetActiveScene();
         if (!scene) return glm::mat4(1.0f);
         auto settings = scene->GetSettings();
-        EntityID cameraEntity = (settings && settings->useDebugCamera) ? scene->GetDebugCameraEntity() : scene->GetSceneCameraEntity();
+        EntityID cameraEntity = (settings && settings->debug.useDebugCamera) ? scene->GetDebugCameraEntity() : scene->GetSceneCameraEntity();
         
         return EditorApiUtils::ReadComponent<CameraComponent>(_sceneManager, cameraEntity, [](const auto& c) { return c.proj; }, glm::mat4(1.0f));
     }

@@ -34,7 +34,11 @@ namespace Syn {
 
     bool MortonRadixSortPass::ShouldExecute(const RenderContext& context) const {
         auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
-        bool isEnabled = context.scene->GetSettings()->enableMortonBvhCulling;
+
+        bool isEnabled = context.scene->GetSettings()->culling.geometrySpatialAcceleration == SpatialAccelerationType::MortonBvh
+            || context.scene->GetSettings()->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh
+            || context.scene->GetSettings()->culling.pointLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh
+            || context.scene->GetSettings()->culling.spotLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh;
 
         if (!isEnabled || !pool || pool->GetStorage().GetStaticEntities().empty()) {
             _wasEnabled = false;
@@ -77,7 +81,7 @@ namespace Syn {
 
         VkBuffer keysHandle = compManager->GetComponentBuffer(BufferNames::MortonKeysData, fIdx).buffer->Handle();
         VkBuffer valuesHandle = compManager->GetComponentBuffer(BufferNames::MortonValuesData, fIdx).buffer->Handle();
-        VkBuffer tempHandle = tempBuffer.GetHandle(context.frameIndex, true);
+        VkBuffer tempHandle = tempBuffer.GetHandle(context.frameIndex);
 
         vrdxCmdSortKeyValue(
             context.cmd,

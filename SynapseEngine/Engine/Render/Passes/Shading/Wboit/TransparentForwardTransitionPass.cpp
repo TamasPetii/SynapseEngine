@@ -4,7 +4,7 @@
 namespace Syn {
     bool TransparentForwardTransitionPass::ShouldExecute(const RenderContext& context) const
     {
-        return !context.scene->GetSettings()->enableDebugVisibility;
+        return !context.scene->GetSettings()->debug.enableDebugVisibility;
     }
 
     void TransparentForwardTransitionPass::PrepareFrame(const RenderContext& context) {

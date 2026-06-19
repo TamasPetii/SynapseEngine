@@ -24,8 +24,8 @@ namespace Syn {
 
     bool TraditionalOpaqueForwardPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->pipelineType == PipelineType::ForwardPlus 
-            && !context.scene->GetSettings()->enableDebugVisibility;;
+        return context.scene->GetSettings()->lighting.pipelineType == PipelineType::ForwardPlus
+            && !context.scene->GetSettings()->debug.enableDebugVisibility;;
     }
 
     TraditionalOpaqueForwardPass::TraditionalOpaqueForwardPass(MaterialRenderType renderType)
@@ -128,7 +128,7 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
 
         Vk::PushConstant<TraditionalMeshletPassPC> pc;
-        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
         pc->baseDescriptorOffset = drawData->Models.traditionalCmdOffsets[_renderType];
         pc->materialRenderType = static_cast<uint32_t>(_renderType);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
@@ -163,10 +163,10 @@ namespace Syn {
     {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
+        
 
-        auto indirectBuffer = drawData->Models.indirectBuffer.GetHandle(context.frameIndex, isGpu);
-        auto countBuffer = drawData->Models.drawCountBuffer.GetHandle(context.frameIndex, isGpu);
+        auto indirectBuffer = drawData->Models.indirectBuffer.GetHandle(context.frameIndex);
+        auto countBuffer = drawData->Models.drawCountBuffer.GetHandle(context.frameIndex);
 
         uint32_t commandOffset = drawData->Models.traditionalCmdOffsets[_renderType];
         uint32_t maxCommandCount = drawData->Models.traditionalCmdCounts[_renderType];

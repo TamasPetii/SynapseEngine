@@ -30,17 +30,16 @@ namespace Syn {
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::PushConstant<ClusterLightCountPC> pc;
-		pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, true);    
+		pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);    
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void ClusterPointLightCountPass::Dispatch(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
 
-        VkBuffer indirectBuffer = drawData->ForwardPlus.dispatchArgsBuffer.GetHandle(context.frameIndex, true);
+        VkBuffer indirectBuffer = drawData->ForwardPlus.dispatchArgsBuffer.GetHandle(context.frameIndex);
         vkCmdDispatchIndirect(context.cmd, indirectBuffer, offsetof(ForwardPlusDispatchArgs, pointSlowCount));
     }
 }

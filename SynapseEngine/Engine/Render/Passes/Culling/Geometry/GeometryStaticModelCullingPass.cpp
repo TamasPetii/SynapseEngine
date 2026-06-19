@@ -10,6 +10,7 @@
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
+#include "Engine/Component/Core/TransformComponent.h"
 
 namespace Syn {
 
@@ -17,8 +18,11 @@ namespace Syn {
 
     bool GeometryStaticModelCullingPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableGeometryGpuCulling
-            && context.scene->GetSettings()->enableStaticBvhCulling;
+        auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
+
+        return context.scene->GetSettings()->culling.geometryCullingDevice == CullingDeviceType::GPU
+            && context.scene->GetSettings()->culling.geometrySpatialAcceleration == SpatialAccelerationType::StaticBvh
+            && pool && !pool->GetStorage().GetStaticEntities().empty();
     }
 
     void GeometryStaticModelCullingPass::Initialize() {
@@ -39,10 +43,9 @@ namespace Syn {
         if (activeChunks == 0) return;
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::PushConstant<ModelMeshCullingPC> pc;
-        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -73,13 +76,12 @@ namespace Syn {
         if (drawData->Chunks.chunkCounter.load(std::memory_order_relaxed) == 0) return;
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-        VkBuffer dispatchBuf = drawData->Chunks.chunkIndirectDispatchBuffer.GetHandle(fIdx, isGpu);
+        VkBuffer dispatchBuf = drawData->Chunks.chunkIndirectDispatchBuffer.GetHandle(fIdx);
         vkCmdDispatchIndirect(context.cmd, dispatchBuf, 0);
 
         Vk::BufferBarrierInfo countBarrier{};
-        countBarrier.buffer = drawData->Models.computeCountBuffer.GetHandle(fIdx, isGpu);
+        countBarrier.buffer = drawData->Models.computeCountBuffer.GetHandle(fIdx);
         countBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         countBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         countBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;

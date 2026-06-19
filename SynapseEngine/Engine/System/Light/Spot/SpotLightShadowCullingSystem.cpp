@@ -92,7 +92,7 @@ namespace Syn
             }
             });
 
-        if (settings->enableGeometryGpuCulling) 
+        if (settings->culling.spotLightCullingDevice == CullingDeviceType::GPU || settings->culling.spotLightShadowCullingDevice == CullingDeviceType::GPU)
             return;
 
         auto registry = scene->GetRegistry();
@@ -196,7 +196,7 @@ namespace Syn
 
                     worldCollider = MeshUtils::TransformCollider(localCollider, data.transform);
 
-                    if (!parentFullyInside && settings->enableFrustumCulling && settings->enableMeshFrustumCulling) {
+                    if (!parentFullyInside && settings->culling.enableFrustumCulling && settings->culling.enableMeshFrustumCulling) {
                         isVisible = CollisionTester::TestConeSphere(
                             cone.pos, cone.dir, cone.range, cone.cosAngle, cone.sinAngle,
                             worldCollider.center, worldCollider.radius
@@ -267,7 +267,7 @@ namespace Syn
 
             IntersectionType visibility = chunkVisibility;
 
-            if (visibility == IntersectionType::Intersect && settings->enableFrustumCulling && settings->enableModelFrustumCulling) 
+            if (visibility == IntersectionType::Intersect && settings->culling.enableFrustumCulling && settings->culling.enableModelFrustumCulling) 
             {
                 visibility = CollisionTester::TestConeSphereIntersectionType(
                     cone.pos, cone.dir, cone.range, cone.cosAngle, cone.sinAngle,
@@ -302,7 +302,7 @@ namespace Syn
         uint32_t activeChunks = chunkGroup->chunkCounter.load(std::memory_order_relaxed);
 
         // BVH Chunk Culling Execution
-        if (settings->enableStaticBvhCulling && activeChunks > 0)
+        if (settings->culling.spotLightShadowSpatialAcceleration == SpatialAccelerationType::StaticBvh && activeChunks > 0)
         {
             if (drawData->SpotLightShadow.visibleChunkIds.Size() < activeChunks) {
                 drawData->SpotLightShadow.visibleChunkIds.Resize(activeChunks);
@@ -328,7 +328,7 @@ namespace Syn
                         const auto& lightComp = spotLightPool->Get(lightEntity);
 
                         IntersectionType visibility = IntersectionType::Intersect;
-                        if (settings->enableFrustumCulling && settings->enableChunkFrustumCulling) {
+                        if (settings->culling.enableFrustumCulling && settings->culling.enableChunkFrustumCulling) {
                             float outerRad = glm::radians(lightComp.outerAngle);
                             visibility = CollisionTester::TestConeSphereIntersectionType(
                                 lightComp.position, lightComp.direction, lightComp.range,
@@ -441,43 +441,36 @@ namespace Syn
             auto drawData = scene->GetSceneDrawData();
             auto settings = scene->GetSettings();
 
-            bool needsCommandUpload = (!settings->enableGeometryGpuCulling) || (drawData->syncFramesRemaining.load(std::memory_order_relaxed) > 0);
+            bool needsCommandUpload = (settings->culling.spotLightCullingDevice == CullingDeviceType::CPU && settings->culling.spotLightShadowCullingDevice == CullingDeviceType::CPU) || (drawData->syncFramesRemaining.load(std::memory_order_relaxed) > 0);
 
             auto& mainGroup = drawData->Models;
             auto& shadowGroup = drawData->SpotLightShadow;
 
-            if (!settings->enableGeometryGpuCulling)
+            if (settings->culling.spotLightCullingDevice == CullingDeviceType::CPU && settings->culling.spotLightShadowCullingDevice == CullingDeviceType::CPU)
             {
                 uint32_t appendedCount = shadowGroup.appendedInstanceCount.load(std::memory_order_relaxed);
 
                 if (appendedCount > 0) {
-                    if (auto mappedInstance = shadowGroup.instanceBuffer.GetMapped(frameIndex)) {
-                        mappedInstance->Write(shadowGroup.instances.Data(), appendedCount * sizeof(SpotShadowInstancePayload), 0);
-                    }
+                    shadowGroup.instanceBuffer.Write(frameIndex, shadowGroup.instances.Data(), appendedCount * sizeof(SpotShadowInstancePayload), 0);
                 }
 
                 uint32_t commandCount = shadowGroup.totalCommandCount;
                 if (commandCount > 0) {
-                    if (auto mappedDesc = shadowGroup.descriptorBuffer.GetMapped(frameIndex)) {
-                        mappedDesc->Write(shadowGroup.shadowDescriptors.Data(), commandCount * sizeof(MeshDrawDescriptor), 0);
-                    }
+                    shadowGroup.descriptorBuffer.Write(frameIndex, shadowGroup.shadowDescriptors.Data(), commandCount * sizeof(MeshDrawDescriptor), 0);
                 }
             }
 
             if (needsCommandUpload)
             {
-                if (auto mappedIndirect = shadowGroup.indirectBuffer.GetMapped(frameIndex)) {
+                size_t tradSize = mainGroup.activeTraditionalCount * sizeof(VkDrawIndirectCommand);
+                if (tradSize > 0) {
+                    shadowGroup.indirectBuffer.Write(frameIndex, shadowGroup.traditionalCmds.Data(), tradSize, 0);
+                }
 
-                    size_t tradSize = mainGroup.activeTraditionalCount * sizeof(VkDrawIndirectCommand);
-                    if (tradSize > 0) {
-                        mappedIndirect->Write(shadowGroup.traditionalCmds.Data(), tradSize, 0);
-                    }
-
-                    size_t meshletSize = mainGroup.activeMeshletCount * sizeof(VkDrawMeshTasksIndirectCommandEXT);
-                    if (meshletSize > 0) {
-                        size_t meshletGpuOffset = tradSize;
-                        mappedIndirect->Write(shadowGroup.meshletCmds.Data(), meshletSize, meshletGpuOffset);
-                    }
+                size_t meshletSize = mainGroup.activeMeshletCount * sizeof(VkDrawMeshTasksIndirectCommandEXT);
+                if (meshletSize > 0) {
+                    size_t meshletGpuOffset = tradSize;
+                    shadowGroup.indirectBuffer.Write(frameIndex, shadowGroup.meshletCmds.Data(), meshletSize, meshletGpuOffset);
                 }
             }
             });

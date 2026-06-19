@@ -17,7 +17,7 @@ namespace Syn {
 
     bool SsaoBlurPass::ShouldExecute(const RenderContext& context) const {
         auto settings = context.scene->GetSettings();
-        return settings->enableSsao && !settings->useDebugCamera;
+        return settings->postProcess.enableSsao && !settings->debug.useDebugCamera;
     }
 
     void SsaoBlurPass::Initialize() {
@@ -52,7 +52,7 @@ namespace Syn {
     void SsaoBlurPass::PushConstants(const RenderContext& context)
     {
         Vk::PushConstant<SsaoBlurPC> pc{};
-        pc->frameGlobalContextBufferAddr = context.scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex, true);
+        pc->frameGlobalContextBufferAddr = context.scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 

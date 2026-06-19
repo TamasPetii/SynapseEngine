@@ -17,9 +17,9 @@ namespace Syn {
 
     bool DeferredDirectionLightPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->pipelineType == PipelineType::Deferred 
-            && context.scene->GetSettings()->enableDeferredDirectionalLights
-            && !context.scene->GetSettings()->enableDebugVisibility;
+        return context.scene->GetSettings()->lighting.pipelineType == PipelineType::Deferred
+            && context.scene->GetSettings()->lighting.enableDeferredDirectionalLights
+            && !context.scene->GetSettings()->debug.enableDebugVisibility;
     }
 
     void DeferredDirectionLightPass::Initialize() {
@@ -85,7 +85,7 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
 
         Vk::PushConstant<DeferredDirectionLightPC> pc;
-		pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+		pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -131,9 +131,8 @@ namespace Syn {
     void DeferredDirectionLightPass::Draw(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
 		auto fIdx = context.frameIndex;
-		auto isGpu = context.scene->GetSettings()->enableGeometryGpuCulling;
 
-		auto indirectBuffer = drawData->DirectionLights.indirectBuffer.GetHandle(fIdx, isGpu);
+		auto indirectBuffer = drawData->DirectionLights.indirectBuffer.GetHandle(fIdx);
 
         vkCmdDrawIndirect(
             context.cmd,

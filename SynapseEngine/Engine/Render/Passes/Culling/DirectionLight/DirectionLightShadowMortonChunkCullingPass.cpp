@@ -31,7 +31,11 @@ namespace Syn {
     bool DirectionLightShadowMortonChunkCullingPass::ShouldExecute(const RenderContext& context) const {
         auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
         auto lightPool = context.scene->GetRegistry()->GetPool<DirectionLightComponent>();
-        return context.scene->GetSettings()->enableMortonBvhCulling && pool && !pool->GetStorage().GetStaticEntities().empty() && lightPool && lightPool->Size() > 0;
+        auto settings = context.scene->GetSettings();
+
+        return settings->culling.directionLightShadowCullingDevice == CullingDeviceType::GPU 
+            && settings->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh 
+            && pool && !pool->GetStorage().GetStaticEntities().empty() && lightPool && lightPool->Size() > 0;
     }
 
     void DirectionLightShadowMortonChunkCullingPass::PushConstants(const RenderContext& context) {
@@ -40,7 +44,7 @@ namespace Syn {
         _activeLights = static_cast<uint32_t>(scene->GetRegistry()->GetPool<DirectionLightComponent>()->Size());
 
         Vk::PushConstant<DirectionLightShadowCullingPC> pc;
-        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex, scene->GetSettings()->enableGeometryGpuCulling);
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -68,7 +72,6 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         //Todo: Direction Light Culling and indirect dispatch
 
@@ -84,7 +87,7 @@ namespace Syn {
         Vk::BufferUtils::InsertBarrier(context.cmd, visibleIndexBarrier);
 
         Vk::BufferBarrierInfo dispatchBarrier{};
-        dispatchBarrier.buffer = drawData->DirectionLightShadow.mortonChunkDispatchBuffer.GetHandle(fIdx, isGpu);
+        dispatchBarrier.buffer = drawData->DirectionLightShadow.mortonChunkDispatchBuffer.GetHandle(fIdx);
         dispatchBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         dispatchBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         dispatchBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;

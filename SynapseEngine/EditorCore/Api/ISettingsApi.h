@@ -1,5 +1,5 @@
 #pragma once
-#include "Engine/Scene/SceneSettings.h"
+#include "Engine/Scene/Settings/SceneSettings.h"
 
 namespace Syn {
     class ISettingsApi {

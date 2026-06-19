@@ -435,25 +435,23 @@ namespace Syn
             }
 
             size_t totalDescSize = totalDescriptors * sizeof(MeshDrawDescriptor);
-            if (auto mappedDesc = drawData->Models.descriptorBuffer.GetMapped(frameIndex); mappedDesc && totalDescSize > 0)
-                mappedDesc->Write(drawData->Models.descriptors.Data(), totalDescSize, 0);
+            if (totalDescSize > 0)
+                drawData->Models.descriptorBuffer.Write(frameIndex, drawData->Models.descriptors.Data(), totalDescSize, 0);
 
             size_t modelAllocSize = drawData->Models.modelAllocations.Size() * sizeof(ModelAllocationInfo);
-            if (auto mappedModelAlloc = drawData->Models.modelAllocBuffer.GetMapped(frameIndex); mappedModelAlloc && modelAllocSize > 0)
-                mappedModelAlloc->Write(drawData->Models.modelAllocations.Data(), modelAllocSize, 0);
+            if (modelAllocSize > 0)
+                drawData->Models.modelAllocBuffer.Write(frameIndex, drawData->Models.modelAllocations.Data(), modelAllocSize, 0);
 
             size_t meshAllocSize = drawData->Models.activeDescriptorCount * sizeof(MeshAllocationInfo);
-            if (auto mappedMeshAlloc = drawData->Models.meshAllocBuffer.GetMapped(frameIndex); mappedMeshAlloc && meshAllocSize > 0)
-                mappedMeshAlloc->Write(drawData->Models.meshAllocations.Data(), meshAllocSize, 0);
+            if (meshAllocSize > 0)
+                drawData->Models.meshAllocBuffer.Write(frameIndex, drawData->Models.meshAllocations.Data(), meshAllocSize, 0);
 
-            if (auto mappedDrawCount = drawData->Models.drawCountBuffer.GetMapped(frameIndex)) {
-                uint32_t counts[8] = { 0 };
-                for (int i = 0; i < MaterialRenderType::Count; ++i) {
-                    counts[i] = drawData->Models.traditionalCmdCounts[i];
-                    counts[MaterialRenderType::Count + i] = drawData->Models.meshletCmdCounts[i];
-                }
-                mappedDrawCount->Write(counts, sizeof(counts), 0);
+            uint32_t counts[8] = { 0 };
+            for (int i = 0; i < MaterialRenderType::Count; ++i) {
+                counts[i] = drawData->Models.traditionalCmdCounts[i];
+                counts[MaterialRenderType::Count + i] = drawData->Models.meshletCmdCounts[i];
             }
+            drawData->Models.drawCountBuffer.Write(frameIndex, counts, sizeof(counts), 0);
             });
     }
 

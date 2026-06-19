@@ -50,7 +50,7 @@ namespace Syn
             }
             });
 
-        if (settings->enableSpotLightGpuCulling) {
+        if (settings->culling.spotLightCullingDevice == CullingDeviceType::GPU) {
             return;
         }
 
@@ -61,7 +61,7 @@ namespace Syn
 
             bool visibility = true;
 
-            if (settings->enableFrustumCulling && settings->enableSpotLightFrustumCulling)
+            if (settings->culling.enableFrustumCulling && settings->culling.enableSpotLightFrustumCulling)
                 visibility = CollisionTester::IsInFrustum(lightComp.sphereCollider.center, lightComp.sphereCollider.radius, lightComp.aabbCollider.min, lightComp.aabbCollider.max, cameraComp.frustum);
 
             if (visibility)
@@ -110,7 +110,7 @@ namespace Syn
             uint32_t count = drawData->SpotLights.cmdTemplate.instanceCount;
             uint32_t shadowCount = drawData->SpotLightShadow.visibleLightCount;
 
-            if (!settings->enableSpotLightGpuCulling) {
+            if (settings->culling.spotLightCullingDevice == CullingDeviceType::CPU) {
                 auto instanceBufferView = bufferManager->GetComponentBuffer(BufferNames::SpotLightVisibleData, frameIndex);
                 if (count > 0 && instanceBufferView.buffer) {
                     instanceBufferView.buffer->Write(drawData->SpotLights.instances.Data(), count * sizeof(uint32_t), 0);
@@ -122,9 +122,7 @@ namespace Syn
                 }
             }
 
-            if (auto mapped = drawData->SpotLights.indirectBuffer.GetMapped(frameIndex)) {
-                mapped->Write(&drawData->SpotLights.cmdTemplate, sizeof(VkDrawIndirectCommand), 0);
-            }
+            drawData->SpotLights.indirectBuffer.Write(frameIndex , &drawData->SpotLights.cmdTemplate, sizeof(VkDrawIndirectCommand), 0);
             });
     }
 }

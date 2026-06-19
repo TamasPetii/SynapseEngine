@@ -5,10 +5,10 @@
 
 namespace Syn
 {
-    class SYN_API PointLightFrustumCullingSystem : public ISystem
+    class SYN_API PointLightCullingSystem : public ISystem
     {
     public:
-        std::string GetName() const override { return "PointLightFrustumCullingSystem"; }
+        std::string GetName() const override { return "PointLightCullingSystem"; }
         std::string GetGroup() const override { return SystemGroupNames::PointLightSystems; }
 
         std::vector<TypeID> GetReadDependencies() const override;

@@ -13,7 +13,8 @@ namespace Syn {
 
     bool DirectionLightShadowCullingCommandResetPass::ShouldExecute(const RenderContext& context) const {
         auto pool = context.scene->GetRegistry()->GetPool<DirectionLightComponent>();
-        return context.scene->GetSettings()->enableGeometryGpuCulling && pool && pool->Size() > 0;
+        return context.scene->GetSettings()->culling.directionLightShadowCullingDevice == CullingDeviceType::GPU 
+            && pool && pool->Size() > 0;
     }
 
     void DirectionLightShadowCullingCommandResetPass::Initialize() {
@@ -32,34 +33,33 @@ namespace Syn {
         auto drawData = context.scene->GetSceneDrawData();
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         _totalCommands = drawData->Models.activeTraditionalCount + drawData->Models.activeMeshletCount;
 
         Vk::PushConstant<CullingCommandResetPC> pc;
-        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void DirectionLightShadowCullingCommandResetPass::Dispatch(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
-        bool isGpu = context.scene->GetSettings()->enableGeometryGpuCulling;
+
         uint32_t fIdx = context.frameIndex;
 
         uint32_t dispatchCount = std::max(1u, ComputeGroupSize::CalculateDispatchCount(_totalCommands, ComputeGroupSize::Buffer256D));
         vkCmdDispatch(context.cmd, dispatchCount, 1, 1);
 
         Vk::BufferBarrierInfo indirectBarrier{};
-        indirectBarrier.buffer = drawData->DirectionLightShadow.indirectBuffer.GetHandle(fIdx, isGpu);
+        indirectBarrier.buffer = drawData->DirectionLightShadow.indirectBuffer.GetHandle(fIdx);
         indirectBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         indirectBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         indirectBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
         indirectBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT | VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT;
         Vk::BufferUtils::InsertBarrier(context.cmd, indirectBarrier);
 
-        VkBuffer modelBuf = drawData->DirectionLightShadow.modelDispatchBuffer.GetHandle(fIdx, isGpu);
-        VkBuffer staticChunkBuf = drawData->DirectionLightShadow.staticChunkDispatchBuffer.GetHandle(fIdx, isGpu);
-        VkBuffer mortonChunkBuf = drawData->DirectionLightShadow.mortonChunkDispatchBuffer.GetHandle(fIdx, isGpu);
+        VkBuffer modelBuf = drawData->DirectionLightShadow.modelDispatchBuffer.GetHandle(fIdx);
+        VkBuffer staticChunkBuf = drawData->DirectionLightShadow.staticChunkDispatchBuffer.GetHandle(fIdx);
+        VkBuffer mortonChunkBuf = drawData->DirectionLightShadow.mortonChunkDispatchBuffer.GetHandle(fIdx);
 
         std::vector<Vk::BufferUpdateInfo> updates = {
             { modelBuf, 0, sizeof(VkDispatchIndirectCommand), &drawData->DirectionLightShadow.dispatchCmdTemplate },

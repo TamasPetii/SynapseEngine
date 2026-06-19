@@ -22,18 +22,16 @@ namespace Syn
         VkBufferUsageFlags storageUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
         VkBufferUsageFlags indirectUsage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT |  VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
-        //Todo: Correct BufferStrategy
-
-        chunkDataBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(ChunkDataGPU), storageUsage });
+        chunkDataBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(ChunkDataGPU), storageUsage });
         chunkDataBuffer.UpdateCapacityAll(1);
 
-        chunkVisibilityBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(uint32_t), storageUsage });
+        chunkVisibilityBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(uint32_t), storageUsage });
         chunkVisibilityBuffer.UpdateCapacityAll(1);
 
         chunkAabbSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
         chunkAabbSingleCmdBuffer.UpdateCapacityAll(1);
 
-        chunkIndirectDispatchBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectUsage });
+        chunkIndirectDispatchBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(VkDispatchIndirectCommand), indirectUsage });
         chunkIndirectDispatchBuffer.UpdateCapacityAll(1);
 
         sceneAabbBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(SceneAABB), storageUsage });
@@ -55,13 +53,15 @@ namespace Syn
         mortonAabbSingleCmdBuffer.UpdateCapacityAll(1);
 
         for (uint32_t i = 0; i < frameCount; ++i) {
-            chunkAabbSingleCmdBuffer.GetMapped(i)->Write(&wireframeCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
-            mortonAabbSingleCmdBuffer.GetMapped(i)->Write(&wireframeCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
-            chunkIndirectDispatchBuffer.GetMapped(i)->Write(&dispatchCmdTemplate, sizeof(VkDispatchIndirectCommand), 0);
+            chunkAabbSingleCmdBuffer.Write(i, &wireframeCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            mortonAabbSingleCmdBuffer.Write(i, &wireframeCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            chunkIndirectDispatchBuffer.Write(i, &dispatchCmdTemplate, sizeof(VkDispatchIndirectCommand), 0);
         }
     }
 
     void ChunkDrawGroup::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) {
-        // Opcionális pipeline barrier szinkronizáció, ha a render graph igényli
+        chunkDataBuffer.RecordSync(cmd, frameIndex);
+        chunkVisibilityBuffer.RecordSync(cmd, frameIndex);
+        chunkIndirectDispatchBuffer.RecordSync(cmd, frameIndex);
     }
 }

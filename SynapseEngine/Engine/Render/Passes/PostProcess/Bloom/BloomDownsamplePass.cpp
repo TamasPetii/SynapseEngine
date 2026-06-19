@@ -18,8 +18,8 @@ namespace Syn {
 
     bool BloomDownsamplePass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableBloom 
-            && !context.scene->GetSettings()->enableDebugVisibility;;
+        return context.scene->GetSettings()->postProcess.enableBloom
+            && !context.scene->GetSettings()->debug.enableDebugVisibility;;
     }
 
     void BloomDownsamplePass::Initialize() {

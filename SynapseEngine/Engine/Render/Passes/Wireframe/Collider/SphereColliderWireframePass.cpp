@@ -18,7 +18,7 @@ namespace Syn {
 
     bool SphereColliderWireframePass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableSphereColliderWireframe;
+        return context.scene->GetSettings()->debug.enableSphereColliderWireframe;
     }
 
     void SphereColliderWireframePass::Initialize() {
@@ -92,7 +92,7 @@ namespace Syn {
 
         VkDrawIndirectCommand cmd = drawData->Debug.sphereColliderCmdTemplate;
         cmd.instanceCount = _activeColliderCount;
-        drawData->Debug.sphereColliderIndirectBuffer.GetMapped(fIdx)->Write(&cmd, sizeof(VkDrawIndirectCommand), 0);
+        drawData->Debug.sphereColliderIndirectBuffer.Write(fIdx, &cmd, sizeof(VkDrawIndirectCommand), 0);
     }
 
     void SphereColliderWireframePass::PushConstants(const RenderContext& context) {
@@ -106,7 +106,7 @@ namespace Syn {
         auto sphere = modelManager->GetResource(MeshSourceNames::Sphere);
 
         Vk::PushConstant<WireframeDebugPC> pc{};
-        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
         pc->vertexPositionBufferAddr = sphere->hardwareBuffers.vertexPositions->GetDeviceAddress();
         pc->indexBufferAddr = sphere->hardwareBuffers.indices->GetDeviceAddress();
         pc->shapeDrawType = WIREFRAME_DEBUG_SHAPE_TYPE_SPHERE_COLLIDER;
@@ -120,7 +120,7 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
 
-        auto indirectBuffer = drawData->Debug.sphereColliderIndirectBuffer.GetHandle(fIdx, false);
+        auto indirectBuffer = drawData->Debug.sphereColliderIndirectBuffer.GetHandle(fIdx);
         vkCmdDrawIndirect(context.cmd, indirectBuffer, 0, 1, sizeof(VkDrawIndirectCommand));
     }
 }

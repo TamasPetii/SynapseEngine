@@ -37,7 +37,7 @@
 #include "TestComponentsSchema.h"
 
 #include "Engine/Scene/Scene.h"
-#include "Engine/Scene/SceneSettings.h"
+#include "Engine/Scene/Settings/SceneSettings.h"
 #include "Engine/Serialization/Schema/Scene/SceneSchema.h"
 #include "Engine/Serialization/Schema/Scene/SceneSettingsSchema.h"
 #include "Engine/Serialization/Schema/Material/MaterialSchema.h"
@@ -259,11 +259,11 @@ TEST_F(SerializationTest, SceneSnapshot_AllFormats) {
     Scene originalScene(1, nullptr, false);
 
     SceneSettings* originalSettings = originalScene.GetSettings();
-    originalSettings->bloomThreshold = 3.14f;
-    originalSettings->enableBloom = false;
-    originalSettings->ambientStrength = 0.88f;
-    originalSettings->pipelineType = PipelineType::Deferred;
-    originalSettings->enableMeshletConeCulling = false;
+    originalSettings->postProcess.bloomThreshold = 3.14f;
+    originalSettings->postProcess.enableBloom = false;
+    originalSettings->lighting.ambientStrength = 0.88f;
+    originalSettings->lighting.pipelineType = PipelineType::Deferred;
+    originalSettings->culling.enableMeshletConeCulling = false;
 
     Registry* originalReg = originalScene.GetRegistry();
 
@@ -286,11 +286,11 @@ TEST_F(SerializationTest, SceneSnapshot_AllFormats) {
         EXPECT_TRUE(serializer->LoadFromFile(path, loadSnapshot)) << "Failed to load Scene from " << extension;
 
         SceneSettings* loadedSettings = loadedScene.GetSettings();
-        EXPECT_FLOAT_EQ(loadedSettings->bloomThreshold, 3.14f);
-        EXPECT_FALSE(loadedSettings->enableBloom);
-        EXPECT_FLOAT_EQ(loadedSettings->ambientStrength, 0.88f);
-        EXPECT_EQ(loadedSettings->pipelineType, PipelineType::Deferred);
-        EXPECT_FALSE(loadedSettings->enableMeshletConeCulling);
+        EXPECT_FLOAT_EQ(loadedSettings->postProcess.bloomThreshold, 3.14f);
+        EXPECT_FALSE(loadedSettings->postProcess.enableBloom);
+        EXPECT_FLOAT_EQ(loadedSettings->lighting.ambientStrength, 0.88f);
+        EXPECT_EQ(loadedSettings->lighting.pipelineType, PipelineType::Deferred);
+        EXPECT_FALSE(loadedSettings->culling.enableMeshletConeCulling);
 
         Registry* loadedReg = loadedScene.GetRegistry();
 

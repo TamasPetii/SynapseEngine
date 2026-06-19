@@ -92,11 +92,11 @@ namespace Syn {
         if (!scene) return;
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
+        
         auto drawData = scene->GetSceneDrawData();
 
         Vk::PushConstant<SpotLightShadowTraditionalMeshletPassPC> pc{};
-        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, true);
+        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
         pc->baseDescriptorOffset = drawData->Models.traditionalCmdOffsets[_renderType];
         pc->materialRenderType = static_cast<uint32_t>(_renderType);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
@@ -111,10 +111,10 @@ namespace Syn {
     {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
+        
 
-        auto indirectBuffer = drawData->SpotLightShadow.indirectBuffer.GetHandle(context.frameIndex, isGpu);
-        auto countBuffer = drawData->Models.drawCountBuffer.GetHandle(context.frameIndex, isGpu);
+        auto indirectBuffer = drawData->SpotLightShadow.indirectBuffer.GetHandle(context.frameIndex);
+        auto countBuffer = drawData->Models.drawCountBuffer.GetHandle(context.frameIndex);
 
         uint32_t commandOffset = drawData->Models.traditionalCmdOffsets[_renderType];
         uint32_t maxCommandCount = drawData->Models.traditionalCmdCounts[_renderType];

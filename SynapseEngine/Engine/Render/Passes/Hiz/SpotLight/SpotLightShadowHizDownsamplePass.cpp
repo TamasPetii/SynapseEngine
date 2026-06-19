@@ -20,10 +20,8 @@ namespace Syn {
 
     bool SpotLightShadowHizDownsamplePass::ShouldExecute(const RenderContext& context) const
     {
-        return true;
-
-        // auto pool = context.scene->GetRegistry()->GetPool<SpotLightComponent>();
-        // return context.scene->GetSettings()->enableGeometryGpuCulling && pool && pool->Size() > 0;
+        auto pool = context.scene->GetRegistry()->GetPool<SpotLightComponent>();
+        return pool && pool->Size() > 0;
     }
 
     void SpotLightShadowHizDownsamplePass::Initialize() {

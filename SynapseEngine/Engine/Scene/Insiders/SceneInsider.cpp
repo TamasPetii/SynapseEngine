@@ -1,7 +1,7 @@
 #include "SceneInsider.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Registry/Registry.h"
-#include "Engine/Scene/SceneSettings.h"
+#include "Engine/Scene/Settings/SceneSettings.h"
 
 namespace Syn
 {

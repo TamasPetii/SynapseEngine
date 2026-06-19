@@ -100,9 +100,7 @@ namespace Syn
                 visibleShadowBufferView.buffer->Write(drawData->DirectionLightShadow.visibleLights.Data(), count * sizeof(uint32_t), 0);
             }
 
-            if (auto mapped = drawData->DirectionLights.indirectBuffer.GetMapped(frameIndex)) {
-                mapped->Write(&drawData->DirectionLights.cmdTemplate, sizeof(VkDrawIndirectCommand), 0);
-            }
+            drawData->DirectionLights.indirectBuffer.Write(frameIndex , &drawData->DirectionLights.cmdTemplate, sizeof(VkDrawIndirectCommand), 0);
             });
     }
 }

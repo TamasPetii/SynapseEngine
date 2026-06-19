@@ -22,8 +22,8 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
 
         Vk::PushConstant<ClusterDispatchSetupPC> pc;
-        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, true);
-        pc->dispatchArgsBufferAddr = drawData->ForwardPlus.dispatchArgsBuffer.GetAddress(fIdx, true);
+        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
+        pc->dispatchArgsBufferAddr = drawData->ForwardPlus.dispatchArgsBuffer.GetAddress(fIdx);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -34,7 +34,7 @@ namespace Syn {
         vkCmdDispatch(context.cmd, 1, 1, 1);
 
         Vk::BufferBarrierInfo barrier{};
-        barrier.buffer = drawData->ForwardPlus.dispatchArgsBuffer.GetHandle(fIdx, true);
+        barrier.buffer = drawData->ForwardPlus.dispatchArgsBuffer.GetHandle(fIdx);
         barrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         barrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         barrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;

@@ -24,7 +24,7 @@ namespace Syn {
         if (!pool || pool->Size() == 0) 
             return false;
 
-        return context.scene->GetSettings()->enableBillboardCameras;
+        return context.scene->GetSettings()->debug.enableBillboardCameras;
     }
 
     void CameraBillboardPass::Initialize() {
@@ -130,7 +130,7 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
 
         Vk::PushConstant<BillboardPC> pc;
-        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
         pc->visibleEntitiesAddr = compManager->GetBufferAddr(BufferNames::CameraVisibleData, fIdx);
         pc->baseScale = 1.0f;
         pc.Push(context.cmd, _shaderProgram->GetLayout());

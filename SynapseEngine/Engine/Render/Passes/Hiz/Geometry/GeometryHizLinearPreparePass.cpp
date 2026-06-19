@@ -20,7 +20,7 @@ namespace Syn {
     bool GeometryHizLinearPreparePass::ShouldExecute(const RenderContext& context) const
     {
         auto settings = context.scene->GetSettings();
-        return !settings->useDebugCamera;
+        return !settings->debug.useDebugCamera;
     }
 
     void GeometryHizLinearPreparePass::Initialize() {
@@ -115,7 +115,7 @@ namespace Syn {
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, fIdx);
 
         Vk::PushConstant<HizLinearizeDepthPC> pc;
-		pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+		pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
         pc->outImageSize = glm::vec2(rtGroup->GetWidth(), rtGroup->GetHeight());    
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }

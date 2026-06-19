@@ -21,10 +21,8 @@ namespace Syn {
 
     bool SpotLightShadowHizCopyPass::ShouldExecute(const RenderContext& context) const
     {
-        return true;
-
-        // auto pool = context.scene->GetRegistry()->GetPool<SpotLightComponent>();
-        // return context.scene->GetSettings()->enableGeometryGpuCulling && pool && pool->Size() > 0;
+        auto pool = context.scene->GetRegistry()->GetPool<SpotLightComponent>();
+        return pool && pool->Size() > 0;
     }
 
     void SpotLightShadowHizCopyPass::Initialize() {
@@ -93,7 +91,7 @@ namespace Syn {
         auto fIdx = context.frameIndex;
 
         Vk::PushConstant<HizLinearizeDepthPC> pc;
-        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
         pc->outImageSize = glm::vec2(SPOT_SHADOW_ATLAS_SIZE, SPOT_SHADOW_ATLAS_SIZE);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }

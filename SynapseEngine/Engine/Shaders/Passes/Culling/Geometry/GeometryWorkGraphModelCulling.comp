@@ -37,7 +37,7 @@ void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
     // 1. Resolve dense index for non-static (dynamic/stream) entities
-    uint offset = ctx.staticTransformCount * ctx.enableStaticBvhCulling;
+    uint offset = ctx.staticTransformCount * ctx.enableGeometryBvhCulling;
     uint transformDenseIndex = gl_GlobalInvocationID.x + offset;
     uint transformCount = ctx.allTransformCount - offset;
 

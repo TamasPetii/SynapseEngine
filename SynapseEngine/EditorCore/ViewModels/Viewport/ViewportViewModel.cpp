@@ -37,8 +37,8 @@ namespace Syn {
 
         if (_settingsApi) {
             SceneSettings settings = _settingsApi->GetSceneSettings();
-            _state.enableDebugVisibility = settings.enableDebugVisibility;
-            _state.debugVisibilityMode = static_cast<uint32_t>(settings.debugVisibilityMode);
+            _state.enableDebugVisibility = settings.debug.enableDebugVisibility;
+            _state.debugVisibilityMode = static_cast<uint32_t>(settings.debug.debugVisibilityMode);
         }
     }
 
@@ -122,7 +122,7 @@ namespace Syn {
         _state.enableDebugVisibility = intent.enabled;
         if (_settingsApi) {
             SceneSettings settings = _settingsApi->GetSceneSettings();
-            settings.enableDebugVisibility = intent.enabled;
+            settings.debug.enableDebugVisibility = intent.enabled;
             _settingsApi->SetSceneSettings(settings);
         }
     }
@@ -131,7 +131,7 @@ namespace Syn {
         _state.debugVisibilityMode = intent.mode;
         if (_settingsApi) {
             SceneSettings settings = _settingsApi->GetSceneSettings();
-            settings.debugVisibilityMode = static_cast<DebugVisibilityMode>(intent.mode);
+            settings.debug.debugVisibilityMode = static_cast<DebugVisibilityMode>(intent.mode);
             _settingsApi->SetSceneSettings(settings);
         }
     }

@@ -16,8 +16,8 @@ namespace Syn {
 
     bool BloomCompositePass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableBloom 
-            && !context.scene->GetSettings()->enableDebugVisibility;
+        return context.scene->GetSettings()->postProcess.enableBloom  
+            && !context.scene->GetSettings()->debug.enableDebugVisibility;
     }
 
     void BloomCompositePass::Initialize() {
@@ -78,8 +78,8 @@ namespace Syn {
 
     void BloomCompositePass::PushConstants(const RenderContext& context) {
         Vk::PushConstant<BloomCompositePC> pc;
-        pc->exposure = context.scene->GetSettings()->bloomExposure;
-        pc->bloomStrength = context.scene->GetSettings()->bloomStrength;
+        pc->exposure = context.scene->GetSettings()->postProcess.bloomExposure;
+        pc->bloomStrength = context.scene->GetSettings()->postProcess.bloomStrength;
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 

@@ -15,13 +15,16 @@
 
 namespace Syn {
 
-#include "Engine/Shaders/Includes/PushConstants/DirectionLightShadowCullingPC.glsl"
+    #include "Engine/Shaders/Includes/PushConstants/DirectionLightShadowCullingPC.glsl"
 
     bool DirectionLightShadowStaticChunkCullingPass::ShouldExecute(const RenderContext& context) const
     {
         auto pool = context.scene->GetRegistry()->GetPool<DirectionLightComponent>();
-        return context.scene->GetSettings()->enableGeometryGpuCulling
-            && context.scene->GetSettings()->enableStaticBvhCulling && pool && pool->Size() > 0;
+        auto settings = context.scene->GetSettings();
+
+        return settings->culling.directionLightShadowCullingDevice == CullingDeviceType::GPU 
+            && settings->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::StaticBvh 
+            && pool && pool->Size() > 0;
     }
 
     void DirectionLightShadowStaticChunkCullingPass::Initialize() {
@@ -44,10 +47,9 @@ namespace Syn {
         if (_activeChunkCount == 0 || _activeLights == 0) return;
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::PushConstant<DirectionLightShadowCullingPC> pc;
-        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -75,7 +77,6 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         //Todo: Direction Light Culling and indirect dispatch
 
@@ -83,7 +84,7 @@ namespace Syn {
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_activeChunkCount, ComputeGroupSize::Buffer32D);
         vkCmdDispatch(context.cmd, groupCountX, _activeLights, CASCADES_PER_LIGHT);
 
-        VkBuffer dispatchBuf = drawData->DirectionLightShadow.staticChunkDispatchBuffer.GetHandle(fIdx, isGpu);
+        VkBuffer dispatchBuf = drawData->DirectionLightShadow.staticChunkDispatchBuffer.GetHandle(fIdx);
         Vk::BufferBarrierInfo cullBarrier{};
         cullBarrier.buffer = dispatchBuf;
         cullBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;

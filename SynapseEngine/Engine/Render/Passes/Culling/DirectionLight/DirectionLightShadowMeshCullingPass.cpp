@@ -24,7 +24,7 @@ namespace Syn {
     bool DirectionLightShadowMeshCullingPass::ShouldExecute(const RenderContext& context) const
     {
         auto pool = context.scene->GetRegistry()->GetPool<DirectionLightComponent>();
-        return context.scene->GetSettings()->enableGeometryGpuCulling && pool && pool->Size() > 0;
+        return context.scene->GetSettings()->culling.directionLightShadowCullingDevice == CullingDeviceType::GPU && pool && pool->Size() > 0;
     }
 
     void DirectionLightShadowMeshCullingPass::Initialize() {
@@ -52,10 +52,9 @@ namespace Syn {
 
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::PushConstant<DirectionLightShadowCullingPC> pc;
-        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -84,14 +83,13 @@ namespace Syn {
 
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         // Indirect dispatch directly from the dynamically populated model dispatch buffer
-        auto countBuffer = drawData->DirectionLightShadow.modelDispatchBuffer.GetHandle(fIdx, isGpu);
+        auto countBuffer = drawData->DirectionLightShadow.modelDispatchBuffer.GetHandle(fIdx);
         vkCmdDispatchIndirect(context.cmd, countBuffer, 0);
 
         Vk::BufferBarrierInfo drawCmdBarrier{};
-        drawCmdBarrier.buffer = drawData->DirectionLightShadow.indirectBuffer.GetHandle(fIdx, isGpu);
+        drawCmdBarrier.buffer = drawData->DirectionLightShadow.indirectBuffer.GetHandle(fIdx);
         drawCmdBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         drawCmdBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         drawCmdBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
@@ -99,7 +97,7 @@ namespace Syn {
         Vk::BufferUtils::InsertBarrier(context.cmd, drawCmdBarrier);
 
         Vk::BufferBarrierInfo instanceBarrier{};
-        instanceBarrier.buffer = drawData->DirectionLightShadow.instanceBuffer.GetHandle(fIdx, isGpu);
+        instanceBarrier.buffer = drawData->DirectionLightShadow.instanceBuffer.GetHandle(fIdx);
         instanceBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         instanceBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         instanceBarrier.dstStage = VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_EXT | VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_EXT;

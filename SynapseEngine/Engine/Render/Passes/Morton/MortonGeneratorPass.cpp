@@ -25,7 +25,11 @@ namespace Syn {
 
     bool MortonGeneratorPass::ShouldExecute(const RenderContext& context) const {
         auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
-        bool isEnabled = context.scene->GetSettings()->enableMortonBvhCulling;
+
+        bool isEnabled = context.scene->GetSettings()->culling.geometrySpatialAcceleration == SpatialAccelerationType::MortonBvh
+            || context.scene->GetSettings()->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh
+            || context.scene->GetSettings()->culling.pointLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh
+            || context.scene->GetSettings()->culling.spotLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh;
 
         if (!isEnabled || !pool || pool->GetStorage().GetStaticEntities().empty()) {
             _wasEnabled = false;
@@ -46,7 +50,7 @@ namespace Syn {
         _staticCount = static_cast<uint32_t>(scene->GetRegistry()->GetPool<TransformComponent>()->GetStorage().GetStaticEntities().size());
 
         Vk::PushConstant<ChunkBuilderPC> pc;
-        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex, scene->GetSettings()->enableGeometryGpuCulling);
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 

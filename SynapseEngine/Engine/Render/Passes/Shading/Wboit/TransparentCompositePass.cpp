@@ -7,7 +7,13 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/SamplerNames.h"
 
-namespace Syn {
+namespace Syn 
+{
+    bool TransparentCompositePass::ShouldExecute(const RenderContext& context) const
+    {
+        //Todo: Has transparent material?
+        return !context.scene->GetSettings()->debug.enableDebugVisibility;
+    }
 
     void TransparentCompositePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
@@ -47,11 +53,6 @@ namespace Syn {
             .colorAttachmentCount = 1,
             .renderArea = std::nullopt
         };
-    }
-
-    bool TransparentCompositePass::ShouldExecute(const RenderContext& context) const
-    {
-        return !context.scene->GetSettings()->enableDebugVisibility;
     }
 
     void TransparentCompositePass::PrepareFrame(const RenderContext& context) {

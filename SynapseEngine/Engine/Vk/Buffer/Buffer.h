@@ -36,17 +36,7 @@ namespace Syn::Vk {
         void Unmap();
 
         void Flush(VkDeviceSize offset = 0, VkDeviceSize size = VK_WHOLE_SIZE);
-
-        void Write(const void* data, size_t size, size_t offset = 0) {
-            uint8_t* ptr = static_cast<uint8_t*>(Map());
-            memcpy(ptr + offset, data, size);
-
-            if (!_isCoherent) {
-                Flush(offset, size);
-            }
-
-            Unmap();
-        }
+        void Write(const void* data, size_t size, size_t offset = 0);
     private:
         BufferConfig _config;
 

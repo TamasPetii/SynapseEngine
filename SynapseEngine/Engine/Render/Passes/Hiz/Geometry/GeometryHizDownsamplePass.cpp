@@ -19,7 +19,7 @@ namespace Syn {
     bool GeometryHizDownsamplePass::ShouldExecute(const RenderContext& context) const
     {
 		auto settings = context.scene->GetSettings();
-        return !settings->useDebugCamera;
+        return !settings->debug.useDebugCamera;
     }
 
     void GeometryHizDownsamplePass::Initialize() {

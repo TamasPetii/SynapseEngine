@@ -17,7 +17,7 @@ namespace Syn {
 
     bool PointLightSphereWireframePass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enablePointLightSphereWireframe;
+        return context.scene->GetSettings()->debug.enablePointLightSphereWireframe;
     }
 
     void PointLightSphereWireframePass::Initialize() {
@@ -83,11 +83,10 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-		auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::BufferCopyInfo copyRegion{};
-        copyRegion.srcBuffer = drawData->PointLights.indirectBuffer.GetHandle(fIdx, isGpu);
-        copyRegion.dstBuffer = drawData->PointLights.sphereSingleCmdBuffer.GetHandle(fIdx, isGpu);
+        copyRegion.srcBuffer = drawData->PointLights.indirectBuffer.GetHandle(fIdx);
+        copyRegion.dstBuffer = drawData->PointLights.sphereSingleCmdBuffer.GetHandle(fIdx);
         copyRegion.srcOffset = offsetof(VkDrawIndirectCommand, instanceCount);
         copyRegion.dstOffset = offsetof(VkDrawIndirectCommand, instanceCount);
         copyRegion.size = sizeof(uint32_t);
@@ -95,7 +94,7 @@ namespace Syn {
         Vk::BufferUtils::CopyBuffer(context.cmd, copyRegion);
 
         Vk::BufferBarrierInfo memBarrier{};
-        memBarrier.buffer = drawData->PointLights.sphereSingleCmdBuffer.GetHandle(fIdx, isGpu);
+        memBarrier.buffer = drawData->PointLights.sphereSingleCmdBuffer.GetHandle(fIdx);
         memBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
         memBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
         memBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
@@ -113,7 +112,7 @@ namespace Syn {
         auto sphere = modelManager->GetResource(MeshSourceNames::Sphere);
 
         Vk::PushConstant<WireframeDebugPC> pc{};
-		pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+		pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
         pc->vertexPositionBufferAddr = sphere->hardwareBuffers.vertexPositions->GetDeviceAddress();
 		pc->indexBufferAddr = sphere->hardwareBuffers.indices->GetDeviceAddress();
         pc->shapeDrawType = WIREFRAME_DEBUG_SHAPE_TYPE_POINT_LIGHT_SPHERE;
@@ -124,9 +123,8 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-		auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-		auto indirectBuffer = drawData->PointLights.sphereSingleCmdBuffer.GetHandle(fIdx, isGpu);
+		auto indirectBuffer = drawData->PointLights.sphereSingleCmdBuffer.GetHandle(fIdx);
 
         vkCmdDrawIndirect(
             context.cmd,

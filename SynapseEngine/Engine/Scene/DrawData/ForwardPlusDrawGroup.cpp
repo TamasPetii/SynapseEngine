@@ -7,8 +7,6 @@ namespace Syn
         VkBufferUsageFlags storageUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
         VkBufferUsageFlags indirectUsage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 
-        //16/32 tile and cluster struct size
-
         tileGridBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, 16, storageUsage, 3000, 6000 });
 		tileGridBuffer.UpdateCapacityAll(1); 
 

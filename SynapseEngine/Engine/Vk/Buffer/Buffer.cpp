@@ -51,4 +51,15 @@ namespace Syn::Vk {
 
         vmaFlushAllocation(_allocator, _allocation, offset, size);
     }
+
+    void Buffer::Write(const void* data, size_t size, size_t offset) {
+        uint8_t* ptr = static_cast<uint8_t*>(Map());
+        memcpy(ptr + offset, data, size);
+
+        if (!_isCoherent) {
+            Flush(offset, size);
+        }
+
+        Unmap();
+    }
 }

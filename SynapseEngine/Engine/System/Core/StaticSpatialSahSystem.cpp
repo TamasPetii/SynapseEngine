@@ -38,7 +38,11 @@ namespace Syn
             return;
         }
 
-        bool isEnabled = scene->GetSettings()->enableStaticBvhCulling;
+        bool isEnabled = scene->GetSettings()->culling.geometrySpatialAcceleration == SpatialAccelerationType::StaticBvh
+                      || scene->GetSettings()->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::StaticBvh
+                      || scene->GetSettings()->culling.spotLightShadowSpatialAcceleration == SpatialAccelerationType::StaticBvh
+                      || scene->GetSettings()->culling.pointLightShadowSpatialAcceleration == SpatialAccelerationType::StaticBvh;
+
         bool toggledOn = (isEnabled && !_wasEnabled);
         _wasEnabled = isEnabled;
 
@@ -168,8 +172,6 @@ namespace Syn
 
     void StaticSpatialSahSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
     {
-        //std::println("[StaticSpatialSah] OnUploadToGpu hívva (Frame: {})", frameIndex);
-
         auto chunkGroup = &scene->GetSceneDrawData()->Chunks;
 
         if (GetFramesToUpload() == 0 || chunkGroup->chunks.empty()) {
@@ -181,10 +183,7 @@ namespace Syn
 
             chunkGroup->chunkDataBuffer.UpdateCapacity(frameIndex, activeChunkCount);
             chunkGroup->chunkVisibilityBuffer.UpdateCapacity(frameIndex, activeChunkCount);
-
-            if (auto mappedData = chunkGroup->chunkDataBuffer.GetMapped(frameIndex)) {
-                mappedData->Write(chunkGroup->chunks.data(), activeChunkCount * sizeof(ChunkDataGPU), 0);
-            }
+            chunkGroup->chunkDataBuffer.Write(frameIndex, chunkGroup->chunks.data(), activeChunkCount * sizeof(ChunkDataGPU), 0);
 
             DecrementFramesToUpload();
 

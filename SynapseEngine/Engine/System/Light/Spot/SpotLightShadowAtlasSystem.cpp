@@ -175,9 +175,7 @@ namespace Syn
             auto drawData = scene->GetSceneDrawData();
             auto& shadowGroup = drawData->SpotLightShadow;
 
-            if (auto mapped = shadowGroup.gridLookupBuffer.GetMapped(frameIndex)) {
-                mapped->Write(shadowGroup.gridLookupData.Data(), sizeof(uint32_t) * SPOT_SHADOW_GRID_SIZE * SPOT_SHADOW_GRID_SIZE, 0);
-            }
+            shadowGroup.gridLookupBuffer.Write(frameIndex, shadowGroup.gridLookupData.Data(), sizeof(uint32_t) * SPOT_SHADOW_GRID_SIZE * SPOT_SHADOW_GRID_SIZE, 0);
             });
     }
 }

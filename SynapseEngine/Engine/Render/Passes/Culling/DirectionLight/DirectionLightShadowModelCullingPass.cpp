@@ -26,7 +26,8 @@ namespace Syn {
     bool DirectionLightShadowModelCullingPass::ShouldExecute(const RenderContext& context) const
     {
         auto pool = context.scene->GetRegistry()->GetPool<DirectionLightComponent>();
-        return context.scene->GetSettings()->enableGeometryGpuCulling && pool && pool->Size() > 0;
+        return context.scene->GetSettings()->culling.directionLightShadowCullingDevice == CullingDeviceType::GPU 
+            && pool && pool->Size() > 0;
     }
 
     void DirectionLightShadowModelCullingPass::Initialize() {
@@ -42,6 +43,7 @@ namespace Syn {
 
     void DirectionLightShadowModelCullingPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
+        auto settings = scene->GetSettings();
 
         auto transformPool = scene->GetRegistry()->GetPool<TransformComponent>();
         auto lightPool = scene->GetRegistry()->GetPool<DirectionLightComponent>();
@@ -55,17 +57,18 @@ namespace Syn {
         _totalModelsToTest = static_cast<uint32_t>(transformPool->Size());
         _activeLights = context.scene->GetSceneDrawData()->DirectionLightShadow.visibleLightCount;
 
-        if (scene->GetSettings()->enableStaticBvhCulling || scene->GetSettings()->enableMortonBvhCulling) {
+        if (settings->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::StaticBvh ||
+            settings->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh)
+        {
             uint32_t staticCount = static_cast<uint32_t>(transformPool->GetStorage().GetStaticEntities().size());
             _totalModelsToTest -= staticCount;
         }
 
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::PushConstant<DirectionLightShadowCullingPC> pc;
-        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -95,14 +98,13 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
         uint32_t fIdx = context.frameIndex;
-        auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         // 3D Grid Dispatch: X = Dynamics, Y = Lights, Z = Cascades
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_totalModelsToTest, ComputeGroupSize::Buffer32D);
         vkCmdDispatch(context.cmd, groupCountX, _activeLights, CASCADES_PER_LIGHT);
 
         Vk::BufferBarrierInfo indirectBarrier{};
-        indirectBarrier.buffer = drawData->DirectionLightShadow.indirectBuffer.GetHandle(fIdx, isGpu);
+        indirectBarrier.buffer = drawData->DirectionLightShadow.indirectBuffer.GetHandle(fIdx);
         indirectBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         indirectBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         indirectBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
@@ -110,7 +112,7 @@ namespace Syn {
         Vk::BufferUtils::InsertBarrier(context.cmd, indirectBarrier);
 
         Vk::BufferBarrierInfo instanceBarrier{};
-        instanceBarrier.buffer = drawData->DirectionLightShadow.instanceBuffer.GetHandle(fIdx, isGpu);
+        instanceBarrier.buffer = drawData->DirectionLightShadow.instanceBuffer.GetHandle(fIdx);
         instanceBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         instanceBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         instanceBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;

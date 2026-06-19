@@ -23,7 +23,7 @@ namespace Syn {
         if (!pool || pool->Size() == 0)
             return false;
 
-        return context.scene->GetSettings()->enableBillboardPointLights;
+        return context.scene->GetSettings()->debug.enableBillboardPointLights;
     }
 
     void PointLightBillboardPass::Initialize() {
@@ -108,11 +108,10 @@ namespace Syn {
 
         auto drawData = context.scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = context.scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::BufferCopyInfo copyRegion{};
-        copyRegion.srcBuffer = drawData->PointLights.indirectBuffer.GetHandle(fIdx, isGpu);
-        copyRegion.dstBuffer = drawData->PointLights.billboardSingleCmdBuffer.GetHandle(fIdx, isGpu);
+        copyRegion.srcBuffer = drawData->PointLights.indirectBuffer.GetHandle(fIdx);
+        copyRegion.dstBuffer = drawData->PointLights.billboardSingleCmdBuffer.GetHandle(fIdx);
         copyRegion.srcOffset = offsetof(VkDrawIndirectCommand, instanceCount);
         copyRegion.dstOffset = offsetof(VkDrawIndirectCommand, instanceCount);
         copyRegion.size = sizeof(uint32_t);
@@ -120,7 +119,7 @@ namespace Syn {
         Vk::BufferUtils::CopyBuffer(context.cmd, copyRegion);
 
         Vk::BufferBarrierInfo memBarrier{};
-        memBarrier.buffer = drawData->PointLights.billboardSingleCmdBuffer.GetHandle(fIdx, isGpu);
+        memBarrier.buffer = drawData->PointLights.billboardSingleCmdBuffer.GetHandle(fIdx);
         memBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
         memBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
         memBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
@@ -151,7 +150,7 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
 
         Vk::PushConstant<BillboardPC> pc;
-        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
         pc->visibleEntitiesAddr = compManager->GetBufferAddr(BufferNames::PointLightVisibleData, fIdx);
         pc->baseScale = 1.0f;
         pc.Push(context.cmd, _shaderProgram->GetLayout());
@@ -161,11 +160,10 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         vkCmdDrawIndirect(
             context.cmd,
-            drawData->PointLights.billboardSingleCmdBuffer.GetHandle(fIdx, isGpu),
+            drawData->PointLights.billboardSingleCmdBuffer.GetHandle(fIdx),
             0,
             1,
             sizeof(VkDrawIndirectCommand)

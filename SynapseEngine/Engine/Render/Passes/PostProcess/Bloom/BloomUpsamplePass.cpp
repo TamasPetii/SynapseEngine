@@ -18,8 +18,8 @@ namespace Syn {
 
     bool BloomUpsamplePass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableBloom 
-            && !context.scene->GetSettings()->enableDebugVisibility;;
+        return context.scene->GetSettings()->postProcess.enableBloom
+            && !context.scene->GetSettings()->debug.enableDebugVisibility;;
     }
 
     void BloomUpsamplePass::Initialize() {
@@ -92,7 +92,7 @@ namespace Syn {
 
             Vk::PushConstant<BloomUpSamplePC> pc;
             pc->texelSize = 1.0f / sourceSize;
-            pc->filterRadius = context.scene->GetSettings()->bloomFilterRadius;
+            pc->filterRadius = context.scene->GetSettings()->postProcess.bloomFilterRadius;
             pc.Push(context.cmd, _shaderProgram->GetLayout());
 
             uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount((uint32_t)targetSize.x, ComputeGroupSize::Image8D);

@@ -18,10 +18,10 @@ namespace Syn
         VkBufferUsageFlags storageUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
         VkBufferUsageFlags indirectStorageUsage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
-        instanceBuffer.Initialize({ BufferStrategy::Hybrid_Dynamic, frameCount, sizeof(uint32_t), storageUsage, 16384 * SHADOW_MULTIPLIER, 32768 * SHADOW_MULTIPLIER });
+        instanceBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(uint32_t), storageUsage, 16384 * SHADOW_MULTIPLIER, 32768 * SHADOW_MULTIPLIER });
         instanceBuffer.UpdateCapacityAll(1);
 
-        indirectBuffer.Initialize({ BufferStrategy::Hybrid_Dynamic, frameCount, sizeof(VkDrawIndirectCommand) * 8, indirectStorageUsage, 1024, 2048 });
+        indirectBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(VkDrawIndirectCommand) * 8, indirectStorageUsage, 1024, 2048 });
         indirectBuffer.UpdateCapacityAll(1);
 
         modelDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
@@ -74,8 +74,7 @@ namespace Syn
     }
 
     void DirectionLightShadowDrawGroup::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) {
-        if (totalCommandCount > 0) {
-            indirectBuffer.RecordSync(cmd, frameIndex, totalCommandCount);
-        }
+        indirectBuffer.RecordSync(cmd, frameIndex);
+        instanceBuffer.RecordSync(cmd, frameIndex);
     }
 }

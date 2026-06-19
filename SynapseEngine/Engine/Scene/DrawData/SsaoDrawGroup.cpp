@@ -10,7 +10,7 @@ namespace Syn
     SsaoDrawGroup::SsaoDrawGroup(uint32_t frameCount)
     {
         VkBufferUsageFlags bufferUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
-        kernelBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(SsaoKernel), bufferUsage });
+        kernelBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(SsaoKernel), bufferUsage });
         kernelBuffer.UpdateCapacityAll(1);
 
         std::mt19937 generator;
@@ -34,7 +34,7 @@ namespace Syn
         }
 
         for (uint32_t i = 0; i < frameCount; ++i) {
-            kernelBuffer.GetMapped(i)->Write(kernel.data(), sizeof(SsaoKernel), 0);
+            kernelBuffer.Write(i, kernel.data(), sizeof(SsaoKernel), 0);
         }
 
 		ServiceLocator::GetImageManager()->LoadImageFromSourceSync("SsaoNoiseTexture", []() {
@@ -43,6 +43,6 @@ namespace Syn
     }
 
     void SsaoDrawGroup::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) {
-
+        kernelBuffer.RecordSync(cmd, frameIndex);
     }
 }

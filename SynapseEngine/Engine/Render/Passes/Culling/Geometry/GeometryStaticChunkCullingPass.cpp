@@ -11,6 +11,7 @@
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
+#include "Engine/Component/Core/TransformComponent.h"
 
 namespace Syn {
 
@@ -18,8 +19,11 @@ namespace Syn {
 
     bool GeometryStaticChunkCullingPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableGeometryGpuCulling
-            && context.scene->GetSettings()->enableStaticBvhCulling;
+        auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
+
+        return context.scene->GetSettings()->culling.geometryCullingDevice == CullingDeviceType::GPU
+            && context.scene->GetSettings()->culling.geometrySpatialAcceleration == SpatialAccelerationType::StaticBvh
+            && pool && !pool->GetStorage().GetStaticEntities().empty();
     }
 
     void GeometryStaticChunkCullingPass::Initialize() {
@@ -40,10 +44,9 @@ namespace Syn {
         if (_activeChunkCount == 0) return;
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::PushConstant<ModelMeshCullingPC> pc;
-        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -72,12 +75,11 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_activeChunkCount, ComputeGroupSize::Buffer32D);
         vkCmdDispatch(context.cmd, groupCountX, 1, 1);
 
-        VkBuffer dispatchBuf = drawData->Chunks.chunkIndirectDispatchBuffer.GetHandle(fIdx, isGpu);
+        VkBuffer dispatchBuf = drawData->Chunks.chunkIndirectDispatchBuffer.GetHandle(fIdx);
         Vk::BufferBarrierInfo cullBarrier{};
         cullBarrier.buffer = dispatchBuf;
         cullBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
@@ -87,7 +89,7 @@ namespace Syn {
         Vk::BufferUtils::InsertBarrier(context.cmd, cullBarrier);
 
         Vk::BufferBarrierInfo chunkBarrier{};
-        chunkBarrier.buffer = drawData->Chunks.chunkVisibilityBuffer.GetHandle(fIdx, isGpu);
+        chunkBarrier.buffer = drawData->Chunks.chunkVisibilityBuffer.GetHandle(fIdx);
         chunkBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         chunkBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         chunkBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;

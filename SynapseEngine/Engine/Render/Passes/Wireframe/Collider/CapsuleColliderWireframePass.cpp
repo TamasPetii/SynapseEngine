@@ -18,7 +18,7 @@ namespace Syn {
 
     bool CapsuleColliderWireframePass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableCapsuleColliderWireframe;
+        return context.scene->GetSettings()->debug.enableCapsuleColliderWireframe;
     }
 
     void CapsuleColliderWireframePass::Initialize() {
@@ -92,7 +92,7 @@ namespace Syn {
 
         VkDrawIndirectCommand cmd = drawData->Debug.capsuleColliderCmdTemplate;
         cmd.instanceCount = _activeColliderCount;
-        drawData->Debug.capsuleColliderIndirectBuffer.GetMapped(fIdx)->Write(&cmd, sizeof(VkDrawIndirectCommand), 0);
+        drawData->Debug.capsuleColliderIndirectBuffer.Write(fIdx, &cmd, sizeof(VkDrawIndirectCommand), 0); //Todo
     }
 
     void CapsuleColliderWireframePass::PushConstants(const RenderContext& context) {
@@ -106,7 +106,7 @@ namespace Syn {
         auto capsule = modelManager->GetResource(MeshSourceNames::Capsule);
 
         Vk::PushConstant<WireframeDebugPC> pc{};
-        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
         pc->vertexPositionBufferAddr = capsule->hardwareBuffers.vertexPositions->GetDeviceAddress();
         pc->indexBufferAddr = capsule->hardwareBuffers.indices->GetDeviceAddress();
         pc->shapeDrawType = WIREFRAME_DEBUG_SHAPE_TYPE_CAPSULE_COLLIDER;
@@ -120,7 +120,7 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
 
-        auto indirectBuffer = drawData->Debug.capsuleColliderIndirectBuffer.GetHandle(fIdx, false);
+        auto indirectBuffer = drawData->Debug.capsuleColliderIndirectBuffer.GetHandle(fIdx);
         vkCmdDrawIndirect(context.cmd, indirectBuffer, 0, 1, sizeof(VkDrawIndirectCommand));
     }
 }

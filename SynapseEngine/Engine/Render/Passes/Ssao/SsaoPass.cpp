@@ -21,7 +21,7 @@ namespace Syn {
     bool SsaoPass::ShouldExecute(const RenderContext& context) const
     {
         auto settings = context.scene->GetSettings();
-        return settings->enableSsao && !settings->useDebugCamera;
+        return settings->postProcess.enableSsao && !settings->debug.useDebugCamera;
     }
 
     void SsaoPass::Initialize() {
@@ -79,12 +79,12 @@ namespace Syn {
         auto noiseTexture = imageManager->GetResource(ImageNames::SsaoNoiseTexture);
 
         Vk::PushConstant<SsaoPC> pc{};
-        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-        pc->aoRadius = scene->GetSettings()->aoRadius;
-        pc->aoIntensity = scene->GetSettings()->aoIntensity;
-        pc->maxOcclusionDistance = scene->GetSettings()->maxOcclusionDistance;
-        pc->bias = scene->GetSettings()->bias;
-        pc->sampleCount = scene->GetSettings()->sampleCount;
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
+        pc->aoRadius = scene->GetSettings()->postProcess.aoRadius;
+        pc->aoIntensity = scene->GetSettings()->postProcess.aoIntensity;
+        pc->maxOcclusionDistance = scene->GetSettings()->postProcess.maxOcclusionDistance;
+        pc->bias = scene->GetSettings()->postProcess.bias;
+        pc->sampleCount = scene->GetSettings()->postProcess.sampleCount;
 		pc->noiseTextureWidth = static_cast<float>(noiseTexture->image->GetExtent().width);
 		pc->noiseTextureHeight = static_cast<float>(noiseTexture->image->GetExtent().height);
         pc.Push(context.cmd, _shaderProgram->GetLayout());

@@ -122,7 +122,6 @@
 
 #include "Engine/Render/Passes/Ssao/SsaoInitPass.h"
 #include "Engine/Render/Passes/Ssao/SsaoPass.h"
-#include "Engine/Render/Passes/Ssao/DpHvoPass.h"
 #include "Engine/Render/Passes/Ssao/SsaoBlurPass.h"
 
 #include "Engine/Render/Passes/Shading/Visibility/DebugVisibilityPass.h"
@@ -183,7 +182,7 @@ namespace Syn
         pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
         pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
-
+        
 		//Forward+ Depth Opaque Prepasses
 		pipeline->AddPass(std::make_unique<OpaqueDepthTransitionPrepass>());
 		pipeline->AddPass(std::make_unique<MeshletOpaqueDepthPrepass>(MaterialRenderType::Opaque1Sided));
@@ -218,7 +217,7 @@ namespace Syn
         pipeline->AddPass(std::make_unique<SpotLightShadowHizCopyPass>());
         pipeline->AddPass(std::make_unique<SpotLightShadowHizDownsamplePass>());
 
-		//Ssao Passes
+        //Ssao Passes
         pipeline->AddPass(std::make_unique<SsaoInitPass>());
         pipeline->AddPass(std::make_unique<SsaoPass>());
         pipeline->AddPass(std::make_unique<SsaoBlurPass>());

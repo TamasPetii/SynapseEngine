@@ -22,7 +22,7 @@ namespace Syn {
 
     bool GeometryMeshCullingPass::ShouldExecute(const RenderContext& context) const
     {
-		return context.scene->GetSettings()->enableGeometryGpuCulling;
+		return context.scene->GetSettings()->culling.geometryCullingDevice == CullingDeviceType::GPU;
     }
 
     void GeometryMeshCullingPass::Initialize() {
@@ -58,10 +58,9 @@ namespace Syn {
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::PushConstant<ModelMeshCullingPC> pc;
-		pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+		pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -92,13 +91,12 @@ namespace Syn {
 
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-		auto countBuffer = drawData->Models.computeCountBuffer.GetHandle(fIdx, isGpu);
+		auto countBuffer = drawData->Models.computeCountBuffer.GetHandle(fIdx);
         vkCmdDispatchIndirect(context.cmd, countBuffer, 0);
 
         Vk::BufferBarrierInfo drawCmdBarrier{};
-        drawCmdBarrier.buffer = drawData->Models.indirectBuffer.GetHandle(fIdx, isGpu);
+        drawCmdBarrier.buffer = drawData->Models.indirectBuffer.GetHandle(fIdx);
         drawCmdBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         drawCmdBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         drawCmdBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
@@ -106,7 +104,7 @@ namespace Syn {
         Vk::BufferUtils::InsertBarrier(context.cmd, drawCmdBarrier);
 
         Vk::BufferBarrierInfo instanceBarrier{};
-        instanceBarrier.buffer = drawData->Models.instanceBuffer.GetHandle(fIdx, isGpu);
+        instanceBarrier.buffer = drawData->Models.instanceBuffer.GetHandle(fIdx);
         instanceBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         instanceBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         instanceBarrier.dstStage = VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_EXT | VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_EXT;

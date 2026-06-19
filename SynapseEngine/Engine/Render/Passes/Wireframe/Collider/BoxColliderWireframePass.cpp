@@ -18,7 +18,7 @@ namespace Syn {
 
     bool BoxColliderWireframePass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableBoxColliderWireframe;
+        return context.scene->GetSettings()->debug.enableBoxColliderWireframe;
     }
 
     void BoxColliderWireframePass::Initialize() {
@@ -92,7 +92,7 @@ namespace Syn {
 
         VkDrawIndirectCommand cmd = drawData->Debug.boxColliderCmdTemplate;
         cmd.instanceCount = _activeColliderCount;
-        drawData->Debug.boxColliderIndirectBuffer.GetMapped(fIdx)->Write(&cmd, sizeof(VkDrawIndirectCommand), 0);
+        drawData->Debug.boxColliderIndirectBuffer.Write(fIdx, &cmd, sizeof(VkDrawIndirectCommand), 0); //Todo
     }
 
     void BoxColliderWireframePass::PushConstants(const RenderContext& context) {
@@ -106,7 +106,7 @@ namespace Syn {
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
 
         Vk::PushConstant<WireframeDebugPC> pc{};
-        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
         pc->vertexPositionBufferAddr = cube->hardwareBuffers.vertexPositions->GetDeviceAddress();
         pc->indexBufferAddr = cube->hardwareBuffers.indices->GetDeviceAddress();
         pc->shapeDrawType = WIREFRAME_DEBUG_SHAPE_TYPE_BOX_COLLIDER;
@@ -120,7 +120,7 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
 
-        auto indirectBuffer = drawData->Debug.boxColliderIndirectBuffer.GetHandle(fIdx, false);
+        auto indirectBuffer = drawData->Debug.boxColliderIndirectBuffer.GetHandle(fIdx);
         vkCmdDrawIndirect(context.cmd, indirectBuffer, 0, 1, sizeof(VkDrawIndirectCommand));
     }
 }

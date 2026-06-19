@@ -17,8 +17,8 @@ namespace Syn {
 
     bool StaticChunkAabbWireframePass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableStaticChunkAabbWireframe 
-            && context.scene->GetSettings()->enableStaticBvhCulling;
+        return context.scene->GetSettings()->debug.enableStaticChunkAabbWireframe 
+            && context.scene->GetSettings()->culling.geometrySpatialAcceleration == SpatialAccelerationType::StaticBvh;
     }
 
     void StaticChunkAabbWireframePass::Initialize() {
@@ -84,27 +84,24 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-        if (isGpu) {
-            Vk::BufferCopyInfo copyRegion{};
-            copyRegion.srcBuffer = drawData->Chunks.chunkIndirectDispatchBuffer.GetHandle(fIdx, isGpu);
-            copyRegion.dstBuffer = drawData->Chunks.chunkAabbSingleCmdBuffer.GetHandle(fIdx, isGpu);
-            copyRegion.srcOffset = 0;
-            copyRegion.dstOffset = offsetof(VkDrawIndirectCommand, instanceCount);
-            copyRegion.size = sizeof(uint32_t);
+        Vk::BufferCopyInfo copyRegion{};
+        copyRegion.srcBuffer = drawData->Chunks.chunkIndirectDispatchBuffer.GetHandle(fIdx);
+        copyRegion.dstBuffer = drawData->Chunks.chunkAabbSingleCmdBuffer.GetHandle(fIdx);
+        copyRegion.srcOffset = 0;
+        copyRegion.dstOffset = offsetof(VkDrawIndirectCommand, instanceCount);
+        copyRegion.size = sizeof(uint32_t);
 
-            Vk::BufferUtils::CopyBuffer(context.cmd, copyRegion);
+        Vk::BufferUtils::CopyBuffer(context.cmd, copyRegion);
 
-            Vk::BufferBarrierInfo memBarrier{};
-            memBarrier.buffer = drawData->Chunks.chunkAabbSingleCmdBuffer.GetHandle(fIdx, isGpu);
-            memBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
-            memBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-            memBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
-            memBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT;
+        Vk::BufferBarrierInfo memBarrier{};
+        memBarrier.buffer = drawData->Chunks.chunkAabbSingleCmdBuffer.GetHandle(fIdx);
+        memBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+        memBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+        memBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
+        memBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT;
 
-            Vk::BufferUtils::InsertBarrier(context.cmd, memBarrier);
-        }
+        Vk::BufferUtils::InsertBarrier(context.cmd, memBarrier);
     }
 
     void StaticChunkAabbWireframePass::PushConstants(const RenderContext& context) {
@@ -115,7 +112,7 @@ namespace Syn {
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
 
         Vk::PushConstant<WireframeDebugPC> pc{};
-        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
         pc->vertexPositionBufferAddr = cube->hardwareBuffers.vertexPositions->GetDeviceAddress();
         pc->indexBufferAddr = cube->hardwareBuffers.indices->GetDeviceAddress();
         pc->shapeDrawType = WIREFRAME_DEBUG_SHAPE_TYPE_STATIC_CHUNK;
@@ -126,9 +123,8 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-        auto indirectBuffer = drawData->Chunks.chunkAabbSingleCmdBuffer.GetHandle(fIdx, isGpu);
+        auto indirectBuffer = drawData->Chunks.chunkAabbSingleCmdBuffer.GetHandle(fIdx);
 
         vkCmdDrawIndirect(
             context.cmd,

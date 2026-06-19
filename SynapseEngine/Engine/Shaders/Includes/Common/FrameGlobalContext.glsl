@@ -83,7 +83,6 @@ struct FrameGlobalContext {
     uint64_t pointLightShadowSparseMapBufferAddr;
     uint64_t pointLightShadowDataBufferAddr; 
 
-
     uint64_t forwardPlusTileGridListBufferAddr;
     uint64_t forwardPlusClusterCountBufferAddr;
     uint64_t forwardPlusClusterListBufferAddr;
@@ -155,7 +154,11 @@ struct FrameGlobalContext {
     uint pointLightCount;
     uint spotLightCount;
 
-    uint enableStaticBvhCulling;
+    uint enableGeometryBvhCulling;
+    uint enableDirectionLightBvhCulling;
+    uint enableSpotLightBvhCulling;
+    uint enablePointLightBvhCulling;
+
     uint allTransformCount;
     uint staticTransformCount;
     uint dynamicTransformCount;

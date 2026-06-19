@@ -13,13 +13,13 @@ namespace Syn
         VkBufferUsageFlags storageUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
         VkBufferUsageFlags indirectStorageUsage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
-        instanceBuffer.Initialize({ BufferStrategy::Hybrid_Dynamic, frameCount, sizeof(SpotShadowInstancePayload), storageUsage, 65536, 131072 });
+        instanceBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(SpotShadowInstancePayload), storageUsage, 65536, 131072 });
         instanceBuffer.UpdateCapacityAll(1);
 
-        indirectBuffer.Initialize({ BufferStrategy::Hybrid_Dynamic, frameCount, sizeof(VkDrawIndirectCommand) * 8, indirectStorageUsage, 1024, 2048 });
+        indirectBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(VkDrawIndirectCommand) * 8, indirectStorageUsage, 1024, 2048 });
         indirectBuffer.UpdateCapacityAll(1);
 
-        descriptorBuffer.Initialize({ BufferStrategy::Hybrid_Dynamic, frameCount, sizeof(MeshDrawDescriptor) * 8, storageUsage, 1024, 2048 });
+        descriptorBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(MeshDrawDescriptor) * 8, storageUsage, 1024, 2048 });
         descriptorBuffer.UpdateCapacityAll(1);
 
         modelDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
@@ -34,7 +34,7 @@ namespace Syn
         gridLookupData.Resize(SPOT_SHADOW_GRID_SIZE * SPOT_SHADOW_GRID_SIZE);
         std::fill(gridLookupData.Data(), gridLookupData.Data() + (SPOT_SHADOW_GRID_SIZE * SPOT_SHADOW_GRID_SIZE), 0xFFFFFFFF);
 
-        gridLookupBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(uint32_t) * SPOT_SHADOW_GRID_SIZE * SPOT_SHADOW_GRID_SIZE, storageUsage, 1, 1 });
+        gridLookupBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(uint32_t) * SPOT_SHADOW_GRID_SIZE * SPOT_SHADOW_GRID_SIZE, storageUsage, 1, 1 });
         gridLookupBuffer.UpdateCapacityAll(1);
 
         Vk::ImageConfig atlasSpec{};
@@ -78,9 +78,9 @@ namespace Syn
     }
 
     void SpotLightShadowDrawGroup::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) {
-        if (totalCommandCount > 0) {
-            indirectBuffer.RecordSync(cmd, frameIndex, totalCommandCount);
-            descriptorBuffer.RecordSync(cmd, frameIndex, totalCommandCount);
-        }
+        indirectBuffer.RecordSync(cmd, frameIndex);
+        descriptorBuffer.RecordSync(cmd, frameIndex);
+        instanceBuffer.RecordSync(cmd, frameIndex);
+        gridLookupBuffer.RecordSync(cmd, frameIndex);
     }
 }

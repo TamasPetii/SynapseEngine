@@ -12,7 +12,7 @@
 #include <unordered_map>
 #include <string>
 
-#include "SceneSettings.h"
+#include "Settings/SceneSettings.h"
 #include "DrawData/SceneDrawData.h"
 #include "Engine/Scene/Source/ISceneSource.h"
 #include "Engine/Physics/IPhysicsEngine.h"

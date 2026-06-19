@@ -28,7 +28,7 @@
 #include "Engine/System/Physics/PhysicsSystem.h"
 #include "Engine/System/Light/Point/PointLightSystem.h"
 #include "Engine/System/Light/Point/PointLightShadowSystem.h"
-#include "Engine/System/Light/Point/PointLightFrustumCullingSystem.h"
+#include "Engine/System/Light/Point/PointLightCullingSystem.h"
 
 #include "Engine/System/Light/Direction/DirectionLightSystem.h"
 #include "Engine/System/Light/Direction/DirectionLightShadowSystem.h"
@@ -142,7 +142,7 @@ namespace Syn
 
         RegisterSystem<PointLightSystem>();
         RegisterSystem<PointLightShadowSystem>();
-        RegisterSystem<PointLightFrustumCullingSystem>();
+        RegisterSystem<PointLightCullingSystem>();
 
         RegisterSystem<SpotLightSystem>();
         RegisterSystem<SpotLightShadowSystem>();

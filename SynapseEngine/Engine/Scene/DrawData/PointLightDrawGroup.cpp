@@ -46,13 +46,13 @@ namespace Syn
         billboardSingleCmdBuffer.UpdateCapacityAll(1);
 
         for (uint32_t i = 0; i < frameCount; ++i) {
-            sphereSingleCmdBuffer.GetMapped(i)->Write(&sphereCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
-            aabbSingleCmdBuffer.GetMapped(i)->Write(&aabbCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
-            billboardSingleCmdBuffer.GetMapped(i)->Write(&billboardCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            sphereSingleCmdBuffer.Write(i, &sphereCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            aabbSingleCmdBuffer.Write(i, &aabbCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            billboardSingleCmdBuffer.Write(i, &billboardCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
         }
     }
 
 	void PointLightDrawGroup::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) {
-    
+        indirectBuffer.RecordSync(cmd, frameIndex);
     }
 }

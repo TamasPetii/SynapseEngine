@@ -16,8 +16,8 @@ namespace Syn {
 
     bool BloomPrefilterPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableBloom 
-            && !context.scene->GetSettings()->enableDebugVisibility;;
+        return context.scene->GetSettings()->postProcess.enableBloom
+            && !context.scene->GetSettings()->debug.enableDebugVisibility;;
     }
 
     void BloomPrefilterPass::Initialize() {
@@ -87,8 +87,8 @@ namespace Syn {
         uint32_t height = rt->GetHeight();
 
         Vk::PushConstant<BloomPrefilterPC> pc;
-        pc->knee = scene->GetSettings()->bloomKnee;
-        pc->threshold = scene->GetSettings()->bloomThreshold;
+        pc->knee = scene->GetSettings()->postProcess.bloomKnee;
+        pc->threshold = scene->GetSettings()->postProcess.bloomThreshold;
         pc->texelSize = 1.0f / glm::vec2(width, height);
 
         pc.Push(context.cmd, _shaderProgram->GetLayout());

@@ -29,7 +29,10 @@ namespace Syn {
 
     bool GeometryMortonChunkCullingPass::ShouldExecute(const RenderContext& context) const {
         auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
-        return context.scene->GetSettings()->enableMortonBvhCulling && pool && !pool->GetStorage().GetStaticEntities().empty();
+
+        return context.scene->GetSettings()->culling.geometryCullingDevice == CullingDeviceType::GPU
+            && context.scene->GetSettings()->culling.geometrySpatialAcceleration == SpatialAccelerationType::MortonBvh
+            && pool && !pool->GetStorage().GetStaticEntities().empty();
     }
 
     void GeometryMortonChunkCullingPass::PushConstants(const RenderContext& context) {
@@ -37,7 +40,7 @@ namespace Syn {
         _staticCount = static_cast<uint32_t>(scene->GetRegistry()->GetPool<TransformComponent>()->GetStorage().GetStaticEntities().size());
 
         Vk::PushConstant<ModelMeshCullingPC> pc;
-        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex, scene->GetSettings()->enableGeometryGpuCulling);
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -66,10 +69,9 @@ namespace Syn {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         VkDispatchIndirectCommand dispatchTemplate = drawData->Chunks.dispatchCmdTemplate;
-        VkBuffer modelDispatchBufferHandle = drawData->Chunks.mortonChunkVisibleIndirectDispatchBuffer.GetHandle(fIdx, isGpu);
+        VkBuffer modelDispatchBufferHandle = drawData->Chunks.mortonChunkVisibleIndirectDispatchBuffer.GetHandle(fIdx);
 
         Vk::BufferUpdateInfo resetInfo{};
         resetInfo.buffer = modelDispatchBufferHandle;
@@ -86,7 +88,7 @@ namespace Syn {
         resetBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         Vk::BufferUtils::InsertBarrier(context.cmd, resetBarrier);
 
-        VkBuffer chunkIndirectBuffer = drawData->Chunks.mortonIndirectDispatchBuffer.GetHandle(fIdx, isGpu);
+        VkBuffer chunkIndirectBuffer = drawData->Chunks.mortonIndirectDispatchBuffer.GetHandle(fIdx);
         vkCmdDispatchIndirect(context.cmd, chunkIndirectBuffer, 0);
 
         Vk::BufferBarrierInfo visibleIndexBarrier{};

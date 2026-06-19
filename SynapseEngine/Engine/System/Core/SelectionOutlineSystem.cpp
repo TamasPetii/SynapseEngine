@@ -33,7 +33,7 @@ namespace Syn
                     _selectionMask[denseIndex] = 1;
                 }
 
-                if (scene->GetSettings()->enableSelectedHierarchyOutline)
+                if (scene->GetSettings()->debug.enableSelectedHierarchyOutline)
                 {
                     std::vector<EntityID> queue;
                     auto& comp = hierarchyPool->Get(selectedEntity);

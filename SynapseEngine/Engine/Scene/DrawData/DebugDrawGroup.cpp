@@ -59,12 +59,10 @@ namespace Syn
         capsuleColliderIndirectBuffer.UpdateCapacityAll(1);
 
         for (uint32_t i = 0; i < frameCount; ++i) {
-            boxColliderIndirectBuffer.GetMapped(i)->Write(&boxColliderCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
-            sphereColliderIndirectBuffer.GetMapped(i)->Write(&sphereColliderCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
-            capsuleColliderIndirectBuffer.GetMapped(i)->Write(&capsuleColliderCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            boxColliderIndirectBuffer.Write(i, &boxColliderCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            sphereColliderIndirectBuffer.Write(i, &sphereColliderCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            capsuleColliderIndirectBuffer.Write(i, &capsuleColliderCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
         }
-
-        //Todo: Meshlet visibility buffer?
     }
 
     void DebugDrawGroup::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) {

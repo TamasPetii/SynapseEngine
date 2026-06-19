@@ -27,6 +27,12 @@ namespace Syn {
         _passName = (_renderType == MaterialRenderType::Transparent1Sided) ? "Traditional_Transparent_Forward_1Sided" : "Traditional_Transparent_Forward_2Sided";
     }
 
+    bool TraditionalTransparentForwardPass::ShouldExecute(const RenderContext& context) const
+    {
+        //Todo: Has transparent material?
+        return !context.scene->GetSettings()->debug.enableDebugVisibility;
+    }
+
     void TraditionalTransparentForwardPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
         auto imageManager = ServiceLocator::GetImageManager();
@@ -132,18 +138,13 @@ namespace Syn {
         auto animationManager = ServiceLocator::GetAnimationManager();
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
+        
 
         Vk::PushConstant<TraditionalMeshletPassPC> pc;
-		pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+		pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
         pc->baseDescriptorOffset = drawData->Models.traditionalCmdOffsets[_renderType];
         pc->materialRenderType = static_cast<uint32_t>(_renderType);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
-    }
-
-    bool TraditionalTransparentForwardPass::ShouldExecute(const RenderContext& context) const
-    {
-        return !context.scene->GetSettings()->enableDebugVisibility;
     }
 
     void TraditionalTransparentForwardPass::BindDescriptors(const RenderContext& context) {
@@ -155,10 +156,10 @@ namespace Syn {
     void TraditionalTransparentForwardPass::Draw(const RenderContext& context) {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
+        
 
-        auto indirectBuffer = drawData->Models.indirectBuffer.GetHandle(context.frameIndex, isGpu);
-        auto countBuffer = drawData->Models.drawCountBuffer.GetHandle(context.frameIndex, isGpu);
+        auto indirectBuffer = drawData->Models.indirectBuffer.GetHandle(context.frameIndex);
+        auto countBuffer = drawData->Models.drawCountBuffer.GetHandle(context.frameIndex);
 
         uint32_t commandOffset = drawData->Models.traditionalCmdOffsets[_renderType];
         uint32_t maxCommandCount = drawData->Models.traditionalCmdCounts[_renderType];

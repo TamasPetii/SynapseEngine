@@ -83,8 +83,7 @@ namespace Syn
             }
             });
 
-        // Skip CPU processing if GPU culling is enabled
-        if (settings->enableGeometryGpuCulling) {
+        if (settings->culling.directionLightShadowCullingDevice == CullingDeviceType::GPU) {
             return;
         }
 
@@ -214,7 +213,7 @@ namespace Syn
 
                     worldCollider = MeshUtils::TransformCollider(localCollider, data.transform);
 
-                    if (!parentFullyInside && settings->enableFrustumCulling && settings->enableMeshFrustumCulling)
+                    if (!parentFullyInside && settings->culling.enableFrustumCulling && settings->culling.enableMeshFrustumCulling)
                         isVisible = CollisionTester::IsInFrustum(worldCollider, frustum);
                 }
                 else {
@@ -292,7 +291,7 @@ namespace Syn
             {
                 IntersectionType visibility = chunkVisibilities[cascadeIdx];
 
-                if (visibility == IntersectionType::Intersect && settings->enableFrustumCulling && settings->enableModelFrustumCulling) {
+                if (visibility == IntersectionType::Intersect && settings->culling.enableFrustumCulling && settings->culling.enableModelFrustumCulling) {
                     visibility = CollisionTester::IsInFrustumIntersectionType(data.globalWorldCollider, shadowComp.cascadeFrustums[cascadeIdx]);
 
                     if (visibility == IntersectionType::Outside)
@@ -333,8 +332,8 @@ namespace Syn
 
         uint32_t activeChunks = chunkGroup->chunkCounter.load(std::memory_order_relaxed);
 
-        // BVH Chunk Culling Execution
-        if (settings->enableStaticBvhCulling && activeChunks > 0)
+        // Static Bvh Chunk Culling Execution
+        if (settings->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::StaticBvh && activeChunks > 0)
         {
             if (drawData->DirectionLightShadow.visibleChunkIds.Size() < activeChunks) {
                 drawData->DirectionLightShadow.visibleChunkIds.Resize(activeChunks);
@@ -359,7 +358,7 @@ namespace Syn
                         {
                             IntersectionType visibility = IntersectionType::Intersect;
 
-                            if (settings->enableFrustumCulling && settings->enableChunkFrustumCulling)
+                            if (settings->culling.enableFrustumCulling && settings->culling.enableChunkFrustumCulling)
                             {
                                 visibility = CollisionTester::TestAabbFrustumIntersectionType(chunk.minBounds, chunk.maxBounds, shadowComp.cascadeFrustums[cascadeIdx]);
                             }
@@ -413,12 +412,12 @@ namespace Syn
             auto drawData = scene->GetSceneDrawData();
             auto settings = scene->GetSettings();
 
-            bool needsCommandUpload = (!settings->enableGeometryGpuCulling) || (drawData->syncFramesRemaining.load(std::memory_order_relaxed) > 0);
+            bool needsCommandUpload = (settings->culling.directionLightShadowCullingDevice == CPU) || (drawData->syncFramesRemaining.load(std::memory_order_relaxed) > 0);
 
             auto& mainGroup = drawData->Models;
             auto& shadowGroup = drawData->DirectionLightShadow;
 
-            if (!settings->enableGeometryGpuCulling)
+            if (settings->culling.directionLightShadowCullingDevice == CPU)
             {
                 // Sync CPU counters to indirect commands
                 for (uint32_t i = 0; i < mainGroup.activeTraditionalCount; ++i) {
@@ -432,48 +431,22 @@ namespace Syn
                 // Upload instances
                 size_t instanceSize = mainGroup.totalAllocatedInstances * SHADOW_MULTIPLIER * sizeof(uint32_t);
                 if (instanceSize > 0) {
-                    if (auto mappedInstance = shadowGroup.instanceBuffer.GetMapped(frameIndex)) {
-                        mappedInstance->Write(shadowGroup.instances.Data(), instanceSize, 0);
-                    }
-                }
-
-                if (settings->enableStaticBvhCulling)
-                {
-                    /*
-                    uint32_t visibleCount = shadowGroup.visibleChunkCount.load(std::memory_order_relaxed);
-
-                    if (auto mappedCmd = shadowGroup.staticChunkDispatchBuffer.GetMapped(frameIndex)) {
-                        VkDispatchIndirectCommand cmd = shadowGroup.dispatchCmdTemplate;
-                        cmd.x = visibleCount > 0 ? ((visibleCount + 31) / 32) : 0;
-                        cmd.y = 1;
-                        cmd.z = 1;
-                        mappedCmd->Write(&cmd, sizeof(VkDispatchIndirectCommand), 0);
-                    }
-
-                    // 2. Visible Chunk ID-k feltöltése
-                    if (visibleCount > 0) {
-                        if (auto mappedVis = shadowGroup.staticChunkVisibleBuffer.GetMapped(frameIndex)) {
-                            mappedVis->Write(shadowGroup.visibleChunkIds.Data(), visibleCount * sizeof(uint32_t), 0);
-                        }
-                    }
-                    */
+                    shadowGroup.instanceBuffer.Write(frameIndex, shadowGroup.instances.Data(), instanceSize, 0);
                 }
             }
 
             if (needsCommandUpload)
             {
                 // Upload base draw commands (indirect data)
-                if (auto mappedIndirect = shadowGroup.indirectBuffer.GetMapped(frameIndex)) {
-                    size_t tradSize = mainGroup.activeTraditionalCount * sizeof(VkDrawIndirectCommand);
-                    if (tradSize > 0) {
-                        mappedIndirect->Write(shadowGroup.traditionalCmds.Data(), tradSize, 0);
-                    }
+                size_t tradSize = mainGroup.activeTraditionalCount * sizeof(VkDrawIndirectCommand);
+                if (tradSize > 0) {
+                    shadowGroup.indirectBuffer.Write(frameIndex, shadowGroup.traditionalCmds.Data(), tradSize, 0);
+                }
 
-                    size_t meshletSize = mainGroup.activeMeshletCount * sizeof(VkDrawMeshTasksIndirectCommandEXT);
-                    if (meshletSize > 0) {
-                        size_t meshletGpuOffset = tradSize;
-                        mappedIndirect->Write(shadowGroup.meshletCmds.Data(), meshletSize, meshletGpuOffset);
-                    }
+                size_t meshletSize = mainGroup.activeMeshletCount * sizeof(VkDrawMeshTasksIndirectCommandEXT);
+                if (meshletSize > 0) {
+                    size_t meshletGpuOffset = tradSize;
+                    shadowGroup.indirectBuffer.Write(frameIndex, shadowGroup.meshletCmds.Data(), meshletSize, meshletGpuOffset);
                 }
             }        
             });

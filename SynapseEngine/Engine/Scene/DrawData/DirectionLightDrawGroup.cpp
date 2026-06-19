@@ -24,7 +24,7 @@ namespace Syn
         billboardSingleCmdBuffer.UpdateCapacityAll(1);
 
         for (uint32_t i = 0; i < frameCount; ++i) {
-            billboardSingleCmdBuffer.GetMapped(i)->Write(&billboardCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            billboardSingleCmdBuffer.Write(i, &billboardCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
         }
     }
 

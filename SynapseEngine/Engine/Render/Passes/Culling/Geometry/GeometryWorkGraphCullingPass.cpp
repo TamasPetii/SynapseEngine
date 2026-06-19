@@ -34,7 +34,8 @@ namespace Syn {
 
     bool GeometryWorkGraphCullingPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableGeometryGpuCulling;
+        //Todo
+        return false;
     }
 
     void GeometryWorkGraphCullingPass::Initialize() {
@@ -153,10 +154,9 @@ namespace Syn {
             return;
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::PushConstant<ModelMeshCullingPC> pc;
-        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -189,7 +189,6 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         auto settings = scene->GetSettings();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = settings->enableGeometryGpuCulling;
 
         vkCmdBindPipeline(context.cmd, VK_PIPELINE_BIND_POINT_EXECUTION_GRAPH_AMDX, _graphPipeline);
 
@@ -225,7 +224,7 @@ namespace Syn {
         }
 
         // Root 2: Static Chunk Graph
-        if (settings->enableStaticBvhCulling && _staticChunkCount > 0) {
+        if (settings->culling.geometrySpatialAcceleration == SpatialAccelerationType::StaticBvh && _staticChunkCount > 0) {
             VkDispatchGraphInfoAMDX info{};
             info.nodeIndex = _staticChunkRootIndex;
             info.payloadCount = 1;
@@ -235,7 +234,7 @@ namespace Syn {
         }
 
         // Root 3: Morton Chunk Graph
-        if (settings->enableMortonBvhCulling && _mortonChunkCount > 0) {
+        if (settings->culling.geometrySpatialAcceleration == SpatialAccelerationType::MortonBvh && _mortonChunkCount > 0) {
             VkDispatchGraphInfoAMDX info{};
             info.nodeIndex = _mortonChunkRootIndex;
             info.payloadCount = 1;
@@ -260,7 +259,7 @@ namespace Syn {
         }
 
         Vk::BufferBarrierInfo instanceBarrier{};
-        instanceBarrier.buffer = drawData->Models.instanceBuffer.GetHandle(fIdx, isGpu);
+        instanceBarrier.buffer = drawData->Models.instanceBuffer.GetHandle(fIdx);
         instanceBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         instanceBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         instanceBarrier.dstStage = VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_EXT | VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_EXT;
@@ -268,7 +267,7 @@ namespace Syn {
         Vk::BufferUtils::InsertBarrier(context.cmd, instanceBarrier);
 
         Vk::BufferBarrierInfo indirectBarrier{};
-        indirectBarrier.buffer = drawData->Models.indirectBuffer.GetHandle(fIdx, isGpu);
+        indirectBarrier.buffer = drawData->Models.indirectBuffer.GetHandle(fIdx);
         indirectBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         indirectBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         indirectBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_EXT;

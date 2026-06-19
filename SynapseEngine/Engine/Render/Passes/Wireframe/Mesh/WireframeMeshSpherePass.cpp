@@ -16,7 +16,7 @@ namespace Syn {
 
     bool WireframeMeshSpherePass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableWireframeMeshSphere;
+        return context.scene->GetSettings()->debug.enableWireframeMeshSphere;
     }
 
     void WireframeMeshSpherePass::Initialize() {
@@ -96,10 +96,9 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
 
         auto sphere = modelManager->GetResource(MeshSourceNames::Sphere);
-		auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::PushConstant<WireframeMeshPC> pc{};
-		pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+		pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
 		pc->vertexPositionBufferAddr = sphere->hardwareBuffers.vertexPositions->GetDeviceAddress();
 		pc->indexBufferAddr = sphere->hardwareBuffers.indices->GetDeviceAddress();
         pc->shapeType = WIREFRAME_MESH_SHAPE_TYPE_SPHERE;
@@ -114,9 +113,8 @@ namespace Syn {
         if (totalCommands == 0) return;
 
 		auto fIdx = context.frameIndex;
-		auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-        auto indirectBuffer = drawData->Debug.modelSphereIndirectBuffer.GetHandle(fIdx, isGpu);
+        auto indirectBuffer = drawData->Debug.modelSphereIndirectBuffer.GetHandle(fIdx);
 
         vkCmdDrawIndirect(
             context.cmd,

@@ -4,7 +4,7 @@
 namespace Syn {
 
     bool OpaqueDeferredTransitionPass::ShouldExecute(const RenderContext& context) const {
-        return context.scene->GetSettings()->pipelineType == PipelineType::Deferred;
+        return context.scene->GetSettings()->lighting.pipelineType == PipelineType::Deferred;
     }
 
     void OpaqueDeferredTransitionPass::PrepareFrame(const RenderContext& context) {

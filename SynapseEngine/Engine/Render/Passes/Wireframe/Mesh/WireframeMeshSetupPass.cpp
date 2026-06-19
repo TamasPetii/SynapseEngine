@@ -12,8 +12,8 @@ namespace Syn {
 
     bool WireframeMeshSetupPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableWireframeMeshSphere 
-            || context.scene->GetSettings()->enableWireframeMeshAabb;
+        return context.scene->GetSettings()->debug.enableWireframeMeshSphere 
+            || context.scene->GetSettings()->debug.enableWireframeMeshAabb;
     }
 
     void WireframeMeshSetupPass::Initialize() {
@@ -35,10 +35,9 @@ namespace Syn {
 
         _shouldDispatch = true;
         uint32_t fIdx = context.frameIndex;
-		auto isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::PushConstant<WireframeSetupPC> pc{};
-		pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+		pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -47,7 +46,6 @@ namespace Syn {
 
         auto drawData = context.scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-		auto isGpu = context.scene->GetSettings()->enableGeometryGpuCulling;
 
         uint32_t totalCommands = drawData->Models.activeTraditionalCount + drawData->Models.activeMeshletCount;
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(totalCommands, ComputeGroupSize::Buffer256D);
@@ -55,7 +53,7 @@ namespace Syn {
         vkCmdDispatch(context.cmd, groupCountX, 1, 1);
 
         Vk::BufferBarrierInfo aabbBarrier{};
-        aabbBarrier.buffer = drawData->Debug.modelAabbIndirectBuffer.GetHandle(fIdx, isGpu);
+        aabbBarrier.buffer = drawData->Debug.modelAabbIndirectBuffer.GetHandle(fIdx);
         aabbBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         aabbBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         aabbBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
@@ -63,7 +61,7 @@ namespace Syn {
         Vk::BufferUtils::InsertBarrier(context.cmd, aabbBarrier);
 
         Vk::BufferBarrierInfo sphereBarrier{};
-        sphereBarrier.buffer = drawData->Debug.modelSphereIndirectBuffer.GetHandle(fIdx, isGpu);
+        sphereBarrier.buffer = drawData->Debug.modelSphereIndirectBuffer.GetHandle(fIdx);
         sphereBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         sphereBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         sphereBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;

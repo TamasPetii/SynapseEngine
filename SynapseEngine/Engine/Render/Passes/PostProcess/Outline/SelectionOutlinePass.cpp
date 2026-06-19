@@ -13,7 +13,8 @@ namespace Syn
     #include "Engine/Shaders/Includes/PushConstants/SelectionOutlinePC.glsl"
 
     bool SelectionOutlinePass::ShouldExecute(const RenderContext& context) const {
-        return context.scene->GetSettings()->enableSelectedOutline && context.scene->GetSelectedEntity() != NULL_ENTITY;
+        return context.scene->GetSettings()->debug.enableSelectedOutline 
+            && context.scene->GetSelectedEntity() != NULL_ENTITY;
     }
 
     void SelectionOutlinePass::Initialize()
@@ -105,12 +106,12 @@ namespace Syn
         auto settings = scene->GetSettings();
 
         Vk::PushConstant<SelectionOutlinePC> pc;
-        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex, true);
-        pc->outlinePrimaryColor = settings->outlinePrimaryColor;
-        pc->outlineSecondaryColor = settings->outlineSecondaryColor;
-        pc->outlineThickness = settings->outlineThickness;
-        pc->enableSelectedOutline = settings->enableSelectedOutline ? 1 : 0;
-        pc->enableSelectedHierarchyOutline = settings->enableSelectedHierarchyOutline ? 1 : 0;
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex);
+        pc->outlinePrimaryColor = settings->debug.outlinePrimaryColor;
+        pc->outlineSecondaryColor = settings->debug.outlineSecondaryColor;
+        pc->outlineThickness = settings->debug.outlineThickness;
+        pc->enableSelectedOutline = settings->debug.enableSelectedOutline ? 1 : 0;
+        pc->enableSelectedHierarchyOutline = settings->debug.enableSelectedHierarchyOutline ? 1 : 0;
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 

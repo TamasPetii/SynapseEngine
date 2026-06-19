@@ -1,12 +1,16 @@
 #pragma once
 #include "Engine/Serialization/Schema/Schema.h"
-#include "Engine/Scene/SceneSettings.h"
+#include "Engine/Scene/Settings/CullingSettings.h"
+#include "Engine/Scene/Settings/LightingSettings.h"
+#include "Engine/Scene/Settings/PostProcessSettings.h"
+#include "Engine/Scene/Settings/DebugSettings.h"
+#include "Engine/Scene/Settings/SceneSettings.h"
 #include <type_traits>
 
 namespace Syn
 {
     template <>
-    struct Schema<SceneSettings>
+    struct Schema<CullingSettings>
     {
         static constexpr bool exists = true;
 
@@ -16,20 +20,21 @@ namespace Syn
             ScopedArchiveObject obj(ar, name);
             auto& settings = const_cast<std::remove_const_t<U>&>(val);
 
-            ar.Property("pipelineType", reinterpret_cast<std::underlying_type_t<PipelineType>&>(settings.pipelineType));
-            ar.Property("tileSize", settings.tileSize);
-            ar.Property("useDebugCamera", settings.useDebugCamera);
+            // Hardware Devices (A frameworköd automatikusan kezeli az enumokat!)
+            ar.Property("geometryCullingDevice", settings.geometryCullingDevice);
+            ar.Property("spotLightCullingDevice", settings.spotLightCullingDevice);
+            ar.Property("pointLightCullingDevice", settings.pointLightCullingDevice);
+            ar.Property("directionLightShadowCullingDevice", settings.directionLightShadowCullingDevice);
+            ar.Property("spotLightShadowCullingDevice", settings.spotLightShadowCullingDevice);
+            ar.Property("pointLightShadowCullingDevice", settings.pointLightShadowCullingDevice);
 
-            // Gpu Culling Toggles
-            ar.Property("enableGeometryGpuCulling", settings.enableGeometryGpuCulling);
-            ar.Property("enablePointLightGpuCulling", settings.enablePointLightGpuCulling);
-            ar.Property("enableSpotLightGpuCulling", settings.enableSpotLightGpuCulling);
-
-            // BVH, Hiz, Bloom
+            // Acceleration & Framework Flags
+            ar.Property("geometrySpatialAcceleration", settings.geometrySpatialAcceleration);
+            ar.Property("directionLightShadowSpatialAcceleration", settings.directionLightShadowSpatialAcceleration);
+            ar.Property("spotLightShadowSpatialAcceleration", settings.spotLightShadowSpatialAcceleration);
+            ar.Property("pointLightShadowSpatialAcceleration", settings.pointLightShadowSpatialAcceleration);
+            
             ar.Property("enableHiz", settings.enableHiz);
-            ar.Property("enableStaticBvhCulling", settings.enableStaticBvhCulling);
-            ar.Property("enableMortonBvhCulling", settings.enableMortonBvhCulling);
-            ar.Property("enableBloom", settings.enableBloom);
             ar.Property("enableMeshletConeCulling", settings.enableMeshletConeCulling);
 
             // Frustum Culling Toggles
@@ -49,70 +54,137 @@ namespace Syn
             ar.Property("enableMeshletOcclusionCulling", settings.enableMeshletOcclusionCulling);
             ar.Property("enablePointLightOcclusionCulling", settings.enablePointLightOcclusionCulling);
             ar.Property("enableSpotLightOcclusionCulling", settings.enableSpotLightOcclusionCulling);
+        }
+    };
 
-            // Deferred Passes Toggles
+    template <>
+    struct Schema<LightingSettings>
+    {
+        static constexpr bool exists = true;
+
+        template <typename Archive, typename U>
+        static void Invoke(Archive& ar, const char* name, U& val)
+        {
+            ScopedArchiveObject obj(ar, name);
+            auto& settings = const_cast<std::remove_const_t<U>&>(val);
+
+            ar.Property("pipelineType", settings.pipelineType);
+            ar.Property("tileSize", settings.tileSize);
+            ar.Property("ambientStrength", settings.ambientStrength);
+            ar.Property("emissiveStrength", settings.emissiveStrength);
+
+            // Deferred Features Toggles
             ar.Property("enableDeferredEmissiveAo", settings.enableDeferredEmissiveAo);
             ar.Property("enableDeferredPointLights", settings.enableDeferredPointLights);
             ar.Property("enableDeferredSpotLights", settings.enableDeferredSpotLights);
             ar.Property("enableDeferredDirectionalLights", settings.enableDeferredDirectionalLights);
 
-            // Forward Plus Passes Toggles
+            // Forward+ Features Toggles
             ar.Property("enableForwardPlusEmissiveAo", settings.enableForwardPlusEmissiveAo);
             ar.Property("enableForwardPlusPointLights", settings.enableForwardPlusPointLights);
             ar.Property("enableForwardPlusSpotLights", settings.enableForwardPlusSpotLights);
             ar.Property("enableForwardPlusDirectionalLights", settings.enableForwardPlusDirectionalLights);
+        }
+    };
 
-            // Wireframe Debug Toggles
-            ar.Property("enableWireframeMeshAabb", settings.enableWireframeMeshAabb);
-            ar.Property("enableWireframeMeshSphere", settings.enableWireframeMeshSphere);
+    template <>
+    struct Schema<PostProcessSettings>
+    {
+        static constexpr bool exists = true;
 
-            ar.Property("enableWireframeMeshletAabb", settings.enableWireframeMeshletAabb);
-            ar.Property("enableWireframeMeshletSphere", settings.enableWireframeMeshletSphere);
-            ar.Property("enableWireframeMeshletCone", settings.enableWireframeMeshletCone);
+        template <typename Archive, typename U>
+        static void Invoke(Archive& ar, const char* name, U& val)
+        {
+            ScopedArchiveObject obj(ar, name);
+            auto& settings = const_cast<std::remove_const_t<U>&>(val);
 
-            ar.Property("enableMortonChunkAabbWireframe", settings.enableMortonChunkAabbWireframe);
-            ar.Property("enableStaticChunkAabbWireframe", settings.enableStaticChunkAabbWireframe);
-            ar.Property("enablePointLightSphereWireframe", settings.enablePointLightSphereWireframe);
-            ar.Property("enablePointLightAabbWireframe", settings.enablePointLightAabbWireframe);
-            ar.Property("enableSpotLightSphereWireframe", settings.enableSpotLightSphereWireframe);
-            ar.Property("enableSpotLightAabbWireframe", settings.enableSpotLightAabbWireframe);
-            ar.Property("enableSpotLightConeWireframe", settings.enableSpotLightConeWireframe);
-            ar.Property("enableSpotLightPyramidWireframe", settings.enableSpotLightPyramidWireframe);
-            ar.Property("enableBoxColliderWireframe", settings.enableBoxColliderWireframe);
-            ar.Property("enableSphereColliderWireframe", settings.enableSphereColliderWireframe);
-            ar.Property("enableCapsuleColliderWireframe", settings.enableCapsuleColliderWireframe);
-
-            // Billboard Toggles
-            ar.Property("enableBillboardCameras", settings.enableBillboardCameras);
-            ar.Property("enableBillboardPointLights", settings.enableBillboardPointLights);
-            ar.Property("enableBillboardSpotLights", settings.enableBillboardSpotLights);
-            ar.Property("enableBillboardDirectionalLights", settings.enableBillboardDirectionalLights);
-
-            // Material & Light Strengths
-            ar.Property("ambientStrength", settings.ambientStrength);
-            ar.Property("emissiveStrength", settings.emissiveStrength);
-
-            // Bloom Settings
+            // Bloom
+            ar.Property("enableBloom", settings.enableBloom);
             ar.Property("bloomThreshold", settings.bloomThreshold);
             ar.Property("bloomKnee", settings.bloomKnee);
             ar.Property("bloomFilterRadius", settings.bloomFilterRadius);
             ar.Property("bloomExposure", settings.bloomExposure);
             ar.Property("bloomStrength", settings.bloomStrength);
 
-            // Debug Visibility
-            ar.Property("enableDebugVisibility", settings.enableDebugVisibility);
-            ar.Property("debugVisibilityMode", reinterpret_cast<std::underlying_type_t<DebugVisibilityMode>&>(settings.debugVisibilityMode));
-
-            // SSAO / HBAO Parameters
+            // SSAO
+            ar.Property("enableSsao", settings.enableSsao);
+            ar.Property("enableSsaoLight", settings.enableSsaoLight);
             ar.Property("aoRadius", settings.aoRadius);
             ar.Property("aoIntensity", settings.aoIntensity);
             ar.Property("maxOcclusionDistance", settings.maxOcclusionDistance);
             ar.Property("depthSharpness", settings.depthSharpness);
             ar.Property("bias", settings.bias);
             ar.Property("sampleCount", settings.sampleCount);
+        }
+    };
 
-            ar.Property("enableSsao", settings.enableSsao);
-            ar.Property("enableSsaoLight", settings.enableSsaoLight);
+    template <>
+    struct Schema<DebugSettings>
+    {
+        static constexpr bool exists = true;
+
+        template <typename Archive, typename U>
+        static void Invoke(Archive& ar, const char* name, U& val)
+        {
+            ScopedArchiveObject obj(ar, name);
+            auto& settings = const_cast<std::remove_const_t<U>&>(val);
+
+            ar.Property("useDebugCamera", settings.useDebugCamera);
+            ar.Property("enableDebugVisibility", settings.enableDebugVisibility);
+            ar.Property("debugVisibilityMode", settings.debugVisibilityMode);
+
+            // Geometry Wireframes
+            ar.Property("enableWireframeMeshAabb", settings.enableWireframeMeshAabb);
+            ar.Property("enableWireframeMeshSphere", settings.enableWireframeMeshSphere);
+            ar.Property("enableWireframeMeshletAabb", settings.enableWireframeMeshletAabb);
+            ar.Property("enableWireframeMeshletSphere", settings.enableWireframeMeshletSphere);
+            ar.Property("enableWireframeMeshletCone", settings.enableWireframeMeshletCone);
+            ar.Property("enableStaticChunkAabbWireframe", settings.enableStaticChunkAabbWireframe);
+            ar.Property("enableMortonChunkAabbWireframe", settings.enableMortonChunkAabbWireframe);
+
+            // Light Wireframes
+            ar.Property("enablePointLightSphereWireframe", settings.enablePointLightSphereWireframe);
+            ar.Property("enablePointLightAabbWireframe", settings.enablePointLightAabbWireframe);
+            ar.Property("enableSpotLightSphereWireframe", settings.enableSpotLightSphereWireframe);
+            ar.Property("enableSpotLightAabbWireframe", settings.enableSpotLightAabbWireframe);
+            ar.Property("enableSpotLightConeWireframe", settings.enableSpotLightConeWireframe);
+            ar.Property("enableSpotLightPyramidWireframe", settings.enableSpotLightPyramidWireframe);
+
+            // Physics Colliders
+            ar.Property("enableBoxColliderWireframe", settings.enableBoxColliderWireframe);
+            ar.Property("enableSphereColliderWireframe", settings.enableSphereColliderWireframe);
+            ar.Property("enableCapsuleColliderWireframe", settings.enableCapsuleColliderWireframe);
+
+            // Billboards
+            ar.Property("enableBillboardCameras", settings.enableBillboardCameras);
+            ar.Property("enableBillboardPointLights", settings.enableBillboardPointLights);
+            ar.Property("enableBillboardSpotLights", settings.enableBillboardSpotLights);
+            ar.Property("enableBillboardDirectionalLights", settings.enableBillboardDirectionalLights);
+
+            // Selection Outlines
+            ar.Property("enableSelectedOutline", settings.enableSelectedOutline);
+            ar.Property("enableSelectedHierarchyOutline", settings.enableSelectedHierarchyOutline);
+            ar.Property("outlinePrimaryColor", settings.outlinePrimaryColor);
+            ar.Property("outlineSecondaryColor", settings.outlineSecondaryColor);
+            ar.Property("outlineThickness", settings.outlineThickness);
+        }
+    };
+
+    template <>
+    struct Schema<SceneSettings>
+    {
+        static constexpr bool exists = true;
+
+        template <typename Archive, typename U>
+        static void Invoke(Archive& ar, const char* name, U& val)
+        {
+            ScopedArchiveObject obj(ar, name);
+            auto& settings = const_cast<std::remove_const_t<U>&>(val);
+
+            ar.Property("Culling", settings.culling);
+            ar.Property("Lighting", settings.lighting);
+            ar.Property("PostProcess", settings.postProcess);
+            ar.Property("Debug", settings.debug);
         }
     };
 }

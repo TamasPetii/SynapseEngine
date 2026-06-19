@@ -20,10 +20,8 @@ namespace Syn {
 
     bool DirectionLightShadowHizCopyPass::ShouldExecute(const RenderContext& context) const
     {
-        return true;
-
         auto pool = context.scene->GetRegistry()->GetPool<DirectionLightComponent>();
-        return context.scene->GetSettings()->enableGeometryGpuCulling && pool && pool->Size() > 0;
+        return pool && pool->Size() > 0;
     }
 
     void DirectionLightShadowHizCopyPass::Initialize() {
@@ -92,7 +90,7 @@ namespace Syn {
 		auto fIdx = context.frameIndex;
 
         Vk::PushConstant<HizLinearizeDepthPC> pc;
-        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
         pc->outImageSize = glm::vec2(SHADOW_ATLAS_SIZE, SHADOW_ATLAS_SIZE);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }

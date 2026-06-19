@@ -40,7 +40,8 @@ namespace Syn {
 
     bool DirectionLightShadowWorkGraphCullingPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->enableGeometryGpuCulling;
+        //Todo: Gpu driven + Work graph
+        return false;
     }
 
     void DirectionLightShadowWorkGraphCullingPass::Initialize() {
@@ -153,16 +154,15 @@ namespace Syn {
         // _dynamicModelCount = ...
         // _staticChunkCount = drawData->Chunks.staticChunkCount;
         // _mortonChunkCount = drawData->Chunks.mortonChunkCount;
-        // _activeDirectionLightShadowCount = drawData->DirectionLightShadows.activeShadowCount; (Saját engine adatszerkezeted szerint)
+        // _activeDirectionLightShadowCount = drawData->DirectionLightShadows.activeShadowCount;
 
         if (_dynamicModelCount == 0 && _staticChunkCount == 0 && _mortonChunkCount == 0)
             return;
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         Vk::PushConstant<DirectionLightShadowCullingPC> pc;
-        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, isGpu);
+        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -194,7 +194,6 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         auto settings = scene->GetSettings();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = settings->enableGeometryGpuCulling;
 
         vkCmdBindPipeline(context.cmd, VK_PIPELINE_BIND_POINT_EXECUTION_GRAPH_AMDX, _graphPipeline);
 
@@ -231,7 +230,7 @@ namespace Syn {
             dispatchInfos.push_back(info);
         }
 
-        if (settings->enableStaticBvhCulling && _staticChunkCount > 0) {
+        if (settings->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::StaticBvh && _staticChunkCount > 0) {
             VkDispatchGraphInfoAMDX info{};
             info.nodeIndex = _staticChunkRootIndex;
             info.payloadCount = 1;
@@ -240,7 +239,7 @@ namespace Syn {
             dispatchInfos.push_back(info);
         }
 
-        if (settings->enableMortonBvhCulling && _mortonChunkCount > 0) {
+        if (settings->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh && _mortonChunkCount > 0) {
             VkDispatchGraphInfoAMDX info{};
             info.nodeIndex = _mortonChunkRootIndex;
             info.payloadCount = 1;
@@ -264,7 +263,7 @@ namespace Syn {
         }
 
         Vk::BufferBarrierInfo instanceBarrier{};
-        instanceBarrier.buffer = drawData->DirectionLightShadow.instanceBuffer.GetHandle(fIdx, isGpu);
+        instanceBarrier.buffer = drawData->DirectionLightShadow.instanceBuffer.GetHandle(fIdx);
         instanceBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         instanceBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         instanceBarrier.dstStage = VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_EXT | VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_EXT;
@@ -272,7 +271,7 @@ namespace Syn {
         Vk::BufferUtils::InsertBarrier(context.cmd, instanceBarrier);
 
         Vk::BufferBarrierInfo indirectBarrier{};
-        indirectBarrier.buffer = drawData->DirectionLightShadow.indirectBuffer.GetHandle(fIdx, isGpu);
+        indirectBarrier.buffer = drawData->DirectionLightShadow.indirectBuffer.GetHandle(fIdx);
         indirectBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         indirectBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         indirectBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_EXT;
