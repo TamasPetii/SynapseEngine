@@ -1,14 +1,13 @@
 #pragma once
-#include "Engine/SynApi.h"
 #include "Engine/System/ISystem.h"
 #include <vector>
 
 namespace Syn
 {
-    class SYN_API SpotLightFrustumCullingSystem : public ISystem
+    class SYN_API SpotLightShadowRenderSystem : public ISystem
     {
     public:
-        std::string GetName() const override { return "SpotLightFrustumCullingSystem"; }
+        std::string GetName() const override { return "SpotLightShadowRenderSystem"; }
         std::string GetGroup() const override { return SystemGroupNames::SpotLightSystems; }
 
         std::vector<TypeID> GetReadDependencies() const override;
@@ -16,6 +15,11 @@ namespace Syn
 
         void OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) override;
         void OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow) override;
-        void OnFinish(Scene* scene, tf::Subflow& subflow) override {}
+        void OnFinish(Scene* scene, tf::Subflow& subflow) override;
+    private:
+        void RebuildShadowBuffers(Scene* scene);
+    private:
+        uint32_t _lastMainAllocatedInstances = 0;
+        bool _needsRebuild = true;
     };
 }

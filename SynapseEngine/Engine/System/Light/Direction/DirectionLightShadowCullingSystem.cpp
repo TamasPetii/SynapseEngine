@@ -333,7 +333,7 @@ namespace Syn
 
         uint32_t activeChunks = chunkGroup->chunkCounter.load(std::memory_order_relaxed);
 
-        //// BVH Chunk Culling Execution
+        // BVH Chunk Culling Execution
         if (settings->enableStaticBvhCulling && activeChunks > 0)
         {
             if (drawData->DirectionLightShadow.visibleChunkIds.Size() < activeChunks) {

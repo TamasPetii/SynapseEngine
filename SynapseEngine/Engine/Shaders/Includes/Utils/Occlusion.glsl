@@ -72,11 +72,35 @@ bool IsSphereOccluded(vec3 worldCenter, float radius, CameraComponent camera, sa
         }
 
         if (enableDepthOcclusion) {
-            float lod = max(0.0, ceil(log2(outScreenSizePixels / 2.0)));
+            float lod = max(0.0, ceil(log2(outScreenSizePixels * 0.5)));
+
+            /* DO NOT USE MAX REDUCTION SAMPLER AND UV COORDS!!!
+            */
             vec2 centerUV = (uv.xy + uv.zw) * 0.5;
-            centerUV.y = 1.0 - centerUV.y;
-            
+            centerUV.y = 1.0 - centerUV.y;            
             float maxDepth = textureLod(depthPyramid, centerUV, lod).r;
+
+            /*
+            int mipLevel = int(lod);
+            ivec2 mipSize = textureSize(depthPyramid, mipLevel);
+
+            vec2 uvMin = vec2(uv.x, 1.0 - uv.w);
+            vec2 uvMax = vec2(uv.z, 1.0 - uv.y);
+
+            vec2 texCoordMin = uvMin * vec2(mipSize);
+            vec2 texCoordMax = uvMax * vec2(mipSize);
+
+            ivec2 p0 = clamp(ivec2(texCoordMin), ivec2(0), mipSize - 1);
+            ivec2 p1 = clamp(ivec2(texCoordMax), ivec2(0), mipSize - 1);
+
+            float d00 = texelFetch(depthPyramid, p0, mipLevel).r;
+            float d10 = texelFetch(depthPyramid, ivec2(p1.x, p0.y), mipLevel).r;
+            float d01 = texelFetch(depthPyramid, ivec2(p0.x, p1.y), mipLevel).r;
+            float d11 = texelFetch(depthPyramid, p1, mipLevel).r;
+
+            float maxDepth = max(max(d00, d10), max(d01, d11));
+            */
+
             float sphereClosestDepth = -viewCenter.z - radius;
             float normalizedDepth = (sphereClosestDepth - camera.params.x) / (camera.params.y - camera.params.x);
 
@@ -115,10 +139,31 @@ bool IsSphereOccludedDirLightShadow(vec3 worldCenter, float radius, mat4 viewPro
 
         // Calculate HZB LOD (scaled to fit footprint into a 2x2 texel quad)
         float lod = max(0.0, ceil(log2(outScreenSizePixels * 0.5)));
-        lod = clamp(lod, 0.0, maxHizMipLevel);
 
+        /* DO NOT USE MAX REDUCTION SAMPLER AND UV COORDS!!!
+        */
+        lod = clamp(lod, 0.0, maxHizMipLevel);
         vec2 centerUV = (atlasUV_min + atlasUV_max) * 0.5;
         float maxDepth = textureLod(shadowDepthPyramid, centerUV, lod).r;
+
+        /*
+        int mipLevel = int(clamp(lod, 0.0, float(maxHizMipLevel)));
+        ivec2 mipSize = textureSize(shadowDepthPyramid, mipLevel);
+
+        vec2 texCoordMin = atlasUV_min * vec2(mipSize);
+        vec2 texCoordMax = atlasUV_max * vec2(mipSize);
+        ivec2 texLimitMin = ivec2(atlasLimitMin * vec2(mipSize));
+        ivec2 texLimitMax = clamp(ivec2(atlasLimitMax * vec2(mipSize)) - ivec2(1), ivec2(0), mipSize - ivec2(1));
+
+        ivec2 p0 = clamp(ivec2(texCoordMin), texLimitMin, texLimitMax);
+        ivec2 p1 = clamp(ivec2(texCoordMax), texLimitMin, texLimitMax);
+
+        float d00 = texelFetch(shadowDepthPyramid, p0, mipLevel).r;
+        float d10 = texelFetch(shadowDepthPyramid, ivec2(p1.x, p0.y), mipLevel).r;
+        float d01 = texelFetch(shadowDepthPyramid, ivec2(p0.x, p1.y), mipLevel).r;
+        float d11 = texelFetch(shadowDepthPyramid, p1, mipLevel).r;
+        float maxDepth = max(max(d00, d10), max(d01, d11));
+        */
 
         // Occluded if the closest sphere point is behind the maximum recorded depth
         return closestZ > maxDepth;

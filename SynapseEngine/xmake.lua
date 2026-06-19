@@ -5,6 +5,7 @@ set_config("vcpkg", os.projectdir() .. "/../External/vcpkg")
 
 set_allowedmodes("debug", "release", "dist", "performance")
 add_rules("mode.debug", "mode.release")
+add_rules("plugin.compile_commands.autoupdate", {outputdir = ".vscode"})
 
 set_languages("c17", "cxx23")
 set_warnings("allextra")

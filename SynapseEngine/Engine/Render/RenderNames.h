@@ -48,5 +48,8 @@ namespace Syn
 
         static constexpr const char* DirectionLightShadowDepthPyramidMin = "DirectionLightShadowDepthPyramidMin";
         static constexpr const char* DirectionLightShadowDepthPyramidMax = "DirectionLightShadowDepthPyramidMax";
+
+        static constexpr const char* SpotLightShadowDepthPyramidMin = "SpotLightShadowDepthPyramidMin";
+        static constexpr const char* SpotLightShadowDepthPyramidMax = "SpotLightShadowDepthPyramidMax";
     };
 }

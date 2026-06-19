@@ -31,7 +31,7 @@
 #include "Engine/System/Light/Point/PointLightFrustumCullingSystem.h"
 #include "Engine/System/Light/Spot/SpotLightSystem.h"
 #include "Engine/System/Light/Spot/SpotLightShadowSystem.h"
-#include "Engine/System/Light/Spot/SpotLightFrustumCullingSystem.h"
+#include "Engine/System/Light/Spot/SpotLightCullingSystem.h"
 #include "Engine/System/Light/Direction/DirectionLightSystem.h"
 #include "Engine/System/Light/Direction/DirectionLightShadowSystem.h"
 #include "Engine/System/Light/Direction/DirectionLightCullingSystem.h"
@@ -138,7 +138,7 @@ namespace Syn
         RegisterSystem<PointLightFrustumCullingSystem>();
         RegisterSystem<SpotLightSystem>();
         RegisterSystem<SpotLightShadowSystem>();
-        RegisterSystem<SpotLightFrustumCullingSystem>();
+        RegisterSystem<SpotLightCullingSystem>();
 		RegisterSystem<DirectionLightSystem>();
         RegisterSystem<DirectionLightCullingSystem>();
         RegisterSystem<DirectionLightShadowSystem>();
@@ -239,6 +239,7 @@ namespace Syn
 
         RegisterComponentSparseMapBuffer<SpotLightShadowComponent>(BufferNames::SpotLightShadowSparseMap);
         RegisterComponentBuffer<SpotLightShadowComponent, SpotLightShadowComponentGPU>(BufferNames::SpotLightShadowData);
+        RegisterComponentBuffer<SpotLightShadowComponent, uint32_t>(BufferNames::SpotLightShadowVisibleData);
 
         RegisterComponentSparseMapBuffer<DirectionLightComponent>(BufferNames::DirectionLightSparseMap);
         RegisterComponentBuffer<DirectionLightComponent, DirectionLightComponentGPU>(BufferNames::DirectionLightData);

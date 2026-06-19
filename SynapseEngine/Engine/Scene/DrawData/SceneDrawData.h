@@ -12,6 +12,7 @@
 #include <atomic>
 #include "IDrawGroup.h"
 #include "DirectionLightShadowDrawGroup.h"
+#include "SpotLightShadowDrawGroup.h"
 
 namespace Syn
 {
@@ -27,12 +28,15 @@ namespace Syn
         ModelDrawGroup Models;
         DebugDrawGroup Debug;
         PointLightDrawGroup PointLights;
-        SpotLightDrawGroup SpotLights;
         ForwardPlusDrawGroup ForwardPlus;
 		ChunkDrawGroup Chunks;
 		SsaoDrawGroup Ssao;
         DirectionLightDrawGroup DirectionLights;
         DirectionLightShadowDrawGroup DirectionLightShadow;
+        SpotLightDrawGroup SpotLights;
+        SpotLightShadowDrawGroup SpotLightShadow;
+
+
 
         std::atomic<uint32_t> syncFramesRemaining{ 0 };
     };

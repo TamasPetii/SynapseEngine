@@ -26,7 +26,8 @@ namespace Syn
         friend struct SpotLightColliderGPU;
         friend struct SpotLightComponentGPU;
         friend class SpotLightSystem;
-        friend class SpotLightFrustumCullingSystem;
+        friend class SpotLightCullingSystem;
+        friend class SpotLightShadowAtlasSystem;
     };
 
     struct SYN_API SpotLightComponentGPU

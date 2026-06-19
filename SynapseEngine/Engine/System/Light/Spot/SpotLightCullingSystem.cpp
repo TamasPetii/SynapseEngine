@@ -1,6 +1,7 @@
-#include "SpotLightFrustumCullingSystem.h"
+#include "SpotLightCullingSystem.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Component/Light/Spot/SpotLightComponent.h"
+#include "Engine/Component/Light/Spot/SpotLightShadowComponent.h"
 #include "Engine/Component/Core/CameraComponent.h"
 #include "SpotLightSystem.h"
 #include "Engine/System/Core/CameraSystem.h"
@@ -9,25 +10,26 @@
 
 namespace Syn
 {
-    std::vector<TypeID> SpotLightFrustumCullingSystem::GetReadDependencies() const {
+    std::vector<TypeID> SpotLightCullingSystem::GetReadDependencies() const {
         return {
             TypeInfo<SpotLightSystem>::ID,
             TypeInfo<CameraSystem>::ID
         };
     }
 
-    std::vector<TypeID> SpotLightFrustumCullingSystem::GetWriteDependencies() const {
+    std::vector<TypeID> SpotLightCullingSystem::GetWriteDependencies() const {
         return {
-            TypeInfo<SpotLightFrustumCullingSystem>::ID
+            TypeInfo<SpotLightCullingSystem>::ID
         };
     }
 
-    void SpotLightFrustumCullingSystem::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
+    void SpotLightCullingSystem::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
     {
         auto settings = scene->GetSettings();
         auto drawData = scene->GetSceneDrawData();
         auto registry = scene->GetRegistry();
         auto pool = registry->GetPool<SpotLightComponent>();
+        auto shadowPool = registry->GetPool<SpotLightShadowComponent>();
         auto cameraPool = registry->GetPool<CameraComponent>();
         EntityID cameraEntity = scene->GetSceneCameraEntity();
 
@@ -41,6 +43,11 @@ namespace Syn
             if (drawData->SpotLights.instances.Size() < maxLights) {
                 drawData->SpotLights.instances.Resize(maxLights);
             }
+
+            drawData->SpotLightShadow.visibleLightCount = 0;
+            if (drawData->SpotLightShadow.visibleLights.Size() < maxLights) {
+                drawData->SpotLightShadow.visibleLights.Resize(maxLights);
+            }
             });
 
         if (settings->enableSpotLightGpuCulling) {
@@ -49,7 +56,7 @@ namespace Syn
 
         glm::vec2 screenRes = glm::vec2(cameraComp.width, cameraComp.height);
 
-        auto cullFunc = [this, settings, pool, cameraComp, drawData, screenRes](EntityID entity) {
+        auto cullFunc = [this, settings, pool, cameraComp, drawData, screenRes, shadowPool](EntityID entity) {
             const auto& lightComp = pool->Get(entity);
 
             bool visibility = true;
@@ -71,6 +78,15 @@ namespace Syn
                     if (slot < drawData->SpotLights.instances.Size()) {
                         drawData->SpotLights.instances[slot] = entity;
                     }
+
+                    if (lightComp.useShadow && shadowPool && shadowPool->Has(entity)) {
+                        std::atomic_ref<uint32_t> shadowCountRef(drawData->SpotLightShadow.visibleLightCount);
+                        uint32_t shadowSlot = shadowCountRef.fetch_add(1, std::memory_order_relaxed);
+
+                        if (shadowSlot < drawData->SpotLightShadow.visibleLights.Size()) {
+                            drawData->SpotLightShadow.visibleLights[shadowSlot] = entity;
+                        }
+                    }
                 }
             }
             };
@@ -84,18 +100,25 @@ namespace Syn
         if (statTask) initTask.precede(*statTask);
     }
 
-    void SpotLightFrustumCullingSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
+    void SpotLightCullingSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
     {
         this->EmplaceTask(subflow, SystemPhaseNames::UploadGPU, [this, scene, frameIndex]() {
             auto bufferManager = scene->GetComponentBufferManager();
             auto drawData = scene->GetSceneDrawData();
             auto settings = scene->GetSettings();
+
             uint32_t count = drawData->SpotLights.cmdTemplate.instanceCount;
+            uint32_t shadowCount = drawData->SpotLightShadow.visibleLightCount;
 
             if (!settings->enableSpotLightGpuCulling) {
                 auto instanceBufferView = bufferManager->GetComponentBuffer(BufferNames::SpotLightVisibleData, frameIndex);
                 if (count > 0 && instanceBufferView.buffer) {
                     instanceBufferView.buffer->Write(drawData->SpotLights.instances.Data(), count * sizeof(uint32_t), 0);
+                }
+
+                auto shadowBufferView = bufferManager->GetComponentBuffer(BufferNames::SpotLightShadowVisibleData, frameIndex);
+                if (shadowCount > 0 && shadowBufferView.buffer) {
+                    shadowBufferView.buffer->Write(drawData->SpotLightShadow.visibleLights.Data(), shadowCount * sizeof(uint32_t), 0);
                 }
             }
 

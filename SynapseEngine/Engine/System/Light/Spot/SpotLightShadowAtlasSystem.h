@@ -1,15 +1,14 @@
 #pragma once
-#include "Engine/SynApi.h"
 #include "Engine/System/ISystem.h"
 #include <vector>
 
 namespace Syn
 {
-    class SYN_API DirectionLightShadowAtlasSystem : public ISystem
+    class SYN_API SpotLightShadowAtlasSystem : public ISystem
     {
     public:
-        std::string GetName() const override { return "DirectionLightShadowAtlasSystem"; }
-        std::string GetGroup() const override { return SystemGroupNames::DirectionLightSystems; }
+        std::string GetName() const override { return "SpotLightShadowAtlasSystem"; }
+        std::string GetGroup() const override { return SystemGroupNames::SpotLightSystems; }
 
         std::vector<TypeID> GetReadDependencies() const override;
         std::vector<TypeID> GetWriteDependencies() const override;

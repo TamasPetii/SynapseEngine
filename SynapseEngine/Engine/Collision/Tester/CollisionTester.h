@@ -37,6 +37,9 @@ namespace Syn
     
         SYN_INLINE static float CalculateSphereScreenSize(const glm::vec3& center, float radius, const glm::mat4& view, const glm::mat4& proj, float nearZ, const glm::vec2& screenRes);
         SYN_INLINE static uint32_t CalculateLodFromScreenSize(float screenSizePixels);
+
+        SYN_INLINE static bool TestConeSphere(const glm::vec3& conePos, const glm::vec3& coneDir, float coneRange, float coneCosAngle, float coneSinAngle, const glm::vec3& sphereCenter, float sphereRadius);
+        SYN_INLINE static IntersectionType TestConeSphereIntersectionType(const glm::vec3& conePos, const glm::vec3& coneDir, float coneRange, float coneCosAngle, float coneSinAngle, const glm::vec3& sphereCenter, float sphereRadius);
     private:
         SYN_INLINE static float GetSignedDistance(const glm::vec4& plane, const glm::vec3& point);
     };
@@ -201,5 +204,41 @@ namespace Syn
         if (screenSizePixels > 256.0f) return 1;
         if (screenSizePixels > 128.0f) return 2;
         return 3;
+    }
+
+    SYN_INLINE bool CollisionTester::TestConeSphere(const glm::vec3& conePos, const glm::vec3& coneDir, float coneRange, float coneCosAngle, float coneSinAngle, const glm::vec3& sphereCenter, float sphereRadius)
+    {
+        glm::vec3 v = sphereCenter - conePos;
+        float lenSq = glm::dot(v, v);
+        float v1Len = glm::dot(v, coneDir);
+        float distanceClosestPoint = coneCosAngle * std::sqrt(std::max(lenSq - v1Len * v1Len, 0.0f)) - v1Len * coneSinAngle;
+
+        bool angleCull = distanceClosestPoint > sphereRadius;
+        bool frontCull = v1Len > sphereRadius + coneRange;
+        bool backCull = v1Len < -sphereRadius;
+
+        return !(angleCull || frontCull || backCull);
+    }
+
+    SYN_INLINE IntersectionType CollisionTester::TestConeSphereIntersectionType(const glm::vec3& conePos, const glm::vec3& coneDir, float coneRange, float coneCosAngle, float coneSinAngle, const glm::vec3& sphereCenter, float sphereRadius)
+    {
+        glm::vec3 v = sphereCenter - conePos;
+        float lenSq = glm::dot(v, v);
+        float v1Len = glm::dot(v, coneDir);
+        float distanceClosestPoint = coneCosAngle * std::sqrt(std::max(lenSq - v1Len * v1Len, 0.0f)) - v1Len * coneSinAngle;
+
+        if (distanceClosestPoint > sphereRadius || v1Len > sphereRadius + coneRange || v1Len < -sphereRadius) {
+            return IntersectionType::Outside;
+        }
+
+        bool fullyInAngle = distanceClosestPoint < -sphereRadius;
+        bool fullyInFront = v1Len > sphereRadius;
+        bool fullyBehindRange = v1Len < coneRange - sphereRadius;
+
+        if (fullyInAngle && fullyInFront && fullyBehindRange) {
+            return IntersectionType::Inside;
+        }
+
+        return IntersectionType::Intersect;
     }
 }

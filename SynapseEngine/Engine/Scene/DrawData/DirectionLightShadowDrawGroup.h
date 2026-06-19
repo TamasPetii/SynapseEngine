@@ -57,7 +57,6 @@ namespace Syn
         std::atomic<uint32_t> visibleChunkCount{ 0 };
 
         VkDispatchIndirectCommand dispatchCmdTemplate{};
-
 		uint32_t totalCommandCount = 0;
 
         std::vector<std::unique_ptr<Vk::Image>> shadowAtlas;
