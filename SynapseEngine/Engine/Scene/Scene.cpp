@@ -29,15 +29,22 @@
 #include "Engine/System/Light/Point/PointLightSystem.h"
 #include "Engine/System/Light/Point/PointLightShadowSystem.h"
 #include "Engine/System/Light/Point/PointLightFrustumCullingSystem.h"
-#include "Engine/System/Light/Spot/SpotLightSystem.h"
-#include "Engine/System/Light/Spot/SpotLightShadowSystem.h"
-#include "Engine/System/Light/Spot/SpotLightCullingSystem.h"
+
+
 #include "Engine/System/Light/Direction/DirectionLightSystem.h"
 #include "Engine/System/Light/Direction/DirectionLightShadowSystem.h"
 #include "Engine/System/Light/Direction/DirectionLightCullingSystem.h"
 #include "Engine/System/Light/Direction/DirectionLightShadowRenderSystem.h"
 #include "Engine/System/Light/Direction/DirectionLightShadowCullingSystem.h"
 #include "Engine/System/Light/Direction/DirectionLightShadowAtlasSystem.h"
+
+#include "Engine/System/Light/Spot/SpotLightSystem.h"
+#include "Engine/System/Light/Spot/SpotLightShadowSystem.h"
+#include "Engine/System/Light/Spot/SpotLightCullingSystem.h"
+#include "Engine/System/Light/Spot/SpotLightShadowRenderSystem.h"
+#include "Engine/System/Light/Spot/SpotLightShadowCullingSystem.h"
+#include "Engine/System/Light/Spot/SpotLightShadowAtlasSystem.h"
+
 #include "Engine/System/Physics/BoxColliderSystem.h"
 #include "Engine/System/Physics/SphereColliderSystem.h"
 #include "Engine/System/Physics/CapsuleColliderSystem.h"
@@ -133,18 +140,25 @@ namespace Syn
         RegisterSystem<ModelSystem>();
         RegisterSystem<ModelFrustumCullingSystem>();
         RegisterSystem<AnimationSystem>();
+
         RegisterSystem<PointLightSystem>();
         RegisterSystem<PointLightShadowSystem>();
         RegisterSystem<PointLightFrustumCullingSystem>();
+
         RegisterSystem<SpotLightSystem>();
         RegisterSystem<SpotLightShadowSystem>();
         RegisterSystem<SpotLightCullingSystem>();
+        RegisterSystem<SpotLightShadowRenderSystem>();
+        RegisterSystem<SpotLightShadowCullingSystem>();
+        RegisterSystem<SpotLightShadowAtlasSystem>();
+
 		RegisterSystem<DirectionLightSystem>();
         RegisterSystem<DirectionLightCullingSystem>();
         RegisterSystem<DirectionLightShadowSystem>();
         RegisterSystem<DirectionLightShadowRenderSystem>();
         RegisterSystem<DirectionLightShadowCullingSystem>();
         RegisterSystem<DirectionLightShadowAtlasSystem>();
+
         RegisterSystem<PhysicsSystem>();
 		RegisterSystem<BoxColliderSystem>();
 		RegisterSystem<SphereColliderSystem>();
@@ -152,8 +166,10 @@ namespace Syn
         RegisterSystem<ConvexColliderSystem>();
         RegisterSystem<MeshColliderSystem>();
 		RegisterSystem<RigidBodySystem>();
+
 		RegisterSystem<HierarchySystem>();
         RegisterSystem<SelectionOutlineSystem>();
+
     }
 
     void Scene::InitializeComponentBuffers()
@@ -182,8 +198,7 @@ namespace Syn
         RegisterGenericBuffer<ChunkDataGPU>(BufferNames::MortonChunkData, mortonChunkBufferSizing, mortonCondition, ComponentMemoryType::GpuOnly);
         RegisterGenericBuffer<uint32_t>(BufferNames::MortonChunkVisibileIndex, mortonChunkBufferSizing, mortonCondition, ComponentMemoryType::GpuOnly);
         RegisterComponentBuffer<TransformComponent, uint32_t>(BufferNames::MortonChunkTransformsIndex, ComponentMemoryType::GpuOnly);
-
-        
+  
         RegisterGenericBuffer<ChunkDataGPU>(BufferNames::MortonChunkData,
             [this]() -> uint32_t {
                 auto pool = _registry->GetPool<TransformComponent>();
@@ -299,6 +314,47 @@ namespace Syn
                 uint32_t chunkCount = ComputeGroupSize::CalculateDispatchCount(staticCount, ComputeGroupSize::Buffer32D);
 
                 return chunkCount * SHADOW_MULTIPLIER;
+            },
+            [this]() -> bool {
+                auto pool = _registry->GetPool<TransformComponent>();
+                return pool && !pool->GetStorage().GetStaticEntities().empty();
+            },
+            ComponentMemoryType::GpuOnly);
+
+        RegisterGenericBuffer<VisibleModelData>(BufferNames::SpotLightShadowModelVisibleData,
+            [this]() -> uint32_t {
+                auto pool = _registry->GetPool<ModelComponent>();
+                return pool ? static_cast<uint32_t>(pool->Size()) * SPOT_SHADOW_MULTIPLIER : 0;
+            },
+            [this]() -> bool {
+                auto pool = _registry->GetPool<ModelComponent>();
+                return pool && pool->Size() > 0;
+            },
+            ComponentMemoryType::GpuOnly);
+
+        RegisterGenericBuffer<uint32_t>(BufferNames::SpotLightShadowMortonChunkVisibleIndex,
+            [this]() -> uint32_t {
+                auto pool = _registry->GetPool<TransformComponent>();
+                if (!pool) return 0;
+
+                uint32_t chunkCount = ComputeGroupSize::CalculateDispatchCount(static_cast<uint32_t>(pool->Size()), ComputeGroupSize::Buffer32D);
+                return chunkCount * SPOT_SHADOW_MULTIPLIER;
+            },
+            [this]() -> bool {
+                auto pool = _registry->GetPool<TransformComponent>();
+                return pool && pool->Size() > 0;
+            },
+            ComponentMemoryType::GpuOnly);
+
+        RegisterGenericBuffer<uint32_t>(BufferNames::SpotLightShadowStaticChunkVisibleIndex,
+            [this]() -> uint32_t {
+                auto pool = _registry->GetPool<TransformComponent>();
+                if (!pool) return 0;
+
+                uint32_t staticCount = static_cast<uint32_t>(pool->GetStorage().GetStaticEntities().size());
+                uint32_t chunkCount = ComputeGroupSize::CalculateDispatchCount(staticCount, ComputeGroupSize::Buffer32D);
+
+                return chunkCount * SPOT_SHADOW_MULTIPLIER;
             },
             [this]() -> bool {
                 auto pool = _registry->GetPool<TransformComponent>();

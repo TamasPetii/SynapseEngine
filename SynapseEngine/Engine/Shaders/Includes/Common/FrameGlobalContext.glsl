@@ -55,6 +55,25 @@ struct FrameGlobalContext {
     uint64_t directionLightShadowMortonChunkCountBufferAddr;
     uint64_t directionLightShadowMortonChunkVisibleIndexBufferAddr;
 
+    uint64_t spotLightIndirectCommandBufferAddr;
+    uint64_t spotLightVisibleIndexBufferAddr;
+    uint64_t spotLightDataBufferAddr;
+    uint64_t spotLightColliderBufferAddr;
+    uint64_t spotLightSparseMapBufferAddr;
+
+    uint64_t spotLightShadowIndirectGeometryCommandBufferAddr;
+    uint64_t spotLightShadowInstanceBufferAddr;
+    uint64_t spotLightDrawDescriptorBufferAddr;
+    uint64_t spotLightShadowSparseMapBufferAddr;
+    uint64_t spotLightShadowDataBufferAddr;  
+    uint64_t spotLightVisibleShadowIndexBufferAddr;
+    uint64_t spotLightShadowModelCountBufferAddr;
+    uint64_t spotLightShadowModelVisibleIndexBufferAddr;
+    uint64_t spotLightShadowChunkCountBufferAddr;
+    uint64_t spotLightShadowChunkVisibleIndexBufferAddr;
+    uint64_t spotLightShadowMortonChunkCountBufferAddr;
+    uint64_t spotLightShadowMortonChunkVisibleIndexBufferAddr;
+
     uint64_t pointLightIndirectCommandBufferAddr;
     uint64_t pointLightVisibleIndexBufferAddr;
     uint64_t pointLightDataBufferAddr;
@@ -63,13 +82,6 @@ struct FrameGlobalContext {
     uint64_t pointLightShadowSparseMapBufferAddr;
     uint64_t pointLightShadowDataBufferAddr; 
 
-    uint64_t spotLightIndirectCommandBufferAddr;
-    uint64_t spotLightVisibleIndexBufferAddr;
-    uint64_t spotLightDataBufferAddr;
-    uint64_t spotLightColliderBufferAddr;
-    uint64_t spotLightSparseMapBufferAddr;
-    uint64_t spotLightShadowSparseMapBufferAddr;
-    uint64_t spotLightShadowDataBufferAddr;  
 
     uint64_t forwardPlusTileGridListBufferAddr;
     uint64_t forwardPlusClusterCountBufferAddr;

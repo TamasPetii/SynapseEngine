@@ -5,7 +5,7 @@
 #include "Engine/Scene/DrawData/SceneDrawData.h"
 #include "SpotLightShadowSystem.h"
 #include "Engine/System/Rendering/RenderSystem.h"
-#include "SpotLightFrustumCullingSystem.h"
+#include "SpotLightCullingSystem.h"
 #include <cstring>
 #include <vector>
 
@@ -18,7 +18,7 @@ namespace Syn
         return {
             TypeInfo<RenderSystem>::ID,
             TypeInfo<SpotLightShadowSystem>::ID,
-            TypeInfo<SpotLightFrustumCullingSystem>::ID,
+            TypeInfo<SpotLightCullingSystem>::ID,
         };
     }
 

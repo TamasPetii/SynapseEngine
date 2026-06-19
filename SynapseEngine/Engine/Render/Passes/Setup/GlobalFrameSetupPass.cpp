@@ -82,11 +82,13 @@ namespace Syn {
         ctx.materialLookupBufferAddr = drawData->Models.materialIndexBuffer.GetAddress(fIdx, isGpu);
         ctx.materialBufferAddr = materialManager->GetAddressBuffer()->GetDeviceAddress();
 
+        //Direction Light Buffers
         ctx.directionLightIndirectCommandBufferAddr = drawData->DirectionLights.indirectBuffer.GetAddress(fIdx, isGpu);
         ctx.directionLightVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightVisibleData, fIdx);
         ctx.directionLightDataBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightData, fIdx);
         ctx.directionLightSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightSparseMap, fIdx);
         
+        //Direction Light Shadow Buffers
         ctx.directionLightShadowIndirectGeometryCommandBufferAddr = drawData->DirectionLightShadow.indirectBuffer.GetAddress(fIdx, isGpu);
         ctx.directionLightShadowSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightShadowSparseMap, fIdx);
         ctx.directionLightShadowDataBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightShadowData, fIdx);
@@ -100,6 +102,28 @@ namespace Syn {
         ctx.directionLightShadowMortonChunkCountBufferAddr = drawData->DirectionLightShadow.mortonChunkDispatchBuffer.GetAddress(fIdx, isGpu);
         ctx.directionLightShadowMortonChunkVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightShadowMortonChunkVisibleIndex, fIdx);
 
+        //Spot Light Buffers
+        ctx.spotLightSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightSparseMap, fIdx);
+        ctx.spotLightIndirectCommandBufferAddr = drawData->SpotLights.indirectBuffer.GetAddress(fIdx, isGpu);
+        ctx.spotLightVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightVisibleData, fIdx);
+        ctx.spotLightDataBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightData, fIdx);
+        ctx.spotLightColliderBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightColliderData, fIdx);
+
+        //Spot Light Shadow Buffers
+        ctx.spotLightShadowIndirectGeometryCommandBufferAddr = drawData->SpotLightShadow.indirectBuffer.GetAddress(fIdx, isGpu);
+        ctx.spotLightShadowSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightShadowSparseMap, fIdx);
+        ctx.spotLightShadowDataBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightShadowData, fIdx);
+        ctx.spotLightShadowInstanceBufferAddr = drawData->SpotLightShadow.instanceBuffer.GetAddress(fIdx, isGpu);
+        ctx.spotLightDrawDescriptorBufferAddr = drawData->SpotLightShadow.descriptorBuffer.GetAddress(fIdx, isGpu);
+        ctx.spotLightVisibleShadowIndexBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightShadowVisibleData, fIdx);       
+        ctx.spotLightShadowModelCountBufferAddr = drawData->SpotLightShadow.modelDispatchBuffer.GetAddress(fIdx, isGpu);
+        ctx.spotLightShadowModelVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightShadowModelVisibleData, fIdx);
+        ctx.spotLightShadowChunkCountBufferAddr = drawData->SpotLightShadow.staticChunkDispatchBuffer.GetAddress(fIdx, isGpu);
+        ctx.spotLightShadowChunkVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightShadowStaticChunkVisibleIndex, fIdx);
+        ctx.spotLightShadowMortonChunkCountBufferAddr = drawData->SpotLightShadow.mortonChunkDispatchBuffer.GetAddress(fIdx, isGpu);
+        ctx.spotLightShadowMortonChunkVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightShadowMortonChunkVisibleIndex, fIdx);
+
+
         ctx.pointLightIndirectCommandBufferAddr = drawData->PointLights.indirectBuffer.GetAddress(fIdx, isGpu);
         ctx.pointLightVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightVisibleData, fIdx);
         ctx.pointLightDataBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightData, fIdx);
@@ -108,13 +132,6 @@ namespace Syn {
         ctx.pointLightShadowSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightShadowSparseMap, fIdx);
         ctx.pointLightShadowDataBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightShadowData, fIdx);
 
-        ctx.spotLightIndirectCommandBufferAddr = drawData->SpotLights.indirectBuffer.GetAddress(fIdx, isGpu);
-        ctx.spotLightVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightVisibleData, fIdx);
-        ctx.spotLightDataBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightData, fIdx);
-        ctx.spotLightColliderBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightColliderData, fIdx);
-        ctx.spotLightSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightSparseMap, fIdx);
-        ctx.spotLightShadowSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightShadowSparseMap, fIdx);
-        ctx.spotLightShadowDataBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightShadowData, fIdx);
 
         ctx.forwardPlusTileGridListBufferAddr = drawData->ForwardPlus.tileGridBuffer.GetAddress(fIdx, true);
         ctx.forwardPlusClusterCountBufferAddr = drawData->ForwardPlus.clusterCountBuffer.GetAddress(fIdx, true);

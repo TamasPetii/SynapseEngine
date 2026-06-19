@@ -44,10 +44,13 @@ layout(buffer_reference, std430) readonly restrict buffer SpotLightDataBuffer { 
 layout(buffer_reference, std430) readonly restrict buffer SpotLightColliderDataBuffer { SpotLightColliderGPU data[]; };
 layout(buffer_reference, std430) readonly restrict buffer SpotLightShadowDataBuffer { SpotLightShadowComponent data[]; };
 layout(buffer_reference, std430) readonly restrict buffer VisibleSpotLightBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer SpotShadowInstanceBuffer { uvec2 data[]; };
 
 #define GET_SPOT_LIGHT(addr, idx)        SpotLightDataBuffer(addr).data[idx]
 #define GET_SPOT_LIGHT_COLLIDER(addr, idx) SpotLightColliderDataBuffer(addr).data[idx]
 #define GET_SPOT_LIGHT_SHADOW(addr, idx) SpotLightShadowDataBuffer(addr).data[idx]
 #define GET_VISIBLE_SPOT_LIGHT(addr, idx) VisibleSpotLightBuffer(addr).data[idx]
+#define GET_SPOT_SHADOW_INSTANCE(addr, idx) SpotShadowInstanceBuffer(addr).data[idx]
+#define GET_VISIBLE_SHADOW_SPOT_LIGHT(addr, idx) VisibleSpotLightBuffer(addr).data[idx]
 
 #endif

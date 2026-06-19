@@ -1,5 +1,6 @@
 #include "SpotLightShadowCullingSystem.h"
 #include "Engine/Scene/Scene.h"
+#include "Engine/Logger/SynLog.h"
 #include "SpotLightShadowRenderSystem.h"
 #include "SpotLightCullingSystem.h"
 #include "SpotLightShadowAtlasSystem.h"
@@ -91,7 +92,8 @@ namespace Syn
             }
             });
 
-        if (settings->enableGeometryGpuCulling) return;
+        if (settings->enableGeometryGpuCulling) 
+            return;
 
         auto registry = scene->GetRegistry();
         auto modelPool = registry->GetPool<ModelComponent>();
@@ -383,6 +385,23 @@ namespace Syn
             auto& shadowGroup = drawData->SpotLightShadow;
 
             uint32_t currentIndirectIdx = 0xFFFFFFFF;
+            uint32_t currentIsMeshlet = 0;
+
+            auto logPreviousBatch = [&]() {
+                if constexpr (ENABLE_DEBUG_LOGGING) {
+                    if (currentIndirectIdx != 0xFFFFFFFF) {
+                        uint32_t count = currentIsMeshlet ?
+                            shadowGroup.meshletCmds[currentIndirectIdx].groupCountX :
+                            shadowGroup.traditionalCmds[currentIndirectIdx].instanceCount;
+
+                        Info("SpotShadow Finalize - IndirectIdx: {} | Offset: {} | Count: {} | Type: {}",
+                            currentIndirectIdx,
+                            shadowGroup.shadowDescriptors[currentIndirectIdx].instanceOffset,
+                            count,
+                            currentIsMeshlet ? "Meshlet" : "Traditional");
+                    }
+                }
+                };
 
             for (uint32_t i = 0; i < appendedCount; ++i)
             {
@@ -393,7 +412,10 @@ namespace Syn
                 shadowGroup.instances[i] = item.gpuPayload;
 
                 if (indirectIdx != currentIndirectIdx) {
+                    logPreviousBatch();
+
                     currentIndirectIdx = indirectIdx;
+                    currentIsMeshlet = isMeshlet;
                     shadowGroup.shadowDescriptors[indirectIdx].instanceOffset = i;
                 }
 

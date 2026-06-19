@@ -74,6 +74,7 @@ namespace Syn
     void SpotLightShadowDrawGroup::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) {
         if (totalCommandCount > 0) {
             indirectBuffer.RecordSync(cmd, frameIndex, totalCommandCount);
+            descriptorBuffer.RecordSync(cmd, frameIndex, totalCommandCount);
         }
     }
 }
