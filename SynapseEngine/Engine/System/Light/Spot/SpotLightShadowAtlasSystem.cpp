@@ -51,6 +51,10 @@ namespace Syn
             if (activeLights == 0)
                 return;
 
+            std::fill(drawData->SpotLightShadow.gridLookupData.Data(),
+                drawData->SpotLightShadow.gridLookupData.Data() + (SPOT_SHADOW_GRID_SIZE * SPOT_SHADOW_GRID_SIZE),
+                0xFFFFFFFF);
+
             const auto& cameraComp = cameraPool->Get(cameraEntity);
             glm::vec2 screenRes = glm::vec2(cameraComp.width, cameraComp.height);
 
@@ -68,9 +72,10 @@ namespace Syn
                     cameraComp.view, cameraComp.proj, cameraComp.nearPlane, screenRes);
 
                 uint32_t blockSizePx = SPOT_SHADOW_MIN_BLOCK_SIZE;
-                if (screenSizePixels > 1024.0f) blockSizePx = 2048;
-                else if (screenSizePixels > 512.0f) blockSizePx = 1024;
-                else if (screenSizePixels > 256.0f) blockSizePx = 512;
+                if (screenSizePixels > 1024.0f) blockSizePx = 1024;
+                else if (screenSizePixels > 512.0f) blockSizePx = 512;
+                else if (screenSizePixels > 256.0f) blockSizePx = 256;
+                else if (screenSizePixels > 128.0f) blockSizePx = 128;
 
                 allocRequests.push_back({
                     entity,
@@ -131,6 +136,13 @@ namespace Syn
 
                     shadowComp.atlasRect = glm::vec4(uvX, uvY, uvW, uvH);
 
+                    for (uint32_t by = 0; by < request.blocksRequired; ++by) {
+                        for (uint32_t bx = 0; bx < request.blocksRequired; ++bx) {
+                            uint32_t flatIndex = (gridY + by) * SPOT_SHADOW_GRID_SIZE + (gridX + bx);
+                            drawData->SpotLightShadow.gridLookupData[flatIndex] = static_cast<uint32_t>(request.entity);
+                        }
+                    }
+
                     if constexpr (ENABLE_ATLAS_DEBUG_LOGGING) {
                         Info("SpotLight Atlas Alloc - Entity: {} -> X: {}, Y: {}, Size: {}x{}",
                             static_cast<uint32_t>(request.entity),
@@ -153,6 +165,18 @@ namespace Syn
                 }
 
                 shadowComp.version++;
+            }
+            });
+    }
+
+    void SpotLightShadowAtlasSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
+    {
+        this->EmplaceTask(subflow, SystemPhaseNames::UploadGPU, [scene, frameIndex]() {
+            auto drawData = scene->GetSceneDrawData();
+            auto& shadowGroup = drawData->SpotLightShadow;
+
+            if (auto mapped = shadowGroup.gridLookupBuffer.GetMapped(frameIndex)) {
+                mapped->Write(shadowGroup.gridLookupData.Data(), sizeof(uint32_t) * SPOT_SHADOW_GRID_SIZE * SPOT_SHADOW_GRID_SIZE, 0);
             }
             });
     }

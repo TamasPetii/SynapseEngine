@@ -45,12 +45,18 @@ layout(buffer_reference, std430) readonly restrict buffer SpotLightColliderDataB
 layout(buffer_reference, std430) readonly restrict buffer SpotLightShadowDataBuffer { SpotLightShadowComponent data[]; };
 layout(buffer_reference, std430) readonly restrict buffer VisibleSpotLightBuffer { uint data[]; };
 layout(buffer_reference, std430) readonly restrict buffer SpotShadowInstanceBuffer { uvec2 data[]; };
+layout(buffer_reference, std430) readonly restrict buffer GridLookupBuffer { uint data[]; };
 
-#define GET_SPOT_LIGHT(addr, idx)        SpotLightDataBuffer(addr).data[idx]
-#define GET_SPOT_LIGHT_COLLIDER(addr, idx) SpotLightColliderDataBuffer(addr).data[idx]
-#define GET_SPOT_LIGHT_SHADOW(addr, idx) SpotLightShadowDataBuffer(addr).data[idx]
-#define GET_VISIBLE_SPOT_LIGHT(addr, idx) VisibleSpotLightBuffer(addr).data[idx]
-#define GET_SPOT_SHADOW_INSTANCE(addr, idx) SpotShadowInstanceBuffer(addr).data[idx]
-#define GET_VISIBLE_SHADOW_SPOT_LIGHT(addr, idx) VisibleSpotLightBuffer(addr).data[idx]
+#define SPOT_SHADOW_MIN_BLOCK_SIZE 64
+
+#define GET_SPOT_LIGHT(addr, idx)                   SpotLightDataBuffer(addr).data[idx]
+#define GET_SPOT_LIGHT_COLLIDER(addr, idx)          SpotLightColliderDataBuffer(addr).data[idx]
+#define GET_SPOT_LIGHT_SHADOW(addr, idx)            SpotLightShadowDataBuffer(addr).data[idx]
+#define GET_VISIBLE_SPOT_LIGHT(addr, idx)           VisibleSpotLightBuffer(addr).data[idx]
+#define GET_SPOT_SHADOW_INSTANCE(addr, idx)         SpotShadowInstanceBuffer(addr).data[idx]
+#define GET_VISIBLE_SHADOW_SPOT_LIGHT(addr, idx)    VisibleSpotLightBuffer(addr).data[idx]
+#define GET_GRID_LOOK_UP_DATA(addr, idx)            GridLookupBuffer(addr).data[idx]
+
+
 
 #endif

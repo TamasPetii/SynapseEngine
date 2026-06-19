@@ -28,7 +28,9 @@ namespace Syn
         static constexpr const char* HizLinearizeDepth = "Engine/Shaders/Passes/Hiz/HizLinearizeDepth.comp";
         static constexpr const char* HizDownsample = "Engine/Shaders/Passes/Hiz/HizDownsample.comp";
         static constexpr const char* HizCopyComp = "Engine/Shaders/Passes/Hiz/HizCopy.comp";
-        
+        static constexpr const char* HizLinearizeSingleDepth = "Engine/Shaders/Passes/Hiz/HizLinearizeSingleDepth.comp";
+        static constexpr const char* SpotHizLinearizeSingleDepth = "Engine/Shaders/Passes/Hiz/SpotHizLinearizeSingleDepth.comp";
+
         static constexpr const char* MeshletTask = "Engine/Shaders/Passes/Shading/Common/Meshlet.task";
         static constexpr const char* MeshletMesh = "Engine/Shaders/Passes/Shading/Common/Meshlet.mesh";
         static constexpr const char* TraditionalVert = "Engine/Shaders/Passes/Shading/Common/Traditional.vert";
@@ -107,5 +109,10 @@ namespace Syn
         static constexpr const char* DirectionLightShadowWorkGraphMortonChunkCullingComp = "Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphMortonChunkCulling.comp";
         static constexpr const char* DirectionLightShadowWorkGraphMortonModelCullingComp = "Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphMortonModelCulling.comp";
         static constexpr const char* DirectionLightShadowWorkGraphMeshCullingComp = "Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphMeshCulling.comp";
+    
+        static constexpr const char* SpotLightShadowFarg = "Engine/Shaders/Passes/Shadow/Spot/SpotLightShadow.frag";
+        static constexpr const char* SpotLightShadowTraditionalVert = "Engine/Shaders/Passes/Shadow/Spot/SpotLightShadowTraditional.vert";
+        static constexpr const char* SpotLightShadowMeshletTask = "Engine/Shaders/Passes/Shadow/Spot/SpotLightShadowMeshlet.task";
+        static constexpr const char* SpotLightShadowMeshletMesh = "Engine/Shaders/Passes/Shadow/Spot/SpotLightShadowMeshlet.mesh";
     };
 }

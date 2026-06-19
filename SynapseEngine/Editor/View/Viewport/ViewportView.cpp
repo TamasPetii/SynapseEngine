@@ -311,6 +311,38 @@ namespace Syn {
                     }
                     ImGui::Unindent();
                 }
+
+                static int spotShadowHzbMaxMip = 0;
+                spotShadowHzbMaxMip = std::clamp(spotShadowHzbMaxMip, 0, int(SPOT_SHADOW_HIZ_MIP_LEVELS - 1));
+                std::string spotShadowMaxBaseView = RenderTargetViewNames::SpotLightShadowDepthPyramidMax;
+                std::string spotShadowMaxView = spotShadowMaxBaseView + Vk::ImageViewNames::Mip + std::to_string(spotShadowHzbMaxMip);
+
+                RadioButton("SpotLight HZB Max (R)", RenderTargetGroupNames::Deferred, RenderTargetNames::SpotLightShadowDepthPyramid, spotShadowMaxView);
+
+                if (state.currentView.contains(spotShadowMaxBaseView)) {
+                    ImGui::Indent();
+                    if (ImGui::SliderInt("Mip##SpotShadowHzbMax", &spotShadowHzbMaxMip, 0, SPOT_SHADOW_HIZ_MIP_LEVELS - 1)) {
+                        spotShadowMaxView = spotShadowMaxBaseView + Vk::ImageViewNames::Mip + std::to_string(spotShadowHzbMaxMip);
+                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::SpotLightShadowDepthPyramid, spotShadowMaxView });
+                    }
+                    ImGui::Unindent();
+                }
+
+                static int spotShadowHzbMinMip = 0;
+                spotShadowHzbMinMip = std::clamp(spotShadowHzbMinMip, 0, int(SPOT_SHADOW_HIZ_MIP_LEVELS - 1));
+                std::string spotShadowMinBaseView = RenderTargetViewNames::SpotLightShadowDepthPyramidMin;
+                std::string spotShadowMinView = spotShadowMinBaseView + Vk::ImageViewNames::Mip + std::to_string(spotShadowHzbMinMip);
+
+                RadioButton("SpotLight HZB Min (G)", RenderTargetGroupNames::Deferred, RenderTargetNames::SpotLightShadowDepthPyramid, spotShadowMinView);
+
+                if (state.currentView.contains(spotShadowMinBaseView)) {
+                    ImGui::Indent();
+                    if (ImGui::SliderInt("Mip##SpotShadowHzbMin", &spotShadowHzbMinMip, 0, SPOT_SHADOW_HIZ_MIP_LEVELS - 1)) {
+                        spotShadowMinView = spotShadowMinBaseView + Vk::ImageViewNames::Mip + std::to_string(spotShadowHzbMinMip);
+                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::SpotLightShadowDepthPyramid, spotShadowMinView });
+                    }
+                    ImGui::Unindent();
+                }
             }
             ImGui::EndChild();
             ImGui::EndPopup();

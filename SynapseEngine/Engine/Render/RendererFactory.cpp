@@ -40,8 +40,11 @@
 #include "Engine/Render/Passes/Hiz/HizInitPass.h"
 #include "Engine/Render/Passes/Hiz/Geometry/GeometryHizLinearPreparePass.h"
 #include "Engine/Render/Passes/Hiz/Geometry/GeometryHizDownsamplePass.h"
+
 #include "Engine/Render/Passes/Hiz/DirectionLight/DirectionLightShadowHizCopyPass.h"
 #include "Engine/Render/Passes/Hiz/DirectionLight/DirectionLightShadowHizDownsamplePass.h"
+#include "Engine/Render/Passes/Hiz/SpotLight/SpotLightShadowHizCopyPass.h"
+#include "Engine/Render/Passes/Hiz/SpotLight/SpotLightShadowHizDownsamplePass.h"
 
 #include "Engine/Render/Passes/Present/GuiPass.h"
 #include "Engine/Render/Passes/Present/CompositePass.h"
@@ -108,9 +111,14 @@
 #include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletAabbPass.h"
 #include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletSpherePass.h"
 #include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletConePass.h"
+
 #include "Engine/Render/Passes/Shadow/Direction/DirectionLightShadowInitPass.h"
 #include "Engine/Render/Passes/Shadow/Direction/DirectionLightShadowTraditionalOpaquePass.h"
 #include "Engine/Render/Passes/Shadow/Direction/DirectionLightShadowMeshletOpaquePass.h"
+
+#include "Engine/Render/Passes/Shadow/Spot/SpotLightShadowInitPass.h"
+#include "Engine/Render/Passes/Shadow/Spot/SpotLightShadowTraditionalOpaquePass.h"
+#include "Engine/Render/Passes/Shadow/Spot/SpotLightShadowMeshletOpaquePass.h"
 
 #include "Engine/Render/Passes/Ssao/SsaoInitPass.h"
 #include "Engine/Render/Passes/Ssao/SsaoPass.h"
@@ -151,7 +159,7 @@ namespace Syn
         pipeline->AddPass(std::make_unique<GeometryModelCullingPass>());
         pipeline->AddPass(std::make_unique<GeometryMeshCullingPass>());
 
-        //Todo - Gpu Driven Direction Light Culling
+        //Gpu Driven Direction Light Culling
         pipeline->AddPass(std::make_unique<DirectionLightShadowCullingCommandResetPass>());
         pipeline->AddPass(std::make_unique<DirectionLightShadowMortonChunkCullingPass>());
         pipeline->AddPass(std::make_unique<DirectionLightShadowMortonModelCullingPass>());
@@ -160,12 +168,21 @@ namespace Syn
         pipeline->AddPass(std::make_unique<DirectionLightShadowModelCullingPass>());
         pipeline->AddPass(std::make_unique<DirectionLightShadowMeshCullingPass>());
 
+        //Todo: Gpu Driven Spot Light Culling
+
         //DirectionLight Shadow Passes
         pipeline->AddPass(std::make_unique<DirectionLightShadowInitPass>());
         pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
         pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
+
+        //SpotLight Shadow Passes
+        pipeline->AddPass(std::make_unique<SpotLightShadowInitPass>());
+        pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque1Sided));
+        pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
+        pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
+        pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
 
 		//Forward+ Depth Opaque Prepasses
 		pipeline->AddPass(std::make_unique<OpaqueDepthTransitionPrepass>());
@@ -194,12 +211,15 @@ namespace Syn
 		//Build Hi-Z depth pyramid (Opaque|Transparent)
         pipeline->AddPass(std::make_unique<GeometryHizLinearPreparePass>());
         pipeline->AddPass(std::make_unique<GeometryHizDownsamplePass>());
+
         pipeline->AddPass(std::make_unique<DirectionLightShadowHizCopyPass>());
         pipeline->AddPass(std::make_unique<DirectionLightShadowHizDownsamplePass>());
 
+        pipeline->AddPass(std::make_unique<SpotLightShadowHizCopyPass>());
+        pipeline->AddPass(std::make_unique<SpotLightShadowHizDownsamplePass>());
+
 		//Ssao Passes
         pipeline->AddPass(std::make_unique<SsaoInitPass>());
-        //pipeline->AddPass(std::make_unique<DpHvoPass>());
         pipeline->AddPass(std::make_unique<SsaoPass>());
         pipeline->AddPass(std::make_unique<SsaoBlurPass>());
 

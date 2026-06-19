@@ -73,6 +73,7 @@ struct FrameGlobalContext {
     uint64_t spotLightShadowChunkVisibleIndexBufferAddr;
     uint64_t spotLightShadowMortonChunkCountBufferAddr;
     uint64_t spotLightShadowMortonChunkVisibleIndexBufferAddr;
+    uint64_t spotLightShadowGridLookupBufferAddr;
 
     uint64_t pointLightIndirectCommandBufferAddr;
     uint64_t pointLightVisibleIndexBufferAddr;

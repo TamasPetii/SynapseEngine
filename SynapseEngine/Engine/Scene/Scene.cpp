@@ -30,7 +30,6 @@
 #include "Engine/System/Light/Point/PointLightShadowSystem.h"
 #include "Engine/System/Light/Point/PointLightFrustumCullingSystem.h"
 
-
 #include "Engine/System/Light/Direction/DirectionLightSystem.h"
 #include "Engine/System/Light/Direction/DirectionLightShadowSystem.h"
 #include "Engine/System/Light/Direction/DirectionLightCullingSystem.h"

@@ -18,7 +18,7 @@ namespace Syn
     constexpr uint32_t SPOT_SHADOW_MULTIPLIER = 4; // Instance Buffer
 
     constexpr uint32_t SPOT_SHADOW_ATLAS_SIZE = 4096;
-    constexpr uint32_t SPOT_SHADOW_MIN_BLOCK_SIZE = 256;
+    constexpr uint32_t SPOT_SHADOW_MIN_BLOCK_SIZE = 64;
     constexpr uint32_t SPOT_SHADOW_GRID_SIZE = SPOT_SHADOW_ATLAS_SIZE / SPOT_SHADOW_MIN_BLOCK_SIZE;
     constexpr uint32_t SPOT_SHADOW_HIZ_MIP_LEVELS = std::countr_zero(SPOT_SHADOW_MIN_BLOCK_SIZE) + 1;
     
@@ -41,6 +41,9 @@ namespace Syn
         RenderBuffer modelDispatchBuffer;
         RenderBuffer staticChunkDispatchBuffer;
         RenderBuffer mortonChunkDispatchBuffer;
+
+        RenderBuffer gridLookupBuffer;
+        CpuData<uint32_t> gridLookupData;
 
         CpuData<VkDrawIndirectCommand> traditionalCmds;
         CpuData<VkDrawMeshTasksIndirectCommandEXT> meshletCmds;

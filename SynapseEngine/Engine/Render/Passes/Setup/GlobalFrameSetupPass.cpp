@@ -122,7 +122,7 @@ namespace Syn {
         ctx.spotLightShadowChunkVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightShadowStaticChunkVisibleIndex, fIdx);
         ctx.spotLightShadowMortonChunkCountBufferAddr = drawData->SpotLightShadow.mortonChunkDispatchBuffer.GetAddress(fIdx, isGpu);
         ctx.spotLightShadowMortonChunkVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightShadowMortonChunkVisibleIndex, fIdx);
-
+        ctx.spotLightShadowGridLookupBufferAddr = drawData->SpotLightShadow.gridLookupBuffer.GetAddress(fIdx, isGpu);
 
         ctx.pointLightIndirectCommandBufferAddr = drawData->PointLights.indirectBuffer.GetAddress(fIdx, isGpu);
         ctx.pointLightVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightVisibleData, fIdx);

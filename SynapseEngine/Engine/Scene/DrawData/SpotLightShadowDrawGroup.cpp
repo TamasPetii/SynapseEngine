@@ -31,6 +31,12 @@ namespace Syn
         mortonChunkDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
         mortonChunkDispatchBuffer.UpdateCapacityAll(1);
 
+        gridLookupData.Resize(SPOT_SHADOW_GRID_SIZE * SPOT_SHADOW_GRID_SIZE);
+        std::fill(gridLookupData.Data(), gridLookupData.Data() + (SPOT_SHADOW_GRID_SIZE * SPOT_SHADOW_GRID_SIZE), 0xFFFFFFFF);
+
+        gridLookupBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(uint32_t) * SPOT_SHADOW_GRID_SIZE * SPOT_SHADOW_GRID_SIZE, storageUsage, 1, 1 });
+        gridLookupBuffer.UpdateCapacityAll(1);
+
         Vk::ImageConfig atlasSpec{};
         atlasSpec.width = SPOT_SHADOW_ATLAS_SIZE;
         atlasSpec.height = SPOT_SHADOW_ATLAS_SIZE;

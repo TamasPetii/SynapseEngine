@@ -27,7 +27,17 @@ namespace Syn {
                     sampler->Handle()
                 );
                 _viewportTextures[cacheKey] = handle;
-            } else {
+            }
+            else if (targetName == RenderTargetNames::SpotLightShadowDepthPyramid) {
+                auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
+                auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::NearestClampEdge);
+                TextureHandle handle = _textureManager->RegisterTexture(
+                    drawData->SpotLightShadow.shadowDepthPyramid[currentFrame]->GetView(viewName),
+                    sampler->Handle()
+                );
+                _viewportTextures[cacheKey] = handle;
+            }
+            else {
                 auto rtManager = renderManager->GetRenderTargetManager();
                 auto group = rtManager->GetGroup(groupName, currentFrame);
                 if (!group) return InvalidTextureHandle;
