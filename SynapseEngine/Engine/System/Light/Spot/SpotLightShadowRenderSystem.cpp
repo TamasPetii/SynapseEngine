@@ -124,7 +124,10 @@ namespace Syn
             size_t indirectCount = mainGroup.activeTraditionalCount + mainGroup.activeMeshletCount;
 
             if (shadowTotalInstances > 0)
+            {
                 shadowGroup.instanceBuffer.UpdateCapacity(frameIndex, shadowTotalInstances);
+                shadowGroup.drawCallKeyBuffer.UpdateCapacity(frameIndex, shadowTotalInstances);
+            }
 
             if (indirectCount > 0)
             {

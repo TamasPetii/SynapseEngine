@@ -123,6 +123,7 @@ namespace Syn
             }
 
             drawData->SpotLights.indirectBuffer.Write(frameIndex , &drawData->SpotLights.cmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            drawData->SpotLightShadow.visibleCountDispatchBuffer.Write(frameIndex, &drawData->SpotLightShadow.visibleLightCount, sizeof(uint32_t), 0);
             });
     }
 }

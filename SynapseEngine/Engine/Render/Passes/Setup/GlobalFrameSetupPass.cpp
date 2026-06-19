@@ -122,6 +122,9 @@ namespace Syn {
         ctx.spotLightShadowMortonChunkCountBufferAddr = drawData->SpotLightShadow.mortonChunkDispatchBuffer.GetAddress(fIdx);
         ctx.spotLightShadowMortonChunkVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightShadowMortonChunkVisibleIndex, fIdx);
         ctx.spotLightShadowGridLookupBufferAddr = drawData->SpotLightShadow.gridLookupBuffer.GetAddress(fIdx);
+        ctx.spotLightShadowVisibleCountBufferAddr = drawData->SpotLightShadow.visibleCountDispatchBuffer.GetAddress(fIdx);
+        ctx.spotLightShadowDrawCallKeyBufferAddr = drawData->SpotLightShadow.drawCallKeyBuffer.GetAddress(fIdx);
+        ctx.spotLightShadowVisibleMeshCountBufferAddr = drawData->SpotLightShadow.visibleMeshCountDispatchBuffer.GetAddress(fIdx);
 
         ctx.pointLightIndirectCommandBufferAddr = drawData->PointLights.indirectBuffer.GetAddress(fIdx);
         ctx.pointLightVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightVisibleData, fIdx);
@@ -130,7 +133,6 @@ namespace Syn {
         ctx.pointLightSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightSparseMap, fIdx);
         ctx.pointLightShadowSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightShadowSparseMap, fIdx);
         ctx.pointLightShadowDataBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightShadowData, fIdx);
-
 
         ctx.forwardPlusTileGridListBufferAddr = drawData->ForwardPlus.tileGridBuffer.GetAddress(fIdx);
         ctx.forwardPlusClusterCountBufferAddr = drawData->ForwardPlus.clusterCountBuffer.GetAddress(fIdx);

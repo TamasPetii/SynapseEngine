@@ -109,6 +109,27 @@ bool TestConeSphere(vec3 conePos, vec3 coneDir, float coneRange, float coneCosAn
     return !(angleCull || frontCull || backCull);
 }
 
+uint TestConeSphere(vec3 conePos, vec3 coneDir, float coneRange, float coneCosAngle, float coneSinAngle, vec3 sphereCenter, float sphereRadius) {
+    vec3 v = sphereCenter - conePos;
+    float lenSq = dot(v, v);
+    float v1Len = dot(v, coneDir);
+    float distanceClosestPoint = coneCosAngle * sqrt(max(lenSq - v1Len * v1Len, 0.0)) - v1Len * coneSinAngle;
+
+    if (distanceClosestPoint > sphereRadius || v1Len > sphereRadius + coneRange || v1Len < -sphereRadius) {
+        return INTERSECTION_OUTSIDE;
+    }
+
+    bool fullyInAngle = distanceClosestPoint < -sphereRadius;
+    bool fullyInFront = v1Len > sphereRadius;
+    bool fullyBehindRange = v1Len < coneRange - sphereRadius;
+
+    if (fullyInAngle && fullyInFront && fullyBehindRange) {
+        return INTERSECTION_INSIDE;
+    }
+
+    return INTERSECTION_INTERSECT;
+}
+
 //Transform Collider
 
 void TransformSphere(vec3 localCenter, float localRadius, mat4 transform, out vec3 worldCenter, out float worldRadius) {

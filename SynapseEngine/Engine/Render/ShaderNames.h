@@ -23,7 +23,7 @@ namespace Syn
         static constexpr const char* ChunkBuilder = "Engine/Shaders/Passes/Morton/ChunkBuilder.comp";
 
         static constexpr const char* PointLightCulling = "Engine/Shaders/Passes/Culling/PointLightCulling.comp";
-        static constexpr const char* SpotLightCulling = "Engine/Shaders/Passes/Culling/SpotLightCulling.comp";
+        static constexpr const char* SpotLightCulling = "Engine/Shaders/Passes/Culling/SpotLight/SpotLightCulling.comp";
 
         static constexpr const char* HizLinearizeDepth = "Engine/Shaders/Passes/Hiz/HizLinearizeDepth.comp";
         static constexpr const char* HizDownsample = "Engine/Shaders/Passes/Hiz/HizDownsample.comp";

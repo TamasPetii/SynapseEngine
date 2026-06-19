@@ -16,8 +16,19 @@ namespace Syn
         instanceBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(SpotShadowInstancePayload), storageUsage, 65536, 131072 });
         instanceBuffer.UpdateCapacityAll(1);
 
+        drawCallKeyBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 65536, 131072 });
+        drawCallKeyBuffer.UpdateCapacityAll(1);
+
         indirectBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(VkDrawIndirectCommand) * 8, indirectStorageUsage, 1024, 2048 });
         indirectBuffer.UpdateCapacityAll(1);
+
+        //Todo: Passban lenullázni + Átrakni az indirect dispatchekre!
+        visibleCountDispatchBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(uint32_t), storageUsage, 1, 1 });
+        visibleCountDispatchBuffer.UpdateCapacityAll(1);
+
+        //Todo: Passban lenullázni
+        visibleMeshCountDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 1, 1 });
+        visibleMeshCountDispatchBuffer.UpdateCapacityAll(1);
 
         descriptorBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(MeshDrawDescriptor) * 8, storageUsage, 1024, 2048 });
         descriptorBuffer.UpdateCapacityAll(1);
@@ -82,5 +93,6 @@ namespace Syn
         descriptorBuffer.RecordSync(cmd, frameIndex);
         instanceBuffer.RecordSync(cmd, frameIndex);
         gridLookupBuffer.RecordSync(cmd, frameIndex);
+        visibleCountDispatchBuffer.RecordSync(cmd, frameIndex);
     }
 }

@@ -33,18 +33,20 @@ namespace Syn
         virtual void CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) override;
 
         RenderBuffer instanceBuffer;
+        RenderBuffer drawCallKeyBuffer;;
         RenderBuffer indirectBuffer;
-
         RenderBuffer descriptorBuffer;
-        CpuData<MeshDrawDescriptor> shadowDescriptors;
 
         RenderBuffer modelDispatchBuffer;
         RenderBuffer staticChunkDispatchBuffer;
         RenderBuffer mortonChunkDispatchBuffer;
 
+        RenderBuffer visibleCountDispatchBuffer;
+        RenderBuffer visibleMeshCountDispatchBuffer;
         RenderBuffer gridLookupBuffer;
-        CpuData<uint32_t> gridLookupData;
 
+        CpuData<uint32_t> gridLookupData;
+        CpuData<MeshDrawDescriptor> shadowDescriptors;
         CpuData<VkDrawIndirectCommand> traditionalCmds;
         CpuData<VkDrawMeshTasksIndirectCommandEXT> meshletCmds;
 

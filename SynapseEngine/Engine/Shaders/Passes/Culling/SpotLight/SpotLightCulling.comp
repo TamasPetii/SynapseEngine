@@ -7,17 +7,17 @@
 #extension GL_KHR_shader_subgroup_arithmetic : require
 #extension GL_KHR_shader_subgroup_ballot : require
 
-#include "../../Includes/Core.glsl"
-#include "../../Includes/Common/FrameGlobalContext.glsl"
-#include "../../Includes/Common/Camera.glsl"
-#include "../../Includes/Common/SpotLight.glsl"
-#include "../../Includes/Utils/CullingMath.glsl"
-#include "../../Includes/Common/IndirectCommand.glsl"
-#include "../../Includes/Utils/Occlusion.glsl"
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Camera.glsl"
+#include "../../../Includes/Common/SpotLight.glsl"
+#include "../../../Includes/Utils/CullingMath.glsl"
+#include "../../../Includes/Common/IndirectCommand.glsl"
+#include "../../../Includes/Utils/Occlusion.glsl"
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
-#include "../../Includes/PushConstants/SpotLightCullingPC.glsl"
+#include "../../../Includes/PushConstants/SpotLightCullingPC.glsl"
 
 layout(push_constant) uniform PushConstants {
     SpotLightCullingPC pc;
@@ -44,7 +44,7 @@ void main() {
         if (visibility == INTERSECTION_OUTSIDE) return;
     }
 
-    // 2. Occlusion és 0-pixel Culling
+    // 2. Occlusion and 0-pixel Culling
     float screenSizePixels = 0.0;
     vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);
     bool enableDepthOcclusion = (ctx.enableSpotLightOcclusionCulling == 1);
@@ -54,7 +54,6 @@ void main() {
     }
 
     uint denseIdx = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, collider.entityIndex);
-    SpotLightComponent light = GET_SPOT_LIGHT(ctx.spotLightDataBufferAddr, denseIdx);
 
     uint needsWrite = 1;
     uint subgroupWriteCount = subgroupAdd(needsWrite);
@@ -66,7 +65,23 @@ void main() {
     }
 
     baseOffset = subgroupBroadcastFirst(baseOffset);
-
     uint finalIndex = baseOffset + localOffset;
     GET_VISIBLE_SPOT_LIGHT(ctx.spotLightVisibleIndexBufferAddr, finalIndex) = collider.entityIndex;
+
+    uint shadowSparseIdx = GET_SPARSE_INDEX(ctx.spotLightShadowSparseMapBufferAddr, collider.entityIndex);
+    if (shadowSparseIdx != INVALID_INDEX) 
+    {
+        uint needsShadowWrite = 1;
+        uint shadowSubgroupWriteCount = subgroupAdd(needsShadowWrite);
+        uint shadowLocalOffset = subgroupExclusiveAdd(needsShadowWrite);
+        uint shadowBaseOffset = 0;
+        
+        if (subgroupElect()) {
+            shadowBaseOffset = atomicAdd(GET_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleCountBufferAddr), shadowSubgroupWriteCount);
+        }
+        
+        shadowBaseOffset = subgroupBroadcastFirst(shadowBaseOffset);
+        uint finalShadowIndex = shadowBaseOffset + shadowLocalOffset;
+        GET_VISIBLE_SHADOW_SPOT_LIGHT(ctx.spotLightVisibleShadowIndexBufferAddr, finalShadowIndex) = collider.entityIndex;
+    }
 }

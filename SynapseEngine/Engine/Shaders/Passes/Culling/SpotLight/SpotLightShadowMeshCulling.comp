@@ -1,0 +1,151 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Camera.glsl"
+#include "../../../Includes/Common/Transform.glsl"
+#include "../../../Includes/Common/Model.glsl"
+#include "../../../Includes/Common/Mesh.glsl"
+#include "../../../Includes/Common/Animation.glsl"
+#include "../../../Includes/Common/Material.glsl"
+#include "../../../Includes/Common/Culling.glsl"
+#include "../../../Includes/Common/SpotLight.glsl"
+#include "../../../Includes/Utils/CullingMath.glsl"
+#include "../../../Includes/Utils/Occlusion.glsl"
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../../Includes/PushConstants/SpotLightShadowCullingPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    SpotLightShadowCullingPC pc;
+};
+
+layout(set = 2, binding = 0) uniform sampler2D shadowDepthPyramid;
+
+void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    uint jobIndex = gl_WorkGroupID.x;
+    uint localThreadId = gl_LocalInvocationID.x;
+
+    // 1. Boundary check against the deferred model count
+    if (jobIndex >= GET_DISPATCH_CMD(ctx.spotLightShadowModelCountBufferAddr).groupCountX) return;
+
+    // 2. Fetch the deferred model data
+    VisibleModelData modelData = GET_VISIBLE_MODEL(ctx.spotLightShadowModelVisibleIndexBufferAddr, jobIndex);
+
+    // 3. Unpack the encoded payload
+    uint pureEntityId = modelData.entityData & 0x7FFFFFFF;
+    bool parentFullyInside = (modelData.entityData >> 31) != 0; 
+
+    uint pureModelIndex = modelData.modelIndex & 0xFFFFFu;
+    uint lightIdx = (modelData.modelIndex >> 20) & 0xFFFu;
+
+    // 4. Resolve Context
+    uint transformIdx = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, pureEntityId);
+    TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformIdx);
+
+    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
+
+    ModelAllocationInfo mAlloc = GET_MODEL_ALLOC(ctx.globalModelAllocationBufferAddr, pureModelIndex);
+    GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, pureModelIndex);
+
+    uint sparseIdx = GET_SPARSE_INDEX(ctx.modelSparseMapBufferAddr, pureEntityId);
+    ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, sparseIdx);
+
+    // 5. Resolve Spot Light and Shadow Component (Ugyanúgy, mint a Model shaderben)
+    uint lightEntity = GET_VISIBLE_SHADOW_SPOT_LIGHT(ctx.spotLightVisibleShadowIndexBufferAddr, lightIdx);
+    uint lightDenseIndex = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, lightEntity);
+    uint lightShadowDenseIndex = GET_SPARSE_INDEX(ctx.spotLightShadowSparseMapBufferAddr, lightEntity);
+    SpotLightColliderGPU lightCollider = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, lightDenseIndex);
+    SpotLightShadowComponent shadowComp = GET_SPOT_LIGHT_SHADOW(ctx.spotLightShadowDataBufferAddr, lightShadowDenseIndex);
+
+    // 6. Evaluate Animation state
+    uint animFrameIndex = 0;
+    bool hasAnimation = false;
+    GpuAnimationAddresses animAddrs;
+    
+    if (ctx.animationSparseMapBufferAddr != 0) {
+        uint animSparseIndex = GET_SPARSE_INDEX(ctx.animationSparseMapBufferAddr, pureEntityId);
+        if (animSparseIndex != INVALID_INDEX) {
+            AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animSparseIndex);
+            if (animComp.animationIndex != INVALID_INDEX) {
+                animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
+                animFrameIndex = animComp.frameIndex;
+                hasAnimation = true;
+            }
+        }
+    }
+
+    vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);
+    float cameraNear = GET_CAMERA_NEAR(camera);
+
+    // 7. Collaborative Loop: Process all meshes
+    for (uint m = localThreadId; m < addrs.meshCount; m += gl_WorkGroupSize.x) {    
+        
+        uint matIdx = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, modelComp.materialOffset + m);
+        Material mat = GET_MATERIAL(ctx.materialBufferAddr, matIdx);
+
+        uint matType = 0;
+        if (IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat))       matType = 3;
+        else if (IS_TRANSPARENT(mat) && !IS_DOUBLE_SIDED(mat)) matType = 2;
+        else if (!IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat)) matType = 1;
+
+        if (matType > 1) continue;
+
+        GpuMeshCollider localMeshCollider = GET_MESH_COLLIDER(addrs.meshColliders, m);
+
+        if (hasAnimation) {
+            uint frameOffset = animFrameIndex * animAddrs.descriptor.globalMeshCount;
+            localMeshCollider = GET_MESH_COLLIDER(animAddrs.frameMeshColliders, frameOffset + m);
+        }
+
+        GpuMeshCollider worldCollider = TransformCollider(localMeshCollider, transform.transform);
+
+        // 8. Cone Culling against Spot Light (Csak akkor, ha a parent model nem volt fully inside)
+        uint visibility = INTERSECTION_INTERSECT;
+
+
+        uint visibility = INTERSECTION_INTERSECT;
+        if (!parentFullyInside && ctx.enableMeshFrustumCulling == 1) {
+            visibility = TestConeSphere(lightCollider.worldPos, lightCollider.worldDir, lightCollider.range, lightCollider.outerAngleCos, lightCollider.outerAngleSin, worldCollider.center, worldCollider.radius);
+            if (visibility == INTERSECTION_OUTSIDE) continue;
+        }
+
+        // 9. Zero Triangle Culling (LOD check via Main Camera)
+        float mainCamScreenSize = CalculateSphereScreenSize(worldCollider.center, worldCollider.radius, camera.view, camera.proj, cameraNear, screenRes);
+        if (mainCamScreenSize < 1.0) continue;
+
+        // 10. Precise Occlusion Culling (HZB)
+        if (ctx.enableMeshOcclusionCulling == 1) {
+            float shadowScreenSizePixels = 0.0;
+            if (IsSphereOccludedDirLightShadow(worldCollider.center, worldCollider.radius, shadowComp.viewProj, shadowComp.atlasRect, shadowDepthPyramid, float(ctx.spotLightShadowAtlasSize), ctx.spotLightShadowHizMipLevels, shadowScreenSizePixels)) {
+                continue;
+            }
+        }
+
+        uint rawLod = (mainCamScreenSize > 512.0) ? 0 : (mainCamScreenSize > 256.0) ? 1 : (mainCamScreenSize > 128.0) ? 2 : 3;
+        uint lod = min(rawLod + ctx.spotLightShadowLodBias, 3u);
+
+        // 11. Emit to Radix Sort Buffers
+        MeshAllocationInfo meshAlloc = GET_MESH_ALLOC(ctx.globalMeshAllocationBufferAddr, mAlloc.meshAllocationOffset + (m * 4) + lod);
+        if (meshAlloc.activeTypes[matType] == 1) {
+            
+            uint indirectIdx = meshAlloc.indirectIndices[matType];
+            uint isMeshlet = (meshAlloc.isMeshletPipeline == PIPELINE_MESHLET) ? 1u : 0u;
+            uint drawCallKey = (isMeshlet << 31) | (indirectIdx & 0x7FFFFFFF);
+            
+            uint entityData = pureEntityId;
+            entityData = SET_BIT_TO(entityData, 31, visibility == INTERSECTION_INSIDE);
+            uvec2 gpuPayload = uvec2(entityData, lightIdx);
+
+            uint sortSlot = atomicAdd(GET_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleMeshCountBufferAddr), 1);
+            
+            GET_DRAW_CALL_KEY_DATA(ctx.spotLightShadowDrawCallKeyBufferAddr, sortSlot) = drawCallKey;
+            GET_SPOT_SHADOW_INSTANCE(ctx.spotLightShadowInstanceBufferAddr, sortSlot) = gpuPayload;
+        }
+    }
+}
