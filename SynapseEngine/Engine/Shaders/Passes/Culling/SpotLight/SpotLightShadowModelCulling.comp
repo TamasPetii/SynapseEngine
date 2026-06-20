@@ -92,7 +92,7 @@ void main()
     // 6. Calculate LOD (Screen size)
     float cameraNear = GET_CAMERA_NEAR(camera);
     vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);  
-    float mainCamScreenSize = CalculateSphereScreenSize(worldCollider.center, worldCollider.radius, camera.view, camera.proj, cameraNear, screenRes);
+    float mainCamScreenSize = CalculateSphereScreenSizePerspective(worldCollider.center, worldCollider.radius, camera.view, camera.proj, cameraNear, screenRes);
 
     if (mainCamScreenSize < 1.0) 
         return;
@@ -100,7 +100,7 @@ void main()
     // 7. Occlusion Culling (HZB)
     if (ctx.enableModelOcclusionCulling == 1) {
         float shadowScreenSizePixels = 0.0;  
-        if (IsSphereOccludedDirLightShadow(worldCollider.center, worldCollider.radius, shadowComp.viewProj, shadowComp.atlasRect, shadowDepthPyramid, float(ctx.spotLightShadowAtlasSize), ctx.spotLightShadowHizMipLevels, shadowScreenSizePixels)) {
+        if (IsSphereOccludedAtlasPerspective(worldCollider.center, worldCollider.radius, shadowComp.view, shadowComp.proj, shadowComp.planes.x, shadowComp.planes.y, shadowComp.atlasRect, shadowDepthPyramid, float(ctx.spotLightShadowAtlasSize), ctx.spotLightShadowHizMipLevels, shadowScreenSizePixels)) {
             return;
         }
     }

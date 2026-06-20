@@ -9,7 +9,6 @@
 #include "Engine/Vk/Rendering/PushConstant.h"
 
 #include <volk.h>
-#define VRDX_IMPLEMENTATION
 #include <vk_radix_sort.h>
 
 namespace Syn {

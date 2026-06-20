@@ -99,7 +99,7 @@ void main() {
 
         // 8. Occlusion Culling using Main Camera HZB
         float screenSizePixels = 0.0;
-        if (IsSphereOccluded(worldCollider.center, worldCollider.radius, camera, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
+        if (IsSphereOccludedPerspective(worldCollider.center, worldCollider.radius, camera.view, camera.projVulkan, camera.params.x, camera.params.y, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
             continue;
         }
 

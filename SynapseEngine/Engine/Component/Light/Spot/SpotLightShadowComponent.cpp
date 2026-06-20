@@ -11,6 +11,8 @@ namespace Syn
 
     SpotLightShadowComponentGPU::SpotLightShadowComponentGPU(const SpotLightShadowComponent& component) :
         planes(component.nearPlane, component.farPlane, 0.0f, 0.0f),
+        view(component.view),
+        proj(component.proj),
         viewProj(component.viewProj),
         atlasRect(component.atlasRect)
     {}

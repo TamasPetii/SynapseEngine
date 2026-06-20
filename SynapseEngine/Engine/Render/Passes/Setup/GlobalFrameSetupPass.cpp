@@ -178,6 +178,11 @@ namespace Syn {
         ctx.directionLightShadowHizMipLevels = SHADOW_HIZ_MIP_LEVELS;
 
         ctx.spotLightShadowLodBias = SPOT_SHADOW_LOD_BIAS;
+        ctx.spotLightShadowMultiplier = SPOT_SHADOW_MULTIPLIER;
+        ctx.spotLightShadowAtlasSize = SPOT_SHADOW_ATLAS_SIZE;
+        ctx.spotLightShadowMinBlockSize = SPOT_SHADOW_MIN_BLOCK_SIZE;
+        ctx.spotLightShadowGridSize = SPOT_SHADOW_GRID_SIZE;
+        ctx.spotLightShadowHizMipLevels = SPOT_SHADOW_HIZ_MIP_LEVELS;
 
         ctx.enableMeshletConeCulling = settings->culling.enableMeshletConeCulling ? 1 : 0;
 

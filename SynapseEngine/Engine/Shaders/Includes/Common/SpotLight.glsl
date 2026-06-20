@@ -36,6 +36,8 @@ struct SpotLightColliderGPU {
 
 struct SpotLightShadowComponent {
     vec4 planes;
+    mat4 view;
+    mat4 proj;
     mat4 viewProj;
     vec4 atlasRect;
 };

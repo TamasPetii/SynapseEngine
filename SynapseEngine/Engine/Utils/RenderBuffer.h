@@ -44,6 +44,10 @@ namespace Syn
         Vk::Buffer* GetMapped(uint32_t frameIndex) const;
         Vk::Buffer* GetGpu(uint32_t frameIndex) const;
 
+        uint64_t GetElementCount(uint32_t frameIndex) const;
+        uint32_t GetElementSize() const;
+        uint64_t GetSizeInBytes(uint32_t frameIndex) const;
+
         VkBuffer GetHandle(uint32_t frameIndex) const;
         VkDeviceAddress GetAddress(uint32_t frameIndex) const;
 

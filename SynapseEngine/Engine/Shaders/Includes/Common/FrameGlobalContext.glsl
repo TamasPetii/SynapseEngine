@@ -191,6 +191,11 @@ struct FrameGlobalContext {
     uint directionLightShadowHizMipLevels;
 
     uint spotLightShadowLodBias;
+    uint spotLightShadowMultiplier;
+    uint spotLightShadowAtlasSize;
+    uint spotLightShadowMinBlockSize;
+    uint spotLightShadowGridSize;
+    uint spotLightShadowHizMipLevels;
 };
 
 #ifndef __cplusplus

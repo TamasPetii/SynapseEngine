@@ -111,18 +111,13 @@ void main() {
         }
 
         // 8. Occlusion Culling using Depth Pyramid (HZB)
-        float screenSizePixels = 0.0;
         if (isVisible && ctx.enableMeshletOcclusionCulling == 1) {
-            mat4 shadowViewProj = GET_SPOT_LIGHT_SHADOW(ctx.spotLightShadowDataBufferAddr, lightShadowDenseIdx).viewProj;
-            vec4 shadowAtlasRect = GET_SPOT_LIGHT_SHADOW(ctx.spotLightShadowDataBufferAddr, lightShadowDenseIdx).atlasRect;
-            bool enableDepthOcclusion = (ctx.enableMeshletOcclusionCulling == 1);
+            SpotLightShadowComponent shadowComp = GET_SPOT_LIGHT_SHADOW(ctx.spotLightShadowDataBufferAddr, lightShadowDenseIdx);
 
-            /*
             float shadowScreenSizePixels = 0.0;
-            if (IsSphereOccludedDirLightShadow(worldCollider.center, worldCollider.radius, shadowViewProj, shadowAtlasRect, shadowDepthPyramid, float(ctx.directionLightShadowAtlasSize), ctx.directionLightShadowHizMipLevels, shadowScreenSizePixels)) {
-               isVisible = false;
+            if (IsSphereOccludedAtlasPerspective(worldCollider.center, worldCollider.radius, shadowComp.view, shadowComp.proj, shadowComp.planes.x, shadowComp.planes.y, shadowComp.atlasRect, shadowDepthPyramid, float(ctx.spotLightShadowAtlasSize), ctx.spotLightShadowHizMipLevels, shadowScreenSizePixels)) {
+                isVisible = false;
             }
-            */
         }
 
         // 9. Emit surviving meshlets

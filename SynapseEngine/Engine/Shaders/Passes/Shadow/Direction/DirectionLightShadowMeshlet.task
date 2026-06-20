@@ -121,7 +121,7 @@ void main() {
             bool enableDepthOcclusion = (ctx.enableMeshletOcclusionCulling == 1);
                         
             float shadowScreenSizePixels = 0.0;
-            if (IsSphereOccludedDirLightShadow(worldCollider.center, worldCollider.radius, shadowViewProj, shadowAtlasRect, shadowDepthPyramid, float(ctx.directionLightShadowAtlasSize), ctx.directionLightShadowHizMipLevels, shadowScreenSizePixels)) {
+            if (IsSphereOccludedAtlasOrtho(worldCollider.center, worldCollider.radius, shadowViewProj, shadowAtlasRect, shadowDepthPyramid, float(ctx.directionLightShadowAtlasSize), ctx.directionLightShadowHizMipLevels, shadowScreenSizePixels)) {
                isVisible = false;
             }
         }

@@ -5,6 +5,9 @@
 #include "Engine/Vk/Buffer/BufferUtils.h"
 #include "Engine/Vk/Context.h"
 
+#include <volk.h>
+#include <vk_radix_sort.h>
+
 namespace Syn {
     SpotLightShadowRadixSortPass::~SpotLightShadowRadixSortPass() {
         if (_radixSorter != VK_NULL_HANDLE) {
@@ -32,7 +35,7 @@ namespace Syn {
         auto drawData = context.scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
 
-        uint32_t maxSortCount = 0; // drawData->SpotLightShadow.instanceBuffer.Get();
+        uint32_t maxSortCount = static_cast<uint32_t>(drawData->SpotLightShadow.drawCallKeyBuffer.GetElementCount(fIdx));
         if (maxSortCount == 0) return;
 
         auto& tempBuffer = drawData->SpotLightShadow.radixSortTempBuffer;

@@ -11,6 +11,8 @@ namespace Syn
 
         float nearPlane;
         float farPlane;
+        glm::mat4 view;
+        glm::mat4 proj;
         glm::mat4 viewProj;
         glm::vec4 atlasRect;
     };
@@ -20,6 +22,8 @@ namespace Syn
         SpotLightShadowComponentGPU(const SpotLightShadowComponent& component);
 
         glm::vec4 planes;
+        glm::mat4 view;
+        glm::mat4 proj;
         glm::mat4 viewProj;
         glm::vec4 atlasRect;
     };

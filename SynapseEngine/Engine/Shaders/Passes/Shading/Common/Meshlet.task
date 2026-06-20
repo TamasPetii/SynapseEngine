@@ -110,7 +110,7 @@ void main() {
             vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);
             bool enableDepthOcclusion = (ctx.enableMeshletOcclusionCulling == 1);
             
-            if (IsSphereOccluded(worldCollider.center, worldCollider.radius, camera, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
+            if (IsSphereOccludedPerspective(worldCollider.center, worldCollider.radius, camera.view, camera.projVulkan, camera.params.x, camera.params.y, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
                 isVisible = false;
             }
         }

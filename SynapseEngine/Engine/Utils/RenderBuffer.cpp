@@ -162,4 +162,26 @@ namespace Syn
 
         _gpuVersions[frameIndex] = _mappedVersions[frameIndex];
     }
+
+    uint64_t RenderBuffer::GetElementCount(uint32_t frameIndex) const
+    {
+        if (frameIndex >= _config.frames) return 0;
+
+        if (_config.strategy == BufferStrategy::MappedOnly) {
+            return _mapped[frameIndex] ? _mapped[frameIndex]->GetCapacity() : 0;
+        }
+        else {
+            return _gpu[frameIndex] ? _gpu[frameIndex]->GetCapacity() : 0;
+        }
+    }
+
+    uint32_t RenderBuffer::GetElementSize() const
+    {
+        return _config.elementSize;
+    }
+
+    uint64_t RenderBuffer::GetSizeInBytes(uint32_t frameIndex) const
+    {
+        return GetElementCount(frameIndex) * _config.elementSize;
+    }
 }

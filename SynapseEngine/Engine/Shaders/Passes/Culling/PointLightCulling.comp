@@ -49,7 +49,7 @@ void main() {
     vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);
     bool enableDepthOcclusion = (ctx.enablePointLightOcclusionCulling == 1);
 
-    if (IsSphereOccluded(collider.center, collider.radius, camera, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
+    if (IsSphereOccludedPerspective(collider.center, collider.radius, camera.view, camera.projVulkan, camera.params.x, camera.params.y, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
         return;
     }
 

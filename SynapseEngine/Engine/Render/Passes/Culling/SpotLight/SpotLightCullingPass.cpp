@@ -50,11 +50,10 @@ namespace Syn {
 
     void SpotLightCullingPass::BindDescriptors(const RenderContext& context) {
         auto imageManager = ServiceLocator::GetImageManager();
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
-
-        //Todo: Previous Frames?
-        //Using current frame's depth pyramid!!
-        auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
+        
+        uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
+        auto prevRtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, prevFrameIndex);
+        auto depthPyramid = prevRtGroup->GetImage(RenderTargetNames::DepthPyramid);
         auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);
 
         Vk::PushDescriptorWriter pushWriter;

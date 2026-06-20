@@ -96,7 +96,7 @@ void main()
     float mainCamScreenSize = 0.0;
     float cameraNear = GET_CAMERA_NEAR(camera);
     vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);  
-    mainCamScreenSize = CalculateSphereScreenSize(worldCollider.center, worldCollider.radius, camera.view, camera.proj, cameraNear, screenRes);
+    mainCamScreenSize = CalculateSphereScreenSizePerspective(worldCollider.center, worldCollider.radius, camera.view, camera.proj, cameraNear, screenRes);
     
     // Zero Triangle Culling: Discard models that are too small to be visible from the main camera
     if (mainCamScreenSize < 1.0) 
@@ -108,7 +108,7 @@ void main()
         vec4 shadowAtlasRect = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeAtlasRects[cascadeIdx];
         
         float shadowScreenSizePixels = 0.0;  
-        if (IsSphereOccludedDirLightShadow(worldCollider.center, worldCollider.radius, shadowViewProj, shadowAtlasRect, shadowDepthPyramid, float(ctx.directionLightShadowAtlasSize), ctx.directionLightShadowHizMipLevels, shadowScreenSizePixels)) {
+        if (IsSphereOccludedAtlasOrtho(worldCollider.center, worldCollider.radius, shadowViewProj, shadowAtlasRect, shadowDepthPyramid, float(ctx.directionLightShadowAtlasSize), ctx.directionLightShadowHizMipLevels, shadowScreenSizePixels)) {
             return;
         }
     }
