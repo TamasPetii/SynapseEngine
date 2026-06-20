@@ -86,7 +86,7 @@ void main() {
         GpuMeshCollider worldCollider = TransformCollider(localGlobalCollider, transform.transform);
 
          // 4. Frustum Culling Test + Occlusion Culling
-        uint visibility = INTERSECTION_INTERSECT;
+        uint visibility = chunkFullyInside ? INTERSECTION_INSIDE : INTERSECTION_INTERSECT;
         if (!chunkFullyInside && ctx.enableModelFrustumCulling == 1) { 
             visibility = TestFrustum(worldCollider, camera);
             if (visibility == INTERSECTION_OUTSIDE) continue;

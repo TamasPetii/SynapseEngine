@@ -85,7 +85,7 @@ void main()
     // 5. Cone Culling against Spot Light
     uint visibility = INTERSECTION_INTERSECT;
     if(ctx.enableModelFrustumCulling == 1) {
-        visibility = TestConeSphere(lightCollider.worldPos, lightCollider.worldDir, lightCollider.range, lightCollider.outerAngleCos, lightCollider.outerAngleSin, worldCollider.center, worldCollider.radius);
+        visibility = TestConeSphereState(lightCollider.worldPos, lightCollider.worldDir, lightCollider.range, lightCollider.outerAngleCos, lightCollider.outerAngleSin, worldCollider.center, worldCollider.radius);
         if (visibility == INTERSECTION_OUTSIDE) return;
     }
 
@@ -139,10 +139,9 @@ void main()
                 uvec2 gpuPayload = uvec2(entityData, lightIdx);
 
                 uint sortSlot = atomicAdd(GET_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleMeshCountBufferAddr), 1);
-                
-                // Write Key and Value
                 GET_DRAW_CALL_KEY_DATA(ctx.spotLightShadowDrawCallKeyBufferAddr, sortSlot) = drawCallKey;
-                GET_SPOT_SHADOW_INSTANCE(ctx.spotLightShadowInstanceBufferAddr, sortSlot) = gpuPayload;
+                GET_SORTED_VALUE(ctx.spotLightShadowSortValuesBufferAddr, sortSlot) = sortSlot;
+                GET_SPOT_SHADOW_INSTANCE_UNSORTED(ctx.spotLightShadowUnsortedInstanceBufferAddr, sortSlot) = gpuPayload;
             }
         }
         return;

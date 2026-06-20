@@ -109,7 +109,7 @@ bool TestConeSphere(vec3 conePos, vec3 coneDir, float coneRange, float coneCosAn
     return !(angleCull || frontCull || backCull);
 }
 
-uint TestConeSphere(vec3 conePos, vec3 coneDir, float coneRange, float coneCosAngle, float coneSinAngle, vec3 sphereCenter, float sphereRadius) {
+uint TestConeSphereState(vec3 conePos, vec3 coneDir, float coneRange, float coneCosAngle, float coneSinAngle, vec3 sphereCenter, float sphereRadius) {
     vec3 v = sphereCenter - conePos;
     float lenSq = dot(v, v);
     float v1Len = dot(v, coneDir);

@@ -33,9 +33,15 @@ namespace Syn
         virtual void CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) override;
 
         RenderBuffer instanceBuffer;
-        RenderBuffer drawCallKeyBuffer;;
+        RenderBuffer unsortedInstanceBuffer;
+        RenderBuffer drawCallKeyBuffer;
         RenderBuffer indirectBuffer;
         RenderBuffer descriptorBuffer;
+        RenderBuffer modelCullingIndirectDispatchBuffer;
+        RenderBuffer finalizeDispatchBuffer;
+
+        RenderBuffer radixSortTempBuffer;
+        RenderBuffer sortValuesBuffer;
 
         RenderBuffer modelDispatchBuffer;
         RenderBuffer staticChunkDispatchBuffer;

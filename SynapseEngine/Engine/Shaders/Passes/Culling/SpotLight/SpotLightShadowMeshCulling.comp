@@ -37,8 +37,8 @@ void main() {
     VisibleModelData modelData = GET_VISIBLE_MODEL(ctx.spotLightShadowModelVisibleIndexBufferAddr, jobIndex);
 
     // 3. Unpack the encoded payload
-    uint pureEntityId = modelData.entityData & 0x7FFFFFFF;
-    bool parentFullyInside = (modelData.entityData >> 31) != 0; 
+    uint pureEntityId = modelData.entityId & 0x7FFFFFFF;
+    bool parentFullyInside = (modelData.entityId >> 31) != 0; 
 
     uint pureModelIndex = modelData.modelIndex & 0xFFFFFu;
     uint lightIdx = (modelData.modelIndex >> 20) & 0xFFFu;
@@ -106,12 +106,9 @@ void main() {
         GpuMeshCollider worldCollider = TransformCollider(localMeshCollider, transform.transform);
 
         // 8. Cone Culling against Spot Light (Csak akkor, ha a parent model nem volt fully inside)
-        uint visibility = INTERSECTION_INTERSECT;
-
-
-        uint visibility = INTERSECTION_INTERSECT;
+        uint visibility = parentFullyInside ? INTERSECTION_INSIDE : INTERSECTION_INTERSECT;
         if (!parentFullyInside && ctx.enableMeshFrustumCulling == 1) {
-            visibility = TestConeSphere(lightCollider.worldPos, lightCollider.worldDir, lightCollider.range, lightCollider.outerAngleCos, lightCollider.outerAngleSin, worldCollider.center, worldCollider.radius);
+            visibility = TestConeSphereState(lightCollider.worldPos, lightCollider.worldDir, lightCollider.range, lightCollider.outerAngleCos, lightCollider.outerAngleSin, worldCollider.center, worldCollider.radius);
             if (visibility == INTERSECTION_OUTSIDE) continue;
         }
 
@@ -136,6 +133,7 @@ void main() {
             
             uint indirectIdx = meshAlloc.indirectIndices[matType];
             uint isMeshlet = (meshAlloc.isMeshletPipeline == PIPELINE_MESHLET) ? 1u : 0u;
+
             uint drawCallKey = (isMeshlet << 31) | (indirectIdx & 0x7FFFFFFF);
             
             uint entityData = pureEntityId;
@@ -143,9 +141,9 @@ void main() {
             uvec2 gpuPayload = uvec2(entityData, lightIdx);
 
             uint sortSlot = atomicAdd(GET_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleMeshCountBufferAddr), 1);
-            
             GET_DRAW_CALL_KEY_DATA(ctx.spotLightShadowDrawCallKeyBufferAddr, sortSlot) = drawCallKey;
-            GET_SPOT_SHADOW_INSTANCE(ctx.spotLightShadowInstanceBufferAddr, sortSlot) = gpuPayload;
+            GET_SORTED_VALUE(ctx.spotLightShadowSortValuesBufferAddr, sortSlot) = sortSlot;
+            GET_SPOT_SHADOW_INSTANCE_UNSORTED(ctx.spotLightShadowUnsortedInstanceBufferAddr, sortSlot) = gpuPayload;
         }
     }
 }

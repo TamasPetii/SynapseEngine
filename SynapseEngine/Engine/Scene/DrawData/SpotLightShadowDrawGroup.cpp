@@ -16,6 +16,12 @@ namespace Syn
         instanceBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(SpotShadowInstancePayload), storageUsage, 65536, 131072 });
         instanceBuffer.UpdateCapacityAll(1);
 
+        unsortedInstanceBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(SpotShadowInstancePayload), storageUsage, 65536, 131072 });
+        unsortedInstanceBuffer.UpdateCapacityAll(1);
+
+        sortValuesBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 65536, 131072 });
+        sortValuesBuffer.UpdateCapacityAll(1);
+
         drawCallKeyBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 65536, 131072 });
         drawCallKeyBuffer.UpdateCapacityAll(1);
 
@@ -33,14 +39,23 @@ namespace Syn
         descriptorBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(MeshDrawDescriptor) * 8, storageUsage, 1024, 2048 });
         descriptorBuffer.UpdateCapacityAll(1);
 
+        modelCullingIndirectDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
+        modelCullingIndirectDispatchBuffer.UpdateCapacityAll(1);
+
         modelDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
         modelDispatchBuffer.UpdateCapacityAll(1);
+
+        finalizeDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
+        finalizeDispatchBuffer.UpdateCapacityAll(1);
 
         staticChunkDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
         staticChunkDispatchBuffer.UpdateCapacityAll(1);
 
         mortonChunkDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
         mortonChunkDispatchBuffer.UpdateCapacityAll(1);
+
+        radixSortTempBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, 1, storageUsage | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 10000, 20000 });
+        radixSortTempBuffer.UpdateCapacityAll(1);
 
         gridLookupData.Resize(SPOT_SHADOW_GRID_SIZE * SPOT_SHADOW_GRID_SIZE);
         std::fill(gridLookupData.Data(), gridLookupData.Data() + (SPOT_SHADOW_GRID_SIZE * SPOT_SHADOW_GRID_SIZE), 0xFFFFFFFF);

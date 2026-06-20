@@ -91,7 +91,7 @@ void main() {
         GpuMeshCollider worldCollider = TransformCollider(localMeshCollider, transform.transform);
 
         // 7. Precise Frustum Test (Optimization: Skip if parent model is already fully inside)
-        uint visibility = INTERSECTION_INTERSECT;
+        uint visibility = parentFullyInside ? INTERSECTION_INSIDE : INTERSECTION_INTERSECT;
         if (!parentFullyInside && ctx.enableMeshFrustumCulling == 1) {
             visibility = TestFrustum(worldCollider, camera);
             if (visibility == INTERSECTION_OUTSIDE) continue;

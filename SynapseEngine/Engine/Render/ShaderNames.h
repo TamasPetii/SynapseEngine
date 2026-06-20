@@ -114,5 +114,11 @@ namespace Syn
         static constexpr const char* SpotLightShadowTraditionalVert = "Engine/Shaders/Passes/Shadow/Spot/SpotLightShadowTraditional.vert";
         static constexpr const char* SpotLightShadowMeshletTask = "Engine/Shaders/Passes/Shadow/Spot/SpotLightShadowMeshlet.task";
         static constexpr const char* SpotLightShadowMeshletMesh = "Engine/Shaders/Passes/Shadow/Spot/SpotLightShadowMeshlet.mesh";
-    };
+
+        static constexpr const char* SpotLightShadowCullingCommandResetComp = "Engine/Shaders/Passes/Culling/SpotLight/SpotLightShadowCullingCommandReset.comp";
+        static constexpr const char* SpotLightShadowModelCullingComp = "Engine/Shaders/Passes/Culling/SpotLight/SpotLightShadowModelCulling.comp";
+        static constexpr const char* SpotLightShadowMeshCullingComp = "Engine/Shaders/Passes/Culling/SpotLight/SpotLightShadowMeshCulling.comp";
+        static constexpr const char* SpotLightShadowFinalizeSetupComp = "Engine/Shaders/Passes/Culling/SpotLight/SpotLightShadowFinalizeSetup.comp";
+        static constexpr const char* SpotLightShadowFinalizeComp = "Engine/Shaders/Passes/Culling/SpotLight/SpotLightShadowFinalize.comp";
+    }; 
 }

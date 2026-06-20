@@ -52,6 +52,7 @@ namespace Syn {
         auto imageManager = ServiceLocator::GetImageManager();
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
+        //Todo: Previous Frames?
         //Using current frame's depth pyramid!!
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
         auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);
@@ -71,12 +72,12 @@ namespace Syn {
         auto scene = context.scene;
         if (_totalLightsToTest == 0) return;
 
-        uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_totalLightsToTest, ComputeGroupSize::Buffer32D);
-        vkCmdDispatch(context.cmd, groupCountX, 1, 1);
-
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
         uint32_t fIdx = context.frameIndex;
+
+        uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_totalLightsToTest, ComputeGroupSize::Buffer32D);
+        vkCmdDispatch(context.cmd, groupCountX, 1, 1);
 
         Vk::BufferBarrierInfo cmdBarrier{};
         cmdBarrier.buffer = drawData->SpotLights.indirectBuffer.GetHandle(fIdx);
@@ -101,5 +102,13 @@ namespace Syn {
         colliderDataBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         colliderDataBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
         Vk::BufferUtils::InsertBarrier(context.cmd, colliderDataBarrier);
+
+        Vk::BufferBarrierInfo shadowCountBarrier{};
+        shadowCountBarrier.buffer = drawData->SpotLightShadow.visibleCountDispatchBuffer.GetHandle(fIdx);
+        shadowCountBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        shadowCountBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        shadowCountBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+        shadowCountBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_TRANSFER_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, shadowCountBarrier);
     }
 }

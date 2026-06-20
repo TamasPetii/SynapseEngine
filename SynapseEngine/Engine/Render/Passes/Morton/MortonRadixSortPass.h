@@ -5,7 +5,7 @@
 #include <vk_radix_sort.h>
 
 namespace Syn {
-    class SYN_API MortonRadixSortPass : public TransferPass {
+    class SYN_API MortonRadixSortPass : public IRenderPass {
     public:
         ~MortonRadixSortPass();
 
@@ -15,7 +15,7 @@ namespace Syn {
         void Initialize() override;
     protected:
         bool ShouldExecute(const RenderContext& context) const override;
-        void Transfer(const RenderContext& context) override;
+        void Execute(const RenderContext& context) override;
     private:
         uint32_t _staticCount = 0;
         VrdxSorter _radixSorter = VK_NULL_HANDLE;

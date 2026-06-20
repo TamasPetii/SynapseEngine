@@ -113,6 +113,7 @@ namespace Syn {
         ctx.spotLightShadowSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightShadowSparseMap, fIdx);
         ctx.spotLightShadowDataBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightShadowData, fIdx);
         ctx.spotLightShadowInstanceBufferAddr = drawData->SpotLightShadow.instanceBuffer.GetAddress(fIdx);
+        ctx.spotLightShadowUnsortedInstanceBufferAddr = drawData->SpotLightShadow.unsortedInstanceBuffer.GetAddress(fIdx);
         ctx.spotLightDrawDescriptorBufferAddr = drawData->SpotLightShadow.descriptorBuffer.GetAddress(fIdx);
         ctx.spotLightVisibleShadowIndexBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightShadowVisibleData, fIdx);       
         ctx.spotLightShadowModelCountBufferAddr = drawData->SpotLightShadow.modelDispatchBuffer.GetAddress(fIdx);
@@ -124,7 +125,9 @@ namespace Syn {
         ctx.spotLightShadowGridLookupBufferAddr = drawData->SpotLightShadow.gridLookupBuffer.GetAddress(fIdx);
         ctx.spotLightShadowVisibleCountBufferAddr = drawData->SpotLightShadow.visibleCountDispatchBuffer.GetAddress(fIdx);
         ctx.spotLightShadowDrawCallKeyBufferAddr = drawData->SpotLightShadow.drawCallKeyBuffer.GetAddress(fIdx);
+        ctx.spotLightShadowSortValuesBufferAddr = drawData->SpotLightShadow.sortValuesBuffer.GetAddress(fIdx);
         ctx.spotLightShadowVisibleMeshCountBufferAddr = drawData->SpotLightShadow.visibleMeshCountDispatchBuffer.GetAddress(fIdx);
+        ctx.spotLightShadowFinalizeDispatchBufferAddr = drawData->SpotLightShadow.finalizeDispatchBuffer.GetAddress(fIdx);
 
         ctx.pointLightIndirectCommandBufferAddr = drawData->PointLights.indirectBuffer.GetAddress(fIdx);
         ctx.pointLightVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightVisibleData, fIdx);
@@ -173,6 +176,8 @@ namespace Syn {
 		ctx.directionLightShadowMinBlockSize = SHADOW_MIN_BLOCK_SIZE;
 		ctx.directionLightShadowGridSize = SHADOW_GRID_SIZE;
         ctx.directionLightShadowHizMipLevels = SHADOW_HIZ_MIP_LEVELS;
+
+        ctx.spotLightShadowLodBias = SPOT_SHADOW_LOD_BIAS;
 
         ctx.enableMeshletConeCulling = settings->culling.enableMeshletConeCulling ? 1 : 0;
 

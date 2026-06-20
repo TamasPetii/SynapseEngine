@@ -127,6 +127,8 @@ namespace Syn
             {
                 shadowGroup.instanceBuffer.UpdateCapacity(frameIndex, shadowTotalInstances);
                 shadowGroup.drawCallKeyBuffer.UpdateCapacity(frameIndex, shadowTotalInstances);
+                shadowGroup.sortValuesBuffer.UpdateCapacity(frameIndex, shadowTotalInstances);
+                shadowGroup.unsortedInstanceBuffer.UpdateCapacity(frameIndex, shadowTotalInstances);
             }
 
             if (indirectCount > 0)

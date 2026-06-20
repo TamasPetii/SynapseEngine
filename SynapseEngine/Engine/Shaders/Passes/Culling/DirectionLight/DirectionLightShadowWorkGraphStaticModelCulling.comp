@@ -93,7 +93,7 @@ void main() {
         GpuMeshCollider worldCollider = TransformCollider(localGlobalCollider, transform.transform);
 
         // 5. Frustum Culling Test against Light Cascade (Skip if Chunk was fully inside)
-        uint visibility = INTERSECTION_INTERSECT;
+        uint visibility = chunkFullyInside ? INTERSECTION_INSIDE : INTERSECTION_INTERSECT;
         if (!chunkFullyInside && ctx.enableModelFrustumCulling == 1) { 
             visibility = TestFrustum(worldCollider.center, worldCollider.radius, worldCollider.aabbMin, worldCollider.aabbMax, cascade);
             if (visibility == INTERSECTION_OUTSIDE) continue;

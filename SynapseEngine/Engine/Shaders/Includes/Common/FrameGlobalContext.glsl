@@ -63,6 +63,7 @@ struct FrameGlobalContext {
 
     uint64_t spotLightShadowIndirectGeometryCommandBufferAddr;
     uint64_t spotLightShadowInstanceBufferAddr;
+    uint64_t spotLightShadowUnsortedInstanceBufferAddr;
     uint64_t spotLightDrawDescriptorBufferAddr;
     uint64_t spotLightShadowSparseMapBufferAddr;
     uint64_t spotLightShadowDataBufferAddr;  
@@ -76,7 +77,9 @@ struct FrameGlobalContext {
     uint64_t spotLightShadowGridLookupBufferAddr;
     uint64_t spotLightShadowVisibleCountBufferAddr;
     uint64_t spotLightShadowDrawCallKeyBufferAddr;
+    uint64_t spotLightShadowSortValuesBufferAddr;
     uint64_t spotLightShadowVisibleMeshCountBufferAddr;
+    uint64_t spotLightShadowFinalizeDispatchBufferAddr;
 
     uint64_t pointLightIndirectCommandBufferAddr;
     uint64_t pointLightVisibleIndexBufferAddr;
@@ -186,6 +189,8 @@ struct FrameGlobalContext {
     uint directionLightShadowMinBlockSize;
     uint directionLightShadowGridSize;
     uint directionLightShadowHizMipLevels;
+
+    uint spotLightShadowLodBias;
 };
 
 #ifndef __cplusplus

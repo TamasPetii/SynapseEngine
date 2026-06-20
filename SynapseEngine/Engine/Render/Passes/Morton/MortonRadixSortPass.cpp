@@ -54,7 +54,7 @@ namespace Syn {
         return hasDirty || _needsRebuild || (_countdown > 0);
     }
 
-    void MortonRadixSortPass::Transfer(const RenderContext& context) {
+    void MortonRadixSortPass::Execute(const RenderContext& context) {
         auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
         bool hasDirty = !pool->GetStorage().GetDirtyStatics().empty();
 

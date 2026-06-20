@@ -48,6 +48,7 @@ layout(buffer_reference, std430) readonly restrict buffer SpotShadowInstanceBuff
 layout(buffer_reference, std430) readonly restrict buffer GridLookupBuffer { uint data[]; };
 layout(buffer_reference, std430) readonly restrict buffer VisibleCountBuffer { uint data; };
 layout(buffer_reference, std430) readonly buffer DrawCallKeyBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly buffer SortValuesBuffer { uint data[]; };
 
 #define SPOT_SHADOW_MIN_BLOCK_SIZE 64
 
@@ -60,5 +61,7 @@ layout(buffer_reference, std430) readonly buffer DrawCallKeyBuffer { uint data[]
 #define GET_GRID_LOOK_UP_DATA(addr, idx)                GridLookupBuffer(addr).data[idx]
 #define GET_VISIBLE_COUNT_DATA(addr)                    VisibleCountBuffer(addr).data
 #define GET_DRAW_CALL_KEY_DATA(addr, idx)               DrawCallKeyBuffer(addr).data[idx]
+#define GET_SORTED_VALUE(addr, idx)                     SortValuesBuffer(addr).data[idx]
+#define GET_SPOT_SHADOW_INSTANCE_UNSORTED(addr, idx)    SpotShadowInstanceBuffer(addr).data[idx]
 
 #endif
