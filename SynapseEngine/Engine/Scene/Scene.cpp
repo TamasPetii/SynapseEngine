@@ -331,7 +331,7 @@ namespace Syn
             },
             ComponentMemoryType::GpuOnly);
 
-        RegisterGenericBuffer<uint32_t>(BufferNames::SpotLightShadowMortonChunkVisibleIndex,
+        RegisterGenericBuffer<glm::vec2>(BufferNames::SpotLightShadowMortonChunkVisibleIndex,
             [this]() -> uint32_t {
                 auto pool = _registry->GetPool<TransformComponent>();
                 if (!pool) return 0;
@@ -345,7 +345,7 @@ namespace Syn
             },
             ComponentMemoryType::GpuOnly);
 
-        RegisterGenericBuffer<uint32_t>(BufferNames::SpotLightShadowStaticChunkVisibleIndex,
+        RegisterGenericBuffer<glm::vec2>(BufferNames::SpotLightShadowStaticChunkVisibleIndex,
             [this]() -> uint32_t {
                 auto pool = _registry->GetPool<TransformComponent>();
                 if (!pool) return 0;

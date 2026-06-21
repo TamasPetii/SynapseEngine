@@ -17,9 +17,6 @@
 #include "../../../Includes/Utils/CullingMath.glsl"
 #include "../../../Includes/Utils/Occlusion.glsl"
 
-layout(buffer_reference, std430) restrict buffer AtomicCounterBuffer { uint count; };
-layout(buffer_reference, std430) restrict buffer SortKeysBuffer { uint data[]; };
-
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
 #include "../../../Includes/PushConstants/SpotLightShadowCullingPC.glsl"

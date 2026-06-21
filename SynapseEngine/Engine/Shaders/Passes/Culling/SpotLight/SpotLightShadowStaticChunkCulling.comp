@@ -1,0 +1,91 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_KHR_shader_subgroup_basic : require
+#extension GL_KHR_shader_subgroup_arithmetic : require
+#extension GL_KHR_shader_subgroup_ballot : require
+
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Camera.glsl"
+#include "../../../Includes/Common/Culling.glsl"
+#include "../../../Includes/Common/SpotLight.glsl"
+#include "../../../Includes/Utils/CullingMath.glsl"
+#include "../../../Includes/Utils/Occlusion.glsl"
+#include "../../../Includes/Common/StaticChunk.glsl"
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../../Includes/PushConstants/SpotLightShadowCullingPC.glsl"
+layout(push_constant) uniform PushConstants {
+    SpotLightShadowCullingPC pc;
+};
+
+// Depth pyramid (HZB) for the shadow atlas occlusion culling
+layout(set = 2, binding = 0) uniform sampler2D shadowDepthPyramid;
+
+void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    // Thread mapping: X = Chunk, Y = Light Index
+    uint chunkId = gl_GlobalInvocationID.x;
+    uint lightIdx = gl_GlobalInvocationID.y;
+
+    // 1. Bounds Checking
+    if (chunkId >= ctx.staticChunkCount) return;
+    uint activeSpotLightShadowCount = GET_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleCountBufferAddr);
+    if (lightIdx >= activeSpotLightShadowCount) return;
+
+    // 2. Fetch Chunk Data and calculate Bounding Sphere
+    StaticChunk chunk = GET_STATIC_CHUNK(ctx.staticChunkDataBufferAddr, chunkId);
+    vec3 aabbMin = chunk.minBounds;
+    vec3 aabbMax = chunk.maxBounds;
+    vec3 sphereCenter = (aabbMin + aabbMax) * 0.5;
+    float sphereRadius = length(aabbMax - sphereCenter);
+
+    // 3. Resolve Spot Light Shadow Data
+    uint lightEntity = GET_VISIBLE_SHADOW_SPOT_LIGHT(ctx.spotLightVisibleShadowIndexBufferAddr, lightIdx);
+    uint lightDenseIndex = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, lightEntity);
+    uint lightShadowDenseIndex = GET_SPARSE_INDEX(ctx.spotLightShadowSparseMapBufferAddr, lightEntity);
+    SpotLightColliderGPU lightCollider = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, lightDenseIndex);
+    SpotLightShadowComponent shadowComp = GET_SPOT_LIGHT_SHADOW(ctx.spotLightShadowDataBufferAddr, lightShadowDenseIndex);
+
+    // 4. Cone Culling against Spot Light Frustum
+    uint visibility = INTERSECTION_INTERSECT;
+    if (ctx.enableChunkFrustumCulling == 1) {
+         visibility = TestConeSphereState(lightCollider.worldPos, lightCollider.worldDir, lightCollider.range, lightCollider.outerAngleCos, lightCollider.outerAngleSin, sphereCenter, sphereRadius);
+         if (visibility == INTERSECTION_OUTSIDE) return;
+    }
+
+    // 5. Occlusion Culling using Spot Light HZB
+    if (ctx.enableChunkOcclusionCulling == 1) {
+        float shadowScreenSizePixels = 0.0;
+        if (false && IsSphereOccludedAtlasPerspective(sphereCenter, sphereRadius, shadowComp.view, shadowComp.proj, shadowComp.planes.x, shadowComp.planes.y, shadowComp.atlasRect, shadowDepthPyramid, float(ctx.spotLightShadowAtlasSize), ctx.spotLightShadowHizMipLevels, shadowScreenSizePixels)) {
+            return;
+        }
+    }
+
+    // 6. Subgroup-optimized writes to the visible chunk list
+    uint needsWrite = 1;
+    uint subgroupWriteCount = subgroupAdd(needsWrite);
+    uint localOffset = subgroupExclusiveAdd(needsWrite); 
+    uint baseOffset = 0;
+    
+    if (subgroupElect() && subgroupWriteCount > 0) {
+        // Increment the global counter for visible shadow chunks
+        baseOffset = atomicAdd(GET_DISPATCH_CMD(ctx.spotLightShadowChunkCountBufferAddr).groupCountX, subgroupWriteCount);
+    }
+
+    baseOffset = subgroupBroadcastFirst(baseOffset);
+
+    // 7. Encode Payload: [Bit 31: Inside Frustum] [Bits 20-30: LightIdx] [Bits 0-19: ChunkID]
+    if (needsWrite == 1) {
+        uint finalIndex = baseOffset + localOffset;
+        
+        uvec2 payload;
+        payload.x = (chunkId & 0x7FFFFFFFu);
+        payload.x = SET_BIT_TO(payload.x, 31, visibility == INTERSECTION_INSIDE);
+        payload.y = lightIdx;
+        
+        GET_VISIBLE_CHUNK_UVEC2(ctx.spotLightShadowChunkVisibleIndexBufferAddr, finalIndex) = payload;
+    }
+}

@@ -41,6 +41,7 @@ namespace Syn {
             Vk::BufferUtils::InsertBarrier(context.cmd, fillShadowBarrier);
         }
 
+        // 1. Mesh Count
         Vk::BufferFillInfo fillMesh{};
         fillMesh.buffer = drawData->SpotLightShadow.visibleMeshCountDispatchBuffer.GetHandle(fIdx);
         fillMesh.offset = 0;
@@ -48,6 +49,7 @@ namespace Syn {
         fillMesh.data = 0;
         Vk::BufferUtils::FillBuffer(context.cmd, fillMesh);
 
+        // 2. Finalize Setup
         VkDispatchIndirectCommand finalizeCmd{ 0, 1, 1 };
         Vk::BufferUpdateInfo updateFinalize{};
         updateFinalize.buffer = drawData->SpotLightShadow.finalizeDispatchBuffer.GetHandle(fIdx);
@@ -56,6 +58,23 @@ namespace Syn {
         updateFinalize.pData = &finalizeCmd;
         Vk::BufferUtils::UpdateBuffer(context.cmd, updateFinalize);
 
+        // 3. Static Chunk Dispatch Count
+        VkDispatchIndirectCommand zeroCmd{ 0, 1, 1 };
+        Vk::BufferUpdateInfo updateStaticChunk{};
+        updateStaticChunk.buffer = drawData->SpotLightShadow.staticChunkDispatchBuffer.GetHandle(fIdx);
+        updateStaticChunk.offset = 0;
+        updateStaticChunk.size = sizeof(VkDispatchIndirectCommand);
+        updateStaticChunk.pData = &zeroCmd;
+        Vk::BufferUtils::UpdateBuffer(context.cmd, updateStaticChunk);
+
+        Vk::BufferUpdateInfo updateMortonChunk{};
+        updateMortonChunk.buffer = drawData->SpotLightShadow.mortonChunkDispatchBuffer.GetHandle(fIdx);
+        updateMortonChunk.offset = 0;
+        updateMortonChunk.size = sizeof(VkDispatchIndirectCommand);
+        updateMortonChunk.pData = &zeroCmd;
+        Vk::BufferUtils::UpdateBuffer(context.cmd, updateMortonChunk);
+
+        // 4. Morton Chunk Dispatch Count
         Vk::BufferBarrierInfo alwaysBarrier{};
         alwaysBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
         alwaysBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
@@ -70,6 +89,16 @@ namespace Syn {
         alwaysBarrier.buffer = updateFinalize.buffer;
         alwaysBarrier.size = updateFinalize.size;
         alwaysBarrier.offset = updateFinalize.offset;
+        Vk::BufferUtils::InsertBarrier(context.cmd, alwaysBarrier);
+
+        alwaysBarrier.buffer = updateStaticChunk.buffer;
+        alwaysBarrier.size = updateStaticChunk.size;
+        alwaysBarrier.offset = updateStaticChunk.offset;
+        Vk::BufferUtils::InsertBarrier(context.cmd, alwaysBarrier);
+
+        alwaysBarrier.buffer = updateMortonChunk.buffer;
+        alwaysBarrier.size = updateMortonChunk.size;
+        alwaysBarrier.offset = updateMortonChunk.offset;
         Vk::BufferUtils::InsertBarrier(context.cmd, alwaysBarrier);
     }
 }
