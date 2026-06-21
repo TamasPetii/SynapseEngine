@@ -44,7 +44,7 @@ namespace Syn {
         vrdxGetSorterKeyValueStorageRequirements(_radixSorter, maxSortCount, &reqs);
         tempBuffer.UpdateCapacity(fIdx, reqs.size);
 
-        VkBuffer keysHandle = drawData->SpotLightShadow.instanceBuffer.GetHandle(fIdx);
+        VkBuffer keysHandle = drawData->SpotLightShadow.drawCallKeyBuffer.GetHandle(fIdx);
         VkBuffer valuesHandle = drawData->SpotLightShadow.sortValuesBuffer.GetHandle(fIdx);
         VkBuffer countBuffer = drawData->SpotLightShadow.visibleMeshCountDispatchBuffer.GetHandle(fIdx);
 

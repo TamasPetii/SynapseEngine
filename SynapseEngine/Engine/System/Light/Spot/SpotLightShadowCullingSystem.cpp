@@ -453,15 +453,15 @@ namespace Syn
                 if (appendedCount > 0) {
                     shadowGroup.instanceBuffer.Write(frameIndex, shadowGroup.instances.Data(), appendedCount * sizeof(SpotShadowInstancePayload), 0);
                 }
-
-                uint32_t commandCount = shadowGroup.totalCommandCount;
-                if (commandCount > 0) {
-                    shadowGroup.descriptorBuffer.Write(frameIndex, shadowGroup.shadowDescriptors.Data(), commandCount * sizeof(MeshDrawDescriptor), 0);
-                }
             }
 
             if (needsCommandUpload)
             {
+                uint32_t commandCount = shadowGroup.totalCommandCount;
+                if (commandCount > 0) {
+                    shadowGroup.descriptorBuffer.Write(frameIndex, shadowGroup.shadowDescriptors.Data(), commandCount * sizeof(MeshDrawDescriptor), 0);
+                }
+
                 size_t tradSize = mainGroup.activeTraditionalCount * sizeof(VkDrawIndirectCommand);
                 if (tradSize > 0) {
                     shadowGroup.indirectBuffer.Write(frameIndex, shadowGroup.traditionalCmds.Data(), tradSize, 0);

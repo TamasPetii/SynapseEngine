@@ -7,19 +7,39 @@ namespace Syn {
         auto drawData = context.scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
 
-        Vk::BufferFillInfo fillBase{};
-        fillBase.buffer = drawData->SpotLights.indirectBuffer.GetHandle(fIdx);
-        fillBase.offset = sizeof(uint32_t);
-        fillBase.size = sizeof(uint32_t);
-        fillBase.data = 0;
-        Vk::BufferUtils::FillBuffer(context.cmd, fillBase);
+        bool isSpotCullingGpu = context.scene->GetSettings()->culling.spotLightCullingDevice == CullingDeviceType::GPU;
 
-        Vk::BufferFillInfo fillShadow{};
-        fillShadow.buffer = drawData->SpotLightShadow.visibleCountDispatchBuffer.GetHandle(fIdx);
-        fillShadow.offset = 0;
-        fillShadow.size = sizeof(uint32_t);
-        fillShadow.data = 0;
-        Vk::BufferUtils::FillBuffer(context.cmd, fillShadow);
+        if (isSpotCullingGpu) {
+            Vk::BufferFillInfo fillBase{};
+            fillBase.buffer = drawData->SpotLights.indirectBuffer.GetHandle(fIdx);
+            fillBase.offset = sizeof(uint32_t);
+            fillBase.size = sizeof(uint32_t);
+            fillBase.data = 0;
+            Vk::BufferUtils::FillBuffer(context.cmd, fillBase);
+
+            Vk::BufferFillInfo fillShadow{};
+            fillShadow.buffer = drawData->SpotLightShadow.visibleCountDispatchBuffer.GetHandle(fIdx);
+            fillShadow.offset = 0;
+            fillShadow.size = sizeof(uint32_t);
+            fillShadow.data = 0;
+            Vk::BufferUtils::FillBuffer(context.cmd, fillShadow);
+
+            Vk::BufferBarrierInfo fillShadowBarrier{};
+            fillShadowBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+            fillShadowBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+            fillShadowBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+            fillShadowBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+
+            fillShadowBarrier.buffer = fillBase.buffer;
+            fillShadowBarrier.size = fillBase.size;
+            fillShadowBarrier.offset = fillBase.offset;
+            Vk::BufferUtils::InsertBarrier(context.cmd, fillShadowBarrier);
+
+            fillShadowBarrier.buffer = fillShadow.buffer;
+            fillShadowBarrier.size = fillShadow.size;
+            fillShadowBarrier.offset = fillShadow.offset;
+            Vk::BufferUtils::InsertBarrier(context.cmd, fillShadowBarrier);
+        }
 
         Vk::BufferFillInfo fillMesh{};
         fillMesh.buffer = drawData->SpotLightShadow.visibleMeshCountDispatchBuffer.GetHandle(fIdx);
@@ -36,33 +56,20 @@ namespace Syn {
         updateFinalize.pData = &finalizeCmd;
         Vk::BufferUtils::UpdateBuffer(context.cmd, updateFinalize);
 
-        Vk::BufferBarrierInfo fillBarrier{};
-        fillBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
-        fillBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-        fillBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        fillBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        Vk::BufferBarrierInfo alwaysBarrier{};
+        alwaysBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+        alwaysBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+        alwaysBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        alwaysBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
 
-        fillBarrier.buffer = fillBase.buffer;
-        fillBarrier.size = fillBase.size;
-        fillBarrier.offset = fillBase.offset;
-        Vk::BufferUtils::InsertBarrier(context.cmd, fillBarrier);
+        alwaysBarrier.buffer = fillMesh.buffer;
+        alwaysBarrier.size = fillMesh.size;
+        alwaysBarrier.offset = fillMesh.offset;
+        Vk::BufferUtils::InsertBarrier(context.cmd, alwaysBarrier);
 
-        fillBarrier.buffer = fillShadow.buffer;
-        fillBarrier.size = fillShadow.size;
-        fillBarrier.offset = fillShadow.offset;
-        Vk::BufferUtils::InsertBarrier(context.cmd, fillBarrier);
-
-        fillBarrier.buffer = fillMesh.buffer;
-        fillBarrier.size = fillMesh.size;
-        fillBarrier.offset = fillMesh.offset;
-        Vk::BufferUtils::InsertBarrier(context.cmd, fillBarrier);
-
-        Vk::BufferBarrierInfo finalizeBarrier{};
-        finalizeBarrier.buffer = updateFinalize.buffer;
-        finalizeBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
-        finalizeBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-        finalizeBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
-        finalizeBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
-        Vk::BufferUtils::InsertBarrier(context.cmd, finalizeBarrier);
+        alwaysBarrier.buffer = updateFinalize.buffer;
+        alwaysBarrier.size = updateFinalize.size;
+        alwaysBarrier.offset = updateFinalize.offset;
+        Vk::BufferUtils::InsertBarrier(context.cmd, alwaysBarrier);
     }
 }

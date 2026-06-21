@@ -88,7 +88,7 @@ namespace Syn {
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 
-        pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
+        //pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
     }
 
     void SpotLightShadowModelCullingPass::Dispatch(const RenderContext& context) {
@@ -98,12 +98,14 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
 
+        bool isSpotCullingGpu = scene->GetSettings()->culling.spotLightCullingDevice == CullingDeviceType::GPU;
+
         VkBuffer cullBuffer = drawData->SpotLightShadow.modelCullingIndirectDispatchBuffer.GetHandle(fIdx);
         VkBuffer countBuffer = drawData->SpotLightShadow.visibleCountDispatchBuffer.GetHandle(fIdx);
 
         VkDispatchIndirectCommand cmd{};
         cmd.x = ComputeGroupSize::CalculateDispatchCount(_totalModelsToTest, ComputeGroupSize::Buffer32D);
-        cmd.y = 0;
+        cmd.y = isSpotCullingGpu ? 0 : drawData->SpotLightShadow.visibleLightCount;
         cmd.z = 1;
 
         Vk::BufferUpdateInfo updateInfo{};
@@ -113,29 +115,31 @@ namespace Syn {
         updateInfo.pData = &cmd;
         Vk::BufferUtils::UpdateBuffer(context.cmd, updateInfo);
 
-        Vk::BufferBarrierInfo updateBarrier{};
-        updateBarrier.buffer = cullBuffer;
-        updateBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
-        updateBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-        updateBarrier.dstStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
-        updateBarrier.dstAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-        Vk::BufferUtils::InsertBarrier(context.cmd, updateBarrier);
+        if (isSpotCullingGpu) {
+            Vk::BufferBarrierInfo updateBarrier{};
+            updateBarrier.buffer = cullBuffer;
+            updateBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+            updateBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+            updateBarrier.dstStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+            updateBarrier.dstAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+            Vk::BufferUtils::InsertBarrier(context.cmd, updateBarrier);
 
-        Vk::BufferCopyInfo copyInfo{};
-        copyInfo.srcBuffer = countBuffer;
-        copyInfo.dstBuffer = cullBuffer;
-        copyInfo.srcOffset = 0;
-        copyInfo.dstOffset = offsetof(VkDispatchIndirectCommand, y);
-        copyInfo.size = sizeof(uint32_t);
-        Vk::BufferUtils::CopyBuffer(context.cmd, copyInfo);
+            Vk::BufferCopyInfo copyInfo{};
+            copyInfo.srcBuffer = countBuffer;
+            copyInfo.dstBuffer = cullBuffer;
+            copyInfo.srcOffset = 0;
+            copyInfo.dstOffset = offsetof(VkDispatchIndirectCommand, y);
+            copyInfo.size = sizeof(uint32_t);
+            Vk::BufferUtils::CopyBuffer(context.cmd, copyInfo);
+        }
 
-        Vk::BufferBarrierInfo copyBarrier{};
-        copyBarrier.buffer = cullBuffer;
-        copyBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
-        copyBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-        copyBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
-        copyBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT;
-        Vk::BufferUtils::InsertBarrier(context.cmd, copyBarrier);
+        Vk::BufferBarrierInfo readyBarrier{};
+        readyBarrier.buffer = cullBuffer;
+        readyBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+        readyBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+        readyBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
+        readyBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, readyBarrier);
 
         vkCmdDispatchIndirect(context.cmd, cullBuffer, 0);
     }

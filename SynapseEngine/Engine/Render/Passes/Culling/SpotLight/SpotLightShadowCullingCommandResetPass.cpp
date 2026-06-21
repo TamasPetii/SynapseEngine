@@ -10,7 +10,7 @@
 
 namespace Syn {
 
-#include "Engine/Shaders/Includes/PushConstants/CullingCommandResetPC.glsl"
+    #include "Engine/Shaders/Includes/PushConstants/CullingCommandResetPC.glsl"
 
     bool SpotLightShadowCullingCommandResetPass::ShouldExecute(const RenderContext& context) const {
         auto pool = context.scene->GetRegistry()->GetPool<SpotLightComponent>();
