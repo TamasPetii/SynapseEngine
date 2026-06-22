@@ -5,35 +5,39 @@ constexpr const char* FONT_PATH = "Assets/Editor/Fonts/Font Awesome 5 Free-Solid
 constexpr const char* ICON_PATH = "Assets/Editor/Icons";
 constexpr const char* ASSET_PATH = "Assets";
 
-//FileSystem icons
-#define SYN_ICON_FOLDER        ICON_FA_FOLDER
-#define SYN_ICON_FOLDER_OPEN   ICON_FA_FOLDER_OPEN
-#define SYN_ICON_FILE          ICON_FA_FILE
-#define SYN_ICON_IMAGE         ICON_FA_IMAGE
-#define SYN_ICON_CODE          ICON_FA_CODE
+// FileSystem icons
+#define SYN_ICON_FOLDER         ICON_FA_FOLDER
+#define SYN_ICON_FOLDER_OPEN    ICON_FA_FOLDER_OPEN
+#define SYN_ICON_FILE           ICON_FA_FILE
+#define SYN_ICON_IMAGE          ICON_FA_IMAGE
+#define SYN_ICON_CODE           ICON_FA_CODE
 
-//Content browser icons
+// Content browser icons
 #define SYN_ICON_ARROW_UP       ICON_FA_ARROW_UP
 #define SYN_ICON_CHEVRON_RIGHT  ICON_FA_CHEVRON_RIGHT
+#define SYN_ICON_CHEVRON_DOWN   ICON_FA_CHEVRON_DOWN
+#define SYN_ICON_CHEVRON_UP     ICON_FA_CHEVRON_UP
 #define SYN_ICON_SEARCH         ICON_FA_SEARCH
 
-//Hierarchy icons
+// Hierarchy icons
 #define SYN_ICON_LIST           ICON_FA_LIST
 #define SYN_ICON_PLUS           ICON_FA_PLUS
 #define SYN_ICON_EYE            ICON_FA_EYE
 #define SYN_ICON_EYE_SLASH      ICON_FA_EYE_SLASH
 #define SYN_ICON_CUBE           ICON_FA_CUBE
+#define SYN_ICON_CUBES          ICON_FA_CUBES
 #define SYN_ICON_VIDEO          ICON_FA_VIDEO
 #define SYN_ICON_TRASH          ICON_FA_TRASH
 #define SYN_ICON_EXPAND_ALL     ICON_FA_ANGLE_DOUBLE_DOWN
 #define SYN_ICON_COLLAPSE_ALL   ICON_FA_ANGLE_DOUBLE_UP
 
-//Profiler
+// Profiler
 #define SYN_ICON_CHART_BAR      ICON_FA_CHART_BAR
 #define SYN_ICON_MICROCHIP      ICON_FA_MICROCHIP
 #define SYN_ICON_DESKTOP        ICON_FA_DESKTOP
 #define SYN_ICON_TACHOMETER     ICON_FA_TACHOMETER_ALT
 
+// Generic / Editor
 #define SYN_ICON_GAMEPAD        ICON_FA_GAMEPAD
 #define SYN_ICON_ARROWS_ALT     ICON_FA_ARROWS_ALT
 #define SYN_ICON_LAYER_GROUP    ICON_FA_LAYER_GROUP
@@ -48,20 +52,19 @@ constexpr const char* ASSET_PATH = "Assets";
 #define SYN_ICON_CROP           ICON_FA_CROP
 #define SYN_ICON_MAGIC          ICON_FA_MAGIC
 #define SYN_ICON_LIGHTBULB      ICON_FA_LIGHTBULB
-#define SYN_ICON_CHEVRON_DOWN   ICON_FA_CHEVRON_DOWN
-#define SYN_ICON_CHEVRON_UP     ICON_FA_CHEVRON_UP
+#define SYN_ICON_SUN            ICON_FA_SUN     
+#define SYN_ICON_RUNNING        ICON_FA_RUNNING 
+#define SYN_ICON_SPOTLIGHT      ICON_FA_BULLHORN
 #define SYN_ICON_FILTER         ICON_FA_FILTER
 
 #define SYN_ICON_INFO_CIRCLE    ICON_FA_INFO_CIRCLE
 #define SYN_ICON_TAG            ICON_FA_TAG
-
 #define SYN_ICON_TERMINAL       ICON_FA_TERMINAL
-#define SYN_ICON_CROP           ICON_FA_CROP
-#define SYN_ICON_MAGIC          ICON_FA_MAGIC
-#define SYN_ICON_LIGHTBULB      ICON_FA_LIGHTBULB
-#define SYN_ICON_SUN            ICON_FA_SUN     
-#define SYN_ICON_RUNNING        ICON_FA_RUNNING 
-#define SYN_ICON_CHEVRON_DOWN   ICON_FA_CHEVRON_DOWN
-#define SYN_ICON_SPOTLIGHT      ICON_FA_BULLHORN
-
 #define SYN_ICON_LEVEL_DOWN_ALT ICON_FA_LEVEL_DOWN_ALT
+#define SYN_ICON_DRAW_POLYGON   ICON_FA_DRAW_POLYGON
+
+// Workspace Labels
+#define SYN_WS_SCENE            SYN_ICON_GLOBE " Scene"
+#define SYN_WS_MODEL            SYN_ICON_DRAW_POLYGON " Model"
+#define SYN_WS_MATERIAL         SYN_ICON_MAGIC " Material"
+#define SYN_WS_TEXTURE          SYN_ICON_IMAGE " Texture"

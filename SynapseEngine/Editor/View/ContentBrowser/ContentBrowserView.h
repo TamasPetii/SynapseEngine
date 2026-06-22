@@ -9,7 +9,7 @@
 namespace Syn {
     class ContentBrowserView : public IView<ContentBrowserViewModel> {
     public:
-        explicit ContentBrowserView(IIconManager* iconManager);
+        explicit ContentBrowserView(IIconManager* iconManager, const std::string& windowTitle);
         ~ContentBrowserView() override = default;
 
         void Draw(ContentBrowserViewModel& vm) override;
@@ -31,5 +31,6 @@ namespace Syn {
 
         std::unordered_map<std::string, bool> _cardStates;
         float _leftPanelWidth = 250.0f;
+        std::string _windowTitle;
     };
 }

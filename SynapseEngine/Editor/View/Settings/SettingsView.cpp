@@ -87,7 +87,7 @@ namespace Syn {
 
                     drawSectionHeader("Hardware Culling Devices");
 
-                    const char* deviceNames[] = { "CPU", "GPU" };
+                    const char* deviceNames[] = { SYN_ICON_MICROCHIP " CPU", SYN_ICON_DESKTOP " GPU" };
 
                     auto DrawDeviceProperty = [&](const char* label, CullingDeviceType& device) {
                         int currentDevice = (int)device;

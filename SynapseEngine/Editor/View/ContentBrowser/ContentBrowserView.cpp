@@ -8,8 +8,8 @@
 
 namespace Syn {
 
-    ContentBrowserView::ContentBrowserView(IIconManager* iconManager)
-        : _iconManager(iconManager) {}
+    ContentBrowserView::ContentBrowserView(IIconManager* iconManager, const std::string& windowTitle)
+        : _iconManager(iconManager), _windowTitle(windowTitle) {}
 
     void ContentBrowserView::Draw(ContentBrowserViewModel& vm) {
         const ContentBrowserState& state = vm.GetState();
@@ -18,7 +18,7 @@ namespace Syn {
 
         ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 
-        if (ImGui::Begin(SYN_ICON_FOLDER_OPEN " Content Browser", nullptr, windowFlags)) {
+        if (ImGui::Begin(_windowTitle.c_str(), nullptr, windowFlags)) {
 
             auto getCardState = [this](const char* name) -> bool& {
                 std::string key(name);

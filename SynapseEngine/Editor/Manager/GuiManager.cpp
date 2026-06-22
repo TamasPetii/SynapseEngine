@@ -9,6 +9,7 @@
 #include "Engine/ServiceLocator.h"
 #include "Engine/FrameContext.h"
 #include "Editor/FileDialog/ImGuiFileDialogImpl.h"
+#include "EditorIcons.h"
 
 namespace Syn {
     GuiManager::~GuiManager() {
@@ -89,17 +90,98 @@ namespace Syn {
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
     }
 
     void GuiManager::UpdateAndDraw() {
-        for (auto& window : _windows) {
+        ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+        for (auto& window : _globalWindows) {
             window->UpdateAndDraw();
+        }
+
+        if (ImGui::BeginMainMenuBar()) {
+
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+
+            const char* wsScene = SYN_WS_SCENE;
+            const char* wsModel = SYN_WS_MODEL;
+            const char* wsMaterial = SYN_WS_MATERIAL;
+            const char* wsTexture = SYN_WS_TEXTURE;
+
+            ImVec2 btnPadding = ImGui::GetStyle().FramePadding;
+            float totalWidth = ImGui::CalcTextSize(wsScene).x + ImGui::CalcTextSize(wsModel).x + ImGui::CalcTextSize(wsMaterial).x + ImGui::CalcTextSize(wsTexture).x + (btnPadding.x * 2.0f * 4.0f);
+
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() - totalWidth - 10.0f);
+
+            auto WorkspaceTab = [&](const char* label, EditorWorkspace ws) {
+                bool isSelected = (_currentWorkspace == ws);
+
+                if (isSelected) {
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_TabSelected));
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                }
+                else {
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
+                }
+
+                if (ImGui::Button(label)) {
+                    _currentWorkspace = ws;
+                }
+
+                ImGui::PopStyleColor(2);
+                };
+
+            WorkspaceTab(wsScene, EditorWorkspace::Scene);
+            WorkspaceTab(wsModel, EditorWorkspace::Model);
+            WorkspaceTab(wsMaterial, EditorWorkspace::Material);
+            WorkspaceTab(wsTexture, EditorWorkspace::Texture);
+
+            ImGui::PopStyleColor();
+            ImGui::PopStyleVar(2);
+
+            ImGui::EndMainMenuBar();
         }
 
         if (_fileDialog) {
             _fileDialog->Draw();
         }
+
+        ImGui::SetNextWindowPos(viewport->WorkPos);
+        ImGui::SetNextWindowSize(viewport->WorkSize);
+        ImGui::SetNextWindowViewport(viewport->ID);
+
+        ImGuiWindowFlags hostWindowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                                           ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
+                                           ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
+                                           ImGuiWindowFlags_NoBackground;
+
+        std::string hostWindowName = "";
+        ImGuiID subDockspaceId = 0;
+
+        switch (_currentWorkspace) {
+            case EditorWorkspace::Scene:    hostWindowName = "HostWindow_Scene";    subDockspaceId = ImGui::GetID("DockSpace_Scene"); break;
+            case EditorWorkspace::Texture:  hostWindowName = "HostWindow_Texture";  subDockspaceId = ImGui::GetID("DockSpace_Texture"); break;
+            case EditorWorkspace::Material: hostWindowName = "HostWindow_Material"; subDockspaceId = ImGui::GetID("DockSpace_Material"); break;
+            case EditorWorkspace::Model:    hostWindowName = "HostWindow_Model";    subDockspaceId = ImGui::GetID("DockSpace_Model"); break;
+            default:                        hostWindowName = "HostWindow_Default";  subDockspaceId = ImGui::GetID("DockSpace_Default"); break;
+        }
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+        if (ImGui::Begin(hostWindowName.c_str(), nullptr, hostWindowFlags)) {
+
+            ImGui::DockSpace(subDockspaceId, ImVec2(0, 0), ImGuiDockNodeFlags_None);
+
+            if (_workspaces.contains(_currentWorkspace)) {
+                _workspaces[_currentWorkspace]->UpdateAndDraw();
+            }
+        }
+
+        ImGui::End();
+        ImGui::PopStyleVar();
     }
 
     void GuiManager::EndFrame() {

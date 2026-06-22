@@ -4,37 +4,18 @@
 #include <GLFW/glfw3.h>
 #include <filesystem>
 
-#include "Editor/View/Component/ComponentView.h"
-#include "EditorCore/ViewModels/Component/ComponentViewModel.h"
-
-#include "Editor/View/Viewport/ViewportView.h"
-#include "EditorCore/ViewModels/Viewport/ViewportViewModel.h"
-
-#include "Editor/View/Settings/SettingsView.h"
-#include "EditorCore/ViewModels/Settings/SettingsViewModel.h"
+#include "Editor/Workspace/SceneWorkspace.h"
+#include "Editor/Workspace/ModelWorkspace.h"
+#include "Editor/Workspace/MaterialWorkspace.h"
+#include "Editor/Workspace/TextureWorkspace.h"
 
 #include "Editor/View/MainMenu/MainMenuView.h"
 #include "EditorCore/ViewModels/MainMenu/MainMenuViewModel.h"
 
-#include "Editor/View/MaterialGraph/MaterialGraphView.h"
-#include "EditorCore/ViewModels/MaterialGraph/MaterialGraphViewModel.h"
-
-#include "Editor/View/ContentBrowser/ContentBrowserView.h"
-#include "EditorCore/ViewModels/ContentBrowser/ContentBrowserViewModel.h"
-
-#include "Editor/View/Hierarchy/HierarchyView.h"
-#include "EditorCore/ViewModels/Hierarchy/HierarchyViewModel.h"
-
-#include "Editor/View/Benchmark/BenchmarkView.h"
-#include "EditorCore/ViewModels/Benchmark/BenchmarkViewModel.h"
-
-#include "Editor/View/Logger/LoggerView.h"
-#include "EditorCore/ViewModels/Logger/LoggerViewModel.h"
-
 #include "Manager/GuiTextureManager.h"
 #include "Manager/EditorIcons.h"
-
 #include "Engine/Utils/PathUtils.h"
+#include "Editor/View/IGuiWindow.h"
 
 Synapse::Synapse(const Syn::ApplicationConfig& config)
     : Syn::Application(config)
@@ -113,90 +94,29 @@ void Synapse::OnInit() {
     _guiManager->CreateFontTexture();
     _iconManager->LoadEngineIcons(Syn::PathUtils::GetAbsolutePathString(ICON_PATH));
 
-    using ComponentWin = Syn::EditorWindow<Syn::ComponentView, Syn::ComponentViewModel>;
-    _guiManager->AddWindow<ComponentWin>(
-        Syn::ComponentView{},
-        Syn::ComponentViewModel{
-            _editorContext->GetSelectionApi(),
-            _editorContext->GetTagApi(),
-            _editorContext->GetTransformApi(),
-            _editorContext->GetHierarchyApi(),
-            _editorContext->GetDirectionLightApi(),
-            _editorContext->GetPointLightApi(),
-            _editorContext->GetSpotLightApi()
-        }
-    );
-
-    using ViewportWin = Syn::EditorWindow<Syn::ViewportView, Syn::ViewportViewModel>;
-    _guiManager->AddWindow<ViewportWin>(
-        Syn::ViewportView{},
-        Syn::ViewportViewModel{
-            _editorContext->GetRenderApi(),
-            _editorContext->GetSelectionApi(),
-            _editorContext->GetTransformApi(),
-            _editorContext->GetSettingsApi(),
-            _editorContext->GetHierarchyApi()
-        }
-    );
-
-    using SettingsWin = Syn::EditorWindow<Syn::SettingsView, Syn::SettingsViewModel>;
-    _guiManager->AddWindow<SettingsWin>(
-        Syn::SettingsView{},
-        Syn::SettingsViewModel{
-            _editorContext->GetSettingsApi()
-        });
-
-    using MainMenuWin = Syn::EditorWindow<Syn::MainMenuView, Syn::MainMenuViewModel>;
-    _guiManager->AddWindow<MainMenuWin>(
-        Syn::MainMenuView{},
-        Syn::MainMenuViewModel{
-            _editorContext->GetSceneApi(),
-            _guiManager->GetFileDialog()
-        }
-    );
-
-    using MaterialGraphWin = Syn::EditorWindow<Syn::MaterialGraphView, Syn::MaterialGraphViewModel>;
-    _guiManager->AddWindow<MaterialGraphWin>(
-        Syn::MaterialGraphView{},
-        Syn::MaterialGraphViewModel{
-            _editorContext->GetMaterialApi()
-        }
-    );
-
     std::string absoluteAssetsPath = std::filesystem::absolute(ASSET_PATH).generic_string();
 
-    using ContentBrowserWin = Syn::EditorWindow<Syn::ContentBrowserView, Syn::ContentBrowserViewModel>;
-    _guiManager->AddWindow<ContentBrowserWin>(
-        Syn::ContentBrowserView{ _iconManager.get() },
-        Syn::ContentBrowserViewModel{ 
-            _editorContext->GetFileSystemApi(), 
-            absoluteAssetsPath 
-        }
+    using MainMenuWin = Syn::EditorWindow<Syn::MainMenuView, Syn::MainMenuViewModel>;
+    _guiManager->AddGlobalWindow<MainMenuWin>(
+        Syn::MainMenuView{},
+        Syn::MainMenuViewModel{ _editorContext->GetSceneApi(), _guiManager->GetFileDialog() }
     );
 
-    using HierarchyWin = Syn::EditorWindow<Syn::HierarchyView, Syn::HierarchyViewModel>;
-    _guiManager->AddWindow<HierarchyWin>(
-        Syn::HierarchyView{},
-        Syn::HierarchyViewModel{
-            _editorContext->GetHierarchyApi(),
-            _editorContext->GetSelectionApi(),
-            _editorContext->GetTagApi()
-        }
-    );
+    _guiManager->AddWorkspace(Syn::EditorWorkspace::Scene, std::make_unique<Syn::SceneWorkspace>(
+        _editorContext.get(), _iconManager.get(), absoluteAssetsPath
+    ));
 
-    using BenchmarkWin = Syn::EditorWindow<Syn::BenchmarkView, Syn::BenchmarkViewModel>;
-    _guiManager->AddWindow<BenchmarkWin>(
-        Syn::BenchmarkView{},
-        Syn::BenchmarkViewModel{}
-    );
+    _guiManager->AddWorkspace(Syn::EditorWorkspace::Model, std::make_unique<Syn::ModelWorkspace>(
+        _editorContext.get(), _iconManager.get(), absoluteAssetsPath
+    ));
 
-    using LoggerWin = Syn::EditorWindow<Syn::LoggerView, Syn::LoggerViewModel>;
-    _guiManager->AddWindow<LoggerWin>(
-        Syn::LoggerView{},
-        Syn::LoggerViewModel{
-            _editorContext->GetLoggerApi()
-        }
-    );
+    _guiManager->AddWorkspace(Syn::EditorWorkspace::Material, std::make_unique<Syn::MaterialWorkspace>(
+        _editorContext.get(), _iconManager.get(), absoluteAssetsPath
+    ));
+
+    _guiManager->AddWorkspace(Syn::EditorWorkspace::Texture, std::make_unique<Syn::TextureWorkspace>(
+        _editorContext.get(), _iconManager.get(), absoluteAssetsPath
+    ));
 
 #endif
 
