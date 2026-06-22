@@ -11,7 +11,8 @@ namespace Syn
     }
 
     PointLightShadowComponentGPU::PointLightShadowComponentGPU(const PointLightShadowComponent& component) :
-        planes(component.nearPlane, component.farPlane, 0.0f, 0.0f)
+        planes(component.nearPlane, component.farPlane, 0.0f, 0.0f),
+        mainAtlasRect(component.mainAtlasRect)
     {
         for (int i = 0; i < 6; ++i)
         {

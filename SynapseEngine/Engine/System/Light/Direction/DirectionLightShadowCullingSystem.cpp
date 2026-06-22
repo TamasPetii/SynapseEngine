@@ -345,6 +345,13 @@ namespace Syn
                 [settings, chunkGroup, staticEntities, drawData, shadowPool, activeShadowLightCount, withEntityData, cullLightCascades](uint32_t chunkIdx) {
                     const auto& chunk = chunkGroup->chunks[chunkIdx];
 
+                    glm::vec3 extents = (chunk.maxBounds - chunk.minBounds) * 0.5f;
+                    GpuMeshCollider chunkCollider;
+                    chunkCollider.center = chunk.minBounds + extents;
+                    chunkCollider.radius = glm::length(extents);
+                    chunkCollider.aabbMin = chunk.minBounds;
+                    chunkCollider.aabbMax = chunk.maxBounds;
+
                     // Allocate light visibilities purely for the hot path of this specific chunk
                     std::array<LightVis, MAX_DIR_LIGHTS> lightVisibilities;
                     bool isVisibleInAnyLight = false;
@@ -360,7 +367,9 @@ namespace Syn
 
                             if (settings->culling.enableFrustumCulling && settings->culling.enableChunkFrustumCulling)
                             {
-                                visibility = CollisionTester::TestAabbFrustumIntersectionType(chunk.minBounds, chunk.maxBounds, shadowComp.cascadeFrustums[cascadeIdx]);
+                                visibility = CollisionTester::IsInFrustumIntersectionType(
+                                    chunkCollider, shadowComp.cascadeFrustums[cascadeIdx]
+                                );
                             }
 
                             lightVisibilities[lightIdx].cascadeVis[cascadeIdx] = visibility;

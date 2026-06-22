@@ -35,6 +35,9 @@ namespace Syn
         
         static constexpr const char* SpotLightShadowAtlas = "SpotLightShadowAtlas";
         static constexpr const char* SpotLightShadowDepthPyramid = "SpotLightShadowDepthPyramid";
+
+        static constexpr const char* PointLightShadowAtlas = "PointLightShadowAtlas";
+        static constexpr const char* PointLightShadowDepthPyramid = "PointLightShadowDepthPyramid";
     };
 
     struct SYN_API RenderTargetViewNames
@@ -54,5 +57,8 @@ namespace Syn
 
         static constexpr const char* SpotLightShadowDepthPyramidMin = "SpotLightShadowDepthPyramidMin";
         static constexpr const char* SpotLightShadowDepthPyramidMax = "SpotLightShadowDepthPyramidMax";
+
+        static constexpr const char* PointLightShadowDepthPyramidMin = "PointLightShadowDepthPyramidMin";
+        static constexpr const char* PointLightShadowDepthPyramidMax = "PointLightShadowDepthPyramidMax";
     };
 }

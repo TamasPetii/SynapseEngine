@@ -1,10 +1,10 @@
-#include "SpotLightShadowCullingSystem.h"
+#include "PointLightShadowCullingSystem.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Logger/SynLog.h"
-#include "SpotLightShadowRenderSystem.h"
-#include "SpotLightCullingSystem.h"
-#include "SpotLightShadowAtlasSystem.h"
-#include "SpotLightSystem.h"
+#include "PointLightShadowRenderSystem.h"
+#include "PointLightCullingSystem.h"
+#include "PointLightShadowAtlasSystem.h"
+#include "PointLightSystem.h"
 #include "Engine/System/Core/TransformSystem.h"
 #include "Engine/System/Core/CameraSystem.h"
 #include "Engine/System/Rendering/ModelSystem.h"
@@ -13,8 +13,8 @@
 #include "Engine/System/Rendering/MaterialSystem.h"
 #include "Engine/System/Core/StaticSpatialSahSystem.h"
 
-#include "Engine/Component/Light/Spot/SpotLightComponent.h"
-#include "Engine/Component/Light/Spot/SpotLightShadowComponent.h"
+#include "Engine/Component/Light/Point/PointLightComponent.h"
+#include "Engine/Component/Light/Point/PointLightShadowComponent.h"
 #include "Engine/Component/Rendering/ModelComponent.h"
 #include "Engine/Component/Core/TransformComponent.h"
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
@@ -25,6 +25,7 @@
 #include "Engine/Mesh/Utils/MeshUtils.h"
 #include <atomic>
 #include <algorithm>
+#include <glm/gtx/norm.hpp>
 
 namespace Syn
 {
@@ -44,20 +45,12 @@ namespace Syn
         std::span<const uint32_t> materialOverrides;
     };
 
-    struct ConeParams {
-        glm::vec3 pos;
-        glm::vec3 dir;
-        float range;
-        float cosAngle;
-        float sinAngle;
-    };
-
-    std::vector<TypeID> SpotLightShadowCullingSystem::GetReadDependencies() const {
+    std::vector<TypeID> PointLightShadowCullingSystem::GetReadDependencies() const {
         return {
-            TypeInfo<SpotLightShadowRenderSystem>::ID,
-            TypeInfo<SpotLightCullingSystem>::ID,
-            TypeInfo<SpotLightShadowAtlasSystem>::ID,
-            TypeInfo<SpotLightSystem>::ID,
+            TypeInfo<PointLightShadowRenderSystem>::ID,
+            TypeInfo<PointLightCullingSystem>::ID,
+            TypeInfo<PointLightShadowAtlasSystem>::ID,
+            TypeInfo<PointLightSystem>::ID,
             TypeInfo<TransformSystem>::ID,
             TypeInfo<ModelSystem>::ID,
             TypeInfo<RenderSystem>::ID,
@@ -68,13 +61,13 @@ namespace Syn
         };
     }
 
-    void SpotLightShadowCullingSystem::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
+    void PointLightShadowCullingSystem::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
     {
         auto drawData = scene->GetSceneDrawData();
         auto settings = scene->GetSettings();
 
-        tf::Task initTask = this->EmplaceTask(subflow, "Spot Shadow Update Init", [this, drawData]() {
-            auto& shadowGroup = drawData->SpotLightShadow;
+        tf::Task initTask = this->EmplaceTask(subflow, "Point Shadow Update Init", [this, drawData]() {
+            auto& shadowGroup = drawData->PointLightShadow;
             auto& mainGroup = drawData->Models;
 
             shadowGroup.appendedInstanceCount.store(0, std::memory_order_relaxed);
@@ -86,13 +79,13 @@ namespace Syn
                 shadowGroup.meshletCmds[i].groupCountX = 0;
             }
 
-            uint32_t expectedMaxInstances = mainGroup.totalAllocatedInstances * SPOT_SHADOW_MULTIPLIER;
+            uint32_t expectedMaxInstances = mainGroup.totalAllocatedInstances * POINT_SHADOW_MULTIPLIER;
             if (_sortBuffer.size() < expectedMaxInstances) {
                 _sortBuffer.resize(expectedMaxInstances);
             }
             });
 
-        if (settings->culling.spotLightCullingDevice == CullingDeviceType::GPU || settings->culling.spotLightShadowCullingDevice == CullingDeviceType::GPU)
+        if (settings->culling.pointLightCullingDevice == CullingDeviceType::GPU || settings->culling.pointLightShadowCullingDevice == CullingDeviceType::GPU)
             return;
 
         auto registry = scene->GetRegistry();
@@ -101,13 +94,13 @@ namespace Syn
         auto cameraPool = registry->GetPool<CameraComponent>();
         auto animPool = registry->GetPool<AnimationComponent>();
         auto overridePool = registry->GetPool<MaterialOverrideComponent>();
-        auto shadowPool = registry->GetPool<SpotLightShadowComponent>();
-        auto spotLightPool = registry->GetPool<SpotLightComponent>();
+        auto shadowPool = registry->GetPool<PointLightShadowComponent>();
+        auto lightPool = registry->GetPool<PointLightComponent>();
 
         EntityID cameraEntity = scene->GetSceneCameraEntity();
-        if (!modelPool || !transformPool || !cameraPool || cameraEntity == NULL_ENTITY || !shadowPool || !spotLightPool) return;
+        if (!modelPool || !transformPool || !cameraPool || cameraEntity == NULL_ENTITY || !shadowPool || !lightPool) return;
 
-        uint32_t activeShadowLightCount = drawData->SpotLightShadow.visibleLightCount;
+        uint32_t activeShadowLightCount = drawData->PointLightShadow.visibleLightCount;
         if (activeShadowLightCount == 0) return;
 
         const auto& cameraComp = cameraPool->Get(cameraEntity);
@@ -172,9 +165,9 @@ namespace Syn
             nextFunc(data);
             };
 
-        // Mesh Level Cone Culling & Sort Payload Generation
+        // Mesh Level Culling & Face Intersection Logic
         auto cullMeshes = [this, settings, drawData, matTypeSnapshot, cameraComp, screenRes]
-        (const EntityCullData& data, uint32_t lightIndex, const ConeParams& cone, bool parentFullyInside) {
+        (const EntityCullData& data, uint32_t lightIndex, const glm::vec3& lightPos, float lightRadius, bool parentFullyInside) {
 
             for (uint32_t m = 0; m < data.meshCount; ++m)
             {
@@ -183,12 +176,9 @@ namespace Syn
                     matIdx = data.materialOverrides[m];
 
                 MaterialRenderType matType = (matIdx < matTypeSnapshot.size()) ? matTypeSnapshot[matIdx] : MaterialRenderType::Opaque1Sided;
-
                 if (matType != MaterialRenderType::Opaque1Sided && matType != MaterialRenderType::Opaque2Sided) continue;
 
-                bool isVisible = true;
                 GpuMeshCollider worldCollider;
-
                 if (data.meshCount > 1) {
                     GpuMeshCollider localCollider = data.hasAnimation ?
                         data.animResource->cpuData.frameMeshColliders[(data.animFrameIndex * data.animResource->cpuData.descriptor.globalMeshCount) + m] :
@@ -197,83 +187,99 @@ namespace Syn
                     worldCollider = MeshUtils::TransformCollider(localCollider, data.transform);
 
                     if (!parentFullyInside && settings->culling.enableFrustumCulling && settings->culling.enableMeshFrustumCulling) {
-                        isVisible = CollisionTester::TestConeSphere(
-                            cone.pos, cone.dir, cone.range, cone.cosAngle, cone.sinAngle,
-                            worldCollider.center, worldCollider.radius
-                        );
+                        if (!CollisionTester::IsInSphere(worldCollider, lightPos, lightRadius)) {
+                            continue;
+                        }
                     }
                 }
                 else {
                     worldCollider = data.globalWorldCollider;
                 }
 
-                if (isVisible)
+                // Fast spatial 6-way AABB face overlap detection based on axes
+                glm::vec3 relMin = (worldCollider.center - glm::vec3(worldCollider.radius)) - lightPos;
+                glm::vec3 relMax = (worldCollider.center + glm::vec3(worldCollider.radius)) - lightPos;
+
+                auto getMinAbs = [](float minVal, float maxVal) {
+                    if (minVal <= 0.0f && maxVal >= 0.0f) return 0.0f;
+                    return std::min(std::abs(minVal), std::abs(maxVal));
+                    };
+
+                float minAbsX = getMinAbs(relMin.x, relMax.x);
+                float minAbsY = getMinAbs(relMin.y, relMax.y);
+                float minAbsZ = getMinAbs(relMin.z, relMax.z);
+
+                bool faceVis[6];
+                faceVis[0] = relMax.x > 0.0f && relMax.x >= minAbsY && relMax.x >= minAbsZ; // +X
+                faceVis[1] = relMin.x < 0.0f && -relMin.x >= minAbsY && -relMin.x >= minAbsZ; // -X
+                faceVis[2] = relMax.y > 0.0f && relMax.y >= minAbsX && relMax.y >= minAbsZ; // +Y
+                faceVis[3] = relMin.y < 0.0f && -relMin.y >= minAbsX && -relMin.y >= minAbsZ; // -Y
+                faceVis[4] = relMax.z > 0.0f && relMax.z >= minAbsX && relMax.z >= minAbsY; // +Z
+                faceVis[5] = relMin.z < 0.0f && -relMin.z >= minAbsX && -relMin.z >= minAbsY; // -Z
+
+                // Skip if doesn't project onto any cubemap face
+                if (!(faceVis[0] || faceVis[1] || faceVis[2] || faceVis[3] || faceVis[4] || faceVis[5])) continue;
+
+                float screenSizePixels = CollisionTester::CalculateSphereScreenSize(
+                    worldCollider.center, worldCollider.radius,
+                    cameraComp.view, cameraComp.proj, cameraComp.nearPlane, screenRes);
+
+                if (screenSizePixels < 1.0f) continue;
+
+                uint32_t lod = CollisionTester::CalculateLodFromScreenSize(screenSizePixels);
+                lod = std::min(lod + POINT_SHADOW_LOD_BIAS, 3u);
+
+                uint32_t allocIndex = data.modelAlloc->meshAllocationOffset + (m * 4) + lod;
+                const auto& meshAlloc = drawData->Models.meshAllocations[allocIndex];
+
+                if (meshAlloc.activeTypes[matType])
                 {
-                    float screenSizePixels = CollisionTester::CalculateSphereScreenSize(
-                        worldCollider.center, worldCollider.radius,
-                        cameraComp.view, cameraComp.proj, cameraComp.nearPlane, screenRes);
+                    uint32_t indirectIdx = meshAlloc.indirectIndices[matType];
+                    uint32_t isMeshlet = (meshAlloc.isMeshletPipeline == MeshDrawBlueprint::PIPELINE_MESHLET) ? 1 : 0;
+                    uint32_t drawCallKey = (isMeshlet << 31) | (indirectIdx & 0x7FFFFFFF);
 
-                    if (screenSizePixels < 1.0f) continue;
+                    uint32_t entityData = static_cast<uint32_t>(data.entity) & 0x7FFFFFFF;
+                    if (parentFullyInside) {
+                        entityData |= (1u << 31);
+                    }
 
-                    uint32_t lod = CollisionTester::CalculateLodFromScreenSize(screenSizePixels);
-                    lod = std::min(lod + SPOT_SHADOW_LOD_BIAS, 3u);
+                    for (uint32_t f = 0; f < 6; ++f) {
+                        if (faceVis[f]) {
+                            PointShadowSortData sortData{
+                                .drawCallKey = drawCallKey,
+                                .gpuPayload = {
+                                    .entityData = entityData,
+                                    .lightIndex = (f << 29) | (lightIndex & 0x1FFFFFFF) // [Bit 31-29: Side]
+                                }
+                            };
 
-                    uint32_t allocIndex = data.modelAlloc->meshAllocationOffset + (m * 4) + lod;
-                    const auto& meshAlloc = drawData->Models.meshAllocations[allocIndex];
-
-                    if (meshAlloc.activeTypes[matType])
-                    {
-                        uint32_t indirectIdx = meshAlloc.indirectIndices[matType];
-                        uint32_t isMeshlet = (meshAlloc.isMeshletPipeline == MeshDrawBlueprint::PIPELINE_MESHLET) ? 1 : 0;
-                        uint32_t drawCallKey = (isMeshlet << 31) | (indirectIdx & 0x7FFFFFFF);
-
-                        uint32_t entityData = static_cast<uint32_t>(data.entity) & 0x7FFFFFFF;
-                        if (parentFullyInside) {
-                            entityData |= (1u << 31);
-                        }
-
-                        SpotShadowSortData sortData{
-                            .drawCallKey = drawCallKey,
-                            .gpuPayload = {
-                                .entityData = entityData,
-                                .lightIndex = lightIndex
+                            uint32_t slot = drawData->PointLightShadow.appendedInstanceCount.fetch_add(1, std::memory_order_relaxed);
+                            if (slot < _sortBuffer.size()) {
+                                _sortBuffer[slot] = sortData;
                             }
-                        };
-
-                        uint32_t slot = drawData->SpotLightShadow.appendedInstanceCount.fetch_add(1, std::memory_order_relaxed);
-                        if (slot < _sortBuffer.size()) {
-                            _sortBuffer[slot] = sortData;
                         }
                     }
                 }
             }
             };
 
-        // Process Light Loop (Per Entity vs Light Cone)
-        auto processLights = [settings, drawData, spotLightPool, cullMeshes]
+        // Process Light Loop
+        auto processLights = [settings, drawData, lightPool, cullMeshes]
         (const EntityCullData& data, uint32_t lightIndex, IntersectionType chunkVisibility) {
-            EntityID lightEntity = drawData->SpotLightShadow.visibleLights[lightIndex];
-            const auto& lightComp = spotLightPool->Get(lightEntity);
-
-            float outerRad = glm::radians(lightComp.outerAngle);
-            ConeParams cone{
-                .pos = lightComp.position,
-                .dir = lightComp.direction,
-                .range = lightComp.range,
-                .cosAngle = std::cos(outerRad),
-                .sinAngle = std::sin(outerRad)
-            };
+            EntityID lightEntity = drawData->PointLightShadow.visibleLights[lightIndex];
+            const auto& lightComp = lightPool->Get(lightEntity);
 
             IntersectionType visibility = chunkVisibility;
 
-            if (visibility == IntersectionType::Intersect && settings->culling.enableFrustumCulling && settings->culling.enableModelFrustumCulling) 
+            if (visibility == IntersectionType::Intersect && settings->culling.enableFrustumCulling && settings->culling.enableModelFrustumCulling)
             {
-                visibility = CollisionTester::TestConeSphereIntersectionType(
-                    cone.pos, cone.dir, cone.range, cone.cosAngle, cone.sinAngle,
-                    data.globalWorldCollider.center, data.globalWorldCollider.radius
+                visibility = CollisionTester::IsInSphereIntersectionType(
+                    data.globalWorldCollider,
+                    lightComp.position,
+                    lightComp.radius
                 );
 
-                if (visibility == IntersectionType::Outside) 
+                if (visibility == IntersectionType::Outside)
                     return;
             }
             else if (visibility == IntersectionType::Outside) {
@@ -281,7 +287,7 @@ namespace Syn
             }
 
             bool parentFullyInside = (visibility == IntersectionType::Inside);
-            cullMeshes(data, lightIndex, cone, parentFullyInside);
+            cullMeshes(data, lightIndex, lightComp.position, lightComp.radius, parentFullyInside);
             };
 
         auto fallbackCull = [withEntityData, processLights, activeShadowLightCount](EntityID entity) {
@@ -301,38 +307,37 @@ namespace Syn
         uint32_t activeChunks = chunkGroup->chunkCounter.load(std::memory_order_relaxed);
 
         // BVH Chunk Culling Execution
-        if (settings->culling.spotLightShadowSpatialAcceleration == SpatialAccelerationType::StaticBvh && activeChunks > 0)
+        if (settings->culling.pointLightShadowSpatialAcceleration == SpatialAccelerationType::StaticBvh && activeChunks > 0)
         {
-            if (drawData->SpotLightShadow.visibleChunkIds.Size() < activeChunks) {
-                drawData->SpotLightShadow.visibleChunkIds.Resize(activeChunks);
+            if (drawData->PointLightShadow.visibleChunkIds.Size() < activeChunks) {
+                drawData->PointLightShadow.visibleChunkIds.Resize(activeChunks);
             }
 
-            drawData->SpotLightShadow.visibleChunkCount.store(0, std::memory_order_relaxed);
+            drawData->PointLightShadow.visibleChunkCount.store(0, std::memory_order_relaxed);
 
-            staticTask = this->ForEachIndex(uint32_t(0), activeChunks, uint32_t(1), subflow, "Update Static Spot Chunks",
-                [settings, chunkGroup, staticEntities, drawData, spotLightPool, activeShadowLightCount, withEntityData, processLights](uint32_t chunkIdx) {
+            staticTask = this->ForEachIndex(uint32_t(0), activeChunks, uint32_t(1), subflow, "Update Static Point Chunks",
+                [settings, chunkGroup, staticEntities, drawData, lightPool, activeShadowLightCount, withEntityData, processLights](uint32_t chunkIdx) {
                     const auto& chunk = chunkGroup->chunks[chunkIdx];
 
-                    // Calculate conservative bounding sphere for the AABB chunk
                     glm::vec3 extents = (chunk.maxBounds - chunk.minBounds) * 0.5f;
-                    glm::vec3 chunkCenter = chunk.minBounds + extents;
-                    float chunkRadius = glm::length(extents);
+                    GpuMeshCollider chunkCollider;
+                    chunkCollider.center = chunk.minBounds + extents;
+                    chunkCollider.radius = glm::length(extents);
+                    chunkCollider.aabbMin = chunk.minBounds;
+                    chunkCollider.aabbMax = chunk.maxBounds;
 
                     std::vector<IntersectionType> lightVisibilities(activeShadowLightCount, IntersectionType::Intersect);
                     bool isVisibleInAnyLight = false;
 
                     for (uint32_t lightIdx = 0; lightIdx < activeShadowLightCount; ++lightIdx)
                     {
-                        EntityID lightEntity = drawData->SpotLightShadow.visibleLights[lightIdx];
-                        const auto& lightComp = spotLightPool->Get(lightEntity);
+                        EntityID lightEntity = drawData->PointLightShadow.visibleLights[lightIdx];
+                        const auto& lightComp = lightPool->Get(lightEntity);
 
                         IntersectionType visibility = IntersectionType::Intersect;
                         if (settings->culling.enableFrustumCulling && settings->culling.enableChunkFrustumCulling) {
-                            float outerRad = glm::radians(lightComp.outerAngle);
-                            visibility = CollisionTester::TestConeSphereIntersectionType(
-                                lightComp.position, lightComp.direction, lightComp.range,
-                                std::cos(outerRad), std::sin(outerRad),
-                                chunkCenter, chunkRadius
+                            visibility = CollisionTester::IsInSphereIntersectionType(
+                                chunkCollider, lightComp.position, lightComp.radius
                             );
                         }
 
@@ -342,11 +347,11 @@ namespace Syn
                         }
                     }
 
-                    if (!isVisibleInAnyLight) 
+                    if (!isVisibleInAnyLight)
                         return;
 
-                    uint32_t slot = drawData->SpotLightShadow.visibleChunkCount.fetch_add(1, std::memory_order_relaxed);
-                    drawData->SpotLightShadow.visibleChunkIds[slot] = chunkIdx;
+                    uint32_t slot = drawData->PointLightShadow.visibleChunkCount.fetch_add(1, std::memory_order_relaxed);
+                    drawData->PointLightShadow.visibleChunkIds[slot] = chunkIdx;
 
                     for (uint32_t i = 0; i < chunk.entityCount; ++i) {
                         withEntityData(staticEntities[chunk.firstEntityIndex + i], [&](const EntityCullData& data) {
@@ -360,11 +365,11 @@ namespace Syn
                 });
         }
         else {
-            staticTask = this->ForEach(staticEntities, subflow, "Update Static Spot Shadow", fallbackCull);
+            staticTask = this->ForEach(staticEntities, subflow, "Update Static Point Shadow", fallbackCull);
         }
 
-        auto dynamicTask = this->ForEach(dynamicEntities, subflow, "Update Dynamic Spot Shadow", fallbackCull);
-        auto streamTask = this->ForEach(streamEntities, subflow, "Update Stream Spot Shadow", fallbackCull);
+        auto dynamicTask = this->ForEach(dynamicEntities, subflow, "Update Dynamic Point Shadow", fallbackCull);
+        auto streamTask = this->ForEach(streamEntities, subflow, "Update Stream Point Shadow", fallbackCull);
 
         if (staticTask.has_value()) initTask.precede(staticTask.value());
         if (dynamicTask.has_value()) initTask.precede(dynamicTask.value());
@@ -372,35 +377,19 @@ namespace Syn
 
         // Sort Task
         tf::Task sortTask = subflow.emplace([this, drawData]() {
-            uint32_t appendedCount = drawData->SpotLightShadow.appendedInstanceCount.load(std::memory_order_relaxed);
+            uint32_t appendedCount = drawData->PointLightShadow.appendedInstanceCount.load(std::memory_order_relaxed);
             if (appendedCount > 0) {
                 std::sort(_sortBuffer.begin(), _sortBuffer.begin() + appendedCount);
             }
-            }).name("Sort Spot Shadow Instances");
+            }).name("Sort Point Shadow Instances");
 
         // Finalize Task: Update Indirect Commands and Instance buffer mapping
         tf::Task finalizeTask = subflow.emplace([this, drawData]() {
-            uint32_t appendedCount = drawData->SpotLightShadow.appendedInstanceCount.load(std::memory_order_relaxed);
-            auto& shadowGroup = drawData->SpotLightShadow;
+            uint32_t appendedCount = drawData->PointLightShadow.appendedInstanceCount.load(std::memory_order_relaxed);
+            auto& shadowGroup = drawData->PointLightShadow;
 
             uint32_t currentIndirectIdx = 0xFFFFFFFF;
             uint32_t currentIsMeshlet = 0;
-
-            auto logPreviousBatch = [&]() {
-                if constexpr (ENABLE_DEBUG_LOGGING) {
-                    if (currentIndirectIdx != 0xFFFFFFFF) {
-                        uint32_t count = currentIsMeshlet ?
-                            shadowGroup.meshletCmds[currentIndirectIdx].groupCountX :
-                            shadowGroup.traditionalCmds[currentIndirectIdx].instanceCount;
-
-                        Info("SpotShadow Finalize - IndirectIdx: {} | Offset: {} | Count: {} | Type: {}",
-                            currentIndirectIdx,
-                            shadowGroup.shadowDescriptors[currentIndirectIdx].instanceOffset,
-                            count,
-                            currentIsMeshlet ? "Meshlet" : "Traditional");
-                    }
-                }
-                };
 
             for (uint32_t i = 0; i < appendedCount; ++i)
             {
@@ -411,8 +400,6 @@ namespace Syn
                 shadowGroup.instances[i] = item.gpuPayload;
 
                 if (indirectIdx != currentIndirectIdx) {
-                    logPreviousBatch();
-
                     currentIndirectIdx = indirectIdx;
                     currentIsMeshlet = isMeshlet;
                     shadowGroup.shadowDescriptors[indirectIdx].instanceOffset = i;
@@ -425,7 +412,7 @@ namespace Syn
                     shadowGroup.traditionalCmds[indirectIdx].instanceCount += 1;
                 }
             }
-            }).name("Finalize Spot Shadow Indirects");
+            }).name("Finalize Point Shadow Indirects");
 
         if (staticTask.has_value()) staticTask.value().precede(sortTask);
         if (dynamicTask.has_value()) dynamicTask.value().precede(sortTask);
@@ -434,23 +421,23 @@ namespace Syn
         sortTask.precede(finalizeTask);
     }
 
-    void SpotLightShadowCullingSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
+    void PointLightShadowCullingSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
     {
         this->EmplaceTask(subflow, SystemPhaseNames::UploadGPU, [scene, frameIndex]() {
             auto drawData = scene->GetSceneDrawData();
             auto settings = scene->GetSettings();
 
-            bool needsCommandUpload = (settings->culling.spotLightCullingDevice == CullingDeviceType::CPU && settings->culling.spotLightShadowCullingDevice == CullingDeviceType::CPU) || (drawData->syncFramesRemaining.load(std::memory_order_relaxed) > 0);
+            bool needsCommandUpload = (settings->culling.pointLightCullingDevice == CullingDeviceType::CPU && settings->culling.pointLightShadowCullingDevice == CullingDeviceType::CPU) || (drawData->syncFramesRemaining.load(std::memory_order_relaxed) > 0);
 
             auto& mainGroup = drawData->Models;
-            auto& shadowGroup = drawData->SpotLightShadow;
+            auto& shadowGroup = drawData->PointLightShadow;
 
-            if (settings->culling.spotLightCullingDevice == CullingDeviceType::CPU && settings->culling.spotLightShadowCullingDevice == CullingDeviceType::CPU)
+            if (settings->culling.pointLightCullingDevice == CullingDeviceType::CPU && settings->culling.pointLightShadowCullingDevice == CullingDeviceType::CPU)
             {
                 uint32_t appendedCount = shadowGroup.appendedInstanceCount.load(std::memory_order_relaxed);
 
                 if (appendedCount > 0) {
-                    shadowGroup.instanceBuffer.Write(frameIndex, shadowGroup.instances.Data(), appendedCount * sizeof(SpotShadowInstancePayload), 0);
+                    shadowGroup.instanceBuffer.Write(frameIndex, shadowGroup.instances.Data(), appendedCount * sizeof(PointShadowInstancePayload), 0);
                 }
             }
 

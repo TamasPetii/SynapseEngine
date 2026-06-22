@@ -13,6 +13,7 @@
 #include "IDrawGroup.h"
 #include "DirectionLightShadowDrawGroup.h"
 #include "SpotLightShadowDrawGroup.h"
+#include "PointLightShadowDrawGroup.h"
 
 namespace Syn
 {
@@ -35,6 +36,7 @@ namespace Syn
         DirectionLightShadowDrawGroup DirectionLightShadow;
         SpotLightDrawGroup SpotLights;
         SpotLightShadowDrawGroup SpotLightShadow;
+        PointLightShadowDrawGroup PointLightShadow;
 
         std::atomic<uint32_t> syncFramesRemaining{ 0 };
     };

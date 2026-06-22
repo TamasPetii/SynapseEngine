@@ -42,9 +42,13 @@ namespace Syn
         static constexpr const char* PointLightData = "PointLightData";
         static constexpr const char* PointLightColliderData = "PointLightColliderData";
 		static constexpr const char* PointLightVisibleData = "PointLightVisibleData";
-
+        
         static constexpr const char* PointLightShadowSparseMap = "PointLightShadowSparseMap";
         static constexpr const char* PointLightShadowData = "PointLightShadowData";
+        static constexpr const char* PointLightShadowVisibleData = "PointLightShadowVisibleData";
+        static constexpr const char* PointLightShadowModelVisibleData = "PointLightShadowModelVisibleData";
+        static constexpr const char* PointLightShadowMortonChunkVisibleIndex = "PointLightShadowMortonChunkVisibleIndex";
+        static constexpr const char* PointLightShadowStaticChunkVisibleIndex = "PointLightShadowStaticChunkVisibleIndex";
 
         static constexpr const char* SpotLightSparseMap = "SpotLightSparseMap";
         static constexpr const char* SpotLightData = "SpotLightData";

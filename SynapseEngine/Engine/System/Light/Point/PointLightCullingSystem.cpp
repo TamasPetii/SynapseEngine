@@ -1,6 +1,7 @@
 #include "PointLightCullingSystem.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Component/Light/Point/PointLightComponent.h"
+#include "Engine/Component/Light/Point/PointLightShadowComponent.h"
 #include "Engine/Component/Core/CameraComponent.h"
 #include "PointLightSystem.h"
 #include "Engine/System/Core/CameraSystem.h"
@@ -30,6 +31,7 @@ namespace Syn
         auto drawData = scene->GetSceneDrawData();
         auto registry = scene->GetRegistry();
         auto pool = registry->GetPool<PointLightComponent>();
+        auto shadowPool = registry->GetPool<PointLightShadowComponent>();
         auto cameraPool = registry->GetPool<CameraComponent>();
         EntityID cameraEntity = scene->GetSceneCameraEntity();
 
@@ -38,10 +40,15 @@ namespace Syn
         const auto& cameraComp = cameraPool->Get(cameraEntity);
         size_t maxLights = pool->Size();
 
-        tf::Task initTask = this->EmplaceTask(subflow, "Init Light Culling", [this, maxLights, drawData]() {
+        tf::Task initTask = this->EmplaceTask(subflow, "Init Point Light Culling", [this, maxLights, drawData]() {
             drawData->PointLights.cmdTemplate.instanceCount = 0;
             if (drawData->PointLights.instances.Size() < maxLights) {
                 drawData->PointLights.instances.Resize(maxLights);
+            }
+
+            drawData->PointLightShadow.visibleLightCount = 0;
+            if (drawData->PointLightShadow.visibleLights.Size() < maxLights) {
+                drawData->PointLightShadow.visibleLights.Resize(maxLights);
             }
             });
 
@@ -51,7 +58,7 @@ namespace Syn
 
         glm::vec2 screenRes = glm::vec2(cameraComp.width, cameraComp.height);
 
-        auto cullFunc = [this, settings, pool, cameraComp, drawData, screenRes](EntityID entity) {
+        auto cullFunc = [this, settings, pool, shadowPool, cameraComp, drawData, screenRes](EntityID entity) {
             const auto& lightComp = pool->Get(entity);
 
             bool visibility = true;
@@ -73,6 +80,15 @@ namespace Syn
                     if (slot < drawData->PointLights.instances.Size()) {
                         drawData->PointLights.instances[slot] = entity;
                     }
+
+                    if (lightComp.useShadow && shadowPool && shadowPool->Has(entity)) {
+                        std::atomic_ref<uint32_t> shadowCountRef(drawData->PointLightShadow.visibleLightCount);
+                        uint32_t shadowSlot = shadowCountRef.fetch_add(1, std::memory_order_relaxed);
+
+                        if (shadowSlot < drawData->PointLightShadow.visibleLights.Size()) {
+                            drawData->PointLightShadow.visibleLights[shadowSlot] = entity;
+                        }
+                    }
                 }
             }
             };
@@ -92,16 +108,25 @@ namespace Syn
             auto bufferManager = scene->GetComponentBufferManager();
             auto drawData = scene->GetSceneDrawData();
             auto settings = scene->GetSettings();
-            uint32_t count = drawData->PointLights.cmdTemplate.instanceCount;
 
-            if (settings->culling.pointLightCullingDevice == CullingDeviceType::CPU) {
+            uint32_t count = drawData->PointLights.cmdTemplate.instanceCount;
+            uint32_t shadowCount = drawData->PointLightShadow.visibleLightCount;
+
+            if (settings->culling.pointLightCullingDevice == CullingDeviceType::CPU) 
+            {
                 auto instanceBufferView = bufferManager->GetComponentBuffer(BufferNames::PointLightVisibleData, frameIndex);
                 if (count > 0 && instanceBufferView.buffer) {
                     instanceBufferView.buffer->Write(drawData->PointLights.instances.Data(), count * sizeof(uint32_t), 0);
                 }
+
+                auto shadowBufferView = bufferManager->GetComponentBuffer(BufferNames::PointLightShadowVisibleData, frameIndex);
+                if (shadowCount > 0 && shadowBufferView.buffer) {
+                    shadowBufferView.buffer->Write(drawData->PointLightShadow.visibleLights.Data(), shadowCount * sizeof(uint32_t), 0);
+                }
             }
 
             drawData->PointLights.indirectBuffer.Write(frameIndex, &drawData->PointLights.cmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            drawData->PointLightShadow.visibleCountDispatchBuffer.Write(frameIndex, &drawData->PointLightShadow.visibleLightCount, sizeof(uint32_t), 0);
             });
     }
 }

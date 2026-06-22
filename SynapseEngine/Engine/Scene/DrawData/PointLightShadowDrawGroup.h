@@ -13,34 +13,33 @@
 
 namespace Syn
 {
-    constexpr uint32_t SPOT_SHADOW_LOD_BIAS = 1;
-    constexpr uint32_t SPOT_MAX_LIGHTS = 64;
-    constexpr uint32_t SPOT_SHADOW_MULTIPLIER = 4;
+    constexpr uint32_t POINT_SHADOW_LOD_BIAS = 1;
+    constexpr uint32_t POINT_SHADOW_MULTIPLIER = 6;
 
-    constexpr uint32_t SPOT_SHADOW_ATLAS_SIZE = 4096;
-    constexpr uint32_t SPOT_SHADOW_MIN_BLOCK_SIZE = 64;
-    constexpr uint32_t SPOT_SHADOW_GRID_SIZE = SPOT_SHADOW_ATLAS_SIZE / SPOT_SHADOW_MIN_BLOCK_SIZE;
-    constexpr uint32_t SPOT_SHADOW_HIZ_MIP_LEVELS = std::countr_zero(SPOT_SHADOW_MIN_BLOCK_SIZE) + 1;
-    
-    struct SpotShadowInstancePayload {
+    constexpr uint32_t POINT_SHADOW_ATLAS_SIZE = 4096;
+    constexpr uint32_t POINT_SHADOW_MIN_BLOCK_SIZE = 64;
+    constexpr uint32_t POINT_SHADOW_GRID_SIZE = POINT_SHADOW_ATLAS_SIZE / POINT_SHADOW_MIN_BLOCK_SIZE;
+    constexpr uint32_t POINT_SHADOW_HIZ_MIP_LEVELS = std::countr_zero(POINT_SHADOW_MIN_BLOCK_SIZE) + 1;
+
+    struct PointShadowInstancePayload {
         uint32_t entityData; // [Bit 31: FullyInside] [Bit 0-30: EntityID]
-        uint32_t lightIndex;
+        uint32_t lightIndex; // [Bit 31-29: Side] [Bit 28-0: LightIndex]
     };
 
-    struct SYN_API SpotLightShadowDrawGroup : public IDrawGroup
+    struct SYN_API PointLightShadowDrawGroup : public IDrawGroup
     {
-        SpotLightShadowDrawGroup(uint32_t frameCount);
+        PointLightShadowDrawGroup(uint32_t frameCount);
         virtual void CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) override;
 
         RenderBuffer instanceBuffer;
         RenderBuffer unsortedInstanceBuffer;
-        RenderBuffer drawCallKeyBuffer;
         RenderBuffer indirectBuffer;
         RenderBuffer descriptorBuffer;
         RenderBuffer modelCullingIndirectDispatchBuffer;
         RenderBuffer finalizeDispatchBuffer;
 
         RenderBuffer radixSortTempBuffer;
+        RenderBuffer drawCallKeyBuffer;
         RenderBuffer sortValuesBuffer;
 
         RenderBuffer modelDispatchBuffer;
@@ -56,8 +55,8 @@ namespace Syn
         CpuData<VkDrawIndirectCommand> traditionalCmds;
         CpuData<VkDrawMeshTasksIndirectCommandEXT> meshletCmds;
 
-        CpuData<SpotShadowInstancePayload> instances;
-        std::atomic<uint32_t> appendedInstanceCount{0};
+        CpuData<PointShadowInstancePayload> instances;
+        std::atomic<uint32_t> appendedInstanceCount{ 0 };
 
         CpuData<uint32_t> visibleLights;
         uint32_t visibleLightCount = 0;
