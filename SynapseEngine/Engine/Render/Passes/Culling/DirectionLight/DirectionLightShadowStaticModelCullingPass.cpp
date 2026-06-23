@@ -66,7 +66,7 @@ namespace Syn {
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 
-        pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
+        //pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
     }
 
     void DirectionLightShadowStaticModelCullingPass::Dispatch(const RenderContext& context) {

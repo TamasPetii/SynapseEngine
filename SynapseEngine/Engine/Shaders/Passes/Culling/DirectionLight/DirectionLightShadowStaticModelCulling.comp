@@ -108,7 +108,7 @@ void main() {
             vec4 shadowAtlasRect = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeAtlasRects[cascadeIdx];
             
             float shadowScreenSizePixels = 0.0;
-            if (IsSphereOccludedAtlasOrtho(worldCollider.center, worldCollider.radius, shadowViewProj, shadowAtlasRect, shadowDepthPyramid, float(ctx.directionLightShadowAtlasSize), ctx.directionLightShadowHizMipLevels, shadowScreenSizePixels)) {
+            if (false && IsSphereOccludedAtlasOrtho(worldCollider.center, worldCollider.radius, shadowViewProj, shadowAtlasRect, shadowDepthPyramid, float(ctx.directionLightShadowAtlasSize), ctx.directionLightShadowHizMipLevels, shadowScreenSizePixels)) {
                 continue;
             }
         }
