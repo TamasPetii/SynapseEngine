@@ -5,7 +5,7 @@
 
 #include "../../Includes/Core.glsl"
 #include "../../Includes/Common/FrameGlobalContext.glsl"
-#include "../../Includes/Common/SpotLight.glsl"
+#include "../../Includes/Common/PointLight.glsl"
 #include "../../Includes/Common/Camera.glsl"
 #include "../../Includes/Utils/DepthMath.glsl"
 
@@ -29,17 +29,18 @@ void main() {
     float rawDepth = texelFetch(inDepth, pos, 0).x;
     float finalDepth = rawDepth;
 
-    uint cellX = uint(pos.x) / SPOT_SHADOW_MIN_BLOCK_SIZE;
-    uint cellY = uint(pos.y) / SPOT_SHADOW_MIN_BLOCK_SIZE;
-    uint flatIndex = cellY * SPOT_SHADOW_GRID_SIZE + cellX;
-    uint entityId = GET_SPOT_GRID_LOOK_UP_DATA(ctx.spotLightShadowGridLookupBufferAddr, flatIndex);
+    uint cellX = uint(pos.x) / POINT_SHADOW_MIN_BLOCK_SIZE;
+    uint cellY = uint(pos.y) / POINT_SHADOW_MIN_BLOCK_SIZE;
+    uint flatIndex = cellY * POINT_SHADOW_GRID_SIZE + cellX;
+
+    uint entityId = GET_POINT_GRID_LOOK_UP_DATA(ctx.pointLightShadowGridLookupBufferAddr, flatIndex);
 
     if (entityId != 0xFFFFFFFF) {
-        uint shadowDenseIdx = GET_SPARSE_INDEX(ctx.spotLightShadowSparseMapBufferAddr, entityId);
+        uint shadowDenseIdx = GET_SPARSE_INDEX(ctx.pointLightShadowSparseMapBufferAddr, entityId);
 
         if (shadowDenseIdx != INVALID_INDEX) {
-            SpotLightShadowComponent shadowComp = GET_SPOT_LIGHT_SHADOW(ctx.spotLightShadowDataBufferAddr, shadowDenseIdx);
-
+            PointLightShadowComponent shadowComp = GET_POINT_LIGHT_SHADOW(ctx.pointLightShadowDataBufferAddr, shadowDenseIdx);
+            
             float nearPlane = shadowComp.planes.x; 
             float farPlane = shadowComp.planes.y;
 
@@ -47,5 +48,5 @@ void main() {
         }
     }
 
-    imageStore(outImage, pos, vec4(finalDepth, finalDepth, 0.0, 0.0));
+    imageStore(outImage, pos, vec4(finalDepth, rawDepth, 0.0, 0.0));
 }

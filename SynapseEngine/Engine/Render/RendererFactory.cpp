@@ -58,6 +58,8 @@
 #include "Engine/Render/Passes/Hiz/DirectionLight/DirectionLightShadowHizDownsamplePass.h"
 #include "Engine/Render/Passes/Hiz/SpotLight/SpotLightShadowHizCopyPass.h"
 #include "Engine/Render/Passes/Hiz/SpotLight/SpotLightShadowHizDownsamplePass.h"
+#include "Engine/Render/Passes/Hiz/PointLight/PointLightShadowHizCopyPass.h"
+#include "Engine/Render/Passes/Hiz/PointLight/PointLightShadowHizDownsamplePass.h"
 
 #include "Engine/Render/Passes/Present/GuiPass.h"
 #include "Engine/Render/Passes/Present/CompositePass.h"
@@ -125,13 +127,18 @@
 #include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletSpherePass.h"
 #include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletConePass.h"
 
-#include "Engine/Render/Passes/Shadow/Direction/DirectionLightShadowInitPass.h"
-#include "Engine/Render/Passes/Shadow/Direction/DirectionLightShadowTraditionalOpaquePass.h"
-#include "Engine/Render/Passes/Shadow/Direction/DirectionLightShadowMeshletOpaquePass.h"
+#include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowInitPass.h"
+#include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowTraditionalOpaquePass.h"
+#include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowMeshletOpaquePass.h"
 
-#include "Engine/Render/Passes/Shadow/Spot/SpotLightShadowInitPass.h"
-#include "Engine/Render/Passes/Shadow/Spot/SpotLightShadowTraditionalOpaquePass.h"
-#include "Engine/Render/Passes/Shadow/Spot/SpotLightShadowMeshletOpaquePass.h"
+#include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowInitPass.h"
+#include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowTraditionalOpaquePass.h"
+#include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowMeshletOpaquePass.h"
+
+#include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowInitPass.h"
+#include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowTraditionalOpaquePass.h"
+#include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowMeshletOpaquePass.h"
+
 
 #include "Engine/Render/Passes/Ssao/SsaoInitPass.h"
 #include "Engine/Render/Passes/Ssao/SsaoPass.h"
@@ -212,7 +219,12 @@ namespace Syn
         pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
         
-        //Todo: Point Light Shadow Passes
+        //Point Light Shadow Passes
+        pipeline->AddPass(std::make_unique<PointLightShadowInitPass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque1Sided));
+        pipeline->AddPass(std::make_unique<PointLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
+        pipeline->AddPass(std::make_unique<PointLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
+        pipeline->AddPass(std::make_unique<PointLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
 
 		//Forward+ Depth Opaque Prepasses
 		pipeline->AddPass(std::make_unique<OpaqueDepthTransitionPrepass>());
@@ -247,6 +259,9 @@ namespace Syn
 
         pipeline->AddPass(std::make_unique<SpotLightShadowHizCopyPass>());
         pipeline->AddPass(std::make_unique<SpotLightShadowHizDownsamplePass>());
+
+        pipeline->AddPass(std::make_unique<PointLightShadowHizCopyPass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowHizDownsamplePass>());
 
         //Ssao Passes
         pipeline->AddPass(std::make_unique<SsaoInitPass>());

@@ -343,6 +343,36 @@ namespace Syn {
                     }
                     ImGui::Unindent();
                 }
+
+                static int pointShadowHzbMaxMip = 0;
+                pointShadowHzbMaxMip = std::clamp(pointShadowHzbMaxMip, 0, int(POINT_SHADOW_HIZ_MIP_LEVELS - 1));
+                std::string pointShadowMaxBaseView = RenderTargetViewNames::PointLightShadowDepthPyramidMax;
+                std::string pointShadowMaxView = pointShadowMaxBaseView + Vk::ImageViewNames::Mip + std::to_string(pointShadowHzbMaxMip);
+
+                RadioButton("PointLight HZB Max (R)", RenderTargetGroupNames::Deferred, RenderTargetNames::PointLightShadowDepthPyramid, pointShadowMaxView);
+                if (state.currentView.contains(pointShadowMaxBaseView)) {
+                    ImGui::Indent();
+                    if (ImGui::SliderInt("Mip##PointShadowHzbMax", &pointShadowHzbMaxMip, 0, POINT_SHADOW_HIZ_MIP_LEVELS - 1)) {
+                        pointShadowMaxView = pointShadowMaxBaseView + Vk::ImageViewNames::Mip + std::to_string(pointShadowHzbMaxMip);
+                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::PointLightShadowDepthPyramid, pointShadowMaxView });
+                    }
+                    ImGui::Unindent();
+                }
+
+                static int pointShadowHzbMinMip = 0;
+                pointShadowHzbMinMip = std::clamp(pointShadowHzbMinMip, 0, int(POINT_SHADOW_HIZ_MIP_LEVELS - 1));
+                std::string pointShadowMinBaseView = RenderTargetViewNames::PointLightShadowDepthPyramidMin;
+                std::string pointShadowMinView = pointShadowMinBaseView + Vk::ImageViewNames::Mip + std::to_string(pointShadowHzbMinMip);
+
+                RadioButton("PointLight HZB Min (G)", RenderTargetGroupNames::Deferred, RenderTargetNames::PointLightShadowDepthPyramid, pointShadowMinView);
+                if (state.currentView.contains(pointShadowMinBaseView)) {
+                    ImGui::Indent();
+                    if (ImGui::SliderInt("Mip##PointShadowHzbMin", &pointShadowHzbMinMip, 0, POINT_SHADOW_HIZ_MIP_LEVELS - 1)) {
+                        pointShadowMinView = pointShadowMinBaseView + Vk::ImageViewNames::Mip + std::to_string(pointShadowHzbMinMip);
+                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::PointLightShadowDepthPyramid, pointShadowMinView });
+                    }
+                    ImGui::Unindent();
+                }
             }
             ImGui::EndChild();
             ImGui::EndPopup();

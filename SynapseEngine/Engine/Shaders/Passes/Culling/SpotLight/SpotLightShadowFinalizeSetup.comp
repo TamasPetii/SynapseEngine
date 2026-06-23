@@ -20,7 +20,7 @@ layout(push_constant) uniform PushConstants {
 void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
-    uint visibleCount = GET_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleMeshCountBufferAddr);
+    uint visibleCount = GET_SPOT_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleMeshCountBufferAddr);
   
     uint groupCountX = (visibleCount + 255u) / 256u;
 

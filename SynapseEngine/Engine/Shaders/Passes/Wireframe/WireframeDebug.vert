@@ -33,7 +33,7 @@ void main() {
     if (pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_POINT_LIGHT_SPHERE ||
         pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_POINT_LIGHT_AABB
     ) {
-        uint entityId = GET_VISIBLE_POINT_LIGHT(ctx.pointLightVisibleIndexBufferAddr, gl_InstanceIndex);
+        uint entityId = GET_POINT_VISIBLE_LIGHT(ctx.pointLightVisibleIndexBufferAddr, gl_InstanceIndex);
         uint denseIdx = GET_SPARSE_INDEX(ctx.pointLightSparseMapBufferAddr, entityId);
         PointLightColliderGPU col = GET_POINT_LIGHT_COLLIDER(ctx.pointLightColliderBufferAddr, denseIdx);
         PointLightComponent light = GET_POINT_LIGHT(ctx.pointLightDataBufferAddr, denseIdx);
@@ -45,7 +45,7 @@ void main() {
              pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_SPOT_LIGHT_AABB ||
              pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_SPOT_LIGHT_CONE
     ) {
-        uint entityId = GET_VISIBLE_SPOT_LIGHT(ctx.spotLightVisibleIndexBufferAddr, gl_InstanceIndex);
+        uint entityId = GET_SPOT_VISIBLE_LIGHT(ctx.spotLightVisibleIndexBufferAddr, gl_InstanceIndex);
         uint denseIdx = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, entityId);
         SpotLightColliderGPU col = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, denseIdx);
         SpotLightComponent light = GET_SPOT_LIGHT(ctx.spotLightDataBufferAddr, denseIdx);

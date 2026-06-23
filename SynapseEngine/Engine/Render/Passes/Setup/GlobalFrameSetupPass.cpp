@@ -129,13 +129,33 @@ namespace Syn {
         ctx.spotLightShadowVisibleMeshCountBufferAddr = drawData->SpotLightShadow.visibleMeshCountDispatchBuffer.GetAddress(fIdx);
         ctx.spotLightShadowFinalizeDispatchBufferAddr = drawData->SpotLightShadow.finalizeDispatchBuffer.GetAddress(fIdx);
 
+        //Point Light Buffers
+        ctx.pointLightSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightSparseMap, fIdx);
         ctx.pointLightIndirectCommandBufferAddr = drawData->PointLights.indirectBuffer.GetAddress(fIdx);
         ctx.pointLightVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightVisibleData, fIdx);
         ctx.pointLightDataBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightData, fIdx);
         ctx.pointLightColliderBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightColliderData, fIdx);
-        ctx.pointLightSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightSparseMap, fIdx);
+
+        //Point Light Shadow Buffers
+        ctx.pointLightShadowIndirectGeometryCommandBufferAddr = drawData->PointLightShadow.indirectBuffer.GetAddress(fIdx);
         ctx.pointLightShadowSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightShadowSparseMap, fIdx);
         ctx.pointLightShadowDataBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightShadowData, fIdx);
+        ctx.pointLightShadowInstanceBufferAddr = drawData->PointLightShadow.instanceBuffer.GetAddress(fIdx);
+        ctx.pointLightShadowUnsortedInstanceBufferAddr = drawData->PointLightShadow.unsortedInstanceBuffer.GetAddress(fIdx);
+        ctx.pointLightDrawDescriptorBufferAddr = drawData->PointLightShadow.descriptorBuffer.GetAddress(fIdx);
+        ctx.pointLightVisibleShadowIndexBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightShadowVisibleData, fIdx);
+        ctx.pointLightShadowModelCountBufferAddr = drawData->PointLightShadow.modelDispatchBuffer.GetAddress(fIdx);
+        ctx.pointLightShadowModelVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightShadowModelVisibleData, fIdx);
+        ctx.pointLightShadowChunkCountBufferAddr = drawData->PointLightShadow.staticChunkDispatchBuffer.GetAddress(fIdx);
+        ctx.pointLightShadowChunkVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightShadowStaticChunkVisibleIndex, fIdx);
+        ctx.pointLightShadowMortonChunkCountBufferAddr = drawData->PointLightShadow.mortonChunkDispatchBuffer.GetAddress(fIdx);
+        ctx.pointLightShadowMortonChunkVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightShadowMortonChunkVisibleIndex, fIdx);
+        ctx.pointLightShadowGridLookupBufferAddr = drawData->PointLightShadow.gridLookupBuffer.GetAddress(fIdx);
+        ctx.pointLightShadowVisibleCountBufferAddr = drawData->PointLightShadow.visibleCountDispatchBuffer.GetAddress(fIdx);
+        ctx.pointLightShadowDrawCallKeyBufferAddr = drawData->PointLightShadow.drawCallKeyBuffer.GetAddress(fIdx);
+        ctx.pointLightShadowSortValuesBufferAddr = drawData->PointLightShadow.sortValuesBuffer.GetAddress(fIdx);
+        ctx.pointLightShadowVisibleMeshCountBufferAddr = drawData->PointLightShadow.visibleMeshCountDispatchBuffer.GetAddress(fIdx);
+        ctx.pointLightShadowFinalizeDispatchBufferAddr = drawData->PointLightShadow.finalizeDispatchBuffer.GetAddress(fIdx);
 
         ctx.forwardPlusTileGridListBufferAddr = drawData->ForwardPlus.tileGridBuffer.GetAddress(fIdx);
         ctx.forwardPlusClusterCountBufferAddr = drawData->ForwardPlus.clusterCountBuffer.GetAddress(fIdx);

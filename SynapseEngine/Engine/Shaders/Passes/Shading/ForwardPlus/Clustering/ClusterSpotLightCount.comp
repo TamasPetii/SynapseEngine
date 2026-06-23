@@ -59,7 +59,7 @@ void main() {
     barrier();
 
     for (uint i = threadId; i < totalLights; i += gl_WorkGroupSize.x) {
-        uint entityIdx = GET_VISIBLE_SPOT_LIGHT(ctx.spotLightVisibleIndexBufferAddr, i);
+        uint entityIdx = GET_SPOT_VISIBLE_LIGHT(ctx.spotLightVisibleIndexBufferAddr, i);
         uint denseIdx = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, entityIdx);
         SpotLightColliderGPU collider = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, denseIdx);
         

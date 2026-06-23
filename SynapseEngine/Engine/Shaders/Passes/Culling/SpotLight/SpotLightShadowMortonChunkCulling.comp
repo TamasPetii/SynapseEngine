@@ -36,7 +36,7 @@ void main() {
 
     // 1. Bounds Checking
     if (chunkId >= exactChunkCount) return;
-    uint activeSpotLightShadowCount = GET_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleCountBufferAddr);
+    uint activeSpotLightShadowCount = GET_SPOT_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleCountBufferAddr);
     if (lightIdx >= activeSpotLightShadowCount) return;
 
     // 2. Fetch Morton Chunk Data and calculate Bounding Sphere
@@ -47,7 +47,7 @@ void main() {
     float sphereRadius = length(aabbMax - sphereCenter);
 
     // 3. Resolve Spot Light Shadow Data
-    uint lightEntity = GET_VISIBLE_SHADOW_SPOT_LIGHT(ctx.spotLightVisibleShadowIndexBufferAddr, lightIdx);
+    uint lightEntity = GET_SPOT_VISIBLE_SHADOW_LIGHT(ctx.spotLightVisibleShadowIndexBufferAddr, lightIdx);
     uint lightDenseIndex = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, lightEntity);
     uint lightShadowDenseIndex = GET_SPARSE_INDEX(ctx.spotLightShadowSparseMapBufferAddr, lightEntity);
     SpotLightColliderGPU lightCollider = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, lightDenseIndex);

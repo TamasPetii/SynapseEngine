@@ -12,25 +12,27 @@
 #include "../../../Includes/Common/Transform.glsl"
 #include "../../../Includes/Common/Animation.glsl"
 #include "../../../Includes/Common/Material.glsl"
-#include "../../../Includes/Common/SpotLight.glsl"
+#include "../../../Includes/Common/PointLight.glsl"
 
-#include "../../../Includes/PushConstants/SpotLightShadowTraditionalMeshletPassPC.glsl"
+#include "../../../Includes/PushConstants/PointLightShadowTraditionalMeshletPassPC.glsl"
 
 layout(push_constant) uniform PushConstants {
-   SpotLightShadowTraditionalMeshletPassPC pc;
+   PointLightShadowTraditionalMeshletPassPC pc;
 };
+
 void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
-    // 1. Fetch Spot Specific!! Draw Descriptor
-    MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.spotLightDrawDescriptorBufferAddr, pc.baseDescriptorOffset + gl_DrawIDARB);
+    // 1. Fetch Point Specific Draw Descriptor
+    MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.pointLightDrawDescriptorBufferAddr, pc.baseDescriptorOffset + gl_DrawIDARB);
 
-    // 2. Fetch Instance and Entity ID
+    // 2. Fetch Instance and Entity ID with Bit-unpacking
     uint shadowInstanceOffset = desc.instanceOffset + gl_InstanceIndex;
-    uvec2 payload = GET_SPOT_SHADOW_INSTANCE(ctx.spotLightShadowInstanceBufferAddr, shadowInstanceOffset);
+    uvec2 payload = GET_POINT_SHADOW_INSTANCE(ctx.pointLightShadowInstanceBufferAddr, shadowInstanceOffset);
     
     uint entityId = payload.x & 0x7FFFFFFF;
-    uint lightIdx = payload.y;
+    uint faceIndex = payload.y >> 29;
+    uint lightIdx = payload.y & 0x1FFFFFFF;
 
     // 3. Fetch Model Component & Material Lookup
     uint modelDenseIndex = GET_SPARSE_INDEX(ctx.modelSparseMapBufferAddr, entityId);
@@ -38,31 +40,23 @@ void main() {
     
     // 4. Fetch Model Addresses & Raw Vertex Data
     GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, desc.modelIndex);
-    
     uint realVertexIndex = GET_INDEX(addrs.indices, gl_VertexIndex);
     GpuVertexPosition v = GET_VERTEX_POS(addrs.vertexPositions, realVertexIndex);
 
-    // 5. Fetch Transform and Camera
+    // 5. Fetch Transform
     uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
     TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
 
-    uint cameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
-    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraDenseIndex);
-
     // 6. Evaluate Static Hierarchy (Default pose)
     uint nodeIndex = UNPACK_UINT16_X(v.packedIndex);
-    uint meshIndex = UNPACK_UINT16_Y(v.packedIndex);
-    
     GpuNodeTransform staticNodeTransform = GET_NODE_TRANSFORM(addrs.nodeTransforms, nodeIndex);
     mat4 finalModelMat = staticNodeTransform.globalTransform;
 
     // 7. Evaluate Animation & Skinning
     if (ctx.animationSparseMapBufferAddr != 0) {
         uint animSparseIndex = GET_SPARSE_INDEX(ctx.animationSparseMapBufferAddr, entityId);
-
         if (animSparseIndex != INVALID_INDEX) {
             AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animSparseIndex);
-
             if (animComp.animationIndex != INVALID_INDEX) {
                 GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
                 GpuVertexSkinData skin = GET_SKIN_DATA(animAddrs.vertexSkinData, realVertexIndex);
@@ -71,7 +65,6 @@ void main() {
                 uint frameOffset = animComp.frameIndex * animAddrs.descriptor.nodeCount;
                 bool hasValidBone = false;
 
-                // Accumulate bone weights
                 for (int i = 0; i < 4; ++i) {
                     float weight = skin.boneWeights[i];
                     if (weight == 0.0) continue; 
@@ -91,10 +84,12 @@ void main() {
         }
     }
 
-    // 8. Resolve Spot Light Shadow component 
-    uint lightEntity = GET_VISIBLE_SHADOW_SPOT_LIGHT(ctx.spotLightVisibleShadowIndexBufferAddr, lightIdx);
-    uint lightShadowDenseIndex = GET_SPARSE_INDEX(ctx.spotLightShadowSparseMapBufferAddr, lightEntity);
-    mat4 viewProj = GET_SPOT_LIGHT_SHADOW(ctx.spotLightShadowDataBufferAddr, lightShadowDenseIndex).viewProj;
+    // 8. Resolve Point Light Shadow component 
+    uint lightEntity = GET_POINT_VISIBLE_SHADOW_LIGHT(ctx.pointLightVisibleShadowIndexBufferAddr, lightIdx);
+    uint lightShadowDenseIndex = GET_SPARSE_INDEX(ctx.pointLightShadowSparseMapBufferAddr, lightEntity);
+    
+    PointLightShadowComponent shadowComp = GET_POINT_LIGHT_SHADOW(ctx.pointLightShadowDataBufferAddr, lightShadowDenseIndex);
+    mat4 viewProj = shadowComp.viewProjs[faceIndex];
 
     // 9. Calculate Final World Position and Outputs
     vec4 clipPos = viewProj * transform.transform * finalModelMat * vec4(v.position, 1.0);
@@ -104,12 +99,11 @@ void main() {
     gl_ClipDistance[2] = clipPos.w + clipPos.y;
     gl_ClipDistance[3] = clipPos.w - clipPos.y;
 
-    vec4 rect = GET_SPOT_LIGHT_SHADOW(ctx.spotLightShadowDataBufferAddr, lightShadowDenseIndex).atlasRect;
+    vec4 rect = shadowComp.atlasRects[faceIndex];
     vec2 scale = rect.zw; 
-    vec2 offset = rect.xy * 2.0 + rect.zw - 1.0; 
-
-    clipPos.xy = clipPos.xy * scale + offset * clipPos.w;
-
+    vec2 offset = rect.xy * 2.0 + rect.zw - 1.0;
+    
     // Atlas Positioning
+    clipPos.xy = clipPos.xy * scale + offset * clipPos.w;
     gl_Position = clipPos;
 }

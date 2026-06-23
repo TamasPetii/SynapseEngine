@@ -39,7 +39,7 @@ void main()
     uint lightIdx = gl_GlobalInvocationID.y;
     if (gl_GlobalInvocationID.x >= transformCount) return;
 
-    uint activeSpotLightShadowCount = GET_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleCountBufferAddr);
+    uint activeSpotLightShadowCount = GET_SPOT_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleCountBufferAddr);
     if (lightIdx >= activeSpotLightShadowCount) return; 
 
     // 2. Resolve Entity and Model Data
@@ -73,7 +73,7 @@ void main()
     GpuMeshCollider worldCollider = TransformCollider(localGlobalCollider, transform.transform);
 
     // 4. Resolve Spot Light Shadow Data
-    uint lightEntity = GET_VISIBLE_SHADOW_SPOT_LIGHT(ctx.spotLightVisibleShadowIndexBufferAddr, lightIdx);
+    uint lightEntity = GET_SPOT_VISIBLE_SHADOW_LIGHT(ctx.spotLightVisibleShadowIndexBufferAddr, lightIdx);
     uint lightDenseIndex = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, lightEntity);
     uint lightShadowDenseIndex = GET_SPARSE_INDEX(ctx.spotLightShadowSparseMapBufferAddr, lightEntity);
     SpotLightColliderGPU lightCollider = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, lightDenseIndex);
@@ -135,9 +135,9 @@ void main()
                 uint drawCallKey = (isMeshlet << 31) | (indirectIdx & 0x7FFFFFFF);
                 uvec2 gpuPayload = uvec2(entityData, lightIdx);
 
-                uint sortSlot = atomicAdd(GET_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleMeshCountBufferAddr), 1);
-                GET_DRAW_CALL_KEY_DATA(ctx.spotLightShadowDrawCallKeyBufferAddr, sortSlot) = drawCallKey;
-                GET_SORTED_VALUE(ctx.spotLightShadowSortValuesBufferAddr, sortSlot) = sortSlot;
+                uint sortSlot = atomicAdd(GET_SPOT_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleMeshCountBufferAddr), 1);
+                GET_SPOT_DRAW_CALL_KEY_DATA(ctx.spotLightShadowDrawCallKeyBufferAddr, sortSlot) = drawCallKey;
+                GET_SPOT_SORTED_VALUE(ctx.spotLightShadowSortValuesBufferAddr, sortSlot) = sortSlot;
                 GET_SPOT_SHADOW_INSTANCE_UNSORTED(ctx.spotLightShadowUnsortedInstanceBufferAddr, sortSlot) = gpuPayload;
             }
         }

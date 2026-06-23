@@ -57,7 +57,7 @@ void main() {
     ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, sparseIdx);
 
     // 5. Resolve Spot Light and Shadow Component (Ugyanúgy, mint a Model shaderben)
-    uint lightEntity = GET_VISIBLE_SHADOW_SPOT_LIGHT(ctx.spotLightVisibleShadowIndexBufferAddr, lightIdx);
+    uint lightEntity = GET_SPOT_VISIBLE_SHADOW_LIGHT(ctx.spotLightVisibleShadowIndexBufferAddr, lightIdx);
     uint lightDenseIndex = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, lightEntity);
     uint lightShadowDenseIndex = GET_SPARSE_INDEX(ctx.spotLightShadowSparseMapBufferAddr, lightEntity);
     SpotLightColliderGPU lightCollider = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, lightDenseIndex);
@@ -140,9 +140,9 @@ void main() {
             entityData = SET_BIT_TO(entityData, 31, visibility == INTERSECTION_INSIDE);
             uvec2 gpuPayload = uvec2(entityData, lightIdx);
 
-            uint sortSlot = atomicAdd(GET_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleMeshCountBufferAddr), 1);
-            GET_DRAW_CALL_KEY_DATA(ctx.spotLightShadowDrawCallKeyBufferAddr, sortSlot) = drawCallKey;
-            GET_SORTED_VALUE(ctx.spotLightShadowSortValuesBufferAddr, sortSlot) = sortSlot;
+            uint sortSlot = atomicAdd(GET_SPOT_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleMeshCountBufferAddr), 1);
+            GET_SPOT_DRAW_CALL_KEY_DATA(ctx.spotLightShadowDrawCallKeyBufferAddr, sortSlot) = drawCallKey;
+            GET_SPOT_SORTED_VALUE(ctx.spotLightShadowSortValuesBufferAddr, sortSlot) = sortSlot;
             GET_SPOT_SHADOW_INSTANCE_UNSORTED(ctx.spotLightShadowUnsortedInstanceBufferAddr, sortSlot) = gpuPayload;
         }
     }

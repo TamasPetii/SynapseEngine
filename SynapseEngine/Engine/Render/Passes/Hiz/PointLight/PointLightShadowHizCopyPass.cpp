@@ -1,4 +1,4 @@
-#include "SpotLightShadowHizCopyPass.h"
+#include "PointLightShadowHizCopyPass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Scene/Scene.h"
@@ -10,37 +10,35 @@
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Vk/Image/ImageUtils.h" 
 #include "Engine/Render/ComputeGroupSize.h"
-#include "Engine/Component/Light/Spot/SpotLightComponent.h"
+#include "Engine/Component/Light/Point/PointLightComponent.h"
 #include <glm/glm.hpp>
 #include "Engine/Vk/Rendering/PushConstant.h"
-#include "Engine/Scene/DrawData/SpotLightShadowDrawGroup.h"
+#include "Engine/Scene/DrawData/PointLightShadowDrawGroup.h"
 
 namespace Syn {
 
 #include "Engine/Shaders/Includes/PushConstants/HizLinearizeDepthPC.glsl"
 
-    bool SpotLightShadowHizCopyPass::ShouldExecute(const RenderContext& context) const
+    bool PointLightShadowHizCopyPass::ShouldExecute(const RenderContext& context) const
     {
-        auto pool = context.scene->GetRegistry()->GetPool<SpotLightComponent>();
+        auto pool = context.scene->GetRegistry()->GetPool<PointLightComponent>();
         return pool && pool->Size() > 0;
     }
 
-    void SpotLightShadowHizCopyPass::Initialize() {
+    void PointLightShadowHizCopyPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
-        _shaderProgram = shaderManager->CreateProgram("SpotLightShadowHizCopyProgram", {
-            ShaderNames::SpotHizLinearizeSingleDepth
+        _shaderProgram = shaderManager->CreateProgram("PointLightShadowHizCopyProgram", {
+            ShaderNames::PointHizLinearizeSingleDepth
             });
     }
 
-    void SpotLightShadowHizCopyPass::PrepareFrame(const RenderContext& context) {
+    void PointLightShadowHizCopyPass::PrepareFrame(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
-        uint32_t fIdx = context.frameIndex;
-
-        auto& shadowAtlas = drawData->SpotLightShadow.shadowAtlas[fIdx];
-        auto& depthPyramid = drawData->SpotLightShadow.shadowDepthPyramid[fIdx];
+        auto& atlas = drawData->PointLightShadow.shadowAtlas[context.frameIndex];
+        auto& depthPyramid = drawData->PointLightShadow.shadowDepthPyramid[context.frameIndex];
 
         _imageTransitions.push_back({
-            shadowAtlas.get(),
+            atlas.get(),
             VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL,
             VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
             VK_ACCESS_SHADER_READ_BIT,
@@ -56,22 +54,18 @@ namespace Syn {
             });
     }
 
-    void SpotLightShadowHizCopyPass::BindDescriptors(const RenderContext& context) {
-        auto imageManager = ServiceLocator::GetImageManager();
+    void PointLightShadowHizCopyPass::BindDescriptors(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
-        uint32_t fIdx = context.frameIndex;
-
-        auto& shadowAtlas = drawData->SpotLightShadow.shadowAtlas[fIdx];
-        auto& depthPyramid = drawData->SpotLightShadow.shadowDepthPyramid[fIdx];
-
-        auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge);
+        auto& atlas = drawData->PointLightShadow.shadowAtlas[context.frameIndex];
+        auto& depthPyramid = drawData->PointLightShadow.shadowDepthPyramid[context.frameIndex];
+        auto imageManager = ServiceLocator::GetImageManager();
 
         Vk::PushDescriptorWriter pushWriter;
 
         pushWriter.AddCombinedImageSampler(
             0,
-            shadowAtlas->GetView(Vk::ImageViewNames::Default),
-            sampler->Handle(),
+            atlas->GetView(Vk::ImageViewNames::Default),
+            imageManager->GetSampler(SamplerNames::NearestClampEdge)->Handle(),
             VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
         );
 
@@ -86,24 +80,24 @@ namespace Syn {
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
     }
 
-    void SpotLightShadowHizCopyPass::PushConstants(const RenderContext& context) {
+    void PointLightShadowHizCopyPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         auto fIdx = context.frameIndex;
 
         Vk::PushConstant<HizLinearizeDepthPC> pc;
         pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
-        pc->outImageSize = glm::vec2(SPOT_SHADOW_ATLAS_SIZE, SPOT_SHADOW_ATLAS_SIZE);
+        pc->outImageSize = glm::vec2(POINT_SHADOW_ATLAS_SIZE, POINT_SHADOW_ATLAS_SIZE);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
-    void SpotLightShadowHizCopyPass::Dispatch(const RenderContext& context) {
-        constexpr uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(SPOT_SHADOW_ATLAS_SIZE, ComputeGroupSize::Image16D);
-        constexpr uint32_t groupCountY = ComputeGroupSize::CalculateDispatchCount(SPOT_SHADOW_ATLAS_SIZE, ComputeGroupSize::Image16D);
+    void PointLightShadowHizCopyPass::Dispatch(const RenderContext& context) {
+        constexpr uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(POINT_SHADOW_ATLAS_SIZE, ComputeGroupSize::Image16D);
+        constexpr uint32_t groupCountY = ComputeGroupSize::CalculateDispatchCount(POINT_SHADOW_ATLAS_SIZE, ComputeGroupSize::Image16D);
 
         vkCmdDispatch(context.cmd, groupCountX, groupCountY, 1);
 
         auto drawData = context.scene->GetSceneDrawData();
-        auto& depthPyramid = drawData->SpotLightShadow.shadowDepthPyramid[context.frameIndex];
+        auto& depthPyramid = drawData->PointLightShadow.shadowDepthPyramid[context.frameIndex];
 
         depthPyramid->TransitionLayout(
             context.cmd,
@@ -112,7 +106,7 @@ namespace Syn {
             VK_ACCESS_2_SHADER_READ_BIT
         );
 
-        auto& shadowAtlas = drawData->SpotLightShadow.shadowAtlas[context.frameIndex];
+        auto& shadowAtlas = drawData->PointLightShadow.shadowAtlas[context.frameIndex];
         shadowAtlas->TransitionLayout(
             context.cmd,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,

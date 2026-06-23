@@ -24,7 +24,7 @@ void main()
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
     // 1. Resolve Entity ID and Sparse Indexes
-    uint entityId = GET_VISIBLE_SPOT_LIGHT(ctx.spotLightVisibleIndexBufferAddr, gl_InstanceIndex);
+    uint entityId = GET_SPOT_VISIBLE_LIGHT(ctx.spotLightVisibleIndexBufferAddr, gl_InstanceIndex);
     uint lightDenseIndex = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, entityId);   
     uint shadowDenseIndex = INVALID_INDEX; 
 

@@ -46,7 +46,7 @@ void main() {
     uint lightIdx   = (rawEntityData >> 28) & 0x7u;
 
     uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
-    uint lightEntity = GET_VISIBLE_SHADOW_DIRECTION_LIGHT(ctx.directionLightVisibleShadowIndexBufferAddr, lightIdx);
+    uint lightEntity = GET_DIRECTION_VISIBLE_SHADOW_LIGHT(ctx.directionLightVisibleShadowIndexBufferAddr, lightIdx);
     uint lightShadowDenseIdx = GET_SPARSE_INDEX(ctx.directionLightShadowSparseMapBufferAddr, lightEntity);
     uint lightDenseIdx = GET_SPARSE_INDEX(ctx.directionLightSparseMapBufferAddr, lightEntity);
 

@@ -40,7 +40,7 @@ namespace Syn {
 
         _shaderProgram = shaderManager->CreateProgram("SpotLightShadowProgram", {
             ShaderNames::SpotLightShadowTraditionalVert,
-            ShaderNames::SpotLightShadowFarg
+            ShaderNames::SpotLightShadowFrag
             }, config);
 
         VkCullModeFlags cullMode = (_renderType == MaterialRenderType::Opaque2Sided) ? VK_CULL_MODE_NONE : VK_CULL_MODE_BACK_BIT;
@@ -120,12 +120,13 @@ namespace Syn {
         uint32_t maxCommandCount = drawData->Models.traditionalCmdCounts[_renderType];
 
         if (maxCommandCount > 0) {
+            VkDeviceSize indirectOffset = commandOffset * sizeof(VkDrawIndirectCommand);
             VkDeviceSize countBufferOffset = _renderType * sizeof(uint32_t);
 
             vkCmdDrawIndirectCount(
                 context.cmd,
                 indirectBuffer,
-                commandOffset * sizeof(VkDrawIndirectCommand),
+                indirectOffset,
                 countBuffer,
                 countBufferOffset,
                 maxCommandCount,

@@ -37,6 +37,15 @@ namespace Syn {
                 );
                 _viewportTextures[cacheKey] = handle;
             }
+            else if (targetName == RenderTargetNames::PointLightShadowDepthPyramid) {
+                auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
+                auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::NearestClampEdge);
+                TextureHandle handle = _textureManager->RegisterTexture(
+                    drawData->PointLightShadow.shadowDepthPyramid[currentFrame]->GetView(viewName),
+                    sampler->Handle()
+                );
+                _viewportTextures[cacheKey] = handle;
+            }
             else {
                 auto rtManager = renderManager->GetRenderTargetManager();
                 auto group = rtManager->GetGroup(groupName, currentFrame);

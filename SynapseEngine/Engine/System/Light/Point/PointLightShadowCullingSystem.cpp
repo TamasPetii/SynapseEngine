@@ -25,7 +25,6 @@
 #include "Engine/Mesh/Utils/MeshUtils.h"
 #include <atomic>
 #include <algorithm>
-#include <glm/gtx/norm.hpp>
 
 namespace Syn
 {

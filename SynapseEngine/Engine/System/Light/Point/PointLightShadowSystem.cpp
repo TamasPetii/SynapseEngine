@@ -43,8 +43,6 @@ namespace Syn
                     auto& shadowComp = shadowPool->Get(entity);
                     auto& lightComp = lightPool->Get(entity);
 
-                    //Todo: Dynamic Distance Based Doom Rects
-
                     shadowComp.farPlane = lightComp.radius;
 
                     glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), 1.0f, shadowComp.nearPlane, shadowComp.farPlane);

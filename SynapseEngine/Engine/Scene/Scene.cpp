@@ -26,9 +26,13 @@
 #include "Engine/System/Rendering/ModelFrustumCullingSystem.h"
 #include "Engine/System/Rendering/AnimationSystem.h"
 #include "Engine/System/Physics/PhysicsSystem.h"
+
 #include "Engine/System/Light/Point/PointLightSystem.h"
 #include "Engine/System/Light/Point/PointLightShadowSystem.h"
 #include "Engine/System/Light/Point/PointLightCullingSystem.h"
+#include "Engine/System/Light/Point/PointLightShadowRenderSystem.h"
+#include "Engine/System/Light/Point/PointLightShadowCullingSystem.h"
+#include "Engine/System/Light/Point/PointLightShadowAtlasSystem.h"
 
 #include "Engine/System/Light/Direction/DirectionLightSystem.h"
 #include "Engine/System/Light/Direction/DirectionLightShadowSystem.h"
@@ -143,6 +147,9 @@ namespace Syn
         RegisterSystem<PointLightSystem>();
         RegisterSystem<PointLightShadowSystem>();
         RegisterSystem<PointLightCullingSystem>();
+        RegisterSystem<PointLightShadowRenderSystem>();
+        RegisterSystem<PointLightShadowCullingSystem>();
+        RegisterSystem<PointLightShadowAtlasSystem>();
 
         RegisterSystem<SpotLightSystem>();
         RegisterSystem<SpotLightShadowSystem>();

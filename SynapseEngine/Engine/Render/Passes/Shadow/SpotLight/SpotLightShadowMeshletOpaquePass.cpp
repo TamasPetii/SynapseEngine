@@ -1,4 +1,4 @@
-#include "DirectionLightShadowMeshletOpaquePass.h"
+#include "SpotLightShadowMeshletOpaquePass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
 #include "Engine/Manager/ShaderManager.h"
@@ -12,39 +12,40 @@
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/ImageManager.h"
+#include "Engine/Scene/DrawData/SpotLightShadowDrawGroup.h"
 
 namespace Syn {
 
-#include "Engine/Shaders/Includes/PushConstants/DirectionLightShadowTraditionalMeshletPassPC.glsl"
+#include "Engine/Shaders/Includes/PushConstants/SpotLightShadowTraditionalMeshletPassPC.glsl"
 
-    bool DirectionLightShadowMeshletOpaquePass::ShouldExecute(const RenderContext& context) const
+    bool SpotLightShadowMeshletOpaquePass::ShouldExecute(const RenderContext& context) const
     {
         return true;
     }
 
-    DirectionLightShadowMeshletOpaquePass::DirectionLightShadowMeshletOpaquePass(MaterialRenderType renderType)
+    SpotLightShadowMeshletOpaquePass::SpotLightShadowMeshletOpaquePass(MaterialRenderType renderType)
         : _renderType(renderType)
     {
         assert(_renderType == MaterialRenderType::Opaque1Sided || _renderType == MaterialRenderType::Opaque2Sided);
 
         if (_renderType == MaterialRenderType::Opaque1Sided) {
-            _passName = "DirectionLightShadowMeshletOpaquePass1Sided";
+            _passName = "SpotLightShadowMeshletOpaquePass1Sided";
         }
         else {
-            _passName = "DirectionLightShadowMeshletOpaquePass2Sided";
+            _passName = "SpotLightShadowMeshletOpaquePass2Sided";
         }
     }
 
-    void DirectionLightShadowMeshletOpaquePass::Initialize() {
+    void SpotLightShadowMeshletOpaquePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("DirectionLightShadowMeshletProgram", {
-            ShaderNames::DirectionLightShadowMeshletTask,
-            ShaderNames::DirectionLightShadowMeshletMesh,
-            ShaderNames::DirectionLightShadowFarg
+        _shaderProgram = shaderManager->CreateProgram("SpotLightShadowMeshletProgram", {
+            ShaderNames::SpotLightShadowMeshletTask,
+            ShaderNames::SpotLightShadowMeshletMesh,
+            ShaderNames::SpotLightShadowFrag
             }, config);
 
         VkCullModeFlags cullMode = (_renderType == MaterialRenderType::Opaque2Sided) ? VK_CULL_MODE_NONE : VK_CULL_MODE_BACK_BIT;
@@ -56,7 +57,6 @@ namespace Syn {
                 .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
                 .polygonMode = VK_POLYGON_MODE_FILL,
                 .lineWidth = 1.0f
-                /* .depthBiasEnable = VK_TRUE,*/ // Érdemes bekapcsolni az árnyékokhoz!
             },
             .depth = {
                 .testEnable = VK_TRUE,
@@ -69,12 +69,12 @@ namespace Syn {
         };
     }
 
-    void DirectionLightShadowMeshletOpaquePass::PrepareFrame(const RenderContext& context) {
+    void SpotLightShadowMeshletOpaquePass::PrepareFrame(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
-        auto& shadowGroup = drawData->DirectionLightShadow;
+        auto& shadowGroup = drawData->SpotLightShadow;
         auto fIdx = context.frameIndex;
 
-        VkExtent2D extent = { SHADOW_ATLAS_SIZE, SHADOW_ATLAS_SIZE };
+        VkExtent2D extent = { SPOT_SHADOW_ATLAS_SIZE, SPOT_SHADOW_ATLAS_SIZE };
         _graphicsState.renderArea = extent;
 
         _depthAttachment = Vk::RenderUtils::CreateAttachment({
@@ -92,24 +92,25 @@ namespace Syn {
         };
     }
 
-    void DirectionLightShadowMeshletOpaquePass::PushConstants(const RenderContext& context) {
+    void SpotLightShadowMeshletOpaquePass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         uint32_t fIdx = context.frameIndex;
         auto drawData = scene->GetSceneDrawData();
 
-        Vk::PushConstant<DirectionLightShadowTraditionalMeshletPassPC> pc{};
+        Vk::PushConstant<SpotLightShadowTraditionalMeshletPassPC> pc{};
         pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
         pc->baseDescriptorOffset = drawData->Models.activeTraditionalCount + drawData->Models.meshletCmdOffsets[_renderType];
         pc->materialRenderType = static_cast<uint32_t>(_renderType);
-		pc.Push(context.cmd, _shaderProgram->GetLayout());
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
-    void DirectionLightShadowMeshletOpaquePass::BindDescriptors(const RenderContext& context)
+    void SpotLightShadowMeshletOpaquePass::BindDescriptors(const RenderContext& context)
     {
         auto imageManager = ServiceLocator::GetImageManager();
 
         uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
-        auto depthPyramid = context.scene->GetSceneDrawData()->DirectionLightShadow.shadowDepthPyramid[prevFrameIndex].get();
+
+        auto depthPyramid = context.scene->GetSceneDrawData()->SpotLightShadow.shadowDepthPyramid[prevFrameIndex].get();
         auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);
 
         Vk::PushDescriptorWriter pushWriter;
@@ -121,16 +122,16 @@ namespace Syn {
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 
-        pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
+        //pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
-    void DirectionLightShadowMeshletOpaquePass::Draw(const RenderContext& context)
+    void SpotLightShadowMeshletOpaquePass::Draw(const RenderContext& context)
     {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         
 
-        auto indirectBuffer = drawData->DirectionLightShadow.indirectBuffer.GetHandle(context.frameIndex);
+        auto indirectBuffer = drawData->SpotLightShadow.indirectBuffer.GetHandle(context.frameIndex);
         auto countBuffer = drawData->Models.drawCountBuffer.GetHandle(context.frameIndex);
 
         uint32_t commandOffsetIdx = drawData->Models.meshletCmdOffsets[_renderType];

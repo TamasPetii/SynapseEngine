@@ -26,7 +26,7 @@ void main()
     outUV = vec2((gl_VertexIndex << 1) & 2, gl_VertexIndex & 2);
     gl_Position = vec4(outUV * 2.0 - 1.0, 0.0, 1.0);
 
-    uint entityId = GET_VISIBLE_DIRECTION_LIGHT(ctx.directionLightVisibleIndexBufferAddr, gl_InstanceIndex);   
+    uint entityId = GET_DIRECTION_VISIBLE_LIGHT(ctx.directionLightVisibleIndexBufferAddr, gl_InstanceIndex);   
     uint lightDenseIndex = GET_SPARSE_INDEX(ctx.directionLightSparseMapBufferAddr, entityId);   
     uint shadowDenseIndex = INVALID_INDEX; 
 

@@ -1,6 +1,7 @@
 #version 460
 #extension GL_GOOGLE_include_directive : require
 #extension GL_ARB_shader_draw_parameters : require
+#extension GL_ARB_gpu_shader_int64 : require
 
 #include "../../../Includes/Core.glsl"
 #include "../../../Includes/Common/Visibility.glsl"
@@ -11,27 +12,25 @@
 #include "../../../Includes/Common/Transform.glsl"
 #include "../../../Includes/Common/Animation.glsl"
 #include "../../../Includes/Common/Material.glsl"
-#include "../../../Includes/Common/DirectionLight.glsl"
+#include "../../../Includes/Common/SpotLight.glsl"
 
-#include "../../../Includes/PushConstants/DirectionLightShadowTraditionalMeshletPassPC.glsl"
+#include "../../../Includes/PushConstants/SpotLightShadowTraditionalMeshletPassPC.glsl"
 
 layout(push_constant) uniform PushConstants {
-   DirectionLightShadowTraditionalMeshletPassPC pc;
+   SpotLightShadowTraditionalMeshletPassPC pc;
 };
-
 void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
-    // 1. Fetch Draw Descriptor
-    MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.globalIndirectCommandDescriptorBufferAddr, pc.baseDescriptorOffset + gl_DrawIDARB);
+    // 1. Fetch Spot Specific!! Draw Descriptor
+    MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.spotLightDrawDescriptorBufferAddr, pc.baseDescriptorOffset + gl_DrawIDARB);
 
     // 2. Fetch Instance and Entity ID
-    uint shadowInstanceOffset = (desc.instanceOffset * ctx.directionLightShadowMultiplier) + gl_InstanceIndex;
-    uint payload = GET_INSTANCE(ctx.directionLightShadowInstanceBufferAddr, shadowInstanceOffset);
-
-    uint entityId   = payload & 0x3FFFFFFu;
-    uint cascadeIdx = (payload >> 26) & 0x3u;
-    uint lightIdx   = (payload >> 28) & 0x7u;
+    uint shadowInstanceOffset = desc.instanceOffset + gl_InstanceIndex;
+    uvec2 payload = GET_SPOT_SHADOW_INSTANCE(ctx.spotLightShadowInstanceBufferAddr, shadowInstanceOffset);
+    
+    uint entityId = payload.x & 0x7FFFFFFF;
+    uint lightIdx = payload.y;
 
     // 3. Fetch Model Component & Material Lookup
     uint modelDenseIndex = GET_SPARSE_INDEX(ctx.modelSparseMapBufferAddr, entityId);
@@ -52,8 +51,6 @@ void main() {
 
     // 6. Evaluate Static Hierarchy (Default pose)
     uint nodeIndex = UNPACK_UINT16_X(v.packedIndex);
-    uint meshIndex = UNPACK_UINT16_Y(v.packedIndex);
-    
     GpuNodeTransform staticNodeTransform = GET_NODE_TRANSFORM(addrs.nodeTransforms, nodeIndex);
     mat4 finalModelMat = staticNodeTransform.globalTransform;
 
@@ -92,10 +89,10 @@ void main() {
         }
     }
 
-    // 8. Resolve Directional Light Shadow component 
-    uint lightEntity = GET_VISIBLE_SHADOW_DIRECTION_LIGHT(ctx.directionLightVisibleShadowIndexBufferAddr, lightIdx);
-    uint lightShadowDenseIndex = GET_SPARSE_INDEX(ctx.directionLightShadowSparseMapBufferAddr, lightEntity);
-    mat4 viewProj = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeViewProjsVulkan[cascadeIdx];
+    // 8. Resolve Spot Light Shadow component 
+    uint lightEntity = GET_SPOT_VISIBLE_SHADOW_LIGHT(ctx.spotLightVisibleShadowIndexBufferAddr, lightIdx);
+    uint lightShadowDenseIndex = GET_SPARSE_INDEX(ctx.spotLightShadowSparseMapBufferAddr, lightEntity);
+    mat4 viewProj = GET_SPOT_LIGHT_SHADOW(ctx.spotLightShadowDataBufferAddr, lightShadowDenseIndex).viewProj;
 
     // 9. Calculate Final World Position and Outputs
     vec4 clipPos = viewProj * transform.transform * finalModelMat * vec4(v.position, 1.0);
@@ -105,7 +102,7 @@ void main() {
     gl_ClipDistance[2] = clipPos.w + clipPos.y;
     gl_ClipDistance[3] = clipPos.w - clipPos.y;
 
-    vec4 rect = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeAtlasRects[cascadeIdx];
+    vec4 rect = GET_SPOT_LIGHT_SHADOW(ctx.spotLightShadowDataBufferAddr, lightShadowDenseIndex).atlasRect;
     vec2 scale = rect.zw; 
     vec2 offset = rect.xy * 2.0 + rect.zw - 1.0; 
 

@@ -65,5 +65,5 @@ void main() {
     baseOffset = subgroupBroadcastFirst(baseOffset);
 
     uint finalIndex = baseOffset + localOffset;
-    GET_VISIBLE_POINT_LIGHT(ctx.pointLightVisibleIndexBufferAddr, finalIndex) = collider.entityIndex;
+    GET_POINT_VISIBLE_LIGHT(ctx.pointLightVisibleIndexBufferAddr, finalIndex) = collider.entityIndex;
 }

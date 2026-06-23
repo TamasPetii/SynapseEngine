@@ -4,6 +4,7 @@
 #include "Engine/Mesh/Data/Gpu/GpuIndexedDrawData.h"
 #include <glm/glm.hpp>
 #include <glm/matrix.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/norm.hpp>
 #include <vector>
 

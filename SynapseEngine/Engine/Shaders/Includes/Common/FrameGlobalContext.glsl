@@ -86,8 +86,26 @@ struct FrameGlobalContext {
     uint64_t pointLightDataBufferAddr;
     uint64_t pointLightColliderBufferAddr;
     uint64_t pointLightSparseMapBufferAddr;
+
+    uint64_t pointLightShadowIndirectGeometryCommandBufferAddr;
     uint64_t pointLightShadowSparseMapBufferAddr;
-    uint64_t pointLightShadowDataBufferAddr; 
+    uint64_t pointLightShadowDataBufferAddr;
+    uint64_t pointLightShadowInstanceBufferAddr;
+    uint64_t pointLightShadowUnsortedInstanceBufferAddr;
+    uint64_t pointLightDrawDescriptorBufferAddr;
+    uint64_t pointLightVisibleShadowIndexBufferAddr;
+    uint64_t pointLightShadowModelCountBufferAddr;
+    uint64_t pointLightShadowModelVisibleIndexBufferAddr;
+    uint64_t pointLightShadowChunkCountBufferAddr;
+    uint64_t pointLightShadowChunkVisibleIndexBufferAddr;
+    uint64_t pointLightShadowMortonChunkCountBufferAddr;
+    uint64_t pointLightShadowMortonChunkVisibleIndexBufferAddr;
+    uint64_t pointLightShadowGridLookupBufferAddr;
+    uint64_t pointLightShadowVisibleCountBufferAddr;
+    uint64_t pointLightShadowDrawCallKeyBufferAddr;
+    uint64_t pointLightShadowSortValuesBufferAddr;
+    uint64_t pointLightShadowVisibleMeshCountBufferAddr;
+    uint64_t pointLightShadowFinalizeDispatchBufferAddr;
 
     uint64_t forwardPlusTileGridListBufferAddr;
     uint64_t forwardPlusClusterCountBufferAddr;
@@ -196,6 +214,13 @@ struct FrameGlobalContext {
     uint spotLightShadowMinBlockSize;
     uint spotLightShadowGridSize;
     uint spotLightShadowHizMipLevels;
+
+    uint pointLightShadowLodBias;
+    uint pointLightShadowMultiplier;
+    uint pointLightShadowAtlasSize;
+    uint pointLightShadowMinBlockSize;
+    uint pointLightShadowGridSize;
+    uint pointLightShadowHizMipLevels;
 };
 
 #ifndef __cplusplus

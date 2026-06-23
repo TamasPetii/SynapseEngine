@@ -19,14 +19,14 @@ layout(push_constant) uniform PushConstants {
 void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
-    uint visibleCount = GET_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleMeshCountBufferAddr);
+    uint visibleCount = GET_SPOT_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleMeshCountBufferAddr);
     uint globalId = gl_GlobalInvocationID.x;
     
     if (globalId >= visibleCount) return;
 
     // Fetch sorted key and original unsorted slot index
-    uint currentKey = GET_DRAW_CALL_KEY_DATA(ctx.spotLightShadowDrawCallKeyBufferAddr, globalId);
-    uint originalIndex = GET_SORTED_VALUE(ctx.spotLightShadowSortValuesBufferAddr, globalId);
+    uint currentKey = GET_SPOT_DRAW_CALL_KEY_DATA(ctx.spotLightShadowDrawCallKeyBufferAddr, globalId);
+    uint originalIndex = GET_SPOT_SORTED_VALUE(ctx.spotLightShadowSortValuesBufferAddr, globalId);
 
     // Gather from unsorted and scatter into final compact instance buffer
     uvec2 payload = GET_SPOT_SHADOW_INSTANCE_UNSORTED(ctx.spotLightShadowUnsortedInstanceBufferAddr, originalIndex);
@@ -34,7 +34,7 @@ void main() {
 
     // Detect draw call boundaries
     bool isFirst = (globalId == 0);
-    uint prevKey = isFirst ? 0xFFFFFFFF : GET_DRAW_CALL_KEY_DATA(ctx.spotLightShadowDrawCallKeyBufferAddr, globalId - 1);
+    uint prevKey = isFirst ? 0xFFFFFFFF : GET_SPOT_DRAW_CALL_KEY_DATA(ctx.spotLightShadowDrawCallKeyBufferAddr, globalId - 1);
 
     uint indirectIdx = currentKey & 0x7FFFFFFF;
     bool isMeshlet = (currentKey >> 31) != 0;

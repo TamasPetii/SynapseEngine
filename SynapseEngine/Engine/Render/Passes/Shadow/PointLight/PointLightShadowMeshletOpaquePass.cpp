@@ -1,4 +1,4 @@
-#include "SpotLightShadowMeshletOpaquePass.h"
+#include "PointLightShadowMeshletOpaquePass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
 #include "Engine/Manager/ShaderManager.h"
@@ -12,40 +12,40 @@
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/ImageManager.h"
-#include "Engine/Scene/DrawData/SpotLightShadowDrawGroup.h"
+#include "Engine/Scene/DrawData/PointLightShadowDrawGroup.h"
 
 namespace Syn {
 
-#include "Engine/Shaders/Includes/PushConstants/SpotLightShadowTraditionalMeshletPassPC.glsl"
+    #include "Engine/Shaders/Includes/PushConstants/PointLightShadowTraditionalMeshletPassPC.glsl"
 
-    bool SpotLightShadowMeshletOpaquePass::ShouldExecute(const RenderContext& context) const
+    bool PointLightShadowMeshletOpaquePass::ShouldExecute(const RenderContext& context) const
     {
         return true;
     }
 
-    SpotLightShadowMeshletOpaquePass::SpotLightShadowMeshletOpaquePass(MaterialRenderType renderType)
+    PointLightShadowMeshletOpaquePass::PointLightShadowMeshletOpaquePass(MaterialRenderType renderType)
         : _renderType(renderType)
     {
         assert(_renderType == MaterialRenderType::Opaque1Sided || _renderType == MaterialRenderType::Opaque2Sided);
 
         if (_renderType == MaterialRenderType::Opaque1Sided) {
-            _passName = "SpotLightShadowMeshletOpaquePass1Sided";
+            _passName = "PointLightShadowMeshletOpaquePass1Sided";
         }
         else {
-            _passName = "SpotLightShadowMeshletOpaquePass2Sided";
+            _passName = "PointLightShadowMeshletOpaquePass2Sided";
         }
     }
 
-    void SpotLightShadowMeshletOpaquePass::Initialize() {
+    void PointLightShadowMeshletOpaquePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("SpotLightShadowMeshletProgram", {
-            ShaderNames::SpotLightShadowMeshletTask,
-            ShaderNames::SpotLightShadowMeshletMesh,
-            ShaderNames::SpotLightShadowFarg
+        _shaderProgram = shaderManager->CreateProgram("PointLightShadowMeshletProgram", {
+            ShaderNames::PointLightShadowMeshletTask,
+            ShaderNames::PointLightShadowMeshletMesh,
+            ShaderNames::PointLightShadowFrag
             }, config);
 
         VkCullModeFlags cullMode = (_renderType == MaterialRenderType::Opaque2Sided) ? VK_CULL_MODE_NONE : VK_CULL_MODE_BACK_BIT;
@@ -69,12 +69,12 @@ namespace Syn {
         };
     }
 
-    void SpotLightShadowMeshletOpaquePass::PrepareFrame(const RenderContext& context) {
+    void PointLightShadowMeshletOpaquePass::PrepareFrame(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
-        auto& shadowGroup = drawData->SpotLightShadow;
+        auto& shadowGroup = drawData->PointLightShadow;
         auto fIdx = context.frameIndex;
 
-        VkExtent2D extent = { SPOT_SHADOW_ATLAS_SIZE, SPOT_SHADOW_ATLAS_SIZE };
+        VkExtent2D extent = { POINT_SHADOW_ATLAS_SIZE, POINT_SHADOW_ATLAS_SIZE };
         _graphicsState.renderArea = extent;
 
         _depthAttachment = Vk::RenderUtils::CreateAttachment({
@@ -92,25 +92,25 @@ namespace Syn {
         };
     }
 
-    void SpotLightShadowMeshletOpaquePass::PushConstants(const RenderContext& context) {
+    void PointLightShadowMeshletOpaquePass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         uint32_t fIdx = context.frameIndex;
         auto drawData = scene->GetSceneDrawData();
 
-        Vk::PushConstant<SpotLightShadowTraditionalMeshletPassPC> pc{};
+        Vk::PushConstant<PointLightShadowTraditionalMeshletPassPC> pc{};
         pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
         pc->baseDescriptorOffset = drawData->Models.activeTraditionalCount + drawData->Models.meshletCmdOffsets[_renderType];
         pc->materialRenderType = static_cast<uint32_t>(_renderType);
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
-    void SpotLightShadowMeshletOpaquePass::BindDescriptors(const RenderContext& context)
+    void PointLightShadowMeshletOpaquePass::BindDescriptors(const RenderContext& context)
     {
         auto imageManager = ServiceLocator::GetImageManager();
 
         uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
 
-        auto depthPyramid = context.scene->GetSceneDrawData()->SpotLightShadow.shadowDepthPyramid[prevFrameIndex].get();
+        auto depthPyramid = context.scene->GetSceneDrawData()->PointLightShadow.shadowDepthPyramid[prevFrameIndex].get();
         auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);
 
         Vk::PushDescriptorWriter pushWriter;
@@ -122,16 +122,15 @@ namespace Syn {
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 
-        //pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
+        // pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
-    void SpotLightShadowMeshletOpaquePass::Draw(const RenderContext& context)
+    void PointLightShadowMeshletOpaquePass::Draw(const RenderContext& context)
     {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
-        
 
-        auto indirectBuffer = drawData->SpotLightShadow.indirectBuffer.GetHandle(context.frameIndex);
+        auto indirectBuffer = drawData->PointLightShadow.indirectBuffer.GetHandle(context.frameIndex);
         auto countBuffer = drawData->Models.drawCountBuffer.GetHandle(context.frameIndex);
 
         uint32_t commandOffsetIdx = drawData->Models.meshletCmdOffsets[_renderType];

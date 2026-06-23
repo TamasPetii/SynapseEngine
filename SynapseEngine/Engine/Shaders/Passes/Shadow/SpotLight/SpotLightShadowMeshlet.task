@@ -45,7 +45,7 @@ void main() {
     uint lightIdx = rawPayload.y;
 
     uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
-    uint lightEntity = GET_VISIBLE_SHADOW_SPOT_LIGHT(ctx.spotLightVisibleShadowIndexBufferAddr, lightIdx);
+    uint lightEntity = GET_SPOT_VISIBLE_SHADOW_LIGHT(ctx.spotLightVisibleShadowIndexBufferAddr, lightIdx);
     uint lightShadowDenseIdx = GET_SPARSE_INDEX(ctx.spotLightShadowSparseMapBufferAddr, lightEntity);
     uint lightDenseIdx = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, lightEntity);
 
@@ -96,7 +96,7 @@ void main() {
         // 5. Transform collider to world space
         GpuMeshletCollider worldCollider = TransformCollider(localCollider, transform.transform, transform.transformIT);
 
-        // 6. Backface Cone Culling (Lokalizált spot fénynél a világpozíciójához viszonyítunk!)
+        // 6. Backface Cone Culling
         if (pc.disableConeCulling == 0 && ctx.enableMeshletConeCulling == 1) {
             if (TestConeCulling(worldCollider, spotCollider.worldPos)) {
                 isVisible = false;
@@ -115,7 +115,7 @@ void main() {
             SpotLightShadowComponent shadowComp = GET_SPOT_LIGHT_SHADOW(ctx.spotLightShadowDataBufferAddr, lightShadowDenseIdx);
 
             float shadowScreenSizePixels = 0.0;
-            if (IsSphereOccludedAtlasPerspective(worldCollider.center, worldCollider.radius, shadowComp.view, shadowComp.proj, shadowComp.planes.x, shadowComp.planes.y, shadowComp.atlasRect, shadowDepthPyramid, float(ctx.spotLightShadowAtlasSize), ctx.spotLightShadowHizMipLevels, shadowScreenSizePixels)) {
+            if (false && IsSphereOccludedAtlasPerspective(worldCollider.center, worldCollider.radius, shadowComp.view, shadowComp.proj, shadowComp.planes.x, shadowComp.planes.y, shadowComp.atlasRect, shadowDepthPyramid, float(ctx.spotLightShadowAtlasSize), ctx.spotLightShadowHizMipLevels, shadowScreenSizePixels)) {
                 isVisible = false;
             }
         }

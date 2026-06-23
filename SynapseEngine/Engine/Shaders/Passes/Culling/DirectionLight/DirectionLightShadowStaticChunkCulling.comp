@@ -44,7 +44,7 @@ void main() {
     float sphereRadius = length(aabbMax - sphereCenter);
 
     // 3. Resolve Directional Light Shadow and Cascade Data
-    uint lightEntity = GET_VISIBLE_SHADOW_DIRECTION_LIGHT(ctx.directionLightVisibleShadowIndexBufferAddr, lightIdx);
+    uint lightEntity = GET_DIRECTION_VISIBLE_SHADOW_LIGHT(ctx.directionLightVisibleShadowIndexBufferAddr, lightIdx);
     uint lightShadowDenseIndex = GET_SPARSE_INDEX(ctx.directionLightShadowSparseMapBufferAddr, lightEntity);
     DirectionLightShadowColliderGPU shadowCollider = GET_DIRECTION_LIGHT_SHADOW_COLLIDER(ctx.directionLightShadowColliderDataBufferAddr, lightShadowDenseIndex);
     CascadeCollider cascade = shadowCollider.cascades[cascadeIdx];

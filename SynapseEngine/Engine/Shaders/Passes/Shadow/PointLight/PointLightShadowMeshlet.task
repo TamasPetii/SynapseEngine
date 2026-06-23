@@ -1,0 +1,128 @@
+#version 460
+#extension GL_EXT_mesh_shader : require
+#extension GL_GOOGLE_include_directive : require
+
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Mesh.glsl"
+#include "../../../Includes/Common/Animation.glsl"
+#include "../../../Includes/Common/Model.glsl"
+#include "../../../Includes/Common/Transform.glsl"
+#include "../../../Includes/Common/PointLight.glsl"
+#include "../../../Includes/Common/Camera.glsl"
+#include "../../../Includes/Utils/CullingMath.glsl"
+#include "../../../Includes/Utils/Occlusion.glsl"
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../../Includes/Payload/ShadowTaskPayload.glsl"
+taskPayloadSharedEXT ShadowTaskPayload payload;
+
+shared uint survivingMeshletCount;
+
+#include "../../../Includes/PushConstants/PointLightShadowTraditionalMeshletPassPC.glsl"
+layout(push_constant) uniform PushConstants {
+   PointLightShadowTraditionalMeshletPassPC pc;
+};
+
+// Depth pyramid (HZB) for the shadow atlas occlusion culling
+layout(set = 2, binding = 0) uniform sampler2D shadowDepthPyramid;
+
+void main() {
+    uint threadIdx = gl_LocalInvocationID.x;
+    uint localInstanceID = gl_WorkGroupID.x;  
+    uint meshletGroupOffset = gl_WorkGroupID.y * 32;
+
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+    MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.pointLightDrawDescriptorBufferAddr, pc.baseDescriptorOffset + gl_DrawID);
+
+    // 1. Fetch Point-specific instance payload & Unpack
+    uint shadowInstanceOffset = desc.instanceOffset + localInstanceID;
+    uvec2 rawPayload = GET_POINT_SHADOW_INSTANCE(ctx.pointLightShadowInstanceBufferAddr, shadowInstanceOffset);
+    
+    uint entityId = rawPayload.x & 0x7FFFFFFF;
+    bool isParentFullyInside = HAS_FLAG(rawPayload.x, 31);
+    uint faceIndex = rawPayload.y >> 29;
+    uint lightIdx = rawPayload.y & 0x1FFFFFFF;
+
+    uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
+    uint lightEntity = GET_POINT_VISIBLE_SHADOW_LIGHT(ctx.pointLightVisibleShadowIndexBufferAddr, lightIdx);
+    uint lightShadowDenseIdx = GET_SPARSE_INDEX(ctx.pointLightShadowSparseMapBufferAddr, lightEntity);
+    uint lightDenseIdx = GET_SPARSE_INDEX(ctx.pointLightSparseMapBufferAddr, lightEntity);
+
+    // 2. Initialize payload and shared memory
+    if (threadIdx == 0) {
+        survivingMeshletCount = 0;
+        payload.drawId = gl_DrawID;
+        payload.entityId = entityId;
+        payload.transformDenseIdx = transformDenseIndex;
+        payload.lightShadowDenseIdx = lightShadowDenseIdx;
+        payload.cascadeIdx = faceIndex;
+    }
+
+    barrier();
+
+    // 3. Resolve transforms, light and meshlet data
+    TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
+    PointLightColliderGPU pointCollider = GET_POINT_LIGHT_COLLIDER(ctx.pointLightColliderBufferAddr, lightDenseIdx);
+
+    GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, desc.modelIndex);
+    uint flatLodIndex = (desc.meshIndex * 4) + desc.lodIndex;
+    GpuMeshletDrawDescriptor submeshData = GET_MESHLET_DRAW_DESC(addrs.meshletDrawDescriptors, flatLodIndex);
+
+    uint currentMeshletIdx = meshletGroupOffset + threadIdx;
+    bool isVisible = (currentMeshletIdx < submeshData.meshletCount);
+
+    if (transformDenseIndex == INVALID_INDEX || lightShadowDenseIdx == INVALID_INDEX || lightDenseIdx == INVALID_INDEX) {
+        isVisible = false;
+    }
+
+    if (isVisible) {
+        uint globalMeshletIdx = submeshData.meshletOffset + currentMeshletIdx;
+        GpuMeshletCollider localCollider = GET_MESHLET_COLLIDER(addrs.meshletColliders, globalMeshletIdx);
+
+        // 4. Handle animation frame collider
+        if (ctx.animationSparseMapBufferAddr != 0) {
+            uint animIdx = GET_SPARSE_INDEX(ctx.animationSparseMapBufferAddr, entityId);
+            if (animIdx != INVALID_INDEX) {
+                AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animIdx);
+                if (animComp.animationIndex != INVALID_INDEX) {
+                    GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
+                    uint frameOffset = animComp.frameIndex * animAddrs.descriptor.globalMeshletCount;
+                    localCollider = GET_MESHLET_COLLIDER(animAddrs.frameMeshletColliders, frameOffset + globalMeshletIdx);
+                }
+            }
+        }
+
+        // 5. Transform collider to world space
+        GpuMeshletCollider worldCollider = TransformCollider(localCollider, transform.transform, transform.transformIT);
+
+        // 6. Backface Cone Culling
+        if (pc.disableConeCulling == 0 && ctx.enableMeshletConeCulling == 1) {
+            //Todo:
+        }
+
+        // 7. Point Sphere vs Meshlet Sphere Culling
+        if (isVisible && !isParentFullyInside && ctx.enableMeshletFrustumCulling == 1) {
+            //Todo:
+        }
+
+
+        // 8. Occlusion Culling using Depth Pyramid (HZB)
+        if (isVisible && ctx.enableMeshletOcclusionCulling == 1) {
+            //Todo:
+        }
+
+        // 9. Emit surviving meshlets
+        if (isVisible) {
+            uint slot = atomicAdd(survivingMeshletCount, 1);
+            payload.meshletIndices[slot] = currentMeshletIdx;
+        }
+    }
+
+    barrier();
+
+    if (threadIdx == 0) {
+        EmitMeshTasksEXT(survivingMeshletCount, 1, 1);
+    }
+}

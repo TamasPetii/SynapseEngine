@@ -66,7 +66,7 @@ void main() {
 
     baseOffset = subgroupBroadcastFirst(baseOffset);
     uint finalIndex = baseOffset + localOffset;
-    GET_VISIBLE_SPOT_LIGHT(ctx.spotLightVisibleIndexBufferAddr, finalIndex) = collider.entityIndex;
+    GET_SPOT_VISIBLE_LIGHT(ctx.spotLightVisibleIndexBufferAddr, finalIndex) = collider.entityIndex;
 
     uint shadowSparseIdx = GET_SPARSE_INDEX(ctx.spotLightShadowSparseMapBufferAddr, collider.entityIndex);
     if (shadowSparseIdx != INVALID_INDEX) 
@@ -77,11 +77,11 @@ void main() {
         uint shadowBaseOffset = 0;
         
         if (subgroupElect()) {
-            shadowBaseOffset = atomicAdd(GET_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleCountBufferAddr), shadowSubgroupWriteCount);
+            shadowBaseOffset = atomicAdd(GET_SPOT_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleCountBufferAddr), shadowSubgroupWriteCount);
         }
         
         shadowBaseOffset = subgroupBroadcastFirst(shadowBaseOffset);
         uint finalShadowIndex = shadowBaseOffset + shadowLocalOffset;
-        GET_VISIBLE_SHADOW_SPOT_LIGHT(ctx.spotLightVisibleShadowIndexBufferAddr, finalShadowIndex) = collider.entityIndex;
+        GET_SPOT_VISIBLE_SHADOW_LIGHT(ctx.spotLightVisibleShadowIndexBufferAddr, finalShadowIndex) = collider.entityIndex;
     }
 }
