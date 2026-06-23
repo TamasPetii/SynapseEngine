@@ -66,4 +66,23 @@ void main() {
 
     uint finalIndex = baseOffset + localOffset;
     GET_POINT_VISIBLE_LIGHT(ctx.pointLightVisibleIndexBufferAddr, finalIndex) = collider.entityIndex;
+
+    // 3. Shadow Culling Logic
+    uint shadowSparseIdx = GET_SPARSE_INDEX(ctx.pointLightShadowSparseMapBufferAddr, collider.entityIndex);
+    if (shadowSparseIdx != INVALID_INDEX) 
+    {
+        uint needsShadowWrite = 1;
+        uint shadowSubgroupWriteCount = subgroupAdd(needsShadowWrite);
+        uint shadowLocalOffset = subgroupExclusiveAdd(needsShadowWrite);
+        uint shadowBaseOffset = 0;
+
+        if (subgroupElect()) {
+            shadowBaseOffset = atomicAdd(GET_POINT_VISIBLE_COUNT_DATA(ctx.pointLightShadowVisibleCountBufferAddr), shadowSubgroupWriteCount);
+        }
+        
+        shadowBaseOffset = subgroupBroadcastFirst(shadowBaseOffset);
+        
+        uint finalShadowIndex = shadowBaseOffset + shadowLocalOffset;
+        GET_POINT_VISIBLE_SHADOW_LIGHT(ctx.pointLightVisibleShadowIndexBufferAddr, finalShadowIndex) = collider.entityIndex;
+    }
 }

@@ -1,0 +1,190 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_KHR_shader_subgroup_basic : require
+#extension GL_KHR_shader_subgroup_arithmetic : require
+#extension GL_KHR_shader_subgroup_ballot : require
+
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Camera.glsl"
+#include "../../../Includes/Common/Transform.glsl"
+#include "../../../Includes/Common/Model.glsl"
+#include "../../../Includes/Common/Mesh.glsl"
+#include "../../../Includes/Common/Material.glsl"
+#include "../../../Includes/Common/Culling.glsl"
+#include "../../../Includes/Common/PointLight.glsl"
+#include "../../../Includes/Utils/CullingMath.glsl"
+#include "../../../Includes/Utils/Occlusion.glsl"
+#include "../../../Includes/Common/StaticChunk.glsl"
+#include "../../../Includes/Common/Animation.glsl"
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../../Includes/PushConstants/PointLightShadowCullingPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    PointLightShadowCullingPC pc;
+};
+
+layout(set = 2, binding = 0) uniform sampler2D shadowDepthPyramid;
+
+void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    // 1 WorkGroup processes 1 Visible Chunk from the Chunk Pass
+    uint visibilitySlot = gl_WorkGroupID.x;
+    if (visibilitySlot >= GET_DISPATCH_CMD(ctx.pointLightShadowChunkCountBufferAddr).groupCountX) return;
+
+    // 1. Unpack Chunk Payload (Now using uvec2)
+    uvec2 rawChunkPayload = GET_VISIBLE_CHUNK_UVEC2(ctx.pointLightShadowChunkVisibleIndexBufferAddr, visibilitySlot);
+    bool chunkFullyInside = (rawChunkPayload.x >> 31) != 0;
+    uint pureChunkId = rawChunkPayload.x & 0x7FFFFFFFu;
+    uint lightIdx = rawChunkPayload.y;
+
+    StaticChunk chunk = GET_STATIC_CHUNK(ctx.staticChunkDataBufferAddr, pureChunkId);
+
+    // 2. Resolve Main Camera (For LOD mapping)
+    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
+
+    // 3. Resolve Light Data
+    uint lightEntity = GET_POINT_VISIBLE_SHADOW_LIGHT(ctx.pointLightVisibleShadowIndexBufferAddr, lightIdx);
+    uint lightDenseIndex = GET_SPARSE_INDEX(ctx.pointLightSparseMapBufferAddr, lightEntity);
+    PointLightColliderGPU lightCollider = GET_POINT_LIGHT_COLLIDER(ctx.pointLightColliderBufferAddr, lightDenseIndex);
+
+    vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);
+    float cameraNear = GET_CAMERA_NEAR(camera);
+
+    // 4. Collaborative processing of all entities within the chunk
+    for (uint i = gl_LocalInvocationID.x; i < chunk.entityCount; i += gl_WorkGroupSize.x) 
+    {     
+        uint denseIndex = chunk.firstEntityIndex + i;
+        TransformModelLink link = GET_TRANSFORM_MODEL_LINK(ctx.transformModelLinkBufferAddr, denseIndex);
+        
+        if (link.modelDenseIndex == INVALID_INDEX) continue;
+        uint entityId = link.entityIndex;
+
+        TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, denseIndex);
+        ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, link.modelDenseIndex);
+        
+        ModelAllocationInfo mAlloc = GET_MODEL_ALLOC(ctx.globalModelAllocationBufferAddr, modelComp.modelIndex);
+        GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, modelComp.modelIndex);
+
+        GpuMeshCollider localGlobalCollider = addrs.globalCollider;
+
+        // Evaluate Animation frame collider if applicable
+        if(ctx.animationSparseMapBufferAddr != 0) {
+            uint animSparseIndex = GET_SPARSE_INDEX(ctx.animationSparseMapBufferAddr, entityId);
+            if (animSparseIndex != INVALID_INDEX) {
+                AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animSparseIndex);
+                if (animComp.animationIndex != INVALID_INDEX) {
+                    GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
+                    localGlobalCollider = GET_MESH_COLLIDER(animAddrs.frameGlobalColliders, animComp.frameIndex);
+                }
+            }
+        }
+
+        // Transform global collider to world space
+        GpuMeshCollider worldCollider = TransformCollider(localGlobalCollider, transform.transform);
+
+        // 5. Frustum Culling Test (Skip if Chunk was fully inside)
+        uint visibility = chunkFullyInside ? INTERSECTION_INSIDE : INTERSECTION_INTERSECT;
+        if (!chunkFullyInside && ctx.enableModelFrustumCulling == 1) { 
+            visibility = TestSphere(worldCollider, lightCollider.center, lightCollider.radius);
+            if (visibility == INTERSECTION_OUTSIDE) continue;
+        }
+
+        // 6. Calculate LOD based on Main Camera screen size
+        float mainCamScreenSize = CalculateSphereScreenSizePerspective(worldCollider.center, worldCollider.radius, camera.view, camera.proj, cameraNear, screenRes);
+        if (mainCamScreenSize < 1.0) continue;
+
+        if (ctx.enableModelOcclusionCulling == 1) {
+            float shadowScreenSizePixels = 0.0;
+            //Todo
+        }
+
+        // 7. Encode Payload for sort/draw phase
+        uint entityData = (entityId & 0x7FFFFFFF);
+        entityData = SET_BIT_TO(entityData, 31, visibility == INTERSECTION_INSIDE);
+
+        // 8. Fast-path: Process simple/small models directly to Radix Sort
+        const uint MAX_MESH_COUNT = 16u;
+        const uint MAX_VERTEX_COUNT = 25000u;
+        uint safeMeshCount = mAlloc.meshAllocationCount / 4;
+        uint maxInstances = ctx.modelCount * ctx.pointLightShadowMultiplier;
+
+        if (safeMeshCount <= MAX_MESH_COUNT && addrs.vertexCount < MAX_VERTEX_COUNT) 
+        {
+            // Global Face Visibility Early-Out for the whole model
+            uint faceMask = GetPointLightFaceVisibilityMask(worldCollider.center, worldCollider.radius, lightCollider.center);
+            if (faceMask == 0u) continue;
+
+            uint rawLod = (mainCamScreenSize > 512.0) ? 0 : (mainCamScreenSize > 256.0) ? 1 : (mainCamScreenSize > 128.0) ? 2 : 3;
+            uint lod = min(rawLod + ctx.pointLightShadowLodBias, 3u);
+
+            for(uint m = 0; m < safeMeshCount; ++m) {
+                uint matIdx = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, modelComp.materialOffset + m);
+                Material mat = GET_MATERIAL(ctx.materialBufferAddr, matIdx);
+
+                uint matType = 0;
+                if (IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat))       matType = 3;
+                else if (IS_TRANSPARENT(mat) && !IS_DOUBLE_SIDED(mat)) matType = 2;
+                else if (!IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat)) matType = 1;
+
+                if (matType > 1) continue;
+
+                MeshAllocationInfo meshAlloc = GET_MESH_ALLOC(ctx.globalMeshAllocationBufferAddr, mAlloc.meshAllocationOffset + (m * 4) + lod);
+
+                if (meshAlloc.activeTypes[matType] == 1) {
+                    uint indirectIdx = meshAlloc.indirectIndices[matType];
+                    uint isMeshlet = (meshAlloc.isMeshletPipeline == PIPELINE_MESHLET) ? 1u : 0u;
+
+                    uint drawCallKey = (isMeshlet << 31) | (indirectIdx & 0x7FFFFFFF);
+
+                    for (uint f = 0; f < 6; ++f) {
+                        if ((faceMask & (1u << f)) != 0u) {
+                            uint lightDataPacked = (f << 29) | (lightIdx & 0x1FFFFFFF);
+                            uvec2 gpuPayload = uvec2(entityData, lightDataPacked);
+
+                            uint sortSlot = atomicAdd(GET_POINT_VISIBLE_COUNT_DATA(ctx.pointLightShadowVisibleMeshCountBufferAddr), 1);
+                            
+                            if (sortSlot < maxInstances) {
+                                GET_POINT_DRAW_CALL_KEY_DATA(ctx.pointLightShadowDrawCallKeyBufferAddr, sortSlot) = drawCallKey;
+                                GET_POINT_SORTED_VALUE(ctx.pointLightShadowSortValuesBufferAddr, sortSlot) = sortSlot;
+                                GET_POINT_SHADOW_INSTANCE_UNSORTED(ctx.pointLightShadowUnsortedInstanceBufferAddr, sortSlot) = gpuPayload;
+                            }
+                        }
+                    }
+                }
+            }
+            continue;
+        }
+
+        // 9. Slow-path: Defer large/complex models to the Mesh Culling pass
+        uint needsWrite = 1;
+        uint subgroupWriteCount = subgroupAdd(needsWrite);
+        uint localOffset = subgroupExclusiveAdd(needsWrite);
+        uint baseOffset = 0;
+        
+        if (subgroupElect()) {
+            baseOffset = atomicAdd(GET_DISPATCH_CMD(ctx.pointLightShadowModelCountBufferAddr).groupCountX, subgroupWriteCount);
+        }
+
+        baseOffset = subgroupBroadcastFirst(baseOffset);
+        
+        if(needsWrite == 1) {
+            uint finalIndex = baseOffset + localOffset;
+            
+            if (finalIndex < maxInstances) {
+                uint modelPayload = (modelComp.modelIndex & 0xFFFFFu);
+                modelPayload |= ((lightIdx & 0xFFFu) << 20);
+
+                VisibleModelData outData;
+                outData.entityId = entityData;
+                outData.modelIndex = modelPayload;
+
+                GET_VISIBLE_MODEL(ctx.pointLightShadowModelVisibleIndexBufferAddr, finalIndex) = outData;
+            }
+        }
+    }
+}

@@ -2,6 +2,7 @@
 #extension GL_GOOGLE_include_directive : require
 #extension GL_EXT_buffer_reference2 : require
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_KHR_shader_subgroup_ballot : require
 
 #include "../../Includes/Core.glsl"
 #include "../../Includes/Common/FrameGlobalContext.glsl"
@@ -33,20 +34,30 @@ void main() {
     uint cellY = uint(pos.y) / POINT_SHADOW_MIN_BLOCK_SIZE;
     uint flatIndex = cellY * POINT_SHADOW_GRID_SIZE + cellX;
 
-    uint entityId = GET_POINT_GRID_LOOK_UP_DATA(ctx.pointLightShadowGridLookupBufferAddr, flatIndex);
+    float nearPlane = 0.0;
+    float farPlane = 0.0;
+    uint isValid = 0;
 
-    if (entityId != 0xFFFFFFFF) {
-        uint shadowDenseIdx = GET_SPARSE_INDEX(ctx.pointLightShadowSparseMapBufferAddr, entityId);
-
-        if (shadowDenseIdx != INVALID_INDEX) {
-            PointLightShadowComponent shadowComp = GET_POINT_LIGHT_SHADOW(ctx.pointLightShadowDataBufferAddr, shadowDenseIdx);
-            
-            float nearPlane = shadowComp.planes.x; 
-            float farPlane = shadowComp.planes.y;
-
-            finalDepth = ConvertDepthToLinearNormalized(rawDepth, nearPlane, farPlane);
+    if (subgroupElect()) {
+        uint entityId = GET_POINT_GRID_LOOK_UP_DATA(ctx.pointLightShadowGridLookupBufferAddr, flatIndex);
+        if (entityId != 0xFFFFFFFF) {
+            uint shadowDenseIdx = GET_SPARSE_INDEX(ctx.pointLightShadowSparseMapBufferAddr, entityId);
+            if (shadowDenseIdx != INVALID_INDEX) {
+                PointLightShadowComponent shadowComp = GET_POINT_LIGHT_SHADOW(ctx.pointLightShadowDataBufferAddr, shadowDenseIdx);
+                nearPlane = shadowComp.planes.x; 
+                farPlane = shadowComp.planes.y;
+                isValid = 1;
+            }
         }
     }
 
-    imageStore(outImage, pos, vec4(finalDepth, rawDepth, 0.0, 0.0));
+    isValid = subgroupBroadcastFirst(isValid);
+    
+    if (isValid == 1) {
+        nearPlane = subgroupBroadcastFirst(nearPlane);
+        farPlane  = subgroupBroadcastFirst(farPlane);
+        finalDepth = ConvertDepthToLinearNormalized(rawDepth, nearPlane, farPlane);
+    }
+
+    imageStore(outImage, pos, vec4(finalDepth, finalDepth, 0.0, 0.0));
 }

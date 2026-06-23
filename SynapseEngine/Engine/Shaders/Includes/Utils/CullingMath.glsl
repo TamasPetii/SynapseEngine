@@ -63,14 +63,82 @@ bool TestSphereSphere(vec3 centerA, float radiusA, vec3 centerB, float radiusB) 
     return dot(diff, diff) <= ((radiusA + radiusB) * (radiusA + radiusB));
 }
 
+uint TestSphereSphereState(vec3 centerA, float radiusA, vec3 centerB, float radiusB) {
+    vec3 diff = centerA - centerB;
+    float distSq = dot(diff, diff);
+    float radSum = radiusA + radiusB;
+    
+    if (distSq > radSum * radSum) return INTERSECTION_OUTSIDE;
+
+    float radDiff = radiusA - radiusB;
+    if (radDiff >= 0.0 && distSq <= radDiff * radDiff) {
+        return INTERSECTION_INSIDE;
+    }
+    return INTERSECTION_INTERSECT;
+}
+
 bool TestAABBAABB(vec3 minA, vec3 maxA, vec3 minB, vec3 maxB) {
     return all(lessThanEqual(minA, maxB)) && all(greaterThanEqual(maxA, minB));
+}
+
+float GetMinAbs(float minVal, float maxVal) {
+    if (minVal <= 0.0 && maxVal >= 0.0) return 0.0;
+    return min(abs(minVal), abs(maxVal));
+}
+
+uint GetPointLightFaceVisibilityMask(vec3 modelCenter, float modelRadius, vec3 lightCenter) {
+    vec3 relMin = (modelCenter - vec3(modelRadius)) - lightCenter;
+    vec3 relMax = (modelCenter + vec3(modelRadius)) - lightCenter;
+
+    float minAbsX = GetMinAbs(relMin.x, relMax.x);
+    float minAbsY = GetMinAbs(relMin.y, relMax.y);
+    float minAbsZ = GetMinAbs(relMin.z, relMax.z);
+
+    uint faceMask = 0;
+    if (relMax.x > 0.0 && relMax.x >= minAbsY && relMax.x >= minAbsZ) faceMask |= (1u << 0); // +X
+    if (relMin.x < 0.0 && -relMin.x >= minAbsY && -relMin.x >= minAbsZ) faceMask |= (1u << 1); // -X
+    if (relMax.y > 0.0 && relMax.y >= minAbsX && relMax.y >= minAbsZ) faceMask |= (1u << 2); // +Y
+    if (relMin.y < 0.0 && -relMin.y >= minAbsX && -relMin.y >= minAbsZ) faceMask |= (1u << 3); // -Y
+    if (relMax.z > 0.0 && relMax.z >= minAbsX && relMax.z >= minAbsY) faceMask |= (1u << 4); // +Z
+    if (relMin.z < 0.0 && -relMin.z >= minAbsX && -relMin.z >= minAbsY) faceMask |= (1u << 5); // -Z
+
+    return faceMask;
 }
 
 bool TestSphereAABB(vec3 sphereCenter, float sphereRadius, vec3 aabbMin, vec3 aabbMax) {
     vec3 closestPoint = clamp(sphereCenter, aabbMin, aabbMax);
     vec3 diff = closestPoint - sphereCenter;
     return dot(diff, diff) <= (sphereRadius * sphereRadius);
+}
+
+uint TestSphereAABBState(vec3 sphereCenter, float sphereRadius, vec3 aabbMin, vec3 aabbMax) {
+    vec3 closestPoint = clamp(sphereCenter, aabbMin, aabbMax);
+    vec3 diffClosest = sphereCenter - closestPoint;
+    if (dot(diffClosest, diffClosest) > sphereRadius * sphereRadius) {
+        return INTERSECTION_OUTSIDE;
+    }
+
+    vec3 aabbCenter = (aabbMin + aabbMax) * 0.5;
+    vec3 furthestPoint = vec3(
+        (sphereCenter.x < aabbCenter.x) ? aabbMax.x : aabbMin.x,
+        (sphereCenter.y < aabbCenter.y) ? aabbMax.y : aabbMin.y,
+        (sphereCenter.z < aabbCenter.z) ? aabbMax.z : aabbMin.z
+    );
+
+    vec3 diffFurthest = sphereCenter - furthestPoint;
+    if (dot(diffFurthest, diffFurthest) <= sphereRadius * sphereRadius) {
+        return INTERSECTION_INSIDE;
+    }
+
+    return INTERSECTION_INTERSECT;
+}
+
+uint TestSphere(GpuMeshCollider collider, vec3 sphereCenter, float sphereRadius) {
+    uint sphereResult = TestSphereSphereState(sphereCenter, sphereRadius, collider.center, collider.radius);
+    
+    if (sphereResult != INTERSECTION_INTERSECT) return sphereResult;
+    
+    return TestSphereAABBState(sphereCenter, sphereRadius, collider.aabbMin, collider.aabbMax);
 }
 
 uint TestSphereFrustum(GpuMeshCollider collider, vec4 planes[6]) {

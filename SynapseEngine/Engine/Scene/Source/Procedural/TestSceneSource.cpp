@@ -514,7 +514,7 @@ namespace Syn
             auto& light = registry.GetComponent<PointLightComponent>(e);
             light.position = transform.translation;
             light.color = glm::vec3(static_cast<float>(rand()) / RAND_MAX, static_cast<float>(rand()) / RAND_MAX, static_cast<float>(rand()) / RAND_MAX);
-            light.radius = 2.0f + (rand() % 10);
+            light.radius = 5.0f + (rand() % 50);
             light.strength = 5.0f + (rand() % 25);
             light.useShadow = (i < pointShadowCount);
 
