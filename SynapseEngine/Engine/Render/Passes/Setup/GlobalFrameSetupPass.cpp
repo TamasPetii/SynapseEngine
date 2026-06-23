@@ -204,6 +204,13 @@ namespace Syn {
         ctx.spotLightShadowGridSize = SPOT_SHADOW_GRID_SIZE;
         ctx.spotLightShadowHizMipLevels = SPOT_SHADOW_HIZ_MIP_LEVELS;
 
+        ctx.pointLightShadowLodBias = POINT_SHADOW_LOD_BIAS;
+        ctx.pointLightShadowMultiplier = POINT_SHADOW_MULTIPLIER;
+        ctx.pointLightShadowAtlasSize = POINT_SHADOW_ATLAS_SIZE;
+        ctx.pointLightShadowMinBlockSize = POINT_SHADOW_MIN_BLOCK_SIZE;
+        ctx.pointLightShadowGridSize = POINT_SHADOW_GRID_SIZE;
+        ctx.pointLightShadowHizMipLevels = POINT_SHADOW_HIZ_MIP_LEVELS;
+
         ctx.enableMeshletConeCulling = settings->culling.enableMeshletConeCulling ? 1 : 0;
 
         ctx.enableChunkFrustumCulling = settings->culling.enableFrustumCulling && settings->culling.enableChunkFrustumCulling ? 1 : 0;

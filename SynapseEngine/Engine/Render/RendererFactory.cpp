@@ -13,8 +13,6 @@
 #include "Engine/Render/Passes/PostProcess/Bloom/BloomCompositePass.h"
 #include "Engine/Render/Passes/PostProcess/Outline/SelectionOutlinePass.h"
 
-#include "Engine/Render/Passes/Culling/PointLight/PointLightCullingPass.h"
-
 #include "Engine/Render/Passes/Culling/Geometry/GeometryModelCullingPass.h"
 #include "Engine/Render/Passes/Culling/Geometry/GeometryStaticModelCullingPass.h"
 #include "Engine/Render/Passes/Culling/Geometry/GeometryStaticChunkCullingPass.h"
@@ -44,6 +42,20 @@
 #include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowMortonModelCullingPass.h"
 #include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowStaticChunkCullingPass.h"
 #include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowStaticModelCullingPass.h"
+
+#include "Engine/Render/Passes/Culling/PointLight/PointLightCullingPass.h"
+#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowBufferResetPass.h"
+#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowCullingCommandResetPass.h"
+#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowCullingMemoryBarrierPass.h"
+#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowFinalizePass.h"
+#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowFinalizeSetupPass.h"
+#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowMeshCullingPass.h"
+#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowModelCullingPass.h"
+#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowRadixSortPass.h"
+#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowMortonChunkCullingPass.h"
+#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowMortonModelCullingPass.h"
+#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowStaticChunkCullingPass.h"
+#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowStaticModelCullingPass.h"
 
 #include "Engine/Render/Passes/Morton/ChunkBuilderPass.h"
 #include "Engine/Render/Passes/Morton/MortonGeneratorPass.h"
@@ -202,8 +214,20 @@ namespace Syn
         pipeline->AddPass(std::make_unique<SpotLightShadowFinalizeSetupPass>());
         pipeline->AddPass(std::make_unique<SpotLightShadowFinalizePass>());
 
-        //Todo: Gpu Driven Point Light Culling
+        //Gpu Driven Point Light Culling
         pipeline->AddPass(std::make_unique<PointLightCullingPass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowBufferResetPass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowCullingCommandResetPass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowMortonChunkCullingPass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowMortonModelCullingPass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowStaticChunkCullingPass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowStaticModelCullingPass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowModelCullingPass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowMeshCullingPass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowCullingMemoryBarrierPass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowRadixSortPass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowFinalizeSetupPass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowFinalizePass>());
 
         //DirectionLight Shadow Passes
         pipeline->AddPass(std::make_unique<DirectionLightShadowInitPass>());

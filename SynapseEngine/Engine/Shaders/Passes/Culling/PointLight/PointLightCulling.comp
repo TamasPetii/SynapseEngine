@@ -7,17 +7,17 @@
 #extension GL_KHR_shader_subgroup_arithmetic : require
 #extension GL_KHR_shader_subgroup_ballot : require
 
-#include "../../Includes/Core.glsl"
-#include "../../Includes/Common/FrameGlobalContext.glsl"
-#include "../../Includes/Common/Camera.glsl"
-#include "../../Includes/Common/PointLight.glsl"
-#include "../../Includes/Utils/CullingMath.glsl"
-#include "../../Includes/Common/IndirectCommand.glsl"
-#include "../../Includes/Utils/Occlusion.glsl"
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Camera.glsl"
+#include "../../../Includes/Common/PointLight.glsl"
+#include "../../../Includes/Utils/CullingMath.glsl"
+#include "../../../Includes/Common/IndirectCommand.glsl"
+#include "../../../Includes/Utils/Occlusion.glsl"
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
-#include "../../Includes/PushConstants/PointLightCullingPC.glsl"
+#include "../../../Includes/PushConstants/PointLightCullingPC.glsl"
 
 layout(push_constant) uniform PushConstants {
     PointLightCullingPC pc;

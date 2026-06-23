@@ -22,9 +22,6 @@ namespace Syn
         static constexpr const char* MortonGenerator = "Engine/Shaders/Passes/Morton/MortonGenerator.comp";
         static constexpr const char* ChunkBuilder = "Engine/Shaders/Passes/Morton/ChunkBuilder.comp";
 
-        static constexpr const char* PointLightCulling = "Engine/Shaders/Passes/Culling/PointLightCulling.comp";
-        static constexpr const char* SpotLightCulling = "Engine/Shaders/Passes/Culling/SpotLight/SpotLightCulling.comp";
-
         static constexpr const char* HizLinearizeDepth = "Engine/Shaders/Passes/Hiz/HizLinearizeDepth.comp";
         static constexpr const char* HizDownsample = "Engine/Shaders/Passes/Hiz/HizDownsample.comp";
         static constexpr const char* HizCopyComp = "Engine/Shaders/Passes/Hiz/HizCopy.comp";
@@ -110,7 +107,8 @@ namespace Syn
         static constexpr const char* DirectionLightShadowWorkGraphMortonChunkCullingComp = "Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphMortonChunkCulling.comp";
         static constexpr const char* DirectionLightShadowWorkGraphMortonModelCullingComp = "Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphMortonModelCulling.comp";
         static constexpr const char* DirectionLightShadowWorkGraphMeshCullingComp = "Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphMeshCulling.comp";
-    
+        
+        static constexpr const char* SpotLightCulling = "Engine/Shaders/Passes/Culling/SpotLight/SpotLightCulling.comp";
         static constexpr const char* SpotLightShadowFrag = "Engine/Shaders/Passes/Shadow/SpotLight/SpotLightShadow.frag";
         static constexpr const char* SpotLightShadowTraditionalVert = "Engine/Shaders/Passes/Shadow/SpotLight/SpotLightShadowTraditional.vert";
         static constexpr const char* SpotLightShadowMeshletTask = "Engine/Shaders/Passes/Shadow/SpotLight/SpotLightShadowMeshlet.task";
@@ -126,9 +124,20 @@ namespace Syn
         static constexpr const char* SpotLightShadowStaticChunkCullingComp = "Engine/Shaders/Passes/Culling/SpotLight/SpotLightShadowStaticChunkCulling.comp";
         static constexpr const char* SpotLightShadowStaticModelCullingComp = "Engine/Shaders/Passes/Culling/SpotLight/SpotLightShadowStaticModelCulling.comp";
         
+        static constexpr const char* PointLightCulling = "Engine/Shaders/Passes/Culling/PointLight/PointLightCulling.comp";
         static constexpr const char* PointLightShadowFrag = "Engine/Shaders/Passes/Shadow/PointLight/PointLightShadow.frag";
         static constexpr const char* PointLightShadowTraditionalVert = "Engine/Shaders/Passes/Shadow/PointLight/PointLightShadowTraditional.vert";
         static constexpr const char* PointLightShadowMeshletTask = "Engine/Shaders/Passes/Shadow/PointLight/PointLightShadowMeshlet.task";
         static constexpr const char* PointLightShadowMeshletMesh = "Engine/Shaders/Passes/Shadow/PointLight/PointLightShadowMeshlet.mesh";
+
+        static constexpr const char* PointLightShadowCullingCommandResetComp = "Engine/Shaders/Passes/Culling/PointLight/PointLightShadowCullingCommandReset.comp";
+        static constexpr const char* PointLightShadowModelCullingComp = "Engine/Shaders/Passes/Culling/PointLight/PointLightShadowModelCulling.comp";
+        static constexpr const char* PointLightShadowMeshCullingComp = "Engine/Shaders/Passes/Culling/PointLight/PointLightShadowMeshCulling.comp";
+        static constexpr const char* PointLightShadowFinalizeSetupComp = "Engine/Shaders/Passes/Culling/PointLight/PointLightShadowFinalizeSetup.comp";
+        static constexpr const char* PointLightShadowFinalizeComp = "Engine/Shaders/Passes/Culling/PointLight/PointLightShadowFinalize.comp";
+        static constexpr const char* PointLightShadowMortonChunkCullingComp = "Engine/Shaders/Passes/Culling/PointLight/PointLightShadowMortonChunkCulling.comp";
+        static constexpr const char* PointLightShadowMortonModelCullingComp = "Engine/Shaders/Passes/Culling/PointLight/PointLightShadowMortonModelCulling.comp";
+        static constexpr const char* PointLightShadowStaticChunkCullingComp = "Engine/Shaders/Passes/Culling/PointLight/PointLightShadowStaticChunkCulling.comp";
+        static constexpr const char* PointLightShadowStaticModelCullingComp = "Engine/Shaders/Passes/Culling/PointLight/PointLightShadowStaticModelCulling.comp";
 }; 
 }
