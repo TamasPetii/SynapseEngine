@@ -9,7 +9,7 @@
 	url = https://github.com/aiekick/ImGuiFileDialog
 [submodule "External/imgui-node-editor"]
     path = External/imgui-node-editor
-    url = https://https://github.com/TamasPetii/imgui-node-editor
+    url = https://github.com/TamasPetii/imgui-node-editor
 [submodule "External/IconFontCppHeaders"]
 	path = External/IconFontCppHeaders
 	url = https://github.com/juliettef/IconFontCppHeaders.git
