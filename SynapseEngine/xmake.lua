@@ -58,7 +58,8 @@ add_defines(
     "JPH_USE_LZCNT",
     "JPH_USE_TZCNT",
     "JPH_USE_F16C",
-    "JPH_USE_FMADD"
+    "JPH_USE_FMADD",
+    "IMGUI_DISABLE_MATH_OPERATORS"
 )
 
 if is_plat("windows") then

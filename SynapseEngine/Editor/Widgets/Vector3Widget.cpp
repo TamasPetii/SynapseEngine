@@ -12,7 +12,7 @@ namespace Syn::UI {
 
         ImGui::PushID(id.c_str());
 
-        float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+        float lineHeight = ImGui::GetFontSize() + GImGui->Style.FramePadding.y * 2.0f;
         ImVec2 buttonSize = { lineHeight + 3.0f, lineHeight };
 
         float availWidth = ImGui::GetContentRegionAvail().x;

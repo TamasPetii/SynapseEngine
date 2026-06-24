@@ -89,9 +89,11 @@ void Synapse::OnInit() {
     );
 
     ImGuiIO& io = ImGui::GetIO();
-    io.Fonts->AddFontDefault();
+    ImFontConfig defaultConfig;
+    defaultConfig.SizePixels = 13.0f;
+    io.Fonts->AddFontDefault(&defaultConfig);
+
     _iconManager->InitializeFontAwesome(io, Syn::PathUtils::GetAbsolutePathString(FONT_PATH), 16.0f);
-    _guiManager->CreateFontTexture();
     _iconManager->LoadEngineIcons(Syn::PathUtils::GetAbsolutePathString(ICON_PATH));
 
     std::string absoluteAssetsPath = std::filesystem::absolute(ASSET_PATH).generic_string();

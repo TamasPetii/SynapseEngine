@@ -34,7 +34,6 @@ namespace Syn {
 
         GuiTextureManager* GetTextureManager() const { return _textureManager.get(); }
         IFileDialogApi* GetFileDialog() const { return _fileDialog.get(); }
-        void CreateFontTexture();
 
         void SetWorkspace(EditorWorkspace workspace) { _currentWorkspace = workspace; }
         EditorWorkspace GetWorkspace() const { return _currentWorkspace; }

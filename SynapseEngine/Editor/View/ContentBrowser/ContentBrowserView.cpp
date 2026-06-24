@@ -47,7 +47,7 @@ namespace Syn {
                 float treeHeight = mainContentBottomY - ImGui::GetCursorScreenPos().y - 12.0f;
                 if (treeHeight < 50.0f) treeHeight = 50.0f;
 
-                ImGui::BeginChild("FolderTreeScroll", ImVec2(0, treeHeight), ImGuiChildFlags_Borders, ImGuiWindowFlags_AlwaysUseWindowPadding);
+                ImGui::BeginChild("FolderTreeScroll", ImVec2(0, treeHeight), ImGuiChildFlags_Borders | ImGuiChildFlags_AlwaysUseWindowPadding, 0);
                 RenderFolderTree(vm, state);
                 ImGui::EndChild();
 
@@ -86,7 +86,7 @@ namespace Syn {
                 float gridHeight = mainContentBottomY - ImGui::GetCursorScreenPos().y - 12.0f;
                 if (gridHeight < 50.0f) gridHeight = 50.0f;
 
-                ImGui::BeginChild("ContentGridScroll", ImVec2(0, gridHeight), ImGuiChildFlags_Borders, ImGuiWindowFlags_AlwaysUseWindowPadding);
+                ImGui::BeginChild("ContentGridScroll", ImVec2(0, gridHeight), ImGuiChildFlags_Borders | ImGuiChildFlags_AlwaysUseWindowPadding, 0);
                 RenderContentArea(vm, state);
                 ImGui::EndChild();
 
@@ -272,7 +272,7 @@ namespace Syn {
         }
 
         ImVec2 itemMin = ImGui::GetItemRectMin();
-        ImGui::SetItemAllowOverlap();
+        ImGui::SetNextItemAllowOverlap();
 
         ImTextureID iconID = GetIconForEntry(entry);
         if (iconID) {
