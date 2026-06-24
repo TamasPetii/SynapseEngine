@@ -82,6 +82,22 @@ namespace Syn {
         VkBuffer valuesHandle = compManager->GetComponentBuffer(BufferNames::MortonValuesData, fIdx).buffer->Handle();
         VkBuffer tempHandle = tempBuffer.GetHandle(context.frameIndex);
 
+        Vk::BufferBarrierInfo keysPreBarrier{};
+        keysPreBarrier.buffer = keysHandle;
+        keysPreBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        keysPreBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        keysPreBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        keysPreBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, keysPreBarrier);
+
+        Vk::BufferBarrierInfo valuesPreBarrier{};
+        valuesPreBarrier.buffer = valuesHandle;
+        valuesPreBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        valuesPreBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        valuesPreBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        valuesPreBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, valuesPreBarrier);
+
         vrdxCmdSortKeyValue(
             context.cmd,
             _radixSorter,

@@ -48,7 +48,30 @@ namespace Syn {
         VkBuffer valuesHandle = drawData->PointLightShadow.sortValuesBuffer.GetHandle(fIdx);
         VkBuffer countBuffer = drawData->PointLightShadow.visibleMeshCountDispatchBuffer.GetHandle(fIdx);
 
-        // Dispatch the indirect radix sort command
+        Vk::BufferBarrierInfo countBarrier{};
+        countBarrier.buffer = countBuffer;
+        countBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        countBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        countBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
+        countBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, countBarrier);
+
+        Vk::BufferBarrierInfo keysPreBarrier{};
+        keysPreBarrier.buffer = keysHandle;
+        keysPreBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        keysPreBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        keysPreBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        keysPreBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, keysPreBarrier);
+
+        Vk::BufferBarrierInfo valuesPreBarrier{};
+        valuesPreBarrier.buffer = valuesHandle;
+        valuesPreBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        valuesPreBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        valuesPreBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        valuesPreBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, valuesPreBarrier);
+
         vrdxCmdSortKeyValueIndirect(
             context.cmd,
             _radixSorter,
