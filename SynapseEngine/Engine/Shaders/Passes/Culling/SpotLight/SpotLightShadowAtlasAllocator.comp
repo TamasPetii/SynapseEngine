@@ -1,0 +1,98 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/SpotLight.glsl"
+
+layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../../Includes/PushConstants/SpotLightShadowCullingPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    SpotLightShadowCullingPC pc;
+};
+
+shared uint64_t s_grid[64];
+
+void main() 
+{
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+    uint localId = gl_LocalInvocationID.x;
+
+    s_grid[localId] = 0ul;
+    
+    for (uint i = 0; i < 64; ++i) {
+        uint flatIndex = localId * 64 + i;
+        GET_SPOT_GRID_LOOK_UP_DATA(ctx.spotLightShadowGridLookupBufferAddr, flatIndex) = 0xFFFFFFFFu;
+    }
+
+    barrier();
+
+    uint lightCount = GET_SPOT_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleCountBufferAddr);
+    if (lightCount == 0) return;
+
+    if (localId == 0) 
+    {
+        for (uint i = 0; i < lightCount; ++i) 
+        {
+            uint key = GET_SPOT_ATLAS_SORT_KEY(ctx.spotLightShadowAtlasSortKeyBufferAddr, i);
+            uint entityIdx = GET_SPOT_ATLAS_SORT_VALUE(ctx.spotLightShadowAtlasSortValueBufferAddr, i);
+            
+            uint blocksReq = 0xFFu - (key >> 24);
+            uint shadowDenseIdx = key & 0xFFFFFFu;
+
+            bool isFree = false;
+            uint outX = 0, outY = 0;
+
+            for (uint y = 0; y <= 64 - blocksReq; y += blocksReq) 
+            {
+                for (uint x = 0; x <= 64 - blocksReq; x += blocksReq) 
+                {
+                    bool fits = true;
+                    
+                    uint64_t mask = (blocksReq == 64) ? ~0ul : ((1ul << blocksReq) - 1ul);
+                    uint64_t shiftedMask = mask << x;
+
+                    for (uint by = 0; by < blocksReq; ++by) {
+                        if ((s_grid[y + by] & shiftedMask) != 0ul) {
+                            fits = false;
+                            break;
+                        }
+                    }
+
+                    if (fits) {
+                        for (uint by = 0; by < blocksReq; ++by) {
+                            s_grid[y + by] |= shiftedMask;
+                        }
+                        isFree = true;
+                        outX = x;
+                        outY = y;
+                        break;
+                    }
+                }
+
+                if (isFree) 
+                    break;
+            }
+
+            if (isFree) 
+            {
+                GET_SPOT_LIGHT_SHADOW(ctx.spotLightShadowDataBufferAddr, shadowDenseIdx).atlasRect = vec4(float(outX) / 64.0, float(outY) / 64.0, float(blocksReq) / 64.0, float(blocksReq) / 64.0);
+                
+                for (uint by = 0; by < blocksReq; ++by) {
+                    for (uint bx = 0; bx < blocksReq; ++bx) {
+                        uint flatIndex = (outY + by) * 64 + (outX + bx);
+                        GET_SPOT_GRID_LOOK_UP_DATA(ctx.spotLightShadowGridLookupBufferAddr, flatIndex) = entityIdx;
+                    }
+                }
+            } 
+            else 
+            {
+                GET_SPOT_LIGHT_SHADOW(ctx.spotLightShadowDataBufferAddr, shadowDenseIdx).atlasRect = vec4(0.0);
+            }
+        }
+    }
+}

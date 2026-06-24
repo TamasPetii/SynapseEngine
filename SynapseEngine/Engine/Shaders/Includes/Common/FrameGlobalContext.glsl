@@ -80,6 +80,8 @@ struct FrameGlobalContext {
     uint64_t spotLightShadowSortValuesBufferAddr;
     uint64_t spotLightShadowVisibleMeshCountBufferAddr;
     uint64_t spotLightShadowFinalizeDispatchBufferAddr;
+    uint64_t spotLightShadowAtlasSortKeyBufferAddr;
+    uint64_t spotLightShadowAtlasSortValueBufferAddr;
 
     uint64_t pointLightIndirectCommandBufferAddr;
     uint64_t pointLightVisibleIndexBufferAddr;

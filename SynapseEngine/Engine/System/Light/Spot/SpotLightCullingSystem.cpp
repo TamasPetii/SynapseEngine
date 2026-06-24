@@ -120,10 +120,12 @@ namespace Syn
                 if (shadowCount > 0 && shadowBufferView.buffer) {
                     shadowBufferView.buffer->Write(drawData->SpotLightShadow.visibleLights.Data(), shadowCount * sizeof(uint32_t), 0);
                 }
+
+                drawData->SpotLightShadow.visibleCountDispatchBuffer.Write(frameIndex, &drawData->SpotLightShadow.visibleLightCount, sizeof(uint32_t), 0);
             }
 
             drawData->SpotLights.indirectBuffer.Write(frameIndex , &drawData->SpotLights.cmdTemplate, sizeof(VkDrawIndirectCommand), 0);
-            drawData->SpotLightShadow.visibleCountDispatchBuffer.Write(frameIndex, &drawData->SpotLightShadow.visibleLightCount, sizeof(uint32_t), 0);
+            
             });
     }
 }

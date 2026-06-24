@@ -109,5 +109,21 @@ namespace Syn {
         shadowCountBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_2_TRANSFER_BIT;
         shadowCountBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_TRANSFER_READ_BIT;
         Vk::BufferUtils::InsertBarrier(context.cmd, shadowCountBarrier);
+
+        Vk::BufferBarrierInfo sortKeyBarrier{};
+        sortKeyBarrier.buffer = compManager->GetComponentBuffer(BufferNames::SpotLightShadowAtlasSortKeyBuffer, fIdx).buffer->Handle();
+        sortKeyBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        sortKeyBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        sortKeyBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        sortKeyBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, sortKeyBarrier);
+
+        Vk::BufferBarrierInfo sortValueBarrier{};
+        sortValueBarrier.buffer = compManager->GetComponentBuffer(BufferNames::SpotLightShadowAtlasSortValueBuffer, fIdx).buffer->Handle();
+        sortValueBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        sortValueBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        sortValueBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        sortValueBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, sortValueBarrier);
     }
 }

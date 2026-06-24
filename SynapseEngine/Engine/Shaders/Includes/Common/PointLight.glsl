@@ -36,8 +36,8 @@ layout(buffer_reference, std430) readonly restrict buffer PointVisibleLightBuffe
 layout(buffer_reference, std430) readonly restrict buffer PointShadowInstanceBuffer { uvec2 data[]; };
 layout(buffer_reference, std430) readonly restrict buffer PointGridLookupBuffer { uint data[]; };
 layout(buffer_reference, std430) readonly restrict buffer PointVisibleCountBuffer { uint data; };
-layout(buffer_reference, std430) readonly buffer PointDrawCallKeyBuffer { uint data[]; };
-layout(buffer_reference, std430) readonly buffer PointSortValuesBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer PointDrawCallKeyBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer PointSortValuesBuffer { uint data[]; };
 
 #define POINT_SHADOW_ATLAS_SIZE 4096
 #define POINT_SHADOW_MIN_BLOCK_SIZE 64

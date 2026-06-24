@@ -87,6 +87,10 @@ namespace Syn
 
             // Sort descending to ensure larger blocks are packed first
             std::sort(allocRequests.begin(), allocRequests.end(), [](const PointLightAllocData& a, const PointLightAllocData& b) {
+                if (a.faceBlockSizePx == b.faceBlockSizePx) {
+                    return a.entity < b.entity;
+                }
+
                 return a.faceBlockSizePx > b.faceBlockSizePx;
                 });
 

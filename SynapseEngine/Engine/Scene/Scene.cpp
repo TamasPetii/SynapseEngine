@@ -262,6 +262,8 @@ namespace Syn
         RegisterComponentSparseMapBuffer<SpotLightShadowComponent>(BufferNames::SpotLightShadowSparseMap);
         RegisterComponentBuffer<SpotLightShadowComponent, SpotLightShadowComponentGPU>(BufferNames::SpotLightShadowData);
         RegisterComponentBuffer<SpotLightShadowComponent, uint32_t>(BufferNames::SpotLightShadowVisibleData);
+        RegisterComponentBuffer<SpotLightShadowComponent, uint32_t>(BufferNames::SpotLightShadowAtlasSortKeyBuffer);
+        RegisterComponentBuffer<SpotLightShadowComponent, uint32_t>(BufferNames::SpotLightShadowAtlasSortValueBuffer);
 
         RegisterComponentSparseMapBuffer<DirectionLightComponent>(BufferNames::DirectionLightSparseMap);
         RegisterComponentBuffer<DirectionLightComponent, DirectionLightComponentGPU>(BufferNames::DirectionLightData);

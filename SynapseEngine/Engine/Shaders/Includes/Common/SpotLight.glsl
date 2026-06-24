@@ -45,12 +45,12 @@ struct SpotLightShadowComponent {
 layout(buffer_reference, std430) readonly restrict buffer SpotLightDataBuffer { SpotLightComponent data[]; };
 layout(buffer_reference, std430) readonly restrict buffer SpotLightColliderDataBuffer { SpotLightColliderGPU data[]; };
 layout(buffer_reference, std430) readonly restrict buffer SpotLightShadowDataBuffer { SpotLightShadowComponent data[]; };
-layout(buffer_reference, std430) readonly restrict buffer SpotVisibleLightBuffer { uint data[]; };
 layout(buffer_reference, std430) readonly restrict buffer SpotShadowInstanceBuffer { uvec2 data[]; };
-layout(buffer_reference, std430) readonly restrict buffer SpotGridLookupBuffer { uint data[]; };
 layout(buffer_reference, std430) readonly restrict buffer SpotVisibleCountBuffer { uint data; };
-layout(buffer_reference, std430) readonly buffer SpotDrawCallKeyBuffer { uint data[]; };
-layout(buffer_reference, std430) readonly buffer SpotSortValuesBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer SpotVisibleLightBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer SpotDrawCallKeyBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer SpotSortValuesBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer SpotGridLookupBuffer { uint data[]; };
 
 #define SPOT_SHADOW_ATLAS_SIZE 4096
 #define SPOT_SHADOW_MIN_BLOCK_SIZE 64
@@ -68,4 +68,6 @@ layout(buffer_reference, std430) readonly buffer SpotSortValuesBuffer { uint dat
 #define GET_SPOT_SORTED_VALUE(addr, idx)                SpotSortValuesBuffer(addr).data[idx]
 #define GET_SPOT_SHADOW_INSTANCE_UNSORTED(addr, idx)    SpotShadowInstanceBuffer(addr).data[idx]
 
+#define GET_SPOT_ATLAS_SORT_KEY(addr, idx)                   SpotDrawCallKeyBuffer(addr).data[idx]
+#define GET_SPOT_ATLAS_SORT_VALUE(addr, idx)                 SpotSortValuesBuffer(addr).data[idx]
 #endif

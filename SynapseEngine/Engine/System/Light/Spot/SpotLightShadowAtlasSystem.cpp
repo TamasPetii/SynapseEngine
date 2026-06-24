@@ -44,6 +44,9 @@ namespace Syn
 
         if (!shadowPool || !lightPool || !cameraPool || cameraEntity == NULL_ENTITY) return;
 
+        if (scene->GetSettings()->culling.spotLightCullingDevice == CullingDeviceType::GPU)
+            return;
+
         this->EmplaceTask(subflow, "Update Spot Shadow Atlas", [drawData, lightPool, shadowPool, cameraPool, cameraEntity]() {
 
             uint32_t activeLights = drawData->SpotLightShadow.visibleLightCount;
@@ -86,6 +89,10 @@ namespace Syn
 
             // Greedy bin packing: Sort requests descending by required block size
             std::sort(allocRequests.begin(), allocRequests.end(), [](const SpotLightAllocData& a, const SpotLightAllocData& b) {
+                if (a.blockSizePx == b.blockSizePx) {
+                    return a.entity < b.entity;
+                }
+
                 return a.blockSizePx > b.blockSizePx;
                 });
 
@@ -171,6 +178,9 @@ namespace Syn
 
     void SpotLightShadowAtlasSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
     {
+        if (scene->GetSettings()->culling.spotLightCullingDevice == CullingDeviceType::GPU)
+            return;
+
         this->EmplaceTask(subflow, SystemPhaseNames::UploadGPU, [scene, frameIndex]() {
             auto drawData = scene->GetSceneDrawData();
             auto& shadowGroup = drawData->SpotLightShadow;

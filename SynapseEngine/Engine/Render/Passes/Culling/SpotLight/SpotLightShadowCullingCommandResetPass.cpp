@@ -4,7 +4,7 @@
 #include "Engine/Scene/Scene.h"
 #include "Engine/Vk/Buffer/BufferUtils.h"
 #include "Engine/Render/ComputeGroupSize.h"
-#include "Engine/Component/Light/Spot/SpotLightComponent.h"
+#include "Engine/Component/Light/Spot/SpotLightShadowComponent.h"
 #include "Engine/Component/Core/TransformComponent.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
 
@@ -13,7 +13,7 @@ namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/CullingCommandResetPC.glsl"
 
     bool SpotLightShadowCullingCommandResetPass::ShouldExecute(const RenderContext& context) const {
-        auto pool = context.scene->GetRegistry()->GetPool<SpotLightComponent>();
+        auto pool = context.scene->GetRegistry()->GetPool<SpotLightShadowComponent>();
 
         return context.scene->GetSettings()->culling.spotLightShadowCullingDevice == CullingDeviceType::GPU
                && pool && pool->Size() > 0;

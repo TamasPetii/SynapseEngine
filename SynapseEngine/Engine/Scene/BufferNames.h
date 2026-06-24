@@ -61,6 +61,8 @@ namespace Syn
         static constexpr const char* SpotLightShadowModelVisibleData = "SpotLightShadowModelVisibleData";
         static constexpr const char* SpotLightShadowMortonChunkVisibleIndex = "SpotLightShadowMortonChunkVisibleIndex";
         static constexpr const char* SpotLightShadowStaticChunkVisibleIndex = "SpotLightShadowStaticChunkVisibleIndex";
+        static constexpr const char* SpotLightShadowAtlasSortKeyBuffer = "SpotLightShadowAtlasSortKeyBuffer";
+        static constexpr const char* SpotLightShadowAtlasSortValueBuffer = "SpotLightShadowAtlasSortValueBuffer";
 
         static constexpr const char* BoxColliderSparseMap = "BoxColliderSparseMap";
         static constexpr const char* BoxColliderData = "BoxColliderData";

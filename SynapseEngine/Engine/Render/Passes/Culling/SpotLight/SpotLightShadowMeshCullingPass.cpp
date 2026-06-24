@@ -14,7 +14,7 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
-#include "Engine/Component/Light/Spot/SpotLightComponent.h"
+#include "Engine/Component/Light/Spot/SpotLightShadowComponent.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
@@ -23,7 +23,7 @@ namespace Syn {
 
     bool SpotLightShadowMeshCullingPass::ShouldExecute(const RenderContext& context) const
     {
-        auto pool = context.scene->GetRegistry()->GetPool<SpotLightComponent>();
+        auto pool = context.scene->GetRegistry()->GetPool<SpotLightShadowComponent>();
         
         return context.scene->GetSettings()->culling.spotLightShadowCullingDevice == CullingDeviceType::GPU 
             && pool && pool->Size() > 0;

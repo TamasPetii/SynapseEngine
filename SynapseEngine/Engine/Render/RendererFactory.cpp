@@ -31,6 +31,8 @@
 
 #include "Engine/Render/Passes/Culling/SpotLight/SpotLightCullingPass.h"
 #include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowBufferResetPass.h"
+#include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowAtlasRadixSortPass.h"
+#include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowAtlasAllocatorPass.h"
 #include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowCullingCommandResetPass.h"
 #include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowCullingMemoryBarrierPass.h"
 #include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowFinalizePass.h"
@@ -200,9 +202,11 @@ namespace Syn
         pipeline->AddPass(std::make_unique<DirectionLightShadowMeshCullingPass>());
 
         //Gpu Driven Spot Light and Shadow Culling
-        pipeline->AddPass(std::make_unique<SpotLightCullingPass>());
         pipeline->AddPass(std::make_unique<SpotLightShadowBufferResetPass>());
         pipeline->AddPass(std::make_unique<SpotLightShadowCullingCommandResetPass>());
+        pipeline->AddPass(std::make_unique<SpotLightCullingPass>());
+        pipeline->AddPass(std::make_unique<SpotLightShadowAtlasRadixSortPass>());
+        pipeline->AddPass(std::make_unique<SpotLightShadowAtlasAllocatorPass>());
         pipeline->AddPass(std::make_unique<SpotLightShadowMortonChunkCullingPass>());
         pipeline->AddPass(std::make_unique<SpotLightShadowMortonModelCullingPass>());
         pipeline->AddPass(std::make_unique<SpotLightShadowStaticChunkCullingPass>());
@@ -278,15 +282,12 @@ namespace Syn
         pipeline->AddPass(std::make_unique<GeometryHizLinearPreparePass>());
         pipeline->AddPass(std::make_unique<GeometryHizDownsamplePass>());
 
-        /*
         pipeline->AddPass(std::make_unique<DirectionLightShadowHizCopyPass>());
         pipeline->AddPass(std::make_unique<DirectionLightShadowHizDownsamplePass>());
         pipeline->AddPass(std::make_unique<SpotLightShadowHizCopyPass>());
         pipeline->AddPass(std::make_unique<SpotLightShadowHizDownsamplePass>());
         pipeline->AddPass(std::make_unique<PointLightShadowHizCopyPass>());
         pipeline->AddPass(std::make_unique<PointLightShadowHizDownsamplePass>());
-        */
-
 
         //Ssao Passes
         pipeline->AddPass(std::make_unique<SsaoInitPass>());

@@ -16,7 +16,7 @@
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "Engine/Component/Core/TransformComponent.h"
-#include "Engine/Component/Light/Spot/SpotLightComponent.h"
+#include "Engine/Component/Light/Spot/SpotLightShadowComponent.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
@@ -25,7 +25,7 @@ namespace Syn {
 
     bool SpotLightShadowModelCullingPass::ShouldExecute(const RenderContext& context) const
     {
-        auto pool = context.scene->GetRegistry()->GetPool<SpotLightComponent>();
+        auto pool = context.scene->GetRegistry()->GetPool<SpotLightShadowComponent>();
         return context.scene->GetSettings()->culling.spotLightShadowCullingDevice == CullingDeviceType::GPU
             && pool && pool->Size() > 0;
     }
@@ -44,9 +44,8 @@ namespace Syn {
     void SpotLightShadowModelCullingPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         auto transformPool = scene->GetRegistry()->GetPool<TransformComponent>();
-        auto lightPool = scene->GetRegistry()->GetPool<SpotLightComponent>();
 
-        if (!transformPool || transformPool->Size() == 0 || !lightPool || lightPool->Size() == 0) {
+        if (!transformPool || transformPool->Size() == 0) {
             _shouldDispatch = false;
             return;
         }

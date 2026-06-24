@@ -71,6 +71,18 @@ void main() {
     uint shadowSparseIdx = GET_SPARSE_INDEX(ctx.spotLightShadowSparseMapBufferAddr, collider.entityIndex);
     if (shadowSparseIdx != INVALID_INDEX) 
     {
+        float screenSizePixels = CalculateSphereScreenSizePerspective(collider.center, collider.radius, camera.view, camera.projVulkan, camera.params.x, screenRes);
+        
+        uint blockSizePx = 64;
+        if (screenSizePixels > 1024.0) blockSizePx = 1024;
+        else if (screenSizePixels > 512.0) blockSizePx = 512;
+        else if (screenSizePixels > 256.0) blockSizePx = 256;
+        else if (screenSizePixels > 128.0) blockSizePx = 128;
+        uint blocksRequired = blockSizePx / 64;
+        
+        uint invertedSize = 0xFFu - blocksRequired;
+        uint sortKey = (invertedSize << 24) | (shadowSparseIdx & 0xFFFFFFu);
+
         uint needsShadowWrite = 1;
         uint shadowSubgroupWriteCount = subgroupAdd(needsShadowWrite);
         uint shadowLocalOffset = subgroupExclusiveAdd(needsShadowWrite);
@@ -83,5 +95,8 @@ void main() {
         shadowBaseOffset = subgroupBroadcastFirst(shadowBaseOffset);
         uint finalShadowIndex = shadowBaseOffset + shadowLocalOffset;
         GET_SPOT_VISIBLE_SHADOW_LIGHT(ctx.spotLightVisibleShadowIndexBufferAddr, finalShadowIndex) = collider.entityIndex;
+
+        GET_SPOT_ATLAS_SORT_KEY(ctx.spotLightShadowAtlasSortKeyBufferAddr, finalShadowIndex) = sortKey;
+        GET_SPOT_ATLAS_SORT_VALUE(ctx.spotLightShadowAtlasSortValueBufferAddr, finalShadowIndex) = collider.entityIndex;
     }
 }
