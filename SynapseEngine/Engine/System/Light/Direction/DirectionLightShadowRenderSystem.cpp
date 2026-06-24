@@ -35,11 +35,16 @@ namespace Syn
 
         this->EmplaceTask(subflow, SystemPhaseNames::Update, [this, scene, drawData]() {
             uint32_t currentMainInstances = drawData->Models.totalAllocatedInstances;
+            uint32_t currentCommandCount = drawData->Models.activeTraditionalCount + drawData->Models.activeMeshletCount;
 
             // Check if the main pass allocated instance count changed
-            if (_lastMainAllocatedInstances != currentMainInstances || currentMainInstances == 0) {
+            if (_lastMainAllocatedInstances != currentMainInstances ||
+                _lastCommandCount != currentCommandCount || 
+                currentMainInstances == 0) 
+            {
                 _needsRebuild = true;
                 _lastMainAllocatedInstances = currentMainInstances;
+                _lastCommandCount = currentCommandCount;
 
                 if constexpr (ENABLE_DEBUG_LOGGING) {
                     Info("[DirectionLightShadowRenderSystem] Capacity change detected. Main Instances: {}", currentMainInstances);

@@ -278,14 +278,15 @@ namespace Syn
         pipeline->AddPass(std::make_unique<GeometryHizLinearPreparePass>());
         pipeline->AddPass(std::make_unique<GeometryHizDownsamplePass>());
 
-        //pipeline->AddPass(std::make_unique<DirectionLightShadowHizCopyPass>());
-        //pipeline->AddPass(std::make_unique<DirectionLightShadowHizDownsamplePass>());
+        /*
+        pipeline->AddPass(std::make_unique<DirectionLightShadowHizCopyPass>());
+        pipeline->AddPass(std::make_unique<DirectionLightShadowHizDownsamplePass>());
+        pipeline->AddPass(std::make_unique<SpotLightShadowHizCopyPass>());
+        pipeline->AddPass(std::make_unique<SpotLightShadowHizDownsamplePass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowHizCopyPass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowHizDownsamplePass>());
+        */
 
-        //pipeline->AddPass(std::make_unique<SpotLightShadowHizCopyPass>());
-        //pipeline->AddPass(std::make_unique<SpotLightShadowHizDownsamplePass>());
-
-        //pipeline->AddPass(std::make_unique<PointLightShadowHizCopyPass>());
-        //pipeline->AddPass(std::make_unique<PointLightShadowHizDownsamplePass>());
 
         //Ssao Passes
         pipeline->AddPass(std::make_unique<SsaoInitPass>());

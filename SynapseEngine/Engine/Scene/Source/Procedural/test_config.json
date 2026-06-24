@@ -11,14 +11,14 @@
   },
   "materials": {
     "use_unique_materials": false,
-    "shared_material_count": 150
+    "shared_material_count": 100
   },
   "entities": {
-    "animated_characters": 500,
-    "static_geometry": 250000,
-    "physics_boxes": 500,
-    "physics_spheres": 500,
-    "physics_capsules": 500
+    "animated_characters": 100,
+    "static_geometry": 1000,
+    "physics_boxes": 0,
+    "physics_spheres": 0,
+    "physics_capsules": 0
   },
   "lights": {
     "directional_count": 1,

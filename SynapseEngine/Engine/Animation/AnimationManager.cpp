@@ -14,7 +14,7 @@ namespace Syn {
         std::shared_ptr<AnimationBuilder> builder,
         std::unique_ptr<IGpuAnimationUploader> uploader,
         std::unique_ptr<ICpuAnimationExtractor> cpuExtractor)
-        : AddressResourceManager<Animation, GpuAnimationAddresses>(framesInFlight, 100, 256, 512),
+        : AddressResourceManager<Animation, GpuAnimationAddresses>(framesInFlight, 1024, 256, 512),
         _builder(builder), 
         _uploader(std::move(uploader)), 
         _cpuExtractor(std::move(cpuExtractor))
@@ -107,7 +107,7 @@ namespace Syn {
         addresses.frameMeshletColliders = hw.frameMeshletColliders->GetDeviceAddress();
         addresses.descriptor = entry.resource->cpuData.descriptor;
 		addresses.globalCollider = entry.resource->cpuData.globalCollider;
-        addresses.padding = 0;
+        addresses.isReady = 1;
 
         WriteAddress(entryIndex, addresses);
 

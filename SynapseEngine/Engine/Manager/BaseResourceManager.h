@@ -75,6 +75,7 @@ namespace Syn {
         void SubmitGpuRequest(const EntryType & entry, Vk::GpuUploadRequest && request);
         virtual void StartGpuUpload(EntryType & entry) = 0;
         virtual void FinalizeResource(EntryType & entry) = 0;
+        virtual void OnEntryCreated(uint32_t index) {}
     protected:
         std::atomic<uint32_t> _version;
         std::vector<EntryType> _entries;
@@ -144,6 +145,8 @@ namespace Syn {
             auto executor = ServiceLocator::GetTaskExecutor();
             newEntry.cpuFuture = executor->async(std::move(task));
             _entries.push_back(std::move(newEntry));
+
+            OnEntryCreated(newId);
         }
         else {
             newEntry.resource = task();
@@ -151,11 +154,15 @@ namespace Syn {
             if (newEntry.resource != nullptr) {
                 newEntry.state = ResourceState::UploadingGPU;
                 _entries.push_back(std::move(newEntry));
+
+                OnEntryCreated(newId);
+
                 StartGpuUpload(_entries.back());
             }
             else {
                 newEntry.state = ResourceState::Failed;
                 _entries.push_back(std::move(newEntry));
+                OnEntryCreated(newId);
             }
         }
 

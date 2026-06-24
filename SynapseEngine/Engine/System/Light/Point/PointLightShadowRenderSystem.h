@@ -20,6 +20,7 @@ namespace Syn
         void RebuildShadowBuffers(Scene* scene);
     private:
         uint32_t _lastMainAllocatedInstances = 0;
+        uint32_t _lastCommandCount = 0;
         bool _needsRebuild = true;
     };
 }

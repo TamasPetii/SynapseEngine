@@ -59,27 +59,30 @@ void main() {
             AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animSparseIndex);
             if (animComp.animationIndex != INVALID_INDEX) {
                 GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
-                GpuVertexSkinData skin = GET_SKIN_DATA(animAddrs.vertexSkinData, realVertexIndex);
 
-                mat4 skinMat = mat4(0.0);
-                uint frameOffset = animComp.frameIndex * animAddrs.descriptor.nodeCount;
-                bool hasValidBone = false;
+                if (animAddrs.isReady == 1) {
+                    GpuVertexSkinData skin = GET_SKIN_DATA(animAddrs.vertexSkinData, realVertexIndex);
 
-                for (int i = 0; i < 4; ++i) {
-                    float weight = skin.boneWeights[i];
-                    if (weight == 0.0) continue; 
+                    mat4 skinMat = mat4(0.0);
+                    uint frameOffset = animComp.frameIndex * animAddrs.descriptor.nodeCount;
+                    bool hasValidBone = false;
+
+                    for (int i = 0; i < 4; ++i) {
+                        float weight = skin.boneWeights[i];
+                        if (weight == 0.0) continue; 
             
-                    uint boneIdx = skin.boneIndices[i];
-                    if (boneIdx != INVALID_INDEX) {
-                        GpuNodeTransform boneNode = GET_NODE_TRANSFORM(animAddrs.nodeTransforms, frameOffset + boneIdx);
-                        skinMat += boneNode.globalTransform * weight;
-                        hasValidBone = true;
+                        uint boneIdx = skin.boneIndices[i];
+                        if (boneIdx != INVALID_INDEX) {
+                            GpuNodeTransform boneNode = GET_NODE_TRANSFORM(animAddrs.nodeTransforms, frameOffset + boneIdx);
+                            skinMat += boneNode.globalTransform * weight;
+                            hasValidBone = true;
+                        }
                     }
-                }
 
-                if (hasValidBone) {
-                    finalModelMat = skinMat;
-                }  
+                    if (hasValidBone) {
+                        finalModelMat = skinMat;
+                    }  
+                }
             }    
         }
     }

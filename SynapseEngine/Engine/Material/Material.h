@@ -27,6 +27,7 @@ namespace Syn
     };
 
     struct SYN_API GpuMaterial {
+        GpuMaterial();
         GpuMaterial(const Material& material);
 
         glm::vec4 color;
@@ -47,7 +48,6 @@ namespace Syn
         uint32_t padding0;
         uint32_t padding1;
         uint32_t padding2;
-        //Todo: uint16_t?
     };
 }
 

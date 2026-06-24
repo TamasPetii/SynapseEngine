@@ -53,7 +53,10 @@ void main() {
                             AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animSparseIndex);
                             if (animComp.animationIndex != INVALID_INDEX) {
                                 GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
-                                collider = animAddrs.globalCollider;
+
+                                if (animAddrs.isReady == 1) {
+                                    collider = animAddrs.globalCollider;
+                                }
                             }
                         }
                     }

@@ -6,7 +6,7 @@
 namespace Syn {
 
     MaterialManager::MaterialManager(uint32_t framesInFlight, TextureLoadCallback textureLoadCallback)
-        : AddressResourceManager<Material, GpuMaterial>(framesInFlight, 100, 1024, 2048)
+        : AddressResourceManager<Material, GpuMaterial>(framesInFlight, 1024, 1024, 2048)
         , _textureLoadCallback(std::move(textureLoadCallback))
     {
         Material emptyMat;

@@ -54,29 +54,48 @@ namespace Syn
         _mappedVersions[frameIndex]++;
     }
 
-    bool RenderBuffer::UpdateCapacityAll(uint64_t requiredElements)
+    std::vector<std::shared_ptr<Vk::Buffer>> RenderBuffer::UpdateCapacityAll(uint64_t requiredElements)
     {
+        std::vector<std::shared_ptr<Vk::Buffer>> allStale;
+
         bool resized = false;
         for (uint32_t i = 0; i < _config.frames; ++i) {
-            if (UpdateCapacity(i, requiredElements)) {
-                resized = true;
-            }
+            StaleFrameBuffers stale = UpdateCapacity(i, requiredElements);
+
+            if (stale.mapped) allStale.push_back(stale.mapped);
+            if (stale.gpu)    allStale.push_back(stale.gpu);
         }
-        return resized;
+
+        return allStale;
     }
 
-    bool RenderBuffer::UpdateCapacity(uint32_t frameIndex, uint64_t requiredElements)
+    StaleFrameBuffers RenderBuffer::UpdateCapacity(uint32_t frameIndex, uint64_t requiredElements)
     {
+        StaleFrameBuffers stale{};
         bool resized = false;
+
         if (frameIndex < _config.frames) {
-            if (_mapped[frameIndex] && _mapped[frameIndex]->UpdateCapacity(requiredElements).first) resized = true;
-            if (_gpu[frameIndex] && _gpu[frameIndex]->UpdateCapacity(requiredElements).first) resized = true;
+            if (_mapped[frameIndex]) {
+                auto [didResize, oldBuf] = _mapped[frameIndex]->UpdateCapacity(requiredElements);
+                if (didResize) {
+                    stale.mapped = oldBuf;
+                    resized = true;
+                }
+            }
+
+            if (_gpu[frameIndex]) {
+                auto [didResize, oldBuf] = _gpu[frameIndex]->UpdateCapacity(requiredElements);
+                if (didResize) {
+                    stale.gpu = oldBuf;
+                    resized = true;
+                }
+            }
 
             if (resized) {
                 _mappedVersions[frameIndex]++;
             }
         }
-        return resized;
+        return stale;
     }
 
     VkBuffer RenderBuffer::GetHandle(uint32_t frameIndex) const

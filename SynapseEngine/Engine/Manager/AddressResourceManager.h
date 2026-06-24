@@ -1,6 +1,6 @@
 #pragma once
 #include "BaseResourceManager.h"
-#include "Engine/Utils/WindowedBuffer.h"
+#include "Engine/Utils/RenderBuffer.h"
 #include <vector>
 #include <mutex>
 #include <memory>
@@ -19,28 +19,35 @@ namespace Syn
         virtual ~AddressResourceManager() = default;
 
         void Update() override;
-        Vk::Buffer* GetAddressBuffer() const;
+        void RecordSync(VkCommandBuffer cmd);
+
+        VkBuffer GetAddressBufferHandle() const;
+        VkDeviceAddress GetAddressBufferDeviceAddress() const;
     protected:
+        virtual void OnEntryCreated(uint32_t index) override;
         void WriteAddress(uint32_t index, const TAddressStruct& addresses);
     protected:
-        std::unique_ptr<WindowedBuffer> _addressBuffer;
-        std::vector<StaleBuffer> _staleBuffers;
-        std::mutex _staleMutex;
         uint32_t _framesInFlight;
+        std::mutex _staleMutex;
+        std::mutex _writeMutex;
+        RenderBuffer _addressBuffer;
+        std::vector<StaleBuffer> _staleBuffers;
     };
 
     template <typename TResource, typename TAddressStruct>
     AddressResourceManager<TResource, TAddressStruct>::AddressResourceManager(uint32_t framesInFlight, uint32_t initialCapacity, uint32_t upWindow, uint32_t downWindow)
         : _framesInFlight(framesInFlight)
     {
-        Vk::BufferConfig config{};
-        config.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
-        config.memoryUsage = VMA_MEMORY_USAGE_AUTO;
-        config.allocationFlags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
-        config.useDeviceAddress = true;
+        RenderBufferConfig config{};
+        config.strategy = BufferStrategy::Hybrid;
+        config.frames = 1;
+        config.elementSize = static_cast<uint32_t>(sizeof(TAddressStruct));
+        config.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
+        config.upWindow = upWindow;
+        config.downWindow = downWindow;
 
-        _addressBuffer = std::make_unique<WindowedBuffer>(config, static_cast<uint32_t>(sizeof(TAddressStruct)), upWindow, downWindow);
-        _addressBuffer->UpdateCapacity(initialCapacity);
+        _addressBuffer.Initialize(config);
+        _addressBuffer.UpdateCapacityAll(initialCapacity);
     }
 
     template <typename TResource, typename TAddressStruct>
@@ -61,22 +68,41 @@ namespace Syn
     }
 
     template <typename TResource, typename TAddressStruct>
-    Vk::Buffer* AddressResourceManager<TResource, TAddressStruct>::GetAddressBuffer() const {
-        return _addressBuffer->GetBuffer();
+    VkBuffer AddressResourceManager<TResource, TAddressStruct>::GetAddressBufferHandle() const {
+        return _addressBuffer.GetHandle(0);
+    }
+
+    template <typename TResource, typename TAddressStruct>
+    VkDeviceAddress AddressResourceManager<TResource, TAddressStruct>::GetAddressBufferDeviceAddress() const {
+        return _addressBuffer.GetAddress(0);
+    }
+
+    template <typename TResource, typename TAddressStruct>
+    void AddressResourceManager<TResource, TAddressStruct>::RecordSync(VkCommandBuffer cmd) {
+        _addressBuffer.RecordSync(cmd, 0);
     }
 
     template <typename TResource, typename TAddressStruct>
     void AddressResourceManager<TResource, TAddressStruct>::WriteAddress(uint32_t index, const TAddressStruct& addresses) {
+        std::lock_guard<std::mutex> writeLock(_writeMutex);
+        
         uint32_t requiredCapacity = index + 1;
 
-		auto [resized, oldBuffer] = _addressBuffer->UpdateCapacity(requiredCapacity);
+        auto staleBuffers = _addressBuffer.UpdateCapacity(0, requiredCapacity);
 
-        if (resized) {
+        if (staleBuffers.HasAny()) {
             std::lock_guard<std::mutex> lock(_staleMutex);
-            _staleBuffers.push_back({ oldBuffer, _framesInFlight });
+            if (staleBuffers.mapped) _staleBuffers.push_back({ staleBuffers.mapped, _framesInFlight });
+            if (staleBuffers.gpu)    _staleBuffers.push_back({ staleBuffers.gpu, _framesInFlight });
         }
 
         size_t offset = index * sizeof(TAddressStruct);
-        _addressBuffer->GetBuffer()->Write(&addresses, sizeof(TAddressStruct), offset);
+        _addressBuffer.Write(0, &addresses, sizeof(TAddressStruct), offset);
+    }
+
+    template <typename TResource, typename TAddressStruct>
+    void AddressResourceManager<TResource, TAddressStruct>::OnEntryCreated(uint32_t index) {
+        TAddressStruct emptyAddresses{};
+        WriteAddress(index, emptyAddresses);
     }
 }

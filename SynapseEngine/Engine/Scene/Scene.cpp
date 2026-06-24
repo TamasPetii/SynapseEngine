@@ -448,35 +448,32 @@ namespace Syn
 
                 }).name(system->GetName());
 
-            if (phase == SystemPhase::Update)
+            for (auto typeId : system->GetReadDependencies())
             {
-                for (auto typeId : system->GetReadDependencies())
+                if (lastWriters.contains(typeId))
                 {
-                    if (lastWriters.contains(typeId))
+                    sysTask.succeed(lastWriters[typeId]);
+                }
+                lastReaders[typeId].push_back(sysTask);
+            }
+
+            for (auto typeId : system->GetWriteDependencies())
+            {
+                if (lastWriters.contains(typeId))
+                {
+                    sysTask.succeed(lastWriters[typeId]);
+                }
+                for (auto& readerTask : lastReaders[typeId])
+                {
+                    if (readerTask != sysTask)
                     {
-                        sysTask.succeed(lastWriters[typeId]);
+                        sysTask.succeed(readerTask);
                     }
-                    lastReaders[typeId].push_back(sysTask);
                 }
 
-                for (auto typeId : system->GetWriteDependencies())
-                {
-                    if (lastWriters.contains(typeId))
-                    {
-                        sysTask.succeed(lastWriters[typeId]);
-                    }
-                    for (auto& readerTask : lastReaders[typeId])
-                    {
-                        if (readerTask != sysTask)
-                        {
-                            sysTask.succeed(readerTask);
-                        }
-                    }
-
-                    lastReaders[typeId].clear();
-                    lastWriters[typeId] = sysTask;
-                }
-            }      
+                lastReaders[typeId].clear();
+                lastWriters[typeId] = sysTask;
+            }   
         }
     }
 

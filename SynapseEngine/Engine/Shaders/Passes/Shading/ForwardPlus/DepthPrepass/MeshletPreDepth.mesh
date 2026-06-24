@@ -72,24 +72,27 @@ void main() {
                 AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animIdx);
                 if (animComp.animationIndex != INVALID_INDEX) {
                     GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
-                    GpuVertexSkinData skin = GET_SKIN_DATA(animAddrs.vertexSkinData, globalVtxIdx);
-                    
-                    mat4 skinMat = mat4(0.0); 
-                    mat4 skinMatIT = mat4(0.0);
-                    uint frameOffset = animComp.frameIndex * animAddrs.descriptor.nodeCount;
-                    bool hasBone = false;
 
-                    for (int b = 0; b < 4; ++b) {
-                        if (skin.boneWeights[b] > 0.0) {
-                            GpuNodeTransform bone = GET_NODE_TRANSFORM(animAddrs.nodeTransforms, frameOffset + skin.boneIndices[b]);
-                            skinMat += bone.globalTransform * skin.boneWeights[b];
-                            skinMatIT += bone.globalTransformIT * skin.boneWeights[b];
-                            hasBone = true;
+                    if (animAddrs.isReady == 1) {
+                        GpuVertexSkinData skin = GET_SKIN_DATA(animAddrs.vertexSkinData, globalVtxIdx);
+                    
+                        mat4 skinMat = mat4(0.0); 
+                        mat4 skinMatIT = mat4(0.0);
+                        uint frameOffset = animComp.frameIndex * animAddrs.descriptor.nodeCount;
+                        bool hasBone = false;
+
+                        for (int b = 0; b < 4; ++b) {
+                            if (skin.boneWeights[b] > 0.0) {
+                                GpuNodeTransform bone = GET_NODE_TRANSFORM(animAddrs.nodeTransforms, frameOffset + skin.boneIndices[b]);
+                                skinMat += bone.globalTransform * skin.boneWeights[b];
+                                skinMatIT += bone.globalTransformIT * skin.boneWeights[b];
+                                hasBone = true;
+                            }
                         }
-                    }
-                    if (hasBone) { 
-                        finalMat = skinMat; 
-                        finalMatIT = skinMatIT;
+                        if (hasBone) { 
+                            finalMat = skinMat; 
+                            finalMatIT = skinMatIT;
+                        }
                     }
                 }
             }

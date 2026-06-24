@@ -8,6 +8,13 @@
 
 namespace Syn
 {
+    struct SYN_API StaleFrameBuffers {
+        std::shared_ptr<Vk::Buffer> mapped;
+        std::shared_ptr<Vk::Buffer> gpu;
+
+        bool HasAny() const { return mapped != nullptr || gpu != nullptr; }
+    };
+
     enum class SYN_API BufferStrategy {
         MappedOnly,
         GpuOnly,
@@ -35,8 +42,8 @@ namespace Syn
         RenderBuffer& operator=(RenderBuffer&& other) noexcept = default;
 
         void Initialize(const RenderBufferConfig& config);
-        bool UpdateCapacity(uint32_t frameIndex, uint64_t requiredElements);
-        bool UpdateCapacityAll(uint64_t requiredElements);
+        StaleFrameBuffers UpdateCapacity(uint32_t frameIndex, uint64_t requiredElements);
+        std::vector<std::shared_ptr<Vk::Buffer>> UpdateCapacityAll(uint64_t requiredElements);
 
         void RecordSync(VkCommandBuffer cmd, uint32_t frameIndex);
         void RecordSync(VkCommandBuffer cmd, uint32_t frameIndex, size_t copySizeElements);

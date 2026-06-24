@@ -60,8 +60,11 @@ void main() {
             AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animIdx);
             if (animComp.animationIndex != INVALID_INDEX) {
                 GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
-                uint frameOffset = animComp.frameIndex * animAddrs.descriptor.globalMeshletCount;
-                collider = GET_MESHLET_COLLIDER(animAddrs.frameMeshletColliders, frameOffset + globalMeshletIdx);
+
+                if (animAddrs.isReady == 1) {
+                    uint frameOffset = animComp.frameIndex * animAddrs.descriptor.globalMeshletCount;
+                    collider = GET_MESHLET_COLLIDER(animAddrs.frameMeshletColliders, frameOffset + globalMeshletIdx);
+                }
             }
         }
     }

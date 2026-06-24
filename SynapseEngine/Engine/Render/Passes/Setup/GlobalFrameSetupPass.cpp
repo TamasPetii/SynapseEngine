@@ -68,18 +68,18 @@ namespace Syn {
         ctx.mortonChunkTransformsIndexBufferAddr = compManager->GetBufferAddr(BufferNames::MortonChunkTransformsIndex, fIdx);
         ctx.mortonChunkVisibleIndirectDispatchBufferAddr = drawData->Chunks.mortonChunkVisibleIndirectDispatchBuffer.GetAddress(fIdx);
 
-        ctx.modelAddressBufferAddr = modelManager->GetAddressBuffer()->GetDeviceAddress();
+        ctx.modelAddressBufferAddr = modelManager->GetAddressBufferDeviceAddress();
         ctx.modelBufferAddr = compManager->GetBufferAddr(BufferNames::ModelData, fIdx);
         ctx.modelSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::ModelSparseMap, fIdx);
 		ctx.modelCountBufferAddr = drawData->Models.computeCountBuffer.GetAddress(fIdx);
         ctx.modelVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::ModelVisibleData, fIdx);
 
-        ctx.animationAddressBufferAddr = animationManager->GetAddressBuffer()->GetDeviceAddress();
+        ctx.animationAddressBufferAddr = animationManager->GetAddressBufferDeviceAddress();
         ctx.animationBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationData, fIdx);
         ctx.animationSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::AnimationSparseMap, fIdx);
         
         ctx.materialLookupBufferAddr = drawData->Models.materialIndexBuffer.GetAddress(fIdx);
-        ctx.materialBufferAddr = materialManager->GetAddressBuffer()->GetDeviceAddress();
+        ctx.materialBufferAddr = materialManager->GetAddressBufferDeviceAddress();
 
         //Direction Light Buffers
         ctx.directionLightIndirectCommandBufferAddr = drawData->DirectionLights.indirectBuffer.GetAddress(fIdx);
@@ -267,6 +267,11 @@ namespace Syn {
         ctx.sliceScaleFactor = 1.0f / std::log2(1.0f + (2.0f * tanHalfFov / static_cast<float>(ctx.tileCountY)));
 
         drawData->frameContextBuffer.Write(fIdx , &ctx, sizeof(FrameGlobalContext), 0);
+
+        //Todo: Kiszervezni lambdába innen!
 		drawData->CoherentToGpuBufferSync(context.cmd, fIdx);
+        ServiceLocator::GetAnimationManager()->RecordSync(context.cmd);
+        ServiceLocator::GetModelManager()->RecordSync(context.cmd);
+        ServiceLocator::GetMaterialManager()->RecordSync(context.cmd);
     }
 }

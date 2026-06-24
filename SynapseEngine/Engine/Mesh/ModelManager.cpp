@@ -16,7 +16,7 @@ namespace Syn {
         std::shared_ptr<StaticMeshBuilder> builder,
         std::unique_ptr<IGpuModelUploader> uploader,
         MaterialLoadCallback materialLoadCallback)
-        : AddressResourceManager<StaticMesh, GpuModelAddresses>(framesInFlight, 100, 256, 512),
+        : AddressResourceManager<StaticMesh, GpuModelAddresses>(framesInFlight, 1024, 256, 512),
         _builder(builder), 
         _uploader(std::move(uploader)), 
         _materialLoadCallback(std::move(materialLoadCallback))
@@ -176,6 +176,7 @@ namespace Syn {
         addresses.indexCount = cpuData.globalIndexCount;
         addresses.meshCount = cpuData.globalMeshCount;
         addresses.averageLodIndexCount = cpuData.globalAverageLodIndexCount;
+        addresses.isReady = 1;
 
         WriteAddress(entryIndex, addresses);
     
