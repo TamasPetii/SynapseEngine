@@ -10,9 +10,10 @@
 #include "../../../../Includes/Utils/PbrMath.glsl"
 #include "../../../../Includes/Utils/DepthMath.glsl"
 #include "../../../../Includes/Utils/LightMath.glsl"
+#include "../../../../Includes/Utils/ShadowMath.glsl"
 
 layout(location = 0) in flat uint inLightDenseIndex;
-layout(location = 1) in flat uint inShadowDenseIndex;
+layout(location = 1) in flat uint inEntityLightIndex;
 layout(location = 2) in flat uint inCameraIndex;
 
 layout(location = 0) out vec4 outColor;
@@ -21,6 +22,7 @@ layout(set = 2, binding = 0) uniform sampler2D colorMetallicTexture;
 layout(set = 2, binding = 1) uniform sampler2D normalRoughnessTexture;
 layout(set = 2, binding = 2) uniform sampler2D depthTexture;
 layout(set = 2, binding = 3) uniform sampler2D ssaoTexture;
+layout(set = 2, binding = 4) uniform sampler2DShadow spotLightShadowAtlas;
 
 #include "../../../../Includes/PushConstants/DeferredSpotLightPC.glsl"
 
@@ -66,7 +68,20 @@ void main()
 
     // 3. Final Attenuation and Physically Based Rendering (PBR)
     vec3 viewDir = normalize(camera.eye.xyz - position); 
+    vec3 lightDir = normalize(light.position.xyz - position);
+
+    float shadowFactor = CalculateSpotLightShadow(
+        ctx.spotLightShadowDataBufferAddr,
+        ctx.spotLightShadowSparseMapBufferAddr,
+        inEntityLightIndex,
+        position,
+        normal,
+        lightDir,
+        spotLightShadowAtlas
+    );
+
     vec3 radiance = SimulateSpotLight(ctx.spotLightDataBufferAddr, inLightDenseIndex, position, albedo, normal, viewDir, roughness, metallic);
+    radiance *= shadowFactor;
 
     if (ctx.enableSsao == 1 && ctx.enableSsaoLight == 1) {
         float ssao = texture(ssaoTexture, uv).r;

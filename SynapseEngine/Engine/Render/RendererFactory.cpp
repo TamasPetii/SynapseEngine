@@ -69,6 +69,7 @@
 #include "Engine/Render/Passes/Hiz/HizInitPass.h"
 #include "Engine/Render/Passes/Hiz/Geometry/GeometryHizLinearPreparePass.h"
 #include "Engine/Render/Passes/Hiz/Geometry/GeometryHizDownsamplePass.h"
+#include "Engine/Render/Passes/Shadow/ShadowAtlasTransitionPass.h"
 
 #include "Engine/Render/Passes/Hiz/DirectionLight/DirectionLightShadowHizCopyPass.h"
 #include "Engine/Render/Passes/Hiz/DirectionLight/DirectionLightShadowHizDownsamplePass.h"
@@ -292,7 +293,8 @@ namespace Syn
         pipeline->AddPass(std::make_unique<SpotLightShadowHizDownsamplePass>());
         pipeline->AddPass(std::make_unique<PointLightShadowHizCopyPass>());
         pipeline->AddPass(std::make_unique<PointLightShadowHizDownsamplePass>());
-
+        pipeline->AddPass(std::make_unique<ShadowAtlasTransitionPass>());
+            
         //Ssao Passes
         pipeline->AddPass(std::make_unique<SsaoInitPass>());
         pipeline->AddPass(std::make_unique<SsaoPass>());

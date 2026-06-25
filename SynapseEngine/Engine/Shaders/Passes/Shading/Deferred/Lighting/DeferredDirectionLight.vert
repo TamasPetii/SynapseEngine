@@ -10,7 +10,7 @@
 
 layout(location = 0) out vec2 outUV;
 layout(location = 1) out flat uint outLightDenseIndex;
-layout(location = 2) out flat uint outShadowDenseIndex;
+layout(location = 2) out flat uint outEntityLightIndex;
 layout(location = 3) out flat uint outCameraIndex;
 
 #include "../../../../Includes/PushConstants/DeferredDirectionLightPC.glsl"
@@ -28,15 +28,10 @@ void main()
 
     uint entityId = GET_DIRECTION_VISIBLE_LIGHT(ctx.directionLightVisibleIndexBufferAddr, gl_InstanceIndex);   
     uint lightDenseIndex = GET_SPARSE_INDEX(ctx.directionLightSparseMapBufferAddr, entityId);   
-    uint shadowDenseIndex = INVALID_INDEX; 
-
-    if (ctx.directionLightShadowSparseMapBufferAddr != 0) {
-        shadowDenseIndex = GET_SPARSE_INDEX(ctx.directionLightShadowSparseMapBufferAddr, entityId);
-    }
 
     uint cameraIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
 
     outLightDenseIndex = lightDenseIndex;
-    outShadowDenseIndex = shadowDenseIndex;
+    outEntityLightIndex = entityId;
     outCameraIndex = cameraIndex;
 }

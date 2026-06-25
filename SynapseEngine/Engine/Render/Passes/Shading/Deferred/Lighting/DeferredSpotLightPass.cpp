@@ -111,6 +111,11 @@ namespace Syn {
         auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge)->Handle();
 		auto ssaoSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge)->Handle();
 
+        uint fIdx = context.frameIndex;
+        auto drawData = context.scene->GetSceneDrawData();
+        auto spotShadowAtlas = drawData->SpotLightShadow.shadowAtlas[fIdx].get();
+        auto shadowSampler = imageManager->GetSampler(SamplerNames::ShadowSampler);
+
         Vk::PushDescriptorWriter pushWriter;
 
         pushWriter.AddCombinedImageSampler(
@@ -138,6 +143,13 @@ namespace Syn {
             3,
             group->GetImage(RenderTargetNames::SsaoAo)->GetView(Vk::ImageViewNames::Default),
             ssaoSampler,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            4,
+            spotShadowAtlas->GetView(Vk::ImageViewNames::Default),
+            shadowSampler->Handle(),
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 

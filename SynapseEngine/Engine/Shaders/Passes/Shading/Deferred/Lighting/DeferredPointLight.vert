@@ -10,7 +10,7 @@
 #include "../../../../Includes/Common/PointLight.glsl"
 
 layout(location = 0) out flat uint outLightDenseIndex;
-layout(location = 1) out flat uint outShadowDenseIndex;
+layout(location = 1) out flat uint outEntityLightIndex;
 layout(location = 2) out flat uint outCameraIndex;
 
 #include "../../../../Includes/PushConstants/DeferredPointLightPC.glsl"
@@ -25,12 +25,7 @@ void main()
 
     // 1. Resolve Entity ID and Sparse Indexes
     uint entityId = GET_POINT_VISIBLE_LIGHT(ctx.pointLightVisibleIndexBufferAddr, gl_InstanceIndex);   
-    uint lightDenseIndex = GET_SPARSE_INDEX(ctx.pointLightSparseMapBufferAddr, entityId);   
-    uint shadowDenseIndex = INVALID_INDEX; 
-
-    if (ctx.pointLightShadowSparseMapBufferAddr != 0) {
-        shadowDenseIndex = GET_SPARSE_INDEX(ctx.pointLightShadowSparseMapBufferAddr, entityId);
-    }
+    uint lightDenseIndex = GET_SPARSE_INDEX(ctx.pointLightSparseMapBufferAddr, entityId);
 
     // 2. Fetch Light and Vertex Data
     PointLightComponent light = GET_POINT_LIGHT(ctx.pointLightDataBufferAddr, lightDenseIndex);
@@ -51,6 +46,6 @@ void main()
     gl_Position = camera.viewProjVulkan * model * vec4(localPos, 1.0);
     
     outLightDenseIndex = lightDenseIndex;
-    outShadowDenseIndex = shadowDenseIndex;
+    outEntityLightIndex = entityId;
     outCameraIndex = cameraIndex;
 }
