@@ -158,6 +158,8 @@ namespace Syn {
         ctx.pointLightShadowSortValuesBufferAddr = drawData->PointLightShadow.sortValuesBuffer.GetAddress(fIdx);
         ctx.pointLightShadowVisibleMeshCountBufferAddr = drawData->PointLightShadow.visibleMeshCountDispatchBuffer.GetAddress(fIdx);
         ctx.pointLightShadowFinalizeDispatchBufferAddr = drawData->PointLightShadow.finalizeDispatchBuffer.GetAddress(fIdx);
+        ctx.pointLightShadowAtlasSortKeyBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightShadowAtlasSortKeyBuffer, fIdx);
+        ctx.pointLightShadowAtlasSortValueBufferAddr = compManager->GetBufferAddr(BufferNames::PointLightShadowAtlasSortValueBuffer, fIdx);
 
         ctx.forwardPlusTileGridListBufferAddr = drawData->ForwardPlus.tileGridBuffer.GetAddress(fIdx);
         ctx.forwardPlusClusterCountBufferAddr = drawData->ForwardPlus.clusterCountBuffer.GetAddress(fIdx);

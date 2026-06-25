@@ -253,6 +253,8 @@ namespace Syn
         RegisterComponentSparseMapBuffer<PointLightShadowComponent>(BufferNames::PointLightShadowSparseMap);
         RegisterComponentBuffer<PointLightShadowComponent, PointLightShadowComponentGPU>(BufferNames::PointLightShadowData);
         RegisterComponentBuffer<PointLightShadowComponent, uint32_t>(BufferNames::PointLightShadowVisibleData);
+        RegisterComponentBuffer<PointLightShadowComponent, uint32_t>(BufferNames::PointLightShadowAtlasSortKeyBuffer);
+        RegisterComponentBuffer<PointLightShadowComponent, uint32_t>(BufferNames::PointLightShadowAtlasSortValueBuffer);
 
         RegisterComponentSparseMapBuffer<SpotLightComponent>(BufferNames::SpotLightSparseMap);
         RegisterComponentBuffer<SpotLightComponent, SpotLightComponentGPU>(BufferNames::SpotLightData);

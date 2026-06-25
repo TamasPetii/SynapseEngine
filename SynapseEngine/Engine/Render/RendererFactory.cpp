@@ -47,6 +47,8 @@
 
 #include "Engine/Render/Passes/Culling/PointLight/PointLightCullingPass.h"
 #include "Engine/Render/Passes/Culling/PointLight/PointLightShadowBufferResetPass.h"
+#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowAtlasRadixSortPass.h"
+#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowAtlasAllocatorPass.h"
 #include "Engine/Render/Passes/Culling/PointLight/PointLightShadowCullingCommandResetPass.h"
 #include "Engine/Render/Passes/Culling/PointLight/PointLightShadowCullingMemoryBarrierPass.h"
 #include "Engine/Render/Passes/Culling/PointLight/PointLightShadowFinalizePass.h"
@@ -219,9 +221,11 @@ namespace Syn
         pipeline->AddPass(std::make_unique<SpotLightShadowFinalizePass>());
 
         //Gpu Driven Point Light Culling
-        pipeline->AddPass(std::make_unique<PointLightCullingPass>());
         pipeline->AddPass(std::make_unique<PointLightShadowBufferResetPass>());
         pipeline->AddPass(std::make_unique<PointLightShadowCullingCommandResetPass>());
+        pipeline->AddPass(std::make_unique<PointLightCullingPass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowAtlasRadixSortPass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowAtlasAllocatorPass>());
         pipeline->AddPass(std::make_unique<PointLightShadowMortonChunkCullingPass>());
         pipeline->AddPass(std::make_unique<PointLightShadowMortonModelCullingPass>());
         pipeline->AddPass(std::make_unique<PointLightShadowStaticChunkCullingPass>());

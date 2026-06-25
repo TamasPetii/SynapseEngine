@@ -38,6 +38,7 @@ namespace Syn
         RenderBuffer modelCullingIndirectDispatchBuffer;
         RenderBuffer finalizeDispatchBuffer;
 
+        RenderBuffer atlasRadixSortTempBuffer;
         RenderBuffer radixSortTempBuffer;
         RenderBuffer drawCallKeyBuffer;
         RenderBuffer sortValuesBuffer;

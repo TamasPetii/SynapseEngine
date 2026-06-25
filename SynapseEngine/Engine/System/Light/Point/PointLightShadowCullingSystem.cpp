@@ -84,7 +84,10 @@ namespace Syn
             }
             });
 
-        if (settings->culling.pointLightCullingDevice == CullingDeviceType::GPU || settings->culling.pointLightShadowCullingDevice == CullingDeviceType::GPU)
+        if (settings->culling.pointLightCullingDevice == CullingDeviceType::GPU)
+            return;
+
+        if (settings->culling.pointLightShadowCullingDevice == CullingDeviceType::GPU)
             return;
 
         auto registry = scene->GetRegistry();

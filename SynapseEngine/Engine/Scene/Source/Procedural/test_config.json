@@ -14,11 +14,11 @@
     "shared_material_count": 100
   },
   "entities": {
-    "animated_characters": 100,
+    "animated_characters": 500,
     "static_geometry": 1000,
-    "physics_boxes": 100,
-    "physics_spheres": 100,
-    "physics_capsules": 100
+    "physics_boxes": 500,
+    "physics_spheres": 500,
+    "physics_capsules": 500
   },
   "lights": {
     "directional_count": 1,

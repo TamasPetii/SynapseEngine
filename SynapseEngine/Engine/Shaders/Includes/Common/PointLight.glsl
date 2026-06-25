@@ -55,4 +55,7 @@ layout(buffer_reference, std430) readonly restrict buffer PointSortValuesBuffer 
 #define GET_POINT_SORTED_VALUE(addr, idx)                PointSortValuesBuffer(addr).data[idx]
 #define GET_POINT_SHADOW_INSTANCE_UNSORTED(addr, idx)    PointShadowInstanceBuffer(addr).data[idx]
 
+#define GET_POINT_ATLAS_SORT_KEY(addr, idx)              PointDrawCallKeyBuffer(addr).data[idx]
+#define GET_POINT_ATLAS_SORT_VALUE(addr, idx)            PointSortValuesBuffer(addr).data[idx]
+
 #endif

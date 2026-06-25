@@ -52,6 +52,9 @@ namespace Syn
         mortonChunkDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
         mortonChunkDispatchBuffer.UpdateCapacityAll(1);
 
+        atlasRadixSortTempBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, 1, storageUsage | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 10000, 20000 });
+        atlasRadixSortTempBuffer.UpdateCapacityAll(1);
+
         radixSortTempBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, 1, storageUsage | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 10000, 20000 });
         radixSortTempBuffer.UpdateCapacityAll(1);
 

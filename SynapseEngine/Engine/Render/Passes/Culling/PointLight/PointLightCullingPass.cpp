@@ -106,5 +106,21 @@ namespace Syn {
         colliderDataBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         colliderDataBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
         Vk::BufferUtils::InsertBarrier(context.cmd, colliderDataBarrier);
+
+        Vk::BufferBarrierInfo sortKeyBarrier{};
+        sortKeyBarrier.buffer = compManager->GetComponentBuffer(BufferNames::PointLightShadowAtlasSortKeyBuffer, fIdx).buffer->Handle();
+        sortKeyBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        sortKeyBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        sortKeyBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        sortKeyBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, sortKeyBarrier);
+
+        Vk::BufferBarrierInfo sortValueBarrier{};
+        sortValueBarrier.buffer = compManager->GetComponentBuffer(BufferNames::PointLightShadowAtlasSortValueBuffer, fIdx).buffer->Handle();
+        sortValueBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        sortValueBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        sortValueBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        sortValueBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, sortValueBarrier);
     }
 }

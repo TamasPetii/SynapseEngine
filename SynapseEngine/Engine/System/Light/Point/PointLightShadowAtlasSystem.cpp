@@ -44,6 +44,9 @@ namespace Syn
 
         if (!shadowPool || !lightPool || !cameraPool || cameraEntity == NULL_ENTITY) return;
 
+        if (scene->GetSettings()->culling.pointLightCullingDevice == CullingDeviceType::GPU)
+            return;
+
         this->EmplaceTask(subflow, "Update Point Shadow Atlas", [drawData, lightPool, shadowPool, cameraPool, cameraEntity]() {
 
             uint32_t activeLights = drawData->PointLightShadow.visibleLightCount;
@@ -197,6 +200,9 @@ namespace Syn
 
     void PointLightShadowAtlasSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
     {
+        if (scene->GetSettings()->culling.pointLightCullingDevice == CullingDeviceType::GPU)
+            return;
+
         this->EmplaceTask(subflow, SystemPhaseNames::UploadGPU, [scene, frameIndex]() {
             auto drawData = scene->GetSceneDrawData();
             auto& shadowGroup = drawData->PointLightShadow;

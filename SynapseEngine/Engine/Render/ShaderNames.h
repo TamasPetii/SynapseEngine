@@ -131,6 +131,7 @@ namespace Syn
         static constexpr const char* PointLightShadowMeshletTask = "Engine/Shaders/Passes/Shadow/PointLight/PointLightShadowMeshlet.task";
         static constexpr const char* PointLightShadowMeshletMesh = "Engine/Shaders/Passes/Shadow/PointLight/PointLightShadowMeshlet.mesh";
 
+        static constexpr const char* PointLightShadowAtlasAllocatorComp = "Engine/Shaders/Passes/Culling/PointLight/PointLightShadowAtlasAllocator.comp";
         static constexpr const char* PointLightShadowCullingCommandResetComp = "Engine/Shaders/Passes/Culling/PointLight/PointLightShadowCullingCommandReset.comp";
         static constexpr const char* PointLightShadowModelCullingComp = "Engine/Shaders/Passes/Culling/PointLight/PointLightShadowModelCulling.comp";
         static constexpr const char* PointLightShadowMeshCullingComp = "Engine/Shaders/Passes/Culling/PointLight/PointLightShadowMeshCulling.comp";
