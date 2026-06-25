@@ -69,6 +69,9 @@ namespace Syn
                         Info("Camera -> FOV: {}, Aspect: {}, Near: {}, ShadowFar: {}", cameraComp.fov, aspect, camNear, camFar);
                     }
 
+                    float globalNear = -2000.0f;
+                    float globalFar = 2000.0f;
+
                     for (int i = 0; i < 4; ++i)
                     {
                         // Calculate split slice distances
@@ -128,19 +131,11 @@ namespace Syn
                         float zNear = -maxOrtho.z;
                         float zFar = -minOrtho.z;
 
-                        zNear -= 200.0f;
-                        zFar += 200.0f;
+                        zNear -= 500.0f;
+                        zFar += 500.0f;
 
                         minOrtho.z = -zFar;
                         maxOrtho.z = -zNear;
-
-                        /*
-                        float zMult = 10.0f;
-                        if (minOrtho.z < 0) minOrtho.z *= zMult;
-                        else minOrtho.z /= zMult;
-                        if (maxOrtho.z < 0) maxOrtho.z /= zMult;
-                        else maxOrtho.z *= zMult;
-                        */
 
                         shadowComp.cascadeAabbMin[i] = minOrtho;
                         shadowComp.cascadeAabbMax[i] = maxOrtho;

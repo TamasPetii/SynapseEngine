@@ -15,9 +15,11 @@ namespace Syn
         cascadeAabbMax.fill(glm::vec3(0.0f));
     }
 
-    DirectionLightShadowGPU::DirectionLightShadowGPU(const DirectionLightShadowComponent& component) :
-        cascadeSplits(component.cascadeSplits)
+    DirectionLightShadowGPU::DirectionLightShadowGPU(const DirectionLightShadowComponent& component)
     {
+        float camFar = component.shadowFarPlane;
+        cascadeSplits = component.cascadeSplits * camFar;
+
         for (int i = 0; i < 4; ++i)
         {
             cascadeViewProjsVulkan[i] = component.cascadeViewProjsVulkan[i];

@@ -486,7 +486,7 @@ namespace Syn
             registry.AddComponent<TransformComponent>(e);
             registry.AddComponent<DirectionLightComponent>(e);
 
-            registry.GetComponent<TransformComponent>(e).rotation = glm::vec3(rand() % 360, rand() % 360, rand() % 360);
+            registry.GetComponent<TransformComponent>(e).rotation = glm::vec3(92.0f, 320.0f, 215.0f);
             auto& light = registry.GetComponent<DirectionLightComponent>(e);
             light.color = glm::vec3(1.0f, 0.95f, 0.85f) * 0.55f;
             light.strength = 5.0f;

@@ -14,7 +14,7 @@ namespace Syn
         , spotLightShadowSpatialAcceleration(SpatialAccelerationType::None)
         , pointLightShadowSpatialAcceleration(SpatialAccelerationType::None)
         , enableHiz(true)
-        , enableMeshletConeCulling(true)
+        , enableMeshletConeCulling(false)
         , enableFrustumCulling(true)
         , enableChunkFrustumCulling(true)
         , enableModelFrustumCulling(true)

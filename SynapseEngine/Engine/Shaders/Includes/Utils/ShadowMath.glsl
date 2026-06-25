@@ -25,45 +25,38 @@ float CalculateDirectionalLightShadow(
 
     DirectionLightShadowComponent shadowComp = GET_DIRECTION_LIGHT_SHADOW(dirLightShadowDataBufferAddr, shadowDenseIndex);
 
-    // 1. Cascade selection based on view-space depth
+    // Select cascade based on absolute view-space depth
     uint cascadeIndex = 0;
     for (uint i = 0; i < 3; ++i) {
         if (viewDepth > shadowComp.cascadeSplits[i]) {
             cascadeIndex = i + 1;
         }
     }
-
     outCascadeIndex = cascadeIndex;
 
-    float NoL = clamp(dot(normal, lightDir), 0.001, 1.0);
-    float offsetScale = clamp(1.0 - NoL, 0.0, 1.0);
-    float orthoWidth = 1.0 / abs(shadowComp.cascadeViewProjsVulkan[cascadeIndex][0][0]);
-    float normalOffsetAmount = orthoWidth * 0.015; 
-    vec3 biasedWorldPos = worldPos + normal * (normalOffsetAmount * offsetScale);
-    vec4 clipPos = shadowComp.cascadeViewProjsVulkan[cascadeIndex] * vec4(biasedWorldPos, 1.0);
+    vec4 clipPos = shadowComp.cascadeViewProjsVulkan[cascadeIndex] * vec4(worldPos, 1.0);
     vec3 ndc = clipPos.xyz / (clipPos.w == 0.0 ? 1.0 : clipPos.w);
-    float depthBias = 0.0005 * float(cascadeIndex + 1);
-    float currentDepth = ndc.z - depthBias;
-
-    // 2. Clip Space
-    if (ndc.x < -1.0 || ndc.x > 1.0 || ndc.y < -1.0 || ndc.y > 1.0) {
+    
+    if (ndc.z < 0.0 || ndc.z > 1.0 || ndc.x < -1.0 || ndc.x > 1.0 || ndc.y < -1.0 || ndc.y > 1.0) {
         return 1.0; 
     }
 
-    // 3. NDC to Atlas UV
+    float constantDepthBias = 0.0002; 
+    float currentDepth = ndc.z - constantDepthBias;
+
+    // Map NDC to shadow atlas UV coordinates
     vec2 uv = ndc.xy * 0.5 + 0.5;
     vec4 rect = shadowComp.cascadeAtlasRects[cascadeIndex];
     uv = uv * rect.zw + rect.xy;
 
-    // 4. Clamp UV with half-texel margin
+    // Clamp UV with half-texel margin to prevent cascade bleeding
     vec2 texelSize = 1.0 / vec2(textureSize(shadowAtlas, 0));
     vec2 minUV = rect.xy + (texelSize * 0.5); 
     vec2 maxUV = rect.xy + rect.zw - (texelSize * 0.5);
     uv = clamp(uv, minUV, maxUV);
 
-    // 5. 3x3 PCF
+    // 3x3 PCF filtering
     float shadow = 0.0;
-    
     for (int x = -1; x <= 1; ++x) {
         for (int y = -1; y <= 1; ++y) {
             vec2 offset = vec2(x, y) * texelSize;

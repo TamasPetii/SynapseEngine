@@ -87,12 +87,7 @@ void main() {
     vec4 viewPos = camera.view * vec4(worldPos, 1.0);
     float viewDepth = abs(viewPos.z);
     vec3 viewDir = normalize(camera.eye.xyz - worldPos);
-    
-    float nearPlane = camera.params.x;
-    float farPlane  = camera.params.y;
-    float normalizedViewDepth = (viewDepth - nearPlane) / (farPlane - nearPlane);
-    normalizedViewDepth = clamp(normalizedViewDepth, 0.0, 1.0);
-
+   
     uint tileX = uint(gl_FragCoord.x) / ctx.tileSize;
     uint tileY = uint(gl_FragCoord.y) / ctx.tileSize;
     uint tileIndex = tileY * ctx.tileCountX + tileX;
@@ -121,7 +116,7 @@ void main() {
             worldPos,
             finalNormal,
             lightDir,
-            normalizedViewDepth,
+            viewDepth,
             dirLightShadowAtlas,
             debugCascadeIndex
         );
@@ -136,10 +131,12 @@ void main() {
             finalMetalness
         );
 
+        /*
         if (debugCascadeIndex == 0) lightContribution *= vec3(2.0, 0.5, 0.5);
         else if (debugCascadeIndex == 1) lightContribution *= vec3(0.5, 2.0, 0.5); 
         else if (debugCascadeIndex == 2) lightContribution *= vec3(0.5, 0.5, 2.0);
         else if (debugCascadeIndex == 3) lightContribution *= vec3(2.0, 2.0, 0.5); 
+        */
 
         totalRadiance += lightContribution * shadowFactor;
     }
