@@ -45,6 +45,7 @@ vec3 SimulateSpotLight(const uint64_t spotLightDataBufferAddr, uint lightIndex, 
     SpotLightComponent light = GET_SPOT_LIGHT(spotLightDataBufferAddr, lightIndex);
     
     float distToLight = distance(worldPos, light.position);
+
     if (distToLight > light.range) return vec3(0.0);
 
     vec3 lightDirToFrag = normalize(worldPos - light.position);

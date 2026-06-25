@@ -140,9 +140,15 @@ namespace Syn {
 
         uint fIdx = context.frameIndex;
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, fIdx);
+        auto drawData = context.scene->GetSceneDrawData();
 
         auto ssaoTexture = rtGroup->GetImage(RenderTargetNames::SsaoAo);
         auto ssaoSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge);
+
+        auto dirShadowAtlas = drawData->DirectionLightShadow.shadowAtlas[fIdx].get();
+        auto pointShadowAtlas = drawData->PointLightShadow.shadowAtlas[fIdx].get();
+        auto spotShadowAtlas = drawData->SpotLightShadow.shadowAtlas[fIdx].get();
+        auto shadowSampler = imageManager->GetSampler(SamplerNames::ShadowSampler);
 
         Vk::PushDescriptorWriter pushWriter;
 
@@ -150,6 +156,27 @@ namespace Syn {
             1,
             ssaoTexture->GetView(Vk::ImageViewNames::Default),
             ssaoSampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            2,
+            dirShadowAtlas->GetView(Vk::ImageViewNames::Default),
+            shadowSampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            3,
+            pointShadowAtlas->GetView(Vk::ImageViewNames::Default),
+            shadowSampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            4,
+            spotShadowAtlas->GetView(Vk::ImageViewNames::Default),
+            shadowSampler->Handle(),
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 
