@@ -1,74 +1,98 @@
-name: Synapse Engine Build
+name: Synapse Engine CI
 
 on:
   push:
-    branches: [ "remake" ]
+    branches: 
+      - "main"
+      - "dev"
   pull_request:
-    branches: [ "remake" ]
-  workflow_dispatch:
+    branches: 
+      - "main"
+      - "dev"
 
 jobs:
   build:
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 120 
+    
     env:
-      VCPKG_DEFAULT_BINARY_CACHE: ${{ github.workspace }}/vcpkg_cache
-
+      VCPKG_ROOT: ${{ github.workspace }}/External/vcpkg
+      VCPKG_BINARY_SOURCES: "clear;files,${{ github.workspace }}/vcpkg_archives,readwrite"
+    
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
       with:
         submodules: recursive
 
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2
-
-    - name: Create Cache Directory
-      run: mkdir -p ${{ github.workspace }}/vcpkg_cache
-      shell: bash
-
-    - name: Restore vcpkg binary cache
+    - name: Cache vcpkg binaries
       uses: actions/cache@v4
       with:
-        path: ${{ github.workspace }}/vcpkg_cache
-        key: ${{ runner.os }}-vcpkg-static-md-${{ hashFiles('SynapseEngine/vcpkg.json') }}
+        path: ${{ github.workspace }}/vcpkg_archives
+        key: ${{ matrix.os }}-vcpkg-archives-${{ hashFiles('**/xmake.lua') }}
         restore-keys: |
-          ${{ runner.os }}-vcpkg-static-md-
+          ${{ matrix.os }}-vcpkg-archives-
+
+    - name: Create vcpkg archives directory
+      shell: bash
+      run: mkdir -p ${{ github.workspace }}/vcpkg_archives
+
+    - name: Install Linux Dependencies
+      if: runner.os == 'Linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          gcc-14 g++-14 \
+          libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev \
+          libgl1-mesa-dev libxxf86vm-dev libwayland-dev libxkbcommon-dev
+
+    - name: Install Xmake
+      shell: bash
+      run: |
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          choco install xmake -y
+          echo "C:/Program Files/xmake" >> $GITHUB_PATH
+          export PATH="/c/Program Files/xmake:$PATH"
+          xmake update -s dev
+        else
+          curl -fsSL https://xmake.io/shget.text | bash
+        fi
 
     - name: Bootstrap vcpkg
+      shell: bash
       run: |
         cd External/vcpkg
-        .\bootstrap-vcpkg.bat
-      shell: cmd
+        if [ "$RUNNER_OS" == "Windows" ]; then
+          ./bootstrap-vcpkg.bat
+        else
+          ./bootstrap-vcpkg.sh
+        fi
 
-    - name: Setup Vulkan
-      uses: humbletim/setup-vulkan-sdk@v1
-      with:
-        vulkan-query-version: latest
-        vulkan-components: Vulkan-Headers, Vulkan-Loader, Volk, Shaderc
-        vulkan-use-cache: true
+    - name: Setup MSVC Environment (Windows only)
+      if: runner.os == 'Windows'
+      uses: ilammy/msvc-dev-cmd@v1
 
-
-    - name: Build Solution (Dist)
+    - name: Configure and Build
+      shell: bash
       run: |
-        msbuild SynapseEngine/SynapseEngine.slnx `
-        /p:Configuration=Dist `
-        /p:Platform=x64 `
-        /p:PlatformToolset=v143 `
-        /p:VcpkgEnableManifest=true `
-        /p:VcpkgConfiguration=Release `
-        /m
-      shell: pwsh
+        cd SynapseEngine
+
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          export CC=gcc-14
+          export CXX=g++-14
+          xmake f -p linux -a x64 -m release --cc=gcc-14 --cxx=g++-14 -v -y
+        else
+          xmake f -p windows -a x64 --toolchain=msvc -m release -v -y
+        fi
+        
+        xmake -v
 
     - name: Run Unit Tests
+      shell: bash
       run: |
-        vstest.console.exe "SynapseEngine/Binaries/x64/Dist/UnitTests.exe" `
-        /Settings:"SynapseEngine/UnitTests.runsettings" `
-        /Logger:console;verbosity=detailed
-      shell: pwsh
-      
-    - name: Upload Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: SynapseEngine-Build
-        path: SynapseEngine/Binaries/x64/Dist/
-        if-no-files-found: error
+        cd SynapseEngine
+        xmake run UnitTests
