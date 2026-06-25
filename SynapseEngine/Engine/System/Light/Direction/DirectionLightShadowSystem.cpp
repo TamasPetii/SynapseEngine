@@ -69,9 +69,6 @@ namespace Syn
                         Info("Camera -> FOV: {}, Aspect: {}, Near: {}, ShadowFar: {}", cameraComp.fov, aspect, camNear, camFar);
                     }
 
-                    float globalNear = -2000.0f;
-                    float globalFar = 2000.0f;
-
                     for (int i = 0; i < 4; ++i)
                     {
                         // Calculate split slice distances
@@ -117,22 +114,23 @@ namespace Syn
                         // Light view matrix looking at the sphere center
                         glm::mat4 lightView = glm::lookAt(center - lightComp.direction * radius, center, up);
 
+                        float orthoExtent = radius * 1.05f;
+
                         // Calculate Orthographic AABB in light space
-                        glm::vec3 minOrtho(std::numeric_limits<float>::max());
-                        glm::vec3 maxOrtho(std::numeric_limits<float>::lowest());
+                        glm::vec3 minOrtho(-orthoExtent, -orthoExtent, 0.0f);
+                        glm::vec3 maxOrtho(orthoExtent, orthoExtent, 0.0f);
 
                         // Expand Z bounds to capture objects behind the camera
+                        float minZ = std::numeric_limits<float>::max();
+                        float maxZ = std::numeric_limits<float>::lowest();
                         for (int j = 0; j < 8; ++j) {
                             glm::vec3 trf = glm::vec3(lightView * glm::vec4(corners[j], 1.0f));
-                            minOrtho = glm::min(minOrtho, trf);
-                            maxOrtho = glm::max(maxOrtho, trf);
+                            minZ = std::min(minZ, trf.z);
+                            maxZ = std::max(maxZ, trf.z);
                         }
 
-                        float zNear = -maxOrtho.z;
-                        float zFar = -minOrtho.z;
-
-                        zNear -= 500.0f;
-                        zFar += 500.0f;
+                        float zNear = -maxZ - 1000.0f;
+                        float zFar = -minZ + 500.0f;
 
                         minOrtho.z = -zFar;
                         maxOrtho.z = -zNear;
@@ -141,7 +139,7 @@ namespace Syn
                         shadowComp.cascadeAabbMax[i] = maxOrtho;
 
                         // Create projection and view-projection matrices
-                        glm::mat4 orthoProj = glm::orthoZO(minOrtho.x, maxOrtho.x, minOrtho.y, maxOrtho.y, minOrtho.z, maxOrtho.z);
+                        glm::mat4 orthoProj = glm::orthoZO(minOrtho.x, maxOrtho.x, minOrtho.y, maxOrtho.y, zNear, zFar);
                         glm::mat4 viewProj = orthoProj * lightView;
                         shadowComp.cascadeViews[i] = lightView;
                         shadowComp.cascadeProjs[i] = orthoProj;

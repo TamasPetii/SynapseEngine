@@ -41,8 +41,14 @@ float CalculateDirectionalLightShadow(
         return 1.0; 
     }
 
-    float constantDepthBias = 0.0002; 
-    float currentDepth = ndc.z - constantDepthBias;
+    float NoL = clamp(dot(normal, lightDir), 0.0, 1.0);
+    float tanTheta = sqrt(1.0 - NoL * NoL) / (NoL + 0.0001);
+    float cascadeMultiplier = 1.0 + (float(cascadeIndex) * 0.5);
+    float baseConstantBias = 0.0001; 
+    float baseSlopeBias = 0.0005;
+    float totalBias = (baseConstantBias + baseSlopeBias * tanTheta) * cascadeMultiplier;
+    totalBias = min(totalBias, 0.0025); 
+    float currentDepth = ndc.z - totalBias;
 
     // Map NDC to shadow atlas UV coordinates
     vec2 uv = ndc.xy * 0.5 + 0.5;
