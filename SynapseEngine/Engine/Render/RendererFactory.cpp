@@ -293,7 +293,7 @@ namespace Syn
         pipeline->AddPass(std::make_unique<SpotLightShadowHizCopyPass>());
         pipeline->AddPass(std::make_unique<SpotLightShadowHizDownsamplePass>());
         pipeline->AddPass(std::make_unique<PointLightShadowHizCopyPass>());
-        pipeline->AddPass(std::make_unique<PointLightShadowHizDownsamplePass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowHizDownsamplePass>()); 
         */
 
         pipeline->AddPass(std::make_unique<ShadowAtlasTransitionPass>());

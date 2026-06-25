@@ -10,7 +10,7 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
-#include "Engine/Component/Light/Direction/DirectionLightComponent.h"
+#include "Engine/Component/Light/Direction/DirectionLightShadowComponent.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
@@ -19,7 +19,7 @@ namespace Syn {
 
     bool DirectionLightShadowStaticChunkCullingPass::ShouldExecute(const RenderContext& context) const
     {
-        auto pool = context.scene->GetRegistry()->GetPool<DirectionLightComponent>();
+        auto pool = context.scene->GetRegistry()->GetPool<DirectionLightShadowComponent>();
         auto settings = context.scene->GetSettings();
 
         return settings->culling.directionLightShadowCullingDevice == CullingDeviceType::GPU 
@@ -42,7 +42,7 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
 
         _activeChunkCount = drawData->Chunks.chunkCounter.load(std::memory_order_relaxed);
-        _activeLights = static_cast<uint32_t>(scene->GetRegistry()->GetPool<DirectionLightComponent>()->Size());
+        _activeLights = static_cast<uint32_t>(scene->GetRegistry()->GetPool<DirectionLightShadowComponent>()->Size());
 
         if (_activeChunkCount == 0 || _activeLights == 0) return;
 

@@ -4,7 +4,7 @@
 #include "Engine/Scene/Scene.h"
 #include "Engine/Vk/Buffer/BufferUtils.h"
 #include "Engine/Render/ComputeGroupSize.h"
-#include "Engine/Component/Light/Direction/DirectionLightComponent.h"
+#include "Engine/Component/Light/Direction/DirectionLightShadowComponent.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
@@ -12,7 +12,7 @@ namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/CullingCommandResetPC.glsl"
 
     bool DirectionLightShadowCullingCommandResetPass::ShouldExecute(const RenderContext& context) const {
-        auto pool = context.scene->GetRegistry()->GetPool<DirectionLightComponent>();
+        auto pool = context.scene->GetRegistry()->GetPool<DirectionLightShadowComponent>();
         return context.scene->GetSettings()->culling.directionLightShadowCullingDevice == CullingDeviceType::GPU 
             && pool && pool->Size() > 0;
     }

@@ -12,6 +12,7 @@
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/ImageManager.h"
+#include "Engine/Component/Light/Direction/DirectionLightShadowComponent.h"
 
 namespace Syn {
 
@@ -19,7 +20,8 @@ namespace Syn {
 
     bool DirectionLightShadowMeshletOpaquePass::ShouldExecute(const RenderContext& context) const
     {
-        return true;
+        auto pool = context.scene->GetRegistry()->GetPool<DirectionLightShadowComponent>();
+        return pool && pool->Size() > 0;
     }
 
     DirectionLightShadowMeshletOpaquePass::DirectionLightShadowMeshletOpaquePass(MaterialRenderType renderType)

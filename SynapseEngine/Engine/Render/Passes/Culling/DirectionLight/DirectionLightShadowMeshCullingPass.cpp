@@ -14,7 +14,7 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
-#include "Engine/Component/Light/Direction/DirectionLightComponent.h"
+#include "Engine/Component/Light/Direction/DirectionLightShadowComponent.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
@@ -23,7 +23,7 @@ namespace Syn {
 
     bool DirectionLightShadowMeshCullingPass::ShouldExecute(const RenderContext& context) const
     {
-        auto pool = context.scene->GetRegistry()->GetPool<DirectionLightComponent>();
+        auto pool = context.scene->GetRegistry()->GetPool<DirectionLightShadowComponent>();
         return context.scene->GetSettings()->culling.directionLightShadowCullingDevice == CullingDeviceType::GPU && pool && pool->Size() > 0;
     }
 

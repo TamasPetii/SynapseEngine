@@ -13,6 +13,7 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Scene/DrawData/SpotLightShadowDrawGroup.h"
+#include "Engine/Component/Light/Spot/SpotLightShadowComponent.h"
 
 namespace Syn {
 
@@ -20,7 +21,8 @@ namespace Syn {
 
     bool SpotLightShadowMeshletOpaquePass::ShouldExecute(const RenderContext& context) const
     {
-        return true;
+        auto pool = context.scene->GetRegistry()->GetPool<SpotLightShadowComponent>();
+        return pool && pool->Size() > 0;
     }
 
     SpotLightShadowMeshletOpaquePass::SpotLightShadowMeshletOpaquePass(MaterialRenderType renderType)

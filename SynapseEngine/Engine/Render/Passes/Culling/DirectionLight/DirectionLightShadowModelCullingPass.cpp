@@ -16,7 +16,7 @@
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "Engine/Component/Core/TransformComponent.h"
-#include "Engine/Component/Light/Direction/DirectionLightComponent.h"
+#include "Engine/Component/Light/Direction/DirectionLightShadowComponent.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
@@ -25,7 +25,7 @@ namespace Syn {
 
     bool DirectionLightShadowModelCullingPass::ShouldExecute(const RenderContext& context) const
     {
-        auto pool = context.scene->GetRegistry()->GetPool<DirectionLightComponent>();
+        auto pool = context.scene->GetRegistry()->GetPool<DirectionLightShadowComponent>();
         return context.scene->GetSettings()->culling.directionLightShadowCullingDevice == CullingDeviceType::GPU 
             && pool && pool->Size() > 0;
     }
@@ -46,7 +46,7 @@ namespace Syn {
         auto settings = scene->GetSettings();
 
         auto transformPool = scene->GetRegistry()->GetPool<TransformComponent>();
-        auto lightPool = scene->GetRegistry()->GetPool<DirectionLightComponent>();
+        auto lightPool = scene->GetRegistry()->GetPool<DirectionLightShadowComponent>();
 
         if (!transformPool || transformPool->Size() == 0 || !lightPool || lightPool->Size() == 0) {
             _totalModelsToTest = 0;

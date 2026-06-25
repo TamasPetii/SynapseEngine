@@ -8,6 +8,7 @@
 #include "Engine/Scene/Scene.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
+#include "Engine/Component/Light/Direction/DirectionLightShadowComponent.h"
 
 namespace Syn {
 
@@ -15,7 +16,8 @@ namespace Syn {
     
     bool DirectionLightShadowTraditionalOpaquePass::ShouldExecute(const RenderContext& context) const
     {
-        return true;
+        auto pool = context.scene->GetRegistry()->GetPool<DirectionLightShadowComponent>();
+        return pool && pool->Size() > 0;
     }
 
     DirectionLightShadowTraditionalOpaquePass::DirectionLightShadowTraditionalOpaquePass(MaterialRenderType renderType)

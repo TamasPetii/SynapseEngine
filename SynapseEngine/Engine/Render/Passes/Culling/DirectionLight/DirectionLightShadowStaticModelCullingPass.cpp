@@ -9,7 +9,7 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
-#include "Engine/Component/Light/Direction/DirectionLightComponent.h"
+#include "Engine/Component/Light/Direction/DirectionLightShadowComponent.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
@@ -18,13 +18,12 @@ namespace Syn {
 
     bool DirectionLightShadowStaticModelCullingPass::ShouldExecute(const RenderContext& context) const
     {
-        auto pool = context.scene->GetRegistry()->GetPool<DirectionLightComponent>();
+        auto pool = context.scene->GetRegistry()->GetPool<DirectionLightShadowComponent>();
         auto settings = context.scene->GetSettings();
 
         return settings->culling.directionLightShadowCullingDevice == CullingDeviceType::GPU 
             && settings->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::StaticBvh
             && pool && pool->Size() > 0;
-
     }
 
     void DirectionLightShadowStaticModelCullingPass::Initialize() {

@@ -9,6 +9,7 @@
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
 #include "Engine/Scene/DrawData/SpotLightShadowDrawGroup.h"
+#include "Engine/Component/Light/Spot/SpotLightShadowComponent.h"
 
 namespace Syn {
 
@@ -16,7 +17,8 @@ namespace Syn {
 
     bool SpotLightShadowTraditionalOpaquePass::ShouldExecute(const RenderContext& context) const
     {
-        return true;
+        auto pool = context.scene->GetRegistry()->GetPool<SpotLightShadowComponent>();
+        return pool && pool->Size() > 0;
     }
 
     SpotLightShadowTraditionalOpaquePass::SpotLightShadowTraditionalOpaquePass(MaterialRenderType renderType)

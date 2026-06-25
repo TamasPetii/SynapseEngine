@@ -13,6 +13,7 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Scene/DrawData/PointLightShadowDrawGroup.h"
+#include "Engine/Component/Light/Point/PointLightShadowComponent.h"
 
 namespace Syn {
 
@@ -20,7 +21,8 @@ namespace Syn {
 
     bool PointLightShadowMeshletOpaquePass::ShouldExecute(const RenderContext& context) const
     {
-        return true;
+        auto pool = context.scene->GetRegistry()->GetPool<PointLightShadowComponent>();
+        return pool && pool->Size() > 0;
     }
 
     PointLightShadowMeshletOpaquePass::PointLightShadowMeshletOpaquePass(MaterialRenderType renderType)

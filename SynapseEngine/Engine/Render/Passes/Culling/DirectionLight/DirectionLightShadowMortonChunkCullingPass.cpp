@@ -11,7 +11,7 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
-#include "Engine/Component/Light/Direction/DirectionLightComponent.h"
+#include "Engine/Component/Light/Direction/DirectionLightShadowComponent.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
@@ -30,7 +30,7 @@ namespace Syn {
 
     bool DirectionLightShadowMortonChunkCullingPass::ShouldExecute(const RenderContext& context) const {
         auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
-        auto lightPool = context.scene->GetRegistry()->GetPool<DirectionLightComponent>();
+        auto lightPool = context.scene->GetRegistry()->GetPool<DirectionLightShadowComponent>();
         auto settings = context.scene->GetSettings();
 
         return settings->culling.directionLightShadowCullingDevice == CullingDeviceType::GPU 
@@ -41,7 +41,7 @@ namespace Syn {
     void DirectionLightShadowMortonChunkCullingPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         _staticCount = static_cast<uint32_t>(scene->GetRegistry()->GetPool<TransformComponent>()->GetStorage().GetStaticEntities().size());
-        _activeLights = static_cast<uint32_t>(scene->GetRegistry()->GetPool<DirectionLightComponent>()->Size());
+        _activeLights = static_cast<uint32_t>(scene->GetRegistry()->GetPool<DirectionLightShadowComponent>()->Size());
 
         Vk::PushConstant<DirectionLightShadowCullingPC> pc;
         pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex);
