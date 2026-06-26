@@ -24,4 +24,7 @@ namespace Syn::UI {
     bool PropertyColor4(const char* label, glm::vec4& color, int indentLevel = 0);
 
     bool PropertyCheckbox(const char* label, bool& value, int indentLevel = 0);
+
+    bool BeginPropertyCombo(const char* label, const char* preview_value, int indentLevel = 0);
+    void EndPropertyCombo();
 }

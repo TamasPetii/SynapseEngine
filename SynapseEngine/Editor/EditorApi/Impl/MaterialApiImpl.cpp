@@ -1,67 +1,94 @@
 #include "MaterialApiImpl.h"
-#include "Engine/Material/MaterialManager.h"
-#include "Engine/Image/ImageManager.h"
-#include "Engine/Logger/SynLog.h"
+#include "EditorCore/ViewModels/MaterialGraph/MaterialGraphState.h"
+#include <filesystem>
 
 namespace Syn {
-    std::vector<MaterialApiDesc> MaterialApiImpl::GetAllMaterials() const {
-        std::vector<MaterialApiDesc> result;
-        auto materialManager = _engine->GetMaterialManager();
-        if (!materialManager) return result;
 
-        for (const auto& path : materialManager->GetResourcePaths()) {
-            result.push_back({ materialManager->GetResourceIndex(path), path });
+    std::vector<MaterialItemData> MaterialApiImpl::GetAllMaterials() const {
+        if (!_materialManager) return {};
+
+        std::vector<MaterialItemData> result;
+        auto paths = _materialManager->GetResourcePaths();
+
+        for (uint32_t i = 0; i < paths.size(); ++i) {
+            if (_materialManager->GetEntryState(i) == ResourceState::Ready) {
+                std::filesystem::path p(paths[i]);
+                result.push_back({ i, p.filename().string(), paths[i] });
+            }
         }
         return result;
     }
 
-    std::vector<TextureApiDesc> MaterialApiImpl::GetAllTextures() const {
-        std::vector<TextureApiDesc> result;
-        auto imageManager = _engine->GetImageManager();
-        if (!imageManager) return result;
+    uint32_t MaterialApiImpl::GetSelectedMaterial() const { return _selectedMaterial; }
+    void MaterialApiImpl::SetSelectedMaterial(uint32_t id) { _selectedMaterial = id; }
+    uint64_t MaterialApiImpl::GetVersion() const { return _materialManager ? _materialManager->GetVersion() : 0; }
 
-        for (const auto& path : imageManager->GetResourcePaths()) {
-            result.push_back({ imageManager->GetResourceIndex(path), path });
+    std::string MaterialApiImpl::GetMaterialName(uint32_t materialId) const {
+        auto mats = GetAllMaterials();
+        for (const auto& m : mats) {
+            if (m.id == materialId) return m.name;
         }
-        return result;
+        return "Unknown Material";
+    }
+
+    uint32_t MaterialApiImpl::GetLinkedTexture(uint32_t materialId, uint32_t textureType) const {
+        if (!_materialManager || materialId == INVALID_MATERIAL_ID) return INVALID_MATERIAL_ID;
+
+        auto mat = _materialManager->GetResource(materialId);
+        if (!mat) return INVALID_MATERIAL_ID;
+
+        switch (static_cast<GraphPinType>(textureType)) {
+        case GraphPinType::Albedo: return mat->albedoTexture;
+        case GraphPinType::Normal: return mat->normalTexture;
+        case GraphPinType::Metalness: return mat->metalnessTexture;
+        case GraphPinType::Roughness: return mat->roughnessTexture;
+        case GraphPinType::MetallicRoughness: return mat->metallicRoughnessTexture;
+        case GraphPinType::Emissive: return mat->emissiveTexture;
+        case GraphPinType::AmbientOcclusion: return mat->ambientOcclusionTexture;
+        default: return INVALID_MATERIAL_ID;
+        }
     }
 
     void MaterialApiImpl::LinkTextureToMaterial(uint32_t materialId, uint32_t textureType, uint32_t textureId) {
-        auto materialManager = _engine->GetMaterialManager();
-        if (!materialManager) return;
-        auto material = materialManager->GetResource(materialId);
-        if (!material) return;
+        if (!_materialManager || materialId == INVALID_MATERIAL_ID) return;
 
-        switch (textureType) {
-            case 0: material->albedoTexture = textureId; break;
-            case 1: material->normalTexture = textureId; break;
-            case 2: material->metalnessTexture = textureId; break;
-            case 3: material->roughnessTexture = textureId; break;
-            case 4: material->metallicRoughnessTexture = textureId; break;
-            case 5: material->emissiveTexture = textureId; break;
-            case 6: material->ambientOcclusionTexture = textureId; break;
-            default:
-                Syn::Warning("MaterialApiImpl: Ismeretlen textúra slot ({}) a {} azonosítójú materialhoz!", textureType, materialId);
-                return;
+        auto mat = _materialManager->GetResource(materialId);
+        if (!mat) return;
+
+        switch (static_cast<GraphPinType>(textureType)) {
+        case GraphPinType::Albedo: mat->albedoTexture = textureId; break;
+        case GraphPinType::Normal: mat->normalTexture = textureId; break;
+        case GraphPinType::Metalness: mat->metalnessTexture = textureId; break;
+        case GraphPinType::Roughness: mat->roughnessTexture = textureId; break;
+        case GraphPinType::MetallicRoughness: mat->metallicRoughnessTexture = textureId; break;
+        case GraphPinType::Emissive: mat->emissiveTexture = textureId; break;
+        case GraphPinType::AmbientOcclusion: mat->ambientOcclusionTexture = textureId; break;
+        default: break;
         }
-        Syn::Info("MaterialApiImpl: Textúra ({}) bekötve a Material ({}) {} slotjába.", textureId, materialId, textureType);
     }
 
     void MaterialApiImpl::UnlinkTextureFromMaterial(uint32_t materialId, uint32_t textureType) {
-        auto materialManager = _engine->GetMaterialManager();
-        if (!materialManager) return;
-        auto material = materialManager->GetResource(materialId);
-        if (!material) return;
+        LinkTextureToMaterial(materialId, textureType, 0xFFFFFFFF);
+    }
 
-        switch (textureType) {
-            case 0: material->albedoTexture = UINT32_MAX; break;
-            case 1: material->normalTexture = UINT32_MAX; break;
-            case 2: material->metalnessTexture = UINT32_MAX; break;
-            case 3: material->roughnessTexture = UINT32_MAX; break;
-            case 4: material->metallicRoughnessTexture = UINT32_MAX; break;
-            case 5: material->emissiveTexture = UINT32_MAX; break;
-            case 6: material->ambientOcclusionTexture = UINT32_MAX; break;
+    bool MaterialApiImpl::GetMaterialData(uint32_t materialId, Material& outMaterial) const {
+        if (!_materialManager || materialId == INVALID_MATERIAL_ID) return false;
+
+        auto resource = _materialManager->GetResource(materialId);
+        if (resource) {
+            outMaterial = *resource;
+            return true;
         }
-        Syn::Info("MaterialApiImpl: Textúra kikötve a Material ({}) {} slotjából.", materialId, textureType);
+        return false;
+    }
+
+    void MaterialApiImpl::UpdateMaterialData(uint32_t materialId, const Material& material) {
+        if (!_materialManager || materialId == INVALID_MATERIAL_ID) return;
+
+        auto resource = _materialManager->GetResource(materialId);
+        if (resource) {
+            *resource = material;
+            //_materialManager->MarkDirty(materialId) 
+        }
     }
 }

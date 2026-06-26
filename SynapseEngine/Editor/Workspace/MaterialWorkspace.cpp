@@ -3,8 +3,15 @@
 
 #include "Editor/View/ContentBrowser/ContentBrowserView.h"
 #include "EditorCore/ViewModels/ContentBrowser/ContentBrowserViewModel.h"
+
 #include "Editor/View/MaterialGraph/MaterialGraphView.h"
 #include "EditorCore/ViewModels/MaterialGraph/MaterialGraphViewModel.h"
+
+#include "Editor/View/MaterialHierarchy/MaterialHierarchyView.h"
+#include "EditorCore/ViewModels/MaterialHierarchy/MaterialHierarchyViewModel.h"
+
+#include "Editor/View/MaterialProperties/MaterialPropertiesView.h"
+#include "EditorCore/ViewModels/MaterialProperties/MaterialPropertiesViewModel.h"
 
 namespace Syn {
 
@@ -18,10 +25,22 @@ namespace Syn {
             ContentBrowserViewModel{ _context->GetFileSystemApi(), _assetPath }
         );
 
+        using MaterialHierarchyWin = EditorWindow<MaterialHierarchyView, MaterialHierarchyViewModel>;
+        AddWindow<MaterialHierarchyWin>(
+            MaterialHierarchyView{},
+            MaterialHierarchyViewModel{ _context->GetMaterialApi() }
+        );
+
         using MaterialGraphWin = EditorWindow<MaterialGraphView, MaterialGraphViewModel>;
         AddWindow<MaterialGraphWin>(
             MaterialGraphView{},
-            MaterialGraphViewModel{ _context->GetMaterialApi() }
+            MaterialGraphViewModel{ _context->GetMaterialApi(), _context->GetTextureApi() }
+        );
+
+        using MaterialPropertiesWin = EditorWindow<MaterialPropertiesView, MaterialPropertiesViewModel>;
+        AddWindow<MaterialPropertiesWin>(
+            MaterialPropertiesView{},
+            MaterialPropertiesViewModel{ _context->GetMaterialApi(), _context->GetTextureApi() }
         );
     }
 

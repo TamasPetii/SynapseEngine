@@ -23,6 +23,8 @@ namespace Syn {
         void Draw(MaterialGraphViewModel& vm) override;
     private:
         const char* GetPinName(GraphPinType type);
+        void DrawMaterialNode(const GraphNodeData& node);
+        void DrawTextureNode(const GraphNodeData& node);
     private:
         ax::NodeEditor::EditorContext* _context = nullptr;
     };

@@ -122,4 +122,13 @@ namespace Syn::UI {
         return ImGui::Checkbox(widgetId.c_str(), &value);
     }
 
+    bool BeginPropertyCombo(const char* label, const char* preview_value, int indentLevel) {
+        BeginProperty(label, indentLevel);
+        std::string widgetId = std::string("##") + label;
+        return ImGui::BeginCombo(widgetId.c_str(), preview_value);
+    }
+
+    void EndPropertyCombo() {
+        ImGui::EndCombo();
+    }
 }
