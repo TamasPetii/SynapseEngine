@@ -1,0 +1,115 @@
+#version 460
+#extension GL_EXT_mesh_shader : require
+#extension GL_GOOGLE_include_directive : require
+
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Mesh.glsl"
+#include "../../../Includes/Common/Model.glsl"
+#include "../../../Includes/Common/Transform.glsl"
+#include "../../../Includes/Common/Animation.glsl"
+#include "../../../Includes/Common/DirectionLight.glsl"
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+layout(triangles, max_vertices = 64, max_primitives = 64) out;
+
+#include "../../../Includes/Payload/ShadowTaskPayload.glsl"
+taskPayloadSharedEXT ShadowTaskPayload payload;
+
+#include "../../../Includes/PushConstants/DirectionLightShadowTraditionalMeshletPassPC.glsl"
+layout(push_constant) uniform PushConstants {
+   DirectionLightShadowTraditionalMeshletPassPC pc;
+};
+
+void main() {
+    uint threadIdx = gl_LocalInvocationID.x;
+    uint localMeshletID = payload.meshletIndices[gl_WorkGroupID.x];
+    
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+    MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.globalIndirectCommandDescriptorBufferAddr, pc.baseDescriptorOffset + payload.drawId);
+    GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, desc.modelIndex);
+    
+    // 1. Resolve entity from shadow payload
+    uint entityId = payload.entityId;
+    uint transformDenseIndex = payload.transformDenseIdx;
+    uint lightShadowDenseIndex = payload.lightShadowDenseIdx;
+    uint cascadeIdx = payload.cascadeIdx;
+
+    // 2. Fetch transforms
+    TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
+ 
+    // 3. Resolve active meshlet
+    uint flatLodIndex = (desc.meshIndex * 4) + desc.lodIndex; 
+    GpuMeshletDrawDescriptor submeshDraw = GET_MESHLET_DRAW_DESC(addrs.meshletDrawDescriptors, flatLodIndex);
+    uint globalMeshletIdx = submeshDraw.meshletOffset + localMeshletID;
+    GpuMeshletDescriptor meshlet = GET_MESHLET_DESC(addrs.meshletDescriptors, globalMeshletIdx);
+
+    SetMeshOutputsEXT(uint(meshlet.vertexCount), uint(meshlet.triangleCount));
+
+    // 4. Fetch cascade matrices and atlas parameters
+    mat4 viewProj = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeViewProjsVulkan[cascadeIdx];
+    vec4 rect = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeAtlasRects[cascadeIdx];
+    vec2 scale = rect.zw; 
+    vec2 offset = rect.xy * 2.0 + rect.zw - 1.0;
+
+    // 5. Process vertices (Static + Skinned)
+    for (uint i = threadIdx; i < uint(meshlet.vertexCount); i += gl_WorkGroupSize.x) {
+        uint globalVtxIdx = GET_MESHLET_VERTEX_INDEX(addrs.meshletVertexIndices, meshlet.vertexIndicesOffset + i);
+        GpuVertexPosition v = GET_VERTEX_POS(addrs.vertexPositions, globalVtxIdx);
+
+        uint nodeIndex = UNPACK_UINT16_X(v.packedIndex);
+        GpuNodeTransform staticNode = GET_NODE_TRANSFORM(addrs.nodeTransforms, nodeIndex);
+        mat4 finalMat = staticNode.globalTransform;
+
+        // Apply hardware skinning if animation is active
+        if (ctx.animationSparseMapBufferAddr != 0) {
+            uint animIdx = GET_SPARSE_INDEX(ctx.animationSparseMapBufferAddr, entityId);
+            if (animIdx != INVALID_INDEX) {
+                AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animIdx);
+                if (animComp.animationIndex != INVALID_INDEX) {
+                    GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
+                    
+                    if (animAddrs.isReady == 1) {
+                        GpuVertexSkinData skin = GET_SKIN_DATA(animAddrs.vertexSkinData, globalVtxIdx);
+                    
+                        mat4 skinMat = mat4(0.0); 
+                        uint frameOffset = animComp.frameIndex * animAddrs.descriptor.nodeCount;
+                        bool hasBone = false;
+
+                        for (int b = 0; b < 4; ++b) {
+                            if (skin.boneWeights[b] > 0.0) {
+                                GpuNodeTransform bone = GET_NODE_TRANSFORM(animAddrs.nodeTransforms, frameOffset + skin.boneIndices[b]);
+                                skinMat += bone.globalTransform * skin.boneWeights[b];
+                                hasBone = true;
+                            }
+                        }
+                        if (hasBone) finalMat = skinMat;
+                    }
+                }
+            }
+        }
+
+        vec4 clipPos = viewProj * transform.transform * finalMat * vec4(v.position, 1.0);
+
+        // Project to cascade view-projection
+        gl_MeshVerticesEXT[i].gl_ClipDistance[0] = clipPos.w + clipPos.x;
+        gl_MeshVerticesEXT[i].gl_ClipDistance[1] = clipPos.w - clipPos.x;
+        gl_MeshVerticesEXT[i].gl_ClipDistance[2] = clipPos.w + clipPos.y;
+        gl_MeshVerticesEXT[i].gl_ClipDistance[3] = clipPos.w - clipPos.y;
+
+        clipPos.xy = clipPos.xy * scale + offset * clipPos.w;
+
+        // Map into specific shadow atlas region
+        gl_MeshVerticesEXT[i].gl_Position = clipPos;
+   }
+
+    // 6. Process primitive indices
+    for (uint i = threadIdx; i < uint(meshlet.triangleCount); i += gl_WorkGroupSize.x) {
+        uint baseOffset = meshlet.triangleIndicesOffset + (i * 3);
+        gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
+            uint(GET_MESHLET_TRIANGLE_INDEX(addrs.meshletTriangleIndices, baseOffset + 0)),
+            uint(GET_MESHLET_TRIANGLE_INDEX(addrs.meshletTriangleIndices, baseOffset + 1)),
+            uint(GET_MESHLET_TRIANGLE_INDEX(addrs.meshletTriangleIndices, baseOffset + 2))
+        );
+    }
+}

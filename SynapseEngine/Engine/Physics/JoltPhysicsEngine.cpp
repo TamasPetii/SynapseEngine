@@ -7,6 +7,11 @@
 #include <Jolt/Geometry/Triangle.h>
 #include <Jolt/Physics/Body/Body.h>
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
+#include <Jolt/Core/JobSystemWithBarrier.h>
+#include <Jolt/Physics/Collision/Shape/ScaledShape.h>
+#include "JobSystemTaskflow.h"
+#include "Engine/ServiceLocator.h"
+#include <memory>
 
 namespace Syn
 {
@@ -31,10 +36,10 @@ namespace Syn
 
         tempAllocator = std::make_unique<JPH::TempAllocatorImpl>(params.tempAllocatorSizeMB * 1024 * 1024);
 
-        jobSystem = std::make_unique<JPH::JobSystemThreadPool>(
+        jobSystem = std::make_unique<JobSystemTaskflow>(
+            *ServiceLocator::GetTaskExecutor(),
             JPH::cMaxPhysicsJobs,
-            JPH::cMaxPhysicsBarriers,
-            std::thread::hardware_concurrency() - 1
+            JPH::cMaxPhysicsBarriers
         );
 
         physicsSystem = std::make_unique<JPH::PhysicsSystem>();
@@ -139,7 +144,7 @@ namespace Syn
         return CreateBodyFromShape(shape, position, rotation, settings);
     }
 
-    PhysicsBodyID JoltPhysicsEngine::CreateConvexBody(const glm::vec3& position, const glm::quat& rotation, std::span<const glm::vec3> vertices, const PhysicsBodySettings& settings)
+    PhysicsBodyID JoltPhysicsEngine::CreateConvexBody(const glm::vec3& position, const glm::quat& rotation, std::span<const glm::vec3> vertices, const glm::vec3& scale, const PhysicsBodySettings& settings)
     {
         JPH::Array<JPH::Vec3> joltVertices;
         joltVertices.reserve(vertices.size());
@@ -148,11 +153,17 @@ namespace Syn
         }
 
         JPH::ConvexHullShapeSettings shapeSettings(joltVertices);
-        JPH::ShapeRefC shape = shapeSettings.Create().Get();
-        return CreateBodyFromShape(shape, position, rotation, settings);
+        JPH::ShapeRefC finalShape = shapeSettings.Create().Get();
+
+        if (scale != glm::vec3(1.0f, 1.0f, 1.0f)) {
+            JPH::ScaledShapeSettings scaledSettings(finalShape, JPH::Vec3(scale.x, scale.y, scale.z));
+            finalShape = scaledSettings.Create().Get();
+        }
+
+        return CreateBodyFromShape(finalShape, position, rotation, settings);
     }
 
-    PhysicsBodyID JoltPhysicsEngine::CreateMeshBody(const glm::vec3& position, const glm::quat& rotation, std::span<const glm::vec3> vertices, std::span<const uint32_t> indices, const PhysicsBodySettings& settings)
+    PhysicsBodyID JoltPhysicsEngine::CreateMeshBody(const glm::vec3& position, const glm::quat& rotation, std::span<const glm::vec3> vertices, std::span<const uint32_t> indices, const glm::vec3& scale, const PhysicsBodySettings& settings)
     {
         JPH::VertexList joltVertices;
         joltVertices.reserve(vertices.size());
@@ -163,14 +174,19 @@ namespace Syn
         JPH::IndexedTriangleList joltTriangles;
         size_t triangleCount = indices.size() / 3;
         joltTriangles.reserve(triangleCount);
-
         for (size_t i = 0; i < indices.size(); i += 3) {
             joltTriangles.push_back(JPH::IndexedTriangle(indices[i], indices[i + 1], indices[i + 2]));
         }
 
-        JPH::MeshShapeSettings shapeSettings(joltVertices, joltTriangles);
-        JPH::ShapeRefC shape = shapeSettings.Create().Get();
-        return CreateBodyFromShape(shape, position, rotation, settings);
+        JPH::MeshShapeSettings meshSettings(joltVertices, joltTriangles);
+        JPH::ShapeRefC finalShape = meshSettings.Create().Get();
+
+        if (scale != glm::vec3(1.0f, 1.0f, 1.0f)) {
+            JPH::ScaledShapeSettings scaledSettings(finalShape, JPH::Vec3(scale.x, scale.y, scale.z));
+            finalShape = scaledSettings.Create().Get();
+        }
+
+        return CreateBodyFromShape(finalShape, position, rotation, settings);
     }
 
     void JoltPhysicsEngine::DestroyBody(PhysicsBodyID bodyId)
@@ -211,7 +227,7 @@ namespace Syn
         physicsSystem->GetBodyInterface().SetShape(JPH::BodyID(bodyId), newShape, true, JPH::EActivation::Activate);
     }
 
-    void JoltPhysicsEngine::SetConvexShape(PhysicsBodyID bodyId, std::span<const glm::vec3> newVertices)
+    void JoltPhysicsEngine::SetConvexShape(PhysicsBodyID bodyId, std::span<const glm::vec3> newVertices, const glm::vec3& scale)
     {
         if (bodyId == INVALID_BODY_ID) return;
 
@@ -223,6 +239,40 @@ namespace Syn
 
         JPH::ConvexHullShapeSettings shapeSettings(joltVertices);
         JPH::ShapeRefC newShape = shapeSettings.Create().Get();
+
+        if (scale != glm::vec3(1.0f, 1.0f, 1.0f)) {
+            JPH::ScaledShapeSettings scaledSettings(newShape, JPH::Vec3(scale.x, scale.y, scale.z));
+            newShape = scaledSettings.Create().Get();
+        }
+
+        physicsSystem->GetBodyInterface().SetShape(JPH::BodyID(bodyId), newShape, true, JPH::EActivation::Activate);
+    }
+
+    void JoltPhysicsEngine::SetMeshShape(PhysicsBodyID bodyId, std::span<const glm::vec3> newVertices, std::span<const uint32_t> newIndices, const glm::vec3& scale)
+    {
+        if (bodyId == INVALID_BODY_ID) return;
+
+        JPH::VertexList joltVertices;
+        joltVertices.reserve(newVertices.size());
+        for (const auto& v : newVertices) {
+            joltVertices.push_back(JPH::Float3(v.x, v.y, v.z));
+        }
+
+        JPH::IndexedTriangleList joltTriangles;
+        size_t triangleCount = newIndices.size() / 3;
+        joltTriangles.reserve(triangleCount);
+        for (size_t i = 0; i < newIndices.size(); i += 3) {
+            joltTriangles.push_back(JPH::IndexedTriangle(newIndices[i], newIndices[i + 1], newIndices[i + 2]));
+        }
+
+        JPH::MeshShapeSettings meshSettings(joltVertices, joltTriangles);
+        JPH::ShapeRefC newShape = meshSettings.Create().Get();
+
+        if (scale != glm::vec3(1.0f, 1.0f, 1.0f)) {
+            JPH::ScaledShapeSettings scaledSettings(newShape, JPH::Vec3(scale.x, scale.y, scale.z));
+            newShape = scaledSettings.Create().Get();
+        }
+
         physicsSystem->GetBodyInterface().SetShape(JPH::BodyID(bodyId), newShape, true, JPH::EActivation::Activate);
     }
 

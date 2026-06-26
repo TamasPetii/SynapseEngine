@@ -51,7 +51,7 @@ namespace Syn::Vk {
 
     void Instance::SetupVolk()
     {
-        SYN_VK_ASSERT_MSG(volkInitialize(), "Failed to initialize volk");
+        SYN_VK_ASSERT_MSG(volkInitialize(), "Failed to initialize volk! Vulkan loader not found.");
     }
 
     void Instance::CreateInstance(std::span<const char*> windowExtensions)

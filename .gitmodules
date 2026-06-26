@@ -4,3 +4,12 @@
 [submodule "External/vulkan_radix_sort"]
 	path = External/vulkan_radix_sort
 	url = https://github.com/jaesung-cs/vulkan_radix_sort.git
+[submodule "External/ImGuiFileDialog"]
+	path = External/ImGuiFileDialog
+	url = https://github.com/aiekick/ImGuiFileDialog
+[submodule "External/imgui-node-editor"]
+	path = External/imgui-node-editor
+	url = https://github.com/thedmd/imgui-node-editor.git
+[submodule "External/IconFontCppHeaders"]
+	path = External/IconFontCppHeaders
+	url = https://github.com/juliettef/IconFontCppHeaders.git

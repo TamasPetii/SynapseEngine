@@ -16,6 +16,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <cassert>
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -123,22 +124,14 @@ namespace Syn {
         auto animationManager = ServiceLocator::GetAnimationManager();
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
+        
 
-        TraditionalMeshletPassPC pc{};
-		pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-        pc.baseDescriptorOffset = drawData->Models.activeTraditionalCount + drawData->Models.meshletCmdOffsets[_renderType];
-        pc.materialRenderType = static_cast<uint32_t>(_renderType);
-        pc.disableConeCulling = 0;
-
-        vkCmdPushConstants(
-            context.cmd,
-            _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL,
-            0,
-            sizeof(TraditionalMeshletPassPC),
-            &pc
-        );
+        Vk::PushConstant<TraditionalMeshletPassPC> pc;
+		pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
+        pc->baseDescriptorOffset = drawData->Models.activeTraditionalCount + drawData->Models.meshletCmdOffsets[_renderType];
+        pc->materialRenderType = static_cast<uint32_t>(_renderType);
+        pc->disableConeCulling = _renderType == MaterialRenderType::Transparent2Sided ? 1 : 0;
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void MeshletTransparentDepthPrepass::BindDescriptors(const RenderContext& context)
@@ -168,10 +161,10 @@ namespace Syn {
     {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
+        
 
-        auto indirectBuffer = drawData->Models.indirectBuffer.GetHandle(context.frameIndex, isGpu);
-        auto countBuffer = drawData->Models.drawCountBuffer.GetHandle(context.frameIndex, isGpu);
+        auto indirectBuffer = drawData->Models.indirectBuffer.GetHandle(context.frameIndex);
+        auto countBuffer = drawData->Models.drawCountBuffer.GetHandle(context.frameIndex);
 
         uint32_t commandOffsetIdx = drawData->Models.meshletCmdOffsets[_renderType];
         uint32_t maxCommandCount = drawData->Models.meshletCmdCounts[_renderType];

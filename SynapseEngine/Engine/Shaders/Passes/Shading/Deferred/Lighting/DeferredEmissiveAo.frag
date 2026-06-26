@@ -9,6 +9,7 @@ layout(location = 0) out vec4 outColor;
 
 layout(set = 2, binding = 0) uniform sampler2D colorMetallicTexture;
 layout(set = 2, binding = 1) uniform sampler2D emissiveAoTexture;
+layout(set = 2, binding = 2) uniform sampler2D ssaoTexture;
 
 #include "../../../../Includes/PushConstants/DeferredEmissiveAoPC.glsl"
 
@@ -26,7 +27,13 @@ void main()
     vec3 emissive = emissiveAo.rgb;
     float ao = emissiveAo.a;
 
-    vec3 ambientResult = SimulateAmbientLight(albedo, ao, ctx.ambientStrength);
+    float ssao = 1.0;
+    if (ctx.enableSsao == 1)
+        ssao = texture(ssaoTexture, inUV).r;  
+
+    float finalAo = ao * ssao;
+
+    vec3 ambientResult = SimulateAmbientLight(albedo, finalAo, ctx.ambientStrength);
     vec3 emissiveResult = SimulateBloom(emissive, 1.0, ctx.emissiveStrength);
 
     outColor = vec4(ambientResult + emissiveResult, 1.0);

@@ -125,10 +125,8 @@ namespace Syn
             size_t requiredElements = std::max(_flatMaterialIndices.size(), (size_t)(drawData->Models.requiredMaterialBufferSize / sizeof(uint32_t)));
             drawData->Models.materialIndexBuffer.UpdateCapacity(frameIndex, requiredElements);
 
-            if (auto mappedBuffer = drawData->Models.materialIndexBuffer.GetMapped(frameIndex)) {
-                size_t actualDataSize = _flatMaterialIndices.size() * sizeof(uint32_t);
-                mappedBuffer->Write(_flatMaterialIndices.data(), actualDataSize, 0);
-            }
+            size_t actualDataSize = _flatMaterialIndices.size() * sizeof(uint32_t);
+            drawData->Models.materialIndexBuffer.Write(frameIndex, _flatMaterialIndices.data(), actualDataSize, 0);
             });
     }
 }

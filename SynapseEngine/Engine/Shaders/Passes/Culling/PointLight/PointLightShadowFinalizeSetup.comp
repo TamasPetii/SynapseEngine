@@ -1,0 +1,27 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Mesh.glsl"
+#include "../../../Includes/Common/PointLight.glsl"
+#include "../../../Includes/Common/Culling.glsl"
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../../Includes/PushConstants/PointLightShadowCullingPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    PointLightShadowCullingPC pc;
+};
+
+void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    uint visibleCount = GET_POINT_VISIBLE_COUNT_DATA(ctx.pointLightShadowVisibleMeshCountBufferAddr);
+  
+    uint groupCountX = (visibleCount + 255u) / 256u;
+
+    GET_DISPATCH_CMD(ctx.pointLightShadowFinalizeDispatchBufferAddr).groupCountX = groupCountX;
+}

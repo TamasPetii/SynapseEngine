@@ -73,7 +73,7 @@ namespace Syn
             if (componentBuffer.versions[sphereIndex] != sphere.version)
             {
                 componentBuffer.versions[sphereIndex] = sphere.version;
-				bufferHandler[sphereIndex] = SphereColliderComponentGPU(sphere);
+				bufferHandler[sphereIndex] = SphereColliderComponentGPU(sphere, entity);
             }
             };
 

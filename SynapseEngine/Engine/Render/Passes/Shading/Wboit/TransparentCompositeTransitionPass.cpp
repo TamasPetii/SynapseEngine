@@ -4,7 +4,8 @@
 namespace Syn {
     bool TransparentCompositeTransitionPass::ShouldExecute(const RenderContext& context) const
     {
-        return !context.scene->GetSettings()->enableDebugVisibility;
+        //Todo: Has transparent material?
+        return !context.scene->GetSettings()->debug.enableDebugVisibility;
     }
 
     void TransparentCompositeTransitionPass::PrepareFrame(const RenderContext& context) {

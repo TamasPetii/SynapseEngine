@@ -3,11 +3,22 @@
 
 #include "../SharedGpuTypes.glsl"
 
+#define WIREFRAME_DEBUG_SHAPE_TYPE_POINT_LIGHT_SPHERE   0
+#define WIREFRAME_DEBUG_SHAPE_TYPE_POINT_LIGHT_AABB     1
+#define WIREFRAME_DEBUG_SHAPE_TYPE_SPOT_LIGHT_SPHERE    2
+#define WIREFRAME_DEBUG_SHAPE_TYPE_SPOT_LIGHT_AABB      3
+#define WIREFRAME_DEBUG_SHAPE_TYPE_SPOT_LIGHT_CONE      4
+#define WIREFRAME_DEBUG_SHAPE_TYPE_STATIC_CHUNK         5
+#define WIREFRAME_DEBUG_SHAPE_TYPE_MORTON_CHUNK         6
+#define WIREFRAME_DEBUG_SHAPE_TYPE_BOX_COLLIDER         7
+#define WIREFRAME_DEBUG_SHAPE_TYPE_SPHERE_COLLIDER      8
+#define WIREFRAME_DEBUG_SHAPE_TYPE_CAPSULE_COLLIDER     9
+
 struct WireframeDebugPC {
     uint64_t frameGlobalContextBufferAddr;
     uint64_t indexBufferAddr;
     uint64_t vertexPositionBufferAddr;
-    uint     lightDrawType; // 0: Point Sphere, 1: Point Aabb, 2: Spot Sphere, 3: Spot Box
+    uint     shapeDrawType;
 };
 
 #endif

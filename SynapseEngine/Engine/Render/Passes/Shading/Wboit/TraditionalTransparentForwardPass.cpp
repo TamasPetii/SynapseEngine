@@ -10,10 +10,15 @@
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Material/MaterialManager.h"
 #include "Engine/Animation/AnimationManager.h"
+#include "Engine/Render/RenderNames.h"
+#include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
+#include "Engine/Image/SamplerNames.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <cassert>
+
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -23,6 +28,12 @@ namespace Syn {
         : _renderType(renderType)
     {
         _passName = (_renderType == MaterialRenderType::Transparent1Sided) ? "Traditional_Transparent_Forward_1Sided" : "Traditional_Transparent_Forward_2Sided";
+    }
+
+    bool TraditionalTransparentForwardPass::ShouldExecute(const RenderContext& context) const
+    {
+        //Todo: Has transparent material?
+        return !context.scene->GetSettings()->debug.enableDebugVisibility;
     }
 
     void TraditionalTransparentForwardPass::Initialize() {
@@ -130,30 +141,52 @@ namespace Syn {
         auto animationManager = ServiceLocator::GetAnimationManager();
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
+        
 
-        TraditionalMeshletPassPC pc{};
-		pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-        pc.baseDescriptorOffset = drawData->Models.traditionalCmdOffsets[_renderType];
-        pc.materialRenderType = static_cast<uint32_t>(_renderType);
-
-        vkCmdPushConstants(
-            context.cmd,
-            _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL,
-            0,
-            sizeof(TraditionalMeshletPassPC),
-            &pc
-        );
-    }
-
-    bool TraditionalTransparentForwardPass::ShouldExecute(const RenderContext& context) const
-    {
-        return !context.scene->GetSettings()->enableDebugVisibility;
+        Vk::PushConstant<TraditionalMeshletPassPC> pc;
+		pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
+        pc->baseDescriptorOffset = drawData->Models.traditionalCmdOffsets[_renderType];
+        pc->materialRenderType = static_cast<uint32_t>(_renderType);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void TraditionalTransparentForwardPass::BindDescriptors(const RenderContext& context) {
         auto imageManager = ServiceLocator::GetImageManager();
+
+        uint fIdx = context.frameIndex;
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, fIdx);
+        auto drawData = context.scene->GetSceneDrawData();
+
+        auto dirShadowAtlas = drawData->DirectionLightShadow.shadowAtlas[fIdx].get();
+        auto pointShadowAtlas = drawData->PointLightShadow.shadowAtlas[fIdx].get();
+        auto spotShadowAtlas = drawData->SpotLightShadow.shadowAtlas[fIdx].get();
+        auto shadowSampler = imageManager->GetSampler(SamplerNames::ShadowSampler);
+
+        Vk::PushDescriptorWriter pushWriter;
+
+        pushWriter.AddCombinedImageSampler(
+            2,
+            dirShadowAtlas->GetView(Vk::ImageViewNames::Default),
+            shadowSampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            3,
+            pointShadowAtlas->GetView(Vk::ImageViewNames::Default),
+            shadowSampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            4,
+            spotShadowAtlas->GetView(Vk::ImageViewNames::Default),
+            shadowSampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
+
         auto bindlessBuffer = imageManager->GetBindlessBuffer();
         bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
@@ -161,10 +194,10 @@ namespace Syn {
     void TraditionalTransparentForwardPass::Draw(const RenderContext& context) {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
+        
 
-        auto indirectBuffer = drawData->Models.indirectBuffer.GetHandle(context.frameIndex, isGpu);
-        auto countBuffer = drawData->Models.drawCountBuffer.GetHandle(context.frameIndex, isGpu);
+        auto indirectBuffer = drawData->Models.indirectBuffer.GetHandle(context.frameIndex);
+        auto countBuffer = drawData->Models.drawCountBuffer.GetHandle(context.frameIndex);
 
         uint32_t commandOffset = drawData->Models.traditionalCmdOffsets[_renderType];
         uint32_t maxCommandCount = drawData->Models.traditionalCmdCounts[_renderType];

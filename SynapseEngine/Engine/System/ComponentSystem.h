@@ -121,12 +121,13 @@ namespace Syn
         bool hasChanged = pool->template IsStateBitSet<CHANGED_BIT>();
         bool hasUpdate = pool->template IsStateBitSet<UPDATE_BIT>();
         bool hasIndex = pool->template IsStateBitSet<INDEX_CHANGED_BIT>();
+        bool hasStaticUpload = pool->template IsStateBitSet<FORCE_STATIC_GPU_UPLOAD>();
         bool hasCustom1 = pool->template IsStateBitSet<CUSTOM_CHANGED_BIT1>();
         bool hasCustom2 = pool->template IsStateBitSet<CUSTOM_CHANGED_BIT2>();
         bool hasCustom3 = pool->template IsStateBitSet<CUSTOM_CHANGED_BIT3>();
         bool hasDirtyStatics = !pool->GetStorage().GetDirtyStatics().empty();
 
-        if (!hasChanged && !hasUpdate && !hasIndex && !hasCustom1 && !hasCustom2 && !hasCustom3 && !hasDirtyStatics) return;
+        if (!hasChanged && !hasUpdate && !hasIndex && !hasCustom1 && !hasCustom2 && !hasCustom3 && !hasDirtyStatics && !hasStaticUpload) return;
 
         //Info("{} -> OnFinish: Cleaning up frame. (Changed: {}, Update: {}, Index: {}, DirtyStatics: {})", GetName(), hasChanged, hasUpdate, hasIndex, hasDirtyStatics);
 
@@ -197,7 +198,9 @@ namespace Syn
 
         bool hasDirtyStatics = !pool->GetStorage().GetDirtyStatics().empty();
 
-        if (hasDirtyStatics)
+        bool forceUpload = pool->template IsStateBitSet<FORCE_STATIC_GPU_UPLOAD>();
+
+        if (forceUpload || hasDirtyStatics)
         {
             _currentStaticVersion++;
             //Info("{} -> Dirty statics found! Incrementing Global Static Version to: {}", GetName(), _currentStaticVersion);

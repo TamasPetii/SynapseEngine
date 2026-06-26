@@ -1,0 +1,129 @@
+#version 460
+#extension GL_EXT_mesh_shader : require
+#extension GL_GOOGLE_include_directive : require
+
+#include "../../Includes/Core.glsl"
+#include "../../Includes/Common/Visibility.glsl"
+#include "../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../Includes/Common/Camera.glsl"
+#include "../../Includes/Common/Mesh.glsl"
+#include "../../Includes/Common/Model.glsl"
+#include "../../Includes/Common/Transform.glsl"
+#include "../../Includes/Common/Animation.glsl"
+#include "../../Includes/Common/Material.glsl"
+#include "../../Includes/Utils/ColorMath.glsl"
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+layout(triangles, max_vertices = 64, max_primitives = 126) out;
+
+#include "../../Includes/Payload/TaskPayload.glsl"
+
+taskPayloadSharedEXT TaskPayload payload;
+
+layout(location = 0) out vec4 outColor[];
+
+#include "../../Includes/PushConstants/WireframeMeshletPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+   WireframeMeshletPC pc;
+};
+
+void main() {
+    uint threadIdx = gl_LocalInvocationID.x;
+    uint localMeshletID = payload.meshletIndices[gl_WorkGroupID.x];
+
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+    MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.globalIndirectCommandDescriptorBufferAddr, pc.baseDescriptorOffset + payload.drawId);
+
+    // Resolve Instance and Model info
+    uint entityId = payload.entityId;
+    uint transformDenseIndex = payload.transformDenseIdx;
+    uint cameraDenseIndex = payload.activeCameraDenseIdx;
+
+    // Resolve Instance and Model info
+    TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraDenseIndex);
+    GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, desc.modelIndex);
+
+    // Resolve specific Meshlet
+    uint flatLodIndex = (desc.meshIndex * 4) + desc.lodIndex; 
+    GpuMeshletDrawDescriptor submeshDraw = GET_MESHLET_DRAW_DESC(addrs.meshletDrawDescriptors, flatLodIndex);
+
+    uint globalMeshletIdx = submeshDraw.meshletOffset + localMeshletID;
+    GpuMeshletDescriptor meshlet = GET_MESHLET_DESC(addrs.meshletDescriptors, globalMeshletIdx);
+    GpuMeshletCollider collider = GET_MESHLET_COLLIDER(addrs.meshletColliders, globalMeshletIdx);
+
+    // 5. Evaluate Animation frame collider if applicable
+    if (ctx.animationSparseMapBufferAddr != 0) {
+        uint animIdx = GET_SPARSE_INDEX(ctx.animationSparseMapBufferAddr, entityId);
+        if (animIdx != INVALID_INDEX) {
+            AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animIdx);
+            if (animComp.animationIndex != INVALID_INDEX) {
+                GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
+
+                if (animAddrs.isReady == 1) {
+                    uint frameOffset = animComp.frameIndex * animAddrs.descriptor.globalMeshletCount;
+                    collider = GET_MESHLET_COLLIDER(animAddrs.frameMeshletColliders, frameOffset + globalMeshletIdx);
+                }
+            }
+        }
+    }
+
+    vec3 debugColor = idToColor(entityId ^ globalMeshletIdx);
+
+    uint triangleCount = pc.indexCount / 3;
+    SetMeshOutputsEXT(pc.vertexCount, triangleCount);
+
+    // Parallel Vertex Processing
+    for (uint i = threadIdx; i < pc.vertexCount; i += gl_WorkGroupSize.x) {
+        GpuVertexPosition v = GET_VERTEX_POS(pc.vertexPositionBufferAddr, i);
+        vec3 localPos = v.position;
+
+        if (pc.shapeType == WIREFRAME_MESHLET_SHAPE_TYPE_CUBE) {
+            vec3 extents = (collider.aabbMax - collider.aabbMin) * 0.5;
+            vec3 center = (collider.aabbMax + collider.aabbMin) * 0.5;
+            localPos = center + (localPos * extents);
+        }
+        else if (pc.shapeType == WIREFRAME_MESHLET_SHAPE_TYPE_SPHERE) {
+            localPos = collider.center + (localPos * collider.radius);
+        }
+        else if (pc.shapeType == WIREFRAME_MESHLET_SHAPE_TYPE_CONE) {
+            vec3 apex = collider.apex;
+            vec3 axis = normalize(collider.axis);
+
+            float sinAngle = clamp(abs(collider.cutoff), 0.0, 0.999);
+            float cosAngle = sqrt(1.0 - sinAngle * sinAngle);
+        
+            float coneRange = collider.radius * 1.5;
+            float baseRadius = coneRange * (sinAngle / cosAngle);
+
+            vec3 scale = vec3(baseRadius, coneRange * 0.5, baseRadius);
+            vec3 scaledPos = localPos * scale;
+
+            vec3 new_Y = -axis;
+            vec3 world_up = (abs(new_Y.y) < 0.999) ? vec3(0.0, 1.0, 0.0) : vec3(1.0, 0.0, 0.0);
+            vec3 new_X = normalize(cross(world_up, new_Y));
+            vec3 new_Z = normalize(cross(new_X, new_Y));
+
+            mat3 rot = mat3(new_X, new_Y, new_Z);
+
+            vec3 centerPos = apex + axis * (coneRange * 0.5);
+            localPos = centerPos + (rot * scaledPos);
+        }
+
+        vec3 worldPos = (transform.transform * vec4(localPos, 1.0)).xyz;
+
+        gl_MeshVerticesEXT[i].gl_Position = camera.viewProjVulkan * vec4(worldPos, 1.0);
+        outColor[i] = vec4(debugColor, 1.0);
+    }
+
+    // Parallel Triangle Primitive Processing
+    for (uint i = threadIdx; i < triangleCount; i += gl_WorkGroupSize.x) {
+        uint baseIdx = i * 3;
+        gl_PrimitiveTriangleIndicesEXT[i] = uvec3(
+            GET_INDEX(pc.indexBufferAddr, baseIdx + 0),
+            GET_INDEX(pc.indexBufferAddr, baseIdx + 1),
+            GET_INDEX(pc.indexBufferAddr, baseIdx + 2)
+        );
+    }
+}

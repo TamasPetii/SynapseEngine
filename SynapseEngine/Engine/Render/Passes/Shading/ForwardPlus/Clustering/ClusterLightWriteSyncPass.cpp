@@ -9,7 +9,7 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
 
         Vk::BufferBarrierInfo pBarrier{};
-        pBarrier.buffer = drawData->ForwardPlus.pointLightIndexBuffer.GetHandle(fIdx, true);
+        pBarrier.buffer = drawData->ForwardPlus.pointLightIndexBuffer.GetHandle(fIdx);
         pBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         pBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         pBarrier.dstStage = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
@@ -17,7 +17,7 @@ namespace Syn {
         Vk::BufferUtils::InsertBarrier(context.cmd, pBarrier);
 
         Vk::BufferBarrierInfo sBarrier{};
-        sBarrier.buffer = drawData->ForwardPlus.spotLightIndexBuffer.GetHandle(fIdx, true);
+        sBarrier.buffer = drawData->ForwardPlus.spotLightIndexBuffer.GetHandle(fIdx);
         sBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         sBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         sBarrier.dstStage = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;

@@ -1,0 +1,63 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_KHR_shader_subgroup_ballot : require
+
+#include "../../Includes/Core.glsl"
+#include "../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../Includes/Common/SpotLight.glsl"
+#include "../../Includes/Common/Camera.glsl"
+#include "../../Includes/Utils/DepthMath.glsl"
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+layout(set = 2, binding = 0) uniform sampler2D inDepth;
+layout(set = 2, binding = 1, rg32f) uniform writeonly image2D outImage;
+
+#include "../../Includes/PushConstants/HizLinearizeDepthPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+   HizLinearizeDepthPC pc;
+};
+
+void main() {
+    ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
+    if (pos.x >= int(pc.outImageSize.x) || pos.y >= int(pc.outImageSize.y)) return;
+
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    float rawDepth = texelFetch(inDepth, pos, 0).x;
+    float finalDepth = rawDepth;
+
+    uint cellX = uint(pos.x) / SPOT_SHADOW_MIN_BLOCK_SIZE;
+    uint cellY = uint(pos.y) / SPOT_SHADOW_MIN_BLOCK_SIZE;
+    uint flatIndex = cellY * SPOT_SHADOW_GRID_SIZE + cellX;
+
+    float nearPlane = 0.0;
+    float farPlane = 0.0;
+    uint isValid = 0;
+
+    if (subgroupElect()) {
+        uint entityId = GET_SPOT_GRID_LOOK_UP_DATA(ctx.spotLightShadowGridLookupBufferAddr, flatIndex);
+        if (entityId != 0xFFFFFFFF) {
+            uint shadowDenseIdx = GET_SPARSE_INDEX(ctx.spotLightShadowSparseMapBufferAddr, entityId);
+            if (shadowDenseIdx != INVALID_INDEX) {
+                SpotLightShadowComponent shadowComp = GET_SPOT_LIGHT_SHADOW(ctx.spotLightShadowDataBufferAddr, shadowDenseIdx);
+                nearPlane = shadowComp.planes.x; 
+                farPlane = shadowComp.planes.y;
+                isValid = 1;
+            }
+        }
+    }
+
+    isValid = subgroupBroadcastFirst(isValid);
+    
+    if (isValid == 1) {
+        nearPlane = subgroupBroadcastFirst(nearPlane);
+        farPlane  = subgroupBroadcastFirst(farPlane);
+        finalDepth = ConvertDepthToLinearNormalized(rawDepth, nearPlane, farPlane);
+    }
+
+    imageStore(outImage, pos, vec4(finalDepth, finalDepth, 0.0, 0.0));
+}

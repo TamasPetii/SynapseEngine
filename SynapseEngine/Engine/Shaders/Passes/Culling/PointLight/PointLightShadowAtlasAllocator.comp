@@ -1,0 +1,112 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/PointLight.glsl"
+
+layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../../Includes/PushConstants/PointLightShadowCullingPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    PointLightShadowCullingPC pc;
+};
+
+shared uint64_t s_grid[64];
+
+void main() 
+{
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+    uint localId = gl_LocalInvocationID.x;
+
+    s_grid[localId] = 0ul;
+    
+    for (uint i = 0; i < 64; ++i) {
+        uint flatIndex = localId * 64 + i;
+        GET_POINT_GRID_LOOK_UP_DATA(ctx.pointLightShadowGridLookupBufferAddr, flatIndex) = 0xFFFFFFFFu;
+    }
+    
+    barrier();
+
+    uint lightCount = GET_POINT_VISIBLE_COUNT_DATA(ctx.pointLightShadowVisibleCountBufferAddr);
+    if (lightCount == 0) return;
+
+    if (localId == 0) 
+    {
+        for (uint i = 0; i < lightCount; ++i) 
+        {
+            uint key = GET_POINT_ATLAS_SORT_KEY(ctx.pointLightShadowAtlasSortKeyBufferAddr, i);
+            uint entityIdx = GET_POINT_ATLAS_SORT_VALUE(ctx.pointLightShadowAtlasSortValueBufferAddr, i);
+            
+            uint faceBlocks = 0xFFu - (key >> 24);
+            uint shadowDenseIdx = key & 0xFFFFFFu;
+
+            uint reqW = faceBlocks * 3;
+            uint reqH = faceBlocks * 2;
+
+            bool isFree = false;
+            uint outX = 0, outY = 0;
+
+            for (uint y = 0; y <= 64 - reqH; y += faceBlocks) 
+            {
+                for (uint x = 0; x <= 64 - reqW; x += faceBlocks) 
+                {
+                    bool fits = true;
+                    
+                    uint64_t mask = (reqW == 64) ? ~0ul : ((1ul << reqW) - 1ul);
+                    uint64_t shiftedMask = mask << x;
+
+                    for (uint by = 0; by < reqH; ++by) {
+                        if ((s_grid[y + by] & shiftedMask) != 0ul) {
+                            fits = false;
+                            break;
+                        }
+                    }
+
+                    if (fits) {
+                        for (uint by = 0; by < reqH; ++by) {
+                            s_grid[y + by] |= shiftedMask;
+                        }
+                        isFree = true;
+                        outX = x;
+                        outY = y;
+                        break;
+                    }
+                }
+                if (isFree) break;
+            }
+
+            if (isFree) 
+            {
+                GET_POINT_LIGHT_SHADOW(ctx.pointLightShadowDataBufferAddr, shadowDenseIdx).mainAtlasRect = vec4(float(outX) / 64.0, float(outY) / 64.0, float(reqW) / 64.0, float(reqH) / 64.0);
+
+                float faceW = float(faceBlocks) / 64.0;
+                float faceH = float(faceBlocks) / 64.0;
+
+                for(int f = 0; f < 6; ++f) {
+                    uint lx = f % 3;
+                    uint ly = f / 3;
+                    GET_POINT_LIGHT_SHADOW(ctx.pointLightShadowDataBufferAddr, shadowDenseIdx).atlasRects[f] = vec4((float(outX)/64.0) + (lx * faceW), (float(outY)/64.0) + (ly * faceH), faceW, faceH);
+                }
+                
+                for (uint by = 0; by < reqH; ++by) {
+                    for (uint bx = 0; bx < reqW; ++bx) {
+                        uint flatIndex = (outY + by) * 64 + (outX + bx);
+                        GET_POINT_GRID_LOOK_UP_DATA(ctx.pointLightShadowGridLookupBufferAddr, flatIndex) = entityIdx;
+                    }
+                }
+            } 
+            else 
+            {
+                GET_POINT_LIGHT_SHADOW(ctx.pointLightShadowDataBufferAddr, shadowDenseIdx).mainAtlasRect = vec4(0.0);
+
+                for(int f = 0; f < 6; ++f) {
+                    GET_POINT_LIGHT_SHADOW(ctx.pointLightShadowDataBufferAddr, shadowDenseIdx).atlasRects[f] = vec4(0.0);
+                }
+            }
+        }
+    }
+}

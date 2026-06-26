@@ -5,6 +5,8 @@
 #include "Engine/Component/Physics/BoxColliderComponent.h"
 #include "Engine/Component/Physics/SphereColliderComponent.h"
 #include "Engine/Component/Physics/CapsuleColliderComponent.h"
+#include "Engine/Component/Physics/ConvexColliderComponent.h"
+#include "Engine/Component/Physics/MeshColliderComponent.h"
 #include "Engine/Component/Physics/RigidBodyComponent.h"
 
 #include "Engine/Physics/PhysicsTypes.h"
@@ -58,6 +60,38 @@ namespace Syn
 
             ar.Property("radius", comp.radius);
             ar.Property("halfHeight", comp.halfHeight);
+            ar.Property("localOffset", comp.localOffset);
+        }
+    };
+
+    SYN_REGISTER_COMPONENT(Syn::ConvexColliderComponent, "ConvexColliderComponent");
+
+    template <>
+    struct SYN_API Schema<ConvexColliderComponent> {
+        static constexpr bool exists = true;
+
+        template <typename Archive, typename T>
+        static void Invoke(Archive& ar, const char* name, T& val) {
+            ScopedArchiveObject obj(ar, name);
+            auto& comp = const_cast<std::remove_const_t<T>&>(val);
+
+            ar.Property("targetLodLevel", comp.targetLodLevel);
+            ar.Property("localOffset", comp.localOffset);
+        }
+    };
+
+    SYN_REGISTER_COMPONENT(Syn::MeshColliderComponent, "MeshColliderComponent");
+
+    template <>
+    struct SYN_API Schema<MeshColliderComponent> {
+        static constexpr bool exists = true;
+
+        template <typename Archive, typename T>
+        static void Invoke(Archive& ar, const char* name, T& val) {
+            ScopedArchiveObject obj(ar, name);
+            auto& comp = const_cast<std::remove_const_t<T>&>(val);
+
+            ar.Property("targetLodLevel", comp.targetLodLevel);
             ar.Property("localOffset", comp.localOffset);
         }
     };

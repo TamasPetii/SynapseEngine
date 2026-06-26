@@ -38,7 +38,6 @@ namespace Syn
 		uint32_t meshCount;
 		uint32_t indexOffset;
 		uint32_t indexCount;
-		float distanceThreshold;
 	};
 
 	struct SYN_API GpuIndexedDrawData

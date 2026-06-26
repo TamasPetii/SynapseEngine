@@ -11,7 +11,7 @@ namespace Syn {
         _sinks.push_back(sink);
     }
 
-    void Logger::Dispatch(LogLevel level, std::string_view msg, const char* file, int line) {
+    void Logger::Dispatch(LogLevel level, const std::string& msg, const char* file, int line) {
         if (!Syn::EnableLogging) return;
 
         LogMessage payload {

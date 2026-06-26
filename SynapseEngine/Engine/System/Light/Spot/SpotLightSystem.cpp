@@ -65,71 +65,71 @@ namespace Syn
 
         auto mathTasks = ParallelForEachIf<UPDATE_BIT>(spotLightPool, subflow, SystemPhaseNames::Update,
             [spotLightPool, transformPool, registry](EntityID entity) {
+                auto& lightComp = spotLightPool->Get(entity);
+
                 if (transformPool->Has(entity) && (transformPool->IsBitSet<TRANSFORM_POS_CHANGED>(entity) || transformPool->IsBitSet<TRANSFORM_ROT_CHANGED>(entity)))
                 {
                     auto& transformComp = transformPool->Get(entity);
-                    auto& lightComp = spotLightPool->Get(entity);
-
                     lightComp.position = glm::vec3(transformComp.transform[3]);
                     lightComp.direction = glm::normalize(glm::vec3(-transformComp.transform[2]));
+                }
 
-                    float outerRad = glm::radians(lightComp.outerAngle);
-                    float cosOuter = std::cos(outerRad);
-                    float sinOuter = std::sin(outerRad);
+                float outerRad = glm::radians(lightComp.outerAngle);
+                float cosOuter = std::cos(outerRad);
+                float sinOuter = std::sin(outerRad);
 
-                    if (lightComp.outerAngle < 45.0f) {
-                        lightComp.sphereCollider.radius = lightComp.range / (2.0f * cosOuter * cosOuter);
-                        lightComp.sphereCollider.center = lightComp.position + lightComp.direction * lightComp.sphereCollider.radius;
-                    }
-                    else {
-                        lightComp.sphereCollider.radius = lightComp.range * sinOuter;
-                        lightComp.sphereCollider.center = lightComp.position + lightComp.direction * (lightComp.range * cosOuter);
-                    }
+                if (lightComp.outerAngle < 45.0f) {
+                    lightComp.sphereCollider.radius = lightComp.range / (2.0f * cosOuter * cosOuter);
+                    lightComp.sphereCollider.center = lightComp.position + lightComp.direction * lightComp.sphereCollider.radius;
+                }
+                else {
+                    lightComp.sphereCollider.radius = lightComp.range * sinOuter;
+                    lightComp.sphereCollider.center = lightComp.position + lightComp.direction * (lightComp.range * cosOuter);
+                }
 
-                    glm::vec3 baseCenter = lightComp.position + lightComp.direction * lightComp.range;
-                    float baseRadius = lightComp.range * std::tan(outerRad);
+                glm::vec3 baseCenter = lightComp.position + lightComp.direction * lightComp.range;
+                float baseRadius = lightComp.range * std::tan(outerRad);
 
-                    glm::vec3 diskExtents(
-                        baseRadius * std::sqrt(std::max(0.0f, 1.0f - lightComp.direction.x * lightComp.direction.x)),
-                        baseRadius * std::sqrt(std::max(0.0f, 1.0f - lightComp.direction.y * lightComp.direction.y)),
-                        baseRadius * std::sqrt(std::max(0.0f, 1.0f - lightComp.direction.z * lightComp.direction.z))
-                    );
+                glm::vec3 diskExtents(
+                    baseRadius * std::sqrt(std::max(0.0f, 1.0f - lightComp.direction.x * lightComp.direction.x)),
+                    baseRadius * std::sqrt(std::max(0.0f, 1.0f - lightComp.direction.y * lightComp.direction.y)),
+                    baseRadius * std::sqrt(std::max(0.0f, 1.0f - lightComp.direction.z * lightComp.direction.z))
+                );
 
-                    glm::vec3 baseMin = baseCenter - diskExtents;
-                    glm::vec3 baseMax = baseCenter + diskExtents;
+                glm::vec3 baseMin = baseCenter - diskExtents;
+                glm::vec3 baseMax = baseCenter + diskExtents;
 
-                    lightComp.aabbCollider.min = glm::min(lightComp.position, baseMin);
-                    lightComp.aabbCollider.max = glm::max(lightComp.position, baseMax);
+                lightComp.aabbCollider.min = glm::min(lightComp.position, baseMin);
+                lightComp.aabbCollider.max = glm::max(lightComp.position, baseMax);
 
-                    glm::vec3 new_Y = -lightComp.direction;
-                    glm::vec3 world_up = (std::abs(new_Y.y) < 0.999f) ? glm::vec3(0.0f, 1.0f, 0.0f) : glm::vec3(1.0f, 0.0f, 0.0f);
-                    glm::vec3 new_X = glm::normalize(glm::cross(world_up, new_Y));
-                    glm::vec3 new_Z = glm::normalize(glm::cross(new_X, new_Y));
+                glm::vec3 new_Y = -lightComp.direction;
+                glm::vec3 world_up = (std::abs(new_Y.y) < 0.999f) ? glm::vec3(0.0f, 1.0f, 0.0f) : glm::vec3(1.0f, 0.0f, 0.0f);
+                glm::vec3 new_X = glm::normalize(glm::cross(world_up, new_Y));
+                glm::vec3 new_Z = glm::normalize(glm::cross(new_X, new_Y));
 
-                    glm::mat4 rot(1.0f);
-                    rot[0] = glm::vec4(new_X, 0.0f);
-                    rot[1] = glm::vec4(new_Y, 0.0f);
-                    rot[2] = glm::vec4(new_Z, 0.0f);
+                glm::mat4 rot(1.0f);
+                rot[0] = glm::vec4(new_X, 0.0f);
+                rot[1] = glm::vec4(new_Y, 0.0f);
+                rot[2] = glm::vec4(new_Z, 0.0f);
 
-                    float enclosingRadius = baseRadius * glm::sqrt(2.f);
-                    glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(baseRadius, lightComp.range / 2.0f, baseRadius));
-                    glm::vec3 centerPos = lightComp.position + lightComp.direction * (lightComp.range * 0.5f);
-                    glm::mat4 trans = glm::translate(glm::mat4(1.0f), centerPos);
+                float enclosingRadius = baseRadius * glm::sqrt(2.f);
+                glm::mat4 scale = glm::scale(glm::mat4(1.0f), glm::vec3(baseRadius, lightComp.range / 2.0f, baseRadius));
+                glm::vec3 centerPos = lightComp.position + lightComp.direction * (lightComp.range * 0.5f);
+                glm::mat4 trans = glm::translate(glm::mat4(1.0f), centerPos);
 
-                    lightComp.transform = trans * rot * scale;
+                lightComp.transform = trans * rot * scale;
 
-                    if (spotLightPool->IsDynamic(entity))
-                        spotLightPool->SetBit<CHANGED_BIT>(entity);
+                if (spotLightPool->IsDynamic(entity))
+                    spotLightPool->SetBit<CHANGED_BIT>(entity);
 
-                    lightComp.version++;
+                lightComp.version++;
 
-                    auto currentShadowPool = registry->GetPool<SpotLightShadowComponent>();
-                    if (currentShadowPool && currentShadowPool->Has(entity)) {
-                        if (currentShadowPool->IsStatic(entity))
-                            currentShadowPool->MarkStaticDirty(entity);
-                        else if (currentShadowPool->IsDynamic(entity))
-                            currentShadowPool->SetBit<UPDATE_BIT>(entity);
-                    }
+                auto currentShadowPool = registry->GetPool<SpotLightShadowComponent>();
+                if (currentShadowPool && currentShadowPool->Has(entity)) {
+                    if (currentShadowPool->IsStatic(entity))
+                        currentShadowPool->MarkStaticDirty(entity);
+                    else if (currentShadowPool->IsDynamic(entity))
+                        currentShadowPool->SetBit<UPDATE_BIT>(entity);
                 }
             });
 

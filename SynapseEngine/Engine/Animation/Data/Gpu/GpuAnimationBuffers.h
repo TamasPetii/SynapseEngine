@@ -16,12 +16,13 @@ namespace Syn
 
     struct SYN_API GpuAnimationAddresses
     {
+        uint32_t isReady;
+        uint32_t padding;
         VkDeviceAddress vertexSkinData;
         VkDeviceAddress nodeTransforms;
         VkDeviceAddress frameGlobalColliders;
         VkDeviceAddress frameMeshColliders;
         VkDeviceAddress frameMeshletColliders;
-        uint64_t padding;
         GpuAnimationDescriptor descriptor;
 		GpuMeshCollider globalCollider;
     };

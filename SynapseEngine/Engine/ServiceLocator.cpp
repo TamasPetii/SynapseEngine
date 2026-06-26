@@ -23,7 +23,6 @@ namespace Syn {
 
 	void ServiceLocator::Shutdown()
 	{
-		_vkContext = nullptr;
 		_shaderManager = nullptr;
 		_resourceManager = nullptr;
 		_staticMeshBuilder = nullptr;

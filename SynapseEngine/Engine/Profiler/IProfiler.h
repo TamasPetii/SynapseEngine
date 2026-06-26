@@ -3,6 +3,7 @@
 #include <string>
 #include <unordered_map>
 #include <format>
+#include <vector>
 
 namespace Syn 
 {

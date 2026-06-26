@@ -46,6 +46,10 @@ namespace Syn {
             OnScroll(xOffset, yOffset);
             };
 
+        callbacks.OnChar = [this](unsigned int codepoint) {
+            OnChar(codepoint);
+            };
+
         _window->SetCallbacks(callbacks);
     }
 

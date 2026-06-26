@@ -8,6 +8,7 @@
 #include <unordered_set>
 #include "ShaderIncluder.h"
 #include "Engine/Logger/Logger.h"
+#include "Engine/Utils/PathUtils.h"
 
 namespace Syn::Vk {
     static void GatherDependencies(const std::filesystem::path& currentFile, std::unordered_set<std::string>& dependencies) {
@@ -33,11 +34,13 @@ namespace Syn::Vk {
                     std::filesystem::path finalPath = (currentDir / includePath).lexically_normal();
 
                     if (!std::filesystem::exists(finalPath)) {
-                        finalPath = (std::filesystem::path("Assets/Shaders") / includePath).lexically_normal();
+                        std::filesystem::path projectRoot(SYN_PROJECT_ROOT);
+                        finalPath = (projectRoot / "Engine/Shaders" / includePath).lexically_normal();
                     }
 
                     if (!std::filesystem::exists(finalPath)) {
-                        finalPath = (std::filesystem::path("Engine/Shaders") / includePath).lexically_normal();
+                        std::filesystem::path projectRoot(SYN_PROJECT_ROOT);
+                        finalPath = (projectRoot / "Assets/Shaders" / includePath).lexically_normal();
                     }
 
                     GatherDependencies(finalPath, dependencies);
@@ -50,6 +53,7 @@ namespace Syn::Vk {
         namespace fs = std::filesystem;
 
         fs::path sourcePath(filepath);
+        sourcePath = Syn::PathUtils::GetAbsolutePath(sourcePath);
 
         const char* appDataPath = std::getenv("APPDATA");
         fs::path baseDir = appDataPath ? appDataPath : ".";
@@ -124,14 +128,14 @@ namespace Syn::Vk {
 #else
         options.SetOptimizationLevel(shaderc_optimization_level_performance);
 #endif
-        std::string source = LoadFile(filepath);
+        std::string source = LoadFile(sourcePath.string());
         shaderc_shader_kind kind = MapStageToKind(stage);
 
-        shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(source, kind, filepath.c_str(), options);
+        shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(source, kind, sourcePath.string().c_str(), options);
 
         if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
             std::string errorMsg = result.GetErrorMessage();
-            Error("Shader compile Error in {}:\n{}", filepath, errorMsg);
+            Error("Shader compile Error in {}:\n{}", sourcePath.string(), errorMsg);
             SYN_ASSERT(false, "Shader compilation failed!");
         }
 
@@ -143,7 +147,7 @@ namespace Syn::Vk {
             outFile.close();
         }
 
-        Info("Compiled and cached shader: {}", filepath);
+        Info("Compiled and cached shader: {}", sourcePath.string());
         return spirv;
     }
 

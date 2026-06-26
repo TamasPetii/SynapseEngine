@@ -7,6 +7,7 @@
 #include "Engine/Render/ComputeGroupSize.h"
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Manager/ComponentBufferManager.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -24,20 +25,48 @@ namespace Syn {
 
     bool MortonGeneratorPass::ShouldExecute(const RenderContext& context) const {
         auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
-        return context.scene->GetSettings()->enableMortonBvhCulling && pool && !pool->GetStorage().GetStaticEntities().empty();
+
+        bool isEnabled = context.scene->GetSettings()->culling.geometrySpatialAcceleration == SpatialAccelerationType::MortonBvh
+            || context.scene->GetSettings()->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh
+            || context.scene->GetSettings()->culling.pointLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh
+            || context.scene->GetSettings()->culling.spotLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh;
+
+        if (!isEnabled || !pool || pool->GetStorage().GetStaticEntities().empty()) {
+            _wasEnabled = false;
+            return false;
+        }
+
+        if (!_wasEnabled) {
+            _needsRebuild = true;
+        }
+        _wasEnabled = true;
+
+        bool hasDirty = !pool->GetStorage().GetDirtyStatics().empty();
+        return hasDirty || _needsRebuild || (_countdown > 0);
     }
 
     void MortonGeneratorPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         _staticCount = static_cast<uint32_t>(scene->GetRegistry()->GetPool<TransformComponent>()->GetStorage().GetStaticEntities().size());
 
-        ChunkBuilderPC pc{};
-        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex, scene->GetSettings()->enableGeometryGpuCulling);
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ChunkBuilderPC), &pc);
+        Vk::PushConstant<ChunkBuilderPC> pc;
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void MortonGeneratorPass::Dispatch(const RenderContext& context) {
+        auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
+        bool hasDirty = !pool->GetStorage().GetDirtyStatics().empty();
+
+        if (hasDirty || _needsRebuild) {
+            _countdown = context.framesInFlight;
+            _needsRebuild = false;
+        }
+
+        if (_countdown > 0) {
+            _countdown--;
+        }
+
         if (_staticCount == 0) return;
 
         auto scene = context.scene;

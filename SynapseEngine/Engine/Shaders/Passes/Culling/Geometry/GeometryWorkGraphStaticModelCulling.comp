@@ -1,0 +1,155 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_AMDX_shader_enqueue : require
+
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Camera.glsl"
+#include "../../../Includes/Common/Transform.glsl"
+#include "../../../Includes/Common/Model.glsl"
+#include "../../../Includes/Common/Mesh.glsl"
+#include "../../../Includes/Common/Material.glsl"
+#include "../../../Includes/Common/Culling.glsl"
+#include "../../../Includes/Utils/CullingMath.glsl"
+#include "../../../Includes/Utils/Occlusion.glsl"
+#include "../../../Includes/Common/StaticChunk.glsl"
+#include "../../../Includes/Common/Animation.glsl"
+#include "../../../Includes/Payload/WorkGraphCullingPayload.glsl"
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../../Includes/PushConstants/ModelMeshCullingPC.glsl"
+layout(push_constant) uniform PushConstants {
+    ModelMeshCullingPC pc;
+};
+
+// Depth pyramid (HZB) for main camera occlusion culling
+layout(set = 2, binding = 0) uniform sampler2D depthPyramid;
+
+// Receive Chunk Payload
+layout(coalescing_node_amdx) in;
+layout(location = 0) in ChunkCullingPayload payloadIn;
+
+// Output to Mesh Node
+layout(coalescing_node_amdx) out node_type GeometryWorkGraphMeshCullingNode;
+layout(location = 1) out MeshCullingPayload payloadOut;
+
+void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    // 1. Unpack Chunk Payload
+    uint rawChunkId = payloadIn.rawChunkPayload;
+    bool chunkFullyInside = (rawChunkId >> 31) != 0;
+    uint pureChunkId = rawChunkId & 0x7FFFFFFF;
+
+    StaticChunk chunk = GET_STATIC_CHUNK(ctx.staticChunkDataBufferAddr, pureChunkId);
+
+    // 2. Resolve Main Camera data
+    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
+
+    float screenSizePixels = 0.0;
+    vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);
+    bool enableDepthOcclusion = (ctx.enableModelOcclusionCulling == 1);
+    
+    // 3. Collaborative processing of all entities within the chunk
+    for (uint i = gl_LocalInvocationID.x; i < chunk.entityCount; i += gl_WorkGroupSize.x) 
+    {     
+        // Resolve dense entity index directly from the chunk
+        uint denseIndex = chunk.firstEntityIndex + i;
+        TransformModelLink link = GET_TRANSFORM_MODEL_LINK(ctx.transformModelLinkBufferAddr, denseIndex);
+        
+        if (link.modelDenseIndex == INVALID_INDEX) continue;
+        uint entityId = link.entityIndex;
+
+        TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, denseIndex);
+        ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, link.modelDenseIndex);
+        
+        ModelAllocationInfo mAlloc = GET_MODEL_ALLOC(ctx.globalModelAllocationBufferAddr, modelComp.modelIndex);
+        GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, modelComp.modelIndex);
+
+        GpuMeshCollider localGlobalCollider = addrs.globalCollider;
+
+        // Evaluate Animation frame collider if applicable
+        if(ctx.animationSparseMapBufferAddr != 0) {
+            uint animSparseIndex = GET_SPARSE_INDEX(ctx.animationSparseMapBufferAddr, entityId);
+            if (animSparseIndex != INVALID_INDEX) {
+                AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animSparseIndex);
+                if (animComp.animationIndex != INVALID_INDEX) {
+                    GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
+
+                     if (animAddrs.isReady == 1) {
+                        localGlobalCollider = GET_MESH_COLLIDER(animAddrs.frameGlobalColliders, animComp.frameIndex);
+                    }
+                }
+            }
+        }
+
+        // Transform global collider to world space
+        GpuMeshCollider worldCollider = TransformCollider(localGlobalCollider, transform.transform);
+
+         // 4. Frustum Culling Test + Occlusion Culling
+        uint visibility = chunkFullyInside ? INTERSECTION_INSIDE : INTERSECTION_INTERSECT;
+        if (!chunkFullyInside && ctx.enableModelFrustumCulling == 1) { 
+            visibility = TestFrustum(worldCollider, camera);
+            if (visibility == INTERSECTION_OUTSIDE) continue;
+        }
+
+        // 5. Occlusion Culling Test
+        if (IsSphereOccludedPerspective(worldCollider.center, worldCollider.radius, camera.view, camera.projVulkan, camera.params.x, camera.params.y, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
+            continue;
+        }
+
+        // 6. Fast-path: Process simple/small models directly
+        const uint MAX_MESH_COUNT = 16u;
+        const uint MAX_VERTEX_COUNT = 25000u;
+        uint safeMeshCount = mAlloc.meshAllocationCount / 4;
+        
+        if (safeMeshCount <= MAX_MESH_COUNT && addrs.vertexCount < MAX_VERTEX_COUNT) 
+        {
+            // Calculate LOD
+            uint lod = (screenSizePixels > 512.0) ? 0 :
+                       (screenSizePixels > 256.0) ? 1 :
+                       (screenSizePixels > 128.0) ? 2 : 3;
+            
+            for(uint m = 0; m < safeMeshCount; ++m) {
+                uint matIdx = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, modelComp.materialOffset + m);
+                Material mat = GET_MATERIAL(ctx.materialBufferAddr, matIdx);
+
+                // Determine Material Render Type (Opaque/Transparent + 1/2 Sided)
+                uint matType = 0;
+                if (IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat))       matType = 3;
+                else if (IS_TRANSPARENT(mat) && !IS_DOUBLE_SIDED(mat)) matType = 2;
+                else if (!IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat)) matType = 1;
+
+                MeshAllocationInfo meshAlloc = GET_MESH_ALLOC(ctx.globalMeshAllocationBufferAddr, mAlloc.meshAllocationOffset + (m * 4) + lod);
+                
+                if (meshAlloc.activeTypes[matType] == 1) {
+                    uint slotIndex = 0;
+                    uint indirectIdx = meshAlloc.indirectIndices[matType];
+
+                     // Check pipeline type and atomic add to the correct command buffer
+                    if (meshAlloc.isMeshletPipeline == PIPELINE_MESHLET) {
+                        uint64_t meshletBaseAddr = ctx.globalIndirectCommandBufferAddr + (ctx.globalTraditionalCommandsCount * 16ul);
+                        slotIndex = atomicAdd(GET_MESHLET_CMD(meshletBaseAddr, indirectIdx).groupCountX, 1);
+                    } else {
+                        slotIndex = atomicAdd(GET_TRADITIONAL_CMD(ctx.globalIndirectCommandBufferAddr, indirectIdx).instanceCount, 1);
+                    }
+
+                    // Write Instance ID (and encode full visibility flag in the MSB)
+                    uint payload = SET_BIT_TO(entityId, 31, visibility == INTERSECTION_INSIDE);
+                    GET_INSTANCE(ctx.globalInstanceIndexBufferAddr, meshAlloc.instanceOffsets[matType] + slotIndex) = payload;
+                }
+            }
+            continue;
+        }
+
+        // 4. Slow-path: WORK GRAPH ENQUEUE (Forward to Mesh Node)
+        allocateNodeRecordAMDX(GeometryWorkGraphMeshCullingNode, 1);
+        
+        payloadOut.entityId = SET_BIT_TO(entityId, 31, visibility == INTERSECTION_INSIDE);
+        payloadOut.modelIndex = modelComp.modelIndex;
+        
+        submitNodeRecordAMDX(GeometryWorkGraphMeshCullingNode);
+    }
+}

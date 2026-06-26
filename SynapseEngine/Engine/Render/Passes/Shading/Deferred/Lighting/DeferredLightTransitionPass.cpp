@@ -1,10 +1,12 @@
 #include "DeferredLightTransitionPass.h"
 #include "Engine/Render/RenderNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
     bool DeferredLightTransitionPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->pipelineType == PipelineType::Deferred && !context.scene->GetSettings()->enableDebugVisibility;
+        return context.scene->GetSettings()->lighting.pipelineType == PipelineType::Deferred 
+            && !context.scene->GetSettings()->debug.enableDebugVisibility;
     }
 
     void DeferredLightTransitionPass::PrepareFrame(const RenderContext& context) {
@@ -13,7 +15,8 @@ namespace Syn {
         std::vector<std::string> gBufferTargets = {
             RenderTargetNames::ColorMetallic,
             RenderTargetNames::NormalRoughness,
-            RenderTargetNames::EmissiveAo
+            RenderTargetNames::EmissiveAo,
+            RenderTargetNames::SsaoAo
         };
 
         for (const auto& target : gBufferTargets) {

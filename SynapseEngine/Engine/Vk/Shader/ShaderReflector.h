@@ -1,6 +1,6 @@
 #pragma once
 #include "../VkCommon.h"
-#include <spirv_reflect.h>
+#include <spirv-reflect/spirv_reflect.h>
 
 namespace Syn::Vk {
 

@@ -24,13 +24,21 @@ namespace Syn::Vk {
         }
 
         if (_isMapped) {
-            void* data;
-            SYN_VK_ASSERT_MSG(vmaMapMemory(_allocator, _allocation, &data), "Failed to map buffer memory");
+            void* data = nullptr;
+
+            if (vmaMapMemory(_allocator, _allocation, &data) != VK_SUCCESS) 
+                return nullptr;
+
             return data;
         }
 
-        void* data;
-        SYN_VK_ASSERT_MSG(vmaMapMemory(_allocator, _allocation, &data), "Failed to map buffer memory");
+        void* data = nullptr;
+        VkResult res = vmaMapMemory(_allocator, _allocation, &data);
+
+        if (res != VK_SUCCESS) {
+            return nullptr;
+        }
+
         _isMapped = true;
         return data;
     }
@@ -50,5 +58,16 @@ namespace Syn::Vk {
             return;
 
         vmaFlushAllocation(_allocator, _allocation, offset, size);
+    }
+
+    void Buffer::Write(const void* data, size_t size, size_t offset) {
+        uint8_t* ptr = static_cast<uint8_t*>(Map());
+        memcpy(ptr + offset, data, size);
+
+        if (!_isCoherent) {
+            Flush(offset, size);
+        }
+
+        Unmap();
     }
 }

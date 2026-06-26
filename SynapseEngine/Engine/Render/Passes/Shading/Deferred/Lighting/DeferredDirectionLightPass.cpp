@@ -9,6 +9,7 @@
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Scene/BufferNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -16,9 +17,9 @@ namespace Syn {
 
     bool DeferredDirectionLightPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->pipelineType == PipelineType::Deferred 
-            && context.scene->GetSettings()->enableDeferredDirectionalLights
-            && !context.scene->GetSettings()->enableDebugVisibility;
+        return context.scene->GetSettings()->lighting.pipelineType == PipelineType::Deferred
+            && context.scene->GetSettings()->lighting.enableDeferredDirectionalLights
+            && !context.scene->GetSettings()->debug.enableDebugVisibility;
     }
 
     void DeferredDirectionLightPass::Initialize() {
@@ -83,30 +84,67 @@ namespace Syn {
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         uint32_t fIdx = context.frameIndex;
 
-        DeferredDirectionLightPC pc{};
-		pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(DeferredDirectionLightPC), &pc);
+        Vk::PushConstant<DeferredDirectionLightPC> pc;
+		pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void DeferredDirectionLightPass::BindDescriptors(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         auto imageManager = ServiceLocator::GetImageManager();
         auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge)->Handle();
+        auto ssaoSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge)->Handle();
+
+        uint fIdx = context.frameIndex;
+        auto drawData = context.scene->GetSceneDrawData();
+        auto dirShadowAtlas = drawData->DirectionLightShadow.shadowAtlas[fIdx].get();
+        auto shadowSampler = imageManager->GetSampler(SamplerNames::ShadowSampler);
 
         Vk::PushDescriptorWriter pushWriter;
-        pushWriter.AddCombinedImageSampler(0, group->GetImage(RenderTargetNames::ColorMetallic)->GetView(Vk::ImageViewNames::Default), sampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-        pushWriter.AddCombinedImageSampler(1, group->GetImage(RenderTargetNames::NormalRoughness)->GetView(Vk::ImageViewNames::Default), sampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-        pushWriter.AddCombinedImageSampler(2, group->GetImage(RenderTargetNames::OpaqueDepth)->GetView(Vk::ImageViewNames::Default), sampler, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL);
+
+        pushWriter.AddCombinedImageSampler(
+            0,
+            group->GetImage(RenderTargetNames::ColorMetallic)->GetView(Vk::ImageViewNames::Default),
+            sampler,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            1, 
+            group->GetImage(RenderTargetNames::NormalRoughness)->GetView(Vk::ImageViewNames::Default),
+            sampler,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            2,
+            group->GetImage(RenderTargetNames::OpaqueDepth)->GetView(Vk::ImageViewNames::Default),
+            sampler,
+            VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            3,
+            group->GetImage(RenderTargetNames::SsaoAo)->GetView(Vk::ImageViewNames::Default),
+            ssaoSampler,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            4,
+            dirShadowAtlas->GetView(Vk::ImageViewNames::Default),
+            shadowSampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
     void DeferredDirectionLightPass::Draw(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
 		auto fIdx = context.frameIndex;
-		auto isGpu = context.scene->GetSettings()->enableGeometryGpuCulling;
 
-		auto indirectBuffer = drawData->DirectionLights.indirectBuffer.GetHandle(fIdx, isGpu);
+		auto indirectBuffer = drawData->DirectionLights.indirectBuffer.GetHandle(fIdx);
 
         vkCmdDrawIndirect(
             context.cmd,

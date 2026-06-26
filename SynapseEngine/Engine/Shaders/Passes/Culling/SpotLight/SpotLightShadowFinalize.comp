@@ -1,0 +1,56 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Mesh.glsl"
+#include "../../../Includes/Common/SpotLight.glsl"
+#include "../../../Includes/Common/IndirectCommand.glsl"
+#include "../../../Includes/Common/Culling.glsl"
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../../Includes/PushConstants/SpotLightShadowCullingPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    SpotLightShadowCullingPC pc;
+};
+
+void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    uint visibleCount = GET_SPOT_VISIBLE_COUNT_DATA(ctx.spotLightShadowVisibleMeshCountBufferAddr);
+    uint globalId = gl_GlobalInvocationID.x;
+    
+    if (globalId >= visibleCount) return;
+
+    // Fetch sorted key and original unsorted slot index
+    uint currentKey = GET_SPOT_DRAW_CALL_KEY_DATA(ctx.spotLightShadowDrawCallKeyBufferAddr, globalId);
+    uint originalIndex = GET_SPOT_SORTED_VALUE(ctx.spotLightShadowSortValuesBufferAddr, globalId);
+
+    // Gather from unsorted and scatter into final compact instance buffer
+    uvec2 payload = GET_SPOT_SHADOW_INSTANCE_UNSORTED(ctx.spotLightShadowUnsortedInstanceBufferAddr, originalIndex);
+    GET_SPOT_SHADOW_INSTANCE(ctx.spotLightShadowInstanceBufferAddr, globalId) = payload;
+
+    // Detect draw call boundaries
+    bool isFirst = (globalId == 0);
+    uint prevKey = isFirst ? 0xFFFFFFFF : GET_SPOT_DRAW_CALL_KEY_DATA(ctx.spotLightShadowDrawCallKeyBufferAddr, globalId - 1);
+
+    uint indirectIdx = currentKey & 0x7FFFFFFF;
+    bool isMeshlet = (currentKey >> 31) != 0;
+
+    uint descIdx = isMeshlet ? (indirectIdx + ctx.globalTraditionalCommandsCount) : indirectIdx;
+
+    // If this is the start of a new draw command, save the compact offset
+    if (currentKey != prevKey) {
+        GET_DRAW_DESCRIPTOR(ctx.spotLightDrawDescriptorBufferAddr, descIdx).instanceOffset = globalId;
+    }
+
+    // Append instance to the appropriate indirect draw command using atomic additions
+    if (isMeshlet) {
+        uint64_t meshletBaseAddr = ctx.spotLightShadowIndirectGeometryCommandBufferAddr + (ctx.globalTraditionalCommandsCount * 16ul);
+        atomicAdd(GET_MESHLET_CMD(meshletBaseAddr, indirectIdx).groupCountX, 1);
+    } else {
+        atomicAdd(GET_TRADITIONAL_CMD(ctx.spotLightShadowIndirectGeometryCommandBufferAddr, indirectIdx).instanceCount, 1);
+    }
+}

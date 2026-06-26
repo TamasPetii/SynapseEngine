@@ -1,0 +1,37 @@
+#version 460
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_GOOGLE_include_directive : require
+
+#include "../../../Includes/Common/IndirectCommand.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../../Includes/PushConstants/CullingCommandResetPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    CullingCommandResetPC pc;
+};
+
+void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    uint id = gl_GlobalInvocationID.x;
+
+    // 1. Boundary check against total indirect commands
+    if (id >= ctx.globalIndirectCommandCount) return;
+
+    // 2. Reset Traditional Pipeline Commands
+    if (id < ctx.globalTraditionalCommandsCount) {
+        GET_VK_DRAW_CMD(ctx.directionLightShadowIndirectGeometryCommandBufferAddr, id).instanceCount = 0;
+    } 
+    // 3. Reset Meshlet Pipeline Commands
+    else {
+        uint64_t meshletBaseAddr = ctx.directionLightShadowIndirectGeometryCommandBufferAddr + (ctx.globalTraditionalCommandsCount * 16ul);
+        uint localCmdIndex = id - ctx.globalTraditionalCommandsCount;
+        
+        GET_VK_MESH_TASKS_CMD(meshletBaseAddr, localCmdIndex).groupCountX = 0;
+        
+    }
+}

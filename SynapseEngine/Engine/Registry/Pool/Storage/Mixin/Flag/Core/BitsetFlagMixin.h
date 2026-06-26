@@ -51,7 +51,14 @@ namespace Syn
             return ((_flags[index].test(Bits)) && ...);
         }
 
-        SYN_INLINE void ResetAllBitsImpl(DenseIndex index) { _flags[index].reset(); }
+        SYN_INLINE void ResetAllBitsImpl(DenseIndex index) { 
+            _flags[index].reset();
+        }
+
+        template<uint32_t... Bits>
+        SYN_INLINE void SetStateBitSetImpl() const {
+            ((_state.set(Bits)), ...);
+        }
 
         template<uint32_t... Bits>
         SYN_INLINE bool IsStateBitSetImpl() const {
@@ -82,6 +89,6 @@ namespace Syn
 
     protected:
         std::vector<std::bitset<N>> _flags;
-        std::bitset<N> _state;
+        mutable std::bitset<N> _state;
     };
 }

@@ -8,6 +8,7 @@
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/SamplerNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -15,9 +16,9 @@ namespace Syn {
 
     bool DeferredEmissiveAoPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->pipelineType == PipelineType::Deferred 
-            && context.scene->GetSettings()->enableDeferredEmissiveAo
-            && !context.scene->GetSettings()->enableDebugVisibility;
+        return context.scene->GetSettings()->lighting.pipelineType == PipelineType::Deferred
+            && context.scene->GetSettings()->lighting.enableDeferredEmissiveAo
+            && !context.scene->GetSettings()->debug.enableDebugVisibility;
     }
 
     void DeferredEmissiveAoPass::Initialize() {
@@ -87,23 +88,16 @@ namespace Syn {
         auto scene = context.scene;
         uint32_t fIdx = context.frameIndex;
 
-        DeferredEmissiveAoPC pc{};
-        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-
-        vkCmdPushConstants(
-            context.cmd,
-            _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL,
-            0,
-            sizeof(DeferredEmissiveAoPC),
-            &pc
-        );
+        Vk::PushConstant<DeferredEmissiveAoPC> pc;
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void DeferredEmissiveAoPass::BindDescriptors(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         auto imageManager = ServiceLocator::GetImageManager();
         auto nearestSampler = imageManager->GetSampler(SamplerNames::NearestClampEdge)->Handle();
+		auto ssaoSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge)->Handle();
 
         auto colorImg = group->GetImage(RenderTargetNames::ColorMetallic);
         auto emissiveAoImg = group->GetImage(RenderTargetNames::EmissiveAo);
@@ -123,6 +117,12 @@ namespace Syn {
             nearestSampler,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
+
+        pushWriter.AddCombinedImageSampler(
+            2,
+            group->GetImage(RenderTargetNames::SsaoAo)->GetView(Vk::ImageViewNames::Default),
+            ssaoSampler,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }

@@ -2,6 +2,8 @@
 #include "Engine/SynApi.h"
 #include "Engine/Animation/Data/Cooked/CookedAnimation.h"
 #include "../IAnimationProcessor.h"
+
+#include <chrono>
 #include <taskflow/taskflow.hpp>
 
 namespace Syn

@@ -1,4 +1,5 @@
 #include "CameraComponent.h"
+#include <cstring>
 
 namespace Syn
 {
@@ -44,7 +45,7 @@ namespace Syn
 		this->projVulkanInv = glm::inverse(this->projVulkan);
 		this->viewProjVulkan = this->projVulkan * this->view;
 		this->viewProjVulkanInv = glm::inverse(this->viewProjVulkan);
-		std::memcpy(frustum, component.frustum.planes, 6 * sizeof(glm::vec4));
+		memcpy(frustum, component.frustum.planes, 6 * sizeof(glm::vec4));
 	}
 }
 

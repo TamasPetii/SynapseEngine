@@ -28,12 +28,13 @@ struct GpuAnimationDescriptor {
 };
 
 struct GpuAnimationAddresses {
+    uint isReady;
+    uint padding;
     uint64_t vertexSkinData;
     uint64_t nodeTransforms;
     uint64_t frameGlobalColliders;
     uint64_t frameMeshColliders;
     uint64_t frameMeshletColliders;
-    uint64_t padding;
     GpuAnimationDescriptor descriptor;
     GpuMeshCollider globalCollider;
 };

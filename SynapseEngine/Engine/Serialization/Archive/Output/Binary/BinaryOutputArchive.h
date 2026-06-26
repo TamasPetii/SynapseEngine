@@ -7,7 +7,7 @@ namespace Syn
     class SYN_API BinaryOutputArchive : public IOutputArchive
     {
     public:
-        static std::vector<std::string> GetSupportedExtensions() { return { ".bin", ".dat", ".synmodel", ".synanim" }; }
+        static std::vector<std::string> GetSupportedExtensions() { return { ".bin", ".dat", ".synmodel", ".synanim", ".synscene"}; }
 
         explicit BinaryOutputArchive(IOutputStream& stream) : IOutputArchive(stream) {}
         ~BinaryOutputArchive() override = default;

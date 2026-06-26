@@ -1,23 +1,27 @@
 #include "GuiManager.h"
-#include <volk.h>
+#include <vulkan/vulkan.h>
 #include <imgui.h>
 
-#include "Editor/Backends/imgui_impl_glfw.h"
-#include "Editor/Backends/imgui_impl_vulkan.h"
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_vulkan.h>
 #include "GuiTextureManager.h"
 #include <print>
 #include "Engine/ServiceLocator.h"
 #include "Engine/FrameContext.h"
+#include "Editor/FileDialog/ImGuiFileDialogImpl.h"
+#include "EditorIcons.h"
 
 namespace Syn {
-    void GuiManager::Init(GLFWwindow* window, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue graphicsQueue, uint32_t imageCount, VkFormat colorFormat) {
+    GuiManager::~GuiManager() {
+        Shutdown();
+    }
+
+    void GuiManager::Init(GLFWwindow* window, VkInstance instance, VkPhysicalDevice physicalDevice, VkDevice device, VkQueue graphicsQueue, uint32_t graphicsQueueFamily, uint32_t imageCount, VkFormat colorFormat) {
         _device = device;
         _windowHandle = window;
         _colorFormat = colorFormat;
-
-        volkInitialize();
-        volkLoadInstance(instance);
-        volkLoadDevice(device);
+		_textureManager = std::make_unique<GuiTextureManager>();
+        _fileDialog = std::make_unique<ImGuiFileDialogImpl>();
 
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -40,6 +44,7 @@ namespace Syn {
         init_info.PhysicalDevice = physicalDevice;
         init_info.Device = device;
         init_info.Queue = graphicsQueue;
+        init_info.QueueFamily = graphicsQueueFamily;
         init_info.DescriptorPool = _imguiPool;
         init_info.MinImageCount = imageCount;
         init_info.ImageCount = imageCount;
@@ -49,36 +54,134 @@ namespace Syn {
         init_info.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
         init_info.PipelineRenderingCreateInfo.pColorAttachmentFormats = &_colorFormat;
 
+        ImGui_ImplVulkan_LoadFunctions(VK_API_VERSION_1_4, [](const char* function_name, void* user_data) {
+            return vkGetInstanceProcAddr(reinterpret_cast<VkInstance>(user_data), function_name);
+            }, instance);
+
         ImGui_ImplVulkan_Init(&init_info);
-        ImGui_ImplVulkan_CreateFontsTexture();
 
         SetStyle();
     }
 
     void GuiManager::Shutdown() {
         vkDeviceWaitIdle(_device);
-        GuiTextureManager::Get().Cleanup();
+
+        _fileDialog.reset();
+        _textureManager.reset();
+
         ImGui_ImplVulkan_Shutdown();
+
+        if (_imguiPool != VK_NULL_HANDLE) {
+            vkDestroyDescriptorPool(_device, _imguiPool, nullptr);
+            _imguiPool = VK_NULL_HANDLE;
+        }
+
         ImGui_ImplGlfw_Shutdown();
         ImGui::DestroyContext();
-        vkDestroyDescriptorPool(_device, _imguiPool, nullptr);
+
+        _device = VK_NULL_HANDLE; 
     }
 
     void GuiManager::BeginFrame() {
         
         if (auto frameCtx = ServiceLocator::GetFrameContext())
-            GuiTextureManager::Get().SetCurrentFrame(frameCtx->currentFrameIndex);
+            _textureManager->SetCurrentFrame(frameCtx->currentFrameIndex);
 
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-        ImGui::DockSpaceOverViewport(0, ImGui::GetMainViewport());
     }
 
     void GuiManager::UpdateAndDraw() {
-        for (auto& window : _windows) {
+        ImGuiViewport* viewport = ImGui::GetMainViewport();
+
+        for (auto& window : _globalWindows) {
             window->UpdateAndDraw();
         }
+
+        if (ImGui::BeginMainMenuBar()) {
+
+            ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 0.0f);
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(0.0f, 0.0f));
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+
+            const char* wsScene = SYN_WS_SCENE;
+            const char* wsModel = SYN_WS_MODEL;
+            const char* wsMaterial = SYN_WS_MATERIAL;
+            const char* wsTexture = SYN_WS_TEXTURE;
+
+            ImVec2 btnPadding = ImGui::GetStyle().FramePadding;
+            float totalWidth = ImGui::CalcTextSize(wsScene).x + ImGui::CalcTextSize(wsModel).x + ImGui::CalcTextSize(wsMaterial).x + ImGui::CalcTextSize(wsTexture).x + (btnPadding.x * 2.0f * 4.0f);
+
+            ImGui::SetCursorPosX(ImGui::GetWindowWidth() - totalWidth - 10.0f);
+
+            auto WorkspaceTab = [&](const char* label, EditorWorkspace ws) {
+                bool isSelected = (_currentWorkspace == ws);
+
+                if (isSelected) {
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImGui::GetStyleColorVec4(ImGuiCol_TabSelected));
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                }
+                else {
+                    ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
+                }
+
+                if (ImGui::Button(label)) {
+                    _currentWorkspace = ws;
+                }
+
+                ImGui::PopStyleColor(2);
+                };
+
+            WorkspaceTab(wsScene, EditorWorkspace::Scene);
+            WorkspaceTab(wsModel, EditorWorkspace::Model);
+            WorkspaceTab(wsMaterial, EditorWorkspace::Material);
+            WorkspaceTab(wsTexture, EditorWorkspace::Texture);
+
+            ImGui::PopStyleColor();
+            ImGui::PopStyleVar(2);
+
+            ImGui::EndMainMenuBar();
+        }
+
+        if (_fileDialog) {
+            _fileDialog->Draw();
+        }
+
+        ImGui::SetNextWindowPos(viewport->WorkPos);
+        ImGui::SetNextWindowSize(viewport->WorkSize);
+        ImGui::SetNextWindowViewport(viewport->ID);
+
+        ImGuiWindowFlags hostWindowFlags = ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+                                           ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse |
+                                           ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus |
+                                           ImGuiWindowFlags_NoBackground;
+
+        std::string hostWindowName = "";
+        ImGuiID subDockspaceId = 0;
+
+        switch (_currentWorkspace) {
+            case EditorWorkspace::Scene:    hostWindowName = "HostWindow_Scene";    subDockspaceId = ImGui::GetID("DockSpace_Scene"); break;
+            case EditorWorkspace::Texture:  hostWindowName = "HostWindow_Texture";  subDockspaceId = ImGui::GetID("DockSpace_Texture"); break;
+            case EditorWorkspace::Material: hostWindowName = "HostWindow_Material"; subDockspaceId = ImGui::GetID("DockSpace_Material"); break;
+            case EditorWorkspace::Model:    hostWindowName = "HostWindow_Model";    subDockspaceId = ImGui::GetID("DockSpace_Model"); break;
+            default:                        hostWindowName = "HostWindow_Default";  subDockspaceId = ImGui::GetID("DockSpace_Default"); break;
+        }
+
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+
+        if (ImGui::Begin(hostWindowName.c_str(), nullptr, hostWindowFlags)) {
+
+            ImGui::DockSpace(subDockspaceId, ImVec2(0, 0), ImGuiDockNodeFlags_None);
+
+            if (_workspaces.contains(_currentWorkspace)) {
+                _workspaces[_currentWorkspace]->UpdateAndDraw();
+            }
+        }
+
+        ImGui::End();
+        ImGui::PopStyleVar();
     }
 
     void GuiManager::EndFrame() {
@@ -111,6 +214,10 @@ namespace Syn {
         ImGui_ImplGlfw_ScrollCallback(_windowHandle, xOffset, yOffset);
     }
 
+    void GuiManager::OnChar(unsigned int codepoint) {
+        ImGui_ImplGlfw_CharCallback(_windowHandle, codepoint);
+    }
+
     bool GuiManager::WantsCaptureKeyboard() const {
         return ImGui::GetCurrentContext() ? ImGui::GetIO().WantCaptureKeyboard : false;
     }
@@ -129,7 +236,7 @@ namespace Syn {
         style.ItemSpacing = ImVec2(8.0f, 4.0f);
         style.ItemInnerSpacing = ImVec2(4.0f, 4.0f);
         style.TouchExtraPadding = ImVec2(0.0f, 0.0f);
-        style.IndentSpacing = 21.0f;
+        style.IndentSpacing = 12.0f;
         style.ScrollbarSize = 14.0f;
         style.GrabMinSize = 10.0f;
         style.WindowBorderSize = 1.0f;
@@ -195,5 +302,9 @@ namespace Syn {
         colors[ImGuiCol_NavHighlight] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
         colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
         colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
+    }
+
+    void GuiManager::CreateFontTexture() {
+        ImGui_ImplVulkan_CreateFontsTexture();
     }
 }

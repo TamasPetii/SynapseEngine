@@ -13,6 +13,7 @@
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Mesh/MeshSourceNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -20,9 +21,9 @@ namespace Syn {
 
     bool DeferredSpotLightPass::ShouldExecute(const RenderContext& context) const
     {
-        return context.scene->GetSettings()->pipelineType == PipelineType::Deferred 
-            && context.scene->GetSettings()->enableDeferredSpotLights
-            && !context.scene->GetSettings()->enableDebugVisibility;
+        return context.scene->GetSettings()->lighting.pipelineType == PipelineType::Deferred
+            && context.scene->GetSettings()->lighting.enableDeferredSpotLights
+            && !context.scene->GetSettings()->debug.enableDebugVisibility;
     }
 
     void DeferredSpotLightPass::Initialize() {
@@ -97,39 +98,69 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
         auto pyramid = modelManager->GetResource(MeshSourceNames::ProxyPyramid);
 
-        DeferredSpotLightPC pc{};
-        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-        pc.indexBufferAddr = pyramid->hardwareBuffers.indices->GetDeviceAddress();
-        pc.vertexPositionBufferAddr = pyramid->hardwareBuffers.vertexPositions->GetDeviceAddress();
-
-        vkCmdPushConstants(
-            context.cmd,
-            _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL,
-            0,
-            sizeof(DeferredSpotLightPC),
-            &pc
-        );
+        Vk::PushConstant<DeferredSpotLightPC> pc;
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
+        pc->indexBufferAddr = pyramid->hardwareBuffers.indices->GetDeviceAddress();
+        pc->vertexPositionBufferAddr = pyramid->hardwareBuffers.vertexPositions->GetDeviceAddress();
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void DeferredSpotLightPass::BindDescriptors(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         auto imageManager = ServiceLocator::GetImageManager();
         auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge)->Handle();
+		auto ssaoSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge)->Handle();
+
+        uint fIdx = context.frameIndex;
+        auto drawData = context.scene->GetSceneDrawData();
+        auto spotShadowAtlas = drawData->SpotLightShadow.shadowAtlas[fIdx].get();
+        auto shadowSampler = imageManager->GetSampler(SamplerNames::ShadowSampler);
 
         Vk::PushDescriptorWriter pushWriter;
-        pushWriter.AddCombinedImageSampler(0, group->GetImage(RenderTargetNames::ColorMetallic)->GetView(Vk::ImageViewNames::Default), sampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-        pushWriter.AddCombinedImageSampler(1, group->GetImage(RenderTargetNames::NormalRoughness)->GetView(Vk::ImageViewNames::Default), sampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-        pushWriter.AddCombinedImageSampler(2, group->GetImage(RenderTargetNames::OpaqueDepth)->GetView(Vk::ImageViewNames::Default), sampler, VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL);
+
+        pushWriter.AddCombinedImageSampler(
+            0,
+            group->GetImage(RenderTargetNames::ColorMetallic)->GetView(Vk::ImageViewNames::Default),
+            sampler,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            1,
+            group->GetImage(RenderTargetNames::NormalRoughness)->GetView(Vk::ImageViewNames::Default),
+            sampler,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            2,
+            group->GetImage(RenderTargetNames::OpaqueDepth)->GetView(Vk::ImageViewNames::Default),
+            sampler,
+            VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            3,
+            group->GetImage(RenderTargetNames::SsaoAo)->GetView(Vk::ImageViewNames::Default),
+            ssaoSampler,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            4,
+            spotShadowAtlas->GetView(Vk::ImageViewNames::Default),
+            shadowSampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
     void DeferredSpotLightPass::Draw(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
         auto fIdx = context.frameIndex;
-        auto isGpu = context.scene->GetSettings()->enableGeometryGpuCulling;
 
-        auto indirectBuffer = drawData->SpotLights.indirectBuffer.GetHandle(fIdx, isGpu);
+        auto indirectBuffer = drawData->SpotLights.indirectBuffer.GetHandle(fIdx);
 
         vkCmdDrawIndirect(
             context.cmd,

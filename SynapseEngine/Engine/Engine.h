@@ -6,7 +6,9 @@
 #include <span>
 #include <memory>
 
+#include <chrono>
 #include <taskflow/taskflow.hpp>
+#include "Logger/Sink/MemorySink.h"
 
 namespace Syn::Vk { 
     class Context;
@@ -23,6 +25,8 @@ namespace Syn {
 	class IGpuProfiler;
     class ICpuProfiler;
     class Serializer;
+    class MaterialManager;
+    class ImageManager;
 }
 
 namespace Syn
@@ -52,7 +56,13 @@ namespace Syn
         void OnKey(int key, int scancode, int action, int mods);
         void OnMouseButton(int button, int action, int mods);
         void OnMouseMove(float x, float y);
+		void OnScroll(float xOffset, float yOffset);
         void SetInputEnabled(bool enabled) { _inputEnabled = enabled; }
+        void OnChar(unsigned int codepoint);
+    public:
+        MaterialManager* GetMaterialManager();
+        ImageManager* GetImageManager();
+        std::shared_ptr<Syn::MemorySink> GetMemorySink() const { return _memorySink; }
     private:
         void Init(const EngineInitParams& params);
         void InitLogger();
@@ -82,6 +92,7 @@ namespace Syn
         std::unique_ptr<IGpuProfiler> _gpuProfiler;
         std::unique_ptr<ICpuProfiler> _cpuProfiler;
 		std::unique_ptr<Serializer> _serializer;
+        std::shared_ptr<MemorySink> _memorySink;
 
         std::function<void(uint32_t)> _onGuiFlushCallback;
     };

@@ -39,5 +39,6 @@ namespace Syn
     private:
         void BuildBinnedSahNodeTask(tf::Subflow& subflow, Scene* scene, std::span<SpatialItem> items);
         std::vector<SpatialItem> _spatialItems;
+        bool _wasEnabled = false;
     };
 }

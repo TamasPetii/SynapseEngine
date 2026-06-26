@@ -6,9 +6,9 @@
 #include "Engine/Vk/Context.h"
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Scene/BufferNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 #include <volk.h>
-#define VRDX_IMPLEMENTATION
 #include <vk_radix_sort.h>
 
 namespace Syn {
@@ -33,12 +33,41 @@ namespace Syn {
 
     bool MortonRadixSortPass::ShouldExecute(const RenderContext& context) const {
         auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
-        return context.scene->GetSettings()->enableMortonBvhCulling && pool && !pool->GetStorage().GetStaticEntities().empty();
+
+        bool isEnabled = context.scene->GetSettings()->culling.geometrySpatialAcceleration == SpatialAccelerationType::MortonBvh
+            || context.scene->GetSettings()->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh
+            || context.scene->GetSettings()->culling.pointLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh
+            || context.scene->GetSettings()->culling.spotLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh;
+
+        if (!isEnabled || !pool || pool->GetStorage().GetStaticEntities().empty()) {
+            _wasEnabled = false;
+            return false;
+        }
+
+        if (!_wasEnabled) {
+            _needsRebuild = true;
+        }
+        _wasEnabled = true;
+
+        bool hasDirty = !pool->GetStorage().GetDirtyStatics().empty();
+        return hasDirty || _needsRebuild || (_countdown > 0);
     }
 
-    void MortonRadixSortPass::Transfer(const RenderContext& context) {
+    void MortonRadixSortPass::Execute(const RenderContext& context) {
         auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
+        bool hasDirty = !pool->GetStorage().GetDirtyStatics().empty();
+
+        if (hasDirty || _needsRebuild) {
+            _countdown = context.framesInFlight;
+            _needsRebuild = false;
+        }
+
+        if (_countdown > 0) {
+            _countdown--;
+        }
+
         _staticCount = static_cast<uint32_t>(pool->GetStorage().GetStaticEntities().size());
+        if (_staticCount == 0) return;
 
         auto drawData = context.scene->GetSceneDrawData();
         auto compManager = context.scene->GetComponentBufferManager();
@@ -51,7 +80,23 @@ namespace Syn {
 
         VkBuffer keysHandle = compManager->GetComponentBuffer(BufferNames::MortonKeysData, fIdx).buffer->Handle();
         VkBuffer valuesHandle = compManager->GetComponentBuffer(BufferNames::MortonValuesData, fIdx).buffer->Handle();
-        VkBuffer tempHandle = tempBuffer.GetHandle(context.frameIndex, true);
+        VkBuffer tempHandle = tempBuffer.GetHandle(context.frameIndex);
+
+        Vk::BufferBarrierInfo keysPreBarrier{};
+        keysPreBarrier.buffer = keysHandle;
+        keysPreBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        keysPreBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        keysPreBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        keysPreBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, keysPreBarrier);
+
+        Vk::BufferBarrierInfo valuesPreBarrier{};
+        valuesPreBarrier.buffer = valuesHandle;
+        valuesPreBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        valuesPreBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        valuesPreBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        valuesPreBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, valuesPreBarrier);
 
         vrdxCmdSortKeyValue(
             context.cmd,

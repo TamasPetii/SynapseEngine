@@ -1,0 +1,105 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+
+#extension GL_KHR_shader_subgroup_basic : require
+#extension GL_KHR_shader_subgroup_arithmetic : require
+#extension GL_KHR_shader_subgroup_ballot : require
+
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Camera.glsl"
+#include "../../../Includes/Common/PointLight.glsl"
+#include "../../../Includes/Utils/CullingMath.glsl"
+#include "../../../Includes/Common/IndirectCommand.glsl"
+#include "../../../Includes/Utils/Occlusion.glsl"
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../../Includes/PushConstants/PointLightCullingPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    PointLightCullingPC pc;
+};
+
+layout(set = 2, binding = 0) uniform sampler2D depthPyramid;
+
+void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    uint globalId = gl_GlobalInvocationID.x;
+    if (globalId >= ctx.pointLightCount) return;
+
+    PointLightColliderGPU collider = GET_POINT_LIGHT_COLLIDER(ctx.pointLightColliderBufferAddr, globalId);
+
+    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
+
+    // 1. Frustum Culling (Sphere)
+    uint visibility = INTERSECTION_INTERSECT;
+    if(ctx.enablePointLightFrustumCulling == 1)
+    {
+        uint visibility = TestSphereFrustum(collider.center, collider.radius, camera);
+        if (visibility == INTERSECTION_OUTSIDE) return;
+    }
+
+    // 2. Occlusion és 0-pixel Culling
+    float screenSizePixels = 0.0;
+    vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);
+    bool enableDepthOcclusion = (ctx.enablePointLightOcclusionCulling == 1);
+
+    if (IsSphereOccludedPerspective(collider.center, collider.radius, camera.view, camera.projVulkan, camera.params.x, camera.params.y, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
+        return;
+    }
+
+    uint needsWrite = 1;
+    uint subgroupWriteCount = subgroupAdd(needsWrite);
+    uint localOffset = subgroupExclusiveAdd(needsWrite);
+    uint baseOffset = 0;
+
+    if (subgroupElect()) {
+        baseOffset = atomicAdd(GET_VK_DRAW_CMD(ctx.pointLightIndirectCommandBufferAddr, 0).instanceCount, subgroupWriteCount);
+    }
+
+    baseOffset = subgroupBroadcastFirst(baseOffset);
+
+    uint finalIndex = baseOffset + localOffset;
+    GET_POINT_VISIBLE_LIGHT(ctx.pointLightVisibleIndexBufferAddr, finalIndex) = collider.entityIndex;
+
+    // 3. Shadow Culling Logic
+    uint shadowSparseIdx = GET_SPARSE_INDEX(ctx.pointLightShadowSparseMapBufferAddr, collider.entityIndex);
+    if (shadowSparseIdx != INVALID_INDEX) 
+    {
+        float screenSizePixels = CalculateSphereScreenSizePerspective(collider.center, collider.radius, camera.view, camera.projVulkan, camera.params.x, screenRes);
+
+        uint faceBlockSizePx = 64;
+        if (screenSizePixels > 1024.0) faceBlockSizePx = 512;
+        else if (screenSizePixels > 512.0) faceBlockSizePx = 256;
+        else if (screenSizePixels > 256.0) faceBlockSizePx = 128;
+        else if (screenSizePixels > 128.0) faceBlockSizePx = 64;
+
+        uint faceBlocks = faceBlockSizePx / 64;
+        uint footprintBlocks = faceBlocks;
+
+        uint invertedSize = 0xFFu - footprintBlocks;
+        uint sortKey = (invertedSize << 24) | (shadowSparseIdx & 0xFFFFFFu);
+
+        uint needsShadowWrite = 1;
+        uint shadowSubgroupWriteCount = subgroupAdd(needsShadowWrite);
+        uint shadowLocalOffset = subgroupExclusiveAdd(needsShadowWrite);
+        uint shadowBaseOffset = 0;
+
+        if (subgroupElect()) {
+            shadowBaseOffset = atomicAdd(GET_POINT_VISIBLE_COUNT_DATA(ctx.pointLightShadowVisibleCountBufferAddr), shadowSubgroupWriteCount);
+        }
+        
+        shadowBaseOffset = subgroupBroadcastFirst(shadowBaseOffset);
+        
+        uint finalShadowIndex = shadowBaseOffset + shadowLocalOffset;
+        GET_POINT_VISIBLE_SHADOW_LIGHT(ctx.pointLightVisibleShadowIndexBufferAddr, finalShadowIndex) = collider.entityIndex;
+
+        GET_POINT_ATLAS_SORT_KEY(ctx.pointLightShadowAtlasSortKeyBufferAddr, finalShadowIndex) = sortKey;
+        GET_POINT_ATLAS_SORT_VALUE(ctx.pointLightShadowAtlasSortValueBufferAddr, finalShadowIndex) = collider.entityIndex;
+    }
+}

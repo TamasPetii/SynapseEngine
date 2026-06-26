@@ -29,6 +29,10 @@ layout(buffer_reference, std430) restrict buffer VisibleChunkList {
     uint data[];
 };
 
+layout(buffer_reference, std430) restrict buffer VisibleChunkListUvec2 { 
+    uvec2 data[];
+};
+
 layout(buffer_reference, std430) restrict buffer SceneAABBBuffer { 
     SceneAABB data; 
 };
@@ -45,8 +49,12 @@ layout(buffer_reference, std430) restrict buffer ChunkTransformIndicesBuffer {
     uint data[]; 
 };
 
-#define GET_STATIC_CHUNK(addr, idx)     StaticChunkBuffer(addr).data[idx]
-#define GET_VISIBLE_CHUNK(addr, idx)    VisibleChunkList(addr).data[idx]
+
+
+#define GET_STATIC_CHUNK(addr, idx)         StaticChunkBuffer(addr).data[idx]
+#define GET_VISIBLE_CHUNK(addr, idx)        VisibleChunkList(addr).data[idx]
+#define GET_VISIBLE_CHUNK_UVEC2(addr, idx)  VisibleChunkListUvec2(addr).data[idx]
+
 #define GET_SCENE_AABB(addr)            SceneAABBBuffer(addr).data
 #define GET_MORTON_KEY(addr, idx)       MortonKeysBuffer(addr).data[idx]
 #define GET_MORTON_VALUE(addr, idx)     MortonValueBuffer(addr).data[idx]

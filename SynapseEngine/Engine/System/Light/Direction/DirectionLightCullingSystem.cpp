@@ -1,6 +1,7 @@
 #include "DirectionLightCullingSystem.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Component/Light/Direction/DirectionLightComponent.h"
+#include "Engine/Component/Light/Direction/DirectionLightShadowComponent.h"
 #include "Engine/Component/Core/CameraComponent.h"
 #include "Engine/System/Light/Direction/DirectionLightSystem.h"
 #include "Engine/System/Core/CameraSystem.h"
@@ -26,7 +27,9 @@ namespace Syn
     {
         auto drawData = scene->GetSceneDrawData();
         auto registry = scene->GetRegistry();
+
         auto pool = registry->GetPool<DirectionLightComponent>();
+        auto shadowPool = registry->GetPool<DirectionLightShadowComponent>();
 
         auto cameraPool = registry->GetPool<CameraComponent>();
         EntityID cameraEntity = scene->GetSceneCameraEntity();
@@ -40,9 +43,14 @@ namespace Syn
             if (drawData->DirectionLights.instances.Size() < maxLights) {
                 drawData->DirectionLights.instances.Resize(maxLights);
             }
+
+            drawData->DirectionLightShadow.visibleLightCount = 0;
+            if (drawData->DirectionLightShadow.visibleLights.Size() < maxLights) {
+                drawData->DirectionLightShadow.visibleLights.Resize(maxLights);
+            }
             });
 
-        auto cullFunc = [pool, drawData](EntityID entity) {
+        auto cullFunc = [pool, drawData, shadowPool](EntityID entity) {
             const auto& lightComp = pool->Get(entity);
 
             // if (!lightComp.enabled) return;
@@ -52,6 +60,16 @@ namespace Syn
 
             if (slot < drawData->DirectionLights.instances.Size()) {
                 drawData->DirectionLights.instances[slot] = entity;
+            }
+
+            if (shadowPool && shadowPool->Has(entity))
+            {
+                std::atomic_ref<uint32_t> shadowCountRef(drawData->DirectionLightShadow.visibleLightCount);
+                uint32_t shadowSlot = shadowCountRef.fetch_add(1, std::memory_order_relaxed);
+
+                if (shadowSlot < drawData->DirectionLightShadow.visibleLights.Size()) {
+                    drawData->DirectionLightShadow.visibleLights[shadowSlot] = entity;
+                }
             }
             };
 
@@ -77,9 +95,12 @@ namespace Syn
                 instanceBufferView.buffer->Write(drawData->DirectionLights.instances.Data(), count * sizeof(uint32_t), 0);
             }
 
-            if (auto mapped = drawData->DirectionLights.indirectBuffer.GetMapped(frameIndex)) {
-                mapped->Write(&drawData->DirectionLights.cmdTemplate, sizeof(VkDrawIndirectCommand), 0);
+            auto visibleShadowBufferView = bufferManager->GetComponentBuffer(BufferNames::DirectionLightVisibleShadowData, frameIndex);
+            if (count > 0 && visibleShadowBufferView.buffer) {
+                visibleShadowBufferView.buffer->Write(drawData->DirectionLightShadow.visibleLights.Data(), count * sizeof(uint32_t), 0);
             }
+
+            drawData->DirectionLights.indirectBuffer.Write(frameIndex , &drawData->DirectionLights.cmdTemplate, sizeof(VkDrawIndirectCommand), 0);
             });
     }
 }

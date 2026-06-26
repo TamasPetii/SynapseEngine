@@ -4,11 +4,11 @@
 #include "Engine/Vk/Core/Device.h"
 #include "Engine/Vk/Rendering/GpuUploader.h"
 #include "Engine/Logger/SynLog.h"
-#include "Engine/Vk/Descriptor/DescriptorLayoutBuilder.h";
-#include "Engine/Image/Source/Procedural/DefaultImageSource.h"
 #include "SamplerNames.h"
 #include "Engine/Vk/Descriptor/DescriptorWriter.h"
 #include "ImageNames.h"
+#include "Engine/Image/Source/Procedural/DefaultImageSource.h"
+#include "Engine/Vk/Descriptor/DescriptorLayoutBuilder.h";
 
 namespace Syn {
 
@@ -21,6 +21,15 @@ namespace Syn {
         _cpuExtractor(std::move(cpuExtractor))
     {
         InitializeBindlessSetup();
+    }
+
+    ImageManager::~ImageManager() {
+        auto device = ServiceLocator::GetVkContext()->GetDevice()->Handle();
+
+        if (_bindlessLayout != VK_NULL_HANDLE) {
+            vkDestroyDescriptorSetLayout(device, _bindlessLayout, nullptr);
+            _bindlessLayout = VK_NULL_HANDLE;
+        }
     }
 
     void ImageManager::InitializeBindlessSetup()

@@ -2,14 +2,27 @@
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
 
-namespace Syn::Vk {
+namespace Syn::Vk 
+{
+    VkDescriptorSetLayout DescriptorUtils::_emptyBufferLayout = VK_NULL_HANDLE;
+    VkDescriptorSetLayout DescriptorUtils::_emptyStandardLayout = VK_NULL_HANDLE;
+
+    void DescriptorUtils::Cleanup() {
+        auto device = ServiceLocator::GetVkContext()->GetDevice()->Handle();
+        if (_emptyBufferLayout != VK_NULL_HANDLE) {
+            vkDestroyDescriptorSetLayout(device, _emptyBufferLayout, nullptr);
+            _emptyBufferLayout = VK_NULL_HANDLE;
+        }
+        if (_emptyStandardLayout != VK_NULL_HANDLE) {
+            vkDestroyDescriptorSetLayout(device, _emptyStandardLayout, nullptr);
+            _emptyStandardLayout = VK_NULL_HANDLE;
+        }
+    }
+
     VkDescriptorSetLayout DescriptorUtils::GetEmptyDescriptorSetLayout(bool useDescriptorBuffers) {
         auto device = ServiceLocator::GetVkContext()->GetDevice();
 
-        static VkDescriptorSetLayout emptyBufferLayout = VK_NULL_HANDLE;
-        static VkDescriptorSetLayout emptyStandardLayout = VK_NULL_HANDLE;
-
-        VkDescriptorSetLayout& targetLayout = useDescriptorBuffers ? emptyBufferLayout : emptyStandardLayout;
+        VkDescriptorSetLayout& targetLayout = useDescriptorBuffers ? _emptyBufferLayout : _emptyStandardLayout;
 
         if (targetLayout == VK_NULL_HANDLE) {
             VkDescriptorSetLayoutCreateInfo layoutInfo = { VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };

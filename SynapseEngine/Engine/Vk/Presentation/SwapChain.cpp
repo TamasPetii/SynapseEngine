@@ -24,7 +24,7 @@ namespace Syn::Vk {
             return;
         }
 
-        vkDeviceWaitIdle(_device.Handle());
+        _device.WaitIdle();
         Cleanup();
         Init();
     }

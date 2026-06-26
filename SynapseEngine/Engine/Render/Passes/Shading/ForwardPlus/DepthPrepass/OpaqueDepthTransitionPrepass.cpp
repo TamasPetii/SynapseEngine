@@ -1,10 +1,11 @@
 #include "OpaqueDepthTransitionPrepass.h"
 #include "Engine/Render/RenderNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
     bool OpaqueDepthTransitionPrepass::ShouldExecute(const RenderContext& context) const {
-        return context.scene->GetSettings()->pipelineType == PipelineType::ForwardPlus;
+        return context.scene->GetSettings()->lighting.pipelineType == PipelineType::ForwardPlus;
     }
 
     void OpaqueDepthTransitionPrepass::PrepareFrame(const RenderContext& context) {

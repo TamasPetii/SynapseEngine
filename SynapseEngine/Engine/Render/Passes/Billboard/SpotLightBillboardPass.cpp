@@ -11,6 +11,8 @@
 #include "Engine/Vk/Buffer/BufferUtils.h"
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
 #include "Engine/Component/Light/Spot/SpotLightComponent.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
+#include "Engine/Utils/PathUtils.h"
 
 namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/BillboardPC.glsl"
@@ -21,7 +23,7 @@ namespace Syn {
         if (!pool || pool->Size() == 0)
             return false;
 
-        return context.scene->GetSettings()->enableBillboardSpotLights;
+        return context.scene->GetSettings()->debug.enableBillboardSpotLights;
     }
 
     void SpotLightBillboardPass::Initialize() {
@@ -67,7 +69,7 @@ namespace Syn {
             .colorAttachmentCount = 2
         };
 
-        _iconTexture = ServiceLocator::GetImageManager()->LoadImageSync("../Assets/SpotLightIcon.png");
+        _iconTexture = ServiceLocator::GetImageManager()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/SpotLightIcon.png"));
     }
 
     void SpotLightBillboardPass::PrepareFrame(const RenderContext& context) {
@@ -107,11 +109,9 @@ namespace Syn {
         auto drawData = context.scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
 
-        bool isGpu = context.scene->GetSettings()->enableGeometryGpuCulling;
-
         Vk::BufferCopyInfo copyRegion{};
-        copyRegion.srcBuffer = drawData->SpotLights.indirectBuffer.GetHandle(fIdx, isGpu);
-        copyRegion.dstBuffer = drawData->SpotLights.billboardSingleCmdBuffer.GetHandle(fIdx, isGpu);
+        copyRegion.srcBuffer = drawData->SpotLights.indirectBuffer.GetHandle(fIdx);
+        copyRegion.dstBuffer = drawData->SpotLights.billboardSingleCmdBuffer.GetHandle(fIdx);
         copyRegion.srcOffset = offsetof(VkDrawIndirectCommand, instanceCount);
         copyRegion.dstOffset = offsetof(VkDrawIndirectCommand, instanceCount);
         copyRegion.size = sizeof(uint32_t);
@@ -119,7 +119,7 @@ namespace Syn {
         Vk::BufferUtils::CopyBuffer(context.cmd, copyRegion);
 
         Vk::BufferBarrierInfo memBarrier{};
-        memBarrier.buffer = drawData->SpotLights.billboardSingleCmdBuffer.GetHandle(fIdx, isGpu);
+        memBarrier.buffer = drawData->SpotLights.billboardSingleCmdBuffer.GetHandle(fIdx);
         memBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
         memBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
         memBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
@@ -149,23 +149,21 @@ namespace Syn {
         auto compManager = scene->GetComponentBufferManager();
         uint32_t fIdx = context.frameIndex;
 
-        BillboardPC pc{};
-        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-        pc.visibleEntitiesAddr = compManager->GetBufferAddr(BufferNames::SpotLightVisibleData, fIdx);
-        pc.baseScale = 1.0f;
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(BillboardPC), &pc);
+        Vk::PushConstant<BillboardPC> pc;
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
+        pc->visibleEntitiesAddr = compManager->GetBufferAddr(BufferNames::SpotLightVisibleData, fIdx);
+        pc->baseScale = 1.0f;
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void SpotLightBillboardPass::Draw(const RenderContext& context) {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         vkCmdDrawIndirect(
             context.cmd,
-            drawData->SpotLights.billboardSingleCmdBuffer.GetHandle(fIdx, isGpu),
+            drawData->SpotLights.billboardSingleCmdBuffer.GetHandle(fIdx),
             0,
             1,
             sizeof(VkDrawIndirectCommand)

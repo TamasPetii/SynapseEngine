@@ -1,0 +1,57 @@
+#include "IconManager.h"
+#include "EditorIcons.h"
+#include "Engine/Image/SamplerNames.h"
+#include "Engine/Vk/Image/ImageViewNames.h"
+#include "Engine/Utils/PathUtils.h"
+
+namespace Syn {
+    IconManager::IconManager(ImageManager* imageManager, GuiTextureManager* guiTextureManager)
+        : _imageManager(imageManager), _guiTextureManager(guiTextureManager) {}
+
+    void IconManager::InitializeFontAwesome(ImGuiIO& io, const std::string& fontPath, float fontSize) {
+        static const ImWchar icons_ranges[] = { ICON_MIN_FA, ICON_MAX_16_FA, 0 };
+        ImFontConfig icons_config;
+        icons_config.MergeMode = true;
+        icons_config.PixelSnapH = true;
+        icons_config.GlyphOffset.y = 2.5f;
+
+        _fontAwesome = io.Fonts->AddFontFromFileTTF(fontPath.c_str(), fontSize, &icons_config, icons_ranges);
+    }
+
+    void IconManager::LoadEngineIcons(const std::string& iconDirectory) {
+        if (!_imageManager || !_guiTextureManager) return;
+
+        Vk::Sampler* sampler = _imageManager->GetSampler(SamplerNames::LinearClampEdge);
+        if (!sampler) return;
+
+        auto loadAndRegister = [&](EditorIconType type, const std::string& fileName) {
+            std::string fullPath = PathUtils::GetAbsolutePathString(iconDirectory + "/" + fileName);
+
+            uint32_t imageId = _imageManager->LoadImageSync(fullPath);
+            auto texture = _imageManager->GetResource(imageId);
+
+            if (texture && texture->image) {
+                TextureHandle handle = _guiTextureManager->RegisterTexture(
+                    texture->image->GetView(Vk::ImageViewNames::Default),
+                    sampler->Handle()
+                );
+                _iconCache[type] = _guiTextureManager->GetImGuiTextureID(handle);
+            }
+            };
+
+        loadAndRegister(EditorIconType::Folder, "folder.png");
+        loadAndRegister(EditorIconType::File, "txt.png");
+        loadAndRegister(EditorIconType::Image, "png.png");
+        loadAndRegister(EditorIconType::Code, "code.png");
+        loadAndRegister(EditorIconType::Model, "obj.png");
+        loadAndRegister(EditorIconType::Sound, "mp3.png");
+    }
+
+    ImTextureID IconManager::GetIconDescriptor(EditorIconType type) const {
+        auto it = _iconCache.find(type);
+        if (it != _iconCache.end()) {
+            return it->second;
+        }
+        return 0;
+    }
+}

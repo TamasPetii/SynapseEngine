@@ -13,13 +13,14 @@ namespace Syn
 
         size_t totalLodCount = gpuData.indexedData.meshDescriptors.size();
 
+		outCpuData.lodDescriptors = gpuData.indexedData.lodDescriptors;
         outCpuData.globalCollider = gpuData.globalCollider;
-        outCpuData.meshColliders = std::move(gpuData.indexedData.meshColliders);
-        outCpuData.meshDescriptors = std::move(gpuData.indexedData.meshDescriptors);
-        outCpuData.meshletDrawDescriptors = std::move(gpuData.meshletData.drawDescriptors);
-        outCpuData.meshletVertexIndices = std::move(gpuData.meshletData.vertexIndices);
-        outCpuData.meshletTriangleIndices = std::move(gpuData.meshletData.triangleIndices);
-		outCpuData.meshletDescriptors = std::move(gpuData.meshletData.meshletDescriptors);
+        outCpuData.meshColliders = gpuData.indexedData.meshColliders;
+        outCpuData.meshDescriptors = gpuData.indexedData.meshDescriptors;
+        outCpuData.meshletDrawDescriptors = gpuData.meshletData.drawDescriptors;
+        outCpuData.meshletVertexIndices = gpuData.meshletData.vertexIndices;
+        outCpuData.meshletTriangleIndices = gpuData.meshletData.triangleIndices;
+		outCpuData.meshletDescriptors = gpuData.meshletData.meshletDescriptors;
         outCpuData.baseDrawCommands.reserve(totalLodCount);
 
         for (size_t i = 0; i < totalLodCount; ++i)
@@ -51,6 +52,6 @@ namespace Syn
             outCpuData.vertices.push_back(v.position);
         }
 
-        outCpuData.indices = std::move(gpuData.indexedData.indices);
+        outCpuData.indices = gpuData.indexedData.indices;
     }
 }

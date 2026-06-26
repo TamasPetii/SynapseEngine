@@ -1,0 +1,23 @@
+#version 460
+
+#include "../../Includes/Core.glsl"
+#include "../../Includes/Common/FrameGlobalContext.glsl"
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+layout(set = 2, binding = 0) uniform sampler2D inDepth;
+layout(set = 2, binding = 1, rg32f) uniform writeonly image2D outImage;
+
+#include "../../Includes/PushConstants/HizLinearizeDepthPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+   HizLinearizeDepthPC pc;
+};
+
+void main() {
+    ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
+    if (pos.x >= int(pc.outImageSize.x) || pos.y >= int(pc.outImageSize.y)) return;
+
+    float depth = texelFetch(inDepth, pos, 0).r;    
+    imageStore(outImage, pos, vec4(depth, depth, 0.0, 0.0));
+}

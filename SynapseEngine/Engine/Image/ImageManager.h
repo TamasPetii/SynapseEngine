@@ -27,7 +27,7 @@ namespace Syn {
             std::unique_ptr<IGpuImageUploader> uploader,
             std::unique_ptr<ICpuImageExtractor> cpuExtractor);
 
-        ~ImageManager() = default;
+        ~ImageManager();
 
         uint32_t LoadImageAsync(const std::string& filePath);
         uint32_t LoadImageFromSourceAsync(const std::string& name, ImageSourceFactory factory);

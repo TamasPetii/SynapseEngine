@@ -19,6 +19,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <cassert>
 
+#include "Engine/Vk/Rendering/PushConstant.h"
+
 namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/TraditionalMeshletPassPC.glsl"
@@ -27,6 +29,12 @@ namespace Syn {
         : _renderType(renderType)
     {
         _passName = (_renderType == MaterialRenderType::Transparent1Sided) ? "Meshlet_Transparent_Forward_1Sided" : "Meshlet_Transparent_Forward_2Sided";
+    }
+
+    bool MeshletTransparentForwardPass::ShouldExecute(const RenderContext& context) const
+    {
+        //Todo: Has transparent material?
+        return !context.scene->GetSettings()->debug.enableDebugVisibility;
     }
 
     void MeshletTransparentForwardPass::Initialize() {
@@ -90,11 +98,6 @@ namespace Syn {
         };
     }
 
-    bool MeshletTransparentForwardPass::ShouldExecute(const RenderContext& context) const
-    {
-        return !context.scene->GetSettings()->enableDebugVisibility;
-    }
-
     void MeshletTransparentForwardPass::PrepareFrame(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
@@ -141,34 +144,33 @@ namespace Syn {
         auto animationManager = ServiceLocator::GetAnimationManager();
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
+        
 
-        TraditionalMeshletPassPC pc{};
-		pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, true);
-        pc.baseDescriptorOffset = drawData->Models.activeTraditionalCount + drawData->Models.meshletCmdOffsets[_renderType];
-        pc.materialRenderType = static_cast<uint32_t>(_renderType);
-        pc.disableConeCulling = (_renderType == MaterialRenderType::Transparent2Sided) ? 1 : 0;
-
-        vkCmdPushConstants(
-            context.cmd,
-            _shaderProgram->GetLayout(),
-            VK_SHADER_STAGE_ALL,
-            0,
-            sizeof(TraditionalMeshletPassPC),
-            &pc
-        );
+        Vk::PushConstant<TraditionalMeshletPassPC> pc;
+		pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
+        pc->baseDescriptorOffset = drawData->Models.activeTraditionalCount + drawData->Models.meshletCmdOffsets[_renderType];
+        pc->materialRenderType = static_cast<uint32_t>(_renderType);
+        pc->disableConeCulling = (_renderType == MaterialRenderType::Transparent2Sided) ? 1 : 0;
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void MeshletTransparentForwardPass::BindDescriptors(const RenderContext& context)
     {
         auto imageManager = ServiceLocator::GetImageManager();
+        auto drawData = context.scene->GetSceneDrawData();
 
         //Using prevous frame's depth pyramid!
+        uint fIdx = context.frameIndex;
         uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, prevFrameIndex);
 
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
         auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);
+
+        auto dirShadowAtlas = drawData->DirectionLightShadow.shadowAtlas[fIdx].get();
+        auto pointShadowAtlas = drawData->PointLightShadow.shadowAtlas[fIdx].get();
+        auto spotShadowAtlas = drawData->SpotLightShadow.shadowAtlas[fIdx].get();
+        auto shadowSampler = imageManager->GetSampler(SamplerNames::ShadowSampler);
 
         Vk::PushDescriptorWriter pushWriter;
 
@@ -176,6 +178,27 @@ namespace Syn {
             0,
             depthPyramid->GetView(Vk::ImageViewNames::Default),
             maxSampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            2,
+            dirShadowAtlas->GetView(Vk::ImageViewNames::Default),
+            shadowSampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            3,
+            pointShadowAtlas->GetView(Vk::ImageViewNames::Default),
+            shadowSampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            4,
+            spotShadowAtlas->GetView(Vk::ImageViewNames::Default),
+            shadowSampler->Handle(),
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 
@@ -189,10 +212,10 @@ namespace Syn {
     {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
+        
 
-        auto indirectBuffer = drawData->Models.indirectBuffer.GetHandle(context.frameIndex, isGpu);
-        auto countBuffer = drawData->Models.drawCountBuffer.GetHandle(context.frameIndex, isGpu);
+        auto indirectBuffer = drawData->Models.indirectBuffer.GetHandle(context.frameIndex);
+        auto countBuffer = drawData->Models.drawCountBuffer.GetHandle(context.frameIndex);
 
         uint32_t commandOffsetIdx = drawData->Models.meshletCmdOffsets[_renderType];
         uint32_t maxCommandCount = drawData->Models.meshletCmdCounts[_renderType];

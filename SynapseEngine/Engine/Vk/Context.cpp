@@ -51,5 +51,10 @@ namespace Syn::Vk {
     }
 
     Context::~Context() {
+        _swapChain.reset();
+        _device.reset();
+        _physicalDevice.reset();
+        _surface.reset();
+        _instance.reset();
     }
 }

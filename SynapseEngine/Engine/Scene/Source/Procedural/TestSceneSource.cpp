@@ -4,6 +4,7 @@
 #include "Engine/ServiceLocator.h"
 #include "Engine/Component/Core/TransformComponent.h"
 #include "Engine/Component/Core/CameraComponent.h"
+#include "Engine/Component/Core/TagComponent.h"
 #include "Engine/Component/Rendering/ModelComponent.h"
 #include "Engine/Mesh/Factory/MeshFactory.h"
 #include "Engine/Mesh/ModelManager.h"
@@ -19,11 +20,15 @@
 #include "Engine/Component/Physics/BoxColliderComponent.h"
 #include "Engine/Component/Physics/SphereColliderComponent.h"
 #include "Engine/Component/Physics/CapsuleColliderComponent.h"
+#include "Engine/Component/Physics/ConvexColliderComponent.h"
+#include "Engine/Component/Physics/MeshColliderComponent.h"
 #include "Engine/Component/Physics/RigidBodyComponent.h"
 #include "Engine/Logger/SynLog.h"
+#include "Engine/Utils/PathUtils.h"
 
 #include <random>
 #include <fstream>
+#include <string>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
@@ -35,13 +40,16 @@ namespace Syn
         Registry& registry = SceneInsider::GetRegistry(scene, SceneInsider::GetKey());
         EntityID& sceneCam = SceneInsider::GetSceneCameraEntity(scene, SceneInsider::GetKey());
         EntityID& debugCam = SceneInsider::GetDebugCameraEntity(scene, SceneInsider::GetKey());
+        HierarchyManager* hm = scene.GetHierarchyManager();
 
         auto modelManager = ServiceLocator::GetModelManager();
         auto animationManager = ServiceLocator::GetAnimationManager();
         auto materialManager = ServiceLocator::GetMaterialManager();
 
         json config;
-        std::ifstream configFile("../Engine/Scene/Source/Procedural/test_config.json");
+        std::string path = PathUtils::GetAbsolutePathString("Engine/Scene/Source/Procedural/test_config.json");
+        std::ifstream configFile(path);
+
         if (configFile.is_open())
         {
             try {
@@ -93,26 +101,80 @@ namespace Syn
             modelManager->GetResourceIndex(MeshSourceNames::Torus)
         };
 
+        // --- ROOT CONTAINERS ---
+        EntityID rootCameras = scene.CreateEntity();
+        registry.AddComponent<TagComponent>(rootCameras);
+        registry.GetComponent<TagComponent>(rootCameras).name = "Cameras";
+        registry.GetComponent<TagComponent>(rootCameras).tag = "Root";
+        registry.AddComponent<TransformComponent>(rootCameras);
+        registry.GetPool<TransformComponent>()->SetCategory(rootCameras, StorageCategory::Static);
+
+        EntityID rootEnvironment = scene.CreateEntity();
+        registry.AddComponent<TagComponent>(rootEnvironment);
+        registry.GetComponent<TagComponent>(rootEnvironment).name = "Environment";
+        registry.GetComponent<TagComponent>(rootEnvironment).tag = "Root";
+        registry.AddComponent<TransformComponent>(rootEnvironment);
+        registry.GetPool<TransformComponent>()->SetCategory(rootEnvironment, StorageCategory::Static);
+
+        EntityID rootCharacters = scene.CreateEntity();
+        registry.AddComponent<TagComponent>(rootCharacters);
+        registry.GetComponent<TagComponent>(rootCharacters).name = "Characters";
+        registry.GetComponent<TagComponent>(rootCharacters).tag = "Root";
+        registry.AddComponent<TransformComponent>(rootCharacters);
+        registry.GetPool<TransformComponent>()->SetCategory(rootCharacters, StorageCategory::Static);
+
+        EntityID rootStaticGeo = scene.CreateEntity();
+        registry.AddComponent<TagComponent>(rootStaticGeo);
+        registry.GetComponent<TagComponent>(rootStaticGeo).name = "Static Geometry";
+        registry.GetComponent<TagComponent>(rootStaticGeo).tag = "Root";
+        registry.AddComponent<TransformComponent>(rootStaticGeo);
+        registry.GetPool<TransformComponent>()->SetCategory(rootStaticGeo, StorageCategory::Static);
+
+        EntityID rootPhysics = scene.CreateEntity();
+        registry.AddComponent<TagComponent>(rootPhysics);
+        registry.GetComponent<TagComponent>(rootPhysics).name = "Physics Objects";
+        registry.GetComponent<TagComponent>(rootPhysics).tag = "Root";
+        registry.AddComponent<TransformComponent>(rootPhysics);
+        registry.GetPool<TransformComponent>()->SetCategory(rootPhysics, StorageCategory::Static);
+
+        EntityID rootLights = scene.CreateEntity();
+        registry.AddComponent<TagComponent>(rootLights);
+        registry.GetComponent<TagComponent>(rootLights).name = "Lights";
+        registry.GetComponent<TagComponent>(rootLights).tag = "Root";
+        registry.AddComponent<TransformComponent>(rootLights);
+        registry.GetPool<TransformComponent>()->SetCategory(rootLights, StorageCategory::Static);
+
         // Cameras (Main & Debug)
         {
-            sceneCam = registry.CreateEntity();
+            sceneCam = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(sceneCam);
+            registry.GetComponent<TagComponent>(sceneCam).name = "Main Camera";
+            registry.GetComponent<TagComponent>(sceneCam).tag = "Camera";
             registry.AddComponent<CameraComponent>(sceneCam);
             registry.AddComponent<TransformComponent>(sceneCam);
             registry.GetPool<CameraComponent>()->SetCategory(sceneCam, StorageCategory::Stream);
             registry.GetPool<TransformComponent>()->SetCategory(sceneCam, StorageCategory::Stream);
+            hm->AttachChild(rootCameras, sceneCam);
 
-            debugCam = registry.CreateEntity();
+            debugCam = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(debugCam);
+            registry.GetComponent<TagComponent>(debugCam).name = "Debug Camera";
+            registry.GetComponent<TagComponent>(debugCam).tag = "Camera";
             registry.AddComponent<CameraComponent>(debugCam);
             registry.AddComponent<TransformComponent>(debugCam);
             registry.GetPool<CameraComponent>()->SetCategory(debugCam, StorageCategory::Stream);
             registry.GetPool<TransformComponent>()->SetCategory(debugCam, StorageCategory::Stream);
+            hm->AttachChild(rootCameras, debugCam);
         }
 
         if (spawnMonkey)
         {
             uint32_t monkeyModelIndex = modelManager->LoadModelAsync(basePath + "Monkey/monkey.obj");
 
-            EntityID monkeyId = registry.CreateEntity();
+            EntityID monkeyId = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(monkeyId);
+            registry.GetComponent<TagComponent>(monkeyId).name = "Suzanne_Monkey";
+            registry.GetComponent<TagComponent>(monkeyId).tag = "Model";
             registry.AddComponent<TransformComponent>(monkeyId);
             registry.AddComponent<ModelComponent>(monkeyId);
 
@@ -122,29 +184,44 @@ namespace Syn
 
             registry.GetPool<TransformComponent>()->SetCategory(monkeyId, StorageCategory::Static);
             registry.GetPool<ModelComponent>()->SetCategory(monkeyId, StorageCategory::Static);
+
+            hm->AttachChild(rootEnvironment, monkeyId);
         }
 
         if (spawnSponza)
         {
             uint32_t sponzaId = modelManager->LoadModelAsync(basePath + "Sponza/sponza.obj");
 
-            EntityID sponzaEntity = registry.CreateEntity();
+            EntityID sponzaEntity = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(sponzaEntity);
+            registry.GetComponent<TagComponent>(sponzaEntity).name = "Classic_Sponza";
+            registry.GetComponent<TagComponent>(sponzaEntity).tag = "Model";
             registry.AddComponent<TransformComponent>(sponzaEntity);
             registry.AddComponent<ModelComponent>(sponzaEntity);
+            registry.AddComponent<MeshColliderComponent>(sponzaEntity);
+            registry.AddComponent<RigidBodyComponent>(sponzaEntity);
 
             registry.GetComponent<TransformComponent>(sponzaEntity).translation = glm::vec3(0.0f, 0.0f, 0.0f);
             registry.GetComponent<TransformComponent>(sponzaEntity).scale = glm::vec3(0.2f, 0.2f, 0.2f);
             registry.GetComponent<ModelComponent>(sponzaEntity).modelIndex = sponzaId;
+            registry.GetComponent<RigidBodyComponent>(sponzaEntity).motionType = PhysicsMotionType::Static;
 
             registry.GetPool<TransformComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
             registry.GetPool<ModelComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
+            registry.GetPool<RigidBodyComponent>()->SetCategory(sponzaEntity, StorageCategory::Stream);
+            registry.GetPool<MeshColliderComponent>()->SetCategory(sponzaEntity, StorageCategory::Stream);
+
+            hm->AttachChild(rootEnvironment, sponzaEntity);
         }
 
         if (spawnBistro)
         {
             uint32_t bistroId = modelManager->LoadModelAsync(basePath + "Bistro/BistroExterior.fbx");
 
-            EntityID bistroEntity = registry.CreateEntity();
+            EntityID bistroEntity = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(bistroEntity);
+            registry.GetComponent<TagComponent>(bistroEntity).name = "Amazon_Bistro";
+            registry.GetComponent<TagComponent>(bistroEntity).tag = "Model";
             registry.AddComponent<TransformComponent>(bistroEntity);
             registry.AddComponent<ModelComponent>(bistroEntity);
 
@@ -154,11 +231,16 @@ namespace Syn
 
             registry.GetPool<TransformComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
             registry.GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
+
+            hm->AttachChild(rootEnvironment, bistroEntity);
         }
 
         if (spawnFloor)
         {
-            EntityID floorEntity = registry.CreateEntity();
+            EntityID floorEntity = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(floorEntity);
+            registry.GetComponent<TagComponent>(floorEntity).name = "Ground_Floor";
+            registry.GetComponent<TagComponent>(floorEntity).tag = "Shape";
             registry.AddComponent<TransformComponent>(floorEntity);
             registry.AddComponent<ModelComponent>(floorEntity);
             registry.AddComponent<RigidBodyComponent>(floorEntity);
@@ -184,6 +266,8 @@ namespace Syn
             floorMatInfo.color = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
             uint32_t floorMatId = materialManager->LoadMaterial("FloorMat", floorMatInfo);
             registry.GetComponent<MaterialOverrideComponent>(floorEntity).materials.push_back(floorMatId);
+
+            hm->AttachChild(rootEnvironment, floorEntity);
         }
 
         if (spawnPbrSponza)
@@ -194,19 +278,25 @@ namespace Syn
             uint32_t sponzaPbrTree = modelManager->LoadModelAsync(basePath + "Sponza_Pbr_Tree/NewSponza_CypressTree_FBX_YUp.fbx");
 
             std::array<uint32_t, 4> sponzaModels = { sponzaPbr, sponzaPbrCurtains, sponzaPbrFlowers, sponzaPbrTree };
+            std::array<std::string, 4> sponzaNames = { "PBR_Sponza_Main", "PBR_Sponza_Curtains", "PBR_Sponza_Flowers", "PBR_Sponza_Tree" };
 
-            for (auto modelIndex : sponzaModels)
+            for (size_t i = 0; i < sponzaModels.size(); i++)
             {
-                EntityID entity = registry.CreateEntity();
+                EntityID entity = scene.CreateEntity();
+                registry.AddComponent<TagComponent>(entity);
+                registry.GetComponent<TagComponent>(entity).name = sponzaNames[i];
+                registry.GetComponent<TagComponent>(entity).tag = "Model";
                 registry.AddComponent<TransformComponent>(entity);
                 registry.AddComponent<ModelComponent>(entity);
 
                 registry.GetComponent<TransformComponent>(entity).translation = glm::vec3(0.0f, 0.0f, 0.0f);
                 registry.GetComponent<TransformComponent>(entity).scale = glm::vec3(0.2f, 0.2f, 0.2f);
-                registry.GetComponent<ModelComponent>(entity).modelIndex = modelIndex;
+                registry.GetComponent<ModelComponent>(entity).modelIndex = sponzaModels[i];
 
                 registry.GetPool<TransformComponent>()->SetCategory(entity, StorageCategory::Static);
                 registry.GetPool<ModelComponent>()->SetCategory(entity, StorageCategory::Static);
+
+                hm->AttachChild(rootEnvironment, entity);
             }
         }
 
@@ -224,7 +314,10 @@ namespace Syn
             // Animated Characters
             for (int i = 0; i < charCount; i++)
             {
-                EntityID characterEntity = registry.CreateEntity();
+                EntityID characterEntity = scene.CreateEntity();
+                registry.AddComponent<TagComponent>(characterEntity);
+                registry.GetComponent<TagComponent>(characterEntity).name = "Mutant_" + std::to_string(i);
+                registry.GetComponent<TagComponent>(characterEntity).tag = "Character";
                 registry.AddComponent<TransformComponent>(characterEntity);
                 registry.AddComponent<ModelComponent>(characterEntity);
                 registry.AddComponent<AnimationComponent>(characterEntity);
@@ -240,6 +333,8 @@ namespace Syn
                 registry.GetPool<TransformComponent>()->SetCategory(characterEntity, StorageCategory::Static);
                 registry.GetPool<ModelComponent>()->SetCategory(characterEntity, StorageCategory::Static);
                 registry.GetPool<AnimationComponent>()->SetCategory(characterEntity, StorageCategory::Stream);
+
+                hm->AttachChild(rootCharacters, characterEntity);
             }
         }
 
@@ -283,7 +378,10 @@ namespace Syn
             };
 
         for (int i = 0; i < staticGeoCount; i++) {
-            EntityID e = registry.CreateEntity();
+            EntityID e = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(e);
+            registry.GetComponent<TagComponent>(e).name = "StaticGeo_" + std::to_string(i);
+            registry.GetComponent<TagComponent>(e).tag = "Shape";
             registry.AddComponent<TransformComponent>(e);
             registry.AddComponent<ModelComponent>(e);
             registry.AddComponent<MaterialOverrideComponent>(e);
@@ -298,14 +396,18 @@ namespace Syn
             registry.GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
 
             ApplyMaterial(e, i);
+            hm->AttachChild(rootStaticGeo, e);
         }
 
         uint32_t cubeMeshId = modelManager->GetResourceIndex(MeshSourceNames::Cube);
-        uint32_t sphereMeshId = modelManager->GetResourceIndex(MeshSourceNames::Sphere);
+        uint32_t sphereMeshId = modelManager->GetResourceIndex(MeshSourceNames::IcoSphere);
         uint32_t capsuleMeshId = modelManager->GetResourceIndex(MeshSourceNames::Capsule);
 
         for (int i = 0; i < physBoxCount; i++) {
-            EntityID e = registry.CreateEntity();
+            EntityID e = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(e);
+            registry.GetComponent<TagComponent>(e).name = "PhysicsBox_" + std::to_string(i);
+            registry.GetComponent<TagComponent>(e).tag = "Physics";
             registry.AddComponent<TransformComponent>(e);
             registry.AddComponent<ModelComponent>(e);
             registry.AddComponent<RigidBodyComponent>(e);
@@ -321,10 +423,15 @@ namespace Syn
             registry.GetPool<RigidBodyComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<BoxColliderComponent>()->SetCategory(e, StorageCategory::Static);
             ApplyMaterial(e, staticGeoCount + i);
+
+            hm->AttachChild(rootPhysics, e);
         }
 
         for (int i = 0; i < physSphereCount; i++) {
-            EntityID e = registry.CreateEntity();
+            EntityID e = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(e);
+            registry.GetComponent<TagComponent>(e).name = "PhysicsSphere_" + std::to_string(i);
+            registry.GetComponent<TagComponent>(e).tag = "Physics";
             registry.AddComponent<TransformComponent>(e);
             registry.AddComponent<ModelComponent>(e);
             registry.AddComponent<RigidBodyComponent>(e);
@@ -340,10 +447,15 @@ namespace Syn
             registry.GetPool<RigidBodyComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<SphereColliderComponent>()->SetCategory(e, StorageCategory::Static);
             ApplyMaterial(e, staticGeoCount + physBoxCount + i);
+
+            hm->AttachChild(rootPhysics, e);
         }
 
         for (int i = 0; i < physCapsuleCount; i++) {
-            EntityID e = registry.CreateEntity();
+            EntityID e = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(e);
+            registry.GetComponent<TagComponent>(e).name = "PhysicsCapsule_" + std::to_string(i);
+            registry.GetComponent<TagComponent>(e).tag = "Physics";
             registry.AddComponent<TransformComponent>(e);
             registry.AddComponent<ModelComponent>(e);
             registry.AddComponent<RigidBodyComponent>(e);
@@ -362,14 +474,19 @@ namespace Syn
             registry.GetPool<CapsuleColliderComponent>()->SetCategory(e, StorageCategory::Static);
 
             ApplyMaterial(e, staticGeoCount + physBoxCount + physSphereCount + i);
+
+            hm->AttachChild(rootPhysics, e);
         }
 
         for (int i = 0; i < dirLightCount; ++i) {
-            EntityID e = registry.CreateEntity();
+            EntityID e = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(e);
+            registry.GetComponent<TagComponent>(e).name = "DirectionalLight_" + std::to_string(i);
+            registry.GetComponent<TagComponent>(e).tag = "Light";
             registry.AddComponent<TransformComponent>(e);
             registry.AddComponent<DirectionLightComponent>(e);
 
-            registry.GetComponent<TransformComponent>(e).rotation = glm::vec3(-45.0f, 45.0f, 0.0f);
+            registry.GetComponent<TransformComponent>(e).rotation = glm::vec3(92.0f, 320.0f, 215.0f);
             auto& light = registry.GetComponent<DirectionLightComponent>(e);
             light.color = glm::vec3(1.0f, 0.95f, 0.85f) * 0.55f;
             light.strength = 5.0f;
@@ -379,10 +496,15 @@ namespace Syn
             registry.GetPool<DirectionLightComponent>()->SetCategory(e, StorageCategory::Stream);
             registry.GetPool<DirectionLightComponent>()->SetBit<SHADOW_TOGGLE_BIT>(e);
             registry.GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(e);
+
+            hm->AttachChild(rootLights, e);
         }
 
         for (int i = 0; i < pointLightCount; i++) {
-            EntityID e = registry.CreateEntity();
+            EntityID e = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(e);
+            registry.GetComponent<TagComponent>(e).name = "PointLight_" + std::to_string(i);
+            registry.GetComponent<TagComponent>(e).tag = "Light";
             registry.AddComponent<TransformComponent>(e);
             registry.AddComponent<PointLightComponent>(e);
 
@@ -392,7 +514,7 @@ namespace Syn
             auto& light = registry.GetComponent<PointLightComponent>(e);
             light.position = transform.translation;
             light.color = glm::vec3(static_cast<float>(rand()) / RAND_MAX, static_cast<float>(rand()) / RAND_MAX, static_cast<float>(rand()) / RAND_MAX);
-            light.radius = 2.0f + (rand() % 10);
+            light.radius = 5.0f + (rand() % 50);
             light.strength = 5.0f + (rand() % 25);
             light.useShadow = (i < pointShadowCount);
 
@@ -400,10 +522,15 @@ namespace Syn
             registry.GetPool<PointLightComponent>()->SetCategory(e, StorageCategory::Stream);
             registry.GetPool<PointLightComponent>()->SetBit<SHADOW_TOGGLE_BIT>(e);
             registry.GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(e);
+
+            hm->AttachChild(rootLights, e);
         }
 
         for (int i = 0; i < spotLightCount; i++) {
-            EntityID e = registry.CreateEntity();
+            EntityID e = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(e);
+            registry.GetComponent<TagComponent>(e).name = "SpotLight_" + std::to_string(i);
+            registry.GetComponent<TagComponent>(e).tag = "Light";
             registry.AddComponent<TransformComponent>(e);
             registry.AddComponent<SpotLightComponent>(e);
 
@@ -424,6 +551,8 @@ namespace Syn
             registry.GetPool<SpotLightComponent>()->SetCategory(e, StorageCategory::Stream);
             registry.GetPool<SpotLightComponent>()->SetBit<SHADOW_TOGGLE_BIT>(e);
             registry.GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(e);
+
+            hm->AttachChild(rootLights, e);
         }
 
         return true;

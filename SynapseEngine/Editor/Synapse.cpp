@@ -2,20 +2,20 @@
 #include "Engine/SynMacro.h"
 #include "Engine/Vk/Context.h"
 #include <GLFW/glfw3.h>
+#include <filesystem>
 
-#include "Editor/View/Transform/TransformView.h"
-#include "EditorCore/ViewModels/Transform/TransformViewModel.h"
-
-#include "Editor/View/Viewport/ViewportView.h"
-#include "EditorCore/ViewModels/Viewport/ViewportViewModel.h"
-
-#include "Editor/View/Settings/SettingsView.h"
-#include "EditorCore/ViewModels/Settings/SettingsViewModel.h"
+#include "Editor/Workspace/SceneWorkspace.h"
+#include "Editor/Workspace/ModelWorkspace.h"
+#include "Editor/Workspace/MaterialWorkspace.h"
+#include "Editor/Workspace/TextureWorkspace.h"
 
 #include "Editor/View/MainMenu/MainMenuView.h"
 #include "EditorCore/ViewModels/MainMenu/MainMenuViewModel.h"
 
 #include "Manager/GuiTextureManager.h"
+#include "Manager/EditorIcons.h"
+#include "Engine/Utils/PathUtils.h"
+#include "Editor/View/IGuiWindow.h"
 
 Synapse::Synapse(const Syn::ApplicationConfig& config)
     : Syn::Application(config)
@@ -23,6 +23,15 @@ Synapse::Synapse(const Syn::ApplicationConfig& config)
 }
 
 Synapse::~Synapse() {
+    if (_engine && _engine->GetVkContext() && _engine->GetVkContext()->GetDevice()) {
+        _engine->GetVkContext()->GetDevice()->WaitIdle();
+    }
+
+    _editorContext.reset();
+    _iconManager.reset();
+    _inputDispatcher.reset();
+    _guiManager.reset();
+    _engine.reset();
 }
 
 void Synapse::OnInit() {
@@ -49,14 +58,13 @@ void Synapse::OnInit() {
         };
 
     params.onGuiFlushCallback = [&](uint32_t frameIndex) {
-        Syn::GuiTextureManager::Get().FlushQueue(frameIndex);
+        _guiManager->GetTextureManager()->FlushQueue(frameIndex);
         };
 #endif
 
     _engine = std::make_unique<Syn::Engine>(params);
 
 #ifndef SYN_PERFORMANCE
-    _editorApi = std::make_unique<Syn::EditorApiImpl>(_engine.get());
 
     auto vkContext = _engine->GetVkContext();
     GLFWwindow* nativeWindow = static_cast<GLFWwindow*>(GetWindow().GetNativePointer());
@@ -68,48 +76,53 @@ void Synapse::OnInit() {
         vkContext->GetPhysicalDevice()->Handle(),
         vkContext->GetDevice()->Handle(),
         vkContext->GetDevice()->GetGraphicsQueue()->Handle(),
+        vkContext->GetDevice()->GetGraphicsQueue()->GetFamilyIndex(),
         vkContext->GetSwapChain()->GetImageCount(),
         vkContext->GetSwapChain()->GetImageFormat()
     );
 
-    using TransformWin = Syn::EditorWindow<Syn::TransformView, Syn::TransformViewModel>;
-    _guiManager->AddWindow<TransformWin>(
-        Syn::TransformView{
-        },
-        Syn::TransformViewModel{
-            _editorApi.get(),
-            _editorApi.get()
-        });
+    _editorContext = std::make_unique<Syn::EditorContext>(_engine.get(), _guiManager->GetTextureManager());
 
-    using ViewportWin = Syn::EditorWindow<Syn::ViewportView, Syn::ViewportViewModel>;
-    _guiManager->AddWindow<ViewportWin>(
-        Syn::ViewportView{},
-        Syn::ViewportViewModel{
-            _editorApi.get(),
-            _editorApi.get(),
-            _editorApi.get(),
-            _editorApi.get()
-        }
+    _iconManager = std::make_unique<Syn::IconManager>(
+        _engine->GetImageManager(),
+        _guiManager->GetTextureManager()
     );
 
-    using SettingsWin = Syn::EditorWindow<Syn::SettingsView, Syn::SettingsViewModel>;
-    _guiManager->AddWindow<SettingsWin>(
-        Syn::SettingsView{},
-        Syn::SettingsViewModel{
-            _editorApi.get()
-        });
+    ImGuiIO& io = ImGui::GetIO();
+    io.Fonts->AddFontDefault();
+    _iconManager->InitializeFontAwesome(io, Syn::PathUtils::GetAbsolutePathString(FONT_PATH), 16.0f);
+    _guiManager->CreateFontTexture();
+    _iconManager->LoadEngineIcons(Syn::PathUtils::GetAbsolutePathString(ICON_PATH));
+
+    std::string absoluteAssetsPath = std::filesystem::absolute(ASSET_PATH).generic_string();
 
     using MainMenuWin = Syn::EditorWindow<Syn::MainMenuView, Syn::MainMenuViewModel>;
-    _guiManager->AddWindow<MainMenuWin>(
+    _guiManager->AddGlobalWindow<MainMenuWin>(
         Syn::MainMenuView{},
-        Syn::MainMenuViewModel{
-            _editorApi.get()
-        }
+        Syn::MainMenuViewModel{ _editorContext->GetSceneApi(), _guiManager->GetFileDialog() }
     );
+
+    _guiManager->AddWorkspace(Syn::EditorWorkspace::Scene, std::make_unique<Syn::SceneWorkspace>(
+        _editorContext.get(), _iconManager.get(), absoluteAssetsPath
+    ));
+
+    _guiManager->AddWorkspace(Syn::EditorWorkspace::Model, std::make_unique<Syn::ModelWorkspace>(
+        _editorContext.get(), _iconManager.get(), absoluteAssetsPath
+    ));
+
+    _guiManager->AddWorkspace(Syn::EditorWorkspace::Material, std::make_unique<Syn::MaterialWorkspace>(
+        _editorContext.get(), _iconManager.get(), absoluteAssetsPath
+    ));
+
+    _guiManager->AddWorkspace(Syn::EditorWorkspace::Texture, std::make_unique<Syn::TextureWorkspace>(
+        _editorContext.get(), _iconManager.get(), absoluteAssetsPath
+    ));
+
 #endif
 
     _inputDispatcher = std::make_unique<Syn::InputDispatcher>(_guiManager.get(), _engine.get());
 }
+
 
 void Synapse::OnUpdate(float dt) {
 #ifndef SYN_PERFORMANCE
@@ -144,6 +157,14 @@ void Synapse::OnMouseButton(int button, int action, int mods) {
 
 void Synapse::OnMouseMove(float x, float y) {
     _inputDispatcher->DispatchMouseMove(x, y);
+}
+
+void Synapse::OnScroll(float xOffset, float yOffset) {
+    _inputDispatcher->DispatchScroll(xOffset, yOffset);
+}
+
+void Synapse::OnChar(unsigned int codepoint) {
+    _inputDispatcher->DispatchChar(codepoint);
 }
 
 void Synapse::OnResize(uint32_t width, uint32_t height) {

@@ -4,6 +4,8 @@
 #include "Engine/Mesh/Data/Gpu/GpuIndexedDrawData.h"
 #include <glm/glm.hpp>
 #include <glm/matrix.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/norm.hpp>
 #include <vector>
 
 namespace Syn
@@ -25,6 +27,12 @@ namespace Syn
         SYN_INLINE static IntersectionType TestSphereFrustumIntersectionType(const glm::vec3& center, float radius, const FrustumCollider& frustum);
         SYN_INLINE static IntersectionType TestAabbFrustumIntersectionType(const glm::vec3& aabbMin, const glm::vec3& aabbMax, const FrustumCollider& frustum);
 
+        SYN_INLINE static bool TestSphereSphere(const glm::vec3& centerA, float radiusA, const glm::vec3& centerB, float radiusB);
+        SYN_INLINE static IntersectionType TestSphereSphereIntersectionType(const glm::vec3& centerA, float radiusA, const glm::vec3& centerB, float radiusB);
+
+        SYN_INLINE static bool TestSphereAabb(const glm::vec3& sphereCenter, float sphereRadius, const glm::vec3& aabbMin, const glm::vec3& aabbMax);
+        SYN_INLINE static IntersectionType TestSphereAabbIntersectionType(const glm::vec3& sphereCenter, float sphereRadius, const glm::vec3& aabbMin, const glm::vec3& aabbMax);
+
         SYN_INLINE static bool IsInFrustum(const glm::vec3& center, float radius, const glm::vec3& aabbMin, const glm::vec3& aabbMax, const FrustumCollider& frustum);
         SYN_INLINE static bool IsInFrustum(const GpuMeshCollider& collider, const FrustumCollider& frustum);
         SYN_INLINE static bool TestSphereFrustum(const GpuMeshCollider& collider, const FrustumCollider& frustum);
@@ -37,9 +45,62 @@ namespace Syn
     
         SYN_INLINE static float CalculateSphereScreenSize(const glm::vec3& center, float radius, const glm::mat4& view, const glm::mat4& proj, float nearZ, const glm::vec2& screenRes);
         SYN_INLINE static uint32_t CalculateLodFromScreenSize(float screenSizePixels);
+
+        SYN_INLINE static bool TestConeSphere(const glm::vec3& conePos, const glm::vec3& coneDir, float coneRange, float coneCosAngle, float coneSinAngle, const glm::vec3& sphereCenter, float sphereRadius);
+        SYN_INLINE static IntersectionType TestConeSphereIntersectionType(const glm::vec3& conePos, const glm::vec3& coneDir, float coneRange, float coneCosAngle, float coneSinAngle, const glm::vec3& sphereCenter, float sphereRadius);
+    
+        SYN_INLINE static bool IsInSphere(const GpuMeshCollider& collider, const glm::vec3& sphereCenter, float sphereRadius);
+        SYN_INLINE static IntersectionType IsInSphereIntersectionType(const GpuMeshCollider& collider, const glm::vec3& sphereCenter, float sphereRadius);
     private:
         SYN_INLINE static float GetSignedDistance(const glm::vec4& plane, const glm::vec3& point);
     };
+
+    SYN_INLINE bool CollisionTester::TestSphereSphere(const glm::vec3& centerA, float radiusA, const glm::vec3& centerB, float radiusB)
+    {
+        float distSq = glm::distance2(centerA, centerB);
+        float radSum = radiusA + radiusB;
+        return distSq <= (radSum * radSum);
+    }
+
+    SYN_INLINE IntersectionType CollisionTester::TestSphereSphereIntersectionType(const glm::vec3& centerA, float radiusA, const glm::vec3& centerB, float radiusB)
+    {
+        float distSq = glm::distance2(centerA, centerB);
+        float radSum = radiusA + radiusB;
+        if (distSq > radSum * radSum) return IntersectionType::Outside;
+
+        float radDiff = radiusA - radiusB;
+        if (radDiff >= 0.0f && distSq <= radDiff * radDiff) {
+            return IntersectionType::Inside;
+        }
+        return IntersectionType::Intersect;
+    }
+
+    SYN_INLINE bool CollisionTester::TestSphereAabb(const glm::vec3& sphereCenter, float sphereRadius, const glm::vec3& aabbMin, const glm::vec3& aabbMax)
+    {
+        glm::vec3 closestPoint = glm::clamp(sphereCenter, aabbMin, aabbMax);
+        float distSq = glm::distance2(sphereCenter, closestPoint);
+        return distSq <= (sphereRadius * sphereRadius);
+    }
+
+    SYN_INLINE IntersectionType CollisionTester::TestSphereAabbIntersectionType(const glm::vec3& sphereCenter, float sphereRadius, const glm::vec3& aabbMin, const glm::vec3& aabbMax)
+    {
+        glm::vec3 closestPoint = glm::clamp(sphereCenter, aabbMin, aabbMax);
+        if (glm::distance2(sphereCenter, closestPoint) > sphereRadius * sphereRadius) {
+            return IntersectionType::Outside;
+        }
+
+        glm::vec3 furthestPoint(
+            (sphereCenter.x < (aabbMin.x + aabbMax.x) * 0.5f) ? aabbMax.x : aabbMin.x,
+            (sphereCenter.y < (aabbMin.y + aabbMax.y) * 0.5f) ? aabbMax.y : aabbMin.y,
+            (sphereCenter.z < (aabbMin.z + aabbMax.z) * 0.5f) ? aabbMax.z : aabbMin.z
+        );
+
+        if (glm::distance2(sphereCenter, furthestPoint) <= sphereRadius * sphereRadius) {
+            return IntersectionType::Inside;
+        }
+
+        return IntersectionType::Intersect;
+    }
 
     SYN_INLINE bool CollisionTester::TestSphereFrustum(const glm::vec3& center, float radius, const FrustumCollider& frustum)
     {
@@ -201,5 +262,59 @@ namespace Syn
         if (screenSizePixels > 256.0f) return 1;
         if (screenSizePixels > 128.0f) return 2;
         return 3;
+    }
+
+    SYN_INLINE bool CollisionTester::TestConeSphere(const glm::vec3& conePos, const glm::vec3& coneDir, float coneRange, float coneCosAngle, float coneSinAngle, const glm::vec3& sphereCenter, float sphereRadius)
+    {
+        glm::vec3 v = sphereCenter - conePos;
+        float lenSq = glm::dot(v, v);
+        float v1Len = glm::dot(v, coneDir);
+        float distanceClosestPoint = coneCosAngle * std::sqrt(std::max(lenSq - v1Len * v1Len, 0.0f)) - v1Len * coneSinAngle;
+
+        bool angleCull = distanceClosestPoint > sphereRadius;
+        bool frontCull = v1Len > sphereRadius + coneRange;
+        bool backCull = v1Len < -sphereRadius;
+
+        return !(angleCull || frontCull || backCull);
+    }
+
+    SYN_INLINE IntersectionType CollisionTester::TestConeSphereIntersectionType(const glm::vec3& conePos, const glm::vec3& coneDir, float coneRange, float coneCosAngle, float coneSinAngle, const glm::vec3& sphereCenter, float sphereRadius)
+    {
+        glm::vec3 v = sphereCenter - conePos;
+        float lenSq = glm::dot(v, v);
+        float v1Len = glm::dot(v, coneDir);
+        float distanceClosestPoint = coneCosAngle * std::sqrt(std::max(lenSq - v1Len * v1Len, 0.0f)) - v1Len * coneSinAngle;
+
+        if (distanceClosestPoint > sphereRadius || v1Len > sphereRadius + coneRange || v1Len < -sphereRadius) {
+            return IntersectionType::Outside;
+        }
+
+        bool fullyInAngle = distanceClosestPoint < -sphereRadius;
+        bool fullyInFront = v1Len > sphereRadius;
+        bool fullyBehindRange = v1Len < coneRange - sphereRadius;
+
+        if (fullyInAngle && fullyInFront && fullyBehindRange) {
+            return IntersectionType::Inside;
+        }
+
+        return IntersectionType::Intersect;
+    }
+
+    SYN_INLINE bool CollisionTester::IsInSphere(const GpuMeshCollider& collider, const glm::vec3& sphereCenter, float sphereRadius)
+    {
+        if (!TestSphereSphere(sphereCenter, sphereRadius, collider.center, collider.radius))
+            return false;
+
+        return TestSphereAabb(sphereCenter, sphereRadius, collider.aabbMin, collider.aabbMax);
+    }
+
+    SYN_INLINE IntersectionType CollisionTester::IsInSphereIntersectionType(const GpuMeshCollider& collider, const glm::vec3& sphereCenter, float sphereRadius)
+    {
+        IntersectionType sphereResult = TestSphereSphereIntersectionType(sphereCenter, sphereRadius, collider.center, collider.radius);
+
+        if (sphereResult != IntersectionType::Intersect)
+            return sphereResult;
+
+        return TestSphereAabbIntersectionType(sphereCenter, sphereRadius, collider.aabbMin, collider.aabbMax);
     }
 }

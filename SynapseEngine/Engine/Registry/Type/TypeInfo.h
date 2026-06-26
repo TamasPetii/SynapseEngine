@@ -9,7 +9,13 @@ namespace Syn
 		static const TypeID ID;
 	private:
 		static const char* GetName() {
-			return __FUNCSIG__;
+			#if defined(_MSC_VER)
+            return __FUNCSIG__;
+			#elif defined(__clang__) || defined(__GNUC__)
+						return __PRETTY_FUNCTION__;
+			#else
+						#error "Unsupported compiler for TypeInfo generation."
+			#endif
 		}
 	};
 

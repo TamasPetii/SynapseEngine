@@ -17,5 +17,13 @@ namespace Syn
         VkDrawIndirectCommand modelSphereCmdTemplate{};
 
         uint32_t totalMaxMeshletInstances = 0;
+
+        RenderBuffer boxColliderIndirectBuffer;
+        RenderBuffer sphereColliderIndirectBuffer;
+        RenderBuffer capsuleColliderIndirectBuffer;
+
+        VkDrawIndirectCommand boxColliderCmdTemplate{};
+        VkDrawIndirectCommand sphereColliderCmdTemplate{};
+        VkDrawIndirectCommand capsuleColliderCmdTemplate{};
     };
 }

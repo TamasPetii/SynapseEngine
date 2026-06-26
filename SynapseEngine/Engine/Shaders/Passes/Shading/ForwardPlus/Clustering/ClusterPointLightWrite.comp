@@ -58,7 +58,7 @@ void main() {
 
     // Collaborative Culling & Writing
     for (uint i = threadId; i < totalLights; i += gl_WorkGroupSize.x) {
-        uint entityIdx = GET_VISIBLE_POINT_LIGHT(ctx.pointLightVisibleIndexBufferAddr, i);
+        uint entityIdx = GET_POINT_VISIBLE_LIGHT(ctx.pointLightVisibleIndexBufferAddr, i);
         uint denseIdx = GET_SPARSE_INDEX(ctx.pointLightSparseMapBufferAddr, entityIdx);
         PointLightColliderGPU collider = GET_POINT_LIGHT_COLLIDER(ctx.pointLightColliderBufferAddr, denseIdx);
         

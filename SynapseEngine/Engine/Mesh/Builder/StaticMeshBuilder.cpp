@@ -4,7 +4,7 @@
 #include "Engine/ServiceLocator.h"
 #include "Engine/Logger/SynLog.h"
 #include "Engine/Serialization/Serializer.h"
-#include "Engine/Serialization/Schema/Models/GpuBatchedModelSchema.h"
+#include "Engine/Serialization/Schema/Models/StaticMeshSchema.h"
 
 namespace Syn
 {
@@ -12,11 +12,15 @@ namespace Syn
         std::unique_ptr<IMeshLoaderRegistry> registry,
         std::unique_ptr<IMeshProcessorPipeline> pipeline,
         std::unique_ptr<IGpuModelConverter> converter,
-        std::unique_ptr<IModelCooker> cooker) :
+        std::unique_ptr<IModelCooker> cooker,
+        std::unique_ptr<ICpuModelExtractor> extractor,
+        std::unique_ptr<ICpuModelProcessorPipeline> cpuPipeline) :
         _registry(std::move(registry)),
         _cooker(std::move(cooker)),
-        _pipeline(std::move(pipeline)),
-        _converter(std::move(converter))
+        _meshPipeline(std::move(pipeline)),
+        _converter(std::move(converter)),
+        _extractor(std::move(extractor)),
+        _cpuModelPipeline(std::move(cpuPipeline))
     {}
 
     void StaticMeshBuilder::RegisterLoader(std::shared_ptr<IMeshLoader> loader, int priority)
@@ -24,9 +28,14 @@ namespace Syn
         _registry->Register(loader, priority);
     }
 
-    void StaticMeshBuilder::RegisterProcessor(std::unique_ptr<IMeshProcessor> processor)
+    void StaticMeshBuilder::RegisterCpuModelProcessor(std::unique_ptr<ICpuModelProcessor> processor)
     {
-        _pipeline->AddProcessor(std::move(processor));
+        _cpuModelPipeline->AddProcessor(std::move(processor));
+    }
+
+    void StaticMeshBuilder::RegisterMeshProcessor(std::unique_ptr<IMeshProcessor> processor)
+    {
+        _meshPipeline->AddProcessor(std::move(processor));
 	}
 
     std::shared_ptr<StaticMesh> StaticMeshBuilder::BuildFromFile(const std::string& filePath)
@@ -44,10 +53,6 @@ namespace Syn
         std::filesystem::path cachePath = saveDir / srcPath.filename();
         cachePath.replace_extension(".synmodel");
 
-        auto staticMesh = std::make_shared<StaticMesh>();
-        staticMesh->transientCpuData = std::make_unique<CookedModel>();
-        staticMesh->transientGpuData = std::make_unique<GpuBatchedModel>();
-
         auto serializer = ServiceLocator::GetSerializer();
 
         bool useCache = false;
@@ -58,7 +63,11 @@ namespace Syn
         }
 
         if (useCache && serializer) {
-            if (serializer->LoadFromFile(cachePath, *(staticMesh->transientGpuData))) {
+            auto staticMesh = std::make_shared<StaticMesh>();
+            staticMesh->transientCpuData = std::make_unique<CookedModel>();
+            staticMesh->transientGpuData = std::make_unique<GpuBatchedModel>();
+
+            if (serializer->LoadFromFile(cachePath, *staticMesh)) {
                 Info("Loaded {} from binary cache.", srcPath.filename().string());
                 return staticMesh;
             }
@@ -78,7 +87,7 @@ namespace Syn
             return nullptr;
 
         if (serializer) {
-            serializer->SaveToFile(cachePath, *(generatedMesh->transientGpuData));
+            serializer->SaveToFile(cachePath, *generatedMesh);
         }
 
         return generatedMesh;
@@ -96,8 +105,11 @@ namespace Syn
         staticMesh->transientGpuData = std::make_unique<GpuBatchedModel>();
 
         *(staticMesh->transientCpuData) = _cooker->Cook(std::move(rawModelOpt).value());
-        _pipeline->Run(*(staticMesh->transientCpuData));
+        _meshPipeline->Run(*(staticMesh->transientCpuData));
         *(staticMesh->transientGpuData) = _converter->Convert(*(staticMesh->transientCpuData));
+
+        _extractor->Extract(*(staticMesh->transientGpuData), staticMesh->cpuData);
+        _cpuModelPipeline->Run(staticMesh->cpuData);
 
         return staticMesh;
     }

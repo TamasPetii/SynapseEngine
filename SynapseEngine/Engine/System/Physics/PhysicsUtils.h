@@ -29,7 +29,7 @@ namespace Syn
     }
 
     template<typename F>
-    SYN_INLINE static PhysicsBodyID PhysicsUtils::TryCreateBody(EntityID entity, TransformComponent* tr, RigidBodyComponent& rb, F&& createShapeFunc)
+    SYN_INLINE PhysicsBodyID PhysicsUtils::TryCreateBody(EntityID entity, TransformComponent* tr, RigidBodyComponent& rb, F&& createShapeFunc)
     {
         if (rb.bodyID != INVALID_BODY_ID)
             return rb.bodyID;

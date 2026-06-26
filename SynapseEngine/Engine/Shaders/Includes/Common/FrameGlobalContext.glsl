@@ -41,24 +41,75 @@ struct FrameGlobalContext {
     uint64_t directionLightVisibleIndexBufferAddr;
     uint64_t directionLightDataBufferAddr;
     uint64_t directionLightSparseMapBufferAddr;
+
+    uint64_t directionLightShadowIndirectGeometryCommandBufferAddr;
     uint64_t directionLightShadowSparseMapBufferAddr;
     uint64_t directionLightShadowDataBufferAddr;
-
-    uint64_t pointLightIndirectCommandBufferAddr;
-    uint64_t pointLightVisibleIndexBufferAddr;
-    uint64_t pointLightDataBufferAddr;
-    uint64_t pointLightColliderBufferAddr;
-    uint64_t pointLightSparseMapBufferAddr;
-    uint64_t pointLightShadowSparseMapBufferAddr;
-    uint64_t pointLightShadowDataBufferAddr; 
+    uint64_t directionLightShadowColliderDataBufferAddr;
+    uint64_t directionLightShadowInstanceBufferAddr;
+    uint64_t directionLightVisibleShadowIndexBufferAddr;
+    uint64_t directionLightShadowModelCountBufferAddr;
+    uint64_t directionLightShadowModelVisibleIndexBufferAddr;
+    uint64_t directionLightShadowChunkCountBufferAddr;
+    uint64_t directionLightShadowChunkVisibleIndexBufferAddr;
+    uint64_t directionLightShadowMortonChunkCountBufferAddr;
+    uint64_t directionLightShadowMortonChunkVisibleIndexBufferAddr;
 
     uint64_t spotLightIndirectCommandBufferAddr;
     uint64_t spotLightVisibleIndexBufferAddr;
     uint64_t spotLightDataBufferAddr;
     uint64_t spotLightColliderBufferAddr;
     uint64_t spotLightSparseMapBufferAddr;
+
+    uint64_t spotLightShadowIndirectGeometryCommandBufferAddr;
+    uint64_t spotLightShadowInstanceBufferAddr;
+    uint64_t spotLightShadowUnsortedInstanceBufferAddr;
+    uint64_t spotLightDrawDescriptorBufferAddr;
     uint64_t spotLightShadowSparseMapBufferAddr;
     uint64_t spotLightShadowDataBufferAddr;  
+    uint64_t spotLightVisibleShadowIndexBufferAddr;
+    uint64_t spotLightShadowModelCountBufferAddr;
+    uint64_t spotLightShadowModelVisibleIndexBufferAddr;
+    uint64_t spotLightShadowChunkCountBufferAddr;
+    uint64_t spotLightShadowChunkVisibleIndexBufferAddr;
+    uint64_t spotLightShadowMortonChunkCountBufferAddr;
+    uint64_t spotLightShadowMortonChunkVisibleIndexBufferAddr;
+    uint64_t spotLightShadowGridLookupBufferAddr;
+    uint64_t spotLightShadowVisibleCountBufferAddr;
+    uint64_t spotLightShadowDrawCallKeyBufferAddr;
+    uint64_t spotLightShadowSortValuesBufferAddr;
+    uint64_t spotLightShadowVisibleMeshCountBufferAddr;
+    uint64_t spotLightShadowFinalizeDispatchBufferAddr;
+    uint64_t spotLightShadowAtlasSortKeyBufferAddr;
+    uint64_t spotLightShadowAtlasSortValueBufferAddr;
+
+    uint64_t pointLightIndirectCommandBufferAddr;
+    uint64_t pointLightVisibleIndexBufferAddr;
+    uint64_t pointLightDataBufferAddr;
+    uint64_t pointLightColliderBufferAddr;
+    uint64_t pointLightSparseMapBufferAddr;
+
+    uint64_t pointLightShadowIndirectGeometryCommandBufferAddr;
+    uint64_t pointLightShadowSparseMapBufferAddr;
+    uint64_t pointLightShadowDataBufferAddr;
+    uint64_t pointLightShadowInstanceBufferAddr;
+    uint64_t pointLightShadowUnsortedInstanceBufferAddr;
+    uint64_t pointLightDrawDescriptorBufferAddr;
+    uint64_t pointLightVisibleShadowIndexBufferAddr;
+    uint64_t pointLightShadowModelCountBufferAddr;
+    uint64_t pointLightShadowModelVisibleIndexBufferAddr;
+    uint64_t pointLightShadowChunkCountBufferAddr;
+    uint64_t pointLightShadowChunkVisibleIndexBufferAddr;
+    uint64_t pointLightShadowMortonChunkCountBufferAddr;
+    uint64_t pointLightShadowMortonChunkVisibleIndexBufferAddr;
+    uint64_t pointLightShadowGridLookupBufferAddr;
+    uint64_t pointLightShadowVisibleCountBufferAddr;
+    uint64_t pointLightShadowDrawCallKeyBufferAddr;
+    uint64_t pointLightShadowSortValuesBufferAddr;
+    uint64_t pointLightShadowVisibleMeshCountBufferAddr;
+    uint64_t pointLightShadowFinalizeDispatchBufferAddr;
+    uint64_t pointLightShadowAtlasSortKeyBufferAddr;
+    uint64_t pointLightShadowAtlasSortValueBufferAddr;
 
     uint64_t forwardPlusTileGridListBufferAddr;
     uint64_t forwardPlusClusterCountBufferAddr;
@@ -78,6 +129,18 @@ struct FrameGlobalContext {
     uint64_t mortonChunkVisibleIndirectDispatchBufferAddr;
     uint64_t mortonChunkVisibleIndexBufferAddr;
     uint64_t mortonChunkTransformsIndexBufferAddr;
+
+    uint64_t ssaoKernelBufferAddr;
+
+    uint64_t boxColliderSparseMapBufferAddr;
+    uint64_t boxColliderDataBufferAddr;
+    uint64_t sphereColliderSparseMapBufferAddr;
+    uint64_t sphereColliderDataBufferAddr;
+    uint64_t capsuleColliderSparseMapBufferAddr;
+    uint64_t capsuleColliderDataBufferAddr;
+
+    uint64_t hierarchySparseMapBufferAddr;
+    uint64_t selectionOutlineBufferAddr;
 
     float screenWidth;
     float screenHeight;
@@ -119,7 +182,11 @@ struct FrameGlobalContext {
     uint pointLightCount;
     uint spotLightCount;
 
-    uint enableStaticBvhCulling;
+    uint enableGeometryBvhCulling;
+    uint enableDirectionLightBvhCulling;
+    uint enableSpotLightBvhCulling;
+    uint enablePointLightBvhCulling;
+
     uint allTransformCount;
     uint staticTransformCount;
     uint dynamicTransformCount;
@@ -131,6 +198,33 @@ struct FrameGlobalContext {
     uint tileCountY;
     float hizMipLevel;
     float sliceScaleFactor;
+
+    uint enableSsao;
+    uint enableSsaoLight;
+
+    uint activeDirectionLightShadowCount;
+    uint directionLightShadowLodBias;
+    uint directionLightShadowMaxDirLights;
+    uint directionLightShadowMaxCascades;
+    uint directionLightShadowMultiplier;
+    uint directionLightShadowAtlasSize;
+    uint directionLightShadowMinBlockSize;
+    uint directionLightShadowGridSize;
+    uint directionLightShadowHizMipLevels;
+
+    uint spotLightShadowLodBias;
+    uint spotLightShadowMultiplier;
+    uint spotLightShadowAtlasSize;
+    uint spotLightShadowMinBlockSize;
+    uint spotLightShadowGridSize;
+    uint spotLightShadowHizMipLevels;
+
+    uint pointLightShadowLodBias;
+    uint pointLightShadowMultiplier;
+    uint pointLightShadowAtlasSize;
+    uint pointLightShadowMinBlockSize;
+    uint pointLightShadowGridSize;
+    uint pointLightShadowHizMipLevels;
 };
 
 #ifndef __cplusplus

@@ -29,9 +29,8 @@ void main() {
     uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
 
-    vec2 uv = (vec2(pos) + vec2(0.5)) / pc.outImageSize;
-    float opaqueDepth = texture(inOpaqueDepth, uv).x;
-    float opaqueTransparentDepth = texture(inOpaqueTransparentDepth, uv).x;
+    float opaqueDepth = texelFetch(inOpaqueDepth, pos, 0).x;
+    float opaqueTransparentDepth = texelFetch(inOpaqueTransparentDepth, pos, 0).x;
 
     float nearPlane = camera.params.x;
     float farPlane = camera.params.y;

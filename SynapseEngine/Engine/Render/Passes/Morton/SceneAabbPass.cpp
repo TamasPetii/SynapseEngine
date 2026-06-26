@@ -5,6 +5,7 @@
 #include "Engine/Component/Core/TransformComponent.h"
 #include "Engine/Vk/Buffer/BufferUtils.h"
 #include "Engine/Render/ComputeGroupSize.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -22,7 +23,24 @@ namespace Syn {
 
     bool SceneAabbPass::ShouldExecute(const RenderContext& context) const {
         auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
-        return context.scene->GetSettings()->enableMortonBvhCulling && pool && !pool->GetStorage().GetStaticEntities().empty();
+
+        bool isEnabled = context.scene->GetSettings()->culling.geometrySpatialAcceleration == SpatialAccelerationType::MortonBvh
+            || context.scene->GetSettings()->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh
+            || context.scene->GetSettings()->culling.pointLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh
+            || context.scene->GetSettings()->culling.spotLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh;
+
+        if (!isEnabled || !pool || pool->GetStorage().GetStaticEntities().empty()) {
+            _wasEnabled = false;
+            return false;
+        }
+
+        if (!_wasEnabled) {
+            _needsRebuild = true;
+        }
+        _wasEnabled = true;
+
+        bool hasDirty = !pool->GetStorage().GetDirtyStatics().empty();
+        return hasDirty || _needsRebuild || (_countdown > 0);
     }
 
     void SceneAabbPass::PushConstants(const RenderContext& context) {
@@ -30,29 +48,38 @@ namespace Syn {
         _staticCount = static_cast<uint32_t>(scene->GetRegistry()->GetPool<TransformComponent>()->GetStorage().GetStaticEntities().size());
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-        ChunkBuilderPC pc{};
-        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx, isGpu);
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ChunkBuilderPC), &pc);
+        Vk::PushConstant<ChunkBuilderPC> pc;
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void SceneAabbPass::Dispatch(const RenderContext& context) {
+        auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
+        bool hasDirty = !pool->GetStorage().GetDirtyStatics().empty();
+
+        if (hasDirty || _needsRebuild) {
+            _countdown = context.framesInFlight;
+            _needsRebuild = false;
+        }
+
+        if (_countdown > 0) {
+            _countdown--;
+        }
+
         if (_staticCount == 0) return;
 
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
         auto settings = scene->GetSettings();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = settings->enableGeometryGpuCulling;
 
         struct {
             uint32_t min[3] = { 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF };
             uint32_t max[3] = { 0x00000000, 0x00000000, 0x00000000 };
         } resetData;
 
-        VkBuffer aabbBufferHandle = drawData->Chunks.sceneAabbBuffer.GetHandle(fIdx, isGpu);
+        VkBuffer aabbBufferHandle = drawData->Chunks.sceneAabbBuffer.GetHandle(fIdx);
 
         Vk::BufferUpdateInfo resetInfo{};
         resetInfo.buffer = aabbBufferHandle;

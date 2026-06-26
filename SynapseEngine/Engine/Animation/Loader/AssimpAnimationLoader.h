@@ -2,6 +2,8 @@
 #include "Engine/SynApi.h"
 #include "IAnimationLoader.h"
 #include <assimp/scene.h>
+
+#include <chrono>
 #include <taskflow/taskflow.hpp>
 
 namespace Syn

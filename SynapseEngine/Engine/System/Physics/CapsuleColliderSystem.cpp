@@ -77,7 +77,7 @@ namespace Syn
             if (componentBuffer.versions[capsuleIndex] != capsule.version)
             {
                 componentBuffer.versions[capsuleIndex] = capsule.version;
-                bufferHandler[capsuleIndex] = CapsuleColliderComponentGPU(capsule);
+                bufferHandler[capsuleIndex] = CapsuleColliderComponentGPU(capsule, entity);
             }
             };
 

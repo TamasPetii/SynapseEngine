@@ -24,6 +24,7 @@ struct PointLightColliderGPU
 
 struct PointLightShadowComponent {
     vec4 planes;
+    vec4 mainAtlasRect;
     mat4 viewProjs[6];
     vec4 atlasRects[6];
 };
@@ -31,11 +32,30 @@ struct PointLightShadowComponent {
 layout(buffer_reference, std430) readonly restrict buffer PointLightDataBuffer { PointLightComponent data[]; };
 layout(buffer_reference, std430) readonly restrict buffer PointLightColliderDataBuffer { PointLightColliderGPU data[]; };
 layout(buffer_reference, std430) readonly restrict buffer PointLightShadowDataBuffer { PointLightShadowComponent data[]; };
-layout(buffer_reference, std430) readonly restrict buffer VisiblePointLightBuffer   { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer PointVisibleLightBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer PointShadowInstanceBuffer { uvec2 data[]; };
+layout(buffer_reference, std430) readonly restrict buffer PointGridLookupBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer PointVisibleCountBuffer { uint data; };
+layout(buffer_reference, std430) readonly restrict buffer PointDrawCallKeyBuffer { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer PointSortValuesBuffer { uint data[]; };
 
-#define GET_POINT_LIGHT(addr, idx)            PointLightDataBuffer(addr).data[idx]
-#define GET_POINT_LIGHT_COLLIDER(addr, idx)   PointLightColliderDataBuffer(addr).data[idx]
-#define GET_POINT_LIGHT_SHADOW(addr, idx)     PointLightShadowDataBuffer(addr).data[idx]
-#define GET_VISIBLE_POINT_LIGHT(addr, idx)    VisiblePointLightBuffer(addr).data[idx]
+#define POINT_SHADOW_ATLAS_SIZE 4096
+#define POINT_SHADOW_MIN_BLOCK_SIZE 64
+#define POINT_SHADOW_GRID_SIZE (POINT_SHADOW_ATLAS_SIZE / POINT_SHADOW_MIN_BLOCK_SIZE)
+
+#define GET_POINT_LIGHT(addr, idx)                       PointLightDataBuffer(addr).data[idx]
+#define GET_POINT_LIGHT_COLLIDER(addr, idx)              PointLightColliderDataBuffer(addr).data[idx]
+#define GET_POINT_LIGHT_SHADOW(addr, idx)                PointLightShadowDataBuffer(addr).data[idx]
+#define GET_POINT_VISIBLE_LIGHT(addr, idx)               PointVisibleLightBuffer(addr).data[idx]
+#define GET_POINT_SHADOW_INSTANCE(addr, idx)             PointShadowInstanceBuffer(addr).data[idx]
+#define GET_POINT_VISIBLE_SHADOW_LIGHT(addr, idx)        PointVisibleLightBuffer(addr).data[idx]
+#define GET_POINT_GRID_LOOK_UP_DATA(addr, idx)           PointGridLookupBuffer(addr).data[idx]
+#define GET_POINT_VISIBLE_COUNT_DATA(addr)               PointVisibleCountBuffer(addr).data
+#define GET_POINT_DRAW_CALL_KEY_DATA(addr, idx)          PointDrawCallKeyBuffer(addr).data[idx]
+#define GET_POINT_SORTED_VALUE(addr, idx)                PointSortValuesBuffer(addr).data[idx]
+#define GET_POINT_SHADOW_INSTANCE_UNSORTED(addr, idx)    PointShadowInstanceBuffer(addr).data[idx]
+
+#define GET_POINT_ATLAS_SORT_KEY(addr, idx)              PointDrawCallKeyBuffer(addr).data[idx]
+#define GET_POINT_ATLAS_SORT_VALUE(addr, idx)            PointSortValuesBuffer(addr).data[idx]
 
 #endif

@@ -4,16 +4,21 @@
 namespace Syn
 {
     SceneDrawData::SceneDrawData(uint32_t frameCount)
-        : Models(frameCount),
+        : 
+        Models(frameCount),
         Debug(frameCount),
         PointLights(frameCount),
         SpotLights(frameCount),
-        DirectionLights(frameCount),
         ForwardPlus(frameCount),
-        Chunks(frameCount)
+        Chunks(frameCount),
+		Ssao(frameCount),
+        DirectionLights(frameCount),
+        DirectionLightShadow(frameCount),
+        SpotLightShadow(frameCount),
+        PointLightShadow(frameCount)
     {
         VkBufferUsageFlags contextUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
-        frameContextBuffer.Initialize({ BufferStrategy::Hybrid_Static, frameCount, sizeof(FrameGlobalContext), contextUsage, 1, 1});
+        frameContextBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(FrameGlobalContext), contextUsage, 1, 1});
         frameContextBuffer.UpdateCapacityAll(1);
     }
 
@@ -26,11 +31,7 @@ namespace Syn
 
     void SceneDrawData::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex)
     {
-        frameContextBuffer.RecordSync(cmd, frameIndex, 1);
-
-        uint32_t currentSync = syncFramesRemaining.load(std::memory_order_relaxed);
-        if (currentSync == 0) return;
-
+        frameContextBuffer.RecordSync(cmd, frameIndex);
         Models.CoherentToGpuBufferSync(cmd, frameIndex);
         Debug.CoherentToGpuBufferSync(cmd, frameIndex);
         PointLights.CoherentToGpuBufferSync(cmd, frameIndex);
@@ -38,6 +39,10 @@ namespace Syn
         DirectionLights.CoherentToGpuBufferSync(cmd, frameIndex);
         ForwardPlus.CoherentToGpuBufferSync(cmd, frameIndex);
 		Chunks.CoherentToGpuBufferSync(cmd, frameIndex);
+		Ssao.CoherentToGpuBufferSync(cmd, frameIndex);
+        DirectionLightShadow.CoherentToGpuBufferSync(cmd, frameIndex);
+        SpotLightShadow.CoherentToGpuBufferSync(cmd, frameIndex);
+        PointLightShadow.CoherentToGpuBufferSync(cmd, frameIndex);
 
         Vk::GlobalBarrierInfo barrierInfo{};
         barrierInfo.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
@@ -46,7 +51,7 @@ namespace Syn
         barrierInfo.dstAccess = VK_ACCESS_2_SHADER_READ_BIT;
         Vk::BufferUtils::InsertGlobalBarrier(cmd, barrierInfo);
 
-        uint32_t expected = currentSync;
+        uint32_t expected = syncFramesRemaining.load(std::memory_order_relaxed);
         while (expected > 0 && !syncFramesRemaining.compare_exchange_weak(expected, expected - 1, std::memory_order_relaxed)) {}
     }
 }

@@ -1,9 +1,10 @@
 #include "DefaultImageSource.h"
+#include "Engine/Image/ImageNames.h"
 
 namespace Syn
 {
     DefaultImageSource::DefaultImageSource()
-        : ProceduralImageSource("DefaultFallbackTexture")
+        : ProceduralImageSource(ImageNames::Default)
     {}
 
     std::optional<RawImage> DefaultImageSource::Produce()

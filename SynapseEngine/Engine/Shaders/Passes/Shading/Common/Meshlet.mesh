@@ -32,25 +32,20 @@ layout(push_constant) uniform PushConstants {
 
 void main() {
     uint threadIdx = gl_LocalInvocationID.x;
-    uint localInstanceID = payload.instanceId;
     uint localMeshletID = payload.meshletIndices[gl_WorkGroupID.x];
 
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+    MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.globalIndirectCommandDescriptorBufferAddr, pc.baseDescriptorOffset + payload.drawId);
 
     // Resolve Instance and Model info
-    MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.globalIndirectCommandDescriptorBufferAddr, pc.baseDescriptorOffset + payload.drawId);
+    uint entityId = payload.entityId;
+    uint transformDenseIndex = payload.transformDenseIdx;
+    uint cameraDenseIndex = payload.activeCameraDenseIdx;
     
-    uint rawEntityData = GET_INSTANCE(ctx.globalInstanceIndexBufferAddr, desc.instanceOffset + localInstanceID);
-    uint entityId = rawEntityData & ~(1u << 31);
-    
-    uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
     TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
-
-    uint cameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraDenseIndex);
-
     GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, desc.modelIndex);
-
+    
     // Resolve specific Meshlet
     uint flatLodIndex = (desc.meshIndex * 4) + desc.lodIndex; 
     GpuMeshletDrawDescriptor submeshDraw = GET_MESHLET_DRAW_DESC(addrs.meshletDrawDescriptors, flatLodIndex);
@@ -79,24 +74,28 @@ void main() {
                 AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animIdx);
                 if (animComp.animationIndex != INVALID_INDEX) {
                     GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
-                    GpuVertexSkinData skin = GET_SKIN_DATA(animAddrs.vertexSkinData, globalVtxIdx);
-                    
-                    mat4 skinMat = mat4(0.0); 
-                    mat4 skinMatIT = mat4(0.0);
-                    uint frameOffset = animComp.frameIndex * animAddrs.descriptor.nodeCount;
-                    bool hasBone = false;
 
-                    for (int b = 0; b < 4; ++b) {
-                        if (skin.boneWeights[b] > 0.0) {
-                            GpuNodeTransform bone = GET_NODE_TRANSFORM(animAddrs.nodeTransforms, frameOffset + skin.boneIndices[b]);
-                            skinMat += bone.globalTransform * skin.boneWeights[b];
-                            skinMatIT += bone.globalTransformIT * skin.boneWeights[b];
-                            hasBone = true;
+                    if (animAddrs.isReady == 1) {
+
+                        GpuVertexSkinData skin = GET_SKIN_DATA(animAddrs.vertexSkinData, globalVtxIdx);
+                    
+                        mat4 skinMat = mat4(0.0); 
+                        mat4 skinMatIT = mat4(0.0);
+                        uint frameOffset = animComp.frameIndex * animAddrs.descriptor.nodeCount;
+                        bool hasBone = false;
+
+                        for (int b = 0; b < 4; ++b) {
+                            if (skin.boneWeights[b] > 0.0) {
+                                GpuNodeTransform bone = GET_NODE_TRANSFORM(animAddrs.nodeTransforms, frameOffset + skin.boneIndices[b]);
+                                skinMat += bone.globalTransform * skin.boneWeights[b];
+                                skinMatIT += bone.globalTransformIT * skin.boneWeights[b];
+                                hasBone = true;
+                            }
                         }
-                    }
-                    if (hasBone) { 
-                        finalMat = skinMat; 
-                        finalMatIT = skinMatIT;
+                        if (hasBone) { 
+                            finalMat = skinMat; 
+                            finalMatIT = skinMatIT;
+                        }
                     }
                 }
             }

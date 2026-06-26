@@ -19,6 +19,7 @@
 #include "../../../../Includes/Utils/DepthMath.glsl"
 #include "../../../../Includes/Utils/LightMath.glsl"
 #include "../../../../Includes/Utils/MaterialMath.glsl"
+#include "../../../../Includes/Utils/ShadowMath.glsl"
 
 layout(location = 0) in vec3 inNormal;
 layout(location = 1) in vec4 inTangent;
@@ -26,6 +27,11 @@ layout(location = 2) in vec2 inUV;
 layout(location = 3) in flat uvec3 inId; // (PackedEntity, Material, PartialPayload)
 
 layout(location = 0) out vec4 outColor;
+
+layout(set = 2, binding = 1) uniform sampler2D ssaoTexture;
+layout(set = 2, binding = 2) uniform sampler2DShadow dirLightShadowAtlas;
+layout(set = 2, binding = 3) uniform sampler2DShadow pointLightShadowAtlas;
+layout(set = 2, binding = 4) uniform sampler2DShadow spotLightShadowAtlas;
 
 #include "../../../../Includes/PushConstants/TraditionalMeshletPassPC.glsl"
 
@@ -59,8 +65,6 @@ void main() {
     // 5. Evaluate Emissive
     vec3 finalEmissive = EvaluateEmissive(mat, finalUV);
 
-    // 6. Evaluate Ambient Occlusion
-    float finalAo = EvaluateAO(mat, finalUV);
 
     uint cameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraDenseIndex);
@@ -69,10 +73,21 @@ void main() {
     float fragDepth = gl_FragCoord.z;
     vec3 worldPos = ReconstructWorldPosition(screenUV, fragDepth, camera.viewProjVulkanInv);
 
+    // 6. Evaluate Ambient Occlusion
+    float ssao = 1.0;
+    if (ctx.enableSsao == 1 || ctx.enableSsaoLight == 1) {
+        ssao = texture(ssaoTexture, screenUV).r;
+    }
+
+    float finalAo = EvaluateAO(mat, finalUV);
+    if (ctx.enableSsao == 1) {
+        finalAo *= ssao;
+    }
+
     vec4 viewPos = camera.view * vec4(worldPos, 1.0);
     float viewDepth = abs(viewPos.z);
     vec3 viewDir = normalize(camera.eye.xyz - worldPos);
-
+   
     uint tileX = uint(gl_FragCoord.x) / ctx.tileSize;
     uint tileY = uint(gl_FragCoord.y) / ctx.tileSize;
     uint tileIndex = tileY * ctx.tileCountX + tileX;
@@ -87,9 +102,43 @@ void main() {
     vec3 totalRadiance = vec3(0.0);
 
     for(uint i = 0; i < ctx.directionLightCount && ctx.enableForwardPlusDirectionalLights == 1; ++i) {
-        uint entityId = GET_VISIBLE_DIRECTION_LIGHT(ctx.directionLightVisibleIndexBufferAddr, i); 
+        uint entityId = GET_DIRECTION_VISIBLE_LIGHT(ctx.directionLightVisibleIndexBufferAddr, i); 
         uint lightDenseIndex = GET_SPARSE_INDEX(ctx.directionLightSparseMapBufferAddr, entityId);   
-        totalRadiance += SimulateDirectionalLight(ctx.directionLightDataBufferAddr, lightDenseIndex, albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness);
+        
+        vec3 dirLightDirection = GET_DIRECTION_LIGHT(ctx.directionLightDataBufferAddr, lightDenseIndex).direction.xyz;
+        vec3 lightDir = normalize(-dirLightDirection);
+
+        uint debugCascadeIndex = 0;
+        float shadowFactor = CalculateDirectionalLightShadow(
+            ctx.directionLightShadowDataBufferAddr,
+            ctx.directionLightShadowSparseMapBufferAddr,
+            entityId,
+            worldPos,
+            finalNormal,
+            lightDir,
+            viewDepth,
+            dirLightShadowAtlas,
+            debugCascadeIndex
+        );
+
+        vec3 lightContribution = SimulateDirectionalLight(
+            ctx.directionLightDataBufferAddr,
+            lightDenseIndex,
+            albedoAlpha.rgb,
+            finalNormal,
+            viewDir,
+            finalRoughness,
+            finalMetalness
+        );
+
+        /*
+        if (debugCascadeIndex == 0) lightContribution *= vec3(2.0, 0.5, 0.5);
+        else if (debugCascadeIndex == 1) lightContribution *= vec3(0.5, 2.0, 0.5); 
+        else if (debugCascadeIndex == 2) lightContribution *= vec3(0.5, 0.5, 2.0);
+        else if (debugCascadeIndex == 3) lightContribution *= vec3(2.0, 2.0, 0.5); 
+        */
+
+        totalRadiance += lightContribution * shadowFactor;
     }
 
     for (uint i = 0; i < cluster.pointLightCount && ctx.enableForwardPlusPointLights == 1; ++i) {
@@ -97,15 +146,66 @@ void main() {
         uint lightEntityIndex = GET_LIGHT_INDEX(ctx.forwardPlusPointLightIndexListBufferAddr, globalLightIndex);
         uint lightDenseIndex = GET_SPARSE_INDEX(ctx.pointLightSparseMapBufferAddr, lightEntityIndex);
         
-        totalRadiance += SimulatePointLight(ctx.pointLightDataBufferAddr, lightDenseIndex, worldPos, albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness);
+        vec3 pointLightPosition = GET_POINT_LIGHT(ctx.pointLightDataBufferAddr, lightDenseIndex).position.xyz;
+
+        float shadowFactor = CalculatePointLightShadow(
+            ctx.pointLightShadowDataBufferAddr,
+            ctx.pointLightShadowSparseMapBufferAddr,
+            lightEntityIndex,
+            worldPos,
+            finalNormal,
+            pointLightPosition,
+            pointLightShadowAtlas
+        );
+
+        vec3 lightContribution = SimulatePointLight(
+            ctx.pointLightDataBufferAddr, 
+            lightDenseIndex, 
+            worldPos, 
+            albedoAlpha.rgb, 
+            finalNormal, 
+            viewDir, 
+            finalRoughness, 
+            finalMetalness
+        );
+        
+        totalRadiance += shadowFactor * lightContribution;
     }
 
     for (uint i = 0; i < cluster.spotLightCount && ctx.enableForwardPlusSpotLights == 1; ++i) {
         uint globalLightIndex = cluster.spotLightOffset + i;
         uint lightEntityIndex = GET_LIGHT_INDEX(ctx.forwardPlusSpotLightIndexListBufferAddr, globalLightIndex);
         uint lightDenseIndex = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, lightEntityIndex);
-        
-        totalRadiance += SimulateSpotLight(ctx.spotLightDataBufferAddr, lightDenseIndex, worldPos, albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness);
+
+        vec3 spotLightPosition = GET_SPOT_LIGHT(ctx.spotLightDataBufferAddr, lightDenseIndex).position.xyz;
+        vec3 lightDir = normalize(spotLightPosition - worldPos);
+
+        float shadowFactor = CalculateSpotLightShadow(
+            ctx.spotLightShadowDataBufferAddr,
+            ctx.spotLightShadowSparseMapBufferAddr,
+            lightEntityIndex,
+            worldPos,
+            finalNormal,
+            lightDir,
+            spotLightShadowAtlas
+        );
+
+        vec3 lightContribution = SimulateSpotLight(
+            ctx.spotLightDataBufferAddr,
+            lightDenseIndex,
+            worldPos,
+            albedoAlpha.rgb,
+            finalNormal,
+            viewDir,
+            finalRoughness,
+            finalMetalness
+        );
+
+        totalRadiance += shadowFactor * lightContribution;
+    }
+
+    if (ctx.enableSsao == 1 && ctx.enableSsaoLight == 1) {
+        totalRadiance *= ssao; 
     }
 
     if(ctx.enableForwardPlusEmissiveAo == 1)

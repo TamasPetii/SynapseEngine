@@ -32,30 +32,32 @@ void main() {
     uint localInstanceID = gl_WorkGroupID.x;  // Entity
     uint meshletGroupOffset = gl_WorkGroupID.y * 32;// Meshlet Block
 
-    // 1. Initialize shared memory and payload
-    if (threadIdx == 0) {
-        survivingMeshletCount = 0;
-        payload.drawId = gl_DrawID;
-        payload.instanceId = localInstanceID;
-    }
-    barrier();
-
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
     // 2. Fetch Draw Descriptor and Instance Data
     MeshDrawDescriptor desc = GET_DRAW_DESCRIPTOR(ctx.globalIndirectCommandDescriptorBufferAddr, pc.baseDescriptorOffset + gl_DrawID);
-    uint rawEntityData = GET_INSTANCE(ctx.globalInstanceIndexBufferAddr, desc.instanceOffset + localInstanceID);
-    
+    uint rawEntityData = GET_INSTANCE(ctx.globalInstanceIndexBufferAddr, desc.instanceOffset + localInstanceID);   
     bool isParentFullyInside = HAS_FLAG(rawEntityData, 31);
     uint entityId = rawEntityData & ~(1u << 31);
 
-    // 3. Resolve Camera and Transform
     uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
-    TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
-    
-    uint cameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
-    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraDenseIndex);
+    uint mainCameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
+    uint activeCameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
 
+    // 1. Initialize shared memory and payload
+    if (threadIdx == 0) {
+        survivingMeshletCount = 0;
+        payload.drawId = gl_DrawID;
+        payload.entityId = entityId;
+        payload.transformDenseIdx = transformDenseIndex;
+        payload.activeCameraDenseIdx = activeCameraDenseIndex;
+    }
+
+    barrier();
+
+    // 3. Resolve Camera and Transform
+    TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, mainCameraDenseIndex);
     GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, desc.modelIndex);
 
     // 4. Resolve Meshlet range for this group
@@ -64,6 +66,10 @@ void main() {
 
     uint currentMeshletIdx = meshletGroupOffset + threadIdx;
     bool isVisible = (currentMeshletIdx < submeshData.meshletCount);
+
+    if (transformDenseIndex == INVALID_INDEX || mainCameraDenseIndex == INVALID_INDEX) {
+        isVisible = false;
+    }
 
     if (isVisible) {
         uint globalMeshletIdx = submeshData.meshletOffset + currentMeshletIdx;
@@ -76,8 +82,12 @@ void main() {
                 AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animIdx);
                 if (animComp.animationIndex != INVALID_INDEX) {
                     GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
-                    uint frameOffset = animComp.frameIndex * animAddrs.descriptor.globalMeshletCount;
-                    localCollider = GET_MESHLET_COLLIDER(animAddrs.frameMeshletColliders, frameOffset + globalMeshletIdx);
+
+                    if (animAddrs.isReady == 1) {
+                        uint frameOffset = animComp.frameIndex * animAddrs.descriptor.globalMeshletCount;
+                        localCollider = GET_MESHLET_COLLIDER(animAddrs.frameMeshletColliders, frameOffset + globalMeshletIdx);
+                    }
+
                 }
             }
         }
@@ -85,8 +95,10 @@ void main() {
         GpuMeshletCollider worldCollider = TransformCollider(localCollider, transform.transform, transform.transformIT);
 
         // 7. Backface Cone Culling
-        if ((pc.disableConeCulling == 0 && ctx.enableMeshletConeCulling == 1) && TestConeCulling(worldCollider, camera.eye.xyz)) {
-            isVisible = false;
+        if ((pc.disableConeCulling == 0 && ctx.enableMeshletConeCulling == 1)) {
+            if(TestConeCulling(worldCollider, camera.eye.xyz)) {
+                isVisible = false;
+            }
         }
 
         // 8. Frustum Culling (Skip if parent model is already fully inside)
@@ -102,7 +114,7 @@ void main() {
             vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);
             bool enableDepthOcclusion = (ctx.enableMeshletOcclusionCulling == 1);
             
-            if (IsSphereOccluded(worldCollider.center, worldCollider.radius, camera, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
+            if (IsSphereOccludedPerspective(worldCollider.center, worldCollider.radius, camera.view, camera.projVulkan, camera.params.x, camera.params.y, depthPyramid, screenRes, enableDepthOcclusion, screenSizePixels)) {
                 isVisible = false;
             }
         }

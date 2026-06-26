@@ -13,10 +13,11 @@
 #include "Engine/Component/Core/CameraComponent.h"
 #include "Engine/Render/ComputeGroupSize.h"
 #include "Engine/Scene/DrawData/ForwardPlusDrawGroup.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
-#include "Engine/Shaders/Includes/PushConstants/ClusterSetupPC.glsl"
+    #include "Engine/Shaders/Includes/PushConstants/ClusterSetupPC.glsl"
 
     void ClusterSetupPass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
@@ -40,10 +41,9 @@ namespace Syn {
         uint32_t cameraEntity = scene->GetSceneCameraEntity();
         const auto& camera = scene->GetRegistry()->GetComponent<CameraComponent>(cameraEntity);
 
-        ClusterSetupPC pc{};
-		pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, true);
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ClusterSetupPC), &pc);
+        Vk::PushConstant<ClusterSetupPC> pc;
+		pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void ClusterSetupPass::BindDescriptors(const RenderContext& context) {
@@ -75,13 +75,13 @@ namespace Syn {
         uint32_t width = rtGroup->GetWidth();
         uint32_t height = rtGroup->GetHeight();
 
-        uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(width, scene->GetSettings()->tileSize);
-        uint32_t groupCountY = ComputeGroupSize::CalculateDispatchCount(height, scene->GetSettings()->tileSize);
+        uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(width, scene->GetSettings()->lighting.tileSize);
+        uint32_t groupCountY = ComputeGroupSize::CalculateDispatchCount(height, scene->GetSettings()->lighting.tileSize);
 
         VkDispatchIndirectCommand resetCmd{ 0, 1, 1 };
 
         Vk::BufferUpdateInfo updateInfo{};
-        updateInfo.buffer = drawData->ForwardPlus.clusterCountBuffer.GetHandle(fIdx, true);
+        updateInfo.buffer = drawData->ForwardPlus.clusterCountBuffer.GetHandle(fIdx);
         updateInfo.offset = 0;
         updateInfo.size = sizeof(VkDispatchIndirectCommand);
         updateInfo.pData = &resetCmd;
@@ -98,7 +98,7 @@ namespace Syn {
         vkCmdDispatch(context.cmd, groupCountX, groupCountY, 1);
 
         Vk::BufferBarrierInfo tileGridBarrier{};
-        tileGridBarrier.buffer = drawData->ForwardPlus.tileGridBuffer.GetHandle(fIdx, true);
+        tileGridBarrier.buffer = drawData->ForwardPlus.tileGridBuffer.GetHandle(fIdx);
         tileGridBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         tileGridBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         tileGridBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
@@ -106,7 +106,7 @@ namespace Syn {
         Vk::BufferUtils::InsertBarrier(context.cmd, tileGridBarrier);
 
         Vk::BufferBarrierInfo clusterListBarrier{};
-        clusterListBarrier.buffer = drawData->ForwardPlus.clusterListBuffer.GetHandle(fIdx, true);
+        clusterListBarrier.buffer = drawData->ForwardPlus.clusterListBuffer.GetHandle(fIdx);
         clusterListBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         clusterListBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         clusterListBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT;
@@ -114,7 +114,7 @@ namespace Syn {
         Vk::BufferUtils::InsertBarrier(context.cmd, clusterListBarrier);
 
         Vk::BufferBarrierInfo countBarrier{};
-        countBarrier.buffer = drawData->ForwardPlus.clusterCountBuffer.GetHandle(fIdx, true);
+        countBarrier.buffer = drawData->ForwardPlus.clusterCountBuffer.GetHandle(fIdx);
         countBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         countBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         countBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;

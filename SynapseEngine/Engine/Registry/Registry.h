@@ -32,6 +32,8 @@ namespace Syn
 		bool IsValid(EntityID entity) const;
 		void Clear();
 
+		const SparseSet& GetActiveEntities() const { return _activeEntities; }
+
 		template<typename T>
 		void AddComponent(EntityID entity, T&& component);
 

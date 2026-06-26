@@ -13,6 +13,8 @@ namespace Syn
         BoxColliderComponent,
         SphereColliderComponent,
         CapsuleColliderComponent,
+		ConvexColliderComponent,
+        MeshColliderComponent,
         RigidBodyComponent,
 		DirectionLightComponent,
 		DirectionLightShadowComponent,

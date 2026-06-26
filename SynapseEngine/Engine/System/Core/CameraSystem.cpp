@@ -41,7 +41,7 @@ namespace Syn
             if (!transformPool->Has(entity)) 
                 return;
 
-            bool useDebugCam = scene->GetSettings()->useDebugCamera;
+            bool useDebugCam = scene->GetSettings()->debug.useDebugCamera;
             bool enableInput = (useDebugCam && entity == scene->GetDebugCameraEntity()) || (!useDebugCam && entity == scene->GetSceneCameraEntity());
 
             auto& cameraComponent = cameraPool->Get(entity);

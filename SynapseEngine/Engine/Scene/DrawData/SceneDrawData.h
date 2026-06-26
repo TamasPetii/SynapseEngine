@@ -1,6 +1,6 @@
 #pragma once
 #include "Engine/SynApi.h"
-#include "Engine/Scene/SceneSettings.h"
+#include "Engine/Scene/Settings/SceneSettings.h"
 #include "ModelDrawGroup.h"
 #include "DebugDrawGroup.h"
 #include "PointLightDrawGroup.h"
@@ -8,8 +8,12 @@
 #include "DirectionLightDrawGroup.h"
 #include "ForwardPlusDrawGroup.h"
 #include "ChunkDrawGroup.h"
+#include "SsaoDrawGroup.h"
 #include <atomic>
 #include "IDrawGroup.h"
+#include "DirectionLightShadowDrawGroup.h"
+#include "SpotLightShadowDrawGroup.h"
+#include "PointLightShadowDrawGroup.h"
 
 namespace Syn
 {
@@ -25,10 +29,15 @@ namespace Syn
         ModelDrawGroup Models;
         DebugDrawGroup Debug;
         PointLightDrawGroup PointLights;
-        SpotLightDrawGroup SpotLights;
-        DirectionLightDrawGroup DirectionLights;
         ForwardPlusDrawGroup ForwardPlus;
 		ChunkDrawGroup Chunks;
+		SsaoDrawGroup Ssao;
+        DirectionLightDrawGroup DirectionLights;
+        DirectionLightShadowDrawGroup DirectionLightShadow;
+        SpotLightDrawGroup SpotLights;
+        SpotLightShadowDrawGroup SpotLightShadow;
+        PointLightShadowDrawGroup PointLightShadow;
+
         std::atomic<uint32_t> syncFramesRemaining{ 0 };
     };
 }

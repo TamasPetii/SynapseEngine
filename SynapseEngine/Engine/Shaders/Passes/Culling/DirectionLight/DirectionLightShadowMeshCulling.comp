@@ -1,0 +1,169 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Camera.glsl"
+#include "../../../Includes/Common/Transform.glsl"
+#include "../../../Includes/Common/Model.glsl"
+#include "../../../Includes/Common/Mesh.glsl"
+#include "../../../Includes/Common/Animation.glsl"
+#include "../../../Includes/Common/Material.glsl"
+#include "../../../Includes/Common/Culling.glsl"
+#include "../../../Includes/Common/DirectionLight.glsl"
+#include "../../../Includes/Utils/CullingMath.glsl"
+#include "../../../Includes/Utils/Occlusion.glsl"
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../../Includes/PushConstants/DirectionLightShadowCullingPC.glsl"
+layout(push_constant) uniform PushConstants {
+    DirectionLightShadowCullingPC pc;
+};
+
+// Depth pyramid (HZB) for the shadow atlas occlusion culling
+layout(set = 2, binding = 0) uniform sampler2D shadowDepthPyramid;
+
+void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    // Thread mapping: 1 WorkGroup = 1 Deferred Model, Local Threads collaboratively process its meshes
+    uint jobIndex = gl_WorkGroupID.x;
+    uint localThreadId = gl_LocalInvocationID.x;
+
+    // 1. Boundary check against the deferred model count
+    if (jobIndex >= GET_DISPATCH_CMD(ctx.directionLightShadowModelCountBufferAddr).groupCountX) return;
+    
+    // 2. Fetch deferred model metadata
+    VisibleModelData modelData = GET_VISIBLE_MODEL(ctx.directionLightShadowModelVisibleIndexBufferAddr, jobIndex);
+
+    // 3. Unpack the encoded payload provided by the Model Culling Pass
+    uint rawPayload = modelData.entityId;
+    bool parentFullyInside = (rawPayload >> 31) != 0; 
+    uint lightIdx   = (rawPayload >> 28) & 0x7u;
+    uint cascadeIdx = (rawPayload >> 26) & 0x3u;
+    uint pureEntityId = rawPayload & 0x3FFFFFFu;
+
+    // 4. Resolve Context (Transform, Main Camera)
+    uint transformIdx = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, pureEntityId);
+    TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformIdx);
+
+    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
+
+    // 5. Resolve Model Allocation and Component
+    ModelAllocationInfo mAlloc = GET_MODEL_ALLOC(ctx.globalModelAllocationBufferAddr, modelData.modelIndex);
+    GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, modelData.modelIndex);
+    
+    uint sparseIdx = GET_SPARSE_INDEX(ctx.modelSparseMapBufferAddr, pureEntityId);
+    ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, sparseIdx);
+
+    // 6. Evaluate Animation state upfront for the whole model
+    uint animFrameIndex = 0;
+    bool hasAnimation = false;
+    GpuAnimationAddresses animAddrs;
+    
+    if (ctx.animationSparseMapBufferAddr != 0) {
+        uint animSparseIndex = GET_SPARSE_INDEX(ctx.animationSparseMapBufferAddr, pureEntityId);
+        if (animSparseIndex != INVALID_INDEX) {
+            AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animSparseIndex);
+            if (animComp.animationIndex != INVALID_INDEX) {
+                animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
+
+                if (animAddrs.isReady == 1) {
+                    animFrameIndex = animComp.frameIndex;
+                    hasAnimation = true;
+                }
+            }
+        }
+    }
+
+    // 7. Resolve Directional Light Shadow and Cascade Data
+    uint lightEntity = GET_DIRECTION_VISIBLE_SHADOW_LIGHT(ctx.directionLightVisibleShadowIndexBufferAddr, lightIdx);
+    uint lightShadowDenseIndex = GET_SPARSE_INDEX(ctx.directionLightShadowSparseMapBufferAddr, lightEntity);
+    DirectionLightShadowColliderGPU shadowCollider = GET_DIRECTION_LIGHT_SHADOW_COLLIDER(ctx.directionLightShadowColliderDataBufferAddr, lightShadowDenseIndex);
+    CascadeCollider cascade = shadowCollider.cascades[cascadeIdx];
+
+    vec2 screenRes = vec2(ctx.screenWidth, ctx.screenHeight);
+    float cameraNear = GET_CAMERA_NEAR(camera);
+
+    // 8. Collaborative Loop: Process all meshes of the current model
+    for (uint m = localThreadId; m < addrs.meshCount; m += gl_WorkGroupSize.x) {    
+        
+        // Resolve Material and Render Type
+        uint matIdx = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, modelComp.materialOffset + m);
+        Material mat = GET_MATERIAL(ctx.materialBufferAddr, matIdx);
+
+        uint matType = 0;
+        if (IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat))       matType = 3;
+        else if (IS_TRANSPARENT(mat) && !IS_DOUBLE_SIDED(mat)) matType = 2;
+        else if (!IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat)) matType = 1;
+
+        // Shadows are only cast by Opaque materials
+        if (matType > 1) 
+            continue;
+
+        // Resolve local mesh collider (Handle animation frame data if skinned)
+        GpuMeshCollider localMeshCollider = GET_MESH_COLLIDER(addrs.meshColliders, m);
+
+        if (hasAnimation) {
+            uint frameOffset = animFrameIndex * animAddrs.descriptor.globalMeshCount;
+            localMeshCollider = GET_MESH_COLLIDER(animAddrs.frameMeshColliders, frameOffset + m);
+        }
+
+        // Transform mesh collider to world space
+        GpuMeshCollider worldCollider = TransformCollider(localMeshCollider, transform.transform);
+
+        // 9. Precise Frustum Culling (Skip if parent model was entirely inside the cascade)
+        uint visibility = parentFullyInside ? INTERSECTION_INSIDE : INTERSECTION_INTERSECT;
+        if (!parentFullyInside && ctx.enableMeshFrustumCulling == 1) {
+            visibility = TestFrustum(worldCollider.center, worldCollider.radius, worldCollider.aabbMin, worldCollider.aabbMax, cascade);
+            if (visibility == INTERSECTION_OUTSIDE) continue;
+        }
+
+        // 10. Calculate LOD based on Main Camera screen size
+        float mainCamScreenSize = CalculateSphereScreenSizePerspective(worldCollider.center, worldCollider.radius, camera.view, camera.proj, cameraNear, screenRes);
+        if (mainCamScreenSize < 1.0) continue;
+
+        // 11. Precise Occlusion Culling using Directional Light HZB
+        if (ctx.enableMeshOcclusionCulling == 1) {
+            mat4 shadowViewProj = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeViewProjsVulkan[cascadeIdx];
+            vec4 shadowAtlasRect = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeAtlasRects[cascadeIdx];
+            
+            float shadowScreenSizePixels = 0.0;
+            if (false && IsSphereOccludedAtlasOrtho(worldCollider.center, worldCollider.radius, shadowViewProj, shadowAtlasRect, shadowDepthPyramid, float(ctx.directionLightShadowAtlasSize), ctx.directionLightShadowHizMipLevels, shadowScreenSizePixels)) {
+                continue;
+            }
+        }
+
+        // Map screen size to base LOD and apply shadow bias
+        uint rawLod = (mainCamScreenSize > 512.0) ? 0 :
+                      (mainCamScreenSize > 256.0) ? 1 :
+                      (mainCamScreenSize > 128.0) ? 2 : 3;
+
+        uint lod = min(rawLod + ctx.directionLightShadowLodBias, 3u);
+
+        // 12. Fetch Mesh Allocation and emit Draw Command
+        MeshAllocationInfo meshAlloc = GET_MESH_ALLOC(ctx.globalMeshAllocationBufferAddr, mAlloc.meshAllocationOffset + (m * 4) + lod);
+        
+        if (meshAlloc.activeTypes[matType] == 1) {
+            uint slotIndex = 0;
+            uint indirectIdx = meshAlloc.indirectIndices[matType];
+
+            // Append instance to the appropriate indirect draw command using atomic additions
+            if (meshAlloc.isMeshletPipeline == PIPELINE_MESHLET) {
+                uint64_t meshletBaseAddr = ctx.directionLightShadowIndirectGeometryCommandBufferAddr + (ctx.globalTraditionalCommandsCount * 16ul);
+                slotIndex = atomicAdd(GET_MESHLET_CMD(meshletBaseAddr, indirectIdx).groupCountX, 1);
+            } else {
+                slotIndex = atomicAdd(GET_TRADITIONAL_CMD(ctx.directionLightShadowIndirectGeometryCommandBufferAddr, indirectIdx).instanceCount, 1);
+            }
+
+            // Repack the payload with the updated precise mesh-level visibility flag
+            uint finalPayload = SET_BIT_TO(rawPayload, 31, visibility == INTERSECTION_INSIDE);
+            
+            // Write the encoded payload to the instance buffer
+            uint bufferIndex = (meshAlloc.instanceOffsets[matType] * ctx.directionLightShadowMultiplier) + slotIndex;
+            GET_INSTANCE(ctx.directionLightShadowInstanceBufferAddr, bufferIndex) = finalPayload;
+        }
+    }
+}

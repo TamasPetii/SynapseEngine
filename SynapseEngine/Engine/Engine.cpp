@@ -15,7 +15,7 @@
 #include "Engine/Mesh/Uploader/DefaultGpuModelUploader.h"
 
 #include "Engine/Mesh/Loader/MeshLoaders.h"
-#include "Engine/Mesh/Processor/MeshProcessors.h"
+#include "Engine/Mesh/Processor/MeshProcessor/MeshProcessors.h"
 #include "Engine/Mesh/Source/MeshSources.h"
 #include "Engine/Mesh/Factory/MeshFactory.h"
 
@@ -50,6 +50,8 @@
 #include "Engine/Scene/Writer/ManifestSceneWriter.h"
 #include "Engine/Scene/Loader/ManifestSceneLoader.h"
 
+#include "Engine/Vk/Descriptor/DescriptorUtils.h"
+
 #include <print>
 #include <filesystem>
 
@@ -57,6 +59,7 @@ namespace Syn
 {
 	Engine::Engine(const EngineInitParams& params)
 	{
+		srand(time(0));
 		Init(params);
 	}
 
@@ -129,8 +132,9 @@ namespace Syn
 
 	void Engine::InitLogger()
 	{
+		_memorySink = std::make_shared<Syn::MemorySink>();
+		Logger::Get().AddSink(_memorySink);
 		Logger::Get().AddSink(std::make_shared<Syn::ConsoleSink>());
-		Logger::Get().AddSink(std::make_shared<Syn::MemorySink>());
 		Logger::Get().AddSink(std::make_shared<Syn::FileSink>());
 	}
 
@@ -223,17 +227,20 @@ namespace Syn
 
 	void Engine::Shutdown() 
 	{
-		_taskExecutor.reset();
-		_inputManager.reset();
-		_serializer.reset();
-		_cpuProfiler.reset();
-		_gpuProfiler.reset();
+		_vkContext->GetDevice()->WaitIdle();
+
 		_sceneManager.reset();
 		_renderManager.reset();
+		_inputManager.reset();
+		_gpuProfiler.reset();
+		_cpuProfiler.reset();
 		_resourceManager.reset();
 		_gpuUploader.reset();
-		_vkContext.reset(); //This has to be the last one!
+		_taskExecutor.reset();
+		_serializer.reset();
 		ServiceLocator::Shutdown();
+		Vk::DescriptorUtils::Cleanup();
+		_vkContext.reset(); //This has to be the last one!
 	}
 
 	void Engine::WindowResizeEvent(uint32_t width, uint32_t height) {
@@ -258,6 +265,11 @@ namespace Syn
 		_taskExecutor = std::make_unique<tf::Executor>(workerThreads);
 
 		ServiceLocator::ProvideTaskExecutor(_taskExecutor.get());
+	}
+
+	void Engine::OnChar(unsigned int codepoint)
+	{
+		if (!_inputEnabled) return;
 	}
 
 	void Engine::OnKey(int key, int scancode, int action, int mods)
@@ -292,6 +304,12 @@ namespace Syn
 		_inputManager->SetMousePosition(x, y);
 	}
 
+	void Engine::OnScroll(float xOffset, float yOffset)
+	{
+		//if (!_inputEnabled) return;
+		//_inputManager->SetScrollOffset(xOffset, yOffset);
+	}
+
 	void Engine::InitSceneManager()
 	{
 		uint32_t frames = _frameContext.framesInFlight;
@@ -306,9 +324,11 @@ namespace Syn
 			return std::make_unique<Scene>(frames, std::make_unique<TestSceneSource>());
 			});
 
+		/*
 		_sceneManager->RegisterScene("NatureLevel", [frames]() {
 			return std::make_unique<Scene>(frames, std::make_unique<NatureSceneSource>());
 			});
+		*/
 
 		_sceneManager->LoadScene("TestLevel");
 	}
@@ -342,5 +362,12 @@ namespace Syn
 		_serializer = std::make_unique<Serializer>(std::move(service));
 
 		ServiceLocator::ProvideSerializer(_serializer.get());
+	}
+
+	MaterialManager* Engine::GetMaterialManager() {
+		return ServiceLocator::GetMaterialManager();
+	}
+	ImageManager* Engine::GetImageManager() {
+		return ServiceLocator::GetImageManager();
 	}
 }

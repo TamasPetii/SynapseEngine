@@ -29,18 +29,28 @@ namespace Syn
         static constexpr const char* DirectionLightSparseMap = "DirectionLightSparseMap";
         static constexpr const char* DirectionLightData = "DirectionLightData";
         static constexpr const char* DirectionLightVisibleData = "DirectionLightVisibleData";
+        static constexpr const char* DirectionLightVisibleShadowData = "DirectionLightVisibleShadowData";
 
         static constexpr const char* DirectionLightShadowSparseMap = "DirectionLightShadowSparseMap";
         static constexpr const char* DirectionLightShadowData = "DirectionLightShadowData";
         static constexpr const char* DirectionLightShadowColliderData = "DirectionLightShadowColliderData";
+        static constexpr const char* DirectionLightShadowModelVisibleData = "DirectionLightShadowModelVisibleData";
+        static constexpr const char* DirectionLightShadowMortonChunkVisibleIndex = "DirectionLightShadowMortonChunkVisibleIndex";
+        static constexpr const char* DirectionLightShadowStaticChunkVisibleIndex = "DirectionLightShadowStaticChunkVisibleIndex";
 
         static constexpr const char* PointLightSparseMap = "PointLightSparseMap";
         static constexpr const char* PointLightData = "PointLightData";
         static constexpr const char* PointLightColliderData = "PointLightColliderData";
 		static constexpr const char* PointLightVisibleData = "PointLightVisibleData";
-
+        
         static constexpr const char* PointLightShadowSparseMap = "PointLightShadowSparseMap";
         static constexpr const char* PointLightShadowData = "PointLightShadowData";
+        static constexpr const char* PointLightShadowVisibleData = "PointLightShadowVisibleData";
+        static constexpr const char* PointLightShadowModelVisibleData = "PointLightShadowModelVisibleData";
+        static constexpr const char* PointLightShadowMortonChunkVisibleIndex = "PointLightShadowMortonChunkVisibleIndex";
+        static constexpr const char* PointLightShadowStaticChunkVisibleIndex = "PointLightShadowStaticChunkVisibleIndex";
+        static constexpr const char* PointLightShadowAtlasSortKeyBuffer = "PointLightShadowAtlasSortKeyBuffer";
+        static constexpr const char* PointLightShadowAtlasSortValueBuffer = "PointLightShadowAtlasSortValueBuffer";
 
         static constexpr const char* SpotLightSparseMap = "SpotLightSparseMap";
         static constexpr const char* SpotLightData = "SpotLightData";
@@ -49,6 +59,12 @@ namespace Syn
 
         static constexpr const char* SpotLightShadowSparseMap = "SpotLightShadowSparseMap";
         static constexpr const char* SpotLightShadowData = "SpotLightShadowData";
+        static constexpr const char* SpotLightShadowVisibleData = "SpotLightShadowVisibleData";
+        static constexpr const char* SpotLightShadowModelVisibleData = "SpotLightShadowModelVisibleData";
+        static constexpr const char* SpotLightShadowMortonChunkVisibleIndex = "SpotLightShadowMortonChunkVisibleIndex";
+        static constexpr const char* SpotLightShadowStaticChunkVisibleIndex = "SpotLightShadowStaticChunkVisibleIndex";
+        static constexpr const char* SpotLightShadowAtlasSortKeyBuffer = "SpotLightShadowAtlasSortKeyBuffer";
+        static constexpr const char* SpotLightShadowAtlasSortValueBuffer = "SpotLightShadowAtlasSortValueBuffer";
 
         static constexpr const char* BoxColliderSparseMap = "BoxColliderSparseMap";
         static constexpr const char* BoxColliderData = "BoxColliderData";
@@ -58,5 +74,14 @@ namespace Syn
 
         static constexpr const char* CapsuleColliderSparseMap = "CapsuleColliderSparseMap";
         static constexpr const char* CapsuleColliderData = "CapsuleColliderData";
+
+        static constexpr const char* ConvexColliderSparseMap = "ConvexColliderSparseMap";
+        static constexpr const char* ConvexColliderData = "ConvexColliderData";
+
+        static constexpr const char* MeshColliderSparseMap = "MeshColliderSparseMap";
+        static constexpr const char* MeshColliderData = "MeshColliderData";
+
+        static constexpr const char* SelectionOutlineData = "SelectionOutlineData";
+        static constexpr const char* HierarchySparseMap = "HierarchySparseMap";
     };
 }

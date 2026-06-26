@@ -7,6 +7,7 @@
 #include "Engine/Render/ComputeGroupSize.h"
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Manager/ComponentBufferManager.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
 
@@ -24,32 +25,60 @@ namespace Syn {
 
     bool ChunkBuilderPass::ShouldExecute(const RenderContext& context) const {
         auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
-        return context.scene->GetSettings()->enableMortonBvhCulling && pool && !pool->GetStorage().GetStaticEntities().empty();
+
+        bool isEnabled = context.scene->GetSettings()->culling.geometrySpatialAcceleration == SpatialAccelerationType::MortonBvh
+            || context.scene->GetSettings()->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh
+            || context.scene->GetSettings()->culling.pointLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh
+            || context.scene->GetSettings()->culling.spotLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh;
+
+        if (!isEnabled || !pool || pool->GetStorage().GetStaticEntities().empty()) {
+            _wasEnabled = false;
+            return false;
+        }
+
+        if (!_wasEnabled) {
+            _needsRebuild = true;
+        }
+
+        _wasEnabled = true;
+
+        bool hasDirty = !pool->GetStorage().GetDirtyStatics().empty();
+        return hasDirty || _needsRebuild || (_countdown > 0);
     }
 
     void ChunkBuilderPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         _staticCount = static_cast<uint32_t>(scene->GetRegistry()->GetPool<TransformComponent>()->GetStorage().GetStaticEntities().size());
 
-        ChunkBuilderPC pc{};
-        pc.frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex, scene->GetSettings()->enableGeometryGpuCulling);
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ChunkBuilderPC), &pc);
+        Vk::PushConstant<ChunkBuilderPC> pc;
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void ChunkBuilderPass::Dispatch(const RenderContext& context) {
+        auto pool = context.scene->GetRegistry()->GetPool<TransformComponent>();
+        bool hasDirty = !pool->GetStorage().GetDirtyStatics().empty();
+
+        if (hasDirty || _needsRebuild) {
+            _countdown = context.framesInFlight;
+            _needsRebuild = false;
+        }
+
+        if (_countdown > 0) {
+            _countdown--;
+        }
+
         if (_staticCount == 0) return;
 
         auto scene = context.scene;
         auto compManager = scene->GetComponentBufferManager();
         auto drawGroup = scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
         VkDrawIndirectCommand drawTemplate = drawGroup->Chunks.wireframeCmdTemplate;
 
         Vk::BufferUpdateInfo drawUpdateInfo{};
-        drawUpdateInfo.buffer = drawGroup->Chunks.mortonIndirectDrawBuffer.GetHandle(fIdx, isGpu);
+        drawUpdateInfo.buffer = drawGroup->Chunks.mortonIndirectDrawBuffer.GetHandle(fIdx);
         drawUpdateInfo.offset = 0;
         drawUpdateInfo.size = sizeof(VkDrawIndirectCommand);
         drawUpdateInfo.pData = &drawTemplate;
@@ -66,7 +95,7 @@ namespace Syn {
         VkDispatchIndirectCommand dispatchTemplate = drawGroup->Chunks.dispatchCmdTemplate;
 
         Vk::BufferUpdateInfo dispatchUpdateInfo{};
-        dispatchUpdateInfo.buffer = drawGroup->Chunks.mortonIndirectDispatchBuffer.GetHandle(fIdx, isGpu);
+        dispatchUpdateInfo.buffer = drawGroup->Chunks.mortonIndirectDispatchBuffer.GetHandle(fIdx);
         dispatchUpdateInfo.offset = 0;
         dispatchUpdateInfo.size = sizeof(VkDispatchIndirectCommand);
         dispatchUpdateInfo.pData = &dispatchTemplate;
@@ -100,7 +129,7 @@ namespace Syn {
         Vk::BufferUtils::InsertBarrier(context.cmd, chunkTransformIndicesBarrier);
 
         Vk::BufferBarrierInfo indirectDispatchBarrier{};
-        indirectDispatchBarrier.buffer = drawGroup->Chunks.mortonIndirectDispatchBuffer.GetHandle(fIdx, isGpu);
+        indirectDispatchBarrier.buffer = drawGroup->Chunks.mortonIndirectDispatchBuffer.GetHandle(fIdx);
         indirectDispatchBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         indirectDispatchBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         indirectDispatchBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
@@ -108,7 +137,7 @@ namespace Syn {
         Vk::BufferUtils::InsertBarrier(context.cmd, indirectDispatchBarrier);
 
         Vk::BufferBarrierInfo indirectDrawBarrier{};
-        indirectDrawBarrier.buffer = drawGroup->Chunks.mortonIndirectDrawBuffer.GetHandle(fIdx, isGpu);
+        indirectDrawBarrier.buffer = drawGroup->Chunks.mortonIndirectDrawBuffer.GetHandle(fIdx);
         indirectDrawBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
         indirectDrawBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         indirectDrawBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;

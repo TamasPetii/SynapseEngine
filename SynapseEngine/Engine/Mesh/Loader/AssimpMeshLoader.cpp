@@ -1,9 +1,9 @@
 #include "AssimpMeshLoader.h"
 #include "Engine/Utils/AssimpUtils.h"
 #include "Engine/Mesh/Utils/MeshUtils.h"
-#include <Assimp/Importer.hpp>
-#include <Assimp/postprocess.h>
-#include <Assimp/scene.h>
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <ranges>
 #include <queue>
 #include <execution>
@@ -12,6 +12,8 @@
 #include <iostream>
 
 #include "Engine/ServiceLocator.h"
+
+#include <chrono>
 #include <taskflow/taskflow.hpp>
 #include <taskflow/algorithm/for_each.hpp>
 
@@ -159,7 +161,11 @@ namespace Syn
                 }
 
                 if (!extractTexture(aiTextureType_NORMALS, matInfo.normal)) {
-                    //...
+                    if (!extractTexture(aiTextureType_HEIGHT, matInfo.normal)) {
+						if(!extractTexture(aiTextureType_DISPLACEMENT, matInfo.normal)) {
+	                        
+						}
+                    }
                 }
 
                 if (!extractTexture(aiTextureType_METALNESS, matInfo.metallicRoughness)) {
@@ -167,7 +173,6 @@ namespace Syn
                 }
 
                 if (!extractTexture(aiTextureType_EMISSIVE, matInfo.emissive)) {
-                    //...
                 }
 
                 if (!extractTexture(aiTextureType_LIGHTMAP, matInfo.ambientOcclusion)) {

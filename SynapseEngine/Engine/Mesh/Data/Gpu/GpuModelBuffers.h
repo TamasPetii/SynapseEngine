@@ -43,10 +43,16 @@ namespace Syn
         VkDeviceAddress meshletDrawDescriptors;
         VkDeviceAddress meshletColliders;
         VkDeviceAddress nodeTransforms;
-        GpuMeshCollider globalCollider;
+
+        uint32_t isReady;
         uint32_t vertexCount;
         uint32_t indexCount;
         uint32_t averageLodIndexCount;
         uint32_t meshCount;
+        uint32_t padding0;
+        uint32_t padding1;
+        uint32_t padding2;
+
+        GpuMeshCollider globalCollider;
     };
 }

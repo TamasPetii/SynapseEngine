@@ -54,17 +54,20 @@ namespace Syn::Vk {
         vkCmdSetDepthBoundsTestEnable(cmd, VK_FALSE);
         vkCmdSetStencilTestEnable(cmd, VK_FALSE);
 
-        VkColorComponentFlags writeMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
-        std::vector<VkColorComponentFlags> writeMasks(config.colorAttachmentCount, writeMask);
-        vkCmdSetColorWriteMaskEXT(cmd, 0, config.colorAttachmentCount, writeMasks.data());
+        if (config.colorAttachmentCount > 0) {
+            VkColorComponentFlags writeMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
+            std::vector<VkColorComponentFlags> writeMasks(config.colorAttachmentCount, writeMask);
+            vkCmdSetColorWriteMaskEXT(cmd, 0, config.colorAttachmentCount, writeMasks.data());
 
-        std::vector<VkBool32> blendEnables(config.colorAttachmentCount, VK_FALSE);
-        for (uint32_t i = 0; i < config.colorAttachmentCount; ++i) {
-            if (i < config.blendStates.size()) {
-                blendEnables[i] = config.blendStates[i].enable ? VK_TRUE : VK_FALSE;
+            std::vector<VkBool32> blendEnables(config.colorAttachmentCount, VK_FALSE);
+            for (uint32_t i = 0; i < config.colorAttachmentCount; ++i) {
+                if (i < config.blendStates.size()) {
+                    blendEnables[i] = config.blendStates[i].enable ? VK_TRUE : VK_FALSE;
+                }
             }
+            vkCmdSetColorBlendEnableEXT(cmd, 0, config.colorAttachmentCount, blendEnables.data());            
         }
-        vkCmdSetColorBlendEnableEXT(cmd, 0, config.colorAttachmentCount, blendEnables.data());
+
 
         vkCmdSetRasterizationSamplesEXT(cmd, config.raster.samples);
 
@@ -76,21 +79,23 @@ namespace Syn::Vk {
 
         vkCmdSetPrimitiveRestartEnable(cmd, config.raster.primitiveRestartEnable);
 
-        std::vector<VkColorBlendEquationEXT> equations(config.colorAttachmentCount);
-        for (uint32_t i = 0; i < config.colorAttachmentCount; ++i) {
-            if (i < config.blendStates.size() && config.blendStates[i].enable) {
-                equations[i].srcColorBlendFactor = config.blendStates[i].srcColorFactor;
-                equations[i].dstColorBlendFactor = config.blendStates[i].dstColorFactor;
-                equations[i].colorBlendOp = config.blendStates[i].colorBlendOp;
-                equations[i].srcAlphaBlendFactor = config.blendStates[i].srcAlphaFactor;
-                equations[i].dstAlphaBlendFactor = config.blendStates[i].dstAlphaFactor;
-                equations[i].alphaBlendOp = config.blendStates[i].alphaBlendOp;
+        if (config.colorAttachmentCount > 0) {
+            std::vector<VkColorBlendEquationEXT> equations(config.colorAttachmentCount);
+            for (uint32_t i = 0; i < config.colorAttachmentCount; ++i) {
+                if (i < config.blendStates.size() && config.blendStates[i].enable) {
+                    equations[i].srcColorBlendFactor = config.blendStates[i].srcColorFactor;
+                    equations[i].dstColorBlendFactor = config.blendStates[i].dstColorFactor;
+                    equations[i].colorBlendOp = config.blendStates[i].colorBlendOp;
+                    equations[i].srcAlphaBlendFactor = config.blendStates[i].srcAlphaFactor;
+                    equations[i].dstAlphaBlendFactor = config.blendStates[i].dstAlphaFactor;
+                    equations[i].alphaBlendOp = config.blendStates[i].alphaBlendOp;
+                }
+                else {
+                    equations[i] = { VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD, VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD };
+                }
             }
-            else {
-                equations[i] = { VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD, VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD };
-            }
+            vkCmdSetColorBlendEquationEXT(cmd, 0, config.colorAttachmentCount, equations.data());
         }
-        vkCmdSetColorBlendEquationEXT(cmd, 0, config.colorAttachmentCount, equations.data());
 
         if (config.renderArea.has_value()) {
             VkViewport viewport{};

@@ -50,11 +50,17 @@ struct GpuModelAddresses {
     uint64_t meshletDrawDescriptors;
     uint64_t meshletColliders;
     uint64_t nodeTransforms;
-    GpuMeshCollider globalCollider;
+
+    uint isReady;
     uint vertexCount;
     uint indexCount;
     uint averageLodIndexCount;
     uint meshCount;
+    uint padding0;
+    uint padding1;
+    uint padding2;
+
+    GpuMeshCollider globalCollider;
 };
 
 struct MeshDrawDescriptor {

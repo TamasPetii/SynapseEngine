@@ -15,6 +15,7 @@
 #include "Engine/Mesh/Source/Procedural/Shape/ScreenQuadMeshSource.h"
 #include "Engine/Mesh/Source/Procedural/Shape/SphereMeshSource.h"
 #include "Engine/Mesh/Source/Procedural/Shape/TorusMeshSource.h"
+#include "Engine/Mesh/Source/Procedural/Shape/IcoSphereMeshSource.h"
 
 namespace Syn
 {
@@ -42,6 +43,11 @@ namespace Syn
 
         ConeMeshSource source(radius, height, radialSegments, heightSegments);
         return builder->BuildFromSource(source);
+    }
+
+    std::shared_ptr<StaticMesh> MeshFactory::CreateProxyCone(float radius, float height, uint32_t radialSegments, uint32_t heightSegments)
+    {
+        return CreateCone(radius, height, radialSegments, heightSegments);
     }
 
     std::shared_ptr<StaticMesh> MeshFactory::CreateCube(float size)
@@ -125,6 +131,11 @@ namespace Syn
         return builder->BuildFromSource(source);
     }
 
+    std::shared_ptr<StaticMesh> MeshFactory::CreateProxySphere(float radius, uint32_t sectors, uint32_t stacks)
+    {
+        return CreateSphere(radius, sectors, stacks);
+    }
+
     std::shared_ptr<StaticMesh> MeshFactory::CreateTorus(float mainRadius, float tubeRadius, uint32_t mainSegments, uint32_t tubeSegments)
     {
         auto builder = ServiceLocator::GetStaticMeshBuilder();
@@ -132,5 +143,19 @@ namespace Syn
 
         TorusMeshSource source(mainRadius, tubeRadius, mainSegments, tubeSegments);
         return builder->BuildFromSource(source);
+    }
+
+    std::shared_ptr<StaticMesh> MeshFactory::CreateIcoSphere(float radius, uint32_t subdivisions)
+    {
+        auto builder = ServiceLocator::GetStaticMeshBuilder();
+        if (!builder) return nullptr;
+
+        IcoSphereMeshSource source(radius, subdivisions);
+        return builder->BuildFromSource(source);
+    }
+
+    std::shared_ptr<StaticMesh> MeshFactory::CreateProxyIcoSphere(float radius, uint32_t subdivisions)
+    {
+		return CreateIcoSphere(radius, subdivisions);
     }
 }

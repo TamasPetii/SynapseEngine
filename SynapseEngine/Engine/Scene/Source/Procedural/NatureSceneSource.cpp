@@ -21,6 +21,7 @@
 #include "Engine/Component/Physics/CapsuleColliderComponent.h"
 #include "Engine/Component/Physics/RigidBodyComponent.h"
 #include "Engine/Logger/SynLog.h"
+#include "Engine/Utils/PathUtils.h"
 
 #include <random>
 #include <fstream>
@@ -41,7 +42,9 @@ namespace Syn
         auto materialManager = ServiceLocator::GetMaterialManager();
 
         json config;
-        std::ifstream configFile("../Engine/Scene/Source/Procedural/nature_config.json");
+        std::string path = PathUtils::GetAbsolutePathString("Engine/Scene/Source/Procedural/nature_config.json");
+        std::ifstream configFile(path);
+
         if (configFile.is_open())
         {
             try {
@@ -77,13 +80,13 @@ namespace Syn
 
         // Cameras (Main & Debug)
         {
-            sceneCam = registry.CreateEntity();
+            sceneCam = scene.CreateEntity();
             registry.AddComponent<CameraComponent>(sceneCam);
             registry.AddComponent<TransformComponent>(sceneCam);
             registry.GetPool<CameraComponent>()->SetCategory(sceneCam, StorageCategory::Stream);
             registry.GetPool<TransformComponent>()->SetCategory(sceneCam, StorageCategory::Stream);
 
-            debugCam = registry.CreateEntity();
+            debugCam = scene.CreateEntity();
             registry.AddComponent<CameraComponent>(debugCam);
             registry.AddComponent<TransformComponent>(debugCam);
             registry.GetPool<CameraComponent>()->SetCategory(debugCam, StorageCategory::Stream);
@@ -92,7 +95,7 @@ namespace Syn
 
         if (spawnFloor)
         {
-            EntityID floorEntity = registry.CreateEntity();
+            EntityID floorEntity = scene.CreateEntity();
             registry.AddComponent<TransformComponent>(floorEntity);
             registry.AddComponent<ModelComponent>(floorEntity);
             registry.AddComponent<RigidBodyComponent>(floorEntity);
@@ -122,7 +125,7 @@ namespace Syn
 
         // Static Geometry
         for (int i = 0; i < staticGeoCount; i++) {
-            EntityID e = registry.CreateEntity();
+            EntityID e = scene.CreateEntity();
             registry.AddComponent<TransformComponent>(e);
             registry.AddComponent<ModelComponent>(e);
             registry.AddComponent<MaterialOverrideComponent>(e);
@@ -140,7 +143,7 @@ namespace Syn
 
         // Lights: Directional
         for (int i = 0; i < dirLightCount; ++i) {
-            EntityID e = registry.CreateEntity();
+            EntityID e = scene.CreateEntity();
             registry.AddComponent<TransformComponent>(e);
             registry.AddComponent<DirectionLightComponent>(e);
 
@@ -158,7 +161,7 @@ namespace Syn
 
         // Lights: Point
         for (int i = 0; i < pointLightCount; i++) {
-            EntityID e = registry.CreateEntity();
+            EntityID e = scene.CreateEntity();
             registry.AddComponent<TransformComponent>(e);
             registry.AddComponent<PointLightComponent>(e);
 
@@ -180,7 +183,7 @@ namespace Syn
 
         // Lights: Spot
         for (int i = 0; i < spotLightCount; i++) {
-            EntityID e = registry.CreateEntity();
+            EntityID e = scene.CreateEntity();
             registry.AddComponent<TransformComponent>(e);
             registry.AddComponent<SpotLightComponent>(e);
 

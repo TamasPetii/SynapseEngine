@@ -1,7 +1,8 @@
 #pragma once
-#include "Engine/Scene/SceneSettings.h"
+#include "Engine/Scene/Settings/SceneSettings.h"
 
-namespace Syn {
+namespace Syn 
+{
     struct SettingsState
     {
         SceneSettings sceneSettings;

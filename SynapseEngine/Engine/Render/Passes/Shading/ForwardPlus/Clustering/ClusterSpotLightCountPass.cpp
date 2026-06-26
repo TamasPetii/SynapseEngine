@@ -7,6 +7,7 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Render/ComputeGroupSize.h"
 #include "Engine/Vk/Buffer/BufferUtils.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn 
 {
@@ -30,18 +31,16 @@ namespace Syn
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
 
         uint32_t fIdx = context.frameIndex;
-        bool isGpu = scene->GetSettings()->enableGeometryGpuCulling;
 
-        ClusterLightCountPC pc{};
-		pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, true);
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ClusterLightCountPC), &pc);
+        Vk::PushConstant<ClusterLightCountPC> pc;
+		pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void ClusterSpotLightCountPass::Dispatch(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
 
-        VkBuffer indirectBuffer = drawData->ForwardPlus.dispatchArgsBuffer.GetHandle(context.frameIndex, true);
+        VkBuffer indirectBuffer = drawData->ForwardPlus.dispatchArgsBuffer.GetHandle(context.frameIndex);
         vkCmdDispatchIndirect(context.cmd, indirectBuffer, offsetof(ForwardPlusDispatchArgs, spotSlowCount));
     }
 }

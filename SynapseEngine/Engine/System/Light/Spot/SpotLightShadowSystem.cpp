@@ -42,7 +42,11 @@ namespace Syn
                         up = glm::vec3(0.0f, 0.0f, 1.0f);
                     }
 
-                    shadowComp.viewProj = shadowProj * glm::lookAt(lightComp.position, lightComp.position + lightComp.direction, up);
+                    glm::mat4 shadowView = glm::lookAt(lightComp.position, lightComp.position + lightComp.direction, up);
+
+                    shadowComp.view = shadowView;
+                    shadowComp.proj = shadowProj;
+                    shadowComp.viewProj = shadowProj * shadowView;
 
                     if (shadowPool->IsDynamic(entity))
                         shadowPool->SetBit<CHANGED_BIT>(entity);

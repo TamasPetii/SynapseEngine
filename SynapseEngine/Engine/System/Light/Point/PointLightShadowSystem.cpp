@@ -31,9 +31,9 @@ namespace Syn
         };
 
         static const glm::vec3 upVectors[6] = {
-            { 0.0, -1.0,  0.0 }, { 0.0, -1.0,  0.0 },
-            { 0.0,  0.0,  1.0 }, { 0.0,  0.0, -1.0 },
-            { 0.0, -1.0,  0.0 }, { 0.0, -1.0,  0.0 }
+            { 0.0,  1.0,  0.0 }, { 0.0,  1.0,  0.0 },
+            { 0.0,  0.0, -1.0 }, { 0.0,  0.0,  1.0 },
+            { 0.0,  1.0,  0.0 }, { 0.0,  1.0,  0.0 }
         };
 
         ParallelForEachIf<UPDATE_BIT>(shadowPool, subflow, SystemPhaseNames::Update,
@@ -42,8 +42,6 @@ namespace Syn
                 {
                     auto& shadowComp = shadowPool->Get(entity);
                     auto& lightComp = lightPool->Get(entity);
-
-                    //Todo: Dynamic Distance Based Doom Rects
 
                     shadowComp.farPlane = lightComp.radius;
 

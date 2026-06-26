@@ -20,7 +20,6 @@ namespace Syn {
         ModelManager(uint32_t framesInFlight, 
             std::shared_ptr<StaticMeshBuilder> builder,
             std::unique_ptr<IGpuModelUploader> uploader,
-            std::unique_ptr<ICpuModelExtractor> cpuExtractor,
             MaterialLoadCallback materialLoadCallback = nullptr);
         ~ModelManager() = default;
 
@@ -38,6 +37,5 @@ namespace Syn {
         MaterialLoadCallback _materialLoadCallback;
         std::shared_ptr<StaticMeshBuilder> _builder;
         std::unique_ptr<IGpuModelUploader> _uploader;
-        std::unique_ptr<ICpuModelExtractor> _cpuExtractor;
     };
 }

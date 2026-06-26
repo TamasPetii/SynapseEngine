@@ -1,0 +1,35 @@
+#include "DebugSettings.h"
+
+namespace Syn
+{
+    DebugSettings::DebugSettings()
+        : useDebugCamera(false)
+        , enableDebugVisibility(false)
+        , debugVisibilityMode(DebugVisibilityMode::AllCombined)
+        , enableWireframeMeshAabb(false)
+        , enableWireframeMeshSphere(false)
+        , enableWireframeMeshletAabb(false)
+        , enableWireframeMeshletSphere(false)
+        , enableWireframeMeshletCone(false)
+        , enableStaticChunkAabbWireframe(false)
+        , enableMortonChunkAabbWireframe(false)
+        , enablePointLightSphereWireframe(false)
+        , enablePointLightAabbWireframe(false)
+        , enableSpotLightSphereWireframe(false)
+        , enableSpotLightAabbWireframe(false)
+        , enableSpotLightConeWireframe(false)
+        , enableSpotLightPyramidWireframe(false)
+        , enableBoxColliderWireframe(false)
+        , enableSphereColliderWireframe(false)
+        , enableCapsuleColliderWireframe(false)
+        , enableBillboardCameras(true)
+        , enableBillboardPointLights(true)
+        , enableBillboardSpotLights(true)
+        , enableBillboardDirectionalLights(true)
+        , enableSelectedOutline(true)
+        , enableSelectedHierarchyOutline(true)
+        , outlinePrimaryColor(glm::vec4(1.0f, 0.60f, 0.0f, 1.0f))
+        , outlineSecondaryColor(glm::vec4(1.0f, 0.85f, 0.0f, 1.0f))
+        , outlineThickness(2.0f)
+    {}
+}

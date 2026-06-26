@@ -3,9 +3,10 @@
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Render/RenderNames.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
-#include "Engine/Shaders/Includes/PushConstants/ClusterLightWritePC.glsl"
+    #include "Engine/Shaders/Includes/PushConstants/ClusterLightWritePC.glsl"
 
     void ClusterPointLightSinglePass::Initialize() {
         auto shaderManager = ServiceLocator::GetShaderManager();
@@ -21,16 +22,15 @@ namespace Syn {
         auto drawData = context.scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
 
-        ClusterLightWritePC pc{};
-        pc.frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx, true);
-
-        vkCmdPushConstants(context.cmd, _shaderProgram->GetLayout(), VK_SHADER_STAGE_ALL, 0, sizeof(ClusterLightWritePC), &pc);
+        Vk::PushConstant<ClusterLightWritePC> pc;
+        pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void ClusterPointLightSinglePass::Dispatch(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
 
-        VkBuffer indirectBuffer = drawData->ForwardPlus.dispatchArgsBuffer.GetHandle(context.frameIndex, true);
+        VkBuffer indirectBuffer = drawData->ForwardPlus.dispatchArgsBuffer.GetHandle(context.frameIndex);
         vkCmdDispatchIndirect(context.cmd, indirectBuffer, offsetof(ForwardPlusDispatchArgs, pointFastPath));
     }
 }

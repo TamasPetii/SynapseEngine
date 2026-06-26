@@ -2,6 +2,8 @@
 #include "IDrawGroup.h"
 #include <glm/glm.hpp>
 #include "Engine/Registry/Entity.h"
+#include <vector>
+#include <atomic>
 
 namespace Syn
 {
@@ -23,19 +25,20 @@ namespace Syn
 
         RenderBuffer chunkDataBuffer;
         RenderBuffer chunkVisibilityBuffer;
-        RenderBuffer aabbSingleCmdBuffer;
-        RenderBuffer indirectDispatchBuffer;
+        RenderBuffer chunkAabbSingleCmdBuffer;
+        RenderBuffer chunkIndirectDispatchBuffer;
 
         RenderBuffer sceneAabbBuffer;
         RenderBuffer mortonRadixSortTempBuffer;
         RenderBuffer mortonIndirectDispatchBuffer;
         RenderBuffer mortonIndirectDrawBuffer;
+        RenderBuffer mortonAabbSingleCmdBuffer;
         RenderBuffer mortonChunkVisibleIndirectDispatchBuffer;
 
-        std::vector<ChunkDataGPU> chunks;
         std::vector<uint32_t> visibleChunkIds;
-
         std::atomic<uint32_t> visibleChunkCount{ 0 };
+
+        std::vector<ChunkDataGPU> chunks;
         std::atomic<uint32_t> chunkCounter{ 0 };
 
         VkDrawIndirectCommand wireframeCmdTemplate{};

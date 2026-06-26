@@ -2,6 +2,27 @@
 #include <limits>
 
 namespace Syn {
+    GpuMaterial::GpuMaterial()
+        : color(1.0f, 1.0f, 1.0f, 1.0f)
+        , emissiveColor(0.0f, 0.0f, 0.0f)
+        , emissiveIntensity(1.0f)
+        , uvScale(1.0f, 1.0f)
+        , metalness(0.0f)
+        , roughness(1.0f)
+        , aoStrength(1.0f)
+        , packedFlags(0)
+        , albedoTexture(UINT32_MAX)
+        , normalTexture(UINT32_MAX)
+        , metalnessTexture(UINT32_MAX)
+        , roughnessTexture(UINT32_MAX)
+        , metallicRoughnessTexture(UINT32_MAX)
+        , emissiveTexture(UINT32_MAX)
+        , ambientOcclusionTexture(UINT32_MAX)
+        , padding0(0)
+        , padding1(0)
+        , padding2(0)
+    {
+    }
 
     GpuMaterial::GpuMaterial(const Material& material)
         : color(material.color)

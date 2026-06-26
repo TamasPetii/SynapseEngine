@@ -3,6 +3,7 @@
 #include <limits>
 
 #include <meshoptimizer.h>
+#include <chrono>
 #include <taskflow/taskflow.hpp>
 #include <taskflow/algorithm/for_each.hpp>
 
@@ -128,16 +129,16 @@ namespace Syn
                 uint32_t lodCount = 4;
                 frameMesh.lods.resize(lodCount);
 
-                if (model.meshletVertexIndices.has_value() && model.meshletTriangleIndices.has_value() && model.meshletDescriptors.has_value())
+                if (true /*model.meshletVertexIndices.has_value() && model.meshletTriangleIndices.has_value() && model.meshletDescriptors.has_value()*/)
                 {
-                    const auto& rawVerts = model.meshletVertexIndices.value();
-                    const auto& rawTris = model.meshletTriangleIndices.value();
-                    const auto& meshletDescs = model.meshletDescriptors.value();
+                    const auto& rawVerts = model.meshletVertexIndices;
+                    const auto& rawTris = model.meshletTriangleIndices;
+                    const auto& meshletDescs = model.meshletDescriptors;
 
                     for (size_t l = 0; l < lodCount; ++l)
                     {
-                        uint32_t lodDescIndex = (static_cast<uint32_t>(m) * 4) + l;
-                        if (lodDescIndex >= model.meshletDrawDescriptors.size()) continue;
+                        uint32_t lodDescIndex = static_cast<uint32_t>((static_cast<uint32_t>(m) * 4) + l);
+                        if (lodDescIndex >= static_cast<uint32_t>(model.meshletDrawDescriptors.size())) continue;
 
                         const auto& drawDesc = model.meshletDrawDescriptors[lodDescIndex];
                         uint32_t meshletOffset = drawDesc.meshletOffset;
@@ -148,7 +149,7 @@ namespace Syn
 
                         for (size_t ml = 0; ml < meshletCount; ++ml)
                         {
-                            uint32_t globalMeshletIdx = meshletOffset + ml;
+                            uint32_t globalMeshletIdx = static_cast<uint32_t>(meshletOffset + ml);
                             const auto& meshletDesc = meshletDescs[globalMeshletIdx];
                             CookedAnimationFrameMeshlet& frameMeshlet = frameLod.meshlets[ml];
 

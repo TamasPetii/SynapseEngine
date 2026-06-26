@@ -18,6 +18,8 @@ namespace Syn
         template<uint32_t... Bits> SYN_INLINE bool IsBitSet(DenseIndex) const { return false; }
         SYN_INLINE void ResetAllBits(DenseIndex) {}
 
+        template<uint32_t... Bits> SYN_INLINE void SetStateBitSetImpl() const { }
+
         template<uint32_t... Bits> SYN_INLINE bool IsStateBitSet() const { return false; }
         template<uint32_t... Bits> SYN_INLINE void ResetStateBit() {}
         SYN_INLINE void ResetAllStateBits() {}
