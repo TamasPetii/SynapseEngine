@@ -62,6 +62,7 @@ namespace Syn {
                 _viewportTextures[cacheKey] = handle;
             }
         }
+
         return _textureManager->GetImGuiTextureID(_viewportTextures[cacheKey]);
     }
 

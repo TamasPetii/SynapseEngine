@@ -14,17 +14,17 @@
     "shared_material_count": 100
   },
   "entities": {
-    "animated_characters": 1000,
-    "static_geometry": 10000,
-    "physics_boxes": 1000,
-    "physics_spheres": 1000,
-    "physics_capsules": 1000
+    "animated_characters": 50,
+    "static_geometry": 500,
+    "physics_boxes": 50,
+    "physics_spheres": 50,
+    "physics_capsules": 50
   },
   "lights": {
     "directional_count": 1,
-    "point_count": 128,
-    "point_shadow_count": 32,
-    "spot_count": 128,
-    "spot_shadow_count": 32
+    "point_count": 32,
+    "point_shadow_count": 16,
+    "spot_count": 32,
+    "spot_shadow_count": 16
   }
 }

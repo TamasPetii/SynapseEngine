@@ -16,6 +16,7 @@
 #include "EditorCore/Api/ISettingsApi.h"
 #include "EditorCore/Api/IPointLightApi.h"
 #include "EditorCore/Api/ISpotLightApi.h"
+#include "EditorCore/Api/ITextureApi.h"
 
 namespace Syn {
     class EditorContext {
@@ -36,6 +37,7 @@ namespace Syn {
         ISettingsApi* GetSettingsApi() const { return _settingsApi.get(); }
         IPointLightApi* GetPointLightApi() const { return _pointLightApi.get(); }
         ISpotLightApi* GetSpotLightApi() const { return _spotLightApi.get(); }
+        ITextureApi* GetTextureApi() const { return _textureApi.get(); }
     private:
         std::unique_ptr<ISelectionApi> _selectionApi;
         std::unique_ptr<ITagApi> _tagApi;
@@ -50,5 +52,6 @@ namespace Syn {
         std::unique_ptr<IDirectionLightApi> _directionLightApi;
         std::unique_ptr<IPointLightApi> _pointLightApi;
         std::unique_ptr<ISpotLightApi> _spotLightApi;
+        std::unique_ptr<ITextureApi> _textureApi;
     };
 }
