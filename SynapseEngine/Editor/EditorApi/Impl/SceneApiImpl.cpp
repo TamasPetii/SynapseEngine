@@ -16,14 +16,14 @@ namespace Syn {
     }
 
     void SceneApiImpl::LoadScene(const std::string& filepath) {
-        std::filesystem::path loadPath = filepath.empty() ? GetSceneCacheDirectory() / "Temp.synscene" : filepath;
+        std::filesystem::path loadPath = filepath.empty() ? GetSceneCacheDirectory() / "Temp.synscene" : std::filesystem::path(filepath);
         _sceneManager->LoadSceneFromFile(loadPath.string());
         Syn::Info("SceneApiImpl: Scene loaded from {}", loadPath.string());
     }
 
     void SceneApiImpl::SaveScene(const std::string& filepath) {
         if (!_sceneManager->GetActiveScene()) return;
-        std::filesystem::path savePath = filepath.empty() ? GetSceneCacheDirectory() / "Temp.synscene" : filepath;
+        std::filesystem::path savePath = filepath.empty() ? GetSceneCacheDirectory() / "Temp.synscene" : std::filesystem::path(filepath);
         _sceneManager->SaveActiveScene(savePath.string());
         Syn::Info("SceneApiImpl: Scene saved to {}", savePath.string());
     }

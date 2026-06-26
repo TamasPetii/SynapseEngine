@@ -34,6 +34,7 @@ namespace Syn {
         virtual void OnMouseMove(float x, float y) {}
         virtual void OnMouseButton(int button, int action, int mods) {}
         virtual void OnScroll(float xOffset, float yOffset) {}
+        virtual void OnChar(unsigned int codepoint) {}
     private:
         bool OnWindowClose();
     private:

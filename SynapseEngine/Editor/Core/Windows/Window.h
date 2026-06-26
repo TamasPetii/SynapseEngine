@@ -23,6 +23,7 @@ namespace Syn
         std::function<void(float x, float y)> OnMouseMove;
         std::function<void(int button, int action, int mods)> OnMouseButton;
         std::function<void(float xOffset, float yOffset)> OnScroll;
+        std::function<void(unsigned int codepoint)> OnChar;
     };
 
     struct WindowData

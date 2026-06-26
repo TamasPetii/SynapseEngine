@@ -108,6 +108,13 @@ namespace Syn {
             }
             });
 
+        glfwSetCharCallback(_window, [](GLFWwindow* window, unsigned int codepoint) {
+            WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
+            if (data.callbacks.OnChar) {
+                data.callbacks.OnChar(codepoint);
+            }
+            });
+
 #ifdef _WIN32
         HWND hwnd = glfwGetWin32Window(_window);
         COLORREF color = RGB(0, 0, 0);

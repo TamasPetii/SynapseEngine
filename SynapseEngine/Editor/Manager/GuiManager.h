@@ -27,6 +27,7 @@ namespace Syn {
         void OnMouseButton(int button, int action, int mods);
         void OnMouseMove(float x, float y);
         void OnScroll(float xOffset, float yOffset);
+        void OnChar(unsigned int codepoint);
 
         bool WantsCaptureKeyboard() const;
         bool WantsCaptureMouse() const;

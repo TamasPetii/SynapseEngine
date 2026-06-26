@@ -163,6 +163,10 @@ void Synapse::OnScroll(float xOffset, float yOffset) {
     _inputDispatcher->DispatchScroll(xOffset, yOffset);
 }
 
+void Synapse::OnChar(unsigned int codepoint) {
+    _inputDispatcher->DispatchChar(codepoint);
+}
+
 void Synapse::OnResize(uint32_t width, uint32_t height) {
     if (_engine) {
         _engine->WindowResizeEvent(width, height);

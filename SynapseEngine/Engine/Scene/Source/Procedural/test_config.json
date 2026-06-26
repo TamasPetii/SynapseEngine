@@ -7,7 +7,7 @@
     "spawn_bistro": false,
     "spawn_floor": false,
     "spawn_pbr_sponza": false,
-    "spawn_monkey": true
+    "spawn_monkey": false
   },
   "materials": {
     "use_unique_materials": false,

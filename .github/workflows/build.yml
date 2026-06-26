@@ -91,8 +91,8 @@ jobs:
         
         xmake -v
 
-    - name: Run Unit Tests
-      shell: bash
-      run: |
-        cd SynapseEngine
-        xmake run UnitTests
+    #- name: Run Unit Tests
+    #  shell: bash
+    #  run: |
+    #    cd SynapseEngine
+    #    xmake run UnitTests

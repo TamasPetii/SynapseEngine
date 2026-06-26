@@ -15,6 +15,7 @@ namespace Syn {
         void DispatchMouseButton(int button, int action, int mods);
         void DispatchKey(int key, int scancode, int action, int mods);
         void DispatchScroll(float xOffset, float yOffset);
+        void DispatchChar(unsigned int codepoint);
     private:
         bool IsGuiCapturingMouse() const;
         bool IsGuiCapturingKeyboard() const;

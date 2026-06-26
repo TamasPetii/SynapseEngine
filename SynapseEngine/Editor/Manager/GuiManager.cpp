@@ -214,6 +214,10 @@ namespace Syn {
         ImGui_ImplGlfw_ScrollCallback(_windowHandle, xOffset, yOffset);
     }
 
+    void GuiManager::OnChar(unsigned int codepoint) {
+        ImGui_ImplGlfw_CharCallback(_windowHandle, codepoint);
+    }
+
     bool GuiManager::WantsCaptureKeyboard() const {
         return ImGui::GetCurrentContext() ? ImGui::GetIO().WantCaptureKeyboard : false;
     }

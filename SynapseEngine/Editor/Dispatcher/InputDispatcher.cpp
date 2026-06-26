@@ -49,4 +49,13 @@ namespace Syn {
         return false;
         return _gui && _gui->WantsCaptureKeyboard();
     }
+
+    void InputDispatcher::DispatchChar(unsigned int codepoint) {
+        if (_gui)
+            _gui->OnChar(codepoint);
+
+        if (_engine && !IsGuiCapturingKeyboard()) {
+            _engine->OnChar(codepoint);
+        }
+    }
 }

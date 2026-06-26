@@ -58,6 +58,7 @@ namespace Syn
         void OnMouseMove(float x, float y);
 		void OnScroll(float xOffset, float yOffset);
         void SetInputEnabled(bool enabled) { _inputEnabled = enabled; }
+        void OnChar(unsigned int codepoint);
     public:
         MaterialManager* GetMaterialManager();
         ImageManager* GetImageManager();

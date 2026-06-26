@@ -267,6 +267,11 @@ namespace Syn
 		ServiceLocator::ProvideTaskExecutor(_taskExecutor.get());
 	}
 
+	void Engine::OnChar(unsigned int codepoint)
+	{
+		if (!_inputEnabled) return;
+	}
+
 	void Engine::OnKey(int key, int scancode, int action, int mods)
 	{
 		if (!_inputEnabled) return;
