@@ -15,7 +15,7 @@
   },
   "entities": {
     "animated_characters": 1000,
-    "static_geometry": 1000000,
+    "static_geometry": 10000,
     "physics_boxes": 1000,
     "physics_spheres": 1000,
     "physics_capsules": 1000

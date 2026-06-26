@@ -1,9 +1,9 @@
 #include "GuiManager.h"
 #include <vulkan/vulkan.h>
 #include <imgui.h>
-
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
+#include <ImGuizmo.h>
 #include "GuiTextureManager.h"
 #include <print>
 #include "Engine/ServiceLocator.h"
@@ -104,6 +104,7 @@ namespace Syn {
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+        ImGuizmo::BeginFrame();
     }
 
     void GuiManager::UpdateAndDraw() {
