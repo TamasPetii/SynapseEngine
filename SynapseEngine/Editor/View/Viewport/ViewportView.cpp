@@ -30,7 +30,9 @@ namespace Syn {
         if (viewportPanelSize.y <= 0.0f) viewportPanelSize.y = 1.0f;
 
         if (state.textureId && !isResizing) {
+            ImGui::GetWindowDrawList()->AddCallback(ImGui::GetPlatformIO().DrawCallback_SetSamplerNearest, nullptr);
             ImGui::Image(state.textureId, viewportPanelSize);
+            ImGui::GetWindowDrawList()->AddCallback(ImGui::GetPlatformIO().DrawCallback_SetSamplerLinear, nullptr);
         }
         else {
             ImGui::Dummy(viewportPanelSize);
@@ -43,14 +45,22 @@ namespace Syn {
         RenderFloatingToolbar(vm, state, imageStartPos, viewportPanelSize);
 		RenderSimulationToolbar(vm, state, imageStartPos, viewportPanelSize);
 
-        if (isImageHovered && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGuizmo::IsOver() && !ImGui::IsAnyItemHovered()) {
-            ImVec2 mousePos = ImGui::GetMousePos();
-            uint32_t x = static_cast<uint32_t>(mousePos.x - vMin.x);
-            uint32_t y = static_cast<uint32_t>(mousePos.y - vMin.y);
-            vm.Dispatch(PickEntityIntent{ x, y });
+        DrawGizmo(vm, state, imageStartPos, viewportPanelSize);
+
+        if (!ImGuizmo::IsUsing()) {
+
+            if (isImageHovered && ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !ImGuizmo::IsOver() && !ImGui::IsAnyItemHovered()) {
+                ImVec2 mousePos = ImGui::GetMousePos();
+                uint32_t x = static_cast<uint32_t>(mousePos.x - imageStartPos.x);
+                uint32_t y = static_cast<uint32_t>(mousePos.y - imageStartPos.y);
+                vm.Dispatch(PickEntityIntent{ x, y });
+            }
+
+            if (isImageHovered && ImGui::IsMouseDown(ImGuiMouseButton_Right)) {
+                
+            }
         }
 
-        DrawGizmo(vm, state, imageStartPos, viewportPanelSize);
         HandleShortcuts(vm);
 
         ImGui::End();

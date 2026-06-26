@@ -46,8 +46,8 @@ void main() {
     vec2 offsetV = vec2(0.0, 1.0 / float(ctx.screenHeight));
     
     // Reconstruct view-space normal from depth gradients
-    vec3 viewPosRight = GetViewPosFromLinearZ(uv + offsetU, textureOffset(inHizPyramid, uv, ivec2(1, 0)).x, camera);
-    vec3 viewPosDown  = GetViewPosFromLinearZ(uv + offsetV, textureOffset(inHizPyramid, uv, ivec2(0, 1)).x, camera);
+    vec3 viewPosRight = GetViewPosFromLinearZ(uv + offsetU, textureLodOffset(inHizPyramid, uv, 0.0, ivec2(1, 0)).x, camera);
+    vec3 viewPosDown  = GetViewPosFromLinearZ(uv + offsetV, textureLodOffset(inHizPyramid, uv, 0.0, ivec2(0, 1)).x, camera);
     vec3 viewNormal   = normalize(cross(viewPosRight - viewPos, viewPos - viewPosDown));
 
     vec2 noiseScale = vec2(ctx.screenWidth / pc.noiseTextureWidth, ctx.screenHeight / pc.noiseTextureHeight);

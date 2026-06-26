@@ -10,7 +10,7 @@ namespace Syn::UI {
 
         bool isOpen = ImGui::BeginTable(id, 2, flags);
         if (isOpen) {
-            ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthFixed, 100.0f);
+            ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthFixed);
             ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch);
         }
         else {
