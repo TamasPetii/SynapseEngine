@@ -131,4 +131,9 @@ namespace Syn::UI {
     void EndPropertyCombo() {
         ImGui::EndCombo();
     }
+
+    void PropertyText(const char* label, const char* text, int indentLevel) {
+        BeginProperty(label, indentLevel);
+        ImGui::TextUnformatted(text);
+    }
 }

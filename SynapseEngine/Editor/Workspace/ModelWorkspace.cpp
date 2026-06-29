@@ -7,6 +7,10 @@
 #include "Editor/View/ModelHierarchy/ModelHierarchyView.h"
 #include "EditorCore/ViewModels/ModelHierarchy/ModelHierarchyViewModel.h"
 
+#include "Editor/View/ModelProperties/ModelPropertiesView.h"
+#include "EditorCore/ViewModels/ModelProperties/ModelPropertiesViewModel.h"
+
+
 namespace Syn {
 
     ModelWorkspace::ModelWorkspace(EditorContext* context, IconManager* iconManager, const std::string& assetPath)
@@ -24,6 +28,12 @@ namespace Syn {
         AddWindow<ModelHierarchyWin>(
             ModelHierarchyView{},
             ModelHierarchyViewModel{ _context->GetModelApi() }
+        );
+
+        using ModelPropertiesWin = EditorWindow<ModelPropertiesView, ModelPropertiesViewModel>;
+        AddWindow<ModelPropertiesWin>(
+            ModelPropertiesView{},
+            ModelPropertiesViewModel{ _context->GetModelApi() }
         );
     }
 

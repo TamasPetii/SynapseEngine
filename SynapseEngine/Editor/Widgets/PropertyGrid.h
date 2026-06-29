@@ -27,4 +27,6 @@ namespace Syn::UI {
 
     bool BeginPropertyCombo(const char* label, const char* preview_value, int indentLevel = 0);
     void EndPropertyCombo();
+
+    void PropertyText(const char* label, const char* text, int indentLevel = 0);
 }
