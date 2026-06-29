@@ -367,7 +367,12 @@ namespace Syn
 	MaterialManager* Engine::GetMaterialManager() {
 		return ServiceLocator::GetMaterialManager();
 	}
+
 	ImageManager* Engine::GetImageManager() {
 		return ServiceLocator::GetImageManager();
+	}
+
+	ModelManager* Engine::GetModelManager() {
+		return ServiceLocator::GetModelManager();
 	}
 }

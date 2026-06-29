@@ -78,6 +78,13 @@ namespace Syn
         value = static_cast<uint8_t>(temp);
     }
 
+    void YamlCppInputArchive::PropertyUint16(const char* name, uint16_t& value)
+    {
+        uint32_t temp = 0;
+        ReadValue(name, temp);
+        value = static_cast<uint16_t>(temp);
+    }
+
     void YamlCppInputArchive::PropertyInt32(const char* name, int32_t& value) { 
         ReadValue(name, value);
     }

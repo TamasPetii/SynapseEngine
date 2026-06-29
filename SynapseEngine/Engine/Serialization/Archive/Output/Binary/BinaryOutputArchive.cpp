@@ -23,6 +23,11 @@ namespace Syn
         _stream.WriteRaw(&value, sizeof(uint8_t));
     }
 
+    void BinaryOutputArchive::PropertyUint16(const char*, uint16_t value)
+    {
+        _stream.WriteRaw(&value, sizeof(uint16_t));
+    }
+
     void BinaryOutputArchive::PropertyInt32(const char*, int32_t value)
     {
         _stream.WriteRaw(&value, sizeof(int32_t));

@@ -23,6 +23,7 @@ namespace Syn
 
         void PropertyBool(const char* name, bool value) override;
         void PropertyUint8(const char* name, uint8_t value) override;
+        void PropertyUint16(const char* name, uint16_t value) override;
         void PropertyInt32(const char* name, int32_t value) override;
         void PropertyUint32(const char* name, uint32_t value) override;
         void PropertyInt64(const char* name, int64_t value) override;

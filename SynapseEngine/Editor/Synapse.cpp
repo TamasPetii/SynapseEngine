@@ -17,6 +17,9 @@
 #include "Engine/Utils/PathUtils.h"
 #include "Editor/View/IGuiWindow.h"
 
+#include "Engine/Image/Loader/SvgImageLoader.h"
+#include "Engine/Logger/SynLog.h"
+
 Synapse::Synapse(const Syn::ApplicationConfig& config)
     : Syn::Application(config)
 {
@@ -63,6 +66,16 @@ void Synapse::OnInit() {
 #endif
 
     _engine = std::make_unique<Syn::Engine>(params);
+
+    std::string iconPath = Syn::PathUtils::GetAbsolutePathString(std::string(ASSET_PATH) + "/dark_icon.svg");
+    Syn::SvgImageLoader svgLoader;
+    if (auto rawImageOpt = svgLoader.LoadFile(iconPath)) {
+        const auto& rawImage = rawImageOpt.value();
+        GetWindow().SetIcon(rawImage.width, rawImage.height, rawImage.pixels.data());
+    }
+    else {
+        Syn::Error("Failed to load window icon from: {}", iconPath);
+    }
 
 #ifndef SYN_PERFORMANCE
 

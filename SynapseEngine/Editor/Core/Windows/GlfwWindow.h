@@ -22,7 +22,7 @@ namespace Syn {
 
         void CreateSurface(VkInstance instance, VkSurfaceKHR* surface) override;
         void SetCallbacks(const WindowCallbacks& callbacks) override;
-
+        void SetIcon(uint32_t width, uint32_t height, const uint8_t* pixels) override;
         void* GetNativePointer() const override { return _window; }
     private:
         void Init(const WindowConfig& config);

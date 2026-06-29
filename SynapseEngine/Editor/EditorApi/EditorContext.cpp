@@ -13,6 +13,7 @@
 #include "Impl/PointLightApiImpl.h"
 #include "Impl/SpotLightApiImpl.h"
 #include "Impl/TextureApiImpl.h"
+#include "Impl/ModelApiImpl.h"
 
 namespace Syn {
     EditorContext::EditorContext(Engine* engine, GuiTextureManager* textureManager) {
@@ -32,6 +33,7 @@ namespace Syn {
         _pointLightApi = std::make_unique<PointLightApiImpl>(sm);
         _spotLightApi = std::make_unique<SpotLightApiImpl>(sm);
         _textureApi = std::make_unique<TextureApiImpl>(engine->GetImageManager(), textureManager);
+        _modelApi = std::make_unique<ModelApiImpl>(engine->GetModelManager());
     }
 
     EditorContext::~EditorContext() = default;

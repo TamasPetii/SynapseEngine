@@ -69,7 +69,7 @@ namespace Syn {
             .colorAttachmentCount = 2,
         };
 
-        _iconTexture = ServiceLocator::GetImageManager()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/PointLightIcon.png"));
+        _iconTexture = ServiceLocator::GetImageManager()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/Engine/PointLightIcon.png"));
     }
 
     void PointLightBillboardPass::PrepareFrame(const RenderContext& context) {

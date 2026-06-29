@@ -17,6 +17,10 @@ namespace Syn
         _stream.ReadRaw(&value, sizeof(uint8_t)); 
     }
 
+    void BinaryInputArchive::PropertyUint16(const char*, uint16_t& value) {
+        _stream.ReadRaw(&value, sizeof(uint16_t));
+    }
+
     void BinaryInputArchive::PropertyInt32(const char*, int32_t& value) { 
         _stream.ReadRaw(&value, sizeof(int32_t)); 
     }

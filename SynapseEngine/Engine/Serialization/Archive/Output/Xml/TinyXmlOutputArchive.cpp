@@ -72,6 +72,10 @@ namespace Syn
         WriteValue(name, static_cast<unsigned int>(value));
     }
 
+    void TinyXmlOutputArchive::PropertyUint16(const char* name, uint16_t value) {
+        WriteValue(name, static_cast<unsigned int>(value));
+    }
+
     void TinyXmlOutputArchive::PropertyInt32(const char* name, int32_t value) { 
         WriteValue(name, value);
     }

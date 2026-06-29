@@ -27,6 +27,7 @@ namespace Syn {
     class Serializer;
     class MaterialManager;
     class ImageManager;
+    class ModelManager;
 }
 
 namespace Syn
@@ -62,6 +63,7 @@ namespace Syn
     public:
         MaterialManager* GetMaterialManager();
         ImageManager* GetImageManager();
+        ModelManager* GetModelManager();
         std::shared_ptr<Syn::MemorySink> GetMemorySink() const { return _memorySink; }
     private:
         void Init(const EngineInitParams& params);

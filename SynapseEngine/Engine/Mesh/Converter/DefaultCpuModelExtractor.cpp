@@ -53,5 +53,6 @@ namespace Syn
         }
 
         outCpuData.indices = gpuData.indexedData.indices;
+        outCpuData.meshNodeDescriptors = gpuData.meshNodeDescriptors;
     }
 }

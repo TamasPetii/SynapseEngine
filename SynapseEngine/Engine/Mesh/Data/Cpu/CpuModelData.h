@@ -20,6 +20,7 @@ namespace Syn
         std::vector<GpuMeshDescriptor> meshDescriptors;
         std::vector<GpuMeshletDrawDescriptor> meshletDrawDescriptors;
         std::vector<GpuMeshLodDescriptor> lodDescriptors;
+        std::vector<MeshInstanceDescriptor> meshNodeDescriptors;
 
         std::vector<MeshDrawBlueprint> baseDrawCommands;
         std::vector<uint32_t> meshMaterialIndices;

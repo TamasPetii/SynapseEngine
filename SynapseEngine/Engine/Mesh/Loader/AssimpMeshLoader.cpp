@@ -80,19 +80,39 @@ namespace Syn
             
             outModel.nodeTransforms.push_back(rawNode);
 
-            for (uint32_t i = 0; i < currentNode->mNumMeshes; ++i)
+            if (currentNode->mNumMeshes == 0)
             {
-                uint32_t meshIndex = currentNode->mMeshes[i];
-                aiMesh* ai_mesh = scene->mMeshes[meshIndex];
-
                 MeshInstanceDescriptor descriptor{};
-                descriptor.meshIndex = static_cast<uint16_t>(meshIndex);
+                descriptor.name = currentNode->mName.C_Str();
+                descriptor.meshIndex = UINT16_MAX;
                 descriptor.nodeIndex = nodeIndex;
                 descriptor.parentNodeIndex = parentNodeIndex;
-                descriptor.vertexCount = ai_mesh->mNumVertices;
-                descriptor.indexCount = ai_mesh->mNumFaces * 3;
-
+                descriptor.vertexCount = 0;
+                descriptor.indexCount = 0;
                 outModel.meshNodeDescriptors.push_back(descriptor);
+            }
+            else
+            {
+                for (uint32_t i = 0; i < currentNode->mNumMeshes; ++i)
+                {
+                    uint32_t meshIndex = currentNode->mMeshes[i];
+                    aiMesh* ai_mesh = scene->mMeshes[meshIndex];
+                    MeshInstanceDescriptor descriptor{};
+
+                    descriptor.name = currentNode->mName.C_Str();
+
+                    if (currentNode->mNumMeshes > 1) {
+                        descriptor.name += "_" + std::to_string(i);
+                    }
+
+                    descriptor.meshIndex = static_cast<uint16_t>(meshIndex);
+                    descriptor.nodeIndex = nodeIndex;
+                    descriptor.parentNodeIndex = parentNodeIndex;
+                    descriptor.vertexCount = ai_mesh->mNumVertices;
+                    descriptor.indexCount = ai_mesh->mNumFaces * 3;
+                    outModel.meshNodeDescriptors.push_back(descriptor);
+                }
+
             }
 
             for (uint32_t i = 0; i < currentNode->mNumChildren; ++i)

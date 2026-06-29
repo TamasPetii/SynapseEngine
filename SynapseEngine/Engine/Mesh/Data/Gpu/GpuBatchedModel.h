@@ -5,6 +5,7 @@
 #include "GpuMeshletDrawData.h"
 #include "GpuNodeTransform.h"
 #include "../Common/MaterialInfo.h"
+#include "../Common/MeshInstanceDescriptor.h"
 
 namespace Syn
 {
@@ -20,6 +21,8 @@ namespace Syn
         uint32_t globalIndexCount = 0;
         uint32_t globalAverageLodIndexCount = 0;
         uint32_t globalMeshCount = 0;
+
+        std::vector<MeshInstanceDescriptor> meshNodeDescriptors;
     };
 }
 
