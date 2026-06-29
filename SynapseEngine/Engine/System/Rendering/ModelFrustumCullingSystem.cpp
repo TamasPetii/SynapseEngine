@@ -11,6 +11,7 @@
 #include "Engine/System/Rendering/AnimationSystem.h"
 #include "Engine/System/Rendering/MaterialSystem.h"
 #include "Engine/System/Core/StaticSpatialSahSystem.h"
+#include "Engine/System/Core/TagSystem.h"
 
 #include "Engine/Material/MaterialManager.h"
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
@@ -31,7 +32,8 @@ namespace Syn
             TypeInfo<CameraSystem>::ID,
             TypeInfo<AnimationSystem>::ID,
             TypeInfo<MaterialSystem>::ID,
-            TypeInfo<StaticSpatialSahSystem>::ID
+            TypeInfo<StaticSpatialSahSystem>::ID,
+            TypeInfo<TagSystem>::ID
         };
     }
 
@@ -69,6 +71,7 @@ namespace Syn
         auto transformPool = registry->GetPool<TransformComponent>();
         auto cameraPool = registry->GetPool<CameraComponent>();
         auto animPool = registry->GetPool<AnimationComponent>();
+        auto tagPool = registry->GetPool<TagComponent>();
 
         EntityID cameraEntity = scene->GetSceneCameraEntity();
         if (!modelPool || !transformPool || !cameraPool || cameraEntity == NULL_ENTITY) return;
@@ -79,8 +82,14 @@ namespace Syn
 
         glm::vec2 screenRes = glm::vec2(cameraComp.width, cameraComp.height);
 
-        auto cullFunc = [settings, drawData, modelPool, transformPool, modelSnapshot, cameraComp, animPool, animSnapshot, matTypeSnapshot, overridePool, screenRes]
+        auto cullFunc = [settings, drawData, modelPool, transformPool, modelSnapshot, cameraComp, animPool, tagPool, animSnapshot, matTypeSnapshot, overridePool, screenRes]
         (EntityID entity, IntersectionType chunkVisibility) {
+            if (tagPool && tagPool->Has(entity)) {
+                if (!tagPool->Get(entity).globalEnabled) {
+                    return;
+                }
+            }
+            
             const FrustumCollider& frustum = cameraComp.frustum;
             const auto& transformComp = transformPool->Get(entity);
 

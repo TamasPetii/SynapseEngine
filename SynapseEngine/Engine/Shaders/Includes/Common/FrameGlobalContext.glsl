@@ -16,6 +16,9 @@ struct FrameGlobalContext {
     uint64_t cameraBufferAddr;
     uint64_t cameraSparseMapBufferAddr;
 
+    uint64_t tagSparseMapBufferAddr;
+    uint64_t tagDataBufferAddr;
+
     uint64_t transformBufferAddr;
     uint64_t transformSparseMapBufferAddr;
     uint64_t transformModelLinkBufferAddr;

@@ -49,10 +49,13 @@ namespace Syn {
         ctx.cameraVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::CameraVisibleData, fIdx);
         ctx.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
         ctx.cameraSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
-
+        
         ctx.transformBufferAddr = compManager->GetBufferAddr(BufferNames::TransformData, fIdx);
         ctx.transformSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::TransformSparseMap, fIdx);
 		ctx.transformModelLinkBufferAddr = compManager->GetBufferAddr(BufferNames::TransformModelLinkData, fIdx);
+
+        ctx.tagSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::TagSparseMap, fIdx);
+        ctx.tagDataBufferAddr = compManager->GetBufferAddr(BufferNames::TagData, fIdx);
 
 		ctx.staticChunkDataBufferAddr = drawData->Chunks.chunkDataBuffer.GetAddress(fIdx);
         ctx.staticChunkVisibleIndexBufferAddr = drawData->Chunks.chunkVisibilityBuffer.GetAddress(fIdx);

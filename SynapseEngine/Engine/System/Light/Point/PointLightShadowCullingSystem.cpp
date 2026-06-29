@@ -26,6 +26,9 @@
 #include <atomic>
 #include <algorithm>
 
+#include "Engine/Component/Core/TagComponent.h"
+#include "Engine/System/Core/TagSystem.h"
+
 namespace Syn
 {
     constexpr bool ENABLE_DEBUG_LOGGING = false;
@@ -57,6 +60,7 @@ namespace Syn
             TypeInfo<MaterialSystem>::ID,
             TypeInfo<CameraSystem>::ID,
             TypeInfo<StaticSpatialSahSystem>::ID,
+            TypeInfo<TagSystem>::ID
         };
     }
 
@@ -98,6 +102,7 @@ namespace Syn
         auto overridePool = registry->GetPool<MaterialOverrideComponent>();
         auto shadowPool = registry->GetPool<PointLightShadowComponent>();
         auto lightPool = registry->GetPool<PointLightComponent>();
+        auto tagPool = registry->GetPool<TagComponent>();
 
         EntityID cameraEntity = scene->GetSceneCameraEntity();
         if (!modelPool || !transformPool || !cameraPool || cameraEntity == NULL_ENTITY || !shadowPool || !lightPool) return;
@@ -117,8 +122,15 @@ namespace Syn
         auto matTypeSnapshot = materialManager->GetRenderTypeSnapshot();
 
         // Extract Entity Data (Runs once per entity)
-        auto withEntityData = [modelPool, transformPool, animPool, overridePool, modelSnapshot, animSnapshot, drawData]
+        auto withEntityData = [modelPool, transformPool, animPool, overridePool, modelSnapshot, tagPool, animSnapshot, drawData]
         (EntityID entity, auto&& nextFunc) {
+            if (tagPool && tagPool->Has(entity)) {
+                const auto& tag = tagPool->Get(entity);
+                if (!tag.globalEnabled || !tag.castShadow) {
+                    return;
+                }
+            }
+
             if (!modelPool->Has(entity)) return;
 
             const auto& modelComp = modelPool->Get(entity);

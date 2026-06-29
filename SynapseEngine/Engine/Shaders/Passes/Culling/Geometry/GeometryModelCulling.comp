@@ -8,6 +8,7 @@
 #include "../../../Includes/Common/FrameGlobalContext.glsl"
 #include "../../../Includes/Common/Camera.glsl"
 #include "../../../Includes/Common/Transform.glsl"
+#include "../../../Includes/Common/Tag.glsl"
 #include "../../../Includes/Common/Model.glsl"
 #include "../../../Includes/Common/Mesh.glsl"
 #include "../../../Includes/Common/Animation.glsl"
@@ -41,8 +42,14 @@ void main()
 
     TransformModelLink link = GET_TRANSFORM_MODEL_LINK(ctx.transformModelLinkBufferAddr, transformDenseIndex);
     if (link.modelDenseIndex == INVALID_INDEX) return;
-
     uint entityId = link.entityIndex;
+
+    uint tagSparseIndex = GET_SPARSE_INDEX(ctx.tagSparseMapBufferAddr, entityId);
+    if (tagSparseIndex == INVALID_INDEX) return;
+    uint entityFlags = GET_TAG_DATA(ctx.tagDataBufferAddr, tagSparseIndex);
+
+    bool isActive = (entityFlags & (1u << 0)) != 0;
+    if (!isActive) return;
 
     // 2. Fetch Model component and Entity ID
     ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, link.modelDenseIndex);

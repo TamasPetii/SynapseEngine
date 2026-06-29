@@ -10,12 +10,16 @@
 #include "Engine/Mesh/MeshSourceNames.h"
 #include <atomic>
 
+#include "Engine/Component/Core/TagComponent.h"
+#include "Engine/System/Core/TagSystem.h"
+
 namespace Syn
 {
     std::vector<TypeID> PointLightCullingSystem::GetReadDependencies() const {
         return { 
             TypeInfo<PointLightSystem>::ID,
-            TypeInfo<CameraSystem>::ID
+            TypeInfo<CameraSystem>::ID,
+            TypeInfo<TagSystem>::ID,
         };
     }
 
@@ -33,6 +37,7 @@ namespace Syn
         auto pool = registry->GetPool<PointLightComponent>();
         auto shadowPool = registry->GetPool<PointLightShadowComponent>();
         auto cameraPool = registry->GetPool<CameraComponent>();
+        auto tagPool = registry->GetPool<TagComponent>();
         EntityID cameraEntity = scene->GetSceneCameraEntity();
 
         if (!pool || !cameraPool || cameraEntity == NULL_ENTITY) return;
@@ -58,7 +63,13 @@ namespace Syn
 
         glm::vec2 screenRes = glm::vec2(cameraComp.width, cameraComp.height);
 
-        auto cullFunc = [this, settings, pool, shadowPool, cameraComp, drawData, screenRes](EntityID entity) {
+        auto cullFunc = [this, settings, pool, shadowPool, cameraComp, drawData, screenRes, tagPool](EntityID entity) {
+            if (tagPool && tagPool->Has(entity)) {
+                if (!tagPool->Get(entity).globalEnabled) {
+                    return;
+                }
+            }
+
             const auto& lightComp = pool->Get(entity);
 
             bool visibility = true;

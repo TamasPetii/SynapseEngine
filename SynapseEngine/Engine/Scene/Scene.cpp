@@ -19,8 +19,9 @@
 #include "Engine/System/Core/TransformSystem.h"
 #include "Engine/System/Core/HierarchySystem.h"
 #include "Engine/System/Core/SelectionOutlineSystem.h"
-#include "Engine/System/Rendering/RenderSystem.h"
+#include "Engine/System/Core/TagSystem.h"
 #include "Engine/System/Core/CameraSystem.h"
+#include "Engine/System/Rendering/RenderSystem.h"
 #include "Engine/System/Rendering/ModelSystem.h"
 #include "Engine/System/Rendering/MaterialSystem.h"
 #include "Engine/System/Rendering/ModelFrustumCullingSystem.h"
@@ -175,7 +176,7 @@ namespace Syn
 
 		RegisterSystem<HierarchySystem>();
         RegisterSystem<SelectionOutlineSystem>();
-
+        RegisterSystem<TagSystem>();
     }
 
     void Scene::InitializeComponentBuffers()
@@ -229,6 +230,9 @@ namespace Syn
 
         RegisterComponentSparseMapBuffer<HierarchyComponent>(BufferNames::HierarchySparseMap);
         RegisterComponentBuffer<HierarchyComponent, uint32_t>(BufferNames::SelectionOutlineData);
+
+        RegisterComponentSparseMapBuffer<TagComponent>(BufferNames::TagSparseMap);
+        RegisterComponentBuffer<TagComponent, uint32_t>(BufferNames::TagData);
 
         RegisterComponentSparseMapBuffer<TransformComponent>(BufferNames::TransformSparseMap);
         RegisterComponentBuffer<TransformComponent, TransformComponentGPU>(BufferNames::TransformData);   

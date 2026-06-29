@@ -7,18 +7,18 @@
     "spawn_bistro": false,
     "spawn_floor": false,
     "spawn_pbr_sponza": false,
-    "spawn_monkey": false
+    "spawn_monkey": true
   },
   "materials": {
     "use_unique_materials": false,
     "shared_material_count": 100
   },
   "entities": {
-    "animated_characters": 50,
-    "static_geometry": 500,
-    "physics_boxes": 50,
-    "physics_spheres": 50,
-    "physics_capsules": 50
+    "animated_characters": 500,
+    "static_geometry": 50000,
+    "physics_boxes": 500,
+    "physics_spheres": 500,
+    "physics_capsules": 500
   },
   "lights": {
     "directional_count": 1,

@@ -16,6 +16,7 @@
 #include "../../../Includes/Common/DirectionLight.glsl"
 #include "../../../Includes/Utils/CullingMath.glsl"
 #include "../../../Includes/Utils/Occlusion.glsl"
+#include "../../../Includes/Common/Tag.glsl"
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
@@ -48,8 +49,17 @@ void main()
     // 2. Resolve Entity and Model Data
     TransformModelLink link = GET_TRANSFORM_MODEL_LINK(ctx.transformModelLinkBufferAddr, transformDenseIndex);
     if (link.modelDenseIndex == INVALID_INDEX) return;
-
     uint entityId = link.entityIndex;
+
+    uint tagSparseIndex = GET_SPARSE_INDEX(ctx.tagSparseMapBufferAddr, entityId);
+    if (tagSparseIndex == INVALID_INDEX) return;
+
+    uint entityFlags = GET_TAG_DATA(ctx.tagDataBufferAddr, tagSparseIndex);
+    bool isActive = (entityFlags & (1u << 0)) != 0;
+    bool castShadow = (entityFlags & (1u << 1)) != 0;
+
+    if (!isActive || !castShadow) return;
+
     ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, link.modelDenseIndex);
     if (modelComp.modelIndex == INVALID_INDEX) return;
 
