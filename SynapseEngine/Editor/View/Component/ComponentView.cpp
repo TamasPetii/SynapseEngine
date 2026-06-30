@@ -20,21 +20,24 @@ namespace Syn {
                 return;
             }
 
-            //Tag
+            //Core
             _tagView.SetActiveEntity(state.activeEntityId);
             _tagView.Draw(vm.GetTagViewModel());
-
-            //Transform
             _transformView.Draw(vm.GetTransformViewModel());
+            _cameraView.Draw(vm.GetCameraViewModel());
 
-            //DirectionLight
+            //Lights
             _directionLightView.Draw(vm.GetDirectionLightViewModel());
-
-            //PointLight
             _pointLightView.Draw(vm.GetPointLightViewModel());
-
-            //SpotLight
             _spotLightView.Draw(vm.GetSpotLightViewModel());
+
+            //Physics
+            _boxColliderView.Draw(vm.GetBoxColliderViewModel());
+            _sphereColliderView.Draw(vm.GetSphereColliderViewModel());
+            _capsuleColliderView.Draw(vm.GetCapsuleColliderViewModel());
+            _convexColliderView.Draw(vm.GetConvexColliderViewModel());
+            _meshColliderView.Draw(vm.GetMeshColliderViewModel());
+            _rigidBodyView.Draw(vm.GetRigidBodyViewModel());
 
             ImGui::Spacing();
             ImGui::Separator();

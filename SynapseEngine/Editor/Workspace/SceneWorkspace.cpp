@@ -33,9 +33,20 @@ namespace Syn {
         AddWindow<ComponentWin>(
             ComponentView{},
             ComponentViewModel{
-                _context->GetSelectionApi(), _context->GetTagApi(), _context->GetTransformApi(),
-                _context->GetHierarchyApi(), _context->GetDirectionLightApi(),
-                _context->GetPointLightApi(), _context->GetSpotLightApi()
+                _context->GetSelectionApi(), 
+                _context->GetTagApi(),
+                _context->GetTransformApi(),
+                _context->GetHierarchyApi(), 
+                _context->GetDirectionLightApi(),
+                _context->GetPointLightApi(), 
+                _context->GetSpotLightApi(),
+                _context->GetCameraApi(),
+                _context->GetBoxColliderApi(),
+                _context->GetSphereColliderApi(),
+                _context->GetCapsuleColliderApi(),
+                _context->GetConvexColliderApi(),
+                _context->GetMeshColliderApi(),
+                _context->GetRigidBodyApi()
             }
         );
 

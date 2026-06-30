@@ -18,6 +18,13 @@
 #include "EditorCore/Api/ISpotLightApi.h"
 #include "EditorCore/Api/ITextureApi.h"
 #include "EditorCore/Api/IModelApi.h"
+#include "EditorCore/Api/ICameraApi.h"
+#include "EditorCore/Api/IBoxColliderApi.h"
+#include "EditorCore/Api/ISphereColliderApi.h"
+#include "EditorCore/Api/ICapsuleColliderApi.h"
+#include "EditorCore/Api/IConvexColliderApi.h"
+#include "EditorCore/Api/IMeshColliderApi.h"
+#include "EditorCore/Api/IRigidBodyApi.h"
 
 namespace Syn {
     class EditorContext {
@@ -40,6 +47,13 @@ namespace Syn {
         ISpotLightApi* GetSpotLightApi() const { return _spotLightApi.get(); }
         ITextureApi* GetTextureApi() const { return _textureApi.get(); }
         IModelApi* GetModelApi() const { return _modelApi.get(); }
+        ICameraApi* GetCameraApi() const { return _cameraApi.get(); }
+        IBoxColliderApi* GetBoxColliderApi() const { return _boxColliderApi.get(); }
+        ISphereColliderApi* GetSphereColliderApi() const { return _sphereColliderApi.get(); }
+        ICapsuleColliderApi* GetCapsuleColliderApi() const { return _capsuleColliderApi.get(); }
+        IConvexColliderApi* GetConvexColliderApi() const { return _convexColliderApi.get(); }
+        IMeshColliderApi* GetMeshColliderApi() const { return _meshColliderApi.get(); }
+        IRigidBodyApi* GetRigidBodyApi() const { return _rigidBodyApi.get(); }
     private:
         std::unique_ptr<ISelectionApi> _selectionApi;
         std::unique_ptr<ITagApi> _tagApi;
@@ -56,5 +70,12 @@ namespace Syn {
         std::unique_ptr<ISpotLightApi> _spotLightApi;
         std::unique_ptr<ITextureApi> _textureApi;
         std::unique_ptr<IModelApi> _modelApi;
+        std::unique_ptr<ICameraApi> _cameraApi;
+        std::unique_ptr<IBoxColliderApi> _boxColliderApi;
+        std::unique_ptr<ISphereColliderApi> _sphereColliderApi;
+        std::unique_ptr<ICapsuleColliderApi> _capsuleColliderApi;
+        std::unique_ptr<IConvexColliderApi> _convexColliderApi;
+        std::unique_ptr<IMeshColliderApi> _meshColliderApi;
+        std::unique_ptr<IRigidBodyApi> _rigidBodyApi;
     };
 }

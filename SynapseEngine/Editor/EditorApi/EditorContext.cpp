@@ -14,6 +14,13 @@
 #include "Impl/SpotLightApiImpl.h"
 #include "Impl/TextureApiImpl.h"
 #include "Impl/ModelApiImpl.h"
+#include "Impl/CameraApiImpl.h"
+#include "Impl/BoxColliderApiImpl.h"
+#include "Impl/SphereColliderApiImpl.h"
+#include "Impl/CapsuleColliderApiImpl.h"
+#include "Impl/ConvexColliderApiImpl.h"
+#include "Impl/MeshColliderApiImpl.h"
+#include "Impl/RigidBodyApiImpl.h"
 
 namespace Syn {
     EditorContext::EditorContext(Engine* engine, GuiTextureManager* textureManager) {
@@ -34,6 +41,13 @@ namespace Syn {
         _spotLightApi = std::make_unique<SpotLightApiImpl>(sm);
         _textureApi = std::make_unique<TextureApiImpl>(engine->GetImageManager(), textureManager);
         _modelApi = std::make_unique<ModelApiImpl>(engine->GetModelManager());
+        _cameraApi = std::make_unique<CameraApiImpl>(sm);
+        _boxColliderApi = std::make_unique<BoxColliderApiImpl>(sm);
+        _sphereColliderApi = std::make_unique<SphereColliderApiImpl>(sm);
+        _capsuleColliderApi = std::make_unique<CapsuleColliderApiImpl>(sm);
+        _convexColliderApi = std::make_unique<ConvexColliderApiImpl>(sm);
+        _meshColliderApi = std::make_unique<MeshColliderApiImpl>(sm);
+        _rigidBodyApi = std::make_unique<RigidBodyApiImpl>(sm);
     }
 
     EditorContext::~EditorContext() = default;

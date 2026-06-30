@@ -9,14 +9,29 @@ namespace Syn
         IHierarchyApi* hierarchyApi, 
         IDirectionLightApi* directionLightApi,
         IPointLightApi* pointLightApi,
-        ISpotLightApi* spotLightApi)
+        ISpotLightApi* spotLightApi,
+        ICameraApi* cameraApi,
+        IBoxColliderApi* boxColliderApi,
+        ISphereColliderApi* sphereColliderApi,
+        ICapsuleColliderApi* capsuleColliderApi,
+        IConvexColliderApi* convexColliderApi,
+        IMeshColliderApi* meshColliderApi,
+        IRigidBodyApi* rigidBodyApi
+    )
         : 
         _selectionApi(selectionApi),
         _tagViewModel(selectionApi, tagApi),
         _transformViewModel(selectionApi, transformApi, hierarchyApi),
         _directionLightViewModel(selectionApi, directionLightApi),
         _pointLightViewModel(selectionApi, pointLightApi),
-        _spotLightViewModel(selectionApi, spotLightApi)
+        _spotLightViewModel(selectionApi, spotLightApi),
+        _cameraViewModel(selectionApi, cameraApi),
+        _boxColliderViewModel(selectionApi, boxColliderApi),
+        _sphereColliderViewModel(selectionApi, sphereColliderApi),
+        _capsuleColliderViewModel(selectionApi, capsuleColliderApi),
+        _convexColliderViewModel(selectionApi, convexColliderApi),
+        _meshColliderViewModel(selectionApi, meshColliderApi),
+        _rigidBodyViewModel(selectionApi, rigidBodyApi)
     {}
 
     const ComponentState& ComponentViewModel::GetState() const {
@@ -37,6 +52,13 @@ namespace Syn
             _directionLightViewModel.SyncWithEngine();
             _pointLightViewModel.SyncWithEngine();
             _spotLightViewModel.SyncWithEngine();
+            _cameraViewModel.SyncWithEngine();
+            _boxColliderViewModel.SyncWithEngine();
+            _sphereColliderViewModel.SyncWithEngine();
+            _capsuleColliderViewModel.SyncWithEngine();
+            _convexColliderViewModel.SyncWithEngine();
+            _meshColliderViewModel.SyncWithEngine();
+            _rigidBodyViewModel.SyncWithEngine();
         }
     }
 
@@ -58,6 +80,27 @@ namespace Syn
             }
             else if constexpr (std::is_same_v<T, SpotLightIntent>) {
                 _spotLightViewModel.Dispatch(arg);
+            }
+            else if constexpr (std::is_same_v<T, CameraIntent>) {
+                _cameraViewModel.Dispatch(arg);
+            }
+            else if constexpr (std::is_same_v<T, BoxColliderIntent>) {
+                _boxColliderViewModel.Dispatch(arg);
+            }
+            else if constexpr (std::is_same_v<T, SphereColliderIntent>) {
+                _sphereColliderViewModel.Dispatch(arg);
+            }
+            else if constexpr (std::is_same_v<T, CapsuleColliderIntent>) {
+                _capsuleColliderViewModel.Dispatch(arg);
+            }
+            else if constexpr (std::is_same_v<T, ConvexColliderIntent>) {
+                _convexColliderViewModel.Dispatch(arg);
+            }
+            else if constexpr (std::is_same_v<T, MeshColliderIntent>) {
+                _meshColliderViewModel.Dispatch(arg);
+            }
+            else if constexpr (std::is_same_v<T, RigidBodyIntent>) {
+                _rigidBodyViewModel.Dispatch(arg);
             }
             }, intent);
     }
