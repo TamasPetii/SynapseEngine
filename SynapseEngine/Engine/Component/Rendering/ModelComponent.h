@@ -8,6 +8,7 @@ namespace Syn
 	struct SYN_API ModelComponent : public Component
 	{
 		ModelComponent();
+		bool isReady;
 
 		bool castShadow;
 		bool receiveShadow;

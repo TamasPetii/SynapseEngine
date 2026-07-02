@@ -226,7 +226,7 @@ namespace Syn
             registry.AddComponent<ModelComponent>(bistroEntity);
 
             registry.GetComponent<TransformComponent>(bistroEntity).translation = glm::vec3(0.0f, 0.0f, 0.0f);
-            registry.GetComponent<TransformComponent>(bistroEntity).scale = glm::vec3(0.2f, 0.2f, 0.2f);
+            registry.GetComponent<TransformComponent>(bistroEntity).scale = glm::vec3(2.3f, 2.3f, 2.3f);
             registry.GetComponent<ModelComponent>(bistroEntity).modelIndex = bistroId;
 
             registry.GetPool<TransformComponent>()->SetCategory(bistroEntity, StorageCategory::Static);

@@ -11,6 +11,8 @@
 #include "Engine/Vk/Image/Sampler.h"
 #include "Engine/Vk/Descriptor/DescriptorPool.h"
 
+#include "Engine/Manager/AddressResourceManager.h"
+
 namespace Syn {
 
     using ImageSourceFactory = std::function<std::unique_ptr<IImageSource>()>;
@@ -23,11 +25,15 @@ namespace Syn {
         static constexpr uint32_t BINDING_TEXTURES = 1;
 
         ImageManager(
+            uint32_t framesInFlight,
             std::shared_ptr<ImageBuilder> builder,
             std::unique_ptr<IGpuImageUploader> uploader,
             std::unique_ptr<ICpuImageExtractor> cpuExtractor);
 
         ~ImageManager();
+
+        void Update() override;
+        void RecordSync(VkCommandBuffer cmd);
 
         uint32_t LoadImageAsync(const std::string& filePath);
         uint32_t LoadImageFromSourceAsync(const std::string& name, ImageSourceFactory factory);
@@ -51,6 +57,11 @@ namespace Syn {
         std::shared_ptr<ImageBuilder> _builder;
         std::unique_ptr<IGpuImageUploader> _uploader;
         std::unique_ptr<ICpuImageExtractor> _cpuExtractor;
+       
+        uint32_t _framesInFlight;
+        std::mutex _staleMutex;
+        std::vector<StaleBuffer> _staleGpuBuffers;
+        std::vector<StaleBuffer> _staleMappedBuffers;
 
         VkDescriptorSetLayout _bindlessLayout = VK_NULL_HANDLE;
         std::unique_ptr<Vk::DescriptorBuffer> _bindlessBuffer;

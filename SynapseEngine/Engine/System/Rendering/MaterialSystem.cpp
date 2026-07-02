@@ -4,9 +4,12 @@
 #include "Engine/FrameContext.h"
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
+#include "Engine/Component/Core/TagComponent.h"
 
 namespace Syn
 {
+    constexpr bool ENABLE_DEBUG_LOGGING = false;
+
     std::vector<TypeID> MaterialSystem::GetWriteDependencies() const {
         return { TypeInfo<MaterialSystem>::ID };
     }
@@ -18,32 +21,40 @@ namespace Syn
         if (!pool) return;
 
         auto overridePool = registry->GetPool<MaterialOverrideComponent>();
+        auto tagPool = registry->GetPool<TagComponent>();
 
         auto drawData = scene->GetSceneDrawData();
-        auto modelManager = ServiceLocator::GetModelManager();
-        uint32_t currentModelManagerVersion = modelManager->GetVersion();
+        uint32_t currentModelManagerVersion = scene->GetSystemContext().modelManagerVersion;
 
         //Todo: Override component changed -> Update??
 
-        this->EmplaceTask(subflow, SystemPhaseNames::Update, [this, scene, pool, modelManager, currentModelManagerVersion, drawData, overridePool]() {
+        this->EmplaceTask(subflow, SystemPhaseNames::Update, [this, scene, pool, tagPool, currentModelManagerVersion, drawData, overridePool]() {
 
             bool needsRebuild = false;
+            bool needsUpload = false;
+
             if (_lastModelManagerVersion != currentModelManagerVersion) {
                 needsRebuild = true;
                 _lastModelManagerVersion = currentModelManagerVersion;
+
+                if constexpr (ENABLE_DEBUG_LOGGING) {
+                    Info("[MaterialSystem UPDATE] Frame {}: ModelManager version changed to {}", scene->GetSystemContext().frameIndex, currentModelManagerVersion);
+                }
+
             }
 
             if (!pool->IsStateBitSet<CHANGED_BIT>() && !pool->IsStateBitSet<INDEX_CHANGED_BIT>() && !needsRebuild) {
                 return;
             }
 
-            auto modelSnapshots = modelManager->GetResourceSnapshot();
+            auto& modelSnapshots = scene->GetSystemContext().modelSnapshots;
 
             uint32_t totalExactMaterials = 0;
             auto countFunc = [&](EntityID entity) {
                 auto& comp = pool->Get(entity);
-                if (comp.modelIndex < modelSnapshots.size() && modelSnapshots[comp.modelIndex].resource) {
-                    totalExactMaterials += static_cast<uint32_t>(modelSnapshots[comp.modelIndex].resource->cpuData.meshMaterialIndices.size());
+                const auto& snapshot = modelSnapshots[comp.modelIndex];
+                if (snapshot.state == ResourceState::Ready && snapshot.resource) {
+                    totalExactMaterials += static_cast<uint32_t>(snapshot.resource->cpuData.meshMaterialIndices.size());
                 }
                 };
 
@@ -51,8 +62,10 @@ namespace Syn
             for (auto e : pool->GetStorage().GetDynamicEntities()) countFunc(e);
             for (auto e : pool->GetStorage().GetStreamEntities()) countFunc(e);
 
-            //Info("MaterialSystem: Rebuilding material indices. Total materials expected: {}", totalExactMaterials);
-
+            if constexpr (ENABLE_DEBUG_LOGGING) {
+                Info("[MaterialSystem UPDATE] Frame {}: Rebuilding material indices. Total slots expected: {}", scene->GetSystemContext().frameIndex, totalExactMaterials);
+            }
+            
             _flatMaterialIndices.resize(totalExactMaterials);
             uint32_t currentOffset = 0;
 
@@ -60,8 +73,9 @@ namespace Syn
                 auto& comp = pool->Get(entity);
                 if (comp.modelIndex >= modelSnapshots.size()) return;
 
-                auto model = modelSnapshots[comp.modelIndex].resource;
-                if (!model) return;
+                const auto& snapshot = modelSnapshots[comp.modelIndex];
+                if (snapshot.state != ResourceState::Ready || !snapshot.resource) return;
+                auto model = snapshot.resource;
 
                 const auto& defaultMaterials = model->cpuData.meshMaterialIndices;
                 uint32_t materialCount = static_cast<uint32_t>(defaultMaterials.size());
@@ -77,22 +91,41 @@ namespace Syn
                     overrides = overrideComp.materials;
                 }
 
-                if (comp.materialOffset != currentOffset) {
+                bool wasReady = comp.isReady;
+                comp.isReady = true;
+
+                if (comp.materialOffset != currentOffset || !wasReady) {
+                    if constexpr (ENABLE_DEBUG_LOGGING) {
+                        std::string entityName = "Unknown";
+                        if (tagPool && tagPool->Has(entity)) entityName = tagPool->Get(entity).name;
+                        Info("[MaterialSystem UPDATE] Frame {}: Entity {} data changed! OldOffset: {}, NewOffset: {}, WasReady: {}", scene->GetSystemContext().frameIndex, entityName, comp.materialOffset, currentOffset, wasReady);
+                    }
+
                     comp.materialOffset = currentOffset;
                     comp.version++;
                     pool->SetBit<CHANGED_BIT>(entity);
                     pool->MarkStaticDirty(entity);
+
+                    needsUpload = true;
                 }
 
-                //Info("MaterialSystem: Entity {} assigned offset: {}, material count: {}", (uint32_t)entity, currentOffset, materialCount);
+                if constexpr (ENABLE_DEBUG_LOGGING) {
+                    std::string entityName = "Unknown";
+                    if (tagPool && tagPool->Has(entity)) entityName = tagPool->Get(entity).name;
+                    Info("MaterialSystem: Entity {} assigned offset: {}, material count: {}", entityName, currentOffset, materialCount);
+                }
 
                 for (uint32_t i = 0; i < materialCount; ++i) {
-                    if (!overrides.empty() && overrides[i] != UINT32_MAX) {
-                        _flatMaterialIndices[currentOffset + i] = overrides[i];
+                    uint32_t matIdx = defaultMaterials[i];
+                    if (!overrides.empty() && i < overrides.size() && overrides[i] != UINT32_MAX) {
+                        matIdx = overrides[i];
                     }
-                    else {
-                        _flatMaterialIndices[currentOffset + i] = defaultMaterials[i];
+                    
+                    if constexpr (ENABLE_DEBUG_LOGGING) {
+                        Info("  -> Slot {}: MatID {}", currentOffset + i, matIdx);
                     }
+
+                    _flatMaterialIndices[currentOffset + i] = matIdx;
                 }
 
                 currentOffset += materialCount;
@@ -102,9 +135,16 @@ namespace Syn
             for (auto e : pool->GetStorage().GetDynamicEntities()) processEntity(e);
             for (auto e : pool->GetStorage().GetStreamEntities()) processEntity(e);
 
-            uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
-            this->SetFramesToUpload(framesInFlight);
-            scene->GetSceneDrawData()->RequestGlobalSync(framesInFlight);
+            
+            if (needsRebuild || needsUpload) {
+                uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
+                this->SetFramesToUpload(framesInFlight);
+                scene->GetSceneDrawData()->RequestGlobalSync(framesInFlight);
+
+                if constexpr (ENABLE_DEBUG_LOGGING) {
+                    Info("[MaterialSystem UPDATE] Frame {}: Requested global sync and GPU upload for {} frames.", scene->GetSystemContext().frameIndex, framesInFlight);
+                }
+            }
             });
     }
 
@@ -117,16 +157,30 @@ namespace Syn
                 this->DecrementFramesToUpload();
             }
 
+            if constexpr (ENABLE_DEBUG_LOGGING) {
+                Info("[MaterialSystem UPLOAD] Frame {}: Upload check. Force: {}, FlatIndicesSize: {}", frameIndex, force, _flatMaterialIndices.size());
+            }
+
             if (!force || _flatMaterialIndices.empty()) 
                 return;
 
             auto drawData = scene->GetSceneDrawData();
+            size_t reqFromModels = drawData->Models.requiredMaterialBufferSize;
+            size_t actualElements = _flatMaterialIndices.size();
+            size_t requiredElements = std::max(actualElements, reqFromModels);
 
-            size_t requiredElements = std::max(_flatMaterialIndices.size(), (size_t)(drawData->Models.requiredMaterialBufferSize / sizeof(uint32_t)));
+            if constexpr (ENABLE_DEBUG_LOGGING) {
+                Info("[MaterialSystem UPLOAD] Frame {}: Resizing GPU buffer. Actual CPU Elements: {}, Req from Models: {}, Final GPU Elements: {}", frameIndex, actualElements, reqFromModels, requiredElements);
+            }
+
             drawData->Models.materialIndexBuffer.UpdateCapacity(frameIndex, requiredElements);
 
             size_t actualDataSize = _flatMaterialIndices.size() * sizeof(uint32_t);
             drawData->Models.materialIndexBuffer.Write(frameIndex, _flatMaterialIndices.data(), actualDataSize, 0);
+
+            if constexpr (ENABLE_DEBUG_LOGGING) {
+                Info("[MaterialSystem UPLOAD] Frame {}: GPU buffer written successfully ({} bytes).", frameIndex, actualDataSize);
+            }
             });
     }
 }

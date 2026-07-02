@@ -490,6 +490,38 @@ namespace Syn
         _currentFrameIndex = frameIndex;
         _currentDeltaTime = deltaTime;
 
+        auto modelSnapshot = ServiceLocator::GetModelManager()->GetSnapshotAndVersion();
+        auto animSnapshot = ServiceLocator::GetAnimationManager()->GetSnapshotAndVersion();
+        auto materialSnapshot = ServiceLocator::GetMaterialManager()->GetSnapshotAndVersion();
+
+        _systemContext.deltaTime = deltaTime;
+        _systemContext.frameIndex = frameIndex;
+
+        _systemContext.modelManagerVersion = modelSnapshot.version;
+        _systemContext.materialManagerVersion = materialSnapshot.version;
+        _systemContext.animationManagerVersion = animSnapshot.version;
+
+        _systemContext.modelSnapshots = modelSnapshot.snapshots;
+        _systemContext.materialSnapshots = materialSnapshot.snapshots;
+        _systemContext.animationSnapshots = animSnapshot.snapshots;
+
+        _systemContext.materialRenderTypes.clear();
+        _systemContext.materialRenderTypes.resize(materialSnapshot.snapshots.size());
+
+        std::transform(materialSnapshot.snapshots.begin(), materialSnapshot.snapshots.end(), _systemContext.materialRenderTypes.begin(),
+            [](const auto& snapshot) -> MaterialRenderType {
+                if (!snapshot.resource) 
+                    return MaterialRenderType::Opaque1Sided;
+
+                bool isTrans = snapshot.resource->isTransparent;
+                bool isDouble = snapshot.resource->doubleSided;
+
+                if (isTrans && isDouble)  return MaterialRenderType::Transparent2Sided;
+                if (isTrans)             return MaterialRenderType::Transparent1Sided;
+                if (isDouble)            return MaterialRenderType::Opaque2Sided;
+                return MaterialRenderType::Opaque1Sided;
+            });
+
         auto screenWidth = ServiceLocator::GetFrameContext()->screenWidth;
         auto screenHeight = ServiceLocator::GetFrameContext()->screenHeight;
 

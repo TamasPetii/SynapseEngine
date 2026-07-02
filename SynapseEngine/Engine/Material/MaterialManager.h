@@ -16,7 +16,6 @@ namespace Syn {
 
         uint32_t LoadMaterial(const std::string& name, const MaterialInfo& info);
         uint32_t LoadMaterialDirect(const std::string& name, const Material& material);
-        std::span<const MaterialRenderType> GetRenderTypeSnapshot() const { return _renderTypeCache; }
     protected:
         void StartGpuUpload(EntryType& entry) override;
         void FinalizeResource(EntryType& entry) override;
@@ -24,6 +23,5 @@ namespace Syn {
         void LoadDefaultMaterialSync();
     private:
         TextureLoadCallback _textureLoadCallback;
-        std::vector<MaterialRenderType> _renderTypeCache;
     };
 }

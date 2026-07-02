@@ -13,10 +13,13 @@
 namespace Syn {
 
     ImageManager::ImageManager(
+        uint32_t framesInFlight,
         std::shared_ptr<ImageBuilder> builder,
         std::unique_ptr<IGpuImageUploader> uploader,
         std::unique_ptr<ICpuImageExtractor> cpuExtractor)
-		: _builder(builder), 
+		: 
+		_framesInFlight(framesInFlight),
+        _builder(builder), 
         _uploader(std::move(uploader)), 
         _cpuExtractor(std::move(cpuExtractor))
     {
@@ -43,6 +46,41 @@ namespace Syn {
 
         CreateSamplers();
         LoadDefaultImageSync();
+    }
+
+    void ImageManager::Update() {
+        BaseResourceManager<Texture>::Update();
+
+        std::lock_guard<std::mutex> lock(_staleMutex);
+
+        for (auto it = _staleGpuBuffers.begin(); it != _staleGpuBuffers.end();) {
+            if (it->framesToLive > 0) {
+                it->framesToLive--;
+                ++it;
+            }
+            else {
+                it = _staleGpuBuffers.erase(it);
+            }
+        }
+
+        for (auto it = _staleMappedBuffers.begin(); it != _staleMappedBuffers.end();) {
+            if (it->framesToLive > 0) {
+                it->framesToLive--;
+                ++it;
+            }
+            else {
+                it = _staleMappedBuffers.erase(it);
+            }
+        }
+    }
+
+    void ImageManager::RecordSync(VkCommandBuffer cmd) {
+        if (auto staleBuffers = _bindlessBuffer->RecordSync(cmd); staleBuffers.mapped || staleBuffers.gpu) {
+            std::lock_guard<std::mutex> lock(_staleMutex);
+
+            _staleMappedBuffers.push_back({ staleBuffers.mapped, _framesInFlight });
+            _staleGpuBuffers.push_back({ staleBuffers.gpu, _framesInFlight });
+        }
     }
 
     void ImageManager::CreateSamplers() {

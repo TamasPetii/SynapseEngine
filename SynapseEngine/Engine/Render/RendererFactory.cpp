@@ -297,7 +297,7 @@ namespace Syn
         */
 
         pipeline->AddPass(std::make_unique<ShadowAtlasTransitionPass>());
-            
+
         //Ssao Passes
         pipeline->AddPass(std::make_unique<SsaoInitPass>());
         pipeline->AddPass(std::make_unique<SsaoPass>());

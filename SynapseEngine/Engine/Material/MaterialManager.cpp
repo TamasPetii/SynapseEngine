@@ -59,22 +59,10 @@ namespace Syn {
         auto materialGPU = GpuMaterial(*entry.resource);
         WriteAddress(entryIndex, materialGPU);
 
-        if (entryIndex >= _renderTypeCache.size()) {
-            _renderTypeCache.resize(entryIndex + 1, MaterialRenderType::Opaque1Sided);
-        }
-
-        bool isTrans = entry.resource->isTransparent;
-        bool isDouble = entry.resource->doubleSided;
-
-        if (isTrans && isDouble)       _renderTypeCache[entryIndex] = MaterialRenderType::Transparent2Sided;
-        else if (isTrans && !isDouble) _renderTypeCache[entryIndex] = MaterialRenderType::Transparent1Sided;
-        else if (!isTrans && isDouble) _renderTypeCache[entryIndex] = MaterialRenderType::Opaque2Sided;
-        else                           _renderTypeCache[entryIndex] = MaterialRenderType::Opaque1Sided;
-
         entry.state = ResourceState::Ready;
         _version.fetch_add(1, std::memory_order_release);
 
-        //Info("Material '{}' is ready", entry.path);
+        Info("Material '{}' is ready", entry.path);
     }
 
     void MaterialManager::LoadDefaultMaterialSync()

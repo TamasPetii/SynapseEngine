@@ -5,7 +5,6 @@
 #include "Engine/System/Physics/RigidBodySystem.h"
 #include "Engine/System/Rendering/ModelSystem.h"
 #include "Engine/Component/Rendering/ModelComponent.h"
-#include "Engine/Mesh/ModelManager.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Physics/IPhysicsEngine.h"
 #include "PhysicsUtils.h"
@@ -33,11 +32,10 @@ namespace Syn
         auto transformPool = registry->GetPool<TransformComponent>();
         auto modelPool = registry->GetPool<ModelComponent>();
         auto physicsEngine = scene->GetPhysicsEngine();
-        auto modelManager = ServiceLocator::GetModelManager();
 
-        if (!meshColliderPool || !rbPool || !transformPool || !modelPool || !physicsEngine || !modelManager) return;
+        if (!meshColliderPool || !rbPool || !transformPool || !modelPool || !physicsEngine) return;
 
-        auto modelSnapshots = modelManager->GetResourceSnapshot();
+        auto& modelSnapshots = scene->GetSystemContext().modelSnapshots;
 
         ParallelForEach(meshColliderPool, subflow, SystemPhaseNames::Update, [meshColliderPool, rbPool, transformPool, modelPool, physicsEngine, modelSnapshots](EntityID entity) {
 

@@ -52,6 +52,11 @@ namespace Syn {
             ResourceState state;
         };
 
+        struct SnapshotResult {
+            std::vector<ResourceSnapshot> snapshots;
+            uint32_t version;
+        };
+
         virtual ~BaseResourceManager() = default;
 
         virtual void Update();
@@ -64,8 +69,10 @@ namespace Syn {
         uint32_t GetResourceIndex(const std::string & name) const;
         std::shared_ptr<TResource> GetResource(uint32_t id) const;
         std::shared_ptr<TResource> GetResource(const std::string & name) const;
-        std::vector<ResourceSnapshot> GetResourceSnapshot() const;
         std::vector<std::string> GetResourcePaths() const;
+
+        SnapshotResult GetSnapshotAndVersion() const;
+        std::vector<ResourceSnapshot> GetResourceSnapshot() const;
     protected:
         uint32_t InternalLoadAsync(const std::string & key, std::function<std::shared_ptr<TResource>()> task);
         uint32_t InternalLoadSync(const std::string & key, std::function<std::shared_ptr<TResource>()> task);
@@ -220,6 +227,20 @@ namespace Syn {
             snapshot.push_back({ entry.resource, entry.state });
         }
         return snapshot;
+    }
+
+    template <typename TResource>
+    typename BaseResourceManager<TResource>::SnapshotResult BaseResourceManager<TResource>::GetSnapshotAndVersion() const {
+        std::lock_guard lock(_mutex);
+
+        std::vector<ResourceSnapshot> snapshots;
+        snapshots.reserve(_entries.size());
+
+        for (const auto& entry : _entries) {
+            snapshots.push_back({ entry.resource, entry.state });
+        }
+
+        return { std::move(snapshots), _version.load(std::memory_order_acquire) };
     }
 
     template <typename TResource>

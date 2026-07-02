@@ -19,8 +19,6 @@
 #include "Engine/System/Rendering/ModelSystem.h"
 #include "Engine/System/Core/TransformSystem.h"
 
-#include "Engine/Mesh/ModelManager.h"
-
 namespace Syn
 {
     std::vector<TypeID> RigidBodySystem::GetReadDependencies() const
@@ -55,10 +53,9 @@ namespace Syn
         auto modelPool = registry->GetPool<ModelComponent>();
 
         auto physicsEngine = scene->GetPhysicsEngine();
-        auto modelManager = ServiceLocator::GetModelManager();
 
-        if (!rbPool || !physicsEngine || !modelManager) return;
-        auto modelSnapshots = modelManager->GetResourceSnapshot();
+        if (!rbPool || !physicsEngine) return;
+        auto& modelSnapshots = scene->GetSystemContext().modelSnapshots;
 
         ParallelForEach(rbPool, subflow, SystemPhaseNames::Update, [rbPool, transformPool, boxPool, spherePool, capsulePool, physicsEngine, convexPool, meshPool, modelPool, modelSnapshots](EntityID entity) {
             auto& rb = rbPool->Get(entity);

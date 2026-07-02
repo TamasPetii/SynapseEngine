@@ -3,6 +3,7 @@
 namespace Syn
 {
 	ModelComponent::ModelComponent() :
+		isReady(false),
 		castShadow(true),
 		receiveShadow(true),
 		hasDirectxNormals(false),

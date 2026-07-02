@@ -5,6 +5,7 @@
 #include "Engine/Material/MaterialManager.h"
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Animation/AnimationManager.h"
+#include "Engine/Image/ImageManager.h"
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Render/ComputeGroupSize.h"
 #include "Engine/Scene/BufferNames.h"
@@ -280,5 +281,6 @@ namespace Syn {
         ServiceLocator::GetAnimationManager()->RecordSync(context.cmd);
         ServiceLocator::GetModelManager()->RecordSync(context.cmd);
         ServiceLocator::GetMaterialManager()->RecordSync(context.cmd);
+        ServiceLocator::GetImageManager()->RecordSync(context.cmd);
     }
 }

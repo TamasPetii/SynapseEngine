@@ -125,9 +125,9 @@ namespace Syn
         auto animationManager = ServiceLocator::GetAnimationManager();
         auto materialManager = ServiceLocator::GetMaterialManager();
 
-        auto modelSnapshot = modelManager->GetResourceSnapshot();
-        auto animSnapshot = animationManager->GetResourceSnapshot();
-        auto matTypeSnapshot = materialManager->GetRenderTypeSnapshot();
+        auto& modelSnapshot = scene->GetSystemContext().modelSnapshots;
+        auto& animSnapshot = scene->GetSystemContext().animationSnapshots;
+        auto& matTypeSnapshot = scene->GetSystemContext().materialRenderTypes;
 
         // Extract Entity Data (Runs once per entity)
         auto withEntityData = [modelPool, transformPool, animPool, overridePool, modelSnapshot, tagPool, animSnapshot, drawData]

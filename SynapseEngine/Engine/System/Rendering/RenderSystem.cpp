@@ -2,10 +2,7 @@
 #include "Engine/Scene/Scene.h"
 #include "Engine/Component/Rendering/ModelComponent.h"
 #include "Engine/ServiceLocator.h"
-#include "Engine/Mesh/ModelManager.h"
-#include "Engine/Material/MaterialManager.h"
 #include "Engine/System/Rendering/ModelSystem.h"
-#include "Engine/ServiceLocator.h"
 #include "Engine/FrameContext.h"
 #include "MaterialSystem.h"
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
@@ -32,16 +29,13 @@ namespace Syn
         auto overridePool = registry->GetPool<MaterialOverrideComponent>();
         if (!pool) return;
 
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto materialManager = ServiceLocator::GetMaterialManager();
+        uint32_t totalModels = static_cast<uint32_t>(scene->GetSystemContext().modelSnapshots.size());
+        uint32_t currentModelManagerVersion = scene->GetSystemContext().modelManagerVersion;
+        uint32_t currentMaterialManagerVersion = scene->GetSystemContext().materialManagerVersion;
 
-        uint32_t totalModels = static_cast<uint32_t>(modelManager->GetResourceCount());
-        uint32_t currentModelManagerVersion = modelManager->GetVersion();
-        uint32_t currentMaterialManagerVersion = materialManager->GetVersion();
-
-        this->EmplaceTask(subflow, SystemPhaseNames::Update, [this, scene, pool, overridePool, modelManager, materialManager, totalModels, currentModelManagerVersion, currentMaterialManagerVersion]() {
-            auto modelSnapshots = modelManager->GetResourceSnapshot();
-            auto matTypeSnapshot = materialManager->GetRenderTypeSnapshot();
+        this->EmplaceTask(subflow, SystemPhaseNames::Update, [this, scene, pool, overridePool, totalModels, currentModelManagerVersion, currentMaterialManagerVersion]() {
+            auto& modelSnapshots = scene->GetSystemContext().modelSnapshots;
+            auto& matTypeSnapshot = scene->GetSystemContext().materialRenderTypes;
             
             if (_lastModelManagerVersion != currentModelManagerVersion) {
                 _needsRebuild = true;
@@ -77,8 +71,9 @@ namespace Syn
             {
                 if(_entitiesPerModel[modelId].empty() || modelId >= modelSnapshots.size()) continue;
 
-                auto model = modelSnapshots[modelId].resource;
-                if (!model) continue;
+                const auto& snapshot = modelSnapshots[modelId];
+                if (snapshot.state != ResourceState::Ready || !snapshot.resource) continue;
+                auto model = snapshot.resource;
 
                 uint32_t meshCount = model->cpuData.globalMeshCount;
                 if (_meshMatCapacities[modelId].size() < meshCount) {
@@ -147,10 +142,8 @@ namespace Syn
 
     void RenderSystem::RebuildGlobalBuffers(Scene* scene)
     {
-        auto modelManager = ServiceLocator::GetModelManager();
         auto drawData = scene->GetSceneDrawData();
-        auto modelSnapshots = modelManager->GetResourceSnapshot();
-
+        auto& modelSnapshots = scene->GetSystemContext().modelSnapshots;
 
         drawData->Models.activeDescriptorCount = 0;
 
@@ -165,8 +158,10 @@ namespace Syn
         for (uint32_t modelId = 0; modelId < _modelCapacities.size(); ++modelId)
         {
             if (_modelCapacities[modelId] == 0 || modelId >= modelSnapshots.size()) continue;
-            auto model = modelSnapshots[modelId].resource;
-            if (!model) continue;
+
+            const auto& snapshot = modelSnapshots[modelId];
+            if (snapshot.state != ResourceState::Ready || !snapshot.resource) continue;
+            auto model = snapshot.resource;
 
             const auto& blueprints = model->cpuData.baseDrawCommands;
             for (size_t i = 0; i < blueprints.size(); ++i) {
@@ -320,7 +315,7 @@ namespace Syn
 
         drawData->Models.totalAllocatedInstances = globalInstanceOffset;
         drawData->Debug.totalMaxMeshletInstances = totalMaxMeshletInstances;
-        drawData->Models.requiredMaterialBufferSize = totalMaterialIndicesCapacity * sizeof(uint32_t);
+        drawData->Models.requiredMaterialBufferSize = totalMaterialIndicesCapacity;
 
         if (drawData->Models.instances.Size() < globalInstanceOffset) {
             drawData->Models.instances.Resize(globalInstanceOffset);

@@ -38,7 +38,7 @@ namespace Syn
         meshAllocBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(MeshAllocationInfo), storageUsage, 1024, 2048 });
         meshAllocBuffer.UpdateCapacityAll(1);
 
-        materialIndexBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(int32_t), storageUsage, 1024, 2048 });
+        materialIndexBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(int32_t), storageUsage, 4096, 8192 });
         materialIndexBuffer.UpdateCapacityAll(1);
 
         drawCountBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(uint32_t), indirectStorageUsage, 1, 1 });

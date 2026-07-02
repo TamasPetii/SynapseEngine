@@ -5,15 +5,12 @@
 #include "Engine/System/Rendering/ModelSystem.h"
 #include "Engine/System/Core/TransformSystem.h"
 #include "Engine/System/Rendering/RenderSystem.h"
-#include "Engine/Mesh/ModelManager.h"
 #include "Engine/System/Core/CameraSystem.h"
-#include "Engine/Animation/AnimationManager.h"
 #include "Engine/System/Rendering/AnimationSystem.h"
 #include "Engine/System/Rendering/MaterialSystem.h"
 #include "Engine/System/Core/StaticSpatialSahSystem.h"
 #include "Engine/System/Core/TagSystem.h"
 
-#include "Engine/Material/MaterialManager.h"
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
 
 #include "Engine/Mesh/Utils/MeshUtils.h"
@@ -24,6 +21,8 @@
 
 namespace Syn
 {
+    constexpr bool ENABLE_DEBUG_LOGGING = false;
+
     std::vector<TypeID> ModelFrustumCullingSystem::GetReadDependencies() const {
         return { 
             TypeInfo<ModelSystem>::ID,
@@ -41,8 +40,7 @@ namespace Syn
     {
         auto settings = scene->GetSettings();
         auto drawData = scene->GetSceneDrawData();
-        auto materialManager = ServiceLocator::GetMaterialManager();
-        auto matTypeSnapshot = materialManager->GetRenderTypeSnapshot();
+        auto matTypeSnapshot = scene->GetSystemContext().materialRenderTypes;
         auto overridePool = scene->GetRegistry()->GetPool<MaterialOverrideComponent>();
 
         tf::Task initTask = this->EmplaceTask(subflow, "Update Init", [drawData]() {
@@ -63,9 +61,6 @@ namespace Syn
             return;
         }
 
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto animationManager = ServiceLocator::GetAnimationManager();
-
         auto registry = scene->GetRegistry();
         auto modelPool = registry->GetPool<ModelComponent>();
         auto transformPool = registry->GetPool<TransformComponent>();
@@ -77,8 +72,8 @@ namespace Syn
         if (!modelPool || !transformPool || !cameraPool || cameraEntity == NULL_ENTITY) return;
 
         const auto& cameraComp = cameraPool->Get(cameraEntity);
-        auto modelSnapshot = modelManager->GetResourceSnapshot();
-        auto animSnapshot = animationManager->GetResourceSnapshot();
+        auto& modelSnapshot = scene->GetSystemContext().modelSnapshots;
+        auto& animSnapshot = scene->GetSystemContext().animationSnapshots;
 
         glm::vec2 screenRes = glm::vec2(cameraComp.width, cameraComp.height);
 
@@ -197,6 +192,12 @@ namespace Syn
                     }
 
                     MaterialRenderType matType = (matIdx < matTypeSnapshot.size()) ? matTypeSnapshot[matIdx] : MaterialRenderType::Opaque1Sided;
+
+                    if constexpr (ENABLE_DEBUG_LOGGING) {
+                        std::string name = "Unknown";
+                        if (tagPool && tagPool->Has(entity)) name = tagPool->Get(entity).name;
+                        Info("[FrustumCulling] Visible in camera: Entity {} ({}) | First visible sub-mesh MatType: {}", (uint32_t)entity, name, (uint32_t)matType);
+                    }
 
                     if (meshAlloc.activeTypes[matType])
                     {

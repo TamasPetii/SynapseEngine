@@ -73,6 +73,7 @@ namespace Syn {
 		ServiceLocator::ProvideImageBuilder(_imageBuilder.get());
 
 		_imageManager = std::make_unique<ImageManager>(
+			_framesInFlight,
 			_imageBuilder,
 			std::make_unique<DefaultGpuImageUploader>(),
 			std::make_unique<DefaultCpuImageExtractor>()
@@ -87,7 +88,6 @@ namespace Syn {
 			_framesInFlight,
 			[this](const TexturePayload& payload) -> uint32_t {
 				if (payload.IsEmbedded()) {
-					
 					size_t hash = payload.embeddedData.size();
 
 					if (hash > 0) {
