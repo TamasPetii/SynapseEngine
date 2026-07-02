@@ -26,6 +26,7 @@
 #include "Engine/System/Rendering/MaterialSystem.h"
 #include "Engine/System/Rendering/ModelFrustumCullingSystem.h"
 #include "Engine/System/Rendering/AnimationSystem.h"
+#include "Engine/System/Rendering/MaterialOverrideSystem.h"
 #include "Engine/System/Physics/PhysicsSystem.h"
 
 #include "Engine/System/Light/Point/PointLightSystem.h"
@@ -144,6 +145,7 @@ namespace Syn
         RegisterSystem<ModelSystem>();
         RegisterSystem<ModelFrustumCullingSystem>();
         RegisterSystem<AnimationSystem>();
+        RegisterSystem<MaterialOverrideSystem>();
 
         RegisterSystem<PointLightSystem>();
         RegisterSystem<PointLightShadowSystem>();
@@ -177,6 +179,7 @@ namespace Syn
 		RegisterSystem<HierarchySystem>();
         RegisterSystem<SelectionOutlineSystem>();
         RegisterSystem<TagSystem>();
+
     }
 
     void Scene::InitializeComponentBuffers()

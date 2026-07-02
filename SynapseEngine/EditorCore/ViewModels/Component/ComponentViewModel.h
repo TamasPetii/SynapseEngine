@@ -19,6 +19,7 @@
 
 #include "Rendering/Model/ModelComponentViewModel.h"
 #include "Rendering/Animation/AnimationViewModel.h"
+#include "Rendering/MaterialOverride/MaterialOverrideViewModel.h"
 
 #include "EditorCore/Api/ISelectionApi.h"
 #include "EditorCore/Api/ITagApi.h"
@@ -34,6 +35,7 @@
 #include "EditorCore/Api/IRigidBodyApi.h"
 #include "EditorCore/Api/IModelComponentApi.h"
 #include "EditorCore/Api/IAnimationApi.h"
+#include "EditorCore/Api/IMaterialOverrideApi.h"
 
 namespace Syn {
     class ComponentViewModel : public IViewModel<ComponentState, ComponentIntent> {
@@ -54,7 +56,8 @@ namespace Syn {
             IMeshColliderApi* meshColliderApi,
             IRigidBodyApi* rigidBodyApi,
             IModelComponentApi* modelComponentApi,
-            IAnimationApi* animationApi 
+            IAnimationApi* animationApi,
+            IMaterialOverrideApi* materialOverrideApi
             );
 
         ~ComponentViewModel() override = default;
@@ -77,6 +80,7 @@ namespace Syn {
         RigidBodyViewModel& GetRigidBodyViewModel() { return _rigidBodyViewModel; }
 		ModelComponentViewModel& GetModelComponentViewModel() { return _modelComponentViewModel; }
 		AnimationViewModel& GetAnimationViewModel() { return _animationViewModel; }
+        MaterialOverrideViewModel& GetMaterialOverrideViewModel() { return _materialOverrideViewModel; }
     private:
 		ISelectionApi* _selectionApi = nullptr;
         ComponentState _state;
@@ -97,5 +101,6 @@ namespace Syn {
 
 		ModelComponentViewModel _modelComponentViewModel;
 		AnimationViewModel _animationViewModel;
+        MaterialOverrideViewModel _materialOverrideViewModel;
     };
 }

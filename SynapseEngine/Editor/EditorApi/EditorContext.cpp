@@ -23,6 +23,7 @@
 #include "Impl/RigidBodyApiImpl.h"
 #include "Impl/ModelComponentApiImpl.h"
 #include "Impl/AnimationApiImpl.h"
+#include "Impl/MaterialOverrideApiImpl.h"
 
 namespace Syn {
     EditorContext::EditorContext(Engine* engine, GuiTextureManager* textureManager) {
@@ -52,6 +53,7 @@ namespace Syn {
         _rigidBodyApi = std::make_unique<RigidBodyApiImpl>(sm);
 		_modelComponentApi = std::make_unique<ModelComponentApiImpl>(sm);
 		_animationApi = std::make_unique<AnimationApiImpl>(sm);
+        _materialOverrideApi = std::make_unique<MaterialOverrideApiImpl>(sm);
     }
 
     EditorContext::~EditorContext() = default;

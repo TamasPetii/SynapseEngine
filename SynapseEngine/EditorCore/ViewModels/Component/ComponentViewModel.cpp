@@ -18,7 +18,8 @@ namespace Syn
         IMeshColliderApi* meshColliderApi,
         IRigidBodyApi* rigidBodyApi,
 		IModelComponentApi* modelComponentApi,
-		IAnimationApi* animationApi
+		IAnimationApi* animationApi,
+        IMaterialOverrideApi* materialOverrideApi
     )
         : 
         _selectionApi(selectionApi),
@@ -35,7 +36,8 @@ namespace Syn
         _meshColliderViewModel(selectionApi, meshColliderApi),
         _rigidBodyViewModel(selectionApi, rigidBodyApi),
 		_modelComponentViewModel(selectionApi, modelComponentApi),
-		_animationViewModel(selectionApi, animationApi)
+		_animationViewModel(selectionApi, animationApi),
+        _materialOverrideViewModel(selectionApi, materialOverrideApi)
     {}
 
     const ComponentState& ComponentViewModel::GetState() const {
@@ -65,6 +67,7 @@ namespace Syn
             _rigidBodyViewModel.SyncWithEngine();
 			_modelComponentViewModel.SyncWithEngine();
 			_animationViewModel.SyncWithEngine();
+            _materialOverrideViewModel.SyncWithEngine();
         }
     }
 
@@ -113,6 +116,9 @@ namespace Syn
             }
             else if constexpr (std::is_same_v<T, AnimationIntent>) {
                 _animationViewModel.Dispatch(arg);
+            }
+            else if constexpr (std::is_same_v<T, MaterialOverrideIntent>) {
+                _materialOverrideViewModel.Dispatch(arg);
             }
         }, intent);
     }

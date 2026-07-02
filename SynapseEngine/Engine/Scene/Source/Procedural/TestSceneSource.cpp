@@ -173,6 +173,7 @@ namespace Syn
 
             EntityID monkeyId = scene.CreateEntity();
             registry.AddComponent<TagComponent>(monkeyId);
+            registry.AddComponent<MaterialOverrideComponent>(monkeyId);
             registry.GetComponent<TagComponent>(monkeyId).name = "Suzanne_Monkey";
             registry.GetComponent<TagComponent>(monkeyId).tag = "Model";
             registry.AddComponent<TransformComponent>(monkeyId);
@@ -184,6 +185,7 @@ namespace Syn
 
             registry.GetPool<TransformComponent>()->SetCategory(monkeyId, StorageCategory::Static);
             registry.GetPool<ModelComponent>()->SetCategory(monkeyId, StorageCategory::Static);
+            registry.GetPool<MaterialOverrideComponent>()->SetCategory(monkeyId, StorageCategory::Static);
 
             hm->AttachChild(rootEnvironment, monkeyId);
         }
@@ -194,6 +196,7 @@ namespace Syn
 
             EntityID sponzaEntity = scene.CreateEntity();
             registry.AddComponent<TagComponent>(sponzaEntity);
+            registry.AddComponent<MaterialOverrideComponent>(sponzaEntity);
             registry.GetComponent<TagComponent>(sponzaEntity).name = "Classic_Sponza";
             registry.GetComponent<TagComponent>(sponzaEntity).tag = "Model";
             registry.AddComponent<TransformComponent>(sponzaEntity);
@@ -210,6 +213,7 @@ namespace Syn
             registry.GetPool<ModelComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
             registry.GetPool<RigidBodyComponent>()->SetCategory(sponzaEntity, StorageCategory::Stream);
             registry.GetPool<MeshColliderComponent>()->SetCategory(sponzaEntity, StorageCategory::Stream);
+            registry.GetPool<MaterialOverrideComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
 
             hm->AttachChild(rootEnvironment, sponzaEntity);
         }

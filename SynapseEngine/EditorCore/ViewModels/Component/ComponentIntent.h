@@ -7,6 +7,7 @@
 #include "Light/SpotLight/SpotLightIntent.h"
 #include "Rendering/Model/ModelComponentIntent.h"
 #include "Rendering/Animation/AnimationIntent.h"
+#include "Rendering/MaterialOverride/MaterialOverrideIntent.h"
 #include "Physics/BoxCollider/BoxColliderIntent.h"
 #include "Physics/SphereCollider/SphereColliderIntent.h"
 #include "Physics/CapsuleCollider/CapsuleColliderIntent.h"
@@ -30,6 +31,7 @@ namespace Syn {
         CapsuleColliderIntent,
         ConvexColliderIntent,
         MeshColliderIntent,
-        RigidBodyIntent
+        RigidBodyIntent,
+        MaterialOverrideIntent
     >;
 }

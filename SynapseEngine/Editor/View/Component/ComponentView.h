@@ -20,6 +20,7 @@
 
 #include "Rendering/ModelComponentView.h"
 #include "Rendering/AnimationView.h"
+#include "Rendering/MaterialOverrideView.h"
 
 namespace Syn {
     class ComponentView : public IView<ComponentViewModel> {
@@ -40,5 +41,6 @@ namespace Syn {
         RigidBodyView _rigidBodyView;
 		ModelComponentView _modelComponentView;
 		AnimationView _animationView;
+        MaterialOverrideView _materialOverrideView;
     };
 }

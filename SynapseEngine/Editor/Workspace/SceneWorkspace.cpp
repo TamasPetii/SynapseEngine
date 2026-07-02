@@ -48,7 +48,8 @@ namespace Syn {
                 _context->GetMeshColliderApi(),
                 _context->GetRigidBodyApi(),
 				_context->GetModelComponentApi(),
-				_context->GetAnimationApi()
+				_context->GetAnimationApi(),
+                _context->GetMaterialOverrideApi()
             }
         );
 

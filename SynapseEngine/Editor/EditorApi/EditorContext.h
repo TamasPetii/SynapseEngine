@@ -27,6 +27,7 @@
 #include "EditorCore/Api/IRigidBodyApi.h"
 #include "EditorCore/Api/IModelComponentApi.h"
 #include "EditorCore/Api/IAnimationApi.h"
+#include "EditorCore/Api/IMaterialOverrideApi.h"
 
 namespace Syn {
     class EditorContext {
@@ -58,6 +59,7 @@ namespace Syn {
         IRigidBodyApi* GetRigidBodyApi() const { return _rigidBodyApi.get(); }
 		IModelComponentApi* GetModelComponentApi() const { return _modelComponentApi.get(); }
 		IAnimationApi* GetAnimationApi() const { return _animationApi.get(); }
+        IMaterialOverrideApi* GetMaterialOverrideApi() { return _materialOverrideApi.get(); }
     private:
         std::unique_ptr<ISelectionApi> _selectionApi;
         std::unique_ptr<ITagApi> _tagApi;
@@ -83,5 +85,6 @@ namespace Syn {
         std::unique_ptr<IRigidBodyApi> _rigidBodyApi;
 		std::unique_ptr<IModelComponentApi> _modelComponentApi;
 		std::unique_ptr<IAnimationApi> _animationApi;
+        std::unique_ptr<IMaterialOverrideApi> _materialOverrideApi;
     };
 }

@@ -5,13 +5,17 @@
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
 #include "Engine/Component/Core/TagComponent.h"
+#include "MaterialOverrideSystem.h"
 
 namespace Syn
 {
     constexpr bool ENABLE_DEBUG_LOGGING = false;
 
     std::vector<TypeID> MaterialSystem::GetWriteDependencies() const {
-        return { TypeInfo<MaterialSystem>::ID };
+        return { 
+            TypeInfo<MaterialSystem>::ID,
+            TypeInfo<MaterialOverrideSystem>::ID
+        };
     }
 
     void MaterialSystem::OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow)
@@ -25,8 +29,6 @@ namespace Syn
 
         auto drawData = scene->GetSceneDrawData();
         uint32_t currentModelManagerVersion = scene->GetSystemContext().modelManagerVersion;
-
-        //Todo: Override component changed -> Update??
 
         this->EmplaceTask(subflow, SystemPhaseNames::Update, [this, scene, pool, tagPool, currentModelManagerVersion, drawData, overridePool]() {
 
@@ -43,10 +45,15 @@ namespace Syn
 
             }
 
-            bool hasChanges = !pool->GetDirtyStatics().empty() ||
+            bool materialOverrideHasChanges = !overridePool->GetDirtyStatics().empty()
+                                            || overridePool->IsStateBitSet<CHANGED_BIT>()
+                                            || overridePool->IsStateBitSet<INDEX_CHANGED_BIT>();
+
+            bool modelHasChanges = !pool->GetDirtyStatics().empty() ||
                               pool->IsStateBitSet<CHANGED_BIT>() ||
-                              pool->IsStateBitSet<INDEX_CHANGED_BIT>() ||
-                              needsRebuild;
+                              pool->IsStateBitSet<INDEX_CHANGED_BIT>();
+
+            bool hasChanges = materialOverrideHasChanges || modelHasChanges || needsRebuild;
 
             if (!hasChanges) {
                 return;
@@ -57,6 +64,9 @@ namespace Syn
 
             uint32_t totalExactMaterials = 0;
             auto countFunc = [&](EntityID entity) {
+                bool isShared = overridePool && overridePool->Has(entity) && overridePool->Get(entity).sharedMaterialEntity != NULL_ENTITY;
+                if (isShared) return;
+
                 auto& comp = pool->Get(entity);
                 const auto& snapshot = modelSnapshots[comp.modelIndex];
                 if (snapshot.state == ResourceState::Ready && snapshot.resource) {
@@ -76,6 +86,9 @@ namespace Syn
             uint32_t currentOffset = 0;
 
             auto processEntity = [&](EntityID entity) {
+                bool isShared = overridePool && overridePool->Has(entity) && overridePool->Get(entity).sharedMaterialEntity != NULL_ENTITY;
+                if (isShared) return;
+
                 auto& comp = pool->Get(entity);
                 if (comp.modelIndex >= modelSnapshots.size()) return;
 
@@ -136,6 +149,26 @@ namespace Syn
             for (auto e : pool->GetStorage().GetDynamicEntities()) processEntity(e);
             for (auto e : pool->GetStorage().GetStreamEntities()) processEntity(e);
 
+            auto processSharedEntity = [&](EntityID entity) {
+                if (!overridePool || !overridePool->Has(entity)) return;
+
+                EntityID sharedEntity = overridePool->Get(entity).sharedMaterialEntity;
+                if (sharedEntity == NULL_ENTITY) return;
+
+                if (pool->Has(sharedEntity)) {
+                    auto& comp = pool->Get(entity);
+                    uint32_t masterOffset = pool->Get(sharedEntity).materialOffset;
+
+                    comp.materialOffset = masterOffset;
+                    comp.version++;
+                    pool->SetBit<CHANGED_BIT>(entity);
+                    pool->MarkStaticDirty(entity);
+                }
+                };
+
+            for (auto e : pool->GetStorage().GetStaticEntities()) processSharedEntity(e);
+            for (auto e : pool->GetStorage().GetDynamicEntities()) processSharedEntity(e);
+            for (auto e : pool->GetStorage().GetStreamEntities()) processSharedEntity(e);
             
             if (needsRebuild || needsUpload) {
                 uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
