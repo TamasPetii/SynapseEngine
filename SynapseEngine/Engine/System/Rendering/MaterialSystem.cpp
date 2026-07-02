@@ -43,10 +43,16 @@ namespace Syn
 
             }
 
-            if (!pool->IsStateBitSet<CHANGED_BIT>() && !pool->IsStateBitSet<INDEX_CHANGED_BIT>() && !needsRebuild) {
+            bool hasChanges = !pool->GetDirtyStatics().empty() ||
+                              pool->IsStateBitSet<CHANGED_BIT>() ||
+                              pool->IsStateBitSet<INDEX_CHANGED_BIT>() ||
+                              needsRebuild;
+
+            if (!hasChanges) {
                 return;
             }
 
+            needsUpload = true;
             auto& modelSnapshots = scene->GetSystemContext().modelSnapshots;
 
             uint32_t totalExactMaterials = 0;
@@ -91,23 +97,18 @@ namespace Syn
                     overrides = overrideComp.materials;
                 }
 
-                bool wasReady = comp.isReady;
-                comp.isReady = true;
-
-                if (comp.materialOffset != currentOffset || !wasReady) {
-                    if constexpr (ENABLE_DEBUG_LOGGING) {
-                        std::string entityName = "Unknown";
-                        if (tagPool && tagPool->Has(entity)) entityName = tagPool->Get(entity).name;
-                        Info("[MaterialSystem UPDATE] Frame {}: Entity {} data changed! OldOffset: {}, NewOffset: {}, WasReady: {}", scene->GetSystemContext().frameIndex, entityName, comp.materialOffset, currentOffset, wasReady);
-                    }
-
-                    comp.materialOffset = currentOffset;
-                    comp.version++;
-                    pool->SetBit<CHANGED_BIT>(entity);
-                    pool->MarkStaticDirty(entity);
-
-                    needsUpload = true;
+                if constexpr (ENABLE_DEBUG_LOGGING) {
+                    std::string entityName = "Unknown";
+                    if (tagPool && tagPool->Has(entity)) entityName = tagPool->Get(entity).name;
+                    Info("[MaterialSystem UPDATE] Frame {}: Entity {} data changed! OldOffset: {}, NewOffset: {}, WasReady: {}", scene->GetSystemContext().frameIndex, entityName, comp.materialOffset, currentOffset);
                 }
+
+                comp.materialOffset = currentOffset;
+                comp.version++;
+                pool->SetBit<CHANGED_BIT>(entity);
+                pool->MarkStaticDirty(entity);
+
+                needsUpload = true;
 
                 if constexpr (ENABLE_DEBUG_LOGGING) {
                     std::string entityName = "Unknown";
