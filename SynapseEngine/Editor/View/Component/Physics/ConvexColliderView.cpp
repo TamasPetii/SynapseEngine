@@ -13,7 +13,7 @@ namespace Syn {
 
         constexpr const char* CardTitle = "Convex Collider";
 
-        if (Syn::UI::BeginCard(CardTitle, SYN_ICON_CUBE, _isCardOpen))
+        if (Syn::UI::BeginCard(CardTitle, SYN_ICON_CONVEX_COLLIDER, _isCardOpen))
         {
             if (Syn::UI::BeginPropertyGrid("ConvexColliderGrid"))
             {

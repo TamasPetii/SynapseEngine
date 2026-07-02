@@ -28,6 +28,7 @@ namespace Syn {
     class MaterialManager;
     class ImageManager;
     class ModelManager;
+    class AnimationManager;
 }
 
 namespace Syn
@@ -64,6 +65,7 @@ namespace Syn
         MaterialManager* GetMaterialManager();
         ImageManager* GetImageManager();
         ModelManager* GetModelManager();
+        AnimationManager* GetAnimationManager();
         std::shared_ptr<Syn::MemorySink> GetMemorySink() const { return _memorySink; }
     private:
         void Init(const EngineInitParams& params);

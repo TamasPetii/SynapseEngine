@@ -22,9 +22,9 @@
   },
   "lights": {
     "directional_count": 1,
-    "point_count": 256,
-    "point_shadow_count": 32,
-    "spot_count": 256,
-    "spot_shadow_count": 32
+    "point_count": 32,
+    "point_shadow_count": 16,
+    "spot_count": 32,
+    "spot_shadow_count": 16
   }
 }

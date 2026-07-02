@@ -375,4 +375,8 @@ namespace Syn
 	ModelManager* Engine::GetModelManager() {
 		return ServiceLocator::GetModelManager();
 	}
+
+	AnimationManager* Engine::GetAnimationManager() {
+		return ServiceLocator::GetAnimationManager();
+	}
 }

@@ -122,19 +122,21 @@ namespace Syn
         // Extract entity properties (runs exactly once per entity)
         auto withEntityData = [modelPool, transformPool, animPool, overridePool, modelSnapshot, tagPool, animSnapshot, drawData]
             (EntityID entity, auto&& nextFunc) {
-                if (tagPool && tagPool->Has(entity)) {
-                    const auto& tag = tagPool->Get(entity);
-                    if (!tag.globalEnabled || !tag.castShadow) {
-                        return;
-                    }
-                }
-
                 if (!modelPool->Has(entity))
                     return;
 
                 const auto& modelComp = modelPool->Get(entity);
+
                 if (modelComp.modelIndex == NULL_INDEX || modelComp.modelIndex >= drawData->Models.modelAllocations.Size())
                     return;
+
+                if (tagPool && tagPool->Has(entity)) {
+                    const auto& tag = tagPool->Get(entity);
+
+                    if (!tag.globalEnabled || !modelComp.castShadow) {
+                        return;
+                    }
+                }
 
                 const auto& snapshotEntry = modelSnapshot[modelComp.modelIndex];
                 if (snapshotEntry.resource == nullptr || snapshotEntry.state != ResourceState::Ready)

@@ -17,6 +17,9 @@
 #include "Physics/MeshCollider/MeshColliderViewModel.h"
 #include "Physics/RigidBody/RigidBodyViewModel.h"
 
+#include "Rendering/Model/ModelComponentViewModel.h"
+#include "Rendering/Animation/AnimationViewModel.h"
+
 #include "EditorCore/Api/ISelectionApi.h"
 #include "EditorCore/Api/ITagApi.h"
 #include "EditorCore/Api/ITransformApi.h"
@@ -29,6 +32,8 @@
 #include "EditorCore/Api/IConvexColliderApi.h"
 #include "EditorCore/Api/IMeshColliderApi.h"
 #include "EditorCore/Api/IRigidBodyApi.h"
+#include "EditorCore/Api/IModelComponentApi.h"
+#include "EditorCore/Api/IAnimationApi.h"
 
 namespace Syn {
     class ComponentViewModel : public IViewModel<ComponentState, ComponentIntent> {
@@ -47,7 +52,9 @@ namespace Syn {
             ICapsuleColliderApi* capsuleColliderApi,
             IConvexColliderApi* convexColliderApi,
             IMeshColliderApi* meshColliderApi,
-            IRigidBodyApi* rigidBodyApi
+            IRigidBodyApi* rigidBodyApi,
+            IModelComponentApi* modelComponentApi,
+            IAnimationApi* animationApi 
             );
 
         ~ComponentViewModel() override = default;
@@ -68,6 +75,8 @@ namespace Syn {
         ConvexColliderViewModel& GetConvexColliderViewModel() { return _convexColliderViewModel; }
         MeshColliderViewModel& GetMeshColliderViewModel() { return _meshColliderViewModel; }
         RigidBodyViewModel& GetRigidBodyViewModel() { return _rigidBodyViewModel; }
+		ModelComponentViewModel& GetModelComponentViewModel() { return _modelComponentViewModel; }
+		AnimationViewModel& GetAnimationViewModel() { return _animationViewModel; }
     private:
 		ISelectionApi* _selectionApi = nullptr;
         ComponentState _state;
@@ -85,5 +94,8 @@ namespace Syn {
         ConvexColliderViewModel _convexColliderViewModel;
         MeshColliderViewModel _meshColliderViewModel;
         RigidBodyViewModel _rigidBodyViewModel;
+
+		ModelComponentViewModel _modelComponentViewModel;
+		AnimationViewModel _animationViewModel;
     };
 }

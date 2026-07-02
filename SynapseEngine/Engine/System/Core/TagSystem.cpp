@@ -84,8 +84,6 @@ namespace Syn
 
                 uint32_t flags = 0;
                 if (tagComp.globalEnabled) flags |= (1 << 0);
-                if (tagComp.castShadow)    flags |= (1 << 1);
-                if (tagComp.receiveShadow) flags |= (1 << 2);
 
                 tagDataBufferHandler[tagIndex] = flags;
             }

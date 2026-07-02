@@ -16,7 +16,9 @@ namespace Syn
         ICapsuleColliderApi* capsuleColliderApi,
         IConvexColliderApi* convexColliderApi,
         IMeshColliderApi* meshColliderApi,
-        IRigidBodyApi* rigidBodyApi
+        IRigidBodyApi* rigidBodyApi,
+		IModelComponentApi* modelComponentApi,
+		IAnimationApi* animationApi
     )
         : 
         _selectionApi(selectionApi),
@@ -31,7 +33,9 @@ namespace Syn
         _capsuleColliderViewModel(selectionApi, capsuleColliderApi),
         _convexColliderViewModel(selectionApi, convexColliderApi),
         _meshColliderViewModel(selectionApi, meshColliderApi),
-        _rigidBodyViewModel(selectionApi, rigidBodyApi)
+        _rigidBodyViewModel(selectionApi, rigidBodyApi),
+		_modelComponentViewModel(selectionApi, modelComponentApi),
+		_animationViewModel(selectionApi, animationApi)
     {}
 
     const ComponentState& ComponentViewModel::GetState() const {
@@ -59,6 +63,8 @@ namespace Syn
             _convexColliderViewModel.SyncWithEngine();
             _meshColliderViewModel.SyncWithEngine();
             _rigidBodyViewModel.SyncWithEngine();
+			_modelComponentViewModel.SyncWithEngine();
+			_animationViewModel.SyncWithEngine();
         }
     }
 
@@ -102,6 +108,12 @@ namespace Syn
             else if constexpr (std::is_same_v<T, RigidBodyIntent>) {
                 _rigidBodyViewModel.Dispatch(arg);
             }
-            }, intent);
+            else if constexpr (std::is_same_v<T, ModelComponentIntent>) {
+                _modelComponentViewModel.Dispatch(arg);
+            }
+            else if constexpr (std::is_same_v<T, AnimationIntent>) {
+                _animationViewModel.Dispatch(arg);
+            }
+        }, intent);
     }
 }

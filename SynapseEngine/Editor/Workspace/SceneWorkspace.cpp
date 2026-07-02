@@ -46,7 +46,9 @@ namespace Syn {
                 _context->GetCapsuleColliderApi(),
                 _context->GetConvexColliderApi(),
                 _context->GetMeshColliderApi(),
-                _context->GetRigidBodyApi()
+                _context->GetRigidBodyApi(),
+				_context->GetModelComponentApi(),
+				_context->GetAnimationApi()
             }
         );
 

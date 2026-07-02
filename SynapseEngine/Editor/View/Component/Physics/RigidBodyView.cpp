@@ -13,7 +13,7 @@ namespace Syn {
 
         constexpr const char* CardTitle = "Rigid Body";
 
-        if (Syn::UI::BeginCard(CardTitle, SYN_ICON_CUBE, _isCardOpen))
+        if (Syn::UI::BeginCard(CardTitle, SYN_ICON_RIGID_BODY, _isCardOpen))
         {
             if (Syn::UI::BeginPropertyGrid("RigidBodyGrid"))
             {

@@ -26,6 +26,10 @@ namespace Syn {
             _transformView.Draw(vm.GetTransformViewModel());
             _cameraView.Draw(vm.GetCameraViewModel());
 
+            //Rendering
+			_modelComponentView.Draw(vm.GetModelComponentViewModel());
+			_animationView.Draw(vm.GetAnimationViewModel());
+
             //Lights
             _directionLightView.Draw(vm.GetDirectionLightViewModel());
             _pointLightView.Draw(vm.GetPointLightViewModel());

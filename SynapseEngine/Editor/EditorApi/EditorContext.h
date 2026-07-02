@@ -25,6 +25,8 @@
 #include "EditorCore/Api/IConvexColliderApi.h"
 #include "EditorCore/Api/IMeshColliderApi.h"
 #include "EditorCore/Api/IRigidBodyApi.h"
+#include "EditorCore/Api/IModelComponentApi.h"
+#include "EditorCore/Api/IAnimationApi.h"
 
 namespace Syn {
     class EditorContext {
@@ -54,6 +56,8 @@ namespace Syn {
         IConvexColliderApi* GetConvexColliderApi() const { return _convexColliderApi.get(); }
         IMeshColliderApi* GetMeshColliderApi() const { return _meshColliderApi.get(); }
         IRigidBodyApi* GetRigidBodyApi() const { return _rigidBodyApi.get(); }
+		IModelComponentApi* GetModelComponentApi() const { return _modelComponentApi.get(); }
+		IAnimationApi* GetAnimationApi() const { return _animationApi.get(); }
     private:
         std::unique_ptr<ISelectionApi> _selectionApi;
         std::unique_ptr<ITagApi> _tagApi;
@@ -77,5 +81,7 @@ namespace Syn {
         std::unique_ptr<IConvexColliderApi> _convexColliderApi;
         std::unique_ptr<IMeshColliderApi> _meshColliderApi;
         std::unique_ptr<IRigidBodyApi> _rigidBodyApi;
+		std::unique_ptr<IModelComponentApi> _modelComponentApi;
+		std::unique_ptr<IAnimationApi> _animationApi;
     };
 }

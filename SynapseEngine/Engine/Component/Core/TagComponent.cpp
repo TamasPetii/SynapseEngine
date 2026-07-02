@@ -6,9 +6,7 @@ namespace Syn
 		name("Entity"),
 		tag("Untagged"),
 		localEnabled(true),
-		globalEnabled(true),
-		castShadow(true),
-		receiveShadow(true)
+		globalEnabled(true)
 	{}
 
 	TagComponent::TagComponent(const std::string& name, const std::string& tag) :

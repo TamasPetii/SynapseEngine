@@ -18,6 +18,9 @@
 #include "Physics/MeshColliderView.h"
 #include "Physics/RigidBodyView.h"
 
+#include "Rendering/ModelComponentView.h"
+#include "Rendering/AnimationView.h"
+
 namespace Syn {
     class ComponentView : public IView<ComponentViewModel> {
     public:
@@ -35,5 +38,7 @@ namespace Syn {
         ConvexColliderView _convexColliderView;
         MeshColliderView _meshColliderView;
         RigidBodyView _rigidBodyView;
+		ModelComponentView _modelComponentView;
+		AnimationView _animationView;
     };
 }

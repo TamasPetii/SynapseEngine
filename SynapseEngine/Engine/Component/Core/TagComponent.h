@@ -15,8 +15,5 @@ namespace Syn
 
 		bool localEnabled = true;
 		bool globalEnabled = true;
-
-		bool castShadow = true;
-		bool receiveShadow = true;
 	};
 }

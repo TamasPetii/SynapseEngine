@@ -21,6 +21,8 @@
 #include "Impl/ConvexColliderApiImpl.h"
 #include "Impl/MeshColliderApiImpl.h"
 #include "Impl/RigidBodyApiImpl.h"
+#include "Impl/ModelComponentApiImpl.h"
+#include "Impl/AnimationApiImpl.h"
 
 namespace Syn {
     EditorContext::EditorContext(Engine* engine, GuiTextureManager* textureManager) {
@@ -48,6 +50,8 @@ namespace Syn {
         _convexColliderApi = std::make_unique<ConvexColliderApiImpl>(sm);
         _meshColliderApi = std::make_unique<MeshColliderApiImpl>(sm);
         _rigidBodyApi = std::make_unique<RigidBodyApiImpl>(sm);
+		_modelComponentApi = std::make_unique<ModelComponentApiImpl>(sm);
+		_animationApi = std::make_unique<AnimationApiImpl>(sm);
     }
 
     EditorContext::~EditorContext() = default;
