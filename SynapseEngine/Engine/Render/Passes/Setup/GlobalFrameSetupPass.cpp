@@ -285,5 +285,21 @@ namespace Syn {
         ServiceLocator::GetModelManager()->RecordSync(context.cmd);
         ServiceLocator::GetMaterialManager()->RecordSync(context.cmd);
         ServiceLocator::GetImageManager()->RecordSync(context.cmd);
+
+        Vk::GlobalBarrierInfo globalBarrier{};
+
+        globalBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT | VK_PIPELINE_STAGE_2_HOST_BIT |  VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        globalBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT | VK_ACCESS_2_HOST_WRITE_BIT | VK_ACCESS_2_SHADER_WRITE_BIT;
+
+        globalBarrier.dstStage = VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_EXT |
+                                 VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_EXT |
+                                 VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT |
+                                 VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT |
+                                 VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT |
+                                 VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
+
+        globalBarrier.dstAccess = VK_ACCESS_2_SHADER_READ_BIT | VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT | VK_ACCESS_2_MEMORY_READ_BIT;
+
+        Vk::BufferUtils::InsertGlobalBarrier(context.cmd, globalBarrier);
     }
 }
