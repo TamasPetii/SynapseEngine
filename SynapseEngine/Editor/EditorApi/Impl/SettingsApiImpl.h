@@ -8,6 +8,7 @@ namespace Syn {
         SettingsApiImpl(SceneManager* sm) : _sceneManager(sm) {}
         SceneSettings GetSceneSettings() const override;
         void SetSceneSettings(const SceneSettings& settings) override;
+        std::vector<std::pair<uint32_t, std::string>> GetAvailableSkyTextures() const override;
     private:
         SceneManager* _sceneManager;
     };

@@ -38,6 +38,7 @@ void main() {
     finalUV.y = 1.0 - finalUV.y; 
 
     vec3 skyColor = SampleTexture2DLod(pc.skyTextureIndex, pc.samplerIndex, finalUV, 0.0).rgb;
+    skyColor *= pc.skyTint;
     skyColor *= pc.skyIntensity;
 
     outColor = vec4(skyColor, 1.0);

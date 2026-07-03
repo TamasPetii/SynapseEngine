@@ -13,6 +13,7 @@ namespace Syn {
     void SettingsViewModel::SyncWithEngine() {
         if (_api) {
             _state.sceneSettings = _api->GetSceneSettings();
+			_state.availableSkyTextures = _api->GetAvailableSkyTextures();
         }
     }
 

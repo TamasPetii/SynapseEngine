@@ -3,6 +3,7 @@
 #include "Engine/Render/ComputeGroupSize.h"
 #include "Editor/Widgets/CardWidget.h"
 #include "Editor/Widgets/PropertyGrid.h"
+#include "Editor/Widgets/Vector3Widget.h"
 #include <imgui.h>
 #include <string>
 #include <glm/glm.hpp>
@@ -210,6 +211,80 @@ namespace Syn {
                         changed |= Syn::UI::PropertyCheckbox("Directional Lights", settings.lighting.enableForwardPlusDirectionalLights);
                         changed |= Syn::UI::PropertyCheckbox("Point Lights", settings.lighting.enableForwardPlusPointLights);
                         changed |= Syn::UI::PropertyCheckbox("Spot Lights", settings.lighting.enableForwardPlusSpotLights);
+                    }
+
+                    Syn::UI::EndPropertyGrid();
+                }
+            }
+            Syn::UI::EndCard();
+
+            constexpr const char* CardEnvironmentTitle = "Environment Settings";
+            if (Syn::UI::BeginCard(CardEnvironmentTitle, SYN_ICON_SUN, getCardState(CardEnvironmentTitle))) {
+                if (Syn::UI::BeginPropertyGrid("EnvironmentGrid")) {
+                    drawSectionHeader("Skybox Render");
+
+                    changed |= Syn::UI::PropertyCheckbox("Enable Sky", settings.environment.enableSky);
+
+                    if (settings.environment.enableSky) {
+                        const char* skyModes[] = { "None", "Equirectangular", "Octahedral", "Procedural" };
+                        int currentMode = (int)settings.environment.skyMode;
+                        Syn::UI::BeginProperty("Sky Mode");
+                        if (ImGui::Combo("##SkyMode", &currentMode, skyModes, IM_ARRAYSIZE(skyModes))) {
+                            settings.environment.skyMode = (SkyMode)currentMode;
+                            changed = true;
+                        }
+
+                        if (settings.environment.skyMode == SkyMode::EquirectangularTexture || settings.environment.skyMode == SkyMode::OctahedralTexture) {
+
+                            const auto& textures = state.availableSkyTextures;
+                            std::vector<const char*> textureNames;
+                            int currentTextureIdx = -1;
+
+                            textureNames.push_back("None");
+                            if (settings.environment.skyTextureId == UINT32_MAX) currentTextureIdx = 0;
+
+                            for (int i = 0; i < textures.size(); ++i) {
+                                textureNames.push_back(textures[i].second.c_str());
+                                if (textures[i].first == settings.environment.skyTextureId) {
+                                    currentTextureIdx = i + 1;
+                                }
+                            }
+
+                            Syn::UI::BeginProperty("Sky Texture");
+                            if (ImGui::Combo("##SkyTexture", &currentTextureIdx, textureNames.data(), textureNames.size())) {
+                                if (currentTextureIdx == 0) {
+                                    settings.environment.skyTextureId = UINT32_MAX;
+                                }
+                                else {
+                                    settings.environment.skyTextureId = textures[currentTextureIdx - 1].first;
+                                }
+                                changed = true;
+                            }
+                        }
+
+                        changed |= Syn::UI::PropertyDragFloat("Intensity", settings.environment.skyIntensity, 0.05f, 0.0f, 100.0f, "%.2f", 1);
+
+                        Syn::UI::BeginProperty("Tint");
+                        if (ImGui::ColorEdit3("##SkyTint", glm::value_ptr(settings.environment.skyTint), ImGuiColorEditFlags_NoInputs)) {
+                            changed = true;
+                        }
+
+                        Syn::UI::BeginProperty("Rotation");
+                        bool rotDeactivated = false;
+                        if (Syn::UI::DrawVec3Control("SkyRot", settings.environment.skyRotation, 0.0f, rotDeactivated)) {
+                            changed = true;
+                        }
+                    }
+
+                    Syn::UI::PropertySeparator();
+                    drawSectionHeader("Fog & Atmospherics");
+                    changed |= Syn::UI::PropertyCheckbox("Enable Fog", settings.environment.enableFog);
+                    if (settings.environment.enableFog) {
+                        Syn::UI::BeginProperty("Fog Color");
+                        if (ImGui::ColorEdit3("##FogColor", glm::value_ptr(settings.environment.fogColor), ImGuiColorEditFlags_NoInputs)) {
+                            changed = true;
+                        }
+                        changed |= Syn::UI::PropertyDragFloat("Fog Density", settings.environment.fogDensity, 0.001f, 0.0f, 1.0f, "%.4f", 1);
                     }
 
                     Syn::UI::EndPropertyGrid();

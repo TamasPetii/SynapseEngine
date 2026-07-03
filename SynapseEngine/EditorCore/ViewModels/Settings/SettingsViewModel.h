@@ -14,7 +14,6 @@ namespace Syn {
 
         void SyncWithEngine() override;
         void Dispatch(const SettingsIntent& intent) override;
-
     private:
         ISettingsApi* _api = nullptr;
         SettingsState _state;

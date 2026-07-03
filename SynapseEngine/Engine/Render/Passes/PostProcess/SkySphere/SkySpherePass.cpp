@@ -19,7 +19,8 @@ namespace Syn {
     bool SkySpherePass::ShouldExecute(const RenderContext& context) const
     {
         auto skyTextureId = context.scene->GetSettings()->environment.skyTextureId;
-        return skyTextureId != UINT32_MAX && !context.scene->GetSettings()->debug.enableDebugVisibility;
+        bool enabled = context.scene->GetSettings()->environment.enableSky;
+        return enabled && skyTextureId != UINT32_MAX && !context.scene->GetSettings()->debug.enableDebugVisibility;
     }
 
     void SkySpherePass::Initialize() {
@@ -121,6 +122,7 @@ namespace Syn {
         pc->mappingType = envSettings.skyMode == SkyMode::EquirectangularTexture ? 0 : 1;
         pc->skyIntensity = envSettings.skyIntensity;
         pc->skyRotationMatrix = rotMat;
+        pc->skyTint = envSettings.skyTint;
 
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }

@@ -5,6 +5,8 @@
 
 struct SkySpherePC {
     mat4 skyRotationMatrix;
+    vec3 skyTint;
+    uint padding;
     uint64_t frameGlobalContextBufferAddr;
     uint skyTextureIndex;
     uint samplerIndex;
