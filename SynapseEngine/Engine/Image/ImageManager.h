@@ -17,7 +17,7 @@ namespace Syn {
 
     using ImageSourceFactory = std::function<std::unique_ptr<IImageSource>()>;
 
-    class SYN_API ImageManager : public BaseResourceManager<Texture> {
+    class SYN_API ImageManager : public AddressResourceManager<Texture, uint32_t> {
     public:
         static constexpr uint32_t MAX_IMAGES = 2048;
         static constexpr uint32_t MAX_SAMPLERS = 32;

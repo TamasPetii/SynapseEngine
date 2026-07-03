@@ -16,9 +16,9 @@ namespace Syn {
             VK_QUERY_PIPELINE_STATISTIC_VERTEX_SHADER_INVOCATIONS_BIT |
             VK_QUERY_PIPELINE_STATISTIC_CLIPPING_INVOCATIONS_BIT |
             VK_QUERY_PIPELINE_STATISTIC_CLIPPING_PRIMITIVES_BIT |
-            VK_QUERY_PIPELINE_STATISTIC_FRAGMENT_SHADER_INVOCATIONS_BIT;
-            //VK_QUERY_PIPELINE_STATISTIC_TASK_SHADER_INVOCATIONS_BIT_EXT |
-            //VK_QUERY_PIPELINE_STATISTIC_MESH_SHADER_INVOCATIONS_BIT_EXT;
+            VK_QUERY_PIPELINE_STATISTIC_FRAGMENT_SHADER_INVOCATIONS_BIT /* |
+            VK_QUERY_PIPELINE_STATISTIC_TASK_SHADER_INVOCATIONS_BIT_EXT | 
+            VK_QUERY_PIPELINE_STATISTIC_MESH_SHADER_INVOCATIONS_BIT_EXT */;
 
         for (uint32_t i = 0; i < framesInFlight; ++i) {
             _pools[i] = std::make_unique<Vk::PipelineStatisticsQueryPool>(MAX_QUERIES_PER_FRAME, flags);
@@ -65,13 +65,14 @@ namespace Syn {
                 RenderPassStats passStat;
                 passStat.groupName = m.groupName;
                 passStat.passName = m.passName;
-
+                 
                 passStat.inputAssemblyVertices = results[offset + 0];
                 passStat.inputAssemblyPrimitives = results[offset + 1];
                 passStat.vertexShaderInvocations = results[offset + 2];
                 passStat.clippingInvocations = results[offset + 3];
                 passStat.clippingPrimitives = results[offset + 4];
                 passStat.fragmentShaderInvocations = results[offset + 5];
+                passStat.meshShaderInvocations = results[offset + 6];
                 //passStat.taskShaderInvocations = results[offset + 6];
                 //passStat.meshShaderInvocations = results[offset + 7];
 

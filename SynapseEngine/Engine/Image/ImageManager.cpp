@@ -10,14 +10,14 @@
 #include "Engine/Image/Source/Procedural/DefaultImageSource.h"
 #include "Engine/Vk/Descriptor/DescriptorLayoutBuilder.h";
 
-namespace Syn {
-
+namespace Syn 
+{
     ImageManager::ImageManager(
         uint32_t framesInFlight,
         std::shared_ptr<ImageBuilder> builder,
         std::unique_ptr<IGpuImageUploader> uploader,
         std::unique_ptr<ICpuImageExtractor> cpuExtractor)
-		: 
+		: AddressResourceManager<Texture, uint32_t>(framesInFlight, 1024, 256, 512),
 		_framesInFlight(framesInFlight),
         _builder(builder), 
         _uploader(std::move(uploader)), 
@@ -339,6 +339,16 @@ namespace Syn {
                 entry.resource->image->GetView()
             );
         }
+
+        uint32_t samplerIndex = GetSamplerIndex("LinearAniso");
+        bool invertTangent = false;
+
+        uint32_t textureData = (samplerIndex & 0x7FFFFFFF);
+        if (invertTangent) {
+            textureData |= (1u << 31);
+        }
+
+        WriteAddress(descriptorIndex, textureData);
 
         entry.resource->transientCpuData.reset();
         entry.resource->transientGpuData.reset();

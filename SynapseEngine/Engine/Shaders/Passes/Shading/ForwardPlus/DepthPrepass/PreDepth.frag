@@ -37,7 +37,7 @@ void main() {
     vec2 finalUV = inUV * mat.uvScale;
 
     // 2. Evaluate Albedo & Alpha
-    vec4 albedoAlpha = EvaluateAlbedoAlpha(mat, finalUV);
+    vec4 albedoAlpha = EvaluateAlbedoAlpha(ctx.textureMetadataBufferAddr, mat, finalUV);
     if (albedoAlpha.a < ctx.alphaLimitDiscard) {
         discard;
     }

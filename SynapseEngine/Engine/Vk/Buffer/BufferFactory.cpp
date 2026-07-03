@@ -43,6 +43,14 @@ namespace Syn::Vk {
             buffer->_persistentMappedData = allocResultInfo.pMappedData;
             buffer->_isMapped = true;
         }
+        
+        if (!buffer->GetConfig().debugName.empty()) {
+            device->SetDebugName(
+                VK_OBJECT_TYPE_BUFFER,
+                (uint64_t)buffer->Handle(),
+                buffer->GetConfig().debugName.c_str()
+            );
+        }
     }
 
     std::unique_ptr<Buffer> BufferFactory::Create(const BufferConfig& config) {

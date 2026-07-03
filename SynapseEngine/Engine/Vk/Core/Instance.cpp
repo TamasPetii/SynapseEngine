@@ -70,7 +70,6 @@ namespace Syn::Vk {
         if (_validationEnabled)
             extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
-
         std::vector<const char*> layers;
         if (_validationEnabled)
             layers.push_back("VK_LAYER_KHRONOS_validation");

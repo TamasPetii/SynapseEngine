@@ -37,8 +37,11 @@ namespace Syn {
         auto modelManager = ServiceLocator::GetModelManager();
         auto materialManager = ServiceLocator::GetMaterialManager();
         auto animationManager = ServiceLocator::GetAnimationManager();
+		auto imageManager = ServiceLocator::GetImageManager();
 
         FrameGlobalContext ctx = {};
+
+		ctx.textureMetadataBufferAddr = imageManager->GetAddressBufferDeviceAddress();
 
         ctx.globalDrawCountBufferAddr = drawData->Models.drawCountBuffer.GetAddress(fIdx);
         ctx.globalInstanceIndexBufferAddr = drawData->Models.instanceBuffer.GetAddress(fIdx);

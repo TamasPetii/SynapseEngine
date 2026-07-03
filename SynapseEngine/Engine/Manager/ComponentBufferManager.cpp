@@ -9,6 +9,7 @@ namespace Syn
     void ComponentBufferManager::RegisterBuffer(const std::string& name, uint32_t elementSize, std::function<uint32_t()> sizeCallback, std::function<bool()> readyCallback, ComponentMemoryType memoryType)
     {
         Vk::BufferConfig config;
+		config.debugName = name;
         config.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
         config.useDeviceAddress = true;
 
