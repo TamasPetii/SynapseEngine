@@ -24,6 +24,7 @@ namespace Syn {
     protected:
         void StartGpuUpload(EntryType& entry) override;
         void FinalizeResource(EntryType& entry) override;
+        void FlushDirtyResources() override;
     private:
         std::shared_ptr<AnimationBuilder> _builder;
         std::unique_ptr<IGpuAnimationUploader> _uploader;

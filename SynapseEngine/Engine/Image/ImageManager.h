@@ -46,6 +46,7 @@ namespace Syn {
         Vk::Sampler* GetSampler(const std::string& name) const;
         uint32_t GetSamplerIndex(const std::string& name) const;
     protected:
+        void FlushDirtyResources() override;
         void StartGpuUpload(EntryType& entry) override;
         void FinalizeResource(EntryType& entry) override;
     private:

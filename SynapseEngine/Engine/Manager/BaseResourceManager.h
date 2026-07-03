@@ -62,6 +62,7 @@ namespace Syn {
         virtual void Update();
         void WaitForResource(uint32_t id) const;
         void SetResourceState(uint32_t id, ResourceState newState);
+        void MarkDirty(uint32_t id);
 
         size_t GetResourceCount() const;
         ResourceState GetEntryState(uint32_t id) const;
@@ -78,6 +79,11 @@ namespace Syn {
         uint32_t InternalLoadSync(const std::string & key, std::function<std::shared_ptr<TResource>()> task);
         uint32_t InternalLoad(const std::string & key, std::function<std::shared_ptr<TResource>()> task, bool isAsync);
         std::shared_ptr<TResource> GetResource(uint32_t id, bool internalCall) const;
+        
+        virtual void FlushDirtyResources() {}
+
+        template <typename Func>
+        void ProcessDirtyReadyEntries(Func&& processFunc);
     protected:
         void SubmitGpuRequest(const EntryType & entry, Vk::GpuUploadRequest && request);
         virtual void StartGpuUpload(EntryType & entry) = 0;
@@ -88,7 +94,38 @@ namespace Syn {
         std::vector<EntryType> _entries;
         std::unordered_map<std::string, uint32_t> _pathToId;
         mutable std::recursive_mutex _mutex;
+
+        std::vector<uint8_t> _dirtyFlags;
+        bool _hasDirty = false;
     };
+
+    template <typename TResource>
+    template <typename Func>
+    void BaseResourceManager<TResource>::ProcessDirtyReadyEntries(Func&& processFunc) {
+        uint32_t count = static_cast<uint32_t>(_entries.size());
+        if (count == 0) return;
+
+        for (uint32_t i = count; i-- > 0; ) {
+            if (_dirtyFlags[i]) {
+                const auto& entry = _entries[i];
+
+                if (entry.state != ResourceState::Ready) continue;
+
+                processFunc(i, entry);
+            }
+        }
+    }
+
+    template <typename TResource>
+    void BaseResourceManager<TResource>::MarkDirty(uint32_t id) {
+        std::lock_guard lock(_mutex);
+        if (id >= _dirtyFlags.size()) {
+            _dirtyFlags.resize(id + 1, 0);
+        }
+
+        _dirtyFlags[id] = 1;
+        _hasDirty = true;
+    }
 
     template <typename TResource>
     void BaseResourceManager<TResource>::Update() {
@@ -108,6 +145,15 @@ namespace Syn {
                     }
                 }
             }
+        }
+
+        if (_hasDirty) {
+            FlushDirtyResources();
+
+            std::fill(_dirtyFlags.begin(), _dirtyFlags.end(), 0);
+            _hasDirty = false;
+
+            _version.fetch_add(1, std::memory_order_release);
         }
     }
 
@@ -172,6 +218,8 @@ namespace Syn {
                 OnEntryCreated(newId);
             }
         }
+
+        _dirtyFlags.resize(_entries.size(), 0);
 
         return newId;
     }

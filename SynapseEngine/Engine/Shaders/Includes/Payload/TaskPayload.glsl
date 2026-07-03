@@ -6,6 +6,7 @@ struct TaskPayload {
     uint entityId;
     uint transformDenseIdx;
     uint activeCameraDenseIdx;
+    uint modelDenseIndex;
     uint meshletIndices[32];
 };
 

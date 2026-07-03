@@ -49,6 +49,7 @@ void main() {
     uint lightEntity = GET_DIRECTION_VISIBLE_SHADOW_LIGHT(ctx.directionLightVisibleShadowIndexBufferAddr, lightIdx);
     uint lightShadowDenseIdx = GET_SPARSE_INDEX(ctx.directionLightShadowSparseMapBufferAddr, lightEntity);
     uint lightDenseIdx = GET_SPARSE_INDEX(ctx.directionLightSparseMapBufferAddr, lightEntity);
+    uint modelDenseIndex = GET_SPARSE_INDEX(ctx.modelSparseMapBufferAddr, entityId);
 
     // 2. Initialize payload and shared memory
     if (threadIdx == 0) {
@@ -58,6 +59,7 @@ void main() {
         payload.transformDenseIdx = transformDenseIndex;
         payload.lightShadowDenseIdx = lightShadowDenseIdx;
         payload.cascadeIdx = cascadeIdx;
+        payload.modelDenseIndex = modelDenseIndex;
     }
 
     barrier();
@@ -75,7 +77,7 @@ void main() {
     uint currentMeshletIdx = meshletGroupOffset + threadIdx;
     bool isVisible = (currentMeshletIdx < submeshData.meshletCount);
 
-    if (transformDenseIndex == INVALID_INDEX || lightShadowDenseIdx == INVALID_INDEX || lightDenseIdx == INVALID_INDEX) {
+    if (transformDenseIndex == INVALID_INDEX || lightShadowDenseIdx == INVALID_INDEX || lightDenseIdx == INVALID_INDEX || modelDenseIndex == INVALID_INDEX) {
         isVisible = false;
     }
 

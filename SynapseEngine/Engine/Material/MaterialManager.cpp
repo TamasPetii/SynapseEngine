@@ -54,13 +54,9 @@ namespace Syn {
 
     void MaterialManager::StartGpuUpload(EntryType& entry) {
         uint32_t entryIndex = _pathToId.at(entry.path);
-        size_t offset = entryIndex * sizeof(GpuMaterial);
-
-        auto materialGPU = GpuMaterial(*entry.resource);
-        WriteAddress(entryIndex, materialGPU);
 
         entry.state = ResourceState::Ready;
-        _version.fetch_add(1, std::memory_order_release);
+        MarkDirty(entryIndex);
 
         Info("Material '{}' is ready", entry.path);
     }
@@ -72,5 +68,14 @@ namespace Syn {
     }
 
     void MaterialManager::FinalizeResource(EntryType& entry) {
+    }
+
+    void MaterialManager::FlushDirtyResources() {
+        ProcessDirtyReadyEntries(
+            [this](uint32_t index, const EntryType& entry) {
+                GpuMaterial gpuMat(*entry.resource);
+                WriteAddress(index, gpuMat);
+            }
+        );
     }
 }

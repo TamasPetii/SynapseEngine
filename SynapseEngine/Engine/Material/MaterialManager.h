@@ -17,6 +17,7 @@ namespace Syn {
         uint32_t LoadMaterial(const std::string& name, const MaterialInfo& info);
         uint32_t LoadMaterialDirect(const std::string& name, const Material& material);
     protected:
+        void FlushDirtyResources() override;
         void StartGpuUpload(EntryType& entry) override;
         void FinalizeResource(EntryType& entry) override;
     private:

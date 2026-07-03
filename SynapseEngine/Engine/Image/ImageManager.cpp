@@ -317,8 +317,8 @@ namespace Syn
                 entry.stagingBuffer.reset();
 
                 SetResourceState(entryId, ResourceState::Ready);
+                MarkDirty(entryId);
 
-                _version.fetch_add(1, std::memory_order_release);
                 Info("Image '{}' is ready", entry.path);
             },
             .needsGraphics = needsGraphics
@@ -331,26 +331,31 @@ namespace Syn
     {
         _cpuExtractor->Extract(*(entry.resource->transientGpuData), entry.resource->cpuData);
 
-        uint32_t descriptorIndex = _pathToId.at(entry.path);
-        if (descriptorIndex != 0) {
-            _bindlessBuffer->WriteSampledImage(
-                BINDING_TEXTURES,
-                descriptorIndex,
-                entry.resource->image->GetView()
-            );
-        }
-
-        uint32_t samplerIndex = GetSamplerIndex("LinearAniso");
-        bool invertTangent = false;
-
-        uint32_t textureData = (samplerIndex & 0x7FFFFFFF);
-        if (invertTangent) {
-            textureData |= (1u << 31);
-        }
-
-        WriteAddress(descriptorIndex, textureData);
-
         entry.resource->transientCpuData.reset();
         entry.resource->transientGpuData.reset();
+    }
+
+    void ImageManager::FlushDirtyResources() {
+        ProcessDirtyReadyEntries(
+            [this](uint32_t index, const EntryType& entry) {
+                if (!entry.resource->image) return;
+
+                _bindlessBuffer->WriteSampledImage(
+                    BINDING_TEXTURES,
+                    index,
+                    entry.resource->image->GetView()
+                );
+
+                uint32_t samplerIndex = GetSamplerIndex("LinearAniso");
+                bool invertTangent = false;
+
+                uint32_t textureData = (samplerIndex & 0x7FFFFFFF);
+                if (invertTangent) {
+                    textureData |= (1u << 31);
+                }
+
+                WriteAddress(index, textureData);
+            }
+        );
     }
 }

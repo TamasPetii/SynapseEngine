@@ -23,6 +23,7 @@ namespace Syn {
             MaterialLoadCallback materialLoadCallback = nullptr);
         ~ModelManager() = default;
 
+
         uint32_t LoadModelAsync(const std::string& filePath);
         uint32_t LoadModelFromSourceAsync(const std::string& name, MeshSourceFactory factory);
         uint32_t LoadModelFromStaticMeshAsync(const std::string& name, StaticMeshFactory factory);
@@ -31,6 +32,7 @@ namespace Syn {
         uint32_t LoadModelFromSourceSync(const std::string& name, MeshSourceFactory factory);
         uint32_t LoadModelFromStaticMeshSync(const std::string& name, StaticMeshFactory factory);
     protected:
+		void FlushDirtyResources() override;
         void StartGpuUpload(EntryType& entry) override;
         void FinalizeResource(EntryType& entry) override;
     private:

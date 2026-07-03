@@ -43,6 +43,7 @@ void main() {
     uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
     uint mainCameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
     uint activeCameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
+    uint modelDenseIndex = GET_SPARSE_INDEX(ctx.modelSparseMapBufferAddr, entityId);
 
     // 1. Initialize shared memory and payload
     if (threadIdx == 0) {
@@ -51,6 +52,7 @@ void main() {
         payload.entityId = entityId;
         payload.transformDenseIdx = transformDenseIndex;
         payload.activeCameraDenseIdx = activeCameraDenseIndex;
+        payload.modelDenseIndex = modelDenseIndex;
     }
 
     barrier();
@@ -67,7 +69,7 @@ void main() {
     uint currentMeshletIdx = meshletGroupOffset + threadIdx;
     bool isVisible = (currentMeshletIdx < submeshData.meshletCount);
 
-    if (transformDenseIndex == INVALID_INDEX || mainCameraDenseIndex == INVALID_INDEX) {
+    if (transformDenseIndex == INVALID_INDEX || mainCameraDenseIndex == INVALID_INDEX || modelDenseIndex == INVALID_INDEX) {
         isVisible = false;
     }
 

@@ -103,8 +103,8 @@ void main() {
 
         // Material Resolution
         uint meshIndex = UNPACK_UINT16_Y(v.packedIndex);
-        ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, GET_SPARSE_INDEX(ctx.modelSparseMapBufferAddr, entityId));
-        uint materialId = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, modelComp.materialOffset + meshIndex);
+        uint materialOffset = GET_MODEL_COMP(ctx.modelBufferAddr, payload.modelDenseIndex).materialOffset;
+        uint materialId = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, materialOffset + meshIndex);
 
         // Final Transform and Output
         gl_MeshVerticesEXT[i].gl_Position = camera.viewProjVulkan * transform.transform * finalMat * vec4(v.position, 1.0);

@@ -266,7 +266,7 @@ namespace Syn
 		pipeline->AddPass(std::make_unique<MeshletOpaqueDepthPrepass>(MaterialRenderType::Opaque2Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueDepthPrepass>(MaterialRenderType::Opaque1Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueDepthPrepass>(MaterialRenderType::Opaque2Sided));
-
+        
         //Deferred Depth Opaque Prepasses
 		pipeline->AddPass(std::make_unique<OpaqueDeferredTransitionPass>());
 		pipeline->AddPass(std::make_unique<MeshletOpaqueDeferredPass>(MaterialRenderType::Opaque1Sided));
@@ -329,7 +329,6 @@ namespace Syn
 		pipeline->AddPass(std::make_unique<MeshletOpaqueForwardPass>(MaterialRenderType::Opaque2Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueForwardPass>(MaterialRenderType::Opaque1Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueForwardPass>(MaterialRenderType::Opaque2Sided));
-
         // SkySphere
         pipeline->AddPass(std::make_unique<SkySpherePass>());
 

@@ -19,9 +19,17 @@ namespace Syn {
         return result;
     }
 
-    uint32_t MaterialApiImpl::GetSelectedMaterial() const { return _selectedMaterial; }
-    void MaterialApiImpl::SetSelectedMaterial(uint32_t id) { _selectedMaterial = id; }
-    uint64_t MaterialApiImpl::GetVersion() const { return _materialManager ? _materialManager->GetVersion() : 0; }
+    uint32_t MaterialApiImpl::GetSelectedMaterial() const { 
+        return _selectedMaterial;
+    }
+
+    void MaterialApiImpl::SetSelectedMaterial(uint32_t id) { 
+        _selectedMaterial = id;
+    }
+
+    uint64_t MaterialApiImpl::GetVersion() const { 
+        return _materialManager ? _materialManager->GetVersion() : 0;
+    }
 
     std::string MaterialApiImpl::GetMaterialName(uint32_t materialId) const {
         auto mats = GetAllMaterials();
@@ -84,11 +92,11 @@ namespace Syn {
 
     void MaterialApiImpl::UpdateMaterialData(uint32_t materialId, const Material& material) {
         if (!_materialManager || materialId == INVALID_MATERIAL_ID) return;
-
         auto resource = _materialManager->GetResource(materialId);
+
         if (resource) {
             *resource = material;
-            //_materialManager->MarkDirty(materialId) 
+            _materialManager->MarkDirty(materialId);
         }
     }
 }

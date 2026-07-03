@@ -113,7 +113,7 @@ namespace Syn
                 if constexpr (ENABLE_DEBUG_LOGGING) {
                     std::string entityName = "Unknown";
                     if (tagPool && tagPool->Has(entity)) entityName = tagPool->Get(entity).name;
-                    Info("[MaterialSystem UPDATE] Frame {}: Entity {} data changed! OldOffset: {}, NewOffset: {}, WasReady: {}", scene->GetSystemContext().frameIndex, entityName, comp.materialOffset, currentOffset);
+                    Info("[MaterialSystem UPDATE] Frame {}: Entity {} data changed! OldOffset: {}, NewOffset: {}", scene->GetSystemContext().frameIndex, entityName, comp.materialOffset, currentOffset);
                 }
 
                 comp.materialOffset = currentOffset;

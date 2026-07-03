@@ -72,7 +72,6 @@ namespace Syn {
                 passStat.clippingInvocations = results[offset + 3];
                 passStat.clippingPrimitives = results[offset + 4];
                 passStat.fragmentShaderInvocations = results[offset + 5];
-                passStat.meshShaderInvocations = results[offset + 6];
                 //passStat.taskShaderInvocations = results[offset + 6];
                 //passStat.meshShaderInvocations = results[offset + 7];
 
