@@ -12,6 +12,7 @@
 #include "Engine/Render/Passes/PostProcess/Bloom/BloomDownsamplePass.h"
 #include "Engine/Render/Passes/PostProcess/Bloom/BloomCompositePass.h"
 #include "Engine/Render/Passes/PostProcess/Outline/SelectionOutlinePass.h"
+#include "Engine/Render/Passes/PostProcess/SkySphere/SkySpherePass.h"
 
 #include "Engine/Render/Passes/Culling/Geometry/GeometryModelCullingPass.h"
 #include "Engine/Render/Passes/Culling/Geometry/GeometryStaticModelCullingPass.h"
@@ -328,6 +329,9 @@ namespace Syn
 		pipeline->AddPass(std::make_unique<MeshletOpaqueForwardPass>(MaterialRenderType::Opaque2Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueForwardPass>(MaterialRenderType::Opaque1Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueForwardPass>(MaterialRenderType::Opaque2Sided));
+
+        // SkySphere
+        pipeline->AddPass(std::make_unique<SkySpherePass>());
 
         // Wireframe Passes
         pipeline->AddPass(std::make_unique<WireframeMeshSetupPass>());

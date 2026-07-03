@@ -16,6 +16,9 @@ namespace Syn
         static constexpr const char* BloomDownsample = "Engine/Shaders/Passes/PostProcess/Bloom/BloomDownsample.comp";
         static constexpr const char* BloomComposite = "Engine/Shaders/Passes/PostProcess/Bloom/BloomComposite.comp";
 
+        static constexpr const char* SkySphereVert = "Engine/Shaders/Passes/PostProcess/SkySphere/SkySphere.vert";
+        static constexpr const char* SkySphereFrag = "Engine/Shaders/Passes/PostProcess/SkySphere/SkySphere.frag";
+
         static constexpr const char* SelectionOutlineFrag = "Engine/Shaders/Passes/PostProcess/Outline/SelectionOutline.frag";
 
         static constexpr const char* StaticSceneAABB = "Engine/Shaders/Passes/Morton/StaticSceneAABB.comp";

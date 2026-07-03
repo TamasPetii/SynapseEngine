@@ -23,6 +23,7 @@
 #include "Engine/Component/Physics/ConvexColliderComponent.h"
 #include "Engine/Component/Physics/MeshColliderComponent.h"
 #include "Engine/Component/Physics/RigidBodyComponent.h"
+#include "Engine/Image/ImageManager.h"
 #include "Engine/Logger/SynLog.h"
 #include "Engine/Utils/PathUtils.h"
 
@@ -101,7 +102,9 @@ namespace Syn
             modelManager->GetResourceIndex(MeshSourceNames::Torus)
         };
 
-        // --- ROOT CONTAINERS ---
+        auto skyTextureId = ServiceLocator::GetImageManager()->LoadImageSync(basePath + "Sky.png");
+        scene.GetSettings()->environment.skyTextureId = skyTextureId;
+
         EntityID rootCameras = scene.CreateEntity();
         registry.AddComponent<TagComponent>(rootCameras);
         registry.GetComponent<TagComponent>(rootCameras).name = "Cameras";
