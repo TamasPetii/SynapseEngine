@@ -29,6 +29,8 @@ namespace Syn {
     class ImageManager;
     class ModelManager;
     class AnimationManager;
+    class IRenderStatCollector;
+    class FrameStatisticsManager;
 }
 
 namespace Syn
@@ -97,6 +99,8 @@ namespace Syn
         std::unique_ptr<ICpuProfiler> _cpuProfiler;
 		std::unique_ptr<Serializer> _serializer;
         std::shared_ptr<MemorySink> _memorySink;
+		std::unique_ptr<IRenderStatCollector> _renderStatCollector;
+		std::unique_ptr<FrameStatisticsManager> _frameStatisticsManager;
 
         std::function<void(uint32_t)> _onGuiFlushCallback;
     };

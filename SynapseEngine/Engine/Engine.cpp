@@ -34,6 +34,8 @@
 
 #include "Engine/Profiler/DefaultGpuProfiler.h"
 #include "Engine/Profiler/DefaultCpuProfiler.h"
+#include "Engine/Statistics/DefaultRenderStatCollector.h"
+#include "Engine/Statistics/FrameStatisticsManager.h"
 
 #include "Engine/Serialization/Serializer.h"
 #include "Engine/Serialization/Archive/DefaultArchiveRegistry.h"
@@ -96,6 +98,7 @@ namespace Syn
 		_renderManager->WaitForFrame(currentFrame);
 
 		ServiceLocator::GetGpuProfiler()->ResolveFrame(currentFrame);
+		ServiceLocator::GetFrameStatisticsManager()->ResolveFrame(currentFrame, ServiceLocator::GetRenderStatCollector());
 
 		if (_onGuiFlushCallback)
 			_onGuiFlushCallback(currentFrame);
@@ -210,17 +213,16 @@ namespace Syn
 
 		_cpuProfiler = std::make_unique<DefaultCpuProfiler>(_frameContext.framesInFlight);
 		ServiceLocator::ProvideCpuProfiler(_cpuProfiler.get());
+
+		_renderStatCollector = std::make_unique<DefaultRenderStatCollector>(_frameContext.framesInFlight);
+		ServiceLocator::ProvideRenderStatCollector(_renderStatCollector.get());
+
+		_frameStatisticsManager = std::make_unique<FrameStatisticsManager>(_frameContext.framesInFlight);
+		ServiceLocator::ProvideFrameStatisticsManager(_frameStatisticsManager.get());
 	}
 
 	void Engine::InitRenderManager(const EngineInitParams& params)
 	{
-		/*
-#ifdef SYN_PERFORMANCE
-		_renderManager = std::move(RendererFactory::CreatePerformanceRenderer(_frameContext.framesInFlight));
-#else
-		_renderManager = std::move(RendererFactory::CreateDeferredRenderer(_frameContext.framesInFlight));
-#endif
-		*/
 		_renderManager = std::move(RendererFactory::CreateDeferredRenderer(_frameContext.framesInFlight));
 		_renderManager->SetGuiRenderCallback(params.onRenderGuiCallback);
 	}
@@ -234,6 +236,8 @@ namespace Syn
 		_inputManager.reset();
 		_gpuProfiler.reset();
 		_cpuProfiler.reset();
+		_renderStatCollector.reset();
+		_frameStatisticsManager.reset();
 		_resourceManager.reset();
 		_gpuUploader.reset();
 		_taskExecutor.reset();
@@ -323,12 +327,6 @@ namespace Syn
 		_sceneManager->RegisterScene("TestLevel", [frames]() {
 			return std::make_unique<Scene>(frames, std::make_unique<TestSceneSource>());
 			});
-
-		/*
-		_sceneManager->RegisterScene("NatureLevel", [frames]() {
-			return std::make_unique<Scene>(frames, std::make_unique<NatureSceneSource>());
-			});
-		*/
 
 		_sceneManager->LoadScene("TestLevel");
 	}

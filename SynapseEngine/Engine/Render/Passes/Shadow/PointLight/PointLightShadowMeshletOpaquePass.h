@@ -12,6 +12,7 @@ namespace Syn {
         std::string GetGroup() const override { return PassGroupNames::ShadowPasses; }
 
         void Initialize() override;
+        bool ShouldCollectStatistics() const override { return true; }
     protected:
         bool ShouldExecute(const RenderContext& context) const override;
         void PrepareFrame(const RenderContext& context) override;

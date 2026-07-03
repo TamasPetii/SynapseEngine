@@ -5,6 +5,7 @@
 #include "Engine/Vk/Context.h"
 #include "Engine/FrameContext.h"
 #include "Engine/Profiler/IGpuProfiler.h"
+#include "Engine/Statistics/IRenderStatCollector.h"
 
 namespace Syn {
 
@@ -51,6 +52,7 @@ namespace Syn {
             return;
 
         ServiceLocator::GetGpuProfiler()->BeginFrame(cmd->Handle(), frameIndex);
+        ServiceLocator::GetRenderStatCollector()->BeginFrame(cmd->Handle(), frameIndex);
 
         if (_preRenderCallback) {
             _preRenderCallback(cmd->Handle(), frameIndex, scene);

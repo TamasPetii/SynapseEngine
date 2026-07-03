@@ -8,6 +8,7 @@ namespace Syn {
         std::string GetName() const override { return "SpotLightSphereWireframePass"; }
         std::string GetGroup() const override { return PassGroupNames::WireframePasses; }
         void Initialize() override;
+        bool ShouldCollectStatistics() const override { return true; }
     protected:
 		bool ShouldExecute(const RenderContext& context) const override;
         void PrepareFrame(const RenderContext& context) override;

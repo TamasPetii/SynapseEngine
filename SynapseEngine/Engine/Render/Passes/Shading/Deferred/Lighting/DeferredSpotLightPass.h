@@ -10,6 +10,7 @@ namespace Syn {
         std::string GetName() const override { return "DeferredSpotLightPass"; }
         std::string GetGroup() const override { return PassGroupNames::DeferredLightingPasses; }
         void Initialize() override;
+        bool ShouldCollectStatistics() const override { return true; }
     protected:
 		bool ShouldExecute(const RenderContext& context) const override;
         void BindDescriptors(const RenderContext& context) override;
