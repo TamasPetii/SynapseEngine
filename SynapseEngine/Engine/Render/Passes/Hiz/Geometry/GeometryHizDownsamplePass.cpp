@@ -30,7 +30,7 @@ namespace Syn {
     }
 
     void GeometryHizDownsamplePass::PrepareFrame(const RenderContext& context) {
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
 
         _imageTransitions.push_back({
@@ -46,7 +46,7 @@ namespace Syn {
         auto imageManager = ServiceLocator::GetImageManager();
         auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge);
 
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
 
         uint32_t mipLevels = depthPyramid->GetConfig().mipLevels;

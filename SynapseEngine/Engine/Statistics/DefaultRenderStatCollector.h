@@ -31,7 +31,6 @@ namespace Syn {
         const std::vector<RenderPassStats>& GetStats(uint32_t frameIndex) const override;
     private:
         static constexpr uint32_t MAX_QUERIES_PER_FRAME = 512;
-        static constexpr uint32_t STATS_PER_QUERY = 8;
 
         uint32_t _framesInFlight;
         std::vector<uint32_t> _queryCounters;

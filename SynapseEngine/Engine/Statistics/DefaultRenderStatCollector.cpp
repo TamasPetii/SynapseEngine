@@ -1,4 +1,5 @@
 #include "DefaultRenderStatCollector.h"
+#include <bit>
 
 namespace Syn {
 
@@ -49,7 +50,9 @@ namespace Syn {
         if (measurements.empty()) return;
 
         uint32_t totalQueries = _queryCounters[frameIndex];
-        std::vector<uint64_t> results(totalQueries * STATS_PER_QUERY);
+		auto activeFlags = _pools[frameIndex]->GetFlags();
+        uint32_t activeStatCount = std::popcount(static_cast<uint32_t>(activeFlags));
+        std::vector<uint64_t> results(totalQueries * activeStatCount);
 
         if (_pools[frameIndex]->GetResults(0, totalQueries, results, false)) {
             auto& stats = _resolvedStats[frameIndex];
@@ -59,21 +62,25 @@ namespace Syn {
             for (size_t i = 0; i < measurements.size(); ++i) {
                 const auto& m = measurements[i];
 
-                //uint32_t offset = m.queryIndex * STATS_PER_QUERY;
-                uint32_t offset = m.queryIndex * 6;
-
                 RenderPassStats passStat;
                 passStat.groupName = m.groupName;
                 passStat.passName = m.passName;
                  
-                passStat.inputAssemblyVertices = results[offset + 0];
-                passStat.inputAssemblyPrimitives = results[offset + 1];
-                passStat.vertexShaderInvocations = results[offset + 2];
-                passStat.clippingInvocations = results[offset + 3];
-                passStat.clippingPrimitives = results[offset + 4];
-                passStat.fragmentShaderInvocations = results[offset + 5];
-                //passStat.taskShaderInvocations = results[offset + 6];
-                //passStat.meshShaderInvocations = results[offset + 7];
+                uint32_t localIndex = 0;
+                uint32_t offset = m.queryIndex * activeStatCount;
+
+                auto extractStat = [&](VkQueryPipelineStatisticFlags flag) -> uint64_t {
+                    return (activeFlags & flag) ? results[offset + localIndex++] : 0;
+                    };
+
+                passStat.inputAssemblyVertices = extractStat(VK_QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_VERTICES_BIT);
+                passStat.inputAssemblyPrimitives = extractStat(VK_QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_PRIMITIVES_BIT);
+                passStat.vertexShaderInvocations = extractStat(VK_QUERY_PIPELINE_STATISTIC_VERTEX_SHADER_INVOCATIONS_BIT);
+                passStat.clippingInvocations = extractStat(VK_QUERY_PIPELINE_STATISTIC_CLIPPING_INVOCATIONS_BIT);
+                passStat.clippingPrimitives = extractStat(VK_QUERY_PIPELINE_STATISTIC_CLIPPING_PRIMITIVES_BIT);
+                passStat.fragmentShaderInvocations = extractStat(VK_QUERY_PIPELINE_STATISTIC_FRAGMENT_SHADER_INVOCATIONS_BIT);
+                passStat.taskShaderInvocations = extractStat(VK_QUERY_PIPELINE_STATISTIC_TASK_SHADER_INVOCATIONS_BIT_EXT);
+                passStat.meshShaderInvocations = extractStat(VK_QUERY_PIPELINE_STATISTIC_MESH_SHADER_INVOCATIONS_BIT_EXT);
 
                 stats.push_back(passStat);
             }

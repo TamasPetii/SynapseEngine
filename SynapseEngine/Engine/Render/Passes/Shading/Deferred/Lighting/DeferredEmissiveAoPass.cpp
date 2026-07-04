@@ -62,7 +62,7 @@ namespace Syn {
     }
 
     void DeferredEmissiveAoPass::PrepareFrame(const RenderContext& context) {
-        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
         _graphicsState.renderArea = extent;
@@ -94,7 +94,7 @@ namespace Syn {
     }
 
     void DeferredEmissiveAoPass::BindDescriptors(const RenderContext& context) {
-        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         auto imageManager = ServiceLocator::GetImageManager();
         auto nearestSampler = imageManager->GetSampler(SamplerNames::NearestClampEdge)->Handle();
 		auto ssaoSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge)->Handle();

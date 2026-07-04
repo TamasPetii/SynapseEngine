@@ -27,7 +27,7 @@ namespace Syn {
     }
 
     void SsaoBlurPass::PrepareFrame(const RenderContext& context) {
-        auto currGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto currGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
         auto ssaoAo = currGroup->GetImage(RenderTargetNames::SsaoAo);
         auto ssaoAoInt = currGroup->GetImage(RenderTargetNames::SsaoAoIntermediate);
@@ -57,7 +57,7 @@ namespace Syn {
     }
 
     void SsaoBlurPass::BindDescriptors(const RenderContext& context) {
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         auto imageManager = ServiceLocator::GetImageManager();
 
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
@@ -84,7 +84,7 @@ namespace Syn {
     }
 
     void SsaoBlurPass::Dispatch(const RenderContext& context) {
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         auto imageManager = ServiceLocator::GetImageManager();
         auto ssaoAo = rtGroup->GetImage(RenderTargetNames::SsaoAo);
 

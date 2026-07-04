@@ -32,7 +32,6 @@ void main() {
                                     ? FINALIZE_VIS_MS(partial, gl_PrimitiveID)
                                     : FINALIZE_VIS_TRADITIONAL(partial, gl_PrimitiveID);
     
-    /*
     // 1. Fetch Material
     Material mat = GET_MATERIAL(ctx.materialBufferAddr, materialId);
     vec2 finalUV = inUV * mat.uvScale;
@@ -42,7 +41,6 @@ void main() {
     if (albedoAlpha.a < ctx.alphaLimitDiscard) {
         discard;
     }
-    */
 
     outId = uvec2(packedEntity, finalPayload);
 }

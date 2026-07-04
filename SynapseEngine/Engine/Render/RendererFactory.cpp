@@ -157,7 +157,6 @@
 #include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowTraditionalOpaquePass.h"
 #include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowMeshletOpaquePass.h"
 
-
 #include "Engine/Render/Passes/Ssao/SsaoInitPass.h"
 #include "Engine/Render/Passes/Ssao/SsaoPass.h"
 #include "Engine/Render/Passes/Ssao/SsaoBlurPass.h"
@@ -169,7 +168,7 @@
 
 namespace Syn 
 {
-    std::unique_ptr<RenderManager> RendererFactory::CreateDeferredRenderer(uint32_t framesInFlight) {
+    std::unique_ptr<RenderManager> RendererFactory::CreateSceneRenderer(uint32_t framesInFlight) {
         auto renderManager = std::make_unique<RenderManager>(framesInFlight);
         auto rtManager = renderManager->GetRenderTargetManager();
 
@@ -386,9 +385,9 @@ namespace Syn
         pipeline->AddPass(std::make_unique<GuiPass>());
         pipeline->InitializeAll();
 
-        renderManager->RegisterPipeline(RenderPipelineNames::DeferredPipeline, std::move(pipeline));
+        renderManager->RegisterPipeline(RenderPipelineNames::ScenePipeline, std::move(pipeline));
 
-        rtManager->CreateGroup(RenderTargetGroupNames::Deferred);
+        rtManager->CreateGroup(RenderTargetGroupNames::Main);
 
         uint32_t initWidth = 4;
         uint32_t initHeight = 4;
@@ -400,7 +399,7 @@ namespace Syn
         mainImageSpec.format = VK_FORMAT_R16G16B16A16_SFLOAT;
         mainImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
         mainImageSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::Main, mainImageSpec);
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::Main, mainImageSpec);
 
         Vk::ImageConfig colorImageSpec{};
         colorImageSpec.width = initWidth;
@@ -421,8 +420,7 @@ namespace Syn
             .swizzle = { VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_ONE }
             });
 
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::ColorMetallic, colorImageSpec);
-
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::ColorMetallic, colorImageSpec);
 
         Vk::ImageConfig normalImageSpec{};
         normalImageSpec.width = initWidth;
@@ -444,7 +442,7 @@ namespace Syn
             .swizzle = { VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_ONE }
             });
 
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::NormalRoughness, normalImageSpec);
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::NormalRoughness, normalImageSpec);
 
         Vk::ImageConfig emissiveAoImageSpec{};
         emissiveAoImageSpec.width = initWidth;
@@ -466,7 +464,7 @@ namespace Syn
             .swizzle = { VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_ONE }
             });
 
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::EmissiveAo, emissiveAoImageSpec);
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::EmissiveAo, emissiveAoImageSpec);
 
         Vk::ImageConfig transparentAccumSpec{};
         transparentAccumSpec.width = initWidth;
@@ -475,7 +473,7 @@ namespace Syn
         transparentAccumSpec.format = VK_FORMAT_R16G16B16A16_SFLOAT;
         transparentAccumSpec.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
         transparentAccumSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::TransparentAccum, transparentAccumSpec);
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::TransparentAccum, transparentAccumSpec);
 
         Vk::ImageConfig transparentRevealSpec{};
         transparentRevealSpec.width = initWidth;
@@ -484,7 +482,7 @@ namespace Syn
         transparentRevealSpec.format = VK_FORMAT_R8_UNORM; 
         transparentRevealSpec.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
         transparentRevealSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::TransparentReveal, transparentRevealSpec);
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::TransparentReveal, transparentRevealSpec);
 
         Vk::ImageConfig entityImageSpec{};
         entityImageSpec.width = initWidth;
@@ -493,7 +491,7 @@ namespace Syn
         entityImageSpec.format = VK_FORMAT_R32G32_UINT;
         entityImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         entityImageSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::EntityIndex, entityImageSpec);
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::EntityIndex, entityImageSpec);
 
         Vk::ImageConfig depthPyramidImageSpec{};
         depthPyramidImageSpec.width = initWidth;
@@ -521,7 +519,7 @@ namespace Syn
             .perMipViews = true
             });
 
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::DepthPyramid, depthPyramidImageSpec);
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::DepthPyramid, depthPyramidImageSpec);
 
         Vk::ImageConfig bloomImageSpec{};
         bloomImageSpec.width = initWidth;
@@ -537,7 +535,7 @@ namespace Syn
             .perMipViews = true
             });
 
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::Bloom, bloomImageSpec);
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::Bloom, bloomImageSpec);
 
         Vk::ImageConfig opaqueDepthSpec{};
         opaqueDepthSpec.width = initWidth;
@@ -546,7 +544,7 @@ namespace Syn
         opaqueDepthSpec.format = VK_FORMAT_D32_SFLOAT;
         opaqueDepthSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         opaqueDepthSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::OpaqueDepth, opaqueDepthSpec);
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::OpaqueDepth, opaqueDepthSpec);
 
         Vk::ImageConfig transparentDepthSpec{};
         transparentDepthSpec.width = initWidth;
@@ -555,7 +553,7 @@ namespace Syn
         transparentDepthSpec.format = VK_FORMAT_D32_SFLOAT;
         transparentDepthSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         transparentDepthSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::TransparentDepth, transparentDepthSpec);
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::TransparentDepth, transparentDepthSpec);
 
         Vk::ImageConfig volumetricAoImageSpec{};
         volumetricAoImageSpec.width = initWidth;
@@ -564,7 +562,7 @@ namespace Syn
         volumetricAoImageSpec.format = VK_FORMAT_R16_SFLOAT;
         volumetricAoImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
         volumetricAoImageSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::SsaoAo, volumetricAoImageSpec);
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::SsaoAo, volumetricAoImageSpec);
 
         Vk::ImageConfig volumetricAoIntermediateImageSpec{};
         volumetricAoIntermediateImageSpec.width = initWidth;
@@ -573,7 +571,7 @@ namespace Syn
         volumetricAoIntermediateImageSpec.format = VK_FORMAT_R16_SFLOAT;
         volumetricAoIntermediateImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
         volumetricAoIntermediateImageSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        rtManager->AddAttachment(RenderTargetGroupNames::Deferred, RenderTargetNames::SsaoAoIntermediate, volumetricAoIntermediateImageSpec);
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::SsaoAoIntermediate, volumetricAoIntermediateImageSpec);
 
         return renderManager;
     }

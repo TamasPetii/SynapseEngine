@@ -28,7 +28,7 @@ namespace Syn {
     }
 
     void BloomCompositePass::PrepareFrame(const RenderContext& context) {
-        auto rt = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto rt = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         auto main = rt->GetImage(RenderTargetNames::Main);
         auto bloom = rt->GetImage(RenderTargetNames::Bloom);
 
@@ -48,7 +48,7 @@ namespace Syn {
     }
 
     void BloomCompositePass::BindDescriptors(const RenderContext& context) {
-        auto rt = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto rt = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         auto main = rt->GetImage(RenderTargetNames::Main);
         auto bloom = rt->GetImage(RenderTargetNames::Bloom);
         auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::LinearClampEdge);
@@ -84,7 +84,7 @@ namespace Syn {
     }
 
     void BloomCompositePass::Dispatch(const RenderContext& context) {
-        auto rt = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto rt = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
         uint32_t width = rt->GetWidth();
         uint32_t height = rt->GetHeight();

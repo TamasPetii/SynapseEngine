@@ -36,7 +36,7 @@ namespace Syn {
     }
 
     void SsaoPass::BindDescriptors(const RenderContext& context) {
-        auto currGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto currGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         auto imageManager = ServiceLocator::GetImageManager();
 
         auto noiseTexture = imageManager->GetResource(ImageNames::SsaoNoiseTexture);
@@ -73,7 +73,7 @@ namespace Syn {
     void SsaoPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         uint32_t fIdx = context.frameIndex;
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, fIdx);
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, fIdx);
 
         auto imageManager = ServiceLocator::GetImageManager();
         auto noiseTexture = imageManager->GetResource(ImageNames::SsaoNoiseTexture);
@@ -91,7 +91,7 @@ namespace Syn {
     }
 
     void SsaoPass::Dispatch(const RenderContext& context) {
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
         uint32_t width = rtGroup->GetWidth();
         uint32_t height = rtGroup->GetHeight();

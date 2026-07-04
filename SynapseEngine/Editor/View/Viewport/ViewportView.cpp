@@ -221,22 +221,22 @@ namespace Syn {
                     return isActive;
                     };
 
-                RadioButton("Main", RenderTargetGroupNames::Deferred, RenderTargetNames::Main, Vk::ImageViewNames::Default);
+                RadioButton("Main", RenderTargetGroupNames::Main, RenderTargetNames::Main, Vk::ImageViewNames::Default);
 
                 ImGui::SeparatorText("GBuffer Textures");
 
-                RadioButton("Color", RenderTargetGroupNames::Deferred, RenderTargetNames::ColorMetallic, RenderTargetViewNames::Color);
-                RadioButton("Metallic", RenderTargetGroupNames::Deferred, RenderTargetNames::ColorMetallic, RenderTargetViewNames::Metallic);
-                RadioButton("Normal", RenderTargetGroupNames::Deferred, RenderTargetNames::NormalRoughness, RenderTargetViewNames::Normal);
-                RadioButton("Roughness", RenderTargetGroupNames::Deferred, RenderTargetNames::NormalRoughness, RenderTargetViewNames::Roughness);
-                RadioButton("Emissive", RenderTargetGroupNames::Deferred, RenderTargetNames::EmissiveAo, RenderTargetViewNames::Emissive);
-                RadioButton("Ambient Occlusion", RenderTargetGroupNames::Deferred, RenderTargetNames::EmissiveAo, RenderTargetViewNames::AmbientOcclusion);
-                RadioButton("Ssao", RenderTargetGroupNames::Deferred, RenderTargetNames::SsaoAo, Vk::ImageViewNames::Default);
+                RadioButton("Color", RenderTargetGroupNames::Main, RenderTargetNames::ColorMetallic, RenderTargetViewNames::Color);
+                RadioButton("Metallic", RenderTargetGroupNames::Main, RenderTargetNames::ColorMetallic, RenderTargetViewNames::Metallic);
+                RadioButton("Normal", RenderTargetGroupNames::Main, RenderTargetNames::NormalRoughness, RenderTargetViewNames::Normal);
+                RadioButton("Roughness", RenderTargetGroupNames::Main, RenderTargetNames::NormalRoughness, RenderTargetViewNames::Roughness);
+                RadioButton("Emissive", RenderTargetGroupNames::Main, RenderTargetNames::EmissiveAo, RenderTargetViewNames::Emissive);
+                RadioButton("Ambient Occlusion", RenderTargetGroupNames::Main, RenderTargetNames::EmissiveAo, RenderTargetViewNames::AmbientOcclusion);
+                RadioButton("Ssao", RenderTargetGroupNames::Main, RenderTargetNames::SsaoAo, Vk::ImageViewNames::Default);
 
                 ImGui::SeparatorText("Wboit Textures");
 
-                RadioButton("Transparent Accum", RenderTargetGroupNames::Deferred, RenderTargetNames::TransparentAccum, Vk::ImageViewNames::Default);
-                RadioButton("Transparent Reveal", RenderTargetGroupNames::Deferred, RenderTargetNames::TransparentReveal, Vk::ImageViewNames::Default);
+                RadioButton("Transparent Accum", RenderTargetGroupNames::Main, RenderTargetNames::TransparentAccum, Vk::ImageViewNames::Default);
+                RadioButton("Transparent Reveal", RenderTargetGroupNames::Main, RenderTargetNames::TransparentReveal, Vk::ImageViewNames::Default);
 
                 ImGui::SeparatorText("Mipchain Textures");
 
@@ -249,13 +249,13 @@ namespace Syn {
                 static int bloomMip = 0;
                 bloomMip = std::min(bloomMip, maxMipIndex);
                 std::string bloomView = std::string(Vk::ImageViewNames::Default) + Vk::ImageViewNames::Mip + std::to_string(bloomMip);
-                RadioButton("Bloom", RenderTargetGroupNames::Deferred, RenderTargetNames::Bloom, bloomView);
+                RadioButton("Bloom", RenderTargetGroupNames::Main, RenderTargetNames::Bloom, bloomView);
 
                 if (state.currentTarget == RenderTargetNames::Bloom) {
                     ImGui::Indent();
                     if (ImGui::SliderInt("Mip##Bloom", &bloomMip, 0, maxMipIndex)) {
                         bloomView = std::string(Vk::ImageViewNames::Default) + Vk::ImageViewNames::Mip + std::to_string(bloomMip);
-                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::Bloom, bloomView });
+                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Main, RenderTargetNames::Bloom, bloomView });
                     }
                     ImGui::Unindent();
                 }
@@ -263,13 +263,13 @@ namespace Syn {
                 static int depthMipMax = 0;
                 depthMipMax = std::min(depthMipMax, maxMipIndex);
                 std::string depthMaxView = std::string(RenderTargetViewNames::DepthOpaqueMax) + Vk::ImageViewNames::Mip + std::to_string(depthMipMax);
-                RadioButton("Depth Pyramid Max", RenderTargetGroupNames::Deferred, RenderTargetNames::DepthPyramid, depthMaxView);
+                RadioButton("Depth Pyramid Max", RenderTargetGroupNames::Main, RenderTargetNames::DepthPyramid, depthMaxView);
 
                 if (state.currentView.contains(RenderTargetViewNames::DepthOpaqueMax)) {
                     ImGui::Indent();
                     if (ImGui::SliderInt("Mip##DepthMax", &depthMipMax, 0, maxMipIndex)) {
                         depthMaxView = std::string(RenderTargetViewNames::DepthOpaqueMax) + Vk::ImageViewNames::Mip + std::to_string(depthMipMax);
-                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::DepthPyramid, depthMaxView });
+                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Main, RenderTargetNames::DepthPyramid, depthMaxView });
                     }
                     ImGui::Unindent();
                 }
@@ -277,13 +277,13 @@ namespace Syn {
                 static int depthMipMin = 0;
                 depthMipMin = std::min(depthMipMin, maxMipIndex);
                 std::string depthMinView = std::string(RenderTargetViewNames::DepthTransparentMin) + Vk::ImageViewNames::Mip + std::to_string(depthMipMin);
-                RadioButton("Depth Pyramid Min", RenderTargetGroupNames::Deferred, RenderTargetNames::DepthPyramid, depthMinView);
+                RadioButton("Depth Pyramid Min", RenderTargetGroupNames::Main, RenderTargetNames::DepthPyramid, depthMinView);
 
                 if (state.currentView.contains(RenderTargetViewNames::DepthTransparentMin)) {
                     ImGui::Indent();
                     if (ImGui::SliderInt("Mip##DepthMin", &depthMipMin, 0, maxMipIndex)) {
                         depthMinView = std::string(RenderTargetViewNames::DepthTransparentMin) + Vk::ImageViewNames::Mip + std::to_string(depthMipMin);
-                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::DepthPyramid, depthMinView });
+                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Main, RenderTargetNames::DepthPyramid, depthMinView });
                     }
                     ImGui::Unindent();
                 }
@@ -295,13 +295,13 @@ namespace Syn {
                 std::string shadowMaxBaseView = RenderTargetViewNames::DirectionLightShadowDepthPyramidMax;
                 std::string shadowMaxView = shadowMaxBaseView + Vk::ImageViewNames::Mip + std::to_string(shadowHzbMaxMip);
 
-                RadioButton("DirLight HZB Max (R)", RenderTargetGroupNames::Deferred, RenderTargetNames::DirectionLightShadowDepthPyramid, shadowMaxView);
+                RadioButton("DirLight HZB Max (R)", RenderTargetGroupNames::Main, RenderTargetNames::DirectionLightShadowDepthPyramid, shadowMaxView);
 
                 if (state.currentView.contains(shadowMaxBaseView)) {
                     ImGui::Indent();
                     if (ImGui::SliderInt("Mip##ShadowHzbMax", &shadowHzbMaxMip, 0, SHADOW_HIZ_MIP_LEVELS - 1)) {
                         shadowMaxView = shadowMaxBaseView + Vk::ImageViewNames::Mip + std::to_string(shadowHzbMaxMip);
-                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::DirectionLightShadowDepthPyramid, shadowMaxView });
+                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Main, RenderTargetNames::DirectionLightShadowDepthPyramid, shadowMaxView });
                     }
                     ImGui::Unindent();
                 }
@@ -311,13 +311,13 @@ namespace Syn {
                 std::string shadowMinBaseView = RenderTargetViewNames::DirectionLightShadowDepthPyramidMin;
                 std::string shadowMinView = shadowMinBaseView + Vk::ImageViewNames::Mip + std::to_string(shadowHzbMinMip);
 
-                RadioButton("DirLight HZB Min (G)", RenderTargetGroupNames::Deferred, RenderTargetNames::DirectionLightShadowDepthPyramid, shadowMinView);
+                RadioButton("DirLight HZB Min (G)", RenderTargetGroupNames::Main, RenderTargetNames::DirectionLightShadowDepthPyramid, shadowMinView);
 
                 if (state.currentView.contains(shadowMinBaseView)) {
                     ImGui::Indent();
                     if (ImGui::SliderInt("Mip##ShadowHzbMin", &shadowHzbMinMip, 0, SHADOW_HIZ_MIP_LEVELS - 1)) {
                         shadowMinView = shadowMinBaseView + Vk::ImageViewNames::Mip + std::to_string(shadowHzbMinMip);
-                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::DirectionLightShadowDepthPyramid, shadowMinView });
+                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Main, RenderTargetNames::DirectionLightShadowDepthPyramid, shadowMinView });
                     }
                     ImGui::Unindent();
                 }
@@ -327,13 +327,13 @@ namespace Syn {
                 std::string spotShadowMaxBaseView = RenderTargetViewNames::SpotLightShadowDepthPyramidMax;
                 std::string spotShadowMaxView = spotShadowMaxBaseView + Vk::ImageViewNames::Mip + std::to_string(spotShadowHzbMaxMip);
 
-                RadioButton("SpotLight HZB Max (R)", RenderTargetGroupNames::Deferred, RenderTargetNames::SpotLightShadowDepthPyramid, spotShadowMaxView);
+                RadioButton("SpotLight HZB Max (R)", RenderTargetGroupNames::Main, RenderTargetNames::SpotLightShadowDepthPyramid, spotShadowMaxView);
 
                 if (state.currentView.contains(spotShadowMaxBaseView)) {
                     ImGui::Indent();
                     if (ImGui::SliderInt("Mip##SpotShadowHzbMax", &spotShadowHzbMaxMip, 0, SPOT_SHADOW_HIZ_MIP_LEVELS - 1)) {
                         spotShadowMaxView = spotShadowMaxBaseView + Vk::ImageViewNames::Mip + std::to_string(spotShadowHzbMaxMip);
-                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::SpotLightShadowDepthPyramid, spotShadowMaxView });
+                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Main, RenderTargetNames::SpotLightShadowDepthPyramid, spotShadowMaxView });
                     }
                     ImGui::Unindent();
                 }
@@ -343,13 +343,13 @@ namespace Syn {
                 std::string spotShadowMinBaseView = RenderTargetViewNames::SpotLightShadowDepthPyramidMin;
                 std::string spotShadowMinView = spotShadowMinBaseView + Vk::ImageViewNames::Mip + std::to_string(spotShadowHzbMinMip);
 
-                RadioButton("SpotLight HZB Min (G)", RenderTargetGroupNames::Deferred, RenderTargetNames::SpotLightShadowDepthPyramid, spotShadowMinView);
+                RadioButton("SpotLight HZB Min (G)", RenderTargetGroupNames::Main, RenderTargetNames::SpotLightShadowDepthPyramid, spotShadowMinView);
 
                 if (state.currentView.contains(spotShadowMinBaseView)) {
                     ImGui::Indent();
                     if (ImGui::SliderInt("Mip##SpotShadowHzbMin", &spotShadowHzbMinMip, 0, SPOT_SHADOW_HIZ_MIP_LEVELS - 1)) {
                         spotShadowMinView = spotShadowMinBaseView + Vk::ImageViewNames::Mip + std::to_string(spotShadowHzbMinMip);
-                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::SpotLightShadowDepthPyramid, spotShadowMinView });
+                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Main, RenderTargetNames::SpotLightShadowDepthPyramid, spotShadowMinView });
                     }
                     ImGui::Unindent();
                 }
@@ -359,12 +359,12 @@ namespace Syn {
                 std::string pointShadowMaxBaseView = RenderTargetViewNames::PointLightShadowDepthPyramidMax;
                 std::string pointShadowMaxView = pointShadowMaxBaseView + Vk::ImageViewNames::Mip + std::to_string(pointShadowHzbMaxMip);
 
-                RadioButton("PointLight HZB Max (R)", RenderTargetGroupNames::Deferred, RenderTargetNames::PointLightShadowDepthPyramid, pointShadowMaxView);
+                RadioButton("PointLight HZB Max (R)", RenderTargetGroupNames::Main, RenderTargetNames::PointLightShadowDepthPyramid, pointShadowMaxView);
                 if (state.currentView.contains(pointShadowMaxBaseView)) {
                     ImGui::Indent();
                     if (ImGui::SliderInt("Mip##PointShadowHzbMax", &pointShadowHzbMaxMip, 0, POINT_SHADOW_HIZ_MIP_LEVELS - 1)) {
                         pointShadowMaxView = pointShadowMaxBaseView + Vk::ImageViewNames::Mip + std::to_string(pointShadowHzbMaxMip);
-                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::PointLightShadowDepthPyramid, pointShadowMaxView });
+                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Main, RenderTargetNames::PointLightShadowDepthPyramid, pointShadowMaxView });
                     }
                     ImGui::Unindent();
                 }
@@ -374,12 +374,12 @@ namespace Syn {
                 std::string pointShadowMinBaseView = RenderTargetViewNames::PointLightShadowDepthPyramidMin;
                 std::string pointShadowMinView = pointShadowMinBaseView + Vk::ImageViewNames::Mip + std::to_string(pointShadowHzbMinMip);
 
-                RadioButton("PointLight HZB Min (G)", RenderTargetGroupNames::Deferred, RenderTargetNames::PointLightShadowDepthPyramid, pointShadowMinView);
+                RadioButton("PointLight HZB Min (G)", RenderTargetGroupNames::Main, RenderTargetNames::PointLightShadowDepthPyramid, pointShadowMinView);
                 if (state.currentView.contains(pointShadowMinBaseView)) {
                     ImGui::Indent();
                     if (ImGui::SliderInt("Mip##PointShadowHzbMin", &pointShadowHzbMinMip, 0, POINT_SHADOW_HIZ_MIP_LEVELS - 1)) {
                         pointShadowMinView = pointShadowMinBaseView + Vk::ImageViewNames::Mip + std::to_string(pointShadowHzbMinMip);
-                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Deferred, RenderTargetNames::PointLightShadowDepthPyramid, pointShadowMinView });
+                        vm.Dispatch(ChangeTargetIntent{ RenderTargetGroupNames::Main, RenderTargetNames::PointLightShadowDepthPyramid, pointShadowMinView });
                     }
                     ImGui::Unindent();
                 }

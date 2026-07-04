@@ -223,7 +223,7 @@ namespace Syn
 
 	void Engine::InitRenderManager(const EngineInitParams& params)
 	{
-		_renderManager = std::move(RendererFactory::CreateDeferredRenderer(_frameContext.framesInFlight));
+		_renderManager = std::move(RendererFactory::CreateSceneRenderer(_frameContext.framesInFlight));
 		_renderManager->SetGuiRenderCallback(params.onRenderGuiCallback);
 	}
 

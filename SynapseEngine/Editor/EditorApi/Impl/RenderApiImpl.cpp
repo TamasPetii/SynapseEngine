@@ -103,7 +103,7 @@ namespace Syn {
         auto frameCtx = ServiceLocator::GetFrameContext();
         uint32_t currentFrame = frameCtx ? frameCtx->currentFrameIndex : 0;
 
-        auto group = rtManager->GetGroup(RenderTargetGroupNames::Deferred, currentFrame);
+        auto group = rtManager->GetGroup(RenderTargetGroupNames::Main, currentFrame);
         if (!group) return NULL_ENTITY;
 
         auto entityImage = group->GetImage(RenderTargetNames::EntityIndex);

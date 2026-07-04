@@ -4,7 +4,7 @@
 namespace Syn {
 
     void BillboardTransitionPass::PrepareFrame(const RenderContext& context) {
-        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
         std::vector<std::string> targets = {
             RenderTargetNames::Main,

@@ -4,7 +4,7 @@
 namespace Syn {
 
     void SsaoInitPass::PrepareFrame(const RenderContext& context) {
-        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         if (!group) return;
 
         auto depthPyramid = group->GetImage(RenderTargetNames::DepthPyramid);

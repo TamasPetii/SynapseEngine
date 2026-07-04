@@ -9,7 +9,7 @@ namespace Syn {
     }
 
     void OpaqueForwardTransitionPass::PrepareFrame(const RenderContext& context) {
-        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
         if (auto mainImg = group->GetImage(RenderTargetNames::Main)) {
             if (mainImg->GetLayout() != VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL) {

@@ -10,5 +10,10 @@ namespace Syn::Vk
 
         void BeginQuery(VkCommandBuffer cmd, uint32_t queryIndex);
         void EndQuery(VkCommandBuffer cmd, uint32_t queryIndex);
+		VkQueryPipelineStatisticFlags GetFlags() const { return _flags; }
+    protected:
+        uint32_t GetStride() const override;
+    private:
+        VkQueryPipelineStatisticFlags _flags;
     };
 }

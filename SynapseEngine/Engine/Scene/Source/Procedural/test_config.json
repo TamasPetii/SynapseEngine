@@ -3,8 +3,8 @@
     "base_model_path": "C:/Users/User/Desktop/Models/"
   },
   "environment": {
-    "spawn_sponza": true,
-    "spawn_bistro": false,
+    "spawn_sponza": false,
+    "spawn_bistro": true,
     "spawn_floor": false,
     "spawn_pbr_sponza": false,
     "spawn_monkey": true

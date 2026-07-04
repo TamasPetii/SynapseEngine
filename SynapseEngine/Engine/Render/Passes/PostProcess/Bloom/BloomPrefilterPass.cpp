@@ -28,7 +28,7 @@ namespace Syn {
     }
 
     void BloomPrefilterPass::PrepareFrame(const RenderContext& context) {
-        auto rt = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto rt = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         auto main = rt->GetImage(RenderTargetNames::Main);
         auto bloom = rt->GetImage(RenderTargetNames::Bloom);
 
@@ -48,7 +48,7 @@ namespace Syn {
     }
 
     void BloomPrefilterPass::BindDescriptors(const RenderContext& context) {
-        auto rt = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto rt = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         auto main = rt->GetImage(RenderTargetNames::Main);
         auto bloom = rt->GetImage(RenderTargetNames::Bloom);
         auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::LinearClampEdge);
@@ -81,7 +81,7 @@ namespace Syn {
 
         uint32_t fIdx = context.frameIndex;
         auto compManager = scene->GetComponentBufferManager();
-        auto rt = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, fIdx);
+        auto rt = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, fIdx);
 
         uint32_t width = rt->GetWidth();
         uint32_t height = rt->GetHeight();
@@ -95,7 +95,7 @@ namespace Syn {
     }
 
     void BloomPrefilterPass::Dispatch(const RenderContext& context) {
-        auto rt = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto rt = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
         uint32_t width = rt->GetWidth();
         uint32_t height = rt->GetHeight();

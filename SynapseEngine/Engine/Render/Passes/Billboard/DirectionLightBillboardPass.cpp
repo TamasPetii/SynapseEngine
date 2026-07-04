@@ -73,7 +73,7 @@ namespace Syn {
     }
 
     void DirectionLightBillboardPass::PrepareFrame(const RenderContext& context) {
-        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
 
         _graphicsState.renderArea = extent;

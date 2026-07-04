@@ -55,7 +55,7 @@ namespace Syn
 
     void SelectionOutlinePass::PrepareFrame(const RenderContext& context)
     {
-        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         _graphicsState.renderArea = VkExtent2D{ group->GetWidth(), group->GetHeight() };
 
         auto mainImage = group->GetImage(RenderTargetNames::Main);
@@ -119,7 +119,7 @@ namespace Syn
     {
         auto imageManager = ServiceLocator::GetImageManager();
  
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         auto entityTexture = rtGroup->GetImage(RenderTargetNames::EntityIndex);
         auto depthTexture = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
         auto nearestSampler = imageManager->GetSampler(SamplerNames::NearestClampEdge);

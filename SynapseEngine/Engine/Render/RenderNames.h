@@ -5,12 +5,12 @@ namespace Syn
 {
     struct SYN_API RenderPipelineNames
     {
-        static constexpr const char* DeferredPipeline = "DeferredPipeline";
+        static constexpr const char* ScenePipeline = "ScenePipeline";
     };
 
     struct SYN_API RenderTargetGroupNames
     {
-        static constexpr const char* Deferred = "Deferred";
+        static constexpr const char* Main = "Main";
     };
 
     struct SYN_API RenderTargetNames

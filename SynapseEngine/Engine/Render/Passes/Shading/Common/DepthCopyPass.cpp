@@ -4,7 +4,7 @@
 namespace Syn 
 {
     void DepthCopyPass::PrepareFrame(const RenderContext& context) {
-        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         if (!group) return;
 
         auto srcDepth = group->GetImage(RenderTargetNames::OpaqueDepth);
@@ -29,7 +29,7 @@ namespace Syn
     }
 
     void DepthCopyPass::Transfer(const RenderContext& context) {
-        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         if (!group) return;
 
         auto srcDepth = group->GetImage(RenderTargetNames::OpaqueDepth);

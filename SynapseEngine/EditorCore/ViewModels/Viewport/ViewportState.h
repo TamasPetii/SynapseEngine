@@ -20,7 +20,7 @@ namespace Syn {
         uint32_t height = 0;
 
         TextureHandle textureId = InvalidTextureHandle;
-        std::string currentGroup = RenderTargetGroupNames::Deferred;
+        std::string currentGroup = RenderTargetGroupNames::Main;
         std::string currentTarget = RenderTargetNames::Main;
         std::string currentView = Vk::ImageViewNames::Default;
 

@@ -4,7 +4,7 @@
 namespace Syn {
 
     void OpaqueInitPass::PrepareFrame(const RenderContext& context) {
-        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         if (!group) return;
 
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
