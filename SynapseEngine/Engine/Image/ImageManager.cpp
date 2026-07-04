@@ -336,8 +336,15 @@ namespace Syn
     }
 
     void ImageManager::FlushDirtyResources() {
+        //Just to handle bistro test, this will be deleted!!
+        auto isNormalMap = [](const std::string& path) {
+            std::string lowerPath = path;
+            std::transform(lowerPath.begin(), lowerPath.end(), lowerPath.begin(), ::tolower);
+            return lowerPath.find("_normal") != std::string::npos;
+            };
+
         ProcessDirtyReadyEntries(
-            [this](uint32_t index, const EntryType& entry) {
+            [this, &isNormalMap](uint32_t index, const EntryType& entry) {
                 if (!entry.resource->image) return;
 
                 _bindlessBuffer->WriteSampledImage(
@@ -347,7 +354,7 @@ namespace Syn
                 );
 
                 uint32_t samplerIndex = GetSamplerIndex("LinearAniso");
-                bool invertTangent = false;
+                bool invertTangent = isNormalMap(entry.path);
 
                 uint32_t textureData = (samplerIndex & 0x7FFFFFFF);
                 if (invertTangent) {

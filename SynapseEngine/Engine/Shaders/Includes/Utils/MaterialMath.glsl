@@ -17,6 +17,7 @@ vec4 EvaluateAlbedoAlpha(uint64_t textureMetadataBufferAddr, const Material mat,
 
 vec3 EvaluateNormal(uint64_t textureMetadataBufferAddr, Material mat, vec2 uv, vec3 vertexNormal, vec4 vertexTangent) {
     vec3 normal = normalize(vertexNormal);
+
     if (!HAS_NORMAL_TEX(mat)) {
         return normal;
     }
@@ -24,22 +25,20 @@ vec3 EvaluateNormal(uint64_t textureMetadataBufferAddr, Material mat, vec2 uv, v
     uint meta = GET_TEXTURE_METADATA(textureMetadataBufferAddr, mat.normalTexture);
 
     uint samplerID;
-    bool invertTangent;
-    UnpackTextureMetadata(meta, samplerID, invertTangent);
+    bool invertNormal;
+    UnpackTextureMetadata(meta, samplerID, invertNormal);
 
     vec3 tangent = normalize(vertexTangent.xyz);
     tangent = normalize(tangent - normal * dot(normal, tangent));
 
-    if (invertTangent) {
-        tangent = -tangent;
-    }
-
     vec3 bitangent = cross(normal, tangent) * vertexTangent.w;
     mat3 TBN = mat3(tangent, bitangent, normal);
 
-    vec3 normalMapSample = SampleTexture2D(mat.normalTexture, SAMPLER_LINEAR_ANISO, uv).rgb;
-    vec3 tangentSpaceNormal = normalMapSample * 2.0 - 1.0;
-    
+    vec3 tangentSpaceNormal;
+    tangentSpaceNormal.xy = SampleTexture2D(mat.normalTexture, SAMPLER_NEAREST_ANISO, uv).xy * 2.0 - 1.0;
+    tangentSpaceNormal.z = sqrt(max(1.0 - dot(tangentSpaceNormal.xy, tangentSpaceNormal.xy), 0.0));
+    tangentSpaceNormal.y *= invertNormal ? -1.0 : 1.0;
+
     return normalize(TBN * tangentSpaceNormal);
 }
 
