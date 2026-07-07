@@ -27,4 +27,11 @@ namespace Syn {
         _sceneManager->SaveActiveScene(savePath.string());
         Syn::Info("SceneApiImpl: Scene saved to {}", savePath.string());
     }
+
+    void SceneApiImpl::ActivateScene(const std::string& sceneName) {
+        if (_sceneManager) {
+            _sceneManager->LoadScene(sceneName);
+            Syn::Info("SceneApiImpl: Activated registered scene: {}", sceneName);
+        }
+    }
 }

@@ -21,6 +21,12 @@ namespace Syn {
     SceneWorkspace::SceneWorkspace(EditorContext* context, IconManager* iconManager, const std::string& assetPath)
         : _context(context), _iconManager(iconManager), _assetPath(assetPath) {}
 
+    void SceneWorkspace::OnActivate() {
+        if (_context && _context->GetSceneApi()) {
+            _context->GetSceneApi()->ActivateScene("TestLevel");
+        }
+    }
+
     void SceneWorkspace::Initialize() 
     {
         using ContentBrowserWin = EditorWindow<ContentBrowserView, ContentBrowserViewModel>;

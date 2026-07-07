@@ -13,10 +13,19 @@
 #include "Editor/View/MaterialProperties/MaterialPropertiesView.h"
 #include "EditorCore/ViewModels/MaterialProperties/MaterialPropertiesViewModel.h"
 
+#include "Editor/View/MaterialViewport/MaterialViewportView.h"
+#include "EditorCore/ViewModels/MaterialViewport/MaterialViewportViewModel.h"
+
 namespace Syn {
 
     MaterialWorkspace::MaterialWorkspace(EditorContext* context, IconManager* iconManager, const std::string& assetPath)
         : _context(context), _iconManager(iconManager), _assetPath(assetPath) {}
+
+    void MaterialWorkspace::OnActivate() {
+        if (_context && _context->GetSceneApi()) {
+            _context->GetSceneApi()->ActivateScene("MaterialPreview");
+        }
+    }
 
     void MaterialWorkspace::Initialize() {
         using ContentBrowserWin = EditorWindow<ContentBrowserView, ContentBrowserViewModel>;
@@ -41,6 +50,12 @@ namespace Syn {
         AddWindow<MaterialPropertiesWin>(
             MaterialPropertiesView{},
             MaterialPropertiesViewModel{ _context->GetMaterialApi(), _context->GetTextureApi() }
+        );
+
+        using MaterialViewportWin = EditorWindow<MaterialViewportView, MaterialViewportViewModel>;
+        AddWindow<MaterialViewportWin>(
+            MaterialViewportView{},
+            MaterialViewportViewModel{ _context->GetRenderApi() }
         );
     }
 

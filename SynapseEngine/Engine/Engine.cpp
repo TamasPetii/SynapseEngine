@@ -26,6 +26,7 @@
 #include "Engine/Logger/LogUtils.h"
 #include "Engine/Scene/SceneManager.h"
 #include "Engine/Scene/Source/Procedural/TestSceneSource.h"
+#include "Engine/Scene/Source/Procedural/MaterialPreviewSceneSource.h"
 #include "Engine/Scene/Source/Procedural/NatureSceneSource.h"
 #include "Engine/Scene/Source/File/FileSceneSource.h"
 
@@ -326,6 +327,10 @@ namespace Syn
 
 		_sceneManager->RegisterScene("TestLevel", [frames]() {
 			return std::make_unique<Scene>(frames, std::make_unique<TestSceneSource>());
+			});
+
+		_sceneManager->RegisterScene("MaterialPreview", [frames]() {
+			return std::make_unique<Scene>(frames, std::make_unique<MaterialPreviewSceneSource>());
 			});
 
 		_sceneManager->LoadScene("TestLevel");

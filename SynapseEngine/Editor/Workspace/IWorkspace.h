@@ -17,6 +17,8 @@ namespace Syn
         virtual ~IWorkspace() = default;
 
         virtual void Initialize() = 0;
+        virtual void OnActivate() {}
+        virtual void OnDeactivate() {}
 
         virtual void UpdateAndDraw() {
             for (auto& window : _windows) {

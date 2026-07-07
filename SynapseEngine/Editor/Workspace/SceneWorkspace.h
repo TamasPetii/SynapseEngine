@@ -12,7 +12,7 @@ namespace Syn {
         ~SceneWorkspace() override = default;
 
         void Initialize() override;
-
+        void OnActivate() override;
     private:
         EditorContext* _context;
         IconManager* _iconManager;

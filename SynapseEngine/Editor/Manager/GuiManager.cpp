@@ -143,7 +143,18 @@ namespace Syn {
                 }
 
                 if (ImGui::Button(label)) {
-                    _currentWorkspace = ws;
+                    if (_currentWorkspace != ws) 
+                    {
+                        if (_workspaces.contains(_currentWorkspace)) {
+                            _workspaces[_currentWorkspace]->OnDeactivate();
+                        }
+
+                        _currentWorkspace = ws;
+
+                        if (_workspaces.contains(_currentWorkspace)) {
+                            _workspaces[_currentWorkspace]->OnActivate();
+                        }
+                    }
                 }
 
                 ImGui::PopStyleColor(2);
