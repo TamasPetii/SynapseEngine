@@ -16,7 +16,7 @@
 
 namespace Syn {
 
-    #include "../../../Shaders/Includes/PushConstants/SsaoPC.glsl"
+    #include "Engine/Shaders/Includes/PushConstants/SsaoPC.glsl"
 
     bool SsaoPass::ShouldExecute(const RenderContext& context) const
     {

@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/Image/Data/Cpu/CpuTextureData.h"
 #include <string>
+#include <cstdint>
 
 namespace Syn {
     struct TexturePropertiesState {

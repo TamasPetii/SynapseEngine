@@ -157,9 +157,10 @@
 #include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowTraditionalOpaquePass.h"
 #include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowMeshletOpaquePass.h"
 
-#include "Engine/Render/Passes/Ssao/SsaoInitPass.h"
-#include "Engine/Render/Passes/Ssao/SsaoPass.h"
-#include "Engine/Render/Passes/Ssao/SsaoBlurPass.h"
+#include "Engine/Render/Passes/PostProcess/Ssao/SsaoInitPass.h"
+#include "Engine/Render/Passes/PostProcess/Ssao/SsaoPass.h"
+#include "Engine/Render/Passes/PostProcess/Ssao/SsaoBlurPass.h"
+#include "Engine/Render/Passes/PostProcess/InfiniteGrid/InfiniteGridPass.h"
 
 #include "Engine/Render/Passes/Shading/Visibility/DebugVisibilityPass.h"
 
@@ -331,6 +332,9 @@ namespace Syn
 
         // SkySphere
         pipeline->AddPass(std::make_unique<SkySpherePass>());
+
+        //Grid
+        pipeline->AddPass(std::make_unique<InfiniteGridPass>());
 
         // Wireframe Passes
         pipeline->AddPass(std::make_unique<WireframeMeshSetupPass>());

@@ -3,9 +3,9 @@
 #extension GL_EXT_buffer_reference2 : require
 #extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
 
-#include "../../Includes/Core.glsl"
-#include "../../Includes/Common/FrameGlobalContext.glsl"
-#include "../../Includes/Common/Camera.glsl"
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Camera.glsl"
 
 layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
 
@@ -13,7 +13,7 @@ layout(set = 2, binding = 0) uniform sampler2D inAoImage;
 layout(set = 2, binding = 1) uniform sampler2D inHizPyramid;
 layout(set = 2, binding = 2, r16f) uniform writeonly image2D outAoImage;
 
-#include "../../Includes/PushConstants/DpHvoBlurPC.glsl"
+#include "../../../Includes/PushConstants/DpHvoBlurPC.glsl"
 
 layout(push_constant) uniform PushConstants {
    DpHvoBlurPC pc;

@@ -60,5 +60,22 @@ namespace Syn
         glm::vec4 outlinePrimaryColor;
         glm::vec4 outlineSecondaryColor;
         float outlineThickness;
+
+        // Infinite grid
+        bool enableInfiniteGrid;
+        float gridScale;
+        float fadeDistance;
+        float gridThickness;
+        float axisThickness;
+        bool gridShowXZ;
+        bool gridShowXY;
+        bool gridShowYZ;
+        bool gridShowAxisX;
+        bool gridShowAxisY;
+        bool gridShowAxisZ;
+        glm::vec4 gridColor;
+        glm::vec4 axisXColor;
+        glm::vec4 axisYColor;
+        glm::vec4 axisZColor;
     };
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <cstdint>
 #include "Engine/Material/Material.h"
 
 namespace Syn {

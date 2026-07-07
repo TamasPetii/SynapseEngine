@@ -357,6 +357,62 @@ namespace Syn {
             }
             Syn::UI::EndCard();
 
+            constexpr const char* CardGridTitle = "Infinite Grid & Axes";
+            if (Syn::UI::BeginCard(CardGridTitle, SYN_ICON_TH, getCardState(CardGridTitle))) {
+
+                if (Syn::UI::BeginPropertyGrid("InfiniteGridGrid")) {
+
+                    changed |= Syn::UI::PropertyCheckbox("Enable Infinite Grid", settings.debug.enableInfiniteGrid);
+
+                    if (settings.debug.enableInfiniteGrid) {
+                        changed |= Syn::UI::PropertyDragFloat("Grid Scale", settings.debug.gridScale, 0.1f, 0.1f, 100.0f, "%.1f", 1);
+                        changed |= Syn::UI::PropertyDragFloat("Fade Distance", settings.debug.fadeDistance, 1.0f, 10.0f, 1000.0f, "%.1f", 1);
+
+                        // Új vastagság beállítások
+                        changed |= Syn::UI::PropertyDragFloat("Grid Line Thickness", settings.debug.gridThickness, 0.05f, 0.1f, 10.0f, "%.2f", 1);
+                        changed |= Syn::UI::PropertyDragFloat("Axis Line Thickness", settings.debug.axisThickness, 0.05f, 0.1f, 10.0f, "%.2f", 1);
+
+                        Syn::UI::PropertySeparator();
+
+                        drawSectionHeader("Grid Planes & Main Color");
+
+                        Syn::UI::BeginProperty("Grid Color");
+                        if (ImGui::ColorEdit4("##GridColorPicker", glm::value_ptr(settings.debug.gridColor), ImGuiColorEditFlags_NoInputs | ImGuiColorEditFlags_AlphaPreview)) {
+                            changed = true;
+                        }
+
+                        changed |= Syn::UI::PropertyCheckbox("Show XZ Plane (Floor)", settings.debug.gridShowXZ);
+                        changed |= Syn::UI::PropertyCheckbox("Show XY Plane (Wall)", settings.debug.gridShowXY);
+                        changed |= Syn::UI::PropertyCheckbox("Show YZ Plane (Wall)", settings.debug.gridShowYZ);
+
+                        Syn::UI::PropertySeparator();
+
+                        drawSectionHeader("World Axes & Custom Colors");
+
+                        changed |= Syn::UI::PropertyCheckbox("Show X Axis", settings.debug.gridShowAxisX);
+                        ImGui::SameLine();
+                        if (ImGui::ColorEdit4("##AxisXColorPicker", glm::value_ptr(settings.debug.axisXColor), ImGuiColorEditFlags_NoInputs)) {
+                            changed = true;
+                        }
+
+                        changed |= Syn::UI::PropertyCheckbox("Show Y Axis", settings.debug.gridShowAxisY);
+                        ImGui::SameLine();
+                        if (ImGui::ColorEdit4("##AxisYColorPicker", glm::value_ptr(settings.debug.axisYColor), ImGuiColorEditFlags_NoInputs)) {
+                            changed = true;
+                        }
+
+                        changed |= Syn::UI::PropertyCheckbox("Show Z Axis", settings.debug.gridShowAxisZ);
+                        ImGui::SameLine();
+                        if (ImGui::ColorEdit4("##AxisZColorPicker", glm::value_ptr(settings.debug.axisZColor), ImGuiColorEditFlags_NoInputs)) {
+                            changed = true;
+                        }
+                    }
+
+                    Syn::UI::EndPropertyGrid();
+                }
+            }
+            Syn::UI::EndCard();
+
             if (changed) {
                 vm.Dispatch(UpdateSceneSettingsIntent{ settings });
             }
