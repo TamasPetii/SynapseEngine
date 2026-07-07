@@ -31,6 +31,7 @@ namespace Syn {
             if constexpr (std::is_same_v<T, MaterialSelectIntent>) {
                 if (_materialApi) {
                     _materialApi->SetSelectedMaterial(arg.materialId);
+                    _materialApi->ApplyMaterialToPreviewObjects(arg.materialId);
                 }
             }
             else if constexpr (std::is_same_v<T, MaterialSetSearchQueryIntent>) {

@@ -5,7 +5,6 @@
 #include "Engine/Material/Material.h"
 //Todo: Domain Material!!
 
-
 namespace Syn 
 {
     constexpr uint32_t INVALID_MATERIAL_ID = 0xFFFFFFFF;
@@ -32,5 +31,7 @@ namespace Syn
 
         virtual bool GetMaterialData(uint32_t materialId, Material& outMaterial) const = 0;
         virtual void UpdateMaterialData(uint32_t materialId, const Material& material) = 0;
+
+        virtual void ApplyMaterialToPreviewObjects(uint32_t materialId) = 0;
     };
 }

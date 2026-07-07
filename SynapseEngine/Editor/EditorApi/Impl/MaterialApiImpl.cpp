@@ -1,5 +1,10 @@
 #include "MaterialApiImpl.h"
 #include "EditorCore/ViewModels/MaterialGraph/MaterialGraphState.h"
+#include "Engine/Scene/Insiders/SceneInsider.h"
+#include "Engine/Component/Core/TagComponent.h"
+#include "Engine/Component/Rendering/MaterialOverrideComponent.h"
+#include "Engine/Logger/SynLog.h"
+#include "Editor/EditorApi/EditorApiUtils.h"
 #include <filesystem>
 
 namespace Syn {
@@ -98,5 +103,38 @@ namespace Syn {
             *resource = material;
             _materialManager->MarkDirty(materialId);
         }
+    }
+
+    void MaterialApiImpl::ApplyMaterialToPreviewObjects(uint32_t materialId) {
+        if (!_sceneManager) return;
+        auto scene = _sceneManager->GetActiveScene();
+        if (!scene) return;
+
+        auto& registry = SceneInsider::GetRegistry(*scene, SceneInsider::GetKey());
+
+        auto tagPool = registry.GetPool<TagComponent>();
+        if (!tagPool) return;
+
+        for (EntityID entity : tagPool->GetDenseEntities()) {
+            if (registry.HasComponent<MaterialOverrideComponent>(entity)) {
+                const auto& tag = tagPool->Get(entity);
+
+                if (tag.tag == "Preview") {
+
+                    EditorApiUtils::ModifyComponent<MaterialOverrideComponent>(
+                        _sceneManager,
+                        entity,
+                        [materialId](auto& matOverride, auto pool) {
+                            matOverride.materials.clear();
+                            if (materialId != 0xFFFFFFFF) {
+                                matOverride.materials.push_back(materialId);
+                            }
+                        }
+                    );
+                }
+            }
+        }
+
+        Info("MaterialApiImpl: Applied material {} to preview objects.", materialId);
     }
 }

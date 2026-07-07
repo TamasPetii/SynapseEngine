@@ -127,12 +127,15 @@ namespace Syn
         registry.AddComponent<TransformComponent>(floor);
         registry.GetComponent<TransformComponent>(floor).translation = glm::vec3(0.0f, -2.0f, 0.0f);
         registry.GetComponent<TransformComponent>(floor).scale = glm::vec3(25.0f, 1.0f, 25.0f);
+        registry.GetPool<TransformComponent>()->SetCategory(floor, StorageCategory::Static);
 
         registry.AddComponent<ModelComponent>(floor);
         registry.GetComponent<ModelComponent>(floor).modelIndex = modelManager->GetResourceIndex(MeshSourceNames::Cube);
+        registry.GetPool<ModelComponent>()->SetCategory(floor, StorageCategory::Static);
 
         registry.AddComponent<MaterialOverrideComponent>(floor);
         registry.GetComponent<MaterialOverrideComponent>(floor).materials.push_back(floorMatId);
+        registry.GetPool<MaterialOverrideComponent>()->SetCategory(floor, StorageCategory::Static);
 
         hm->AttachChild(rootEnvironment, floor);
 
@@ -141,15 +144,20 @@ namespace Syn
             EntityID e = scene.CreateEntity();
             registry.AddComponent<TagComponent>(e);
             registry.GetComponent<TagComponent>(e).name = name;
+            registry.GetComponent<TagComponent>(e).tag = "Preview";
+            registry.GetPool<TagComponent>()->SetCategory(e, StorageCategory::Static);
 
             registry.AddComponent<TransformComponent>(e);
             registry.GetComponent<TransformComponent>(e).translation = pos;
             registry.GetComponent<TransformComponent>(e).scale = scale;
+            registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Static);
 
             registry.AddComponent<ModelComponent>(e);
             registry.GetComponent<ModelComponent>(e).modelIndex = modelIndex;
+            registry.GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
 
             registry.AddComponent<MaterialOverrideComponent>(e);
+            registry.GetPool<MaterialOverrideComponent>()->SetCategory(e, StorageCategory::Static);
 
             hm->AttachChild(rootEnvironment, e);
             };

@@ -36,7 +36,7 @@ namespace Syn {
         _fileSystemApi = std::make_unique<FileSystemApiImpl>();
         _hierarchyApi = std::make_unique<HierarchyApiImpl>(sm);
         _loggerApi = std::make_unique<LoggerApiImpl>(engine);
-        _materialApi = std::make_unique<MaterialApiImpl>(engine->GetMaterialManager());
+        _materialApi = std::make_unique<MaterialApiImpl>(engine->GetMaterialManager(), sm);
         _renderApi = std::make_unique<RenderApiImpl>(engine, textureManager, sm);
         _sceneApi = std::make_unique<SceneApiImpl>(sm);
         _settingsApi = std::make_unique<SettingsApiImpl>(sm);
