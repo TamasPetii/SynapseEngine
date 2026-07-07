@@ -8,6 +8,16 @@ namespace Syn {
         return EditorApiUtils::HasComponent<CameraComponent>(_sceneManager, entity);
     }
 
+    bool CameraApiImpl::GetCameraIsOrthographic(EntityID entity) const {
+        return EditorApiUtils::ReadComponent<CameraComponent>(_sceneManager, entity, [](const auto& c) { return c.isOrthographic; }, false);
+    }
+    float CameraApiImpl::GetCameraOrthoSize(EntityID entity) const {
+        return EditorApiUtils::ReadComponent<CameraComponent>(_sceneManager, entity, [](const auto& c) { return c.orthoSize; }, 10.0f);
+    }
+    bool CameraApiImpl::GetCameraUseOrbit(EntityID entity) const {
+        return EditorApiUtils::ReadComponent<CameraComponent>(_sceneManager, entity, [](const auto& c) { return c.useOrbit; }, false);
+    }
+
     float CameraApiImpl::GetCameraYaw(EntityID entity) const {
         return EditorApiUtils::ReadComponent<CameraComponent>(_sceneManager, entity, [](const auto& c) { return c.yaw; }, 0.0f);
     }
@@ -31,6 +41,16 @@ namespace Syn {
     }
     float CameraApiImpl::GetCameraDistance(EntityID entity) const {
         return EditorApiUtils::ReadComponent<CameraComponent>(_sceneManager, entity, [](const auto& c) { return c.distance; }, 10.0f);
+    }
+
+    void CameraApiImpl::SetCameraIsOrthographic(EntityID entity, bool isOrthographic) {
+        EditorApiUtils::ModifyComponent<CameraComponent>(_sceneManager, entity, [&](auto& c, auto pool) { c.isOrthographic = isOrthographic; });
+    }
+    void CameraApiImpl::SetCameraOrthoSize(EntityID entity, float orthoSize) {
+        EditorApiUtils::ModifyComponent<CameraComponent>(_sceneManager, entity, [&](auto& c, auto pool) { c.orthoSize = orthoSize; });
+    }
+    void CameraApiImpl::SetCameraUseOrbit(EntityID entity, bool useOrbit) {
+        EditorApiUtils::ModifyComponent<CameraComponent>(_sceneManager, entity, [&](auto& c, auto pool) { c.useOrbit = useOrbit; });
     }
 
     void CameraApiImpl::SetCameraYaw(EntityID entity, float yaw) {

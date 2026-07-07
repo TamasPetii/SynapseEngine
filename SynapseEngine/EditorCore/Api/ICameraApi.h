@@ -8,6 +8,10 @@ namespace Syn {
 
         virtual bool HasCamera(EntityID entity) const = 0;
 
+        virtual bool GetCameraIsOrthographic(EntityID entity) const = 0;
+        virtual float GetCameraOrthoSize(EntityID entity) const = 0;
+        virtual bool GetCameraUseOrbit(EntityID entity) const = 0;
+
         virtual float GetCameraYaw(EntityID entity) const = 0;
         virtual float GetCameraPitch(EntityID entity) const = 0;
         virtual float GetCameraNearPlane(EntityID entity) const = 0;
@@ -16,6 +20,10 @@ namespace Syn {
         virtual float GetCameraSpeed(EntityID entity) const = 0;
         virtual float GetCameraSensitivity(EntityID entity) const = 0;
         virtual float GetCameraDistance(EntityID entity) const = 0;
+
+        virtual void SetCameraIsOrthographic(EntityID entity, bool isOrthographic) = 0;
+        virtual void SetCameraOrthoSize(EntityID entity, float orthoSize) = 0;
+        virtual void SetCameraUseOrbit(EntityID entity, bool useOrbit) = 0;
 
         virtual void SetCameraYaw(EntityID entity, float yaw) = 0;
         virtual void SetCameraPitch(EntityID entity, float pitch) = 0;

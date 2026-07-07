@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <variant>
+#include <cstdint>
 
 namespace Syn {
     struct MaterialSelectIntent {

@@ -22,6 +22,11 @@ namespace Syn
         {
             _state.hasComponent = true;
 
+            _state.isOrthographic = _cameraApi->GetCameraIsOrthographic(activeEntity);
+            _state.useOrbit = _cameraApi->GetCameraUseOrbit(activeEntity);
+
+            if (!_orthoSizeDrag.IsDragging())   _state.orthoSize = _cameraApi->GetCameraOrthoSize(activeEntity);
+
             if (!_yawDrag.IsDragging())         _state.yaw = _cameraApi->GetCameraYaw(activeEntity);
             if (!_pitchDrag.IsDragging())       _state.pitch = _cameraApi->GetCameraPitch(activeEntity);
             if (!_nearPlaneDrag.IsDragging())   _state.nearPlane = _cameraApi->GetCameraNearPlane(activeEntity);
@@ -43,14 +48,47 @@ namespace Syn
             {
                 using T = std::decay_t<decltype(arg)>;
 
-                if constexpr (std::is_same_v<T, SetCameraYawIntent>)         HandleSetYaw(arg);
+                // Új Dispatchek
+                if constexpr (std::is_same_v<T, SetCameraIsOrthographicIntent>)   HandleSetIsOrthographic(arg);
+                else if constexpr (std::is_same_v<T, SetCameraOrthoSizeIntent>)   HandleSetOrthoSize(arg);
+                else if constexpr (std::is_same_v<T, SetCameraUseOrbitIntent>)    HandleSetUseOrbit(arg);
+
+                else if constexpr (std::is_same_v<T, SetCameraYawIntent>)         HandleSetYaw(arg);
                 else if constexpr (std::is_same_v<T, SetCameraPitchIntent>)       HandleSetPitch(arg);
                 else if constexpr (std::is_same_v<T, SetCameraNearPlaneIntent>)   HandleSetNearPlane(arg);
                 else if constexpr (std::is_same_v<T, SetCameraFarPlaneIntent>)    HandleSetFarPlane(arg);
                 else if constexpr (std::is_same_v<T, SetCameraFovIntent>)         HandleSetFov(arg);
                 else if constexpr (std::is_same_v<T, SetCameraSpeedIntent>)       HandleSetSpeed(arg);
                 else if constexpr (std::is_same_v<T, SetCameraSensitivityIntent>) HandleSetSensitivity(arg);
-                else if constexpr (std::is_same_v<T, SetCameraDistanceIntent>)    HandleSetDistance(arg); }, intent);
+                else if constexpr (std::is_same_v<T, SetCameraDistanceIntent>)    HandleSetDistance(arg);
+            }, intent);
+    }
+
+    void CameraViewModel::HandleSetIsOrthographic(const SetCameraIsOrthographicIntent& intent)
+    {
+        EntityID activeEntity = _selectionApi->GetSelectedEntity();
+        if (activeEntity == NULL_ENTITY) return;
+
+        _state.isOrthographic = intent.isOrthographic;
+        _cameraApi->SetCameraIsOrthographic(activeEntity, intent.isOrthographic);
+    }
+
+    void CameraViewModel::HandleSetUseOrbit(const SetCameraUseOrbitIntent& intent)
+    {
+        EntityID activeEntity = _selectionApi->GetSelectedEntity();
+        if (activeEntity == NULL_ENTITY) return;
+
+        _state.useOrbit = intent.useOrbit;
+        _cameraApi->SetCameraUseOrbit(activeEntity, intent.useOrbit);
+    }
+
+    void CameraViewModel::HandleSetOrthoSize(const SetCameraOrthoSizeIntent& intent)
+    {
+        EntityID activeEntity = _selectionApi->GetSelectedEntity();
+        if (activeEntity == NULL_ENTITY) return;
+        _orthoSizeDrag.Handle(intent.isDragging, intent.orthoSize, _state.orthoSize,
+            [&](const float& v) { _cameraApi->SetCameraOrthoSize(activeEntity, v); },
+            [&](const float& s, const float& e) { return std::make_shared<ChangeCameraOrthoSizeCommand>(_cameraApi, activeEntity, s, e); });
     }
 
     void CameraViewModel::HandleSetYaw(const SetCameraYawIntent& intent)

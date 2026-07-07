@@ -9,6 +9,10 @@ namespace Syn {
 
         bool HasCamera(EntityID entity) const override;
 
+        bool GetCameraIsOrthographic(EntityID entity) const override;
+        float GetCameraOrthoSize(EntityID entity) const override;
+        bool GetCameraUseOrbit(EntityID entity) const override;
+
         float GetCameraYaw(EntityID entity) const override;
         float GetCameraPitch(EntityID entity) const override;
         float GetCameraNearPlane(EntityID entity) const override;
@@ -17,6 +21,10 @@ namespace Syn {
         float GetCameraSpeed(EntityID entity) const override;
         float GetCameraSensitivity(EntityID entity) const override;
         float GetCameraDistance(EntityID entity) const override;
+
+        void SetCameraIsOrthographic(EntityID entity, bool isOrthographic) override;
+        void SetCameraOrthoSize(EntityID entity, float orthoSize) override;
+        void SetCameraUseOrbit(EntityID entity, bool useOrbit) override;
 
         void SetCameraYaw(EntityID entity, float yaw) override;
         void SetCameraPitch(EntityID entity, float pitch) override;

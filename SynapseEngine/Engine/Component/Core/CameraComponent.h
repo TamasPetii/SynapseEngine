@@ -22,6 +22,10 @@ namespace Syn
 		float sensitivity;
 		float distance;
 
+		bool isOrthographic;
+		float orthoSize;
+		bool useOrbit;
+
 		glm::vec3 up;
 		glm::vec3 target;
 		glm::vec3 position;

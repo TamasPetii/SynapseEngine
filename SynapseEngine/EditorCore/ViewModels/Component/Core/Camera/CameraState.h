@@ -4,6 +4,10 @@ namespace Syn {
     struct CameraState {
         bool hasComponent = false;
 
+        bool isOrthographic;
+        float orthoSize;
+        bool useOrbit;
+
         float yaw;
         float pitch;
         float nearPlane;

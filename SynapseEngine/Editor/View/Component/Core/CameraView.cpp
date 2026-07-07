@@ -1,5 +1,5 @@
 #include "CameraView.h"
-#include "Editor/Manager/EditorIcons.h" // Esetleg lecserélheted egy kamera ikonra, ha van (pl. SYN_ICON_CAMERA)
+#include "Editor/Manager/EditorIcons.h"
 #include "Editor/Widgets/CardWidget.h"
 #include "Editor/Widgets/PropertyGrid.h"
 #include <imgui.h>
@@ -17,6 +17,16 @@ namespace Syn {
         {
             if (Syn::UI::BeginPropertyGrid("CameraGrid"))
             {
+                if (Syn::UI::PropertyCheckbox("Orthographic", state.isOrthographic)) {
+                    vm.Dispatch(SetCameraIsOrthographicIntent{ state.isOrthographic });
+                }
+
+                if (Syn::UI::PropertyCheckbox("Orbit Camera", state.useOrbit)) {
+                    vm.Dispatch(SetCameraUseOrbitIntent{ state.useOrbit });
+                }
+
+                Syn::UI::PropertySeparator();
+
                 if (Syn::UI::PropertyDragFloat("Yaw", state.yaw, 0.1f, -360.0f, 360.0f, "%.2f")) {
                     vm.Dispatch(SetCameraYawIntent{ state.yaw, !ImGui::IsItemDeactivatedAfterEdit() });
                 }
@@ -27,8 +37,17 @@ namespace Syn {
 
                 Syn::UI::PropertySeparator();
 
-                if (Syn::UI::PropertyDragFloat("FOV", state.fov, 0.1f, 1.0f, 179.0f, "%.2f")) {
-                    vm.Dispatch(SetCameraFovIntent{ state.fov, !ImGui::IsItemDeactivatedAfterEdit() });
+                if (state.isOrthographic)
+                {
+                    if (Syn::UI::PropertyDragFloat("Ortho Size", state.orthoSize, 0.1f, 1.0f, 1000.0f, "%.2f")) {
+                        vm.Dispatch(SetCameraOrthoSizeIntent{ state.orthoSize, !ImGui::IsItemDeactivatedAfterEdit() });
+                    }
+                }
+                else
+                {
+                    if (Syn::UI::PropertyDragFloat("FOV", state.fov, 0.1f, 1.0f, 179.0f, "%.2f")) {
+                        vm.Dispatch(SetCameraFovIntent{ state.fov, !ImGui::IsItemDeactivatedAfterEdit() });
+                    }
                 }
 
                 if (Syn::UI::PropertyDragFloat("Near Plane", state.nearPlane, 0.01f, 0.001f, 100.0f, "%.3f")) {

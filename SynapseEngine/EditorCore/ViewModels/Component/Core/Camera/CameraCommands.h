@@ -4,6 +4,9 @@
 
 namespace Syn
 {
+    using ChangeCameraIsOrthographicCommand = ComponentChangeCommand<ICameraApi, bool, &ICameraApi::SetCameraIsOrthographic>;
+    using ChangeCameraOrthoSizeCommand = ComponentChangeCommand<ICameraApi, float, &ICameraApi::SetCameraOrthoSize>;
+    using ChangeCameraUseOrbitCommand = ComponentChangeCommand<ICameraApi, bool, &ICameraApi::SetCameraUseOrbit>;
     using ChangeCameraYawCommand = ComponentChangeCommand<ICameraApi, float, &ICameraApi::SetCameraYaw>;
     using ChangeCameraPitchCommand = ComponentChangeCommand<ICameraApi, float, &ICameraApi::SetCameraPitch>;
     using ChangeCameraNearPlaneCommand = ComponentChangeCommand<ICameraApi, float, &ICameraApi::SetCameraNearPlane>;

@@ -18,6 +18,9 @@ namespace Syn {
         void Dispatch(const CameraIntent& intent) override;
 
     private:
+        void HandleSetIsOrthographic(const SetCameraIsOrthographicIntent& intent);
+        void HandleSetOrthoSize(const SetCameraOrthoSizeIntent& intent);
+        void HandleSetUseOrbit(const SetCameraUseOrbitIntent& intent);
         void HandleSetYaw(const SetCameraYawIntent& intent);
         void HandleSetPitch(const SetCameraPitchIntent& intent);
         void HandleSetNearPlane(const SetCameraNearPlaneIntent& intent);
@@ -26,12 +29,12 @@ namespace Syn {
         void HandleSetSpeed(const SetCameraSpeedIntent& intent);
         void HandleSetSensitivity(const SetCameraSensitivityIntent& intent);
         void HandleSetDistance(const SetCameraDistanceIntent& intent);
-
     private:
         ISelectionApi* _selectionApi = nullptr;
         ICameraApi* _cameraApi = nullptr;
         CameraState _state;
 
+        DragInteraction<float> _orthoSizeDrag;
         DragInteraction<float> _yawDrag;
         DragInteraction<float> _pitchDrag;
         DragInteraction<float> _nearPlaneDrag;
