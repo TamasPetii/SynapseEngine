@@ -16,6 +16,8 @@
 #include "Editor/View/MaterialViewport/MaterialViewportView.h"
 #include "EditorCore/ViewModels/MaterialViewport/MaterialViewportViewModel.h"
 
+#include "Engine/Scene/SceneNames.h"
+
 namespace Syn {
 
     MaterialWorkspace::MaterialWorkspace(EditorContext* context, IconManager* iconManager, const std::string& assetPath)
@@ -23,7 +25,7 @@ namespace Syn {
 
     void MaterialWorkspace::OnActivate() {
         if (_context && _context->GetSceneApi()) {
-            _context->GetSceneApi()->ActivateScene("MaterialPreview");
+            _context->GetSceneApi()->ActivateScene(SceneNames::MaterialPreview);
         }
     }
 

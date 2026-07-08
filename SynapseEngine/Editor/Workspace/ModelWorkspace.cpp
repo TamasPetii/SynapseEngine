@@ -10,11 +10,21 @@
 #include "Editor/View/ModelProperties/ModelPropertiesView.h"
 #include "EditorCore/ViewModels/ModelProperties/ModelPropertiesViewModel.h"
 
+#include "Editor/View/ModelViewport/ModelViewportView.h"
+#include "EditorCore/ViewModels/ModelViewport/ModelViewportViewModel.h"
+
+#include "Engine/Scene/SceneNames.h"
 
 namespace Syn {
 
     ModelWorkspace::ModelWorkspace(EditorContext* context, IconManager* iconManager, const std::string& assetPath)
         : _context(context), _iconManager(iconManager), _assetPath(assetPath) {}
+
+    void ModelWorkspace::OnActivate() {
+        if (_context && _context->GetSceneApi()) {
+            _context->GetSceneApi()->ActivateScene(SceneNames::ModelPreview);
+        }
+    }
 
     void ModelWorkspace::Initialize() {
 
@@ -35,6 +45,11 @@ namespace Syn {
             ModelPropertiesView{},
             ModelPropertiesViewModel{ _context->GetModelApi() }
         );
-    }
 
+        using ModelViewportWin = EditorWindow<ModelViewportView, ModelViewportViewModel>;
+        AddWindow<ModelViewportWin>(
+            ModelViewportView{},
+            ModelViewportViewModel{ _context->GetRenderApi(),  _context->GetSelectionApi(),  _context->GetTransformApi(), _context->GetSettingsApi(), _context->GetModelApi() }
+        );
+    }
 }

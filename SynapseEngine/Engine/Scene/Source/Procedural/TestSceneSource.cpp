@@ -102,7 +102,7 @@ namespace Syn
             modelManager->GetResourceIndex(MeshSourceNames::Torus)
         };
 
-        auto skyTextureId = ServiceLocator::GetImageManager()->LoadImageSync(basePath + "Sky.png");
+        auto skyTextureId = ServiceLocator::GetImageManager()->LoadImageSync(basePath + "MainScene.hdr");
         scene.GetSettings()->environment.skyTextureId = skyTextureId;
 
         EntityID rootCameras = scene.CreateEntity();

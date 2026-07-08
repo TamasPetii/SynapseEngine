@@ -23,6 +23,7 @@
 #include "Engine/Image/Loader/StbImageLoader.h"
 #include "Engine/Image/Loader/GliImageLoader.h"
 #include "Engine/Image/Loader/SvgImageLoader.h"
+#include "Engine/Image/Loader/HdriImageLoader.h"
 #include "Engine/Image/Uploader/DefaultGpuImageUploader.h"
 
 #include "Engine/Animation/Loader/AnimationLoaderRegistry.h"
@@ -69,6 +70,7 @@ namespace Syn {
 		_imageBuilder->RegisterLoader(std::make_shared<StbImageLoader>(), 1);
 		_imageBuilder->RegisterLoader(std::make_shared<GliImageLoader>(), 1);
 		_imageBuilder->RegisterLoader(std::make_shared<SvgImageLoader>(), 1);
+		_imageBuilder->RegisterLoader(std::make_shared<HdriImageLoader>(), 1);
 
 		ServiceLocator::ProvideImageBuilder(_imageBuilder.get());
 

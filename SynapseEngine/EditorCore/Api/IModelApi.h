@@ -27,5 +27,7 @@ namespace Syn
 
         virtual const CpuModelData* GetModelCpuData(uint32_t modelId) const = 0;
         virtual std::string GetNodeName(uint32_t modelId, uint16_t nodeIndex) const = 0;
+
+        virtual void ApplyModelToPreviewObject(uint32_t modelId) = 0;
     };
 }

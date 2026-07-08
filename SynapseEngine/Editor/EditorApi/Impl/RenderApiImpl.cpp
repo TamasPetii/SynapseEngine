@@ -95,22 +95,23 @@ namespace Syn {
         return EditorApiUtils::ReadComponent<CameraComponent>(_sceneManager, cameraEntity, [](const auto& c) { return c.proj; }, glm::mat4(1.0f));
     }
 
-    EntityID RenderApiImpl::ReadEntityIdAtPixel(uint32_t x, uint32_t y) {
+
+    std::pair<EntityID, uint32_t> RenderApiImpl::ReadEntityAndMeshIdAtPixel(uint32_t x, uint32_t y) {
         auto renderManager = _engine->GetRenderManager();
-        if (!renderManager) return NULL_ENTITY;
+        if (!renderManager) return { NULL_ENTITY, 0 };
 
         auto rtManager = renderManager->GetRenderTargetManager();
         auto frameCtx = ServiceLocator::GetFrameContext();
         uint32_t currentFrame = frameCtx ? frameCtx->currentFrameIndex : 0;
 
         auto group = rtManager->GetGroup(RenderTargetGroupNames::Main, currentFrame);
-        if (!group) return NULL_ENTITY;
+        if (!group) return { NULL_ENTITY, 0 };
 
         auto entityImage = group->GetImage(RenderTargetNames::EntityIndex);
-        if (!entityImage) return NULL_ENTITY;
+        if (!entityImage) return { NULL_ENTITY, 0 };
 
         auto extent = entityImage->GetExtent();
-        if (x >= extent.width || y >= extent.height) return NULL_ENTITY;
+        if (x >= extent.width || y >= extent.height) return { NULL_ENTITY, 0 };
 
         Vk::BufferConfig readbackConfig{};
         readbackConfig.size = sizeof(uint32_t) * 2;
@@ -144,15 +145,24 @@ namespace Syn {
         ServiceLocator::GetGpuUploader()->UploadSync(std::move(request));
 
         EntityID selectedEntity = NULL_ENTITY;
+        uint32_t selectedMesh = 0;
+
         void* mappedData = readbackBuffer->Map();
         if (mappedData) {
             uint32_t pixelData[2] = { 0, 0 };
             std::memcpy(pixelData, mappedData, sizeof(uint32_t) * 2);
             readbackBuffer->Unmap();
 
-            uint32_t packedEntity = pixelData[0];
-            selectedEntity = packedEntity & ~(1u << 31);
+            uint32_t word0 = pixelData[0];
+            selectedEntity = word0 & ~(1u << 31);
+
+            uint32_t word1 = pixelData[1];
+            selectedMesh = (word1 >> 22) & 0x3FFu;
         }
-        return selectedEntity;
+        return { selectedEntity, selectedMesh };
+    }
+
+    EntityID RenderApiImpl::ReadEntityIdAtPixel(uint32_t x, uint32_t y) {
+        return ReadEntityAndMeshIdAtPixel(x, y).first;
     }
 }

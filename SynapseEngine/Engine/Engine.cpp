@@ -7,6 +7,7 @@
 #include "Vk/Buffer/SynVkBuffer.h"
 #include "Vk/Rendering/GpuUploader.h"
 
+#include "Engine/Scene/SceneNames.h"
 #include "Engine/Manager/ResourceManager.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Mesh/Builder/StaticMeshBuilder.h"
@@ -27,6 +28,7 @@
 #include "Engine/Scene/SceneManager.h"
 #include "Engine/Scene/Source/Procedural/TestSceneSource.h"
 #include "Engine/Scene/Source/Procedural/MaterialPreviewSceneSource.h"
+#include "Engine/Scene/Source/Procedural/ModelPreviewSceneSource.h"
 #include "Engine/Scene/Source/Procedural/NatureSceneSource.h"
 #include "Engine/Scene/Source/File/FileSceneSource.h"
 
@@ -325,15 +327,19 @@ namespace Syn
 		_sceneManager = std::make_unique<Syn::SceneManager>(std::move(writer), std::move(loader));
 		ServiceLocator::ProvideSceneManager(_sceneManager.get());
 
-		_sceneManager->RegisterScene("TestLevel", [frames]() {
+		_sceneManager->RegisterScene(SceneNames::Main, [frames]() {
 			return std::make_unique<Scene>(frames, std::make_unique<TestSceneSource>());
 			});
 
-		_sceneManager->RegisterScene("MaterialPreview", [frames]() {
+		_sceneManager->RegisterScene(SceneNames::MaterialPreview, [frames]() {
 			return std::make_unique<Scene>(frames, std::make_unique<MaterialPreviewSceneSource>());
 			});
 
-		_sceneManager->LoadScene("TestLevel");
+		_sceneManager->RegisterScene(SceneNames::ModelPreview, [frames]() {
+			return std::make_unique<Scene>(frames, std::make_unique<ModelPreviewSceneSource>());
+			});
+
+		_sceneManager->LoadScene(SceneNames::Main);
 	}
 
 	void Engine::InitPhysicsEngine()

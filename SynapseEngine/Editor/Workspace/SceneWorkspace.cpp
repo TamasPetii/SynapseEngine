@@ -16,6 +16,9 @@
 #include "Editor/View/Logger/LoggerView.h"
 #include "EditorCore/ViewModels/Logger/LoggerViewModel.h"
 
+#include "Engine/Scene/SceneNames.h"
+
+
 namespace Syn {
 
     SceneWorkspace::SceneWorkspace(EditorContext* context, IconManager* iconManager, const std::string& assetPath)
@@ -23,7 +26,7 @@ namespace Syn {
 
     void SceneWorkspace::OnActivate() {
         if (_context && _context->GetSceneApi()) {
-            _context->GetSceneApi()->ActivateScene("TestLevel");
+            _context->GetSceneApi()->ActivateScene(SceneNames::Main);
         }
     }
 

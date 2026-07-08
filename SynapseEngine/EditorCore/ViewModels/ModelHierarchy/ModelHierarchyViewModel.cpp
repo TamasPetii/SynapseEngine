@@ -35,7 +35,12 @@ namespace Syn {
             using T = std::decay_t<decltype(arg)>;
 
             if constexpr (std::is_same_v<T, ModelHierarchySelectIntent>) {
-                if (_modelApi) _modelApi->SetSelected(arg.modelId, arg.descriptorIndex);
+                if (_modelApi)
+                {
+                    _modelApi->SetSelected(arg.modelId, arg.descriptorIndex);
+                    _modelApi->ApplyModelToPreviewObject(arg.modelId);
+                }
+
                 _state.selectedModelId = arg.modelId;
                 _state.selectedDescriptorIndex = arg.descriptorIndex;
             }

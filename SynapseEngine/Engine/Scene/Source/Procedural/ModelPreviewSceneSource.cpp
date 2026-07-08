@@ -1,4 +1,4 @@
-#include "MaterialPreviewSceneSource.h"
+#include "ModelPreviewSceneSource.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Scene/Insiders/SceneInsider.h"
 #include "Engine/ServiceLocator.h"
@@ -18,12 +18,11 @@
 #include "Engine/Utils/PathUtils.h"
 
 #include <glm/gtc/constants.hpp>
-#include <vector>
-#include <string>
+#include <limits>
 
 namespace Syn
 {
-    bool MaterialPreviewSceneSource::Populate(Scene& scene)
+    bool ModelPreviewSceneSource::Populate(Scene& scene)
     {
         Registry& registry = SceneInsider::GetRegistry(scene, SceneInsider::GetKey());
         EntityID& sceneCam = SceneInsider::GetSceneCameraEntity(scene, SceneInsider::GetKey());
@@ -32,7 +31,7 @@ namespace Syn
         auto modelManager = ServiceLocator::GetModelManager();
         auto materialManager = ServiceLocator::GetMaterialManager();
 
-        Syn::Info("Populating Material Preview Scene...");
+        Syn::Info("Populating Model Preview Scene...");
 
         // Root entities
         EntityID rootCameras = scene.CreateEntity();
@@ -69,7 +68,7 @@ namespace Syn
         registry.AddComponent<CameraComponent>(sceneCam);
         auto& camComp = registry.GetComponent<CameraComponent>(sceneCam);
         camComp.useOrbit = true;
-        camComp.target = glm::vec3(0.0f);
+        camComp.target = glm::vec3(0.0f, 0.5f, 0.0f);
         camComp.distance = 12.0f;
         camComp.speed = 20.0f;
 
@@ -77,9 +76,7 @@ namespace Syn
         registry.GetPool<TransformComponent>()->SetCategory(sceneCam, StorageCategory::Stream);
         hm->AttachChild(rootCameras, sceneCam);
 
-        // Studio lighting setup
-
-        // 1. Key light (warm, casts shadows)
+        // 1. Key light
         EntityID keyLight = scene.CreateEntity();
         registry.AddComponent<TagComponent>(keyLight);
         registry.GetComponent<TagComponent>(keyLight).name = "Key Light";
@@ -96,7 +93,7 @@ namespace Syn
         registry.GetPool<DirectionLightComponent>()->SetBit<SHADOW_TOGGLE_BIT>(keyLight);
         hm->AttachChild(rootLights, keyLight);
 
-        // 2. Fill light (cool, no shadows)
+        // 2. Fill light
         EntityID fillLight = scene.CreateEntity();
         registry.AddComponent<TagComponent>(fillLight);
         registry.GetComponent<TagComponent>(fillLight).name = "Fill Light";
@@ -112,71 +109,30 @@ namespace Syn
 
         hm->AttachChild(rootLights, fillLight);
 
-        // Base materials
-        MaterialInfo floorMatInfo{};
-        floorMatInfo.color = glm::vec4(0.15f, 0.15f, 0.15f, 1.0f);
-        floorMatInfo.roughnessFactor = 0.9f;
-        uint32_t floorMatId = materialManager->LoadMaterial("Preview_FloorMat", floorMatInfo);
+        EntityID previewModel = scene.CreateEntity();
+        registry.AddComponent<TagComponent>(previewModel);
+        registry.GetComponent<TagComponent>(previewModel).name = "Preview_Model";
+        registry.GetComponent<TagComponent>(previewModel).tag = "Preview";
+        registry.GetPool<TagComponent>()->SetCategory(previewModel, StorageCategory::Static);
 
-        // Geometries
+        registry.AddComponent<TransformComponent>(previewModel);
+        registry.GetComponent<TransformComponent>(previewModel).translation = glm::vec3(0.0f, 0.0f, 0.0f);
+        registry.GetComponent<TransformComponent>(previewModel).scale = glm::vec3(1.0f);
+        registry.GetPool<TransformComponent>()->SetCategory(previewModel, StorageCategory::Static);
 
-        // 1. Floor
-        EntityID floor = scene.CreateEntity();
-        registry.AddComponent<TagComponent>(floor);
-        registry.GetComponent<TagComponent>(floor).name = "Studio_Floor";
+        registry.AddComponent<ModelComponent>(previewModel);
+        registry.GetComponent<ModelComponent>(previewModel).modelIndex = 0xFFFFFFFF;
+        registry.GetPool<ModelComponent>()->SetCategory(previewModel, StorageCategory::Static);
 
-        registry.AddComponent<TransformComponent>(floor);
-        registry.GetComponent<TransformComponent>(floor).translation = glm::vec3(0.0f, -2.0f, 0.0f);
-        registry.GetComponent<TransformComponent>(floor).scale = glm::vec3(25.0f, 1.0f, 25.0f);
-        registry.GetPool<TransformComponent>()->SetCategory(floor, StorageCategory::Static);
+        registry.AddComponent<MaterialOverrideComponent>(previewModel);
+        registry.GetPool<MaterialOverrideComponent>()->SetCategory(previewModel, StorageCategory::Static);
 
-        registry.AddComponent<ModelComponent>(floor);
-        registry.GetComponent<ModelComponent>(floor).modelIndex = modelManager->GetResourceIndex(MeshSourceNames::Cube);
-        registry.GetPool<ModelComponent>()->SetCategory(floor, StorageCategory::Static);
+        hm->AttachChild(rootEnvironment, previewModel);
 
-        registry.AddComponent<MaterialOverrideComponent>(floor);
-        registry.GetComponent<MaterialOverrideComponent>(floor).materials.push_back(floorMatId);
-        registry.GetPool<MaterialOverrideComponent>()->SetCategory(floor, StorageCategory::Static);
-
-        hm->AttachChild(rootEnvironment, floor);
-
-        // Helper for preview objects
-        auto CreatePreviewObject = [&](const std::string& name, uint32_t modelIndex, glm::vec3 pos, glm::vec3 scale = glm::vec3(1.0f)) {
-            EntityID e = scene.CreateEntity();
-            registry.AddComponent<TagComponent>(e);
-            registry.GetComponent<TagComponent>(e).name = name;
-            registry.GetComponent<TagComponent>(e).tag = "Preview";
-            registry.GetPool<TagComponent>()->SetCategory(e, StorageCategory::Static);
-
-            registry.AddComponent<TransformComponent>(e);
-            registry.GetComponent<TransformComponent>(e).translation = pos;
-            registry.GetComponent<TransformComponent>(e).scale = scale;
-            registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Static);
-
-            registry.AddComponent<ModelComponent>(e);
-            registry.GetComponent<ModelComponent>(e).modelIndex = modelIndex;
-            registry.GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
-
-            registry.AddComponent<MaterialOverrideComponent>(e);
-            registry.GetPool<MaterialOverrideComponent>()->SetCategory(e, StorageCategory::Static);
-
-            hm->AttachChild(rootEnvironment, e);
-            };
-
-        // 2. Center object: Suzanne
         std::string basePath = "C:/Users/User/Desktop/Models/";
-
-        auto skyTextureId = ServiceLocator::GetImageManager()->LoadImageSync(basePath + "MaterialPreview.hdr");
+        auto skyTextureId = ServiceLocator::GetImageManager()->LoadImageSync(basePath + "ModelPreview.hdr");
         scene.GetSettings()->environment.skyTextureId = skyTextureId;
-
-        uint32_t monkeyId = modelManager->LoadModelAsync(basePath + "Monkey/monkey.obj");
-        CreatePreviewObject("Center_Monkey", monkeyId, glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(1.5f));
-
-        uint32_t sphereId = modelManager->GetResourceIndex(MeshSourceNames::Sphere);
-        CreatePreviewObject("Preview_Sphere", sphereId, glm::vec3(-4.0f, 0.5f, 0.0f));
-
-        uint32_t cubeId = modelManager->GetResourceIndex(MeshSourceNames::Cube);
-        CreatePreviewObject("Preview_Cube", cubeId, glm::vec3(4.0f, 0.5f, 0.0f));
+        scene.GetSettings()->debug.enableInfiniteGrid = true;
 
         return true;
     }

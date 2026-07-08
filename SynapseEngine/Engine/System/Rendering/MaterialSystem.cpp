@@ -68,6 +68,8 @@ namespace Syn
                 if (isShared) return;
 
                 auto& comp = pool->Get(entity);
+                if (comp.modelIndex == UINT32_MAX) return;
+
                 const auto& snapshot = modelSnapshots[comp.modelIndex];
                 if (snapshot.state == ResourceState::Ready && snapshot.resource) {
                     totalExactMaterials += static_cast<uint32_t>(snapshot.resource->cpuData.meshMaterialIndices.size());

@@ -43,7 +43,7 @@ namespace Syn {
         _pointLightApi = std::make_unique<PointLightApiImpl>(sm);
         _spotLightApi = std::make_unique<SpotLightApiImpl>(sm);
         _textureApi = std::make_unique<TextureApiImpl>(engine->GetImageManager(), textureManager);
-        _modelApi = std::make_unique<ModelApiImpl>(engine->GetModelManager());
+        _modelApi = std::make_unique<ModelApiImpl>(engine->GetModelManager(), sm);
         _cameraApi = std::make_unique<CameraApiImpl>(sm);
         _boxColliderApi = std::make_unique<BoxColliderApiImpl>(sm);
         _sphereColliderApi = std::make_unique<SphereColliderApiImpl>(sm);

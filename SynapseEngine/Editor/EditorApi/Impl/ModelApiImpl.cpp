@@ -1,5 +1,12 @@
 #include "ModelApiImpl.h"
+#include "Engine/Scene/Insiders/SceneInsider.h"
+#include "Engine/Component/Core/TagComponent.h"
+#include "Engine/Component/Core/CameraComponent.h"
+#include "Engine/Component/Rendering/ModelComponent.h"
+#include "Editor/EditorApi/EditorApiUtils.h"
+#include "Engine/Logger/SynLog.h"
 #include <filesystem>
+#include <algorithm>
 
 namespace Syn {
 
@@ -48,5 +55,55 @@ namespace Syn {
 
         auto resource = _modelManager->GetResource(modelId);
         return resource->cpuData.meshNodeDescriptors[nodeIndex].name;
+    }
+
+    void ModelApiImpl::ApplyModelToPreviewObject(uint32_t modelId) {
+        if (!_sceneManager) return;
+        auto scene = _sceneManager->GetActiveScene();
+        if (!scene) return;
+
+        auto& registry = SceneInsider::GetRegistry(*scene, SceneInsider::GetKey());
+        auto tagPool = registry.GetPool<TagComponent>();
+        if (!tagPool) return;
+
+        for (EntityID entity : tagPool->GetDenseEntities()) {
+            const auto& tag = tagPool->Get(entity);
+            if (tag.tag == "Preview" && registry.HasComponent<ModelComponent>(entity)) {
+                EditorApiUtils::ModifyComponent<ModelComponent>(
+                    _sceneManager,
+                    entity,
+                    [modelId](auto& modelComp, auto pool) {
+                        modelComp.modelIndex = modelId;
+                    }
+                );
+            }
+        }
+
+        if (modelId != INVALID_MODEL_ID && _modelManager) {
+            auto resource = _modelManager->GetResource(modelId);
+            if (resource) {
+                glm::vec3 center = resource->cpuData.globalCollider.center;
+                float radius = resource->cpuData.globalCollider.radius;
+
+                for (EntityID entity : tagPool->GetDenseEntities()) {
+                    const auto& tag = tagPool->Get(entity);
+
+                    if (tag.tag == "Camera" && registry.HasComponent<CameraComponent>(entity)) {
+
+                        EditorApiUtils::ModifyComponent<CameraComponent>(
+                            _sceneManager,
+                            entity,
+                            [center, radius](auto& camComp, auto pool) {
+                                camComp.target = center;
+                                camComp.distance = std::max(radius * 2.5f, 2.0f);
+                            }
+                        );
+                        break;
+                    }
+                }
+            }
+        }
+
+        Syn::Info("ModelApiImpl: Applied model {} to preview object and adjusted camera.", modelId);
     }
 }
