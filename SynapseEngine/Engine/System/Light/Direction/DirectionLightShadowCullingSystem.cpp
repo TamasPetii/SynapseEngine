@@ -440,7 +440,7 @@ namespace Syn
             auto& mainGroup = drawData->Models;
             auto& shadowGroup = drawData->DirectionLightShadow;
 
-            if (settings->culling.directionLightShadowCullingDevice == CPU)
+            if (settings->culling.directionLightShadowCullingDevice == CPU )
             {
                 // Sync CPU counters to indirect commands
                 for (uint32_t i = 0; i < mainGroup.activeTraditionalCount; ++i) {
@@ -451,10 +451,14 @@ namespace Syn
                     shadowGroup.meshletCmds[i].groupCountX = shadowGroup.paddedMeshletCounts[i * 16];
                 }
 
-                // Upload instances
-                size_t instanceSize = mainGroup.totalAllocatedInstances * SHADOW_MULTIPLIER * sizeof(uint32_t);
-                if (instanceSize > 0) {
-                    shadowGroup.instanceBuffer.Write(frameIndex, shadowGroup.instances.Data(), instanceSize, 0);
+                uint32_t activeShadowLightCount = drawData->DirectionLightShadow.visibleLightCount;
+                if (activeShadowLightCount != 0)
+                {
+                    // Upload instances
+                    size_t instanceSize = mainGroup.totalAllocatedInstances * SHADOW_MULTIPLIER * sizeof(uint32_t);
+                    if (instanceSize > 0) {
+                        shadowGroup.instanceBuffer.Write(frameIndex, shadowGroup.instances.Data(), instanceSize, 0);
+                    }
                 }
             }
 
