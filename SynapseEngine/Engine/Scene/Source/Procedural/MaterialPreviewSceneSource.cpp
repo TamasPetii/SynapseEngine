@@ -164,12 +164,10 @@ namespace Syn
             };
 
         // 2. Center object: Suzanne
-        std::string basePath = "C:/Users/User/Desktop/Models/";
-
-        auto skyTextureId = ServiceLocator::GetImageManager()->LoadImageSync(basePath + "MaterialPreview.hdr");
+        auto skyTextureId = ServiceLocator::GetImageManager()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/Engine/Environment/MaterialPreview.hdr"));
         scene.GetSettings()->environment.skyTextureId = skyTextureId;
 
-        uint32_t monkeyId = modelManager->LoadModelAsync(basePath + "Monkey/monkey.obj");
+        uint32_t monkeyId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString("Assets/Engine/Models/Monkey/Untitled.obj"));
         CreatePreviewObject("Center_Monkey", monkeyId, glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(1.5f));
 
         uint32_t sphereId = modelManager->GetResourceIndex(MeshSourceNames::Sphere);

@@ -129,8 +129,7 @@ namespace Syn
 
         hm->AttachChild(rootEnvironment, previewModel);
 
-        std::string basePath = "C:/Users/User/Desktop/Models/";
-        auto skyTextureId = ServiceLocator::GetImageManager()->LoadImageSync(basePath + "ModelPreview.hdr");
+        auto skyTextureId = ServiceLocator::GetImageManager()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/Engine/Environment/ModelPreview.hdr"));
         scene.GetSettings()->environment.skyTextureId = skyTextureId;
         scene.GetSettings()->debug.enableInfiniteGrid = true;
 

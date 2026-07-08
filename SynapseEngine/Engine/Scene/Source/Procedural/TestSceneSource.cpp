@@ -66,7 +66,9 @@ namespace Syn
             Syn::Warning("scene_config.json not found, using default settings.");
         }
 
-        std::string basePath = config.value("/paths/base_model_path"_json_pointer, "C:/Users/User/Desktop/Models/");
+        const std::string modelPath = "Assets/Engine/Models/";
+        const std::string envPath = "Assets/Engine/Environment/";
+
         bool spawnSponza = config.value("/environment/spawn_sponza"_json_pointer, true);
         bool spawnBistro = config.value("/environment/spawn_bistro"_json_pointer, false);
         bool spawnFloor = config.value("/environment/spawn_floor"_json_pointer, true);
@@ -102,7 +104,7 @@ namespace Syn
             modelManager->GetResourceIndex(MeshSourceNames::Torus)
         };
 
-        auto skyTextureId = ServiceLocator::GetImageManager()->LoadImageSync(basePath + "MainScene.hdr");
+        auto skyTextureId = ServiceLocator::GetImageManager()->LoadImageSync(PathUtils::GetAbsolutePathString(envPath + "MainScene.hdr"));
         scene.GetSettings()->environment.skyTextureId = skyTextureId;
 
         EntityID rootCameras = scene.CreateEntity();
@@ -172,7 +174,7 @@ namespace Syn
 
         if (spawnMonkey)
         {
-            uint32_t monkeyModelIndex = modelManager->LoadModelAsync(basePath + "Monkey/monkey.obj");
+            uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Monkey/Untitled.obj"));
 
             EntityID monkeyId = scene.CreateEntity();
             registry.AddComponent<TagComponent>(monkeyId);
@@ -195,7 +197,7 @@ namespace Syn
 
         if (spawnSponza)
         {
-            uint32_t sponzaId = modelManager->LoadModelAsync(basePath + "Sponza/sponza.obj");
+            uint32_t sponzaId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Sponza/sponza.obj"));
 
             EntityID sponzaEntity = scene.CreateEntity();
             registry.AddComponent<TagComponent>(sponzaEntity);
@@ -219,27 +221,6 @@ namespace Syn
             registry.GetPool<MaterialOverrideComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
 
             hm->AttachChild(rootEnvironment, sponzaEntity);
-        }
-
-        if (spawnBistro)
-        {
-            uint32_t bistroId = modelManager->LoadModelAsync(basePath + "Bistro/BistroExterior.fbx");
-
-            EntityID bistroEntity = scene.CreateEntity();
-            registry.AddComponent<TagComponent>(bistroEntity);
-            registry.GetComponent<TagComponent>(bistroEntity).name = "Amazon_Bistro";
-            registry.GetComponent<TagComponent>(bistroEntity).tag = "Model";
-            registry.AddComponent<TransformComponent>(bistroEntity);
-            registry.AddComponent<ModelComponent>(bistroEntity);
-
-            registry.GetComponent<TransformComponent>(bistroEntity).translation = glm::vec3(0.0f, 0.0f, 0.0f);
-            registry.GetComponent<TransformComponent>(bistroEntity).scale = glm::vec3(2.3f, 2.3f, 2.3f);
-            registry.GetComponent<ModelComponent>(bistroEntity).modelIndex = bistroId;
-
-            registry.GetPool<TransformComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
-            registry.GetPool<ModelComponent>()->SetCategory(bistroEntity, StorageCategory::Static);
-
-            hm->AttachChild(rootEnvironment, bistroEntity);
         }
 
         if (spawnFloor)
@@ -277,46 +258,16 @@ namespace Syn
             hm->AttachChild(rootEnvironment, floorEntity);
         }
 
-        if (spawnPbrSponza)
-        {
-            uint32_t sponzaPbr = modelManager->LoadModelAsync(basePath + "Sponza_Pbr/NewSponza_Main_Yup_003.fbx");
-            uint32_t sponzaPbrCurtains = modelManager->LoadModelAsync(basePath + "Sponza_Pbr_Curtains/NewSponza_Curtains_FBX_YUp.fbx");
-            uint32_t sponzaPbrFlowers = modelManager->LoadModelAsync(basePath + "Sponza_Pbr_Flowers/NewSponza_IvyGrowth_FBX_YUp.fbx");
-            uint32_t sponzaPbrTree = modelManager->LoadModelAsync(basePath + "Sponza_Pbr_Tree/NewSponza_CypressTree_FBX_YUp.fbx");
-
-            std::array<uint32_t, 4> sponzaModels = { sponzaPbr, sponzaPbrCurtains, sponzaPbrFlowers, sponzaPbrTree };
-            std::array<std::string, 4> sponzaNames = { "PBR_Sponza_Main", "PBR_Sponza_Curtains", "PBR_Sponza_Flowers", "PBR_Sponza_Tree" };
-
-            for (size_t i = 0; i < sponzaModels.size(); i++)
-            {
-                EntityID entity = scene.CreateEntity();
-                registry.AddComponent<TagComponent>(entity);
-                registry.GetComponent<TagComponent>(entity).name = sponzaNames[i];
-                registry.GetComponent<TagComponent>(entity).tag = "Model";
-                registry.AddComponent<TransformComponent>(entity);
-                registry.AddComponent<ModelComponent>(entity);
-
-                registry.GetComponent<TransformComponent>(entity).translation = glm::vec3(0.0f, 0.0f, 0.0f);
-                registry.GetComponent<TransformComponent>(entity).scale = glm::vec3(0.2f, 0.2f, 0.2f);
-                registry.GetComponent<ModelComponent>(entity).modelIndex = sponzaModels[i];
-
-                registry.GetPool<TransformComponent>()->SetCategory(entity, StorageCategory::Static);
-                registry.GetPool<ModelComponent>()->SetCategory(entity, StorageCategory::Static);
-
-                hm->AttachChild(rootEnvironment, entity);
-            }
-        }
-
         if (charCount > 0)
         {
-            uint32_t mutantId = modelManager->LoadModelAsync(basePath + "Monster/Mutant/Mutant.dae");
+            uint32_t mutantId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Monster/Mutant/Mutant.dae"));
 
             std::vector<uint32_t> animationIds;
-            animationIds.push_back(animationManager->LoadAnimationAsync(basePath + "Monster/Breakdance 1990/Breakdance 1990.dae", mutantId));
-            animationIds.push_back(animationManager->LoadAnimationAsync(basePath + "Monster/Breakdance Ending 1/Breakdance Ending 1.dae", mutantId));
-            animationIds.push_back(animationManager->LoadAnimationAsync(basePath + "Monster/Dancing/Dancing.dae", mutantId));
-            animationIds.push_back(animationManager->LoadAnimationAsync(basePath + "Monster/Hip Hop Dancing/Hip Hop Dancing.dae", mutantId));
-            animationIds.push_back(animationManager->LoadAnimationAsync(basePath + "Monster/Hip Hop Dancing_2/Hip Hop Dancing.dae", mutantId));
+            animationIds.push_back(animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "Monster/Breakdance 1990/Breakdance 1990.dae"), mutantId));
+            animationIds.push_back(animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "Monster/Breakdance Ending 1/Breakdance Ending 1.dae"), mutantId));
+            animationIds.push_back(animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "Monster/Dancing/Dancing.dae"), mutantId));
+            animationIds.push_back(animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "Monster/Hip Hop Dancing/Hip Hop Dancing.dae"), mutantId));
+            animationIds.push_back(animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "Monster/Hip Hop Dancing_2/Hip Hop Dancing.dae"), mutantId));
 
             // Animated Characters
             for (int i = 0; i < charCount; i++)

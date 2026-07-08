@@ -29,7 +29,6 @@
 #include "Engine/Scene/Source/Procedural/TestSceneSource.h"
 #include "Engine/Scene/Source/Procedural/MaterialPreviewSceneSource.h"
 #include "Engine/Scene/Source/Procedural/ModelPreviewSceneSource.h"
-#include "Engine/Scene/Source/Procedural/NatureSceneSource.h"
 #include "Engine/Scene/Source/File/FileSceneSource.h"
 
 #include "Engine/Render/RendererFactory.h"
