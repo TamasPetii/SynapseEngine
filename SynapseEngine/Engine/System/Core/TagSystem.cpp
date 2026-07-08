@@ -50,17 +50,13 @@ namespace Syn
                         }
                     }
 
-                    bool newGlobalEnabled = tag.localEnabled && parentGlobalEnabled;
-                    if (tag.globalEnabled != newGlobalEnabled)
-                    {
-                        tag.globalEnabled = newGlobalEnabled;
+                    tag.globalEnabled = tag.localEnabled && parentGlobalEnabled;
 
-                        if (tagPool->IsDynamic(entity)) {
-                            tagPool->SetBit<CHANGED_BIT>(entity);
-                        }
-
-                        tag.version++;
+                    if (tagPool->IsDynamic(entity)) {
+                        tagPool->SetBit<CHANGED_BIT>(entity);
                     }
+
+                    tag.version++;
                     });
                 });
 
