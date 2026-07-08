@@ -1,13 +1,13 @@
 #include "TagSystem.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Component/Core/HierarchyComponent.h"
-#include "Engine/System/Core/HierarchySystem.h"
+#include "TagSetupSystem.h"
 
 namespace Syn
 {
     std::vector<TypeID> TagSystem::GetReadDependencies() const
     {
-        return { TypeInfo<HierarchySystem>::ID };
+        return { TypeInfo<TagSetupSystem>::ID };
     }
 
     std::vector<TypeID> TagSystem::GetWriteDependencies() const
@@ -24,41 +24,52 @@ namespace Syn
 
         if (!tagPool || !hierarchyPool || !hierarchyManager) return;
 
-        this->EmplaceTask(subflow, SystemPhaseNames::Update, [tagPool, hierarchyPool, hierarchyManager]() {
+        auto* workQueue = hierarchyManager->EnsureWorkQueue<TagComponent>();
+        uint32_t maxLevel = hierarchyManager->GetMaxActiveLevel();
+        std::vector<tf::Task> levelTasks;
 
-            uint32_t maxLevel = hierarchyManager->GetMaxActiveLevel();
+        for (uint32_t level = 0; level < maxLevel; ++level)
+        {
+            tf::Task levelTask = this->EmplaceTask(subflow, "TagEnable_" + std::to_string(level), [=](tf::Subflow& nested_subflow) {
 
-            for (uint32_t level = 0; level < maxLevel; ++level)
-            {
-                auto entitiesInLevel = hierarchyManager->GetEntitiesInLevel(level);
+                auto currentQueue = workQueue->GetQueue(level);
 
-                for (EntityID entity : entitiesInLevel)
-                {
-                    if (!tagPool->Has(entity)) continue;
+                if (currentQueue.empty()) return;
+
+                nested_subflow.for_each(currentQueue.begin(), currentQueue.end(), [=](EntityID entity) {
 
                     auto& tag = tagPool->Get(entity);
-                    bool parentGlobalEnabled = true;
 
-                    if (level > 0)
+                    bool parentGlobalEnabled = true;
+                    if (hierarchyPool->Has(entity))
                     {
-                        EntityID parentId = hierarchyPool->Get(entity).parent;
-                        if (parentId != NULL_ENTITY && tagPool->Has(parentId))
-                        {
-                            parentGlobalEnabled = tagPool->Get(parentId).globalEnabled;
+                        EntityID parent = hierarchyPool->Get(entity).parent;
+
+                        if (parent != NULL_ENTITY && tagPool->Has(parent)) {
+                            parentGlobalEnabled = tagPool->Get(parent).globalEnabled;
                         }
                     }
 
                     bool newGlobalEnabled = tag.localEnabled && parentGlobalEnabled;
-
-                    if (tag.globalEnabled != newGlobalEnabled || tagPool->IsBitSet<UPDATE_BIT>(entity) || tagPool->IsBitSet<INDEX_CHANGED_BIT>(entity))
+                    if (tag.globalEnabled != newGlobalEnabled)
                     {
                         tag.globalEnabled = newGlobalEnabled;
-                        tagPool->SetBit<CHANGED_BIT>(entity);
+
+                        if (tagPool->IsDynamic(entity)) {
+                            tagPool->SetBit<CHANGED_BIT>(entity);
+                        }
+
                         tag.version++;
                     }
-                }
+                    });
+                });
+
+            if (!levelTasks.empty()) {
+                levelTasks.back().precede(levelTask);
             }
-            });
+
+            levelTasks.push_back(levelTask);
+        }
     }
 
     void TagSystem::UploadComponents(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic, bool uploadStatic)

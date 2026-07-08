@@ -21,6 +21,7 @@
 #include "Engine/System/Core/HierarchySystem.h"
 #include "Engine/System/Core/SelectionOutlineSystem.h"
 #include "Engine/System/Core/TagSystem.h"
+#include "Engine/System/Core/TagSetupSystem.h"
 #include "Engine/System/Core/CameraSystem.h"
 #include "Engine/System/Rendering/RenderSystem.h"
 #include "Engine/System/Rendering/ModelSystem.h"
@@ -139,8 +140,11 @@ namespace Syn
     {
         RegisterSystem<TransformSetupSystem>();
         RegisterSystem<TransformSystem>();
-
         RegisterSystem<TransformModelLinkSystem>();
+
+        RegisterSystem<TagSetupSystem>();
+        RegisterSystem<TagSystem>();
+
         RegisterSystem<StaticSpatialSahSystem>();
         RegisterSystem<MaterialSystem>();
         RegisterSystem<CameraSystem>();
@@ -181,7 +185,7 @@ namespace Syn
 
 		RegisterSystem<HierarchySystem>();
         RegisterSystem<SelectionOutlineSystem>();
-        RegisterSystem<TagSystem>();
+
 
     }
 

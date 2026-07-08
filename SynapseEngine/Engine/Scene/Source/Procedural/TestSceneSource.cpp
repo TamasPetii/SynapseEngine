@@ -113,6 +113,7 @@ namespace Syn
         registry.GetComponent<TagComponent>(rootCameras).tag = "Root";
         registry.AddComponent<TransformComponent>(rootCameras);
         registry.GetPool<TransformComponent>()->SetCategory(rootCameras, StorageCategory::Static);
+        registry.GetPool<TagComponent>()->SetCategory(rootCameras, StorageCategory::Static);
 
         EntityID rootEnvironment = scene.CreateEntity();
         registry.AddComponent<TagComponent>(rootEnvironment);
@@ -120,6 +121,7 @@ namespace Syn
         registry.GetComponent<TagComponent>(rootEnvironment).tag = "Root";
         registry.AddComponent<TransformComponent>(rootEnvironment);
         registry.GetPool<TransformComponent>()->SetCategory(rootEnvironment, StorageCategory::Static);
+        registry.GetPool<TagComponent>()->SetCategory(rootEnvironment, StorageCategory::Static);
 
         EntityID rootCharacters = scene.CreateEntity();
         registry.AddComponent<TagComponent>(rootCharacters);
@@ -127,6 +129,7 @@ namespace Syn
         registry.GetComponent<TagComponent>(rootCharacters).tag = "Root";
         registry.AddComponent<TransformComponent>(rootCharacters);
         registry.GetPool<TransformComponent>()->SetCategory(rootCharacters, StorageCategory::Static);
+        registry.GetPool<TagComponent>()->SetCategory(rootCharacters, StorageCategory::Static);
 
         EntityID rootStaticGeo = scene.CreateEntity();
         registry.AddComponent<TagComponent>(rootStaticGeo);
@@ -134,6 +137,7 @@ namespace Syn
         registry.GetComponent<TagComponent>(rootStaticGeo).tag = "Root";
         registry.AddComponent<TransformComponent>(rootStaticGeo);
         registry.GetPool<TransformComponent>()->SetCategory(rootStaticGeo, StorageCategory::Static);
+        registry.GetPool<TagComponent>()->SetCategory(rootStaticGeo, StorageCategory::Static);
 
         EntityID rootPhysics = scene.CreateEntity();
         registry.AddComponent<TagComponent>(rootPhysics);
@@ -141,6 +145,7 @@ namespace Syn
         registry.GetComponent<TagComponent>(rootPhysics).tag = "Root";
         registry.AddComponent<TransformComponent>(rootPhysics);
         registry.GetPool<TransformComponent>()->SetCategory(rootPhysics, StorageCategory::Static);
+        registry.GetPool<TagComponent>()->SetCategory(rootPhysics, StorageCategory::Static);
 
         EntityID rootLights = scene.CreateEntity();
         registry.AddComponent<TagComponent>(rootLights);
@@ -148,6 +153,7 @@ namespace Syn
         registry.GetComponent<TagComponent>(rootLights).tag = "Root";
         registry.AddComponent<TransformComponent>(rootLights);
         registry.GetPool<TransformComponent>()->SetCategory(rootLights, StorageCategory::Static);
+        registry.GetPool<TagComponent>()->SetCategory(rootLights, StorageCategory::Static);
 
         // Cameras (Main & Debug)
         {
@@ -159,6 +165,7 @@ namespace Syn
             registry.AddComponent<TransformComponent>(sceneCam);
             registry.GetPool<CameraComponent>()->SetCategory(sceneCam, StorageCategory::Stream);
             registry.GetPool<TransformComponent>()->SetCategory(sceneCam, StorageCategory::Stream);
+            registry.GetPool<TagComponent>()->SetCategory(sceneCam, StorageCategory::Static);
             hm->AttachChild(rootCameras, sceneCam);
 
             debugCam = scene.CreateEntity();
@@ -169,6 +176,7 @@ namespace Syn
             registry.AddComponent<TransformComponent>(debugCam);
             registry.GetPool<CameraComponent>()->SetCategory(debugCam, StorageCategory::Stream);
             registry.GetPool<TransformComponent>()->SetCategory(debugCam, StorageCategory::Stream);
+            registry.GetPool<TagComponent>()->SetCategory(debugCam, StorageCategory::Static);
             hm->AttachChild(rootCameras, debugCam);
         }
 
@@ -191,6 +199,7 @@ namespace Syn
             registry.GetPool<TransformComponent>()->SetCategory(monkeyId, StorageCategory::Static);
             registry.GetPool<ModelComponent>()->SetCategory(monkeyId, StorageCategory::Static);
             registry.GetPool<MaterialOverrideComponent>()->SetCategory(monkeyId, StorageCategory::Static);
+            registry.GetPool<TagComponent>()->SetCategory(monkeyId, StorageCategory::Static);
 
             hm->AttachChild(rootEnvironment, monkeyId);
         }
@@ -219,6 +228,7 @@ namespace Syn
             registry.GetPool<RigidBodyComponent>()->SetCategory(sponzaEntity, StorageCategory::Stream);
             registry.GetPool<MeshColliderComponent>()->SetCategory(sponzaEntity, StorageCategory::Stream);
             registry.GetPool<MaterialOverrideComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
+            registry.GetPool<TagComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
 
             hm->AttachChild(rootEnvironment, sponzaEntity);
         }
@@ -249,6 +259,8 @@ namespace Syn
             registry.GetPool<ModelComponent>()->SetCategory(floorEntity, StorageCategory::Static);
             registry.GetPool<RigidBodyComponent>()->SetCategory(floorEntity, StorageCategory::Static);
             registry.GetPool<BoxColliderComponent>()->SetCategory(floorEntity, StorageCategory::Static);
+            registry.GetPool<MaterialOverrideComponent>()->SetCategory(floorEntity, StorageCategory::Static);
+            registry.GetPool<TagComponent>()->SetCategory(floorEntity, StorageCategory::Static);
 
             MaterialInfo floorMatInfo{};
             floorMatInfo.color = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
@@ -279,6 +291,7 @@ namespace Syn
                 registry.AddComponent<TransformComponent>(characterEntity);
                 registry.AddComponent<ModelComponent>(characterEntity);
                 registry.AddComponent<AnimationComponent>(characterEntity);
+                registry.AddComponent<MaterialOverrideComponent>(characterEntity);
 
                 registry.GetComponent<TransformComponent>(characterEntity).translation = glm::vec3((rand() % 400) - 200.0f, 0.0f, (rand() % 400) - 200.0f);
                 registry.GetComponent<TransformComponent>(characterEntity).scale = glm::vec3(5.f);
@@ -288,6 +301,8 @@ namespace Syn
                 animComp.animationIndex = animationIds[rand() % animationIds.size()];
                 animComp.speed = 0.5f + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * 1.5f;
 
+                registry.GetPool<MaterialOverrideComponent>()->SetCategory(characterEntity, StorageCategory::Static);
+                registry.GetPool<TagComponent>()->SetCategory(characterEntity, StorageCategory::Static);
                 registry.GetPool<TransformComponent>()->SetCategory(characterEntity, StorageCategory::Static);
                 registry.GetPool<ModelComponent>()->SetCategory(characterEntity, StorageCategory::Static);
                 registry.GetPool<AnimationComponent>()->SetCategory(characterEntity, StorageCategory::Stream);
@@ -350,6 +365,8 @@ namespace Syn
 
             registry.GetComponent<ModelComponent>(e).modelIndex = geoIds[rand() % geoIds.size()];
 
+            registry.GetPool<MaterialOverrideComponent>()->SetCategory(e, StorageCategory::Static);
+            registry.GetPool<TagComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
 
@@ -376,6 +393,8 @@ namespace Syn
             registry.GetComponent<ModelComponent>(e).modelIndex = cubeMeshId;
             registry.GetComponent<RigidBodyComponent>(e).motionType = PhysicsMotionType::Dynamic;
 
+            registry.GetPool<MaterialOverrideComponent>()->SetCategory(e, StorageCategory::Static);
+            registry.GetPool<TagComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
             registry.GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<RigidBodyComponent>()->SetCategory(e, StorageCategory::Static);
@@ -400,6 +419,8 @@ namespace Syn
             registry.GetComponent<ModelComponent>(e).modelIndex = sphereMeshId;
             registry.GetComponent<RigidBodyComponent>(e).motionType = PhysicsMotionType::Dynamic;
 
+            registry.GetPool<MaterialOverrideComponent>()->SetCategory(e, StorageCategory::Static);
+            registry.GetPool<TagComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
             registry.GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<RigidBodyComponent>()->SetCategory(e, StorageCategory::Static);
@@ -426,6 +447,8 @@ namespace Syn
             registry.GetComponent<ModelComponent>(e).modelIndex = capsuleMeshId;
             registry.GetComponent<RigidBodyComponent>(e).motionType = PhysicsMotionType::Dynamic;
 
+            registry.GetPool<MaterialOverrideComponent>()->SetCategory(e, StorageCategory::Static);
+            registry.GetPool<TagComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
             registry.GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<RigidBodyComponent>()->SetCategory(e, StorageCategory::Static);
@@ -452,6 +475,7 @@ namespace Syn
 
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
             registry.GetPool<DirectionLightComponent>()->SetCategory(e, StorageCategory::Stream);
+            registry.GetPool<TagComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<DirectionLightComponent>()->SetBit<SHADOW_TOGGLE_BIT>(e);
             registry.GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(e);
 
@@ -478,6 +502,7 @@ namespace Syn
 
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
             registry.GetPool<PointLightComponent>()->SetCategory(e, StorageCategory::Stream);
+            registry.GetPool<TagComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<PointLightComponent>()->SetBit<SHADOW_TOGGLE_BIT>(e);
             registry.GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(e);
 
@@ -507,6 +532,7 @@ namespace Syn
 
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
             registry.GetPool<SpotLightComponent>()->SetCategory(e, StorageCategory::Stream);
+            registry.GetPool<TagComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<SpotLightComponent>()->SetBit<SHADOW_TOGGLE_BIT>(e);
             registry.GetPool<TransformComponent>()->SetBit<TRANSFORM_POS_CHANGED, TRANSFORM_ROT_CHANGED, TRANSFORM_SCALE_CHANGED>(e);
 
