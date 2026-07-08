@@ -35,7 +35,7 @@ vec3 EvaluateNormal(uint64_t textureMetadataBufferAddr, Material mat, vec2 uv, v
     mat3 TBN = mat3(tangent, bitangent, normal);
 
     vec3 tangentSpaceNormal;
-    tangentSpaceNormal.xy = SampleTexture2D(mat.normalTexture, SAMPLER_NEAREST_ANISO, uv).xy * 2.0 - 1.0;
+    tangentSpaceNormal.xy = SampleTexture2D(mat.normalTexture, SAMPLER_LINEAR_REPEAT, uv).xy * 2.0 - 1.0;
     tangentSpaceNormal.z = sqrt(max(1.0 - dot(tangentSpaceNormal.xy, tangentSpaceNormal.xy), 0.0));
     tangentSpaceNormal.y *= invertNormal ? -1.0 : 1.0;
 

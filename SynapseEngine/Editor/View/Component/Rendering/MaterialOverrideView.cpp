@@ -30,17 +30,25 @@ namespace Syn {
                         vm.Dispatch(SetSharedMaterialEntityIntent{ NULL_ENTITY });
                     }
 
-                    for (const auto& ent : state.compatibleSharedEntities) {
-                        bool isSelected = (state.sharedMaterialEntity == ent.first);
+                    ImGuiListClipper clipper;
+                    clipper.Begin(static_cast<int>(state.compatibleSharedEntities.size()));
 
-                        if (ImGui::Selectable(ent.second.c_str(), isSelected)) {
-                            vm.Dispatch(SetSharedMaterialEntityIntent{ ent.first });
-                        }
+                    while (clipper.Step()) {
+                        for (int i = clipper.DisplayStart; i < clipper.DisplayEnd; ++i) {
+                            const auto& ent = state.compatibleSharedEntities[i];
+                            bool isSelected = (state.sharedMaterialEntity == ent.first);
 
-                        if (isSelected) {
-                            ImGui::SetItemDefaultFocus();
+                            ImGui::PushID(ent.first);
+                            if (ImGui::Selectable(ent.second.c_str(), isSelected)) {
+                                vm.Dispatch(SetSharedMaterialEntityIntent{ ent.first });
+                            }
+                            if (isSelected) {
+                                ImGui::SetItemDefaultFocus();
+                            }
+                            ImGui::PopID();
                         }
                     }
+
                     Syn::UI::EndPropertyCombo();
                 }
 

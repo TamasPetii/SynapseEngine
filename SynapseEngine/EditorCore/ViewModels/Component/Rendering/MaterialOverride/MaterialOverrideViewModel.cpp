@@ -21,7 +21,7 @@ namespace Syn
             _state.expectedSlotCount = _overrideApi->GetExpectedSlotCount(activeEntity);
             _state.sharedMaterialEntity = _overrideApi->GetSharedMaterialEntity(activeEntity);
             _state.availableMaterials = _overrideApi->GetAvailableMaterials();
-            _state.compatibleSharedEntities = _overrideApi->GetCompatibleSharedEntities(activeEntity);
+            //_state.compatibleSharedEntities = _overrideApi->GetCompatibleSharedEntities(activeEntity);
 
             _state.overrides.clear();
             _state.overrides.reserve(_state.expectedSlotCount);
