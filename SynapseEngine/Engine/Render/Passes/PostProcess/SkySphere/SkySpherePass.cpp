@@ -123,6 +123,7 @@ namespace Syn {
         pc->skyIntensity = envSettings.skyIntensity;
         pc->skyRotationMatrix = rotMat;
         pc->skyTint = envSettings.skyTint;
+        pc->skyExposureEV = envSettings.skyExposureEV;
 
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }

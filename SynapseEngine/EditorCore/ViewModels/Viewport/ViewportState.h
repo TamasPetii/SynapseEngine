@@ -28,7 +28,7 @@ namespace Syn {
         bool isFocused = false;
 
         ImGuizmo::OPERATION gizmoOperation = ImGuizmo::TRANSLATE;
-        ImGuizmo::MODE gizmoMode = ImGuizmo::LOCAL;
+        ImGuizmo::MODE gizmoMode = ImGuizmo::WORLD;
         bool useSnap = false;
 
         glm::vec3 snapTranslate{ 1.0f, 1.0f, 1.0f };

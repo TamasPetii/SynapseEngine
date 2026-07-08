@@ -104,17 +104,13 @@ void main() {
 
         // 6. Backface Cone Culling
         if (pc.disableConeCulling == 0 && ctx.enableMeshletConeCulling == 1) {
-            //Todo:
+            if (TestConeCulling(worldCollider, pointCollider.center)) {
+                isVisible = false;
+            }
         }
 
         // 7. Point Sphere vs Meshlet Sphere Culling
         if (isVisible && !isParentFullyInside && ctx.enableMeshletFrustumCulling == 1) {
-            //Todo:
-        }
-
-
-        // 8. Occlusion Culling using Depth Pyramid (HZB)
-        if (isVisible && ctx.enableMeshletOcclusionCulling == 1) {
             //Todo:
         }
 

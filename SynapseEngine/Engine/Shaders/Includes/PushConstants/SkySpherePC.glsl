@@ -12,5 +12,6 @@ struct SkySpherePC {
     uint samplerIndex;
     uint mappingType;
     float skyIntensity;
+    float skyExposureEV;
 };
 #endif

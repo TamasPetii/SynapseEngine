@@ -21,6 +21,7 @@ namespace Syn
 
         uint32_t skyTextureId;
         float skyIntensity;
+        float skyExposureEV;
         glm::vec3 skyTint;
         glm::vec3 skyRotation;
 

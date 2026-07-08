@@ -38,6 +38,7 @@ install_manifest.txt
 # ==========================================
 # Binaries, Intermediates, and Compiled Objects
 # ==========================================
+Assets/
 Binaries/
 Intermediates/
 [Dd]ebug/

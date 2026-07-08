@@ -263,6 +263,7 @@ namespace Syn {
                         }
 
                         changed |= Syn::UI::PropertyDragFloat("Intensity", settings.environment.skyIntensity, 0.05f, 0.0f, 100.0f, "%.2f", 1);
+                        changed |= Syn::UI::PropertyDragFloat("Exposure", settings.environment.skyExposureEV, 0.05f, -100.0f, 100.0f, "%.2f", 1);
 
                         Syn::UI::BeginProperty("Tint");
                         if (ImGui::ColorEdit3("##SkyTint", glm::value_ptr(settings.environment.skyTint), ImGuiColorEditFlags_NoInputs)) {

@@ -7,6 +7,7 @@ namespace Syn
         , skyMode(SkyMode::EquirectangularTexture)
         , skyTextureId(UINT32_MAX)
         , skyIntensity(1.0f)
+        , skyExposureEV(0.0f)
         , skyTint(glm::vec3(1.0f))
         , skyRotation(glm::vec3(0.0f))
         , ambientIntensity(1.0f)

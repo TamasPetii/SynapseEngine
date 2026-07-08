@@ -16,7 +16,7 @@
 #include "DrawData/SceneDrawData.h"
 #include "Engine/Scene/Source/ISceneSource.h"
 #include "Engine/Physics/IPhysicsEngine.h"
-#include "HierarchyManager.h"
+#include "Hierarchy/HierarchyManager.h"
 #include "Engine/System/SystemContext.h"
 
 namespace Syn

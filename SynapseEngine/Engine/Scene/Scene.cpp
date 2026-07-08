@@ -17,6 +17,7 @@
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
 
 #include "Engine/System/Core/TransformSystem.h"
+#include "Engine/System/Core/TransformSetupSystem.h"
 #include "Engine/System/Core/HierarchySystem.h"
 #include "Engine/System/Core/SelectionOutlineSystem.h"
 #include "Engine/System/Core/TagSystem.h"
@@ -136,7 +137,9 @@ namespace Syn
 
     void Scene::InitializeSystems()
     {
+        RegisterSystem<TransformSetupSystem>();
         RegisterSystem<TransformSystem>();
+
         RegisterSystem<TransformModelLinkSystem>();
         RegisterSystem<StaticSpatialSahSystem>();
         RegisterSystem<MaterialSystem>();

@@ -103,11 +103,6 @@ void main()
 
     if (mainCamScreenSize < 1.0) return;
 
-    if (ctx.enableChunkOcclusionCulling == 1) {
-        float shadowScreenSizePixels = 0.0;
-        // Todo:
-    }
-
     uint entityData = (entityId & 0x7FFFFFFF);
     entityData = SET_BIT_TO(entityData, 31, visibility == INTERSECTION_INSIDE);
 

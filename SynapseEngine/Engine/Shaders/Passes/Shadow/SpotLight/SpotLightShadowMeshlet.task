@@ -104,7 +104,7 @@ void main() {
 
         // 6. Backface Cone Culling
         if (pc.disableConeCulling == 0 && ctx.enableMeshletConeCulling == 1) {
-            if (TestConeCulling(worldCollider, spotCollider.worldPos)) {
+            if (TestConeCullingLight(worldCollider, spotCollider.worldPos)) {
                 isVisible = false;
             }
         }

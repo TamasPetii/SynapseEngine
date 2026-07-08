@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include "Engine/Registry/Registry.h"
-#include "Engine/Scene/HierarchyManager.h"
+#include "Engine/Scene/Hierarchy/HierarchyManager.h"
 #include "Engine/Component/Core/HierarchyComponent.h"
 
 using namespace Syn;

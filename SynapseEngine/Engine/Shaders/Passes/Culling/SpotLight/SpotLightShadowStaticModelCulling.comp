@@ -112,14 +112,6 @@ void main() {
         float mainCamScreenSize = CalculateSphereScreenSizePerspective(worldCollider.center, worldCollider.radius, camera.view, camera.proj, cameraNear, screenRes);
         if (mainCamScreenSize < 1.0) continue;
 
-        // 7. Occlusion Culling using Spot Light HZB
-        if (ctx.enableModelOcclusionCulling == 1) {
-            float shadowScreenSizePixels = 0.0;
-            if (false && IsSphereOccludedAtlasPerspective(worldCollider.center, worldCollider.radius, shadowComp.view, shadowComp.proj, shadowComp.planes.x, shadowComp.planes.y, shadowComp.atlasRect, shadowDepthPyramid, float(ctx.spotLightShadowAtlasSize), ctx.spotLightShadowHizMipLevels, shadowScreenSizePixels)) {
-                continue;
-            }
-        }
-
         // 8. Encode Payload for sort/draw phase
         uint entityData = (entityId & 0x7FFFFFFF);
         entityData = SET_BIT_TO(entityData, 31, visibility == INTERSECTION_INSIDE);

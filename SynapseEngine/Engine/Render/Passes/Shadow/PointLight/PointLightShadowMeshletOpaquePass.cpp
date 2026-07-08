@@ -103,6 +103,7 @@ namespace Syn {
         pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
         pc->baseDescriptorOffset = drawData->Models.activeTraditionalCount + drawData->Models.meshletCmdOffsets[_renderType];
         pc->materialRenderType = static_cast<uint32_t>(_renderType);
+        pc->disableConeCulling = _renderType == MaterialRenderType::Opaque2Sided ? 1 : 0;
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 

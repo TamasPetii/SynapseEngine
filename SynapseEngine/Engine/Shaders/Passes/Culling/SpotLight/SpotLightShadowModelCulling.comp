@@ -107,14 +107,6 @@ void main()
     if (mainCamScreenSize < 1.0) 
         return;
 
-    // 7. Occlusion Culling (HZB)
-    if (ctx.enableModelOcclusionCulling == 1) {
-        float shadowScreenSizePixels = 0.0;  
-        if (false && IsSphereOccludedAtlasPerspective(worldCollider.center, worldCollider.radius, shadowComp.view, shadowComp.proj, shadowComp.planes.x, shadowComp.planes.y, shadowComp.atlasRect, shadowDepthPyramid, float(ctx.spotLightShadowAtlasSize), ctx.spotLightShadowHizMipLevels, shadowScreenSizePixels)) {
-            return;
-        }
-    }
-
     uint entityData = (entityId & 0x7FFFFFFF);
     entityData = SET_BIT_TO(entityData, 31, visibility == INTERSECTION_INSIDE);
 
