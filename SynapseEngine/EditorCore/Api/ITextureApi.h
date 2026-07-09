@@ -12,6 +12,7 @@ namespace Syn {
         uint32_t id;
         std::string name;
         std::string path;
+        TextureHandle handle;
     };
 
     struct SamplerItemData {
@@ -23,7 +24,7 @@ namespace Syn {
     public:
         virtual ~ITextureApi() = default;
 
-        virtual std::vector<TextureItemData> GetAllTextures() const = 0;
+        virtual std::vector<TextureItemData> GetAllTextures() = 0;
         virtual std::vector<SamplerItemData> GetAllSamplers() const = 0;
 
         virtual uint32_t GetSelectedTexture() const = 0;

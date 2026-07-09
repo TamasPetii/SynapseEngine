@@ -1,12 +1,14 @@
 #include "TextureHierarchyView.h"
 #include "Editor/Manager/EditorIcons.h"
 #include "Editor/Widgets/CardWidget.h"
+#include "Editor/Widgets/ItemCardWidget.h"
+#include "Editor/Widgets/ItemCardContainerWidget.h"
 #include <imgui.h>
 
 namespace Syn {
     void TextureHierarchyView::Draw(TextureHierarchyViewModel& vm) {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
-        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None;
 
         if (ImGui::Begin(SYN_ICON_IMAGE " Textures", nullptr, windowFlags)) {
 
@@ -25,47 +27,33 @@ namespace Syn {
 
                 const auto& state = vm.GetState();
 
-                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.08f, 0.08f, 0.08f, 0.6f));
-                ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
-                ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
+                const auto entries = state.filteredNodes;
+                const float thumbnailSize = 100;
+                Syn::UI::ItemCardContainer("ContentGrid", (int)entries.size(), thumbnailSize,
+                    [&](int index) {
+                        const auto& entry = entries[index];
 
-                float currentY = ImGui::GetCursorScreenPos().y;
-                float tableHeight = mainContentBottomY - currentY - 12.0f;
-                if (tableHeight < 100.0f) tableHeight = 100.0f;
+                        Syn::UI::ItemCardDesc desc;
+                        desc.id = entry.path.c_str();
+                        desc.title = entry.name.c_str();
+                        desc.texture = entry.handle;
+                        desc.selected = (state.selectedTexture == entry.id);
 
-                ImGui::BeginChild("TextureTableContainer", ImVec2(0, tableHeight), ImGuiChildFlags_Borders, ImGuiWindowFlags_NoScrollbar);
+                        desc.events.onClick = [&vm, &entry] {
+                            vm.Dispatch(TextureSelectIntent{ entry.id });
+                            };
 
-                if (ImGui::BeginTable("TextureTable", 1, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable)) {
-                    ImGui::TableSetupScrollFreeze(0, 1);
-                    ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
+                        desc.events.onDoubleClick = [&vm, &entry] {
+                            //Todo?
+                            };
 
-                    ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
-                    ImGui::TableSetColumnIndex(0);
+                        desc.events.onDragDropSource = [this, &entry] {
+                            //Todo?
+                            };
 
-                    float cellWidth = ImGui::GetColumnWidth();
-                    float textWidth = ImGui::CalcTextSize("Name").x;
-                    ImVec2 startPos = ImGui::GetCursorPos();
-
-                    ImGui::TableHeader("");
-                    ImGui::SetCursorPos(ImVec2(startPos.x + (cellWidth - textWidth) * 0.5f, startPos.y + 3.0f));
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-                    ImGui::Text("Name");
-                    ImGui::PopStyleColor();
-
-                    ImGuiListClipper clipper;
-                    clipper.Begin(static_cast<int>(state.filteredNodes.size()));
-
-                    while (clipper.Step()) {
-                        for (int row = clipper.DisplayStart; row < clipper.DisplayEnd; ++row) {
-                            RenderTextureRow(vm, state.filteredNodes[row]);
-                        }
-                    }
-
-                    ImGui::EndTable();
-                }
-                ImGui::EndChild();
-                ImGui::PopStyleVar(2);
-                ImGui::PopStyleColor();
+                        Syn::UI::ItemCard(desc, thumbnailSize);
+                    });
+                
             }
             Syn::UI::EndCard();
 
@@ -109,25 +97,5 @@ namespace Syn {
         ImGui::EndChild();
         ImGui::PopStyleVar();
         ImGui::Spacing();
-    }
-
-    void TextureHierarchyView::RenderTextureRow(TextureHierarchyViewModel& vm, const TextureNode& node) {
-        ImGui::PushID(node.id);
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding;
-        if (vm.GetState().selectedTexture == node.id) {
-            flags |= ImGuiTreeNodeFlags_Selected;
-        }
-
-        std::string label = node.icon + " " + node.name;
-        ImGui::TreeNodeEx((void*)(intptr_t)node.id, flags, "%s", label.c_str());
-
-        if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
-            vm.Dispatch(TextureSelectIntent{ node.id });
-        }
-
-        ImGui::PopID();
     }
 }

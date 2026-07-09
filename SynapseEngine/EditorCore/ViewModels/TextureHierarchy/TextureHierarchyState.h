@@ -3,11 +3,15 @@
 #include <vector>
 #include <cstdint>
 
+#include "EditorCore/Types/TextureHandle.h"
+
 namespace Syn {
     struct TextureNode {
         uint32_t id;
         std::string name;
+        std::string path;
         std::string icon;
+        TextureHandle handle = InvalidTextureHandle;
     };
 
     struct TextureHierarchyState {

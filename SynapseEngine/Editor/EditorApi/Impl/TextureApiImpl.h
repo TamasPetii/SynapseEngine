@@ -9,7 +9,7 @@ namespace Syn {
         TextureApiImpl(ImageManager* imageManager, GuiTextureManager* guiTextureManager) 
             : _imageManager(imageManager), _guiTextureManager(guiTextureManager) {}
 
-        std::vector<TextureItemData> GetAllTextures() const override;
+        std::vector<TextureItemData> GetAllTextures() override;
         std::vector<SamplerItemData> GetAllSamplers() const override;
 
         uint32_t GetSelectedTexture() const override;

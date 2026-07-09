@@ -4,7 +4,7 @@
 
 namespace Syn {
 
-    std::vector<TextureItemData> TextureApiImpl::GetAllTextures() const {
+    std::vector<TextureItemData> TextureApiImpl::GetAllTextures() {
         if (!_imageManager) return {};
 
         std::vector<TextureItemData> result;
@@ -18,6 +18,7 @@ namespace Syn {
 
                 std::filesystem::path p(paths[i]);
                 data.name = p.filename().string();
+                data.handle = GetTextureHandle(i);
 
                 result.push_back(data);
             }

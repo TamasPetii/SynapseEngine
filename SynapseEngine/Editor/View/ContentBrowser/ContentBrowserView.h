@@ -19,7 +19,6 @@ namespace Syn {
 
         void RenderFolderTree(ContentBrowserViewModel& vm, const ContentBrowserState& state);
         void RenderContentArea(ContentBrowserViewModel& vm, const ContentBrowserState& state);
-        void RenderFileCard(ContentBrowserViewModel& vm, const ContentBrowserState& state, const FileEntry& entry);
 
         ImTextureID GetIconForEntry(const FileEntry& entry) const;
         std::string GetPayloadType(const std::string& extension) const;

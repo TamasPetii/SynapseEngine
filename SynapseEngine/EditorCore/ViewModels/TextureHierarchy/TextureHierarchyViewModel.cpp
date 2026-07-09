@@ -62,6 +62,8 @@ namespace Syn {
                 TextureNode node;
                 node.id = tex.id;
                 node.name = tex.name;
+                node.path = tex.path;
+                node.handle = tex.handle;
                 node.icon = SYN_ICON_IMAGE;
                 _state.filteredNodes.push_back(node);
             }
