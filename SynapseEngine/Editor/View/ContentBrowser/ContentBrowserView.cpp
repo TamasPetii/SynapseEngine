@@ -1,6 +1,8 @@
 #include "ContentBrowserView.h"
 #include "Editor/Manager/EditorIcons.h"
 #include "Editor/Widgets/CardWidget.h"
+#include "Editor/Widgets/ItemCardWidget.h"
+#include "Editor/Widgets/ItemCardContainerWidget.h"
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <sstream>
@@ -223,19 +225,33 @@ namespace Syn {
     }
 
     void ContentBrowserView::RenderContentArea(ContentBrowserViewModel& vm, const ContentBrowserState& state) {
-        float panelWidth = ImGui::GetContentRegionAvail().x;
-        float padding = 16.0f;
-        float cellSize = state.thumbnailSize + padding;
-        int columnCount = std::max(1, static_cast<int>(panelWidth / cellSize));
+        const auto entries = state.currentEntries;
+        Syn::UI::ItemCardContainer("ContentGrid", (int)entries.size(), state.thumbnailSize,
+            [&](int index) {
+                const FileEntry& entry = entries[index];
 
-        ImGui::Columns(columnCount, "FileSystemGrid", false);
+                Syn::UI::ItemCardDesc desc;
+                desc.id = entry.path.c_str();
+                desc.title = entry.name.c_str();
+                desc.texture = GetIconForEntry(entry);
+                desc.selected = (state.selectedPath == entry.path);
 
-        for (const auto& entry : state.currentEntries) {
-            RenderFileCard(vm, state, entry);
-            ImGui::NextColumn();
-        }
+                desc.events.onClick = [&vm, &entry] {
+                    vm.Dispatch(SelectEntryIntent{ entry.path });
+                    };
 
-        ImGui::Columns(1);
+                desc.events.onDoubleClick = [&vm, &entry] {
+                    if (entry.isDirectory) vm.Dispatch(ChangeDirectoryIntent{ entry.path });
+                    };
+
+                desc.events.onDragDropSource = [this, &entry] {
+                    std::string payloadType = GetPayloadType(entry.extension);
+                    ImGui::SetDragDropPayload(payloadType.c_str(), entry.path.c_str(), entry.path.size() + 1);
+                    ImGui::TextUnformatted(entry.name.c_str());
+                    };
+
+                Syn::UI::ItemCard(desc, state.thumbnailSize);
+            });
     }
 
     void ContentBrowserView::RenderFileCard(ContentBrowserViewModel& vm, const ContentBrowserState& state, const FileEntry& entry) {
