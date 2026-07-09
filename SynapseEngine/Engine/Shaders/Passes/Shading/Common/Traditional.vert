@@ -116,7 +116,7 @@ void main() {
     gl_Position = camera.viewProjVulkan * transform.transform * finalModelMat * vec4(v.position, 1.0);
 
     outNormal = (transform.transformIT * finalModelMatIT * vec4(attr.normal, 0.0)).xyz;
-    outTangent = vec4((transform.transform * finalModelMat * vec4(attr.tangent, 0.0)).xyz, 1.0); // Todo: Invert Normal from model!
+    outTangent = vec4((transform.transform * finalModelMat * vec4(attr.tangent, 0.0)).xyz, 1.0);
     outUV = vec2(attr.uv_x, 1.0 - attr.uv_y);
 
     uint packedEntity = PACK_VISIBILITY_ENTITY(entityId, VIS_PIPELINE_TRADITIONAL);

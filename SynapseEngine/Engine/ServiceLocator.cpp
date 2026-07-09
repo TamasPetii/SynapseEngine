@@ -22,6 +22,7 @@ namespace Syn {
 	PhysicsFactory ServiceLocator::_physicsFactory = nullptr;
 	IRenderStatCollector* ServiceLocator::_renderStatCollector = nullptr;	
 	FrameStatisticsManager* ServiceLocator::_frameStatisticsManager = nullptr;
+	PreviewManager* ServiceLocator::_previewManager = nullptr;
 
 	void ServiceLocator::Shutdown()
 	{
@@ -45,5 +46,6 @@ namespace Syn {
 		_serializer = nullptr;
 		_renderStatCollector = nullptr;
 		_frameStatisticsManager = nullptr;
+		_previewManager = nullptr;
 	}
 }

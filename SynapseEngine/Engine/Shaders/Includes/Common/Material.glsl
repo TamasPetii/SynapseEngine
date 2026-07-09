@@ -3,18 +3,16 @@
 
 #include "../Core.glsl"
 
-#define INVALID_SAMPLER_INDEX 0xFF
-
 struct Material { 
     vec4 color; 
     vec3 emissiveColor; 
     float emissiveIntensity; 
     vec2 uvScale; 
     float metalness; 
-    float roughness; 
-    float aoStrength; 
+    float roughness;
+    float aoStrength;
     uint packedFlags; 
-    uint albedoTexture; //(8 bit sampler | 24 bit texture)
+    uint albedoTexture;
     uint normalTexture; 
     uint metalnessTexture; 
     uint roughnessTexture; 
@@ -28,6 +26,8 @@ struct Material {
 
 layout(buffer_reference, std430) readonly restrict buffer MaterialBuffer { Material data[]; };
 layout(buffer_reference, std430) readonly restrict buffer MaterialLookupBuffer { uint data[]; };
+
+#define INVALID_SAMPLER_INDEX 0xFF
 
 #define GET_MATERIAL(addr, idx)         MaterialBuffer(addr).data[idx]
 #define GET_MATERIAL_INDEX(addr, idx)   MaterialLookupBuffer(addr).data[idx]
@@ -49,4 +49,3 @@ layout(buffer_reference, std430) readonly restrict buffer MaterialLookupBuffer {
 #define HAS_AO_TEX(mat)                 HAS_VALID_TEXTURE((mat).ambientOcclusionTexture)
 
 #endif
-

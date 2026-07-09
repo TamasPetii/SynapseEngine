@@ -8,10 +8,16 @@
 
 namespace Syn {
     using TextureLoadCallback = std::function<uint32_t(const TexturePayload& payload)>;
+    using PreviewAllocateCallback = std::function<void(uint32_t resourceId)>;
+    using PreviewMarkDirtyCallback = std::function<void(uint32_t resourceId)>;
 
     class SYN_API MaterialManager : public AddressResourceManager<Material, GpuMaterial> {
     public:
-        MaterialManager(uint32_t framesInFlight, TextureLoadCallback textureLoadCallback);
+        MaterialManager(uint32_t framesInFlight,
+            TextureLoadCallback textureLoadCallback,
+            PreviewAllocateCallback previewAllocateCallback = nullptr,
+            PreviewMarkDirtyCallback previewMarkDirtyCallback = nullptr
+        );
         ~MaterialManager() = default;
 
         uint32_t LoadMaterial(const std::string& name, const MaterialInfo& info);
@@ -24,5 +30,7 @@ namespace Syn {
         void LoadDefaultMaterialSync();
     private:
         TextureLoadCallback _textureLoadCallback;
+        PreviewAllocateCallback _previewAllocateCallback;
+        PreviewMarkDirtyCallback _previewMarkDirtyCallback;
     };
 }

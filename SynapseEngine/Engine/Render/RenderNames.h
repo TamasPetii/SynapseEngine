@@ -38,6 +38,8 @@ namespace Syn
 
         static constexpr const char* PointLightShadowAtlas = "PointLightShadowAtlas";
         static constexpr const char* PointLightShadowDepthPyramid = "PointLightShadowDepthPyramid";
+
+        static constexpr const char* PreviewAtlas = "PreviewAtlas";
     };
 
     struct SYN_API RenderTargetViewNames

@@ -14,6 +14,10 @@
 #include "Engine/Render/Passes/PostProcess/Outline/SelectionOutlinePass.h"
 #include "Engine/Render/Passes/PostProcess/SkySphere/SkySpherePass.h"
 
+#include "Engine/Render/Passes/Preview/PreviewPreTransitionPass.h"
+#include "Engine/Render/Passes/Preview/PreviewPostTransitionPass.h"
+#include "Engine/Render/Passes/Preview/MaterialPreviewPass.h"
+
 #include "Engine/Render/Passes/Culling/Geometry/GeometryModelCullingPass.h"
 #include "Engine/Render/Passes/Culling/Geometry/GeometryStaticModelCullingPass.h"
 #include "Engine/Render/Passes/Culling/Geometry/GeometryStaticChunkCullingPass.h"
@@ -384,6 +388,11 @@ namespace Syn
 
 		//Debug Visibility Pass
         pipeline->AddPass(std::make_unique<DebugVisibilityPass>());     
+
+        //Preview Passes
+        pipeline->AddPass(std::make_unique<PreviewPreTransitionPass>());
+        pipeline->AddPass(std::make_unique<MaterialPreviewPass>());
+        pipeline->AddPass(std::make_unique<PreviewPostTransitionPass>());
 
 		//Gui and Present Passes
 		pipeline->AddPass(std::make_unique<PresentationTransitionPass>());

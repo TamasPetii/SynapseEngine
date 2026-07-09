@@ -46,11 +46,17 @@ namespace Syn {
 
     ResourceManager::ResourceManager(uint32_t framesInFlight) : _framesInFlight(framesInFlight) {
 		InitShaderManager();
+		InitPreviewManager();
 		InitImageManager();
 		InitMaterialManager();
 		InitModelManager();
 		InitAnimationManager();
     }
+
+	void ResourceManager::InitPreviewManager() {
+		_previewManager = std::make_unique<PreviewManager>(1024, 64);
+		ServiceLocator::ProvidePreviewManager(_previewManager.get());
+	}
 
 	void ResourceManager::InitShaderManager()
 	{
@@ -108,6 +114,12 @@ namespace Syn {
 				else {
 					return _imageManager->LoadImageAsync(payload.path);
 				}
+			},
+			[this](uint32_t id) {
+				if (_previewManager) _previewManager->AllocateTile(PreviewResourceType::Material, id);
+			},
+			[this](uint32_t id) {
+				if (_previewManager) _previewManager->MarkDirty(PreviewResourceType::Material, id);
 			}
 		);
 
@@ -146,6 +158,12 @@ namespace Syn {
 			std::make_unique<DefaultGpuModelUploader>(),
 			[this](const std::string& name, const MaterialInfo& info) -> uint32_t {
 				return _materialManager->LoadMaterial(name, info);
+			},
+			[this](uint32_t id) {
+				if (_previewManager) _previewManager->AllocateTile(PreviewResourceType::Model, id);
+			},
+			[this](uint32_t id) {
+				if (_previewManager) _previewManager->MarkDirty(PreviewResourceType::Model, id);
 			}
 		);
 
@@ -203,5 +221,6 @@ namespace Syn {
 		ServiceLocator::ProvideImageBuilder(nullptr);
 		ServiceLocator::ProvideImageManager(nullptr);
 		ServiceLocator::ProvideMaterialManager(nullptr);
+		
     }
 }

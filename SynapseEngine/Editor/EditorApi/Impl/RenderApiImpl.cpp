@@ -7,6 +7,7 @@
 #include "Engine/Component/Core/CameraComponent.h"
 #include "Engine/Vk/Image/ImageUtils.h"
 #include "Engine/Vk/Rendering/GpuUploader.h"
+#include "Engine/Manager/PreviewManager.h"
 #include <format>
 
 namespace Syn {
@@ -42,6 +43,15 @@ namespace Syn {
                 auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::NearestClampEdge);
                 TextureHandle handle = _textureManager->RegisterTexture(
                     drawData->PointLightShadow.shadowDepthPyramid[currentFrame]->GetView(viewName),
+                    sampler->Handle()
+                );
+                _viewportTextures[cacheKey] = handle;
+            }
+            else if (targetName == RenderTargetNames::PreviewAtlas) {
+                auto imageView = ServiceLocator::GetPreviewManager()->GetAtlasImage()->GetView(viewName);
+                auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::LinearClampEdge);
+                TextureHandle handle = _textureManager->RegisterTexture(
+                    imageView,
                     sampler->Handle()
                 );
                 _viewportTextures[cacheKey] = handle;

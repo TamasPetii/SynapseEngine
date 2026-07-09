@@ -15,11 +15,16 @@ namespace Syn {
     ModelManager::ModelManager(uint32_t framesInFlight,
         std::shared_ptr<StaticMeshBuilder> builder,
         std::unique_ptr<IGpuModelUploader> uploader,
-        MaterialLoadCallback materialLoadCallback)
+        MaterialLoadCallback materialLoadCallback,
+        PreviewAllocateCallback previewAllocateCallback,
+        PreviewMarkDirtyCallback previewMarkDirtyCallback
+    )
         : AddressResourceManager<StaticMesh, GpuModelAddresses>(framesInFlight, 1024, 256, 512),
         _builder(builder), 
         _uploader(std::move(uploader)), 
-        _materialLoadCallback(std::move(materialLoadCallback))
+        _materialLoadCallback(std::move(materialLoadCallback)),
+        _previewAllocateCallback(std::move(previewAllocateCallback)),
+        _previewMarkDirtyCallback(std::move(previewMarkDirtyCallback))
     {
     }
 
@@ -154,6 +159,8 @@ namespace Syn {
 
     void ModelManager::FinalizeResource(EntryType& entry)
     {
+        uint32_t index = _pathToId.at(entry.path);
+        if (_previewAllocateCallback) _previewAllocateCallback(index);
         entry.resource->transientGpuData.reset();
         entry.resource->transientCpuData.reset();
     }
@@ -186,6 +193,8 @@ namespace Syn {
             addresses.isReady = 1;
 
             WriteAddress(index, addresses);
+
+            if (_previewMarkDirtyCallback) _previewMarkDirtyCallback(index);
             });
     }
 }

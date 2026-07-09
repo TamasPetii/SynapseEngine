@@ -14,13 +14,19 @@ namespace Syn {
     using MaterialLoadCallback = std::function<uint32_t(const std::string& name, const MaterialInfo& info)>;
     using MeshSourceFactory = std::function<std::unique_ptr<IMeshSource>()>;
     using StaticMeshFactory = std::function<std::shared_ptr<StaticMesh>()>;
+    using PreviewAllocateCallback = std::function<void(uint32_t resourceId)>;
+    using PreviewMarkDirtyCallback = std::function<void(uint32_t resourceId)>;
 
     class SYN_API ModelManager : public AddressResourceManager<StaticMesh, GpuModelAddresses> {
     public:
         ModelManager(uint32_t framesInFlight, 
             std::shared_ptr<StaticMeshBuilder> builder,
             std::unique_ptr<IGpuModelUploader> uploader,
-            MaterialLoadCallback materialLoadCallback = nullptr);
+            MaterialLoadCallback materialLoadCallback = nullptr,
+            PreviewAllocateCallback previewAllocateCallback = nullptr,
+            PreviewMarkDirtyCallback previewMarkDirtyCallback = nullptr
+        );
+
         ~ModelManager() = default;
 
 
@@ -37,6 +43,8 @@ namespace Syn {
         void FinalizeResource(EntryType& entry) override;
     private:
         MaterialLoadCallback _materialLoadCallback;
+        PreviewAllocateCallback _previewAllocateCallback;
+        PreviewMarkDirtyCallback _previewMarkDirtyCallback;
         std::shared_ptr<StaticMeshBuilder> _builder;
         std::unique_ptr<IGpuModelUploader> _uploader;
     };

@@ -5,9 +5,15 @@
 
 namespace Syn {
 
-    MaterialManager::MaterialManager(uint32_t framesInFlight, TextureLoadCallback textureLoadCallback)
+    MaterialManager::MaterialManager(uint32_t framesInFlight, 
+        TextureLoadCallback textureLoadCallback, 
+        PreviewAllocateCallback previewAllocateCallback,
+        PreviewMarkDirtyCallback previewMarkDirtyCallback
+    )
         : AddressResourceManager<Material, GpuMaterial>(framesInFlight, 1024, 1024, 2048)
         , _textureLoadCallback(std::move(textureLoadCallback))
+        , _previewAllocateCallback(std::move(previewAllocateCallback))
+        , _previewMarkDirtyCallback(std::move(previewMarkDirtyCallback))
     {
         Material emptyMat;
         WriteAddress(0, GpuMaterial(emptyMat));
@@ -55,6 +61,8 @@ namespace Syn {
     void MaterialManager::StartGpuUpload(EntryType& entry) {
         uint32_t entryIndex = _pathToId.at(entry.path);
 
+        FinalizeResource(entry);
+
         entry.state = ResourceState::Ready;
         MarkDirty(entryIndex);
 
@@ -68,13 +76,19 @@ namespace Syn {
     }
 
     void MaterialManager::FinalizeResource(EntryType& entry) {
+        uint32_t index = _pathToId.at(entry.path);
+        if (_previewAllocateCallback) _previewAllocateCallback(index);
+        if (_previewMarkDirtyCallback) _previewMarkDirtyCallback(index);
     }
 
     void MaterialManager::FlushDirtyResources() {
         ProcessDirtyReadyEntries(
             [this](uint32_t index, const EntryType& entry) {
-                GpuMaterial gpuMat(*entry.resource);
-                WriteAddress(index, gpuMat);
+                WriteAddress(index, GpuMaterial(*entry.resource));
+
+                if (_previewMarkDirtyCallback) {
+                    _previewMarkDirtyCallback(index);
+                }
             }
         );
     }

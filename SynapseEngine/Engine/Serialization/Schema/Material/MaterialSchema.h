@@ -32,6 +32,14 @@ namespace Syn
             ar.Property("metallicRoughnessTexture", mat.metallicRoughnessTexture);
             ar.Property("emissiveTexture", mat.emissiveTexture);
             ar.Property("ambientOcclusionTexture", mat.ambientOcclusionTexture);
+
+            ar.Property("albedoSampler", mat.albedoSampler);
+            ar.Property("normalSampler", mat.normalSampler);
+            ar.Property("metalnessSampler", mat.metalnessSampler);
+            ar.Property("roughnessSampler", mat.roughnessSampler);
+            ar.Property("metallicRoughnessSampler", mat.metallicRoughnessSampler);
+            ar.Property("emissiveSampler", mat.emissiveSampler);
+            ar.Property("ambientOcclusionSampler", mat.ambientOcclusionSampler);
         }
     };
 }

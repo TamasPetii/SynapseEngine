@@ -147,5 +147,7 @@ namespace Syn
         static constexpr const char* PointLightShadowStaticChunkCullingComp = "Engine/Shaders/Passes/Culling/PointLight/PointLightShadowStaticChunkCulling.comp";
         static constexpr const char* PointLightShadowStaticModelCullingComp = "Engine/Shaders/Passes/Culling/PointLight/PointLightShadowStaticModelCulling.comp";
 
+        static constexpr const char* MaterialPreviewVert = "Engine/Shaders/Passes/Preview/MaterialPreview.vert";
+        static constexpr const char* MaterialPreviewFrag = "Engine/Shaders/Passes/Preview/MaterialPreview.frag";
 }; 
 }

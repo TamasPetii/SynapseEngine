@@ -30,6 +30,7 @@ namespace Syn {
     class Serializer;
     class IRenderStatCollector;
 	class FrameStatisticsManager;
+    class PreviewManager;
 
     using PhysicsFactory = std::function<std::unique_ptr<IPhysicsEngine>()>;
 }
@@ -107,6 +108,8 @@ namespace Syn
 		static void ProvideFrameStatisticsManager(FrameStatisticsManager* manager) { _frameStatisticsManager = manager; }
 		static FrameStatisticsManager* GetFrameStatisticsManager() { return _frameStatisticsManager; }
 
+        static void ProvidePreviewManager(PreviewManager* manager) { _previewManager = manager; }
+        static PreviewManager* GetPreviewManager() { return _previewManager; }
     private:
         static Vk::Context* _vkContext;
         static Vk::GpuUploader* _gpuUploader;
@@ -129,5 +132,6 @@ namespace Syn
         static PhysicsFactory _physicsFactory;
 		static IRenderStatCollector* _renderStatCollector;
 		static FrameStatisticsManager* _frameStatisticsManager;
+        static PreviewManager* _previewManager;
     };
 }

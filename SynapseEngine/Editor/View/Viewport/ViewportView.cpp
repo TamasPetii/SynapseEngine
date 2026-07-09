@@ -383,6 +383,8 @@ namespace Syn {
                     }
                     ImGui::Unindent();
                 }
+
+                RadioButton("PreviewAtlas", RenderTargetGroupNames::Main, RenderTargetNames::PreviewAtlas, Vk::ImageViewNames::Default);
             }
             ImGui::EndChild();
             ImGui::EndPopup();

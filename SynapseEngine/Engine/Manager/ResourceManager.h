@@ -6,6 +6,7 @@
 #include "Engine/Material/MaterialManager.h"
 #include "Engine/Animation/Builder/AnimationBuilder.h"
 #include "Engine/Animation/AnimationManager.h"
+#include "PreviewManager.h"
 #include <memory>
 
 namespace Syn {
@@ -23,6 +24,7 @@ namespace Syn {
         void InitImageManager();
         void InitMaterialManager();
         void InitAnimationManager();
+        void InitPreviewManager();
     private:
         std::unique_ptr<ShaderManager> _shaderManager;
         std::unique_ptr<MaterialManager> _materialManager;
@@ -35,6 +37,8 @@ namespace Syn {
 
         std::shared_ptr<AnimationBuilder> _animationBuilder;
         std::unique_ptr<AnimationManager> _animationManager;
+
+        std::unique_ptr<PreviewManager> _previewManager;
 
 		uint32_t _framesInFlight;
     };
