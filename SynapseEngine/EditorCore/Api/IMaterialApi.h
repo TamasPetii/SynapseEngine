@@ -1,4 +1,5 @@
 #pragma once
+#include "IApi.h"
 #include <cstdint>
 #include <vector>
 #include <string>
@@ -15,7 +16,7 @@ namespace Syn
         std::string path;
     };
 
-    class IMaterialApi {
+    class IMaterialApi : public IApi {
     public:
         virtual ~IMaterialApi() = default;
 

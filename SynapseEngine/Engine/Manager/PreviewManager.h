@@ -36,6 +36,8 @@ namespace Syn {
         void GetNormalizedUVs(PreviewResourceType type, uint32_t resourceId, glm::vec2& outUv0, glm::vec2& outUv1) const;
 
         Vk::Image* GetAtlasImage() const { return _atlasImage.get(); }
+        uint32_t GetResolution() const { return _resolution; }
+        std::vector<uint32_t> GetActiveResources(PreviewResourceType type) const;
     private:
         void CreateOrResizeAtlas(uint32_t newResolution);
         uint64_t GetUniqueId(PreviewResourceType type, uint32_t resourceId) const;

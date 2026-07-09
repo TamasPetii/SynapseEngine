@@ -3,8 +3,8 @@
 #include <algorithm>
 
 namespace Syn {
-    MaterialHierarchyViewModel::MaterialHierarchyViewModel(IMaterialApi* materialApi)
-        : _materialApi(materialApi)
+    MaterialHierarchyViewModel::MaterialHierarchyViewModel(IMaterialApi* materialApi, IPreviewApi* previewApi)
+        : _materialApi(materialApi), _previewApi(previewApi)
     {}
 
     void MaterialHierarchyViewModel::SyncWithEngine() {
@@ -21,6 +21,18 @@ namespace Syn {
 
         if (_state.selectedMaterial != currentSelection) {
             _state.selectedMaterial = currentSelection;
+        }
+
+        if (_previewApi) {
+            _state.atlasHandle = _previewApi->GetAtlasHandle();
+
+            for (auto& node : _state.filteredNodes) {
+                if (!node.hasPreview) {
+                    if (_previewApi->GetPreviewUVs(PreviewResourceType::Material, node.id, node.uv0, node.uv1)) {
+                        node.hasPreview = true;
+                    }
+                }
+            }
         }
     }
 
@@ -63,7 +75,19 @@ namespace Syn {
                 MaterialNode node;
                 node.id = mat.id;
                 node.name = mat.name;
+                node.path = mat.path;
                 node.icon = SYN_ICON_BRUSH;
+
+                if (_previewApi) {
+                    if (_previewApi->GetPreviewUVs(PreviewResourceType::Material, mat.id, node.uv0, node.uv1)) {
+                        node.hasPreview = true;
+                    }
+                    else {
+                        node.hasPreview = false;
+                        _previewApi->RequestPreview(PreviewResourceType::Material, mat.id);
+                    }
+                }
+
                 _state.filteredNodes.push_back(node);
             }
         }

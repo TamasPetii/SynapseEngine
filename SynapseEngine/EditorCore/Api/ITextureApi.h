@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include "IApi.h"
 #include "Engine/Image/Data/Cpu/CpuTextureData.h"
 #include "EditorCore/Types/TextureHandle.h"
 
@@ -20,7 +21,7 @@ namespace Syn {
         std::string name;
     };
 
-    class ITextureApi {
+    class ITextureApi : public IApi {
     public:
         virtual ~ITextureApi() = default;
 

@@ -1,11 +1,12 @@
 #pragma once
+#include "IApi.h"
 #include <vector>
 #include <string>
 #include "EditorCore/Types/FileEntry.h"
 
 namespace Syn 
 {
-    class IFileSystemApi {
+    class IFileSystemApi : public IApi {
     public:
         virtual ~IFileSystemApi() = default;
 

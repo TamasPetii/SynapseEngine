@@ -134,4 +134,20 @@ namespace Syn {
         outUv0 = glm::vec2(col * normalizedTileSize, row * normalizedTileSize);
         outUv1 = glm::vec2((col + 1) * normalizedTileSize, (row + 1) * normalizedTileSize);
     }
+
+    std::vector<uint32_t> PreviewManager::GetActiveResources(PreviewResourceType type) const {
+        std::lock_guard<std::mutex> lock(_mutex);
+        std::vector<uint32_t> result;
+
+        uint64_t typePrefix = static_cast<uint64_t>(type) << 32;
+        uint64_t typeMask = 0xFFFFFFFF00000000;
+
+        for (const auto& [id, tileIndex] : _resourceToTile) {
+            if ((id & typeMask) == typePrefix) {
+                result.push_back(static_cast<uint32_t>(id & 0xFFFFFFFF));
+            }
+        }
+
+        return result;
+    }
 }

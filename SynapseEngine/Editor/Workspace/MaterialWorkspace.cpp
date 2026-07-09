@@ -24,8 +24,8 @@ namespace Syn {
         : _context(context), _iconManager(iconManager), _assetPath(assetPath) {}
 
     void MaterialWorkspace::OnActivate() {
-        if (_context && _context->GetSceneApi()) {
-            _context->GetSceneApi()->ActivateScene(SceneNames::MaterialPreview);
+        if (_context && _context->GetApi<ISceneApi>()) {
+            _context->GetApi<ISceneApi>()->ActivateScene(SceneNames::MaterialPreview);
         }
     }
 
@@ -33,31 +33,31 @@ namespace Syn {
         using ContentBrowserWin = EditorWindow<ContentBrowserView, ContentBrowserViewModel>;
         AddWindow<ContentBrowserWin>(
             ContentBrowserView{ _iconManager, SYN_ICON_FOLDER_OPEN " Content Browser###Content_Material" },
-            ContentBrowserViewModel{ _context->GetFileSystemApi(), _assetPath }
+            ContentBrowserViewModel{ _context->GetApi<IFileSystemApi>(), _assetPath }
         );
 
         using MaterialHierarchyWin = EditorWindow<MaterialHierarchyView, MaterialHierarchyViewModel>;
         AddWindow<MaterialHierarchyWin>(
             MaterialHierarchyView{},
-            MaterialHierarchyViewModel{ _context->GetMaterialApi() }
+            MaterialHierarchyViewModel{ _context->GetApi<IMaterialApi>(), _context->GetApi<IPreviewApi>() }
         );
 
         using MaterialGraphWin = EditorWindow<MaterialGraphView, MaterialGraphViewModel>;
         AddWindow<MaterialGraphWin>(
             MaterialGraphView{},
-            MaterialGraphViewModel{ _context->GetMaterialApi(), _context->GetTextureApi() }
+            MaterialGraphViewModel{ _context->GetApi<IMaterialApi>(), _context->GetApi<ITextureApi>() }
         );
 
         using MaterialPropertiesWin = EditorWindow<MaterialPropertiesView, MaterialPropertiesViewModel>;
         AddWindow<MaterialPropertiesWin>(
             MaterialPropertiesView{},
-            MaterialPropertiesViewModel{ _context->GetMaterialApi(), _context->GetTextureApi() }
+            MaterialPropertiesViewModel{ _context->GetApi<IMaterialApi>(), _context->GetApi<ITextureApi>() }
         );
 
         using MaterialViewportWin = EditorWindow<MaterialViewportView, MaterialViewportViewModel>;
         AddWindow<MaterialViewportWin>(
             MaterialViewportView{},
-            MaterialViewportViewModel{ _context->GetRenderApi() }
+            MaterialViewportViewModel{ _context->GetApi<IRenderApi>() }
         );
     }
 

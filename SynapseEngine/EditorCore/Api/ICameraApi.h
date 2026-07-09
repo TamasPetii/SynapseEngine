@@ -1,8 +1,9 @@
 #pragma once
+#include "IApi.h"
 #include "EditorCore/Types/EntityHandle.h"
 
 namespace Syn {
-    class ICameraApi {
+    class ICameraApi : public IApi {
     public:
         virtual ~ICameraApi() = default;
 

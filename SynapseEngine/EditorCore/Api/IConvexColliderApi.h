@@ -1,10 +1,11 @@
 #pragma once
+#include "IApi.h"
 #include <glm/glm.hpp>
 #include "EditorCore/Types/EntityHandle.h"
 #include <cstdint>
 
 namespace Syn {
-    class IConvexColliderApi {
+    class IConvexColliderApi : public IApi {
     public:
         virtual ~IConvexColliderApi() = default;
 

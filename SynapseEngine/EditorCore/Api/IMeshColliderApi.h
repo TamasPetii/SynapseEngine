@@ -1,10 +1,11 @@
 #pragma once
 #include <glm/glm.hpp>
+#include "IApi.h"
 #include "EditorCore/Types/EntityHandle.h"
 #include <cstdint>
 
 namespace Syn {
-    class IMeshColliderApi {
+    class IMeshColliderApi : public IApi {
     public:
         virtual ~IMeshColliderApi() = default;
 

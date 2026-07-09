@@ -4,9 +4,10 @@
 #include <cstdint>
 #include "EditorCore/Types/TextureHandle.h"
 #include "EditorCore/Types/EntityHandle.h"
+#include "IApi.h"
 
 namespace Syn {
-    class IRenderApi {
+    class IRenderApi : public IApi {
     public:
         virtual ~IRenderApi() = default;
 

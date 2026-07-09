@@ -1,9 +1,10 @@
 #pragma once
 #include <glm/glm.hpp>
+#include "IApi.h"
 #include "EditorCore/Types/EntityHandle.h"
 
 namespace Syn {
-    class IBoxColliderApi {
+    class IBoxColliderApi : public IApi {
     public:
         virtual ~IBoxColliderApi() = default;
 

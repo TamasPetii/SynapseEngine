@@ -1,10 +1,11 @@
 #pragma once
+#include "IApi.h"
 #include <string>
 #include <vector>
 #include "EditorCore/Types/EntityHandle.h"
 
 namespace Syn {
-    class IHierarchyApi {
+    class IHierarchyApi : public IApi {
     public:
         virtual ~IHierarchyApi() = default;
 

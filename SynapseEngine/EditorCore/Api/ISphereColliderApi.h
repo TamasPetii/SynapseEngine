@@ -1,9 +1,10 @@
 #pragma once
 #include <glm/glm.hpp>
+#include "IApi.h"
 #include "EditorCore/Types/EntityHandle.h"
 
 namespace Syn {
-    class ISphereColliderApi {
+    class ISphereColliderApi : public IApi {
     public:
         virtual ~ISphereColliderApi() = default;
 

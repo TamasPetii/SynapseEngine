@@ -1,11 +1,12 @@
 #pragma once
+#include "IApi.h"
 #include "Engine/Scene/Settings/SceneSettings.h"
 #include <vector>
 #include <string>
 #include <cstdint>
 
 namespace Syn {
-    class ISettingsApi {
+    class ISettingsApi : public IApi {
     public:
         virtual ~ISettingsApi() = default;
 

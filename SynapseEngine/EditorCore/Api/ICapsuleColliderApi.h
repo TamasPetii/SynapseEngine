@@ -1,9 +1,10 @@
 #pragma once
+#include "IApi.h"
 #include <glm/glm.hpp>
 #include "EditorCore/Types/EntityHandle.h"
 
 namespace Syn {
-    class ICapsuleColliderApi {
+    class ICapsuleColliderApi : public IApi {
     public:
         virtual ~ICapsuleColliderApi() = default;
 

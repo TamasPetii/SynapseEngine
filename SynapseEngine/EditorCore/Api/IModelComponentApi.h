@@ -1,11 +1,12 @@
 #pragma once
+#include "IApi.h"
 #include "EditorCore/Types/EntityHandle.h"
 #include <string>
 #include <vector>
 #include <cstdint>
 
 namespace Syn {
-    class IModelComponentApi {
+    class IModelComponentApi : public IApi {
     public:
         virtual ~IModelComponentApi() = default;
 

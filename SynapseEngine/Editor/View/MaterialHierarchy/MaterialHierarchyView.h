@@ -10,7 +10,6 @@ namespace Syn {
         void Draw(MaterialHierarchyViewModel& vm) override;
     private:
         void RenderTopBar(MaterialHierarchyViewModel& vm);
-        void RenderMaterialRow(MaterialHierarchyViewModel& vm, const MaterialNode& node);
     private:
         std::unordered_map<std::string, bool> _cardStates;
     };

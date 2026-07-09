@@ -18,47 +18,46 @@
 
 #include "Engine/Scene/SceneNames.h"
 
-
 namespace Syn {
 
     SceneWorkspace::SceneWorkspace(EditorContext* context, IconManager* iconManager, const std::string& assetPath)
         : _context(context), _iconManager(iconManager), _assetPath(assetPath) {}
 
     void SceneWorkspace::OnActivate() {
-        if (_context && _context->GetSceneApi()) {
-            _context->GetSceneApi()->ActivateScene(SceneNames::Main);
+        if (_context && _context->GetApi<ISceneApi>()) {
+            _context->GetApi<ISceneApi>()->ActivateScene(SceneNames::Main);
         }
     }
 
-    void SceneWorkspace::Initialize() 
+    void SceneWorkspace::Initialize()
     {
         using ContentBrowserWin = EditorWindow<ContentBrowserView, ContentBrowserViewModel>;
         AddWindow<ContentBrowserWin>(
             ContentBrowserView{ _iconManager, SYN_ICON_FOLDER_OPEN " Content Browser###Content_Scene" },
-            ContentBrowserViewModel{ _context->GetFileSystemApi(), _assetPath }
+            ContentBrowserViewModel{ _context->GetApi<IFileSystemApi>(), _assetPath }
         );
 
         using ComponentWin = EditorWindow<ComponentView, ComponentViewModel>;
         AddWindow<ComponentWin>(
             ComponentView{},
             ComponentViewModel{
-                _context->GetSelectionApi(), 
-                _context->GetTagApi(),
-                _context->GetTransformApi(),
-                _context->GetHierarchyApi(), 
-                _context->GetDirectionLightApi(),
-                _context->GetPointLightApi(), 
-                _context->GetSpotLightApi(),
-                _context->GetCameraApi(),
-                _context->GetBoxColliderApi(),
-                _context->GetSphereColliderApi(),
-                _context->GetCapsuleColliderApi(),
-                _context->GetConvexColliderApi(),
-                _context->GetMeshColliderApi(),
-                _context->GetRigidBodyApi(),
-				_context->GetModelComponentApi(),
-				_context->GetAnimationApi(),
-                _context->GetMaterialOverrideApi()
+                _context->GetApi<ISelectionApi>(),
+                _context->GetApi<ITagApi>(),
+                _context->GetApi<ITransformApi>(),
+                _context->GetApi<IHierarchyApi>(),
+                _context->GetApi<IDirectionLightApi>(),
+                _context->GetApi<IPointLightApi>(),
+                _context->GetApi<ISpotLightApi>(),
+                _context->GetApi<ICameraApi>(),
+                _context->GetApi<IBoxColliderApi>(),
+                _context->GetApi<ISphereColliderApi>(),
+                _context->GetApi<ICapsuleColliderApi>(),
+                _context->GetApi<IConvexColliderApi>(),
+                _context->GetApi<IMeshColliderApi>(),
+                _context->GetApi<IRigidBodyApi>(),
+                _context->GetApi<IModelComponentApi>(),
+                _context->GetApi<IAnimationApi>(),
+                _context->GetApi<IMaterialOverrideApi>()
             }
         );
 
@@ -66,34 +65,41 @@ namespace Syn {
         AddWindow<ViewportWin>(
             ViewportView{},
             ViewportViewModel{
-                _context->GetRenderApi(), _context->GetSelectionApi(), _context->GetTransformApi(),
-                _context->GetSettingsApi(), _context->GetHierarchyApi()
+                _context->GetApi<IRenderApi>(),
+                _context->GetApi<ISelectionApi>(),
+                _context->GetApi<ITransformApi>(),
+                _context->GetApi<ISettingsApi>(),
+                _context->GetApi<IHierarchyApi>()
             }
         );
 
         using SettingsWin = EditorWindow<SettingsView, SettingsViewModel>;
         AddWindow<SettingsWin>(
             SettingsView{},
-            SettingsViewModel{ _context->GetSettingsApi() }
+            SettingsViewModel{ _context->GetApi<ISettingsApi>() }
         );
 
         using HierarchyWin = EditorWindow<HierarchyView, HierarchyViewModel>;
         AddWindow<HierarchyWin>(
             HierarchyView{},
-            HierarchyViewModel{ _context->GetHierarchyApi(), _context->GetSelectionApi(), _context->GetTagApi() }
+            HierarchyViewModel{
+                _context->GetApi<IHierarchyApi>(),
+                _context->GetApi<ISelectionApi>(),
+                _context->GetApi<ITagApi>()
+            }
         );
 
         using BenchmarkWin = EditorWindow<BenchmarkView, BenchmarkViewModel>;
         AddWindow<BenchmarkWin>(
-            BenchmarkView{}, 
+            BenchmarkView{},
             BenchmarkViewModel{}
         );
 
         using LoggerWin = EditorWindow<LoggerView, LoggerViewModel>;
         AddWindow<LoggerWin>(
             LoggerView{},
-            LoggerViewModel{ 
-                _context->GetLoggerApi()
+            LoggerViewModel{
+                _context->GetApi<ILoggerApi>()
             }
         );
     }

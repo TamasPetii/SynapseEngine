@@ -24,37 +24,37 @@
 #include "Impl/ModelComponentApiImpl.h"
 #include "Impl/AnimationApiImpl.h"
 #include "Impl/MaterialOverrideApiImpl.h"
+#include "Impl/PreviewApiImpl.h"
 
 namespace Syn {
     EditorContext::EditorContext(Engine* engine, GuiTextureManager* textureManager) {
         SceneManager* sm = engine->GetSceneManager();
 
-        _selectionApi = std::make_unique<SelectionApiImpl>(sm);
-        _tagApi = std::make_unique<TagApiImpl>(sm);
-        _transformApi = std::make_unique<TransformApiImpl>(sm);
-        _directionLightApi = std::make_unique<DirectionLightApiImpl>(sm);
-        _fileSystemApi = std::make_unique<FileSystemApiImpl>();
-        _hierarchyApi = std::make_unique<HierarchyApiImpl>(sm);
-        _loggerApi = std::make_unique<LoggerApiImpl>(engine);
-        _materialApi = std::make_unique<MaterialApiImpl>(engine->GetMaterialManager(), sm);
-        _renderApi = std::make_unique<RenderApiImpl>(engine, textureManager, sm);
-        _sceneApi = std::make_unique<SceneApiImpl>(sm);
-        _settingsApi = std::make_unique<SettingsApiImpl>(sm);
-        _pointLightApi = std::make_unique<PointLightApiImpl>(sm);
-        _spotLightApi = std::make_unique<SpotLightApiImpl>(sm);
-        _textureApi = std::make_unique<TextureApiImpl>(engine->GetImageManager(), textureManager);
-        _modelApi = std::make_unique<ModelApiImpl>(engine->GetModelManager(), sm);
-        _cameraApi = std::make_unique<CameraApiImpl>(sm);
-        _boxColliderApi = std::make_unique<BoxColliderApiImpl>(sm);
-        _sphereColliderApi = std::make_unique<SphereColliderApiImpl>(sm);
-        _capsuleColliderApi = std::make_unique<CapsuleColliderApiImpl>(sm);
-        _convexColliderApi = std::make_unique<ConvexColliderApiImpl>(sm);
-        _meshColliderApi = std::make_unique<MeshColliderApiImpl>(sm);
-        _rigidBodyApi = std::make_unique<RigidBodyApiImpl>(sm);
-		_modelComponentApi = std::make_unique<ModelComponentApiImpl>(sm);
-		_animationApi = std::make_unique<AnimationApiImpl>(sm);
-        _materialOverrideApi = std::make_unique<MaterialOverrideApiImpl>(sm);
+        RegisterApi<ISelectionApi, SelectionApiImpl>(sm);
+        RegisterApi<ITagApi, TagApiImpl>(sm);
+        RegisterApi<ITransformApi, TransformApiImpl>(sm);
+        RegisterApi<IDirectionLightApi, DirectionLightApiImpl>(sm);
+        RegisterApi<IFileSystemApi, FileSystemApiImpl>();
+        RegisterApi<IHierarchyApi, HierarchyApiImpl>(sm);
+        RegisterApi<ILoggerApi, LoggerApiImpl>(engine);
+        RegisterApi<IMaterialApi, MaterialApiImpl>(engine->GetMaterialManager(), sm);
+        RegisterApi<IRenderApi, RenderApiImpl>(engine, textureManager, sm);
+        RegisterApi<ISceneApi, SceneApiImpl>(sm);
+        RegisterApi<ISettingsApi, SettingsApiImpl>(sm);
+        RegisterApi<IPointLightApi, PointLightApiImpl>(sm);
+        RegisterApi<ISpotLightApi, SpotLightApiImpl>(sm);
+        RegisterApi<ITextureApi, TextureApiImpl>(engine->GetImageManager(), textureManager);
+        RegisterApi<IModelApi, ModelApiImpl>(engine->GetModelManager(), sm);
+        RegisterApi<ICameraApi, CameraApiImpl>(sm);
+        RegisterApi<IBoxColliderApi, BoxColliderApiImpl>(sm);
+        RegisterApi<ISphereColliderApi, SphereColliderApiImpl>(sm);
+        RegisterApi<ICapsuleColliderApi, CapsuleColliderApiImpl>(sm);
+        RegisterApi<IConvexColliderApi, ConvexColliderApiImpl>(sm);
+        RegisterApi<IMeshColliderApi, MeshColliderApiImpl>(sm);
+        RegisterApi<IRigidBodyApi, RigidBodyApiImpl>(sm);
+        RegisterApi<IModelComponentApi, ModelComponentApiImpl>(sm);
+        RegisterApi<IAnimationApi, AnimationApiImpl>(sm);
+        RegisterApi<IMaterialOverrideApi, MaterialOverrideApiImpl>(sm);
+        RegisterApi<IPreviewApi, PreviewApiImpl>(engine->GetPreviewManager(), textureManager, engine->GetImageManager());
     }
-
-    EditorContext::~EditorContext() = default;
 }

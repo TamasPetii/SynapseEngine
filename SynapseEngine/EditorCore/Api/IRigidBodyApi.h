@@ -1,10 +1,11 @@
 #pragma once
 #include "EditorCore/Types/EntityHandle.h"
 #include "Engine/Physics/PhysicsTypes.h"
+#include "IApi.h"
 #include <cstdint>
 
 namespace Syn {
-    class IRigidBodyApi {
+    class IRigidBodyApi : public IApi {
     public:
         virtual ~IRigidBodyApi() = default;
 

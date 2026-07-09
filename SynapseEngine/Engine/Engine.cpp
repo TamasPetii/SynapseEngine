@@ -387,4 +387,9 @@ namespace Syn
 	AnimationManager* Engine::GetAnimationManager() {
 		return ServiceLocator::GetAnimationManager();
 	}
+
+	PreviewManager* Engine::GetPreviewManager()
+	{
+		return ServiceLocator::GetPreviewManager();
+	}
 }

@@ -21,8 +21,8 @@ namespace Syn {
         : _context(context), _iconManager(iconManager), _assetPath(assetPath) {}
 
     void ModelWorkspace::OnActivate() {
-        if (_context && _context->GetSceneApi()) {
-            _context->GetSceneApi()->ActivateScene(SceneNames::ModelPreview);
+        if (_context && _context->GetApi<ISceneApi>()) {
+            _context->GetApi<ISceneApi>()->ActivateScene(SceneNames::ModelPreview);
         }
     }
 
@@ -31,25 +31,31 @@ namespace Syn {
         using ContentBrowserWin = EditorWindow<ContentBrowserView, ContentBrowserViewModel>;
         AddWindow<ContentBrowserWin>(
             ContentBrowserView{ _iconManager, SYN_ICON_FOLDER_OPEN " Content Browser###Content_Model" },
-            ContentBrowserViewModel{ _context->GetFileSystemApi(), _assetPath }
+            ContentBrowserViewModel{ _context->GetApi<IFileSystemApi>(), _assetPath }
         );
 
         using ModelHierarchyWin = EditorWindow<ModelHierarchyView, ModelHierarchyViewModel>;
         AddWindow<ModelHierarchyWin>(
             ModelHierarchyView{},
-            ModelHierarchyViewModel{ _context->GetModelApi() }
+            ModelHierarchyViewModel{ _context->GetApi<IModelApi>() }
         );
 
         using ModelPropertiesWin = EditorWindow<ModelPropertiesView, ModelPropertiesViewModel>;
         AddWindow<ModelPropertiesWin>(
             ModelPropertiesView{},
-            ModelPropertiesViewModel{ _context->GetModelApi() }
+            ModelPropertiesViewModel{ _context->GetApi<IModelApi>() }
         );
 
         using ModelViewportWin = EditorWindow<ModelViewportView, ModelViewportViewModel>;
         AddWindow<ModelViewportWin>(
             ModelViewportView{},
-            ModelViewportViewModel{ _context->GetRenderApi(),  _context->GetSelectionApi(),  _context->GetTransformApi(), _context->GetSettingsApi(), _context->GetModelApi() }
+            ModelViewportViewModel{
+                _context->GetApi<IRenderApi>(),
+                _context->GetApi<ISelectionApi>(),
+                _context->GetApi<ITransformApi>(),
+                _context->GetApi<ISettingsApi>(),
+                _context->GetApi<IModelApi>()
+            }
         );
     }
 }

@@ -31,6 +31,7 @@ namespace Syn {
     class AnimationManager;
     class IRenderStatCollector;
     class FrameStatisticsManager;
+    class PreviewManager;
 }
 
 namespace Syn
@@ -68,6 +69,7 @@ namespace Syn
         ImageManager* GetImageManager();
         ModelManager* GetModelManager();
         AnimationManager* GetAnimationManager();
+        PreviewManager* GetPreviewManager();
         std::shared_ptr<Syn::MemorySink> GetMemorySink() const { return _memorySink; }
     private:
         void Init(const EngineInitParams& params);

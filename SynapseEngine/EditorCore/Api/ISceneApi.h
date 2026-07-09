@@ -1,8 +1,9 @@
 #pragma once
+#include "IApi.h"
 #include <string>
 
 namespace Syn {
-    class ISceneApi {
+    class ISceneApi : public IApi {
     public:
         virtual ~ISceneApi() = default;
 

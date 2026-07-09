@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <vector>
 #include <string>
+#include "IApi.h"
 #include "Engine/Mesh/Data/Cpu/CpuModelData.h"
 
 namespace Syn
@@ -15,7 +16,7 @@ namespace Syn
         std::string path;
     };
 
-    class IModelApi {
+    class IModelApi : public IApi {
     public:
         virtual ~IModelApi() = default;
 

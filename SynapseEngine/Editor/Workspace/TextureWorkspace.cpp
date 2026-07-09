@@ -18,30 +18,30 @@ namespace Syn {
     TextureWorkspace::TextureWorkspace(EditorContext* context, IconManager* iconManager, const std::string& assetPath)
         : _context(context), _iconManager(iconManager), _assetPath(assetPath) {}
 
-    void TextureWorkspace::Initialize() 
+    void TextureWorkspace::Initialize()
     {
         using ContentBrowserWin = EditorWindow<ContentBrowserView, ContentBrowserViewModel>;
         AddWindow<ContentBrowserWin>(
             ContentBrowserView{ _iconManager, SYN_ICON_FOLDER_OPEN " Content Browser###Content_Texture" },
-            ContentBrowserViewModel{ _context->GetFileSystemApi(), _assetPath }
+            ContentBrowserViewModel{ _context->GetApi<IFileSystemApi>(), _assetPath }
         );
 
         using TextureHierarchyWin = EditorWindow<TextureHierarchyView, TextureHierarchyViewModel>;
         AddWindow<TextureHierarchyWin>(
             TextureHierarchyView{},
-            TextureHierarchyViewModel{ _context->GetTextureApi() }
+            TextureHierarchyViewModel{ _context->GetApi<ITextureApi>() }
         );
 
         using TexturePropertiesWin = EditorWindow<TexturePropertiesView, TexturePropertiesViewModel>;
         AddWindow<TexturePropertiesWin>(
             TexturePropertiesView{},
-            TexturePropertiesViewModel{ _context->GetTextureApi() }
+            TexturePropertiesViewModel{ _context->GetApi<ITextureApi>() }
         );
 
         using TextureGraphWin = EditorWindow<TextureGraphView, TextureGraphViewModel>;
         AddWindow<TextureGraphWin>(
             TextureGraphView{},
-            TextureGraphViewModel{ _context->GetTextureApi() }
+            TextureGraphViewModel{ _context->GetApi<ITextureApi>() }
         );
     }
 }

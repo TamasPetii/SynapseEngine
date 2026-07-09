@@ -114,7 +114,7 @@ void Synapse::OnInit() {
     using MainMenuWin = Syn::EditorWindow<Syn::MainMenuView, Syn::MainMenuViewModel>;
     _guiManager->AddGlobalWindow<MainMenuWin>(
         Syn::MainMenuView{},
-        Syn::MainMenuViewModel{ _editorContext->GetSceneApi(), _guiManager->GetFileDialog() }
+        Syn::MainMenuViewModel{ _editorContext->GetApi<Syn::ISceneApi>(), _guiManager->GetFileDialog() }
     );
 
     _guiManager->AddWorkspace(Syn::EditorWorkspace::Scene, std::make_unique<Syn::SceneWorkspace>(
