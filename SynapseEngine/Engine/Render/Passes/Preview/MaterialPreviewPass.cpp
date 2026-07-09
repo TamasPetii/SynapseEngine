@@ -68,7 +68,7 @@ namespace Syn {
         auto pm = ServiceLocator::GetPreviewManager();
         auto modelManager = ServiceLocator::GetModelManager();
 
-        _dirtyMaterials = pm->ConsumeDirtyResources(PreviewResourceType::Material);
+        _dirtyMaterials = pm->GetDirtyResources(PreviewResourceType::Material);
         if (_dirtyMaterials.empty()) return;
 
         auto atlas = pm->GetAtlasImage();

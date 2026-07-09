@@ -54,7 +54,7 @@ namespace Syn {
     }
 
 	void ResourceManager::InitPreviewManager() {
-		_previewManager = std::make_unique<PreviewManager>(1024, 64);
+		_previewManager = std::make_unique<PreviewManager>(2048, 128);
 		ServiceLocator::ProvidePreviewManager(_previewManager.get());
 	}
 

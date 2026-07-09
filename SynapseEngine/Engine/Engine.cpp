@@ -112,6 +112,7 @@ namespace Syn
 		_sceneManager->Finish();
 
 		ServiceLocator::GetCpuProfiler()->ResolveFrame(currentFrame);
+		ServiceLocator::GetPreviewManager()->ClearAllDirtyResources();
 
 		AdvanceFrameIndex();
 	}

@@ -8,6 +8,30 @@ namespace Syn {
         : _resolution(initialResolution), _tileSize(tileSize), _tilesPerRow(0)
     {
         CreateOrResizeAtlas(_resolution);
+
+        Vk::ImageConfig colorConfig{};
+        colorConfig.width = _tileSize;
+        colorConfig.height = _tileSize;
+        colorConfig.type = VK_IMAGE_TYPE_2D;
+        colorConfig.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+        colorConfig.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        colorConfig.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        colorConfig.AddView(Vk::ImageViewNames::Default, { .viewType = VK_IMAGE_VIEW_TYPE_2D });
+        _scratchColorImage = std::make_unique<Vk::Image>(colorConfig);
+
+        Vk::ImageConfig bloomConfig{};
+        bloomConfig.width = _tileSize;
+        bloomConfig.height = _tileSize;
+        bloomConfig.type = VK_IMAGE_TYPE_2D;
+        bloomConfig.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+        bloomConfig.usage = VK_IMAGE_USAGE_STORAGE_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        bloomConfig.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        bloomConfig.generateMipMaps = true;
+        bloomConfig.AddView(Vk::ImageViewNames::Default, {
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .perMipViews = true
+            });
+        _scratchBloomImage = std::make_unique<Vk::Image>(bloomConfig);
     }
 
     uint64_t PreviewManager::GetUniqueId(PreviewResourceType type, uint32_t resourceId) const {
@@ -84,14 +108,22 @@ namespace Syn {
         _dirtyResources[type].insert(resourceId);
     }
 
-    std::vector<uint32_t> PreviewManager::ConsumeDirtyResources(PreviewResourceType type) {
+    std::vector<uint32_t> PreviewManager::GetDirtyResources(PreviewResourceType type) {
         std::lock_guard<std::mutex> lock(_mutex);
         auto& dirtySet = _dirtyResources[type];
+        return std::vector<uint32_t>(dirtySet.begin(), dirtySet.end());
+    }
 
-        std::vector<uint32_t> result(dirtySet.begin(), dirtySet.end());
-        dirtySet.clear();
+    void PreviewManager::ClearDirtyResources(PreviewResourceType type) {
+        std::lock_guard<std::mutex> lock(_mutex);
+        _dirtyResources[type].clear();
+    }
 
-        return result;
+    void PreviewManager::ClearAllDirtyResources() {
+        std::lock_guard<std::mutex> lock(_mutex);
+        for (auto& [type, set] : _dirtyResources) {
+            set.clear();
+        }
     }
 
     void PreviewManager::GetViewportAndScissor(PreviewResourceType type, uint32_t resourceId, VkViewport& outViewport, VkRect2D& outScissor) const {
