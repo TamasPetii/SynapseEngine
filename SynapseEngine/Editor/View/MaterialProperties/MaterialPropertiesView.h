@@ -9,7 +9,10 @@ namespace Syn {
     public:
         void Draw(MaterialPropertiesViewModel& vm) override;
     private:
-        void DrawTextureSlot(const char* label, uint32_t& currentTexId, const std::string& currentName, const std::vector<TextureOption>& options, bool& changed);
+        void DrawTextureSlot(const char* label,
+            uint32_t& currentTexId, const std::string& currentTexName, const std::vector<TextureOption>& texOptions,
+            uint32_t& currentSampId, const std::string& currentSampName, const std::vector<SamplerOption>& sampOptions,
+            bool& changed);
     private:
         std::unordered_map<std::string, bool> _cardStates;
     };

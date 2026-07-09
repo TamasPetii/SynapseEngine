@@ -28,6 +28,12 @@ namespace Syn {
                 _state.availableTextures.push_back({ t.id, t.name });
             }
 
+            _state.availableSamplers.clear();
+            auto samps = _textureApi ? _textureApi->GetAllSamplers() : std::vector<SamplerItemData>();
+            for (const auto& s : samps) {
+                _state.availableSamplers.push_back({ s.id, s.name });
+            }
+
             auto getTexName = [&](uint32_t id) -> std::string {
                 if (id == 0xFFFFFFFF) return "None";
                 for (const auto& t : texs) {
@@ -36,13 +42,34 @@ namespace Syn {
                 return "Unknown";
                 };
 
+            auto getSamplerName = [&](uint32_t id) -> std::string {
+                if (id == 0xFFFFFFFF || id == 0xFF) return "Default";
+                for (const auto& s : samps) {
+                    if (s.id == id) return s.name;
+                }
+                return "Unknown";
+                };
+
             _state.albedoName = getTexName(matData.albedoTexture);
+            _state.albedoSamplerName = getSamplerName(matData.albedoSampler);
+
             _state.normalName = getTexName(matData.normalTexture);
+            _state.normalSamplerName = getSamplerName(matData.normalSampler);
+
             _state.metalnessName = getTexName(matData.metalnessTexture);
+            _state.metalnessSamplerName = getSamplerName(matData.metalnessSampler);
+
             _state.roughnessName = getTexName(matData.roughnessTexture);
+            _state.roughnessSamplerName = getSamplerName(matData.roughnessSampler);
+
             _state.metallicRoughnessName = getTexName(matData.metallicRoughnessTexture);
+            _state.metallicRoughnessSamplerName = getSamplerName(matData.metallicRoughnessSampler);
+
             _state.emissiveName = getTexName(matData.emissiveTexture);
+            _state.emissiveSamplerName = getSamplerName(matData.emissiveSampler);
+
             _state.aoName = getTexName(matData.ambientOcclusionTexture);
+            _state.aoSamplerName = getSamplerName(matData.ambientOcclusionSampler);
         }
         else {
             _state.hasSelection = false;

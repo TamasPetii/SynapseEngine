@@ -10,7 +10,7 @@ namespace Syn {
         const TexturePropertiesState& state = vm.GetState();
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
-        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
+        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None;
 
         if (ImGui::Begin(SYN_ICON_INFO_CIRCLE " Texture Properties", nullptr, windowFlags)) {
 
@@ -43,9 +43,8 @@ namespace Syn {
                         Syn::UI::EndPropertyGrid();
                     }
                 }
-
-                Syn::UI::EndCard();
             }
+            Syn::UI::EndCard();
         }
 
         ImGui::End();

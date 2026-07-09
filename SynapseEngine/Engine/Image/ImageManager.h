@@ -45,6 +45,8 @@ namespace Syn {
         VkDescriptorSetLayout GetBindlessLayout() const { return _bindlessLayout; }
         Vk::Sampler* GetSampler(const std::string& name) const;
         uint32_t GetSamplerIndex(const std::string& name) const;
+
+        const std::unordered_map<std::string, uint32_t>& GetAvailableSamplers() const { return _samplerNameToIndex; }
     protected:
         void FlushDirtyResources() override;
         void StartGpuUpload(EntryType& entry) override;

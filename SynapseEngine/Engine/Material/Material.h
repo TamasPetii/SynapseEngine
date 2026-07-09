@@ -6,6 +6,8 @@
 
 namespace Syn
 {
+    constexpr uint32_t INVALID_SAMPLER_INDEX = 0xFF;
+
     struct SYN_API Material {
         glm::vec4 color = glm::vec4(1.0f);
         glm::vec3 emissiveColor = glm::vec3(0.0f);
@@ -18,12 +20,25 @@ namespace Syn
         bool isTransparent = false;
 
         uint32_t albedoTexture = UINT32_MAX;
+        uint32_t albedoSampler = UINT32_MAX;
+
         uint32_t normalTexture = UINT32_MAX;
+        uint32_t normalSampler = UINT32_MAX;
+
         uint32_t metalnessTexture = UINT32_MAX;
+        uint32_t metalnessSampler = UINT32_MAX;
+
         uint32_t roughnessTexture = UINT32_MAX;
+        uint32_t roughnessSampler = UINT32_MAX;
+
         uint32_t metallicRoughnessTexture = UINT32_MAX;
+        uint32_t metallicRoughnessSampler = UINT32_MAX;
+
         uint32_t emissiveTexture = UINT32_MAX;
+        uint32_t emissiveSampler = UINT32_MAX;
+
         uint32_t ambientOcclusionTexture = UINT32_MAX;
+        uint32_t ambientOcclusionSampler = UINT32_MAX;
     };
 
     struct SYN_API GpuMaterial {

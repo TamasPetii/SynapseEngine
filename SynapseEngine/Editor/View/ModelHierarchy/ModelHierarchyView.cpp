@@ -3,7 +3,7 @@
 #include "Editor/Widgets/CardWidget.h"
 #include <imgui.h>
 
-namespace Syn 
+namespace Syn
 {
     void ModelHierarchyView::Draw(ModelHierarchyViewModel& vm) {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
@@ -36,10 +36,9 @@ namespace Syn
 
                 ImGui::BeginChild("ModelHierarchyTableContainer", ImVec2(0, tableHeight), ImGuiChildFlags_Borders, ImGuiWindowFlags_NoScrollbar);
 
-                if (ImGui::BeginTable("ModelTable", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable)) {
+                if (ImGui::BeginTable("ModelTable", 1, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable)) {
                     ImGui::TableSetupScrollFreeze(0, 1);
                     ImGui::TableSetupColumn("Hierarchy", ImGuiTableColumnFlags_WidthStretch);
-                    ImGui::TableSetupColumn("Tris", ImGuiTableColumnFlags_WidthFixed, 45.0f);
 
                     ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
 
@@ -51,17 +50,9 @@ namespace Syn
                     ImGui::TableHeader("##ColHierarchy");
 
                     ImGui::SetCursorPos(ImVec2(startPos.x + (cellWidth - textWidth) * 0.5f, startPos.y + 3.0f));
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
                     ImGui::Text("Hierarchy");
-
-                    ImGui::TableSetColumnIndex(1);
-                    cellWidth = ImGui::GetColumnWidth();
-                    textWidth = ImGui::CalcTextSize("Tris").x;
-                    startPos = ImGui::GetCursorPos();
-
-                    ImGui::TableHeader("##ColTris");
-
-                    ImGui::SetCursorPos(ImVec2(startPos.x + (cellWidth - textWidth) * 0.5f, startPos.y + 3.0f));
-                    ImGui::Text("Tris");
+                    ImGui::PopStyleColor();
 
                     ImGuiListClipper clipper;
                     clipper.Begin(static_cast<int>(state.flatNodes.size()));
@@ -154,12 +145,6 @@ namespace Syn
 
         if (ImGui::IsItemToggledOpen()) {
             vm.Dispatch(ModelHierarchyToggleExpandIntent{ node.modelId, node.descriptorIndex, !node.isExpanded });
-        }
-
-        ImGui::TableNextColumn();
-
-        if (node.triangleCount > 0) {
-            ImGui::TextDisabled("%u", node.triangleCount);
         }
     }
 }

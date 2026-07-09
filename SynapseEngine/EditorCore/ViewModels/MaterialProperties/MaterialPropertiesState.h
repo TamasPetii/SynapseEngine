@@ -4,8 +4,14 @@
 #include <cstdint>
 #include "Engine/Material/Material.h"
 
-namespace Syn {
+namespace Syn 
+{
     struct TextureOption {
+        uint32_t id;
+        std::string name;
+    };
+
+    struct SamplerOption {
         uint32_t id;
         std::string name;
     };
@@ -17,13 +23,27 @@ namespace Syn {
 
         Material materialData;
         std::vector<TextureOption> availableTextures;
+        std::vector<SamplerOption> availableSamplers;
 
         std::string albedoName = "None";
+        std::string albedoSamplerName = "Default";
+
         std::string normalName = "None";
+        std::string normalSamplerName = "Default";
+
         std::string metalnessName = "None";
+        std::string metalnessSamplerName = "Default";
+
         std::string roughnessName = "None";
+        std::string roughnessSamplerName = "Default";
+
         std::string metallicRoughnessName = "None";
+        std::string metallicRoughnessSamplerName = "Default";
+
         std::string emissiveName = "None";
+        std::string emissiveSamplerName = "Default";
+
         std::string aoName = "None";
+        std::string aoSamplerName = "Default";
     };
 }

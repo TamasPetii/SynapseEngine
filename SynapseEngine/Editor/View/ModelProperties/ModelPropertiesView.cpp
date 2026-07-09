@@ -34,9 +34,9 @@ namespace Syn {
                     DrawPropertyRow("Indices", std::to_string(state.globalIndexCount));
                     DrawPropertyRow("Triangles", std::to_string(state.globalIndexCount / 3));
                     Syn::UI::EndPropertyGrid();
-                }
-                Syn::UI::EndCard();
+                }  
             }
+            Syn::UI::EndCard();
 
             if (state.isNodeSelected) {
                 ImGui::Spacing();
@@ -50,8 +50,8 @@ namespace Syn {
                         DrawPropertyRow("Meshlets", std::to_string(state.nodeMeshletCount));
                         Syn::UI::EndPropertyGrid();
                     }
-                    Syn::UI::EndCard();
                 }
+                Syn::UI::EndCard();
             }
         }
 

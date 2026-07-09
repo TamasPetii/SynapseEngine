@@ -3,6 +3,8 @@
 
 #include "../Core.glsl"
 
+#define INVALID_SAMPLER_INDEX 0xFF
+
 struct Material { 
     vec4 color; 
     vec3 emissiveColor; 
@@ -12,7 +14,7 @@ struct Material {
     float roughness; 
     float aoStrength; 
     uint packedFlags; 
-    uint albedoTexture; 
+    uint albedoTexture; //(8 bit sampler | 24 bit texture)
     uint normalTexture; 
     uint metalnessTexture; 
     uint roughnessTexture; 
@@ -31,6 +33,9 @@ layout(buffer_reference, std430) readonly restrict buffer MaterialLookupBuffer {
 #define GET_MATERIAL_INDEX(addr, idx)   MaterialLookupBuffer(addr).data[idx]
 
 #define HAS_VALID_TEXTURE(texIdx) ((texIdx) != INVALID_INDEX)
+
+#define UNPACK_TEXTURE_ID(packedVal)  ((packedVal) & 0x00FFFFFF)
+#define UNPACK_SAMPLER_ID(packedVal)  ((packedVal) >> 24)
 
 #define IS_DOUBLE_SIDED(mat)    HAS_FLAG((mat).packedFlags, 0)
 #define IS_TRANSPARENT(mat)     HAS_FLAG((mat).packedFlags, 1)

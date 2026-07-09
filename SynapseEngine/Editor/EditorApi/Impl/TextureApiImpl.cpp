@@ -26,6 +26,23 @@ namespace Syn {
         return result;
     }
 
+    std::vector<SamplerItemData> TextureApiImpl::GetAllSamplers() const {
+        if (!_imageManager) return {};
+
+        std::vector<SamplerItemData> result;
+        const auto& samplers = _imageManager->GetAvailableSamplers();
+
+        for (const auto& [name, id] : samplers) {
+            result.push_back({ id, name });
+        }
+
+        std::sort(result.begin(), result.end(), [](const SamplerItemData& a, const SamplerItemData& b) {
+            return a.id < b.id;
+            });
+
+        return result;
+    }
+
     uint32_t TextureApiImpl::GetSelectedTexture() const {
         return _selectedTexture;
     }

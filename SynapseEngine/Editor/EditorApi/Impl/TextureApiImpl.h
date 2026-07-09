@@ -10,6 +10,7 @@ namespace Syn {
             : _imageManager(imageManager), _guiTextureManager(guiTextureManager) {}
 
         std::vector<TextureItemData> GetAllTextures() const override;
+        std::vector<SamplerItemData> GetAllSamplers() const override;
 
         uint32_t GetSelectedTexture() const override;
         void SetSelectedTexture(uint32_t id) override;
