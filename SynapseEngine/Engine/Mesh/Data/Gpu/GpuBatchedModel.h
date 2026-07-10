@@ -14,6 +14,7 @@ namespace Syn
         GpuVertexData vertexData;
         GpuIndexedDrawData indexedData;
         GpuMeshletDrawData meshletData;
+        std::vector<uint32_t> meshMaterialIndices;
         std::vector<MaterialInfo> materials;
         std::vector<GpuNodeTransform> nodeTransforms;
         GpuMeshCollider globalCollider;

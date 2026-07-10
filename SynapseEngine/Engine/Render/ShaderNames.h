@@ -149,5 +149,8 @@ namespace Syn
 
         static constexpr const char* MaterialPreviewVert = "Engine/Shaders/Passes/Preview/MaterialPreview.vert";
         static constexpr const char* MaterialPreviewFrag = "Engine/Shaders/Passes/Preview/MaterialPreview.frag";
+
+        static constexpr const char* ModelPreviewVert = "Engine/Shaders/Passes/Preview/ModelPreview.vert";
+        static constexpr const char* ModelPreviewFrag = "Engine/Shaders/Passes/Preview/ModelPreview.frag";
 }; 
 }

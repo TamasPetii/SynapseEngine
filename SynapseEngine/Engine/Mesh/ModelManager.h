@@ -9,6 +9,8 @@
 #include "Engine/Vk/Command/CommandPool.h"
 #include "Engine/Utils/WindowedBuffer.h"
 
+#include <unordered_set>
+
 namespace Syn {
 
     using MaterialLoadCallback = std::function<uint32_t(const std::string& name, const MaterialInfo& info)>;
@@ -37,6 +39,9 @@ namespace Syn {
         uint32_t LoadModelSync(const std::string& filePath);
         uint32_t LoadModelFromSourceSync(const std::string& name, MeshSourceFactory factory);
         uint32_t LoadModelFromStaticMeshSync(const std::string& name, StaticMeshFactory factory);
+
+        std::vector<uint32_t> GetModelsUsingMaterials(uint32_t materialId) const;
+        void NotifyMaterialReady(uint32_t materialId);
     protected:
 		void FlushDirtyResources() override;
         void StartGpuUpload(EntryType& entry) override;
@@ -47,5 +52,8 @@ namespace Syn {
         PreviewMarkDirtyCallback _previewMarkDirtyCallback;
         std::shared_ptr<StaticMeshBuilder> _builder;
         std::unique_ptr<IGpuModelUploader> _uploader;
+
+        std::mutex _pendingMaterialMutex;
+        std::unordered_set<uint32_t> _pendingMaterials;
     };
 }

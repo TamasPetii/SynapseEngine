@@ -12,6 +12,7 @@ namespace Syn
         std::unique_ptr<Vk::Buffer> vertexPositions;
         std::unique_ptr<Vk::Buffer> vertexAttributes;
         std::unique_ptr<Vk::Buffer> indices;
+        std::unique_ptr<Vk::Buffer> meshMaterialIndices;
 
         // Traditional Pipeline Buffers
         std::unique_ptr<Vk::Buffer> meshDescriptors;
@@ -34,6 +35,7 @@ namespace Syn
         VkDeviceAddress vertexPositions;
         VkDeviceAddress vertexAttributes;
         VkDeviceAddress indices;
+        VkDeviceAddress meshMaterialIndices;
         VkDeviceAddress meshDescriptors;
         VkDeviceAddress meshColliders;
         VkDeviceAddress lodDescriptors;
@@ -50,8 +52,6 @@ namespace Syn
         uint32_t averageLodIndexCount;
         uint32_t meshCount;
         uint32_t padding0;
-        uint32_t padding1;
-        uint32_t padding2;
 
         GpuMeshCollider globalCollider;
     };

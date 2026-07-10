@@ -8,12 +8,14 @@ namespace Syn {
     MaterialManager::MaterialManager(uint32_t framesInFlight, 
         TextureLoadCallback textureLoadCallback, 
         PreviewAllocateCallback previewAllocateCallback,
-        PreviewMarkDirtyCallback previewMarkDirtyCallback
+        PreviewMarkDirtyCallback previewMarkDirtyCallback,
+        MaterialReadyOrChangedCallback materialReadyOrChangedCallback
     )
         : AddressResourceManager<Material, GpuMaterial>(framesInFlight, 1024, 1024, 2048)
         , _textureLoadCallback(std::move(textureLoadCallback))
         , _previewAllocateCallback(std::move(previewAllocateCallback))
         , _previewMarkDirtyCallback(std::move(previewMarkDirtyCallback))
+        , _materialReadyOrChangedCallback(std::move(materialReadyOrChangedCallback))
     {
         Material emptyMat;
         WriteAddress(0, GpuMaterial(emptyMat));
@@ -79,11 +81,12 @@ namespace Syn {
         uint32_t index = _pathToId.at(entry.path);
         if (_previewAllocateCallback) _previewAllocateCallback(index);
         if (_previewMarkDirtyCallback) _previewMarkDirtyCallback(index);
+        if (_materialReadyOrChangedCallback) _materialReadyOrChangedCallback(index);
     }
 
     void MaterialManager::FlushDirtyResources() 
     {
-        std::vector<uint32_t> imagesToProcess;
+        std::unordered_set<uint32_t> imagesToProcess;
 
         {
             std::lock_guard lock(_pendingImageMutex);
@@ -105,9 +108,11 @@ namespace Syn {
             [this](uint32_t index, const EntryType& entry) {
                 WriteAddress(index, GpuMaterial(*entry.resource));
 
-                if (_previewMarkDirtyCallback) {
+                if (_previewMarkDirtyCallback)
                     _previewMarkDirtyCallback(index);
-                }
+
+                if (_materialReadyOrChangedCallback)
+                    _materialReadyOrChangedCallback(index);
             }
         );
     }
@@ -137,6 +142,6 @@ namespace Syn {
 
     void MaterialManager::NotifyImageReady(uint32_t imageId) {
         std::lock_guard lock(_pendingImageMutex);
-        _pendingImages.push_back(imageId);
+        _pendingImages.insert(imageId);
     }
 }

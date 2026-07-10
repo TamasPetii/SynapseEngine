@@ -56,6 +56,17 @@ namespace Syn {
 
         _atlasImage = std::make_unique<Vk::Image>(config);
 
+        Vk::ImageConfig depthConfig{};
+        depthConfig.width = _resolution;
+        depthConfig.height = _resolution;
+        depthConfig.type = VK_IMAGE_TYPE_2D;
+        depthConfig.format = VK_FORMAT_D32_SFLOAT;
+        depthConfig.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT;
+        depthConfig.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
+        depthConfig.AddView(Vk::ImageViewNames::Default, { .viewType = VK_IMAGE_VIEW_TYPE_2D });
+        
+        _atlasDepthImage = std::make_unique<Vk::Image>(depthConfig);
+
         for (uint32_t i = oldTotalTiles; i < newTotalTiles; ++i) {
             _freeTiles.push(i);
         }

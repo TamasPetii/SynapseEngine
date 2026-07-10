@@ -126,6 +126,12 @@ namespace Syn {
 			},
 			[this](uint32_t id) {
 				if (_previewManager) _previewManager->MarkDirty(PreviewResourceType::Material, id);
+			},
+			[](uint32_t materialId) {
+				auto modelManager = ServiceLocator::GetModelManager();
+				if (modelManager) {
+					modelManager->NotifyMaterialReady(materialId);
+				}
 			}
 		);
 

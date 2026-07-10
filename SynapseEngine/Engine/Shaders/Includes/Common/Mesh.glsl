@@ -41,6 +41,7 @@ struct GpuModelAddresses {
     uint64_t vertexPositions;
     uint64_t vertexAttributes;
     uint64_t indices;
+    uint64_t meshMaterialIndices;
     uint64_t meshDescriptors;
     uint64_t meshColliders;
     uint64_t lodDescriptors;
@@ -56,9 +57,7 @@ struct GpuModelAddresses {
     uint indexCount;
     uint averageLodIndexCount;
     uint meshCount;
-    uint padding0;
-    uint padding1;
-    uint padding2;
+    uint padding;
 
     GpuMeshCollider globalCollider;
 };
@@ -105,10 +104,12 @@ layout(buffer_reference, std430) readonly restrict buffer MeshletColliderBuffer 
 layout(buffer_reference, std430) readonly restrict buffer VertexIndicesBuffer    { uint data[]; };
 layout(buffer_reference, std430) readonly restrict buffer TriangleIndicesBuffer  { uint8_t data[]; };
 layout(buffer_reference, std430) readonly restrict buffer DebugMeshletInstanceBuffer    { DebugMeshletInstance data[]; };
+layout(buffer_reference, std430) readonly restrict buffer MaterialIndices        { uint data[]; };
 
 #define GET_VERTEX_POS(addr, idx)             PositionBuffer(addr).data[idx]
 #define GET_VERTEX_ATTR(addr, idx)            AttributeBuffer(addr).data[idx]
 #define GET_INDEX(addr, idx)                  IndexBuffer(addr).data[idx]
+#define GET_DEFUALT_MATERIAL_INDEX(addr, idx)         MaterialIndices(addr).data[idx]
 #define GET_MODEL_ADDRESSES(addr, idx)        ModelAddressBuffer(addr).data[idx]
 #define GET_DRAW_DESCRIPTOR(addr, idx)        DescriptorBuffer(addr).data[idx]
 #define GET_MESHLET_DRAW_DESC(addr, idx)      MeshletDrawDescBuffer(addr).data[idx]

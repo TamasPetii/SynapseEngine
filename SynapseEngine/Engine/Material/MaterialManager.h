@@ -6,17 +6,21 @@
 #include "Engine/Mesh/Data/Common/MaterialInfo.h"
 #include "MaterialRenderType.h"
 
+#include <unordered_set>
+
 namespace Syn {
     using TextureLoadCallback = std::function<uint32_t(const TexturePayload& payload)>;
     using PreviewAllocateCallback = std::function<void(uint32_t resourceId)>;
     using PreviewMarkDirtyCallback = std::function<void(uint32_t resourceId)>;
+    using MaterialReadyOrChangedCallback = std::function<void(uint32_t materialId)>;
 
     class SYN_API MaterialManager : public AddressResourceManager<Material, GpuMaterial> {
     public:
         MaterialManager(uint32_t framesInFlight,
             TextureLoadCallback textureLoadCallback,
             PreviewAllocateCallback previewAllocateCallback = nullptr,
-            PreviewMarkDirtyCallback previewMarkDirtyCallback = nullptr
+            PreviewMarkDirtyCallback previewMarkDirtyCallback = nullptr,
+            MaterialReadyOrChangedCallback = nullptr
         );
         ~MaterialManager() = default;
 
@@ -34,8 +38,9 @@ namespace Syn {
         TextureLoadCallback _textureLoadCallback;
         PreviewAllocateCallback _previewAllocateCallback;
         PreviewMarkDirtyCallback _previewMarkDirtyCallback;
+        MaterialReadyOrChangedCallback _materialReadyOrChangedCallback;
 
         std::mutex _pendingImageMutex;
-        std::vector<uint32_t> _pendingImages;
+        std::unordered_set<uint32_t> _pendingImages;
     };
 }

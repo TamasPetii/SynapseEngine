@@ -16,6 +16,7 @@
 
 #include "Engine/Render/Passes/Preview/PreviewPreTransitionPass.h"
 #include "Engine/Render/Passes/Preview/PreviewPostTransitionPass.h"
+#include "Engine/Render/Passes/Preview/ModelPreviewPass.h"
 #include "Engine/Render/Passes/Preview/MaterialPreviewPass.h"
 #include "Engine/Render/Passes/Preview/MaterialPreviewBloomPass.h"
 
@@ -393,6 +394,7 @@ namespace Syn
         //Preview Passes
         pipeline->AddPass(std::make_unique<PreviewPreTransitionPass>());
         pipeline->AddPass(std::make_unique<MaterialPreviewPass>());
+        pipeline->AddPass(std::make_unique<ModelPreviewPass>());
         pipeline->AddPass(std::make_unique<MaterialPreviewBloomPass>());
         pipeline->AddPass(std::make_unique<PreviewPostTransitionPass>());
 

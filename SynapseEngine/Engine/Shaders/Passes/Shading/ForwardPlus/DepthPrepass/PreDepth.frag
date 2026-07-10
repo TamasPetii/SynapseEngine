@@ -38,6 +38,7 @@ void main() {
 
     // 2. Evaluate Albedo & Alpha
     vec4 albedoAlpha = EvaluateAlbedoAlpha(ctx.textureMetadataBufferAddr, mat, finalUV);
+
     if (albedoAlpha.a < ctx.alphaLimitDiscard) {
         discard;
     }

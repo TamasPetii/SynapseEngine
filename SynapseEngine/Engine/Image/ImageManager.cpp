@@ -17,13 +17,13 @@ namespace Syn
         std::shared_ptr<ImageBuilder> builder,
         std::unique_ptr<IGpuImageUploader> uploader,
         std::unique_ptr<ICpuImageExtractor> cpuExtractor,
-        ImageReadyCallback imageReadyCallback)
+        ImageReadyOrChangedCallback imageReadyCallback)
 		: AddressResourceManager<Texture, uint32_t>(framesInFlight, 1024, 256, 512),
 		_framesInFlight(framesInFlight),
         _builder(builder), 
         _uploader(std::move(uploader)), 
         _cpuExtractor(std::move(cpuExtractor)),
-        _imageReadyCallback(std::move(imageReadyCallback))
+        _imageReadyOrChangedCallback(std::move(imageReadyCallback))
     {
         InitializeBindlessSetup();
     }
@@ -365,8 +365,8 @@ namespace Syn
 
                 WriteAddress(index, textureData);
 
-                if (_imageReadyCallback) {
-                    _imageReadyCallback(index);
+                if (_imageReadyOrChangedCallback) {
+                    _imageReadyOrChangedCallback(index);
                 }
             }
         );

@@ -38,6 +38,7 @@ namespace Syn {
         void GetNormalizedUVs(PreviewResourceType type, uint32_t resourceId, glm::vec2& outUv0, glm::vec2& outUv1) const;
 
         Vk::Image* GetAtlasImage() const { return _atlasImage.get(); }
+        Vk::Image* GetAtlasDepthImage() const { return _atlasDepthImage.get(); }
         Vk::Image* GetScratchColorImage() const { return _scratchColorImage.get(); }
         Vk::Image* GetScratchBloomImage() const { return _scratchBloomImage.get(); }
 
@@ -54,6 +55,7 @@ namespace Syn {
         uint32_t _tilesPerRow;
 
         std::unique_ptr<Vk::Image> _atlasImage;
+        std::unique_ptr<Vk::Image> _atlasDepthImage;
         std::unique_ptr<Vk::Image> _scratchColorImage;
         std::unique_ptr<Vk::Image> _scratchBloomImage;
 

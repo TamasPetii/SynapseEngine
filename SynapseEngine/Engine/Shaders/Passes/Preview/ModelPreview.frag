@@ -12,63 +12,39 @@
 #include "../../Includes/Utils/PbrMath.glsl"
 #include "../../Includes/Utils/LightMath.glsl"
 
-layout(location = 0) in vec2 inUV;
+layout(location = 0) in vec3 inNormal;
+layout(location = 1) in vec4 inTangent;
+layout(location = 2) in vec2 inUV;
+layout(location = 3) in flat uint inMaterialId;
+
 layout(location = 0) out vec4 outColor;
 
-#include "../../Includes/PushConstants/MaterialPreviewPC.glsl"
+#include "../../Includes/PushConstants/ModelPreviewPC.glsl"
 
 layout(push_constant) uniform PushConstants {
-    MaterialPreviewPC pc;
+    ModelPreviewPC pc;
 };
 
 void main() {
-    vec2 checkerUV = inUV * 10.0;
-    float checker = mod(floor(checkerUV.x) + floor(checkerUV.y), 2.0);
-    vec3 bgColor = mix(vec3(0.15), vec3(0.25), checker);
-
-    vec2 p = inUV * 2.0 - 1.0;
-    float r2 = dot(p, p);
-
-    if (r2 > 0.85) {
-        outColor = vec4(bgColor, 1.0);
-        return;
-    }
-
-    float z = sqrt(1.0 - r2);
-    vec3 localNormal = vec3(p.x, -p.y, z);
-
-    vec2 sphereUV = vec2(
-        atan(localNormal.x, localNormal.z) / (2.0 * PI) + 0.5,
-        asin(localNormal.y) / PI + 0.5
-    );
-
-    vec3 t = cross(vec3(0.0, 1.0, 0.0), localNormal);
-    vec3 tangent = (dot(t, t) < 1e-6) ? vec3(1.0, 0.0, 0.0) : normalize(t);
-    vec4 inTangent = vec4(tangent, 1.0);
-
-    float radius = 1.0;
-    vec3 inWorldPos = localNormal * radius;
-    vec3 viewDir = vec3(0.0, 0.0, 1.0);
-
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
-    Material mat = GET_MATERIAL(ctx.materialBufferAddr, pc.materialId);
+    Material mat = GET_MATERIAL(ctx.materialBufferAddr, inMaterialId);
 
-    vec4 albedoAlpha = EvaluateAlbedoAlpha(ctx.textureMetadataBufferAddr, mat, sphereUV);
-
+    vec4 albedoAlpha = EvaluateAlbedoAlpha(ctx.textureMetadataBufferAddr, mat, inUV);
     if (albedoAlpha.a < ctx.alphaLimitDiscard) {
         discard;
     }
 
-    vec3 finalNormal = EvaluateNormal(ctx.textureMetadataBufferAddr, mat, sphereUV, localNormal, inTangent);
-    vec2 metalRough = EvaluateMetallicRoughness(ctx.textureMetadataBufferAddr, mat, sphereUV);
-    vec3 emissive = EvaluateEmissive(ctx.textureMetadataBufferAddr, mat, sphereUV);
-    float ao = EvaluateAO(ctx.textureMetadataBufferAddr, mat, sphereUV);
+    vec3 finalNormal = EvaluateNormal(ctx.textureMetadataBufferAddr, mat, inUV, inNormal, inTangent);
+    vec2 metalRough = EvaluateMetallicRoughness(ctx.textureMetadataBufferAddr, mat, inUV);
+    vec3 emissive = EvaluateEmissive(ctx.textureMetadataBufferAddr, mat, inUV);
+    float ao = EvaluateAO(ctx.textureMetadataBufferAddr, mat, inUV);
 
     float finalMetalness = clamp(metalRough.x, 0.0, 1.0);
     float finalRoughness = clamp(metalRough.y, 0.04, 1.0);
 
+    vec3 viewDir = vec3(0.0, 0.0, 1.0); 
     vec3 totalRadiance = vec3(0.0);
-    
+
     // Key Light
     vec3 keyLightDir = normalize(vec3(1.0, 1.0, 1.0));
     vec3 keyLightColor = vec3(1.0, 1.0, 1.0);
@@ -87,12 +63,12 @@ void main() {
         finalRoughness, finalMetalness, fillLightColor, 1.0, fillLightStrength
     );
 
-    // Ambient & Bloom
+    // Ambient és Bloom
     totalRadiance += SimulateAmbientLight(albedoAlpha.rgb, ao, ctx.ambientStrength);
     totalRadiance += SimulateBloom(emissive, 1.0, ctx.emissiveStrength);
 
-    
-
+    vec3 bgColor = vec3(0.15);
     vec3 finalColor = mix(bgColor, totalRadiance, IS_TRANSPARENT(mat) ? albedoAlpha.a : 1.0);
+
     outColor = vec4(finalColor, 1.0);
 }
