@@ -1,6 +1,7 @@
 #include "ModelApiImpl.h"
 #include "Engine/Scene/Insiders/SceneInsider.h"
 #include "Engine/Component/Core/TagComponent.h"
+#include "Engine/Component/Core/TransformComponent.h"
 #include "Engine/Component/Core/CameraComponent.h"
 #include "Engine/Component/Rendering/ModelComponent.h"
 #include "Editor/EditorApi/EditorApiUtils.h"
@@ -83,22 +84,37 @@ namespace Syn {
             auto resource = _modelManager->GetResource(modelId);
             if (resource) {
                 glm::vec3 center = resource->cpuData.globalCollider.center;
-                float radius = resource->cpuData.globalCollider.radius;
+                float radius = resource->cpuData.globalCollider.radius * 1.05f;
+
+                float targetSize = radius;
+
+                if (targetSize > 100)
+                    targetSize = 100.0f;
+
+                float scaleFactor = targetSize / (radius * 2.0f);
 
                 for (EntityID entity : tagPool->GetDenseEntities()) {
                     const auto& tag = tagPool->Get(entity);
 
-                    if (tag.tag == "Camera" && registry.HasComponent<CameraComponent>(entity)) {
+                    if (tag.tag == "Preview" && registry.HasComponent<TransformComponent>(entity)) {
+                        EditorApiUtils::ModifyComponent<TransformComponent>(
+                            _sceneManager,
+                            entity,
+                            [center, scaleFactor](auto& transformComp, auto pool) {
+                                transformComp.scale = glm::vec3(scaleFactor);
+                            }
+                        );
+                    }
 
+                    if (tag.tag == "Camera" && registry.HasComponent<CameraComponent>(entity)) {
                         EditorApiUtils::ModifyComponent<CameraComponent>(
                             _sceneManager,
                             entity,
-                            [center, radius](auto& camComp, auto pool) {
-                                camComp.target = center;
-                                camComp.distance = std::max(radius * 2.5f, 2.0f);
+                            [targetSize](auto& camComp, auto pool) {
+                                camComp.target = glm::vec3(0.0f);
+                                camComp.distance = targetSize * 1.25f;
                             }
                         );
-                        break;
                     }
                 }
             }

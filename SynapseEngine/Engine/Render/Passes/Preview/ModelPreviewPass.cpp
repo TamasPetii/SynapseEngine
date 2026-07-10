@@ -146,13 +146,23 @@ namespace Syn {
 
             const auto& cpuData = resource->cpuData;
             glm::vec3 center = cpuData.globalCollider.center;
-            float radius = cpuData.globalCollider.radius > 0.0f ? cpuData.globalCollider.radius : 1.0f;
+            float radius = cpuData.globalCollider.radius > 0.0f ? cpuData.globalCollider.radius * 1.05f : 1.0f;
 
-            glm::mat4 view = glm::lookAt(glm::vec3(0.0f, 0.0f, radius * 2.5f), glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            glm::mat4 proj = glm::perspective(glm::radians(45.0f), 1.0f, 0.1f, 1000.0f);
+            float targetSize = 10.0f;
+            float scaleFactor = targetSize / (radius * 2.0f);
+            float cameraDistance = targetSize * 1.25f;
+
+            glm::vec3 camDir = glm::normalize(glm::vec3(1.0f, 0.75f, 1.0f));
+            glm::vec3 camPos = camDir * cameraDistance;
+            glm::mat4 view = glm::lookAt(camPos, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+            float nearPlane = targetSize * 0.05f;
+            float farPlane = targetSize * 5.0f;
+            glm::mat4 proj = glm::perspective(glm::radians(45.0f), 1.0f, nearPlane, farPlane);
             proj[1][1] *= -1.0f;
 
-            glm::mat4 model = glm::translate(glm::mat4(1.0f), -center);
+            glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(scaleFactor));
+            model = glm::translate(model, -center);
 
             pc->modelId = modelId;
             pc->mvp = proj * view * model;
