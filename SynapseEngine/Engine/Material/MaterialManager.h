@@ -22,6 +22,8 @@ namespace Syn {
 
         uint32_t LoadMaterial(const std::string& name, const MaterialInfo& info);
         uint32_t LoadMaterialDirect(const std::string& name, const Material& material);
+        std::vector<uint32_t> GetMaterialsUsingTexture(uint32_t textureId) const;
+        void NotifyImageReady(uint32_t imageId);
     protected:
         void FlushDirtyResources() override;
         void StartGpuUpload(EntryType& entry) override;
@@ -32,5 +34,8 @@ namespace Syn {
         TextureLoadCallback _textureLoadCallback;
         PreviewAllocateCallback _previewAllocateCallback;
         PreviewMarkDirtyCallback _previewMarkDirtyCallback;
+
+        std::mutex _pendingImageMutex;
+        std::vector<uint32_t> _pendingImages;
     };
 }

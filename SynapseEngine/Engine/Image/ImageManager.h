@@ -16,6 +16,7 @@
 namespace Syn {
 
     using ImageSourceFactory = std::function<std::unique_ptr<IImageSource>()>;
+    using ImageReadyCallback = std::function<void(uint32_t imageId)>;
 
     class SYN_API ImageManager : public AddressResourceManager<Texture, uint32_t> {
     public:
@@ -28,7 +29,8 @@ namespace Syn {
             uint32_t framesInFlight,
             std::shared_ptr<ImageBuilder> builder,
             std::unique_ptr<IGpuImageUploader> uploader,
-            std::unique_ptr<ICpuImageExtractor> cpuExtractor);
+            std::unique_ptr<ICpuImageExtractor> cpuExtractor,
+            ImageReadyCallback imageReadyCallback = nullptr);
 
         ~ImageManager();
 
@@ -57,6 +59,8 @@ namespace Syn {
         void LoadDefaultImageSync();
         uint32_t RegisterSampler(const std::string& name, const Vk::SamplerConfig& config);
     private:
+        ImageReadyCallback _imageReadyCallback;
+
         std::shared_ptr<ImageBuilder> _builder;
         std::unique_ptr<IGpuImageUploader> _uploader;
         std::unique_ptr<ICpuImageExtractor> _cpuExtractor;

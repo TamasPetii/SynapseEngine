@@ -81,7 +81,26 @@ namespace Syn {
         if (_previewMarkDirtyCallback) _previewMarkDirtyCallback(index);
     }
 
-    void MaterialManager::FlushDirtyResources() {
+    void MaterialManager::FlushDirtyResources() 
+    {
+        std::vector<uint32_t> imagesToProcess;
+
+        {
+            std::lock_guard lock(_pendingImageMutex);
+            imagesToProcess = _pendingImages;
+            _pendingImages.clear();
+        }
+
+        for (uint32_t imgId : imagesToProcess) {
+            auto affectedMaterials = GetMaterialsUsingTexture(imgId);
+
+            for (uint32_t matId : affectedMaterials) {
+                if (_previewMarkDirtyCallback) {
+                    _previewMarkDirtyCallback(matId);
+                }
+            }
+        }
+
         ProcessDirtyReadyEntries(
             [this](uint32_t index, const EntryType& entry) {
                 WriteAddress(index, GpuMaterial(*entry.resource));
@@ -91,5 +110,33 @@ namespace Syn {
                 }
             }
         );
+    }
+
+    std::vector<uint32_t> MaterialManager::GetMaterialsUsingTexture(uint32_t textureId) const {
+        std::lock_guard lock(_mutex);
+        std::vector<uint32_t> result;
+
+        for (uint32_t i = 0; i < _entries.size(); ++i) {
+            if (_entries[i].state == ResourceState::Ready && _entries[i].resource) {
+                const auto& mat = *_entries[i].resource;
+
+                if (mat.albedoTexture == textureId ||
+                    mat.normalTexture == textureId ||
+                    mat.metalnessTexture == textureId ||
+                    mat.roughnessTexture == textureId ||
+                    mat.metallicRoughnessTexture == textureId ||
+                    mat.emissiveTexture == textureId ||
+                    mat.ambientOcclusionTexture == textureId)
+                {
+                    result.push_back(i);
+                }
+            }
+        }
+        return result;
+    }
+
+    void MaterialManager::NotifyImageReady(uint32_t imageId) {
+        std::lock_guard lock(_pendingImageMutex);
+        _pendingImages.push_back(imageId);
     }
 }

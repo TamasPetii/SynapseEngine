@@ -16,12 +16,14 @@ namespace Syn
         uint32_t framesInFlight,
         std::shared_ptr<ImageBuilder> builder,
         std::unique_ptr<IGpuImageUploader> uploader,
-        std::unique_ptr<ICpuImageExtractor> cpuExtractor)
+        std::unique_ptr<ICpuImageExtractor> cpuExtractor,
+        ImageReadyCallback imageReadyCallback)
 		: AddressResourceManager<Texture, uint32_t>(framesInFlight, 1024, 256, 512),
 		_framesInFlight(framesInFlight),
         _builder(builder), 
         _uploader(std::move(uploader)), 
-        _cpuExtractor(std::move(cpuExtractor))
+        _cpuExtractor(std::move(cpuExtractor)),
+        _imageReadyCallback(std::move(imageReadyCallback))
     {
         InitializeBindlessSetup();
     }
@@ -362,6 +364,10 @@ namespace Syn
                 }
 
                 WriteAddress(index, textureData);
+
+                if (_imageReadyCallback) {
+                    _imageReadyCallback(index);
+                }
             }
         );
     }

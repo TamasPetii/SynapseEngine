@@ -84,7 +84,13 @@ namespace Syn {
 			_framesInFlight,
 			_imageBuilder,
 			std::make_unique<DefaultGpuImageUploader>(),
-			std::make_unique<DefaultCpuImageExtractor>()
+			std::make_unique<DefaultCpuImageExtractor>(),
+			[](uint32_t imageId) {
+				auto matManager = ServiceLocator::GetMaterialManager();
+				if (matManager) {
+					matManager->NotifyImageReady(imageId);
+				}
+			}
 		);
 
 		ServiceLocator::ProvideImageManager(_imageManager.get());
