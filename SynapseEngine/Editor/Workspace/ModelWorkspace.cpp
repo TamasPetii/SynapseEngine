@@ -37,7 +37,7 @@ namespace Syn {
         using ModelHierarchyWin = EditorWindow<ModelHierarchyView, ModelHierarchyViewModel>;
         AddWindow<ModelHierarchyWin>(
             ModelHierarchyView{},
-            ModelHierarchyViewModel{ _context->GetApi<IModelApi>() }
+            ModelHierarchyViewModel{ _context->GetApi<IModelApi>(), _context->GetApi<IPreviewApi>() }
         );
 
         using ModelPropertiesWin = EditorWindow<ModelPropertiesView, ModelPropertiesViewModel>;

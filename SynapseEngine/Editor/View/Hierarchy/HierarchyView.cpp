@@ -34,7 +34,7 @@ namespace Syn {
 
                 ImGui::BeginChild("HierarchyTableContainer", ImVec2(0, tableHeight), ImGuiChildFlags_Borders, ImGuiWindowFlags_NoScrollbar);
 
-                if (ImGui::BeginTable("HierarchyTable", 2, ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable)) {
+                if (ImGui::BeginTable("HierarchyTable", 2, ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable)) {
 
                     ImGui::TableSetupScrollFreeze(0, 1);
                     ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);

@@ -86,6 +86,8 @@ void main() {
     totalRadiance += SimulateAmbientLight(albedoAlpha.rgb, ao, ctx.ambientStrength);
     totalRadiance += SimulateBloom(emissive, 1.0, ctx.emissiveStrength);
 
-    vec3 finalColor = mix(bgColor, totalRadiance, albedoAlpha.a);
+    
+
+    vec3 finalColor = mix(bgColor, totalRadiance, IS_TRANSPARENT(mat) ? albedoAlpha.a : 1.0);
     outColor = vec4(finalColor, 1.0);
 }

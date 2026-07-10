@@ -4,8 +4,8 @@
 #include <cctype>
 
 namespace Syn {
-    ModelHierarchyViewModel::ModelHierarchyViewModel(IModelApi* modelApi)
-        : _modelApi(modelApi)
+    ModelHierarchyViewModel::ModelHierarchyViewModel(IModelApi* modelApi, IPreviewApi* previewApi)
+        : _modelApi(modelApi), _previewApi(previewApi)
     {}
 
     uint64_t ModelHierarchyViewModel::GetNodeKey(uint32_t modelId, int32_t descriptorIndex) const {
@@ -19,6 +19,7 @@ namespace Syn {
         auto selection = _modelApi->GetSelected();
 
         if (currentVersion != _lastEngineVersion || _isDirty) {
+            RebuildModelList();
             RebuildFlatList();
             _lastEngineVersion = currentVersion;
             _isDirty = false;
@@ -28,6 +29,18 @@ namespace Syn {
             _state.selectedModelId = selection.first;
             _state.selectedDescriptorIndex = selection.second;
         }
+
+        if (_previewApi) {
+            _state.atlasHandle = _previewApi->GetAtlasHandle();
+
+            for (auto& node : _state.filteredModels) {
+                if (!node.hasPreview) {
+                    if (_previewApi->GetPreviewUVs(PreviewResourceType::Model, node.id, node.uv0, node.uv1)) {
+                        node.hasPreview = true;
+                    }
+                }
+            }
+        }
     }
 
     void ModelHierarchyViewModel::Dispatch(const ModelHierarchyIntent& intent) {
@@ -35,14 +48,19 @@ namespace Syn {
             using T = std::decay_t<decltype(arg)>;
 
             if constexpr (std::is_same_v<T, ModelHierarchySelectIntent>) {
-                if (_modelApi)
-                {
+                if (_modelApi) {
                     _modelApi->SetSelected(arg.modelId, arg.descriptorIndex);
                     _modelApi->ApplyModelToPreviewObject(arg.modelId);
                 }
 
-                _state.selectedModelId = arg.modelId;
-                _state.selectedDescriptorIndex = arg.descriptorIndex;
+                if (_state.selectedModelId != arg.modelId) {
+                    _state.selectedModelId = arg.modelId;
+                    _state.selectedDescriptorIndex = arg.descriptorIndex;
+                    _isDirty = true;
+                }
+                else {
+                    _state.selectedDescriptorIndex = arg.descriptorIndex;
+                }
             }
             else if constexpr (std::is_same_v<T, ModelHierarchyToggleExpandIntent>) {
                 uint64_t key = GetNodeKey(arg.modelId, arg.descriptorIndex);
@@ -62,22 +80,62 @@ namespace Syn {
             }, intent);
     }
 
-    void ModelHierarchyViewModel::RebuildFlatList() {
+    void ModelHierarchyViewModel::RebuildModelList() {
         if (!_modelApi) return;
 
-        _state.flatNodes.clear();
+        _state.filteredModels.clear();
         auto allModels = _modelApi->GetAllModels();
 
-        for (const auto& mod : allModels) {
-            if (const CpuModelData* cpuData = _modelApi->GetModelCpuData(mod.id)) {
+        std::string searchLower = _state.searchQuery;
+        std::transform(searchLower.begin(), searchLower.end(), searchLower.begin(), ::tolower);
 
-                std::unordered_map<uint16_t, std::vector<uint32_t>> childMap;
-                for (uint32_t i = 0; i < cpuData->meshNodeDescriptors.size(); ++i) {
-                    childMap[cpuData->meshNodeDescriptors[i].parentNodeIndex].push_back(i);
+        for (const auto& mod : allModels) {
+            std::string nameLower = mod.name;
+            std::transform(nameLower.begin(), nameLower.end(), nameLower.begin(), ::tolower);
+
+            if (searchLower.empty() || nameLower.find(searchLower) != std::string::npos) {
+                ModelNode node;
+                node.id = mod.id;
+                node.name = mod.name;
+                node.path = mod.path;
+                node.icon = SYN_ICON_CUBE;
+
+                if (_previewApi) {
+                    if (_previewApi->GetPreviewUVs(PreviewResourceType::Model, mod.id, node.uv0, node.uv1)) {
+                        node.hasPreview = true;
+                    }
+                    else {
+                        node.hasPreview = false;
+                        _previewApi->RequestPreview(PreviewResourceType::Model, mod.id);
+                    }
                 }
 
-                TraverseAndFlatten(mod.id, -1, 0xFFFF, 0, *cpuData, childMap, mod.name);
+                _state.filteredModels.push_back(node);
             }
+        }
+    }
+
+    void ModelHierarchyViewModel::RebuildFlatList() {
+        _state.flatNodes.clear();
+        if (!_modelApi || _state.selectedModelId == 0xFFFFFFFF) return;
+
+        if (const CpuModelData* cpuData = _modelApi->GetModelCpuData(_state.selectedModelId)) {
+
+            std::unordered_map<uint16_t, std::vector<uint32_t>> childMap;
+            for (uint32_t i = 0; i < cpuData->meshNodeDescriptors.size(); ++i) {
+                childMap[cpuData->meshNodeDescriptors[i].parentNodeIndex].push_back(i);
+            }
+
+            std::string modelName = "Selected Model";
+            auto allModels = _modelApi->GetAllModels();
+            for (const auto& mod : allModels) {
+                if (mod.id == _state.selectedModelId) {
+                    modelName = mod.name;
+                    break;
+                }
+            }
+
+            TraverseAndFlatten(_state.selectedModelId, -1, 0xFFFF, 0, *cpuData, childMap, modelName);
         }
     }
 
@@ -123,7 +181,7 @@ namespace Syn {
                 const auto& childDesc = cpuData.meshNodeDescriptors[childDescIdx];
                 std::string childName = childDesc.name;
 
-                if (childName.empty()) 
+                if (childName.empty())
                     childName = "Node_" + std::to_string(childDescIdx);
 
                 if (TraverseAndFlatten(modelId, childDescIdx, childDesc.nodeIndex, depth + 1, cpuData, childMap, childName)) {

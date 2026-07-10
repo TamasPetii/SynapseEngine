@@ -8,7 +8,7 @@
 namespace Syn {
     void MaterialHierarchyView::Draw(MaterialHierarchyViewModel& vm) {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
-        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None;
+        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 
         if (ImGui::Begin(SYN_ICON_BRUSH " Materials", nullptr, windowFlags)) {
 
@@ -25,10 +25,16 @@ namespace Syn {
 
                 RenderTopBar(vm);
 
+                float currentY = ImGui::GetCursorScreenPos().y;
+                float gridHeight = mainContentBottomY - currentY - 12.0f;
+                if (gridHeight < 150.0f) gridHeight = 150.0f;
+
+                ImGui::BeginChild("MaterialGridContainer", ImVec2(0, gridHeight), false, ImGuiWindowFlags_NoScrollbar);
+
                 const auto& state = vm.GetState();
                 const auto entries = state.filteredNodes;
                 const float thumbnailSize = 100.0f;
-                
+
                 Syn::UI::ItemCardContainer("MaterialGrid", (int)entries.size(), thumbnailSize,
                     [&](int index) {
                         const auto& entry = entries[index];
@@ -60,6 +66,8 @@ namespace Syn {
 
                         Syn::UI::ItemCard(desc, thumbnailSize);
                     });
+
+                ImGui::EndChild();
             }
             Syn::UI::EndCard();
 

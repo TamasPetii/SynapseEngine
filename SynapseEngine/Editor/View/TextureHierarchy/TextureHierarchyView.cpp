@@ -8,7 +8,7 @@
 namespace Syn {
     void TextureHierarchyView::Draw(TextureHierarchyViewModel& vm) {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8, 8));
-        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_None;
+        ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 
         if (ImGui::Begin(SYN_ICON_IMAGE " Textures", nullptr, windowFlags)) {
 
@@ -24,6 +24,12 @@ namespace Syn {
             if (Syn::UI::BeginCard(CardTexturesTitle, SYN_ICON_IMAGE, getCardState(CardTexturesTitle))) {
 
                 RenderTopBar(vm);
+
+                float currentY = ImGui::GetCursorScreenPos().y;
+                float gridHeight = mainContentBottomY - currentY - 12.0f;
+                if (gridHeight < 150.0f) gridHeight = 150.0f;
+
+                ImGui::BeginChild("TextureGridContainer", ImVec2(0, gridHeight), false, ImGuiWindowFlags_NoScrollbar);
 
                 const auto& state = vm.GetState();
 
@@ -53,7 +59,8 @@ namespace Syn {
 
                         Syn::UI::ItemCard(desc, thumbnailSize);
                     });
-                
+
+                ImGui::EndChild();
             }
             Syn::UI::EndCard();
 
