@@ -135,6 +135,14 @@ namespace Syn {
         for (auto& [type, set] : _dirtyResources) {
             set.clear();
         }
+
+        if (_warmupFramesRemaining > 0) {
+            --_warmupFramesRemaining;
+            for (const auto& [id, tile] : _resourceToTile) {
+                PreviewResourceType type = static_cast<PreviewResourceType>(id >> 32);
+                _dirtyResources[type].insert(static_cast<uint32_t>(id & 0xFFFFFFFF));
+            }
+        }
     }
 
     void PreviewManager::GetViewportAndScissor(PreviewResourceType type, uint32_t resourceId, VkViewport& outViewport, VkRect2D& outScissor) const {
@@ -192,5 +200,13 @@ namespace Syn {
         }
 
         return result;
+    }
+
+    void PreviewManager::MarkAllActiveDirty() {
+        std::lock_guard lock(_mutex);
+        for (const auto& [id, tile] : _resourceToTile) {
+            PreviewResourceType type = static_cast<PreviewResourceType>(id >> 32);
+            _dirtyResources[type].insert(static_cast<uint32_t>(id & 0xFFFFFFFF));
+        }
     }
 }

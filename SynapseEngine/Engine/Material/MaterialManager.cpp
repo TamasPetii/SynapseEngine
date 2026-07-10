@@ -86,24 +86,6 @@ namespace Syn {
 
     void MaterialManager::FlushDirtyResources() 
     {
-        std::unordered_set<uint32_t> imagesToProcess;
-
-        {
-            std::lock_guard lock(_pendingImageMutex);
-            imagesToProcess = _pendingImages;
-            _pendingImages.clear();
-        }
-
-        for (uint32_t imgId : imagesToProcess) {
-            auto affectedMaterials = GetMaterialsUsingTexture(imgId);
-
-            for (uint32_t matId : affectedMaterials) {
-                if (_previewMarkDirtyCallback) {
-                    _previewMarkDirtyCallback(matId);
-                }
-            }
-        }
-
         ProcessDirtyReadyEntries(
             [this](uint32_t index, const EntryType& entry) {
                 WriteAddress(index, GpuMaterial(*entry.resource));
@@ -143,5 +125,27 @@ namespace Syn {
     void MaterialManager::NotifyImageReady(uint32_t imageId) {
         std::lock_guard lock(_pendingImageMutex);
         _pendingImages.insert(imageId);
+    }
+
+    void MaterialManager::ProcessPendingNotifications() {
+        std::unordered_set<uint32_t> imagesToProcess;
+
+        {
+            std::lock_guard lock(_pendingImageMutex);
+            imagesToProcess.swap(_pendingImages);
+        }
+
+        if (imagesToProcess.empty()) return;
+
+        for (uint32_t imgId : imagesToProcess) {
+            for (uint32_t matId : GetMaterialsUsingTexture(imgId)) 
+            {
+                if (_previewMarkDirtyCallback) 
+                    _previewMarkDirtyCallback(matId);
+
+                if (_materialReadyOrChangedCallback)
+                    _materialReadyOrChangedCallback(matId);
+            }
+        }
     }
 }

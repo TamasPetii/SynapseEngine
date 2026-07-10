@@ -31,7 +31,6 @@ namespace Syn {
 
         ~ModelManager() = default;
 
-
         uint32_t LoadModelAsync(const std::string& filePath);
         uint32_t LoadModelFromSourceAsync(const std::string& name, MeshSourceFactory factory);
         uint32_t LoadModelFromStaticMeshAsync(const std::string& name, StaticMeshFactory factory);
@@ -42,6 +41,7 @@ namespace Syn {
 
         std::vector<uint32_t> GetModelsUsingMaterials(uint32_t materialId) const;
         void NotifyMaterialReady(uint32_t materialId);
+        void ProcessPendingNotifications() override;
     protected:
 		void FlushDirtyResources() override;
         void StartGpuUpload(EntryType& entry) override;

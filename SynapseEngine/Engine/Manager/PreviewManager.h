@@ -29,6 +29,7 @@ namespace Syn {
         void FreeTile(PreviewResourceType type, uint32_t resourceId);
         bool HasTile(PreviewResourceType type, uint32_t resourceId) const;
 
+        void MarkAllActiveDirty();
         void MarkDirty(PreviewResourceType type, uint32_t resourceId);
         std::vector<uint32_t> GetDirtyResources(PreviewResourceType type);
         void ClearDirtyResources(PreviewResourceType type);
@@ -53,6 +54,7 @@ namespace Syn {
         uint32_t _resolution;
         uint32_t _tileSize;
         uint32_t _tilesPerRow;
+        uint32_t _warmupFramesRemaining = 1;
 
         std::unique_ptr<Vk::Image> _atlasImage;
         std::unique_ptr<Vk::Image> _atlasDepthImage;

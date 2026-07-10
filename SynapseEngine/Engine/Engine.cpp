@@ -79,10 +79,16 @@ namespace Syn
 
 		ServiceLocator::GetCpuProfiler()->BeginFrame(currentFrame);
 
+		//Updates
 		ServiceLocator::GetAnimationManager()->Update();
 		ServiceLocator::GetModelManager()->Update();
 		ServiceLocator::GetMaterialManager()->Update();
 		ServiceLocator::GetImageManager()->Update();
+
+		//Notifications
+		ServiceLocator::GetMaterialManager()->ProcessPendingNotifications();
+		ServiceLocator::GetModelManager()->ProcessPendingNotifications();
+
 		ServiceLocator::GetGpuUploader()->ProcessUploads();
 
 		_sceneManager->Update(_frameContext.deltaTime, currentFrame);
@@ -124,7 +130,7 @@ namespace Syn
 		_inputManager = std::make_unique<InputManager>();
 		ServiceLocator::ProvideInputManager(_inputManager.get());
 
-		InitFrameContext(2);
+		InitFrameContext(1);
 		InitLogger();
 		InitVulkan(params);
 		InitTaskExecutor();

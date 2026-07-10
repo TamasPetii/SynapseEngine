@@ -60,6 +60,8 @@ namespace Syn {
         virtual ~BaseResourceManager() = default;
 
         virtual void Update();
+        virtual void ProcessPendingNotifications() {}
+
         void WaitForResource(uint32_t id) const;
         void SetResourceState(uint32_t id, ResourceState newState);
         void MarkDirty(uint32_t id);

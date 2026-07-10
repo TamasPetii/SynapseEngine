@@ -168,24 +168,6 @@ namespace Syn {
 
     void ModelManager::FlushDirtyResources() 
     {
-        std::unordered_set<uint32_t> materialsToProcess;
-
-        {
-            std::lock_guard lock(_pendingMaterialMutex);
-            materialsToProcess = _pendingMaterials;
-            _pendingMaterials.clear();
-        }
-
-        for (uint32_t materialId : materialsToProcess) {
-            auto affectedModels = GetModelsUsingMaterials(materialId);
-
-            for (uint32_t modelId : affectedModels) {
-                if (_previewMarkDirtyCallback) {
-                    _previewMarkDirtyCallback(modelId);
-                }
-            }
-        }
-
         ProcessDirtyReadyEntries([this](uint32_t index, const EntryType& entry) {
 
             GpuModelAddresses addresses{};
@@ -244,5 +226,23 @@ namespace Syn {
     void ModelManager::NotifyMaterialReady(uint32_t materialId) {
         std::lock_guard lock(_pendingMaterialMutex);
         _pendingMaterials.insert(materialId);
+    }
+
+    void ModelManager::ProcessPendingNotifications() {
+        std::unordered_set<uint32_t> materialsToProcess;
+
+        {
+            std::lock_guard lock(_pendingMaterialMutex);
+            materialsToProcess.swap(_pendingMaterials);
+        }
+
+        if (materialsToProcess.empty()) return;
+
+        for (uint32_t materialId : materialsToProcess) {
+            for (uint32_t modelId : GetModelsUsingMaterials(materialId)) {
+                if (_previewMarkDirtyCallback) 
+                        _previewMarkDirtyCallback(modelId);
+            }
+        }
     }
 }

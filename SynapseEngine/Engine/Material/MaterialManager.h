@@ -28,6 +28,7 @@ namespace Syn {
         uint32_t LoadMaterialDirect(const std::string& name, const Material& material);
         std::vector<uint32_t> GetMaterialsUsingTexture(uint32_t textureId) const;
         void NotifyImageReady(uint32_t imageId);
+        void ProcessPendingNotifications() override;
     protected:
         void FlushDirtyResources() override;
         void StartGpuUpload(EntryType& entry) override;
