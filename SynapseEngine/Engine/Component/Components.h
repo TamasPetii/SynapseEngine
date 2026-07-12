@@ -11,6 +11,8 @@
 #include "Physics/BoxColliderComponent.h"
 #include "Physics/SphereColliderComponent.h"
 #include "Physics/CapsuleColliderComponent.h"
+#include "Physics/ConvexColliderComponent.h"
+#include "Physics/MeshColliderComponent.h"
 #include "Physics/RigidBodyComponent.h"
 #include "Rendering/ModelComponent.h"
 #include "Rendering/MaterialOverrideComponent.h"

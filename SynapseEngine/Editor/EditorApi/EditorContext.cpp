@@ -35,7 +35,7 @@ namespace Syn {
         RegisterApi<ITransformApi, TransformApiImpl>(sm);
         RegisterApi<IDirectionLightApi, DirectionLightApiImpl>(sm);
         RegisterApi<IFileSystemApi, FileSystemApiImpl>();
-        RegisterApi<IHierarchyApi, HierarchyApiImpl>(sm);
+        RegisterApi<IHierarchyApi, HierarchyApiImpl>(sm, engine->GetModelManager());
         RegisterApi<ILoggerApi, LoggerApiImpl>(engine);
         RegisterApi<IMaterialApi, MaterialApiImpl>(engine->GetMaterialManager(), sm);
         RegisterApi<IRenderApi, RenderApiImpl>(engine, textureManager, sm);

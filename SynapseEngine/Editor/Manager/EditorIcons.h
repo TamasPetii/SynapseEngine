@@ -28,6 +28,7 @@ constexpr const char* ASSET_PATH = "Assets";
 #define SYN_ICON_CUBES          ICON_FA_CUBES
 #define SYN_ICON_VIDEO          ICON_FA_VIDEO
 #define SYN_ICON_TRASH          ICON_FA_TRASH
+#define SYN_ICON_COPY           ICON_FA_COPY
 #define SYN_ICON_EXPAND_ALL     ICON_FA_ANGLE_DOUBLE_DOWN
 #define SYN_ICON_COLLAPSE_ALL   ICON_FA_ANGLE_DOUBLE_UP
 

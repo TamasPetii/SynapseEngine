@@ -35,13 +35,6 @@ void main() {
     uint modelDenseIndex = GET_SPARSE_INDEX(ctx.modelSparseMapBufferAddr, entityId);
     uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
 
-    if (transformDenseIndex == INVALID_INDEX || modelDenseIndex == INVALID_INDEX) {
-        gl_Position = vec4(0.0, 0.0, 0.0, 0.0);
-        outUV = vec2(0.0);
-        outId = uvec3(0u);
-        return; 
-    }
-
     ModelComponent comp = GET_MODEL_COMP(ctx.modelBufferAddr, modelDenseIndex);
     
     // 4. Fetch Model Addresses & Raw Vertex Data

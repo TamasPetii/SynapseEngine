@@ -3,6 +3,7 @@
 #include <string>
 #include <variant>
 #include "EditorCore/Types/EntityHandle.h"
+#include "EditorCore/Api/IHierarchyApi.h"
 
 namespace Syn 
 {
@@ -26,11 +27,23 @@ namespace Syn
     };
 
     struct HierarchyCreateEntityIntent {
-        std::string name; 
+        EntityTemplate type;
         EntityID parent;
     };
 
+    struct HierarchyCopyEntityIntent {
+        EntityID entity;
+    };
+
+    struct HierarchyFullCopyEntityIntent {
+        EntityID entity;
+    };
+
     struct HierarchyDestroyEntityIntent {
+        EntityID entity;
+    };
+
+    struct HierarchyDestroyKeepChildrenIntent {
         EntityID entity;
     };
 
@@ -53,7 +66,10 @@ namespace Syn
         HierarchyToggleVisibilityIntent,
         HierarchyReparentEntityIntent,
         HierarchyCreateEntityIntent,
+        HierarchyCopyEntityIntent,
+        HierarchyFullCopyEntityIntent,
         HierarchyDestroyEntityIntent,
+        HierarchyDestroyKeepChildrenIntent,
         HierarchyRefreshHierarchyIntent,
         HierarchySetSearchQueryIntent,
         HierarchyExpandAllIntent,

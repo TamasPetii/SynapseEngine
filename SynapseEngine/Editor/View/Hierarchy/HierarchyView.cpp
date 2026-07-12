@@ -234,21 +234,85 @@ namespace Syn {
     }
 
     void HierarchyView::RenderContextMenu(HierarchyViewModel& vm, EntityID contextEntity) {
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8.0f, 8.0f));
+
+        auto DrawStyledSeparator = []() {
+            ImGui::PushStyleColor(ImGuiCol_Separator, ImVec4(0.35f, 0.35f, 0.35f, 1.0f));
+            ImGui::Separator();
+            ImGui::PopStyleColor();
+            };
+
         if (ImGui::MenuItem(SYN_ICON_CUBE " Empty Entity")) {
-            vm.Dispatch(HierarchyCreateEntityIntent{ "Empty Entity", contextEntity });
+            vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::Empty, contextEntity });
         }
 
-        ImGui::Separator();
-
         if (ImGui::MenuItem(SYN_ICON_VIDEO " Camera")) {
-            vm.Dispatch(HierarchyCreateEntityIntent{ "Camera", contextEntity });
+            vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::Camera, contextEntity });
+        }
+
+        DrawStyledSeparator();
+
+        if (ImGui::BeginMenu(SYN_ICON_LIGHTBULB " Lights")) {
+            if (ImGui::MenuItem("Directional Light")) vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::DirectionalLight, contextEntity });
+            if (ImGui::MenuItem("Point Light"))       vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::PointLight, contextEntity });
+            if (ImGui::MenuItem("Spot Light"))        vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::SpotLight, contextEntity });
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu(SYN_ICON_CUBE " Shape")) {
+            if (ImGui::MenuItem("Cube"))       vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::ShapeCube, contextEntity });
+            if (ImGui::MenuItem("Sphere"))     vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::ShapeSphere, contextEntity });
+            if (ImGui::MenuItem("Quad"))       vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::ShapeQuad, contextEntity });
+            if (ImGui::MenuItem("Cylinder"))   vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::ShapeCylinder, contextEntity });
+            if (ImGui::MenuItem("Cone"))       vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::ShapeCone, contextEntity });
+            if (ImGui::MenuItem("Capsule"))    vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::ShapeCapsule, contextEntity });
+            if (ImGui::MenuItem("Hemisphere")) vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::ShapeHemisphere, contextEntity });
+            if (ImGui::MenuItem("Pyramid"))    vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::ShapePyramid, contextEntity });
+            if (ImGui::MenuItem("Grid"))       vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::ShapeGrid, contextEntity });
+            if (ImGui::MenuItem("Torus"))      vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::ShapeTorus, contextEntity });
+            ImGui::EndMenu();
+        }
+
+        if (ImGui::BeginMenu(SYN_ICON_CUBE " Collider")) {
+            if (ImGui::MenuItem("Box Collider"))     vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::BoxCollider, contextEntity });
+            if (ImGui::MenuItem("Sphere Collider"))  vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::SphereCollider, contextEntity });
+            if (ImGui::MenuItem("Capsule Collider")) vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::CapsuleCollider, contextEntity });
+            if (ImGui::MenuItem("Convex Collider"))  vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::ConvexCollider, contextEntity });
+            if (ImGui::MenuItem("Mesh Collider"))    vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::MeshCollider, contextEntity });
+            ImGui::EndMenu();
+        }
+
+        DrawStyledSeparator();
+
+        if (ImGui::MenuItem(SYN_ICON_CUBE " Model")) {
+            vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::Model, contextEntity });
+        }
+
+        if (ImGui::MenuItem(SYN_ICON_RUNNING " Animation")) {
+            vm.Dispatch(HierarchyCreateEntityIntent{ EntityTemplate::Animation, contextEntity });
         }
 
         if (contextEntity != NULL_ENTITY) {
-            ImGui::Separator();
+            DrawStyledSeparator();
+
+            if (ImGui::MenuItem(SYN_ICON_COPY " Copy")) {
+                vm.Dispatch(HierarchyCopyEntityIntent{ contextEntity });
+            }
+            if (ImGui::MenuItem(SYN_ICON_COPY " Full Copy")) {
+                vm.Dispatch(HierarchyFullCopyEntityIntent{ contextEntity });
+            }
+
+            DrawStyledSeparator();
+
             if (ImGui::MenuItem(SYN_ICON_TRASH " Delete")) {
                 vm.Dispatch(HierarchyDestroyEntityIntent{ contextEntity });
             }
+
+            if (ImGui::MenuItem(SYN_ICON_TRASH " Delete (Keep Children)")) {
+                vm.Dispatch(HierarchyDestroyKeepChildrenIntent{ contextEntity });
+            }
         }
+
+        ImGui::PopStyleVar();
     }
 }

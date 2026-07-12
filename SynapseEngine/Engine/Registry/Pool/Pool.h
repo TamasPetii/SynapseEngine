@@ -252,6 +252,13 @@ namespace Syn
         requires StorageConstraint<StoragePolicy>&& MappingConstraint<MappingPolicy>
     SYN_INLINE void Pool<T, StoragePolicy, MappingPolicy>::EnsureEntityMapping(EntityID entity)
     {
+        size_t oldSize = _mapping.GetSparseIndices().size();
+
         _mapping.EnsureEntityMapping(entity);
+
+        if (_mapping.GetSparseIndices().size() > oldSize)
+        {
+            IncrementMappingVersion();
+        }
     }
 }

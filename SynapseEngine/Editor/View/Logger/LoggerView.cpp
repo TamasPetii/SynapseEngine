@@ -4,6 +4,7 @@
 #include "Engine/Logger/LogUtils.h"
 #include <imgui.h>
 #include <filesystem>
+#include <algorithm>
 
 namespace Syn {
 
@@ -47,46 +48,31 @@ namespace Syn {
 
     void LoggerView::RenderTopBar(LoggerViewModel& vm, const LoggerState& state)
     {
-        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.8f, 0.8f, 0.8f, 1.0f));
-        if (ImGui::Button(SYN_ICON_FILTER " Filters")) {
-            ImGui::OpenPopup("LogLevelFilterPopup");
-        }
-        ImGui::PopStyleColor(2);
+        auto DrawFilterToggle = [&](const char* label, LogLevel level, bool& currentVal) {
+            ImGui::PushStyleColor(ImGuiCol_Text, currentVal ? GetColorForLevel(level) : ImVec4(0.4f, 0.4f, 0.4f, 1.0f));
+            ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+            ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1, 1, 1, 0.1f));
+            ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1, 1, 1, 0.2f));
 
-        if (ImGui::BeginPopup("LogLevelFilterPopup")) {
-            ImGui::TextDisabled("Log Levels");
-            ImGui::Separator();
+            if (ImGui::Button(label)) {
+                bool newVal = !currentVal;
+                vm.Dispatch(LoggerToggleLevelIntent{ level, newVal });
+            }
 
-            bool showInfo = state.filters.showInfo;
-            ImGui::PushStyleColor(ImGuiCol_Text, GetColorForLevel(LogLevel::Info));
-            if (ImGui::Checkbox("Info", &showInfo)) vm.Dispatch(LoggerToggleLevelIntent{ LogLevel::Info, showInfo });
-            ImGui::PopStyleColor();
+            ImGui::PopStyleColor(4);
+            };
 
-            bool showWarn = state.filters.showWarning;
-            ImGui::PushStyleColor(ImGuiCol_Text, GetColorForLevel(LogLevel::Warning));
-            if (ImGui::Checkbox("Warning", &showWarn)) vm.Dispatch(LoggerToggleLevelIntent{ LogLevel::Warning, showWarn });
-            ImGui::PopStyleColor();
+        bool showInfo = state.filters.showInfo;
+        bool showWarn = state.filters.showWarning;
+        bool showError = state.filters.showError;
+        bool showCrit = state.filters.showCritical;
 
-            bool showError = state.filters.showError;
-            ImGui::PushStyleColor(ImGuiCol_Text, GetColorForLevel(LogLevel::Error));
-            if (ImGui::Checkbox("Error", &showError)) vm.Dispatch(LoggerToggleLevelIntent{ LogLevel::Error, showError });
-            ImGui::PopStyleColor();
+        DrawFilterToggle("Info", LogLevel::Info, showInfo); ImGui::SameLine();
+        DrawFilterToggle("Warn", LogLevel::Warning, showWarn); ImGui::SameLine();
+        DrawFilterToggle("Error", LogLevel::Error, showError); ImGui::SameLine();
+        DrawFilterToggle("Crit", LogLevel::Critical, showCrit);
 
-            bool showCrit = state.filters.showCritical;
-            ImGui::PushStyleColor(ImGuiCol_Text, GetColorForLevel(LogLevel::Critical));
-            if (ImGui::Checkbox("Critical", &showCrit)) vm.Dispatch(LoggerToggleLevelIntent{ LogLevel::Critical, showCrit });
-            ImGui::PopStyleColor();
-
-            ImGui::EndPopup();
-        }
-
-        ImGui::SameLine();
-
-        float autoScrollWidth = ImGui::CalcTextSize("Auto-Scroll").x + 35.0f;
-        float clearBtnWidth = ImGui::CalcTextSize(SYN_ICON_TRASH " Clear").x + ImGui::GetStyle().FramePadding.x * 2.0f;
-        float spacing = ImGui::GetStyle().ItemSpacing.x;
-        float rightItemsTotalWidth = autoScrollWidth + clearBtnWidth + spacing * 3.0f;
+        ImGui::SameLine(0, 15.0f);
 
         ImGui::AlignTextToFramePadding();
         ImGui::TextDisabled(SYN_ICON_SEARCH);
@@ -95,6 +81,8 @@ namespace Syn {
         char searchBuffer[256];
         strncpy(searchBuffer, state.filters.searchQuery.c_str(), sizeof(searchBuffer));
         searchBuffer[sizeof(searchBuffer) - 1] = '\0';
+
+        float rightItemsTotalWidth = ImGui::CalcTextSize("Auto-Scroll").x + ImGui::CalcTextSize(SYN_ICON_TRASH " Clear").x + 70.0f;
 
         ImGui::SetNextItemWidth(ImGui::GetContentRegionAvail().x - rightItemsTotalWidth);
         if (ImGui::InputTextWithHint("##LogSearch", "Filter logs by message or file...", searchBuffer, IM_ARRAYSIZE(searchBuffer))) {
@@ -113,11 +101,9 @@ namespace Syn {
     void LoggerView::RenderLogTable(const LoggerState& state, float tableHeight) {
         ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(4, 4));
         ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-
         ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.08f, 0.08f, 0.08f, 0.6f));
 
-        ImGui::BeginChild("LogTableContainer", ImVec2(0, tableHeight), ImGuiChildFlags_Borders, ImGuiWindowFlags_NoScrollbar);
+        ImGui::BeginChild("LogTableContainer", ImVec2(0, tableHeight), false, ImGuiWindowFlags_NoScrollbar);
 
         if (state.filteredLogs.empty()) {
             ImGui::SetCursorPosY(ImGui::GetCursorPosY() + 8.0f);
@@ -125,34 +111,22 @@ namespace Syn {
             ImGui::TextDisabled("No logs match the current filters.");
         }
         else {
-            ImGuiTableFlags flags = ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollY | ImGuiTableFlags_RowBg;
+            ImGuiTableFlags flags = ImGuiTableFlags_Resizable | ImGuiTableFlags_ScrollY | ImGuiTableFlags_ScrollX | ImGuiTableFlags_PadOuterX;
 
             if (ImGui::BeginTable("LogTable", 4, flags)) {
                 ImGui::TableSetupScrollFreeze(0, 1);
-                ImGui::TableSetupColumn("Time", ImGuiTableColumnFlags_WidthFixed, 140.0f);
-                ImGui::TableSetupColumn("Level", ImGuiTableColumnFlags_WidthFixed, 60.0f);
-                ImGui::TableSetupColumn("Source", ImGuiTableColumnFlags_WidthFixed, 150.0f);
+                ImGui::TableSetupColumn("Time", ImGuiTableColumnFlags_WidthFixed, 100.0f);
+                ImGui::TableSetupColumn("Level", ImGuiTableColumnFlags_WidthFixed, 50.0f);
+                ImGui::TableSetupColumn("Source", ImGuiTableColumnFlags_WidthFixed, 130.0f);
                 ImGui::TableSetupColumn("Message", ImGuiTableColumnFlags_WidthStretch);
 
                 ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
                 for (int column = 0; column < 4; column++) {
                     ImGui::TableSetColumnIndex(column);
                     const char* columnName = ImGui::TableGetColumnName(column);
-
-                    ImGui::PushID(column);
-
-                    float cellWidth = ImGui::GetColumnWidth();
-                    float textWidth = ImGui::CalcTextSize(columnName).x;
-                    ImVec2 startPos = ImGui::GetCursorPos();
-
-                    ImGui::TableHeader("");
-
-                    ImGui::SetCursorPos(ImVec2(startPos.x + (cellWidth - textWidth) * 0.5f, startPos.y + 3.0f));
-                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-                    ImGui::Text("%s", columnName);
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.6f, 0.6f, 0.6f, 1.0f));
+                    ImGui::TableHeader(columnName);
                     ImGui::PopStyleColor();
-
-                    ImGui::PopID();
                 }
 
                 ImGuiListClipper clipper;
@@ -176,7 +150,17 @@ namespace Syn {
                         ImGui::Text("%s:%d", filenameStr.c_str(), log.line);
 
                         ImGui::TableNextColumn();
-                        ImGui::TextWrapped("%.*s", static_cast<int>(log.message.length()), log.message.data());
+
+                        std::string singleLineMsg = std::string(log.message.data(), log.message.length());
+                        std::replace(singleLineMsg.begin(), singleLineMsg.end(), '\n', ' ');
+
+                        ImGui::TextUnformatted(singleLineMsg.c_str());
+
+                        if (ImGui::IsItemHovered() && log.message.find('\n') != std::string::npos) {
+                            ImGui::BeginTooltip();
+                            ImGui::TextUnformatted(log.message.data());
+                            ImGui::EndTooltip();
+                        }
 
                         ImGui::PopStyleColor();
                     }
@@ -191,17 +175,16 @@ namespace Syn {
         }
 
         ImGui::EndChild();
-
         ImGui::PopStyleColor();
-        ImGui::PopStyleVar(3);
+        ImGui::PopStyleVar(2);
     }
 
     ImVec4 LoggerView::GetColorForLevel(LogLevel level) const {
         switch (level) {
-        case LogLevel::Info:     return ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
-        case LogLevel::Warning:  return ImVec4(0.8f, 0.4f, 1.0f, 1.0f);
-        case LogLevel::Error:    return ImVec4(1.0f, 0.2f, 0.2f, 1.0f);
-        case LogLevel::Critical: return ImVec4(1.0f, 0.6f, 0.0f, 1.0f);
+        case LogLevel::Info:     return ImVec4(0.9f, 0.9f, 0.9f, 1.0f);
+        case LogLevel::Warning:  return ImVec4(0.9f, 0.7f, 0.0f, 1.0f);
+        case LogLevel::Error:    return ImVec4(1.0f, 0.3f, 0.3f, 1.0f);
+        case LogLevel::Critical: return ImVec4(1.0f, 0.1f, 0.1f, 1.0f);
         default:                 return ImGui::GetStyleColorVec4(ImGuiCol_Text);
         }
     }

@@ -118,6 +118,7 @@ namespace Syn
 		{
 			auto* wrapper = new WrapperType<T>();
 			_pools.Add(id, wrapper);
+			_pools.EnsureEntityMapping(_entityCounter);
 			return wrapper;
 		}
 

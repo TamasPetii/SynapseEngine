@@ -6,10 +6,10 @@
   },
   "materials": {
     "use_unique_materials": false,
-    "shared_material_count": 150
+    "shared_material_count": 100
   },
   "entities": {
-    "animated_characters": 500,
+    "animated_characters": 1000,
     "static_geometry": 25000,
     "physics_boxes": 500,
     "physics_spheres": 500,
@@ -17,9 +17,9 @@
   },
   "lights": {
     "directional_count": 1,
-    "point_count": 64,
-    "point_shadow_count": 16,
-    "spot_count": 64,
-    "spot_shadow_count": 16
+    "point_count": 128,
+    "point_shadow_count": 32,
+    "spot_count": 128,
+    "spot_shadow_count": 32
   }
 }

@@ -50,14 +50,28 @@ namespace Syn {
                 _hierarchyApi->SetParent(arg.child, arg.newParent);
             }
             else if constexpr (std::is_same_v<T, HierarchyCreateEntityIntent>) {
-                EntityID newEnt = _hierarchyApi->CreateEntity(arg.name, arg.parent);
+                EntityID newEnt = _hierarchyApi->CreateEntity(arg.type, arg.parent);
                 if (arg.parent != NULL_ENTITY) {
                     _expandedNodes.insert(arg.parent);
                 }
                 _selectionApi->SetSelectedEntity(newEnt);
             }
+            else if constexpr (std::is_same_v<T, HierarchyCopyEntityIntent>) {
+                EntityID newEnt = _hierarchyApi->CopyEntity(arg.entity, _hierarchyApi->GetParent(arg.entity));
+                _selectionApi->SetSelectedEntity(newEnt);
+            }
+            else if constexpr (std::is_same_v<T, HierarchyFullCopyEntityIntent>) {
+                EntityID newEnt = _hierarchyApi->FullCopyEntity(arg.entity, _hierarchyApi->GetParent(arg.entity));
+                _selectionApi->SetSelectedEntity(newEnt);
+            }
             else if constexpr (std::is_same_v<T, HierarchyDestroyEntityIntent>) {
-                _hierarchyApi->DestroyEntity(arg.entity);
+                _hierarchyApi->DestroyEntityRecursive(arg.entity);
+                if (_state.selectedEntity == arg.entity) {
+                    _selectionApi->SetSelectedEntity(NULL_ENTITY);
+                }
+            }
+            else if constexpr (std::is_same_v<T, HierarchyDestroyKeepChildrenIntent>) {
+                _hierarchyApi->DestroyEntityKeepChildren(arg.entity);
                 if (_state.selectedEntity == arg.entity) {
                     _selectionApi->SetSelectedEntity(NULL_ENTITY);
                 }
