@@ -30,7 +30,7 @@ namespace Syn {
     }
 
     void BloomUpsamplePass::PrepareFrame(const RenderContext& context) {
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         auto bloom = rtGroup->GetImage(RenderTargetNames::Bloom);
 
         _imageTransitions.push_back({
@@ -46,7 +46,7 @@ namespace Syn {
         auto imageManager = ServiceLocator::GetImageManager();
         auto sampler = imageManager->GetSampler(SamplerNames::LinearClampEdge);
 
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         auto bloom = rtGroup->GetImage(RenderTargetNames::Bloom);
 
         uint32_t mipLevels = bloom->GetConfig().mipLevels;

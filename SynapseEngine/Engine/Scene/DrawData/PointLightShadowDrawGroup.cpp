@@ -13,55 +13,55 @@ namespace Syn
         VkBufferUsageFlags storageUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
         VkBufferUsageFlags indirectStorageUsage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
-        instanceBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(PointShadowInstancePayload), storageUsage, 65536, 131072 });
+        instanceBuffer.Initialize({ "PointLightShadowDrawGroup_InstanceBuffer", BufferStrategy::Hybrid, frameCount, sizeof(PointShadowInstancePayload), storageUsage, 65536, 131072 });
         instanceBuffer.UpdateCapacityAll(1);
 
-        unsortedInstanceBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(PointShadowInstancePayload), storageUsage, 65536, 131072 });
+        unsortedInstanceBuffer.Initialize({ "PointLightShadowDrawGroup_UnsortedInstanceBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(PointShadowInstancePayload), storageUsage, 65536, 131072 });
         unsortedInstanceBuffer.UpdateCapacityAll(1);
 
-        sortValuesBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 65536, 131072 });
+        sortValuesBuffer.Initialize({ "PointLightShadowDrawGroup_SortValuesBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 65536, 131072 });
         sortValuesBuffer.UpdateCapacityAll(1);
 
-        drawCallKeyBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 65536, 131072 });
+        drawCallKeyBuffer.Initialize({ "PointLightShadowDrawGroup_DrawCallKeyBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 65536, 131072 });
         drawCallKeyBuffer.UpdateCapacityAll(1);
 
-        indirectBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(VkDrawIndirectCommand) * 8, indirectStorageUsage, 1024, 2048 });
+        indirectBuffer.Initialize({ "PointLightShadowDrawGroup_IndirectBuffer", BufferStrategy::Hybrid, frameCount, sizeof(VkDrawIndirectCommand) * 8, indirectStorageUsage, 1024, 2048 });
         indirectBuffer.UpdateCapacityAll(1);
 
-        visibleCountDispatchBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(uint32_t), storageUsage, 1, 1 });
+        visibleCountDispatchBuffer.Initialize({ "PointLightShadowDrawGroup_VisibleCountDispatchBuffer", BufferStrategy::Hybrid, frameCount, sizeof(uint32_t), storageUsage, 1, 1 });
         visibleCountDispatchBuffer.UpdateCapacityAll(1);
 
-        visibleMeshCountDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 1, 1 });
+        visibleMeshCountDispatchBuffer.Initialize({ "PointLightShadowDrawGroup_VisibleMeshCountDispatchBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 1, 1 });
         visibleMeshCountDispatchBuffer.UpdateCapacityAll(1);
 
-        descriptorBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(MeshDrawDescriptor) * 8, storageUsage, 1024, 2048 });
+        descriptorBuffer.Initialize({ "PointLightShadowDrawGroup_DescriptorBuffer", BufferStrategy::Hybrid, frameCount, sizeof(MeshDrawDescriptor) * 8, storageUsage, 1024, 2048 });
         descriptorBuffer.UpdateCapacityAll(1);
 
-        modelCullingIndirectDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
+        modelCullingIndirectDispatchBuffer.Initialize({ "PointLightShadowDrawGroup_ModelCullingIndirectDispatchBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
         modelCullingIndirectDispatchBuffer.UpdateCapacityAll(1);
 
-        modelDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
+        modelDispatchBuffer.Initialize({ "PointLightShadowDrawGroup_ModelDispatchBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
         modelDispatchBuffer.UpdateCapacityAll(1);
 
-        finalizeDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
+        finalizeDispatchBuffer.Initialize({ "PointLightShadowDrawGroup_FinalizeDispatchBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
         finalizeDispatchBuffer.UpdateCapacityAll(1);
 
-        staticChunkDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
+        staticChunkDispatchBuffer.Initialize({ "PointLightShadowDrawGroup_StaticChunkDispatchBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
         staticChunkDispatchBuffer.UpdateCapacityAll(1);
 
-        mortonChunkDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
+        mortonChunkDispatchBuffer.Initialize({ "PointLightShadowDrawGroup_MortonChunkDispatchBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
         mortonChunkDispatchBuffer.UpdateCapacityAll(1);
 
-        atlasRadixSortTempBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, 1, storageUsage | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 10000, 20000 });
+        atlasRadixSortTempBuffer.Initialize({ "PointLightShadowDrawGroup_AtlasRadixSortTempBuffer", BufferStrategy::GpuOnly, frameCount, 1, storageUsage | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 10000, 20000 });
         atlasRadixSortTempBuffer.UpdateCapacityAll(1);
 
-        radixSortTempBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, 1, storageUsage | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 10000, 20000 });
+        radixSortTempBuffer.Initialize({ "PointLightShadowDrawGroup_RadixSortTempBuffer", BufferStrategy::GpuOnly, frameCount, 1, storageUsage | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 10000, 20000 });
         radixSortTempBuffer.UpdateCapacityAll(1);
 
         gridLookupData.Resize(POINT_SHADOW_GRID_SIZE * POINT_SHADOW_GRID_SIZE);
         std::fill(gridLookupData.Data(), gridLookupData.Data() + (POINT_SHADOW_GRID_SIZE * POINT_SHADOW_GRID_SIZE), 0xFFFFFFFF);
 
-        gridLookupBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(uint32_t) * POINT_SHADOW_GRID_SIZE * POINT_SHADOW_GRID_SIZE, storageUsage, 1, 1 });
+        gridLookupBuffer.Initialize({ "PointLightShadowDrawGroup_GridLookupBuffer", BufferStrategy::Hybrid, frameCount, sizeof(uint32_t) * POINT_SHADOW_GRID_SIZE * POINT_SHADOW_GRID_SIZE, storageUsage, 1, 1 });
         gridLookupBuffer.UpdateCapacityAll(1);
 
         Vk::ImageConfig atlasSpec{};

@@ -1,6 +1,5 @@
 #include "AnimationSystem.h"
 #include "Engine/ServiceLocator.h"
-#include "Engine/Animation/AnimationManager.h"
 
 namespace Syn
 {
@@ -14,8 +13,8 @@ namespace Syn
         auto animPool = registry->GetPool<AnimationComponent>();
         if (!animPool) return;
 
-        auto animationManager = ServiceLocator::GetAnimationManager();
-        auto animations = animationManager->GetResourceSnapshot();
+        const auto& ctx = scene->GetSystemContext();
+        auto& animations = ctx.animationSnapshots;
 
         ParallelForEachIf<UPDATE_BIT>(animPool, subflow, SystemPhaseNames::Update, [animPool, deltaTime, animations](EntityID entity) {
             auto& animComponent = animPool->Get(entity);

@@ -25,6 +25,7 @@ namespace Syn::Vk {
         VkPhysicalDeviceMeshShaderFeaturesEXT meshFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MESH_SHADER_FEATURES_EXT };
         meshFeatures.meshShader = VK_TRUE;
         meshFeatures.taskShader = VK_TRUE;
+        meshFeatures.meshShaderQueries = VK_TRUE;
 
         VkPhysicalDeviceShaderObjectFeaturesEXT shaderObjectFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_OBJECT_FEATURES_EXT };
         shaderObjectFeatures.shaderObject = VK_TRUE;
@@ -202,5 +203,18 @@ namespace Syn::Vk {
 
     void Device::WaitIdle() const {
         vkDeviceWaitIdle(_handle);
+    }
+
+    void Device::SetDebugName(VkObjectType objectType, uint64_t objectHandle, const char* name) const {
+        if constexpr (!Syn::EnableLogging) {
+            return;
+        }
+
+        VkDebugUtilsObjectNameInfoEXT nameInfo{ VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT };
+        nameInfo.objectType = objectType;
+        nameInfo.objectHandle = objectHandle;
+        nameInfo.pObjectName = name;
+
+        vkSetDebugUtilsObjectNameEXT(_handle, &nameInfo);
     }
 }

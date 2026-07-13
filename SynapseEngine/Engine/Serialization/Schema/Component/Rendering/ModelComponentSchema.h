@@ -17,7 +17,6 @@ namespace Syn
 
             ar.Property("castShadow", comp.castShadow);
             ar.Property("receiveShadow", comp.receiveShadow);
-            ar.Property("hasDirectxNormals", comp.hasDirectxNormals);
             ar.Property("modelIndex", comp.modelIndex);
             ar.Property("materialOffset", comp.materialOffset);
         }

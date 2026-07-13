@@ -7,6 +7,7 @@
 #include "Vk/Buffer/SynVkBuffer.h"
 #include "Vk/Rendering/GpuUploader.h"
 
+#include "Engine/Scene/SceneNames.h"
 #include "Engine/Manager/ResourceManager.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Mesh/Builder/StaticMeshBuilder.h"
@@ -26,7 +27,8 @@
 #include "Engine/Logger/LogUtils.h"
 #include "Engine/Scene/SceneManager.h"
 #include "Engine/Scene/Source/Procedural/TestSceneSource.h"
-#include "Engine/Scene/Source/Procedural/NatureSceneSource.h"
+#include "Engine/Scene/Source/Procedural/MaterialPreviewSceneSource.h"
+#include "Engine/Scene/Source/Procedural/ModelPreviewSceneSource.h"
 #include "Engine/Scene/Source/File/FileSceneSource.h"
 
 #include "Engine/Render/RendererFactory.h"
@@ -34,6 +36,8 @@
 
 #include "Engine/Profiler/DefaultGpuProfiler.h"
 #include "Engine/Profiler/DefaultCpuProfiler.h"
+#include "Engine/Statistics/DefaultRenderStatCollector.h"
+#include "Engine/Statistics/FrameStatisticsManager.h"
 
 #include "Engine/Serialization/Serializer.h"
 #include "Engine/Serialization/Archive/DefaultArchiveRegistry.h"
@@ -75,10 +79,16 @@ namespace Syn
 
 		ServiceLocator::GetCpuProfiler()->BeginFrame(currentFrame);
 
+		//Updates
 		ServiceLocator::GetAnimationManager()->Update();
 		ServiceLocator::GetModelManager()->Update();
 		ServiceLocator::GetMaterialManager()->Update();
 		ServiceLocator::GetImageManager()->Update();
+
+		//Notifications
+		ServiceLocator::GetMaterialManager()->ProcessPendingNotifications();
+		ServiceLocator::GetModelManager()->ProcessPendingNotifications();
+
 		ServiceLocator::GetGpuUploader()->ProcessUploads();
 
 		_sceneManager->Update(_frameContext.deltaTime, currentFrame);
@@ -96,6 +106,7 @@ namespace Syn
 		_renderManager->WaitForFrame(currentFrame);
 
 		ServiceLocator::GetGpuProfiler()->ResolveFrame(currentFrame);
+		ServiceLocator::GetFrameStatisticsManager()->ResolveFrame(currentFrame, ServiceLocator::GetRenderStatCollector());
 
 		if (_onGuiFlushCallback)
 			_onGuiFlushCallback(currentFrame);
@@ -107,6 +118,7 @@ namespace Syn
 		_sceneManager->Finish();
 
 		ServiceLocator::GetCpuProfiler()->ResolveFrame(currentFrame);
+		ServiceLocator::GetPreviewManager()->ClearAllDirtyResources();
 
 		AdvanceFrameIndex();
 	}
@@ -210,18 +222,17 @@ namespace Syn
 
 		_cpuProfiler = std::make_unique<DefaultCpuProfiler>(_frameContext.framesInFlight);
 		ServiceLocator::ProvideCpuProfiler(_cpuProfiler.get());
+
+		_renderStatCollector = std::make_unique<DefaultRenderStatCollector>(_frameContext.framesInFlight);
+		ServiceLocator::ProvideRenderStatCollector(_renderStatCollector.get());
+
+		_frameStatisticsManager = std::make_unique<FrameStatisticsManager>(_frameContext.framesInFlight);
+		ServiceLocator::ProvideFrameStatisticsManager(_frameStatisticsManager.get());
 	}
 
 	void Engine::InitRenderManager(const EngineInitParams& params)
 	{
-		/*
-#ifdef SYN_PERFORMANCE
-		_renderManager = std::move(RendererFactory::CreatePerformanceRenderer(_frameContext.framesInFlight));
-#else
-		_renderManager = std::move(RendererFactory::CreateDeferredRenderer(_frameContext.framesInFlight));
-#endif
-		*/
-		_renderManager = std::move(RendererFactory::CreateDeferredRenderer(_frameContext.framesInFlight));
+		_renderManager = std::move(RendererFactory::CreateSceneRenderer(_frameContext.framesInFlight));
 		_renderManager->SetGuiRenderCallback(params.onRenderGuiCallback);
 	}
 
@@ -234,6 +245,8 @@ namespace Syn
 		_inputManager.reset();
 		_gpuProfiler.reset();
 		_cpuProfiler.reset();
+		_renderStatCollector.reset();
+		_frameStatisticsManager.reset();
 		_resourceManager.reset();
 		_gpuUploader.reset();
 		_taskExecutor.reset();
@@ -320,17 +333,19 @@ namespace Syn
 		_sceneManager = std::make_unique<Syn::SceneManager>(std::move(writer), std::move(loader));
 		ServiceLocator::ProvideSceneManager(_sceneManager.get());
 
-		_sceneManager->RegisterScene("TestLevel", [frames]() {
+		_sceneManager->RegisterScene(SceneNames::Main, [frames]() {
 			return std::make_unique<Scene>(frames, std::make_unique<TestSceneSource>());
 			});
 
-		/*
-		_sceneManager->RegisterScene("NatureLevel", [frames]() {
-			return std::make_unique<Scene>(frames, std::make_unique<NatureSceneSource>());
+		_sceneManager->RegisterScene(SceneNames::MaterialPreview, [frames]() {
+			return std::make_unique<Scene>(frames, std::make_unique<MaterialPreviewSceneSource>());
 			});
-		*/
 
-		_sceneManager->LoadScene("TestLevel");
+		_sceneManager->RegisterScene(SceneNames::ModelPreview, [frames]() {
+			return std::make_unique<Scene>(frames, std::make_unique<ModelPreviewSceneSource>());
+			});
+
+		_sceneManager->LoadScene(SceneNames::Main);
 	}
 
 	void Engine::InitPhysicsEngine()
@@ -367,7 +382,21 @@ namespace Syn
 	MaterialManager* Engine::GetMaterialManager() {
 		return ServiceLocator::GetMaterialManager();
 	}
+
 	ImageManager* Engine::GetImageManager() {
 		return ServiceLocator::GetImageManager();
+	}
+
+	ModelManager* Engine::GetModelManager() {
+		return ServiceLocator::GetModelManager();
+	}
+
+	AnimationManager* Engine::GetAnimationManager() {
+		return ServiceLocator::GetAnimationManager();
+	}
+
+	PreviewManager* Engine::GetPreviewManager()
+	{
+		return ServiceLocator::GetPreviewManager();
 	}
 }

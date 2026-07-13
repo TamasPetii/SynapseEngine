@@ -67,6 +67,12 @@ namespace Syn
         else parent[name] = value;
     }
 
+    void NlohmannJsonOutputArchive::PropertyUint16(const char* name, uint16_t value) {
+        auto& parent = *_stack.back();
+        if (parent.is_array()) parent.push_back(value);
+        else parent[name] = value;
+    }
+
     void NlohmannJsonOutputArchive::PropertyInt32(const char* name, int32_t value) {
         auto& parent = *_stack.back();
         if (parent.is_array()) parent.push_back(value);

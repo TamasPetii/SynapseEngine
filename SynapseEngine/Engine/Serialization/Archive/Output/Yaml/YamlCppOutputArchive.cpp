@@ -69,6 +69,10 @@ namespace Syn
         WriteValue(name, static_cast<uint32_t>(value));
     }
 
+    void YamlCppOutputArchive::PropertyUint16(const char* name, uint16_t value) {
+        WriteValue(name, static_cast<uint32_t>(value));
+    }
+
     void YamlCppOutputArchive::PropertyInt32(const char* name, int32_t value) { 
         WriteValue(name, value);
     }

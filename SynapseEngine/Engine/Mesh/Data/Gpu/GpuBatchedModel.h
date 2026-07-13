@@ -5,6 +5,7 @@
 #include "GpuMeshletDrawData.h"
 #include "GpuNodeTransform.h"
 #include "../Common/MaterialInfo.h"
+#include "../Common/MeshInstanceDescriptor.h"
 
 namespace Syn
 {
@@ -13,6 +14,7 @@ namespace Syn
         GpuVertexData vertexData;
         GpuIndexedDrawData indexedData;
         GpuMeshletDrawData meshletData;
+        std::vector<uint32_t> meshMaterialIndices;
         std::vector<MaterialInfo> materials;
         std::vector<GpuNodeTransform> nodeTransforms;
         GpuMeshCollider globalCollider;
@@ -20,6 +22,8 @@ namespace Syn
         uint32_t globalIndexCount = 0;
         uint32_t globalAverageLodIndexCount = 0;
         uint32_t globalMeshCount = 0;
+
+        std::vector<MeshInstanceDescriptor> meshNodeDescriptors;
     };
 }
 

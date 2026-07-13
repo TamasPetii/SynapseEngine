@@ -5,9 +5,17 @@
 
 namespace Syn {
 
-    MaterialManager::MaterialManager(uint32_t framesInFlight, TextureLoadCallback textureLoadCallback)
+    MaterialManager::MaterialManager(uint32_t framesInFlight, 
+        TextureLoadCallback textureLoadCallback, 
+        PreviewAllocateCallback previewAllocateCallback,
+        PreviewMarkDirtyCallback previewMarkDirtyCallback,
+        MaterialReadyOrChangedCallback materialReadyOrChangedCallback
+    )
         : AddressResourceManager<Material, GpuMaterial>(framesInFlight, 1024, 1024, 2048)
         , _textureLoadCallback(std::move(textureLoadCallback))
+        , _previewAllocateCallback(std::move(previewAllocateCallback))
+        , _previewMarkDirtyCallback(std::move(previewMarkDirtyCallback))
+        , _materialReadyOrChangedCallback(std::move(materialReadyOrChangedCallback))
     {
         Material emptyMat;
         WriteAddress(0, GpuMaterial(emptyMat));
@@ -54,27 +62,13 @@ namespace Syn {
 
     void MaterialManager::StartGpuUpload(EntryType& entry) {
         uint32_t entryIndex = _pathToId.at(entry.path);
-        size_t offset = entryIndex * sizeof(GpuMaterial);
 
-        auto materialGPU = GpuMaterial(*entry.resource);
-        WriteAddress(entryIndex, materialGPU);
-
-        if (entryIndex >= _renderTypeCache.size()) {
-            _renderTypeCache.resize(entryIndex + 1, MaterialRenderType::Opaque1Sided);
-        }
-
-        bool isTrans = entry.resource->isTransparent;
-        bool isDouble = entry.resource->doubleSided;
-
-        if (isTrans && isDouble)       _renderTypeCache[entryIndex] = MaterialRenderType::Transparent2Sided;
-        else if (isTrans && !isDouble) _renderTypeCache[entryIndex] = MaterialRenderType::Transparent1Sided;
-        else if (!isTrans && isDouble) _renderTypeCache[entryIndex] = MaterialRenderType::Opaque2Sided;
-        else                           _renderTypeCache[entryIndex] = MaterialRenderType::Opaque1Sided;
+        FinalizeResource(entry);
 
         entry.state = ResourceState::Ready;
-        _version.fetch_add(1, std::memory_order_release);
+        MarkDirty(entryIndex);
 
-        //Info("Material '{}' is ready", entry.path);
+        Info("Material '{}' is ready", entry.path);
     }
 
     void MaterialManager::LoadDefaultMaterialSync()
@@ -84,5 +78,74 @@ namespace Syn {
     }
 
     void MaterialManager::FinalizeResource(EntryType& entry) {
+        uint32_t index = _pathToId.at(entry.path);
+        if (_previewAllocateCallback) _previewAllocateCallback(index);
+        if (_previewMarkDirtyCallback) _previewMarkDirtyCallback(index);
+        if (_materialReadyOrChangedCallback) _materialReadyOrChangedCallback(index);
+    }
+
+    void MaterialManager::FlushDirtyResources() 
+    {
+        ProcessDirtyReadyEntries(
+            [this](uint32_t index, const EntryType& entry) {
+                WriteAddress(index, GpuMaterial(*entry.resource));
+
+                if (_previewMarkDirtyCallback)
+                    _previewMarkDirtyCallback(index);
+
+                if (_materialReadyOrChangedCallback)
+                    _materialReadyOrChangedCallback(index);
+            }
+        );
+    }
+
+    std::vector<uint32_t> MaterialManager::GetMaterialsUsingTexture(uint32_t textureId) const {
+        std::lock_guard lock(_mutex);
+        std::vector<uint32_t> result;
+
+        for (uint32_t i = 0; i < _entries.size(); ++i) {
+            if (_entries[i].state == ResourceState::Ready && _entries[i].resource) {
+                const auto& mat = *_entries[i].resource;
+
+                if (mat.albedoTexture == textureId ||
+                    mat.normalTexture == textureId ||
+                    mat.metalnessTexture == textureId ||
+                    mat.roughnessTexture == textureId ||
+                    mat.metallicRoughnessTexture == textureId ||
+                    mat.emissiveTexture == textureId ||
+                    mat.ambientOcclusionTexture == textureId)
+                {
+                    result.push_back(i);
+                }
+            }
+        }
+        return result;
+    }
+
+    void MaterialManager::NotifyImageReady(uint32_t imageId) {
+        std::lock_guard lock(_pendingImageMutex);
+        _pendingImages.insert(imageId);
+    }
+
+    void MaterialManager::ProcessPendingNotifications() {
+        std::unordered_set<uint32_t> imagesToProcess;
+
+        {
+            std::lock_guard lock(_pendingImageMutex);
+            imagesToProcess.swap(_pendingImages);
+        }
+
+        if (imagesToProcess.empty()) return;
+
+        for (uint32_t imgId : imagesToProcess) {
+            for (uint32_t matId : GetMaterialsUsingTexture(imgId)) 
+            {
+                if (_previewMarkDirtyCallback) 
+                    _previewMarkDirtyCallback(matId);
+
+                if (_materialReadyOrChangedCallback)
+                    _materialReadyOrChangedCallback(matId);
+            }
+        }
     }
 }

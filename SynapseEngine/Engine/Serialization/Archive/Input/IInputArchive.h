@@ -26,6 +26,7 @@ namespace Syn
 
         virtual void PropertyBool(const char* name, bool& value) = 0;
         virtual void PropertyUint8(const char* name, uint8_t& value) = 0;
+        virtual void PropertyUint16(const char* name, uint16_t& value) = 0;
         virtual void PropertyInt32(const char* name, int32_t& value) = 0;
         virtual void PropertyUint32(const char* name, uint32_t& value) = 0;
         virtual void PropertyInt64(const char* name, int64_t& value) = 0;
@@ -46,6 +47,7 @@ namespace Syn
     {
         if constexpr (std::is_same_v<T, bool>) PropertyBool(name, value);
         else if constexpr (std::is_same_v<T, uint8_t>) PropertyUint8(name, value);
+        else if constexpr (std::is_same_v<T, uint16_t>) PropertyUint16(name, value);
         else if constexpr (std::is_same_v<T, int32_t>) PropertyInt32(name, value);
         else if constexpr (std::is_same_v<T, uint32_t>) PropertyUint32(name, value);
         else if constexpr (std::is_same_v<T, int64_t>) PropertyInt64(name, value);

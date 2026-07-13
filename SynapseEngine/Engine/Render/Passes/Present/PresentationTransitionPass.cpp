@@ -4,7 +4,7 @@
 
 namespace Syn {
     void PresentationTransitionPass::PrepareFrame(const RenderContext& context) {
-        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
         std::vector<std::string> gBufferTargets = {
             RenderTargetNames::Main,

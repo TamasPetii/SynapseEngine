@@ -43,19 +43,19 @@ namespace Syn
         VkBufferUsageFlags indirectUsage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
         VkBufferUsageFlags storageUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
-        modelAabbIndirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand) * 8, indirectUsage, 1024, 2048 });
+        modelAabbIndirectBuffer.Initialize({ "DebugDrawGroup_ModelAabbIndirectBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand) * 8, indirectUsage, 1024, 2048 });
         modelAabbIndirectBuffer.UpdateCapacityAll(1);
 
-        modelSphereIndirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand) * 8, indirectUsage, 1024, 2048 });
+        modelSphereIndirectBuffer.Initialize({ "DebugDrawGroup_ModelSphereIndirectBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand) * 8, indirectUsage, 1024, 2048 });
         modelSphereIndirectBuffer.UpdateCapacityAll(1);
 
-        boxColliderIndirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
+        boxColliderIndirectBuffer.Initialize({ "DebugDrawGroup_BoxColliderIndirectBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
         boxColliderIndirectBuffer.UpdateCapacityAll(1);
 
-        sphereColliderIndirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
+        sphereColliderIndirectBuffer.Initialize({ "DebugDrawGroup_SphereColliderIndirectBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
         sphereColliderIndirectBuffer.UpdateCapacityAll(1);
 
-        capsuleColliderIndirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
+        capsuleColliderIndirectBuffer.Initialize({ "DebugDrawGroup_CapsuleColliderIndirectBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
         capsuleColliderIndirectBuffer.UpdateCapacityAll(1);
 
         for (uint32_t i = 0; i < frameCount; ++i) {

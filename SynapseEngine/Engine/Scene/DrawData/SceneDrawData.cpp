@@ -18,7 +18,7 @@ namespace Syn
         PointLightShadow(frameCount)
     {
         VkBufferUsageFlags contextUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
-        frameContextBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(FrameGlobalContext), contextUsage, 1, 1});
+        frameContextBuffer.Initialize({ "SceneDrawData_FrameContextBuffer", BufferStrategy::Hybrid, frameCount, sizeof(FrameGlobalContext), contextUsage, 1, 1});
         frameContextBuffer.UpdateCapacityAll(1);
     }
 

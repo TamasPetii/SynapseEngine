@@ -70,7 +70,7 @@ namespace Syn
 
     void DebugVisibilityPass::PrepareFrame(const RenderContext& context)
     {
-        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
         _graphicsState.renderArea = extent;
 
@@ -122,7 +122,7 @@ namespace Syn
     void DebugVisibilityPass::BindDescriptors(const RenderContext& context)
     {
         auto imageManager = ServiceLocator::GetImageManager();
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
         auto visibilityTexture = rtGroup->GetImage(RenderTargetNames::EntityIndex);
         auto nearestSampler = imageManager->GetSampler(SamplerNames::NearestClampEdge);

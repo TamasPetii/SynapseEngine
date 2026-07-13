@@ -19,6 +19,7 @@ namespace Syn::Vk
         VkQueryType GetType() const { return _type; }
     protected:
         QueryPool(VkQueryType type, uint32_t queryCount, VkQueryPipelineStatisticFlags pipelineStats = 0);
+		virtual uint32_t GetStride() const { return sizeof(uint64_t); }
     protected:
         VkQueryType _type;
         uint32_t _queryCount = 0;

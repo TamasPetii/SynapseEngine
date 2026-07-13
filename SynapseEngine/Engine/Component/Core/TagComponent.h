@@ -12,6 +12,8 @@ namespace Syn
 
 		std::string name;
 		std::string tag;
-		bool enabled;
+
+		bool localEnabled = true;
+		bool globalEnabled = true;
 	};
 }

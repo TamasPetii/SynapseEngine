@@ -9,6 +9,7 @@ namespace Syn {
         void NewScene() override;
         void LoadScene(const std::string& filepath = "") override;
         void SaveScene(const std::string& filepath = "") override;
+        void ActivateScene(const std::string& sceneName) override;
     private:
         SceneManager* _sceneManager;
     };

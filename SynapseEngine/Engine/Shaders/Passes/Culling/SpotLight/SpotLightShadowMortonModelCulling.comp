@@ -8,6 +8,7 @@
 #include "../../../Includes/Common/FrameGlobalContext.glsl"
 #include "../../../Includes/Common/Camera.glsl"
 #include "../../../Includes/Common/Transform.glsl"
+#include "../../../Includes/Common/Tag.glsl"
 #include "../../../Includes/Common/Model.glsl"
 #include "../../../Includes/Common/Mesh.glsl"
 #include "../../../Includes/Common/Material.glsl"
@@ -70,9 +71,20 @@ void main() {
         if (link.modelDenseIndex == INVALID_INDEX) continue;
         uint entityId = link.entityIndex;
 
+        uint tagSparseIndex = GET_SPARSE_INDEX(ctx.tagSparseMapBufferAddr, entityId);
+        if (tagSparseIndex == INVALID_INDEX) return;
+
+        uint entityFlags = GET_TAG_DATA(ctx.tagDataBufferAddr, tagSparseIndex);
+        bool isActive = (entityFlags & (1u << 0)) != 0;
+
+        if (!isActive) return;
+
         TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, denseIndex);
         ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, link.modelDenseIndex);
         
+        bool castShadow = (modelComp.flags & (1u << 0)) != 0;
+        if (modelComp.modelIndex == INVALID_INDEX || !castShadow) return;
+
         ModelAllocationInfo mAlloc = GET_MODEL_ALLOC(ctx.globalModelAllocationBufferAddr, modelComp.modelIndex);
         GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, modelComp.modelIndex);
 
@@ -106,14 +118,6 @@ void main() {
         // 6. Calculate LOD based on Main Camera screen size
         float mainCamScreenSize = CalculateSphereScreenSizePerspective(worldCollider.center, worldCollider.radius, camera.view, camera.proj, cameraNear, screenRes);
         if (mainCamScreenSize < 1.0) continue;
-
-        // 7. Occlusion Culling using Spot Light HZB
-        if (ctx.enableModelOcclusionCulling == 1) {
-            float shadowScreenSizePixels = 0.0;
-            if (false && IsSphereOccludedAtlasPerspective(worldCollider.center, worldCollider.radius, shadowComp.view, shadowComp.proj, shadowComp.planes.x, shadowComp.planes.y, shadowComp.atlasRect, shadowDepthPyramid, float(ctx.spotLightShadowAtlasSize), ctx.spotLightShadowHizMipLevels, shadowScreenSizePixels)) {
-                continue;
-            }
-        }
 
         // 8. Encode Payload for sort/draw phase
         uint entityData = (entityId & 0x7FFFFFFF);

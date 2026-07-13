@@ -1,4 +1,5 @@
 #pragma once
+#include "IApi.h"
 #include <string>
 #include <functional>
 
@@ -10,7 +11,7 @@ namespace Syn {
         std::string DefaultPath;
     };
 
-    class IFileDialogApi {
+    class IFileDialogApi : public IApi {
     public:
         virtual ~IFileDialogApi() = default;
 

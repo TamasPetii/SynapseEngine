@@ -88,6 +88,10 @@ namespace Syn
         value = static_cast<uint8_t>(GetNextElement(name)->UnsignedText()); 
     }
 
+    void TinyXmlInputArchive::PropertyUint16(const char* name, uint16_t& value) {
+        value = static_cast<uint16_t>(GetNextElement(name)->UnsignedText());
+    }
+
     void TinyXmlInputArchive::PropertyInt32(const char* name, int32_t& value) { 
         value = GetNextElement(name)->IntText(); 
     }

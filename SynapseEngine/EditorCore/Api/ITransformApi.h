@@ -1,9 +1,10 @@
 #pragma once
 #include <glm/glm.hpp>
+#include "IApi.h"
 #include "EditorCore/Types/EntityHandle.h"
 
 namespace Syn {
-    class ITransformApi {
+    class ITransformApi : public IApi {
     public:
         virtual ~ITransformApi() = default;
 

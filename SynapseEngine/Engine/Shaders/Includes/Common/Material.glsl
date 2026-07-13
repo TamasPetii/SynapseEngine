@@ -9,10 +9,10 @@ struct Material {
     float emissiveIntensity; 
     vec2 uvScale; 
     float metalness; 
-    float roughness; 
-    float aoStrength; 
+    float roughness;
+    float aoStrength;
     uint packedFlags; 
-    uint albedoTexture; 
+    uint albedoTexture;
     uint normalTexture; 
     uint metalnessTexture; 
     uint roughnessTexture; 
@@ -27,10 +27,15 @@ struct Material {
 layout(buffer_reference, std430) readonly restrict buffer MaterialBuffer { Material data[]; };
 layout(buffer_reference, std430) readonly restrict buffer MaterialLookupBuffer { uint data[]; };
 
+#define INVALID_SAMPLER_INDEX 0xFF
+
 #define GET_MATERIAL(addr, idx)         MaterialBuffer(addr).data[idx]
 #define GET_MATERIAL_INDEX(addr, idx)   MaterialLookupBuffer(addr).data[idx]
 
 #define HAS_VALID_TEXTURE(texIdx) ((texIdx) != INVALID_INDEX)
+
+#define UNPACK_TEXTURE_ID(packedVal)  ((packedVal) & 0x00FFFFFF)
+#define UNPACK_SAMPLER_ID(packedVal)  ((packedVal) >> 24)
 
 #define IS_DOUBLE_SIDED(mat)    HAS_FLAG((mat).packedFlags, 0)
 #define IS_TRANSPARENT(mat)     HAS_FLAG((mat).packedFlags, 1)
@@ -44,4 +49,3 @@ layout(buffer_reference, std430) readonly restrict buffer MaterialLookupBuffer {
 #define HAS_AO_TEX(mat)                 HAS_VALID_TEXTURE((mat).ambientOcclusionTexture)
 
 #endif
-

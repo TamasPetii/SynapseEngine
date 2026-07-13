@@ -22,6 +22,7 @@ namespace Syn
     };
 
     struct SYN_API RenderBufferConfig {
+        std::string debugName = "";
         BufferStrategy strategy = BufferStrategy::Hybrid;
         uint32_t frames = 0;
         uint32_t elementSize = 0;

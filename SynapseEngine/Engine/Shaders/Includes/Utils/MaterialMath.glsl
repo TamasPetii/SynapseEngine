@@ -4,45 +4,79 @@
 #include "../Common/Texture.glsl"
 #include "../Common/Material.glsl"
 
-vec4 EvaluateAlbedoAlpha(const Material mat, vec2 uv) {
+uint ResolveSampler(uint64_t textureMetadataBufferAddr, uint packedTexData, uint texID) {
+    uint sampID = UNPACK_SAMPLER_ID(packedTexData);
+    if (sampID == INVALID_SAMPLER_INDEX) {
+        uint meta = GET_TEXTURE_METADATA(textureMetadataBufferAddr, texID);
+        return UnpackTextureMetadataSampler(meta);
+    }
+    return sampID;
+}
+
+vec4 EvaluateAlbedoAlpha(uint64_t textureMetadataBufferAddr, const Material mat, vec2 uv) {
     vec4 finalColor = mat.color;
+    
     if (HAS_ALBEDO_TEX(mat)) {
-        finalColor *= SampleTexture2D(mat.albedoTexture, SAMPLER_LINEAR_ANISO, uv);
+        uint texID = UNPACK_TEXTURE_ID(mat.albedoTexture);
+        uint sampID = ResolveSampler(textureMetadataBufferAddr, mat.albedoTexture, texID);
+        finalColor *= SampleTexture2D(texID, sampID, uv);
     }
     return finalColor;
 }
 
-vec3 EvaluateNormal(Material mat, vec2 uv, vec3 vertexNormal, vec4 vertexTangent) {
+vec3 EvaluateNormal(uint64_t textureMetadataBufferAddr, Material mat, vec2 uv, vec3 vertexNormal, vec4 vertexTangent) {
     vec3 normal = normalize(vertexNormal);
+    
     if (!HAS_NORMAL_TEX(mat)) {
         return normal;
     }
 
+    uint texID = UNPACK_TEXTURE_ID(mat.normalTexture);
+    uint meta = GET_TEXTURE_METADATA(textureMetadataBufferAddr, texID);
+    
+    uint defaultSamplerID;
+    bool invertNormal;
+    UnpackTextureMetadata(meta, defaultSamplerID, invertNormal);
+
+    uint sampID = UNPACK_SAMPLER_ID(mat.normalTexture);
+    if (sampID == INVALID_SAMPLER_INDEX) {
+        sampID = defaultSamplerID;
+    }
+
     vec3 tangent = normalize(vertexTangent.xyz);
     tangent = normalize(tangent - normal * dot(normal, tangent));
+
     vec3 bitangent = cross(normal, tangent) * vertexTangent.w;
     mat3 TBN = mat3(tangent, bitangent, normal);
 
-    vec3 normalMapSample = SampleTexture2D(mat.normalTexture, SAMPLER_LINEAR_ANISO, uv).rgb;
-    vec3 tangentSpaceNormal = normalMapSample * 2.0 - 1.0;
-    
+    vec3 tangentSpaceNormal;
+    tangentSpaceNormal.xy = SampleTexture2D(texID, sampID, uv).xy * 2.0 - 1.0;
+    tangentSpaceNormal.z = sqrt(max(1.0 - dot(tangentSpaceNormal.xy, tangentSpaceNormal.xy), 0.0));
+    tangentSpaceNormal.y *= invertNormal ? -1.0 : 1.0;
+
     return normalize(TBN * tangentSpaceNormal);
 }
 
-vec2 EvaluateMetallicRoughness(Material mat, vec2 uv) {
+vec2 EvaluateMetallicRoughness(uint64_t textureMetadataBufferAddr, Material mat, vec2 uv) {
     float metalness = mat.metalness;
     float roughness = mat.roughness;
-
+    
     if (HAS_METALNESS_TEX(mat)) {
-        metalness *= SampleTexture2D(mat.metalnessTexture, SAMPLER_LINEAR_ANISO, uv).r;
+        uint texID = UNPACK_TEXTURE_ID(mat.metalnessTexture);
+        uint sampID = ResolveSampler(textureMetadataBufferAddr, mat.metalnessTexture, texID);
+        metalness *= SampleTexture2D(texID, sampID, uv).r;
     }
 
     if (HAS_ROUGHNESS_TEX(mat)) {
-        roughness *= SampleTexture2D(mat.roughnessTexture, SAMPLER_LINEAR_ANISO, uv).r;
+        uint texID = UNPACK_TEXTURE_ID(mat.roughnessTexture);
+        uint sampID = ResolveSampler(textureMetadataBufferAddr, mat.roughnessTexture, texID);
+        roughness *= SampleTexture2D(texID, sampID, uv).r;
     }
 
     if (HAS_METALLIC_ROUGHNESS_TEX(mat)) {
-        vec4 mrSample = SampleTexture2D(mat.metallicRoughnessTexture, SAMPLER_LINEAR_ANISO, uv);
+        uint texID = UNPACK_TEXTURE_ID(mat.metallicRoughnessTexture);
+        uint sampID = ResolveSampler(textureMetadataBufferAddr, mat.metallicRoughnessTexture, texID);
+        vec4 mrSample = SampleTexture2D(texID, sampID, uv);
         roughness *= mrSample.g;
         metalness *= mrSample.b;
     }
@@ -50,18 +84,24 @@ vec2 EvaluateMetallicRoughness(Material mat, vec2 uv) {
     return vec2(metalness, roughness);
 }
 
-vec3 EvaluateEmissive(Material mat, vec2 uv) {
+vec3 EvaluateEmissive(uint64_t textureMetadataBufferAddr, Material mat, vec2 uv) {
     vec3 emissive = mat.emissiveColor * mat.emissiveIntensity;
+    
     if (HAS_EMISSIVE_TEX(mat)) {
-        emissive *= SampleTexture2D(mat.emissiveTexture, SAMPLER_LINEAR_ANISO, uv).rgb;
+        uint texID = UNPACK_TEXTURE_ID(mat.emissiveTexture);
+        uint sampID = ResolveSampler(textureMetadataBufferAddr, mat.emissiveTexture, texID);
+        emissive *= SampleTexture2D(texID, sampID, uv).rgb;
     }
     return emissive;
 }
 
-float EvaluateAO(Material mat, vec2 uv) {
+float EvaluateAO(uint64_t textureMetadataBufferAddr, Material mat, vec2 uv) {
     float ao = mat.aoStrength;
+    
     if (HAS_AO_TEX(mat)) {
-        ao *= SampleTexture2D(mat.ambientOcclusionTexture, SAMPLER_LINEAR_ANISO, uv).r;
+        uint texID = UNPACK_TEXTURE_ID(mat.ambientOcclusionTexture);
+        uint sampID = ResolveSampler(textureMetadataBufferAddr, mat.ambientOcclusionTexture, texID);
+        ao *= SampleTexture2D(texID, sampID, uv).r;
     }
     return ao;
 }

@@ -8,12 +8,16 @@
 #include "Engine/Scene/BufferNames.h"
 #include <atomic>
 
+#include "Engine/Component/Core/TagComponent.h"
+#include "Engine/System/Core/TagSystem.h"
+
 namespace Syn
 {
     std::vector<TypeID> DirectionLightCullingSystem::GetReadDependencies() const {
         return {
             TypeInfo<DirectionLightSystem>::ID,
-            TypeInfo<CameraSystem>::ID
+            TypeInfo<CameraSystem>::ID,
+            TypeInfo<TagSystem>::ID
         };
     }
 
@@ -28,6 +32,7 @@ namespace Syn
         auto drawData = scene->GetSceneDrawData();
         auto registry = scene->GetRegistry();
 
+        auto tagPool = registry->GetPool<TagComponent>();
         auto pool = registry->GetPool<DirectionLightComponent>();
         auto shadowPool = registry->GetPool<DirectionLightShadowComponent>();
 
@@ -50,10 +55,14 @@ namespace Syn
             }
             });
 
-        auto cullFunc = [pool, drawData, shadowPool](EntityID entity) {
+        auto cullFunc = [pool, drawData, shadowPool, tagPool](EntityID entity) {
+            if (tagPool && tagPool->Has(entity)) {
+                if (!tagPool->Get(entity).globalEnabled) {
+                    return;
+                }
+            }
+            
             const auto& lightComp = pool->Get(entity);
-
-            // if (!lightComp.enabled) return;
 
             std::atomic_ref<uint32_t> countRef(drawData->DirectionLights.cmdTemplate.instanceCount);
             uint32_t slot = countRef.fetch_add(1, std::memory_order_relaxed);

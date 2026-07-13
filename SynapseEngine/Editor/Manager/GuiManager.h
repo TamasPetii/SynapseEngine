@@ -4,7 +4,7 @@
 #include <memory>
 #include "GuiTextureManager.h"
 #include "EditorCore/Api/IFileDialogApi.h"
-#include "Editor/View/IGuiWindow.h"
+#include "Editor/Workspace/IGuiWindow.h"
 #include "Editor/Workspace/IWorkspace.h"
 #include <unordered_map>
 
@@ -35,7 +35,6 @@ namespace Syn {
 
         GuiTextureManager* GetTextureManager() const { return _textureManager.get(); }
         IFileDialogApi* GetFileDialog() const { return _fileDialog.get(); }
-        void CreateFontTexture();
 
         void SetWorkspace(EditorWorkspace workspace) { _currentWorkspace = workspace; }
         EditorWorkspace GetWorkspace() const { return _currentWorkspace; }

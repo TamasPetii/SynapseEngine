@@ -1,9 +1,10 @@
 #pragma once
 #include <string>
+#include "IApi.h"
 #include "EditorCore/Types/EntityHandle.h"
 
 namespace Syn {
-    class ITagApi {
+    class ITagApi : public IApi {
     public:
         virtual ~ITagApi() = default;
 

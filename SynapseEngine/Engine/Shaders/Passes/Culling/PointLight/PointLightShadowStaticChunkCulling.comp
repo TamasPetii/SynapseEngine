@@ -56,12 +56,6 @@ void main() {
         if (visibility == INTERSECTION_OUTSIDE) return;
     }
 
-    // 5. Occlusion Culling (Deferred for Point Lights / Atlas evaluation needed)
-    if (ctx.enableChunkOcclusionCulling == 1) {
-        float shadowScreenSizePixels = 0.0;
-        // Todo
-    }
-
     // 6. Subgroup-optimized writes to the visible chunk list
     uint needsWrite = 1;
     uint subgroupWriteCount = subgroupAdd(needsWrite);

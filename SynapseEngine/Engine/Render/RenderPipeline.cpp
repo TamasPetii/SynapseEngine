@@ -2,6 +2,7 @@
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
 #include "Engine/Profiler/IGpuProfiler.h"
+#include "Engine/Statistics/IRenderStatCollector.h"
 
 namespace Syn
 {
@@ -20,6 +21,7 @@ namespace Syn
     void RenderPipeline::Execute(const RenderContext& context)
     {
         auto profiler = ServiceLocator::GetGpuProfiler();
+		auto statCollector = ServiceLocator::GetRenderStatCollector();
 
         if (context.scene)
         {
@@ -27,7 +29,20 @@ namespace Syn
                 if (pass->ShouldExecute(context))
                 {
                     uint32_t measureIdx = profiler->StartPass(context.cmd, context.frameIndex, pass->GetGroup(), pass->GetName());
+
+                    bool collectStats = pass->ShouldCollectStatistics();
+                    uint32_t statIdx = 0;
+
+                    if (collectStats) {
+                        statIdx = statCollector->StartPass(context.cmd, context.frameIndex, pass->GetGroup(), pass->GetName());
+                    }
+
                     pass->Execute(context);
+
+                    if (collectStats) {
+                        statCollector->EndPass(context.cmd, context.frameIndex, statIdx);
+                    }
+
                     profiler->EndPass(context.cmd, context.frameIndex, measureIdx);
                 }
             }

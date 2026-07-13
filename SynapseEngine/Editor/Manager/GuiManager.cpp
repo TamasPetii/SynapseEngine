@@ -1,9 +1,9 @@
 #include "GuiManager.h"
 #include <vulkan/vulkan.h>
 #include <imgui.h>
-
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
+#include <ImGuizmo.h>
 #include "GuiTextureManager.h"
 #include <print>
 #include "Engine/ServiceLocator.h"
@@ -31,11 +31,25 @@ namespace Syn {
 
         ImGui_ImplGlfw_InitForVulkan(window, false);
 
-        VkDescriptorPoolSize poolSizes[] = { { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 } };
+        VkDescriptorPoolSize poolSizes[] =
+        {
+            { VK_DESCRIPTOR_TYPE_SAMPLER, 1000 },
+            { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1000 },
+            { VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 1000 },
+            { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 1000 },
+            { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, 1000 },
+            { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, 1000 },
+            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 1000 },
+            { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 1000 },
+            { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 1000 },
+            { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER_DYNAMIC, 1000 },
+            { VK_DESCRIPTOR_TYPE_INPUT_ATTACHMENT, 1000 }
+        };
+
         VkDescriptorPoolCreateInfo poolInfo = { .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
         poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-        poolInfo.maxSets = 1000;
-        poolInfo.poolSizeCount = 1;
+        poolInfo.maxSets = 1000 * IM_ARRAYSIZE(poolSizes);
+        poolInfo.poolSizeCount = (uint32_t)IM_ARRAYSIZE(poolSizes);
         poolInfo.pPoolSizes = poolSizes;
         vkCreateDescriptorPool(device, &poolInfo, nullptr, &_imguiPool);
 
@@ -48,11 +62,11 @@ namespace Syn {
         init_info.DescriptorPool = _imguiPool;
         init_info.MinImageCount = imageCount;
         init_info.ImageCount = imageCount;
-        init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
         init_info.UseDynamicRendering = true;
-        init_info.PipelineRenderingCreateInfo = { .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO };
-        init_info.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
-        init_info.PipelineRenderingCreateInfo.pColorAttachmentFormats = &_colorFormat;
+        init_info.PipelineInfoMain.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+        init_info.PipelineInfoMain.PipelineRenderingCreateInfo = { .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO };
+        init_info.PipelineInfoMain.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
+        init_info.PipelineInfoMain.PipelineRenderingCreateInfo.pColorAttachmentFormats = &_colorFormat;
 
         ImGui_ImplVulkan_LoadFunctions(VK_API_VERSION_1_4, [](const char* function_name, void* user_data) {
             return vkGetInstanceProcAddr(reinterpret_cast<VkInstance>(user_data), function_name);
@@ -90,6 +104,7 @@ namespace Syn {
         ImGui_ImplVulkan_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+        ImGuizmo::BeginFrame();
     }
 
     void GuiManager::UpdateAndDraw() {
@@ -128,7 +143,18 @@ namespace Syn {
                 }
 
                 if (ImGui::Button(label)) {
-                    _currentWorkspace = ws;
+                    if (_currentWorkspace != ws) 
+                    {
+                        if (_workspaces.contains(_currentWorkspace)) {
+                            _workspaces[_currentWorkspace]->OnDeactivate();
+                        }
+
+                        _currentWorkspace = ws;
+
+                        if (_workspaces.contains(_currentWorkspace)) {
+                            _workspaces[_currentWorkspace]->OnActivate();
+                        }
+                    }
                 }
 
                 ImGui::PopStyleColor(2);
@@ -302,9 +328,5 @@ namespace Syn {
         colors[ImGuiCol_NavHighlight] = ImVec4(0.26f, 0.59f, 0.98f, 1.00f);
         colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
         colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
-    }
-
-    void GuiManager::CreateFontTexture() {
-        ImGui_ImplVulkan_CreateFontsTexture();
     }
 }

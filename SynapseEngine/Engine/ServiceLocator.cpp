@@ -20,6 +20,9 @@ namespace Syn {
 	ICpuProfiler* ServiceLocator::_cpuProfiler = nullptr;
 	Serializer* ServiceLocator::_serializer = nullptr;
 	PhysicsFactory ServiceLocator::_physicsFactory = nullptr;
+	IRenderStatCollector* ServiceLocator::_renderStatCollector = nullptr;	
+	FrameStatisticsManager* ServiceLocator::_frameStatisticsManager = nullptr;
+	PreviewManager* ServiceLocator::_previewManager = nullptr;
 
 	void ServiceLocator::Shutdown()
 	{
@@ -41,5 +44,8 @@ namespace Syn {
 		_gpuProfiler = nullptr;
 		_cpuProfiler = nullptr;
 		_serializer = nullptr;
+		_renderStatCollector = nullptr;
+		_frameStatisticsManager = nullptr;
+		_previewManager = nullptr;
 	}
 }

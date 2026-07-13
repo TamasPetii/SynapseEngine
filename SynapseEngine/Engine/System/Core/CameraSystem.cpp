@@ -50,11 +50,6 @@ namespace Syn
             float forward = 0;
             float sideways = 0;
 
-            if (enableInput && inputManager->IsKeyHeld(KEY_W)) forward = 1;
-            if (enableInput && inputManager->IsKeyHeld(KEY_S)) forward = -1;
-            if (enableInput && inputManager->IsKeyHeld(KEY_D)) sideways = 1;
-            if (enableInput && inputManager->IsKeyHeld(KEY_A)) sideways = -1;
-
             if (enableInput && inputManager->IsButtonHeld(BUTTON_RIGHT))
             {
                 auto deltaPos = inputManager->GetMouseDelta();
@@ -70,69 +65,100 @@ namespace Syn
             };
 
             glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
-
             cameraComponent.direction = glm::normalize(direction);
             cameraComponent.right = glm::normalize(glm::cross(cameraComponent.direction, worldUp));
             cameraComponent.up = glm::normalize(glm::cross(cameraComponent.right, cameraComponent.direction));
 
-            transformComponent.translation += (forward * cameraComponent.direction + sideways * cameraComponent.right) * cameraComponent.speed * deltaTime;
+            if (cameraComponent.useOrbit)
+            {
+                if (enableInput)
+                {
+                    float sideways = 0;
+                    if (inputManager->IsKeyHeld(KEY_D)) sideways = 1;
+                    if (inputManager->IsKeyHeld(KEY_A)) sideways = -1;
 
-            cameraComponent.position = transformComponent.translation;
-            cameraComponent.target = cameraComponent.position + cameraComponent.direction;
+                    cameraComponent.target += (sideways * cameraComponent.right) * cameraComponent.speed * deltaTime;
+
+                    if (inputManager->IsKeyHeld(KEY_W)) cameraComponent.distance -= cameraComponent.speed * deltaTime;
+                    if (inputManager->IsKeyHeld(KEY_S)) cameraComponent.distance += cameraComponent.speed * deltaTime;
+
+                    cameraComponent.distance = glm::max(cameraComponent.distance, 0.1f);
+                }
+
+                cameraComponent.position = cameraComponent.target - cameraComponent.direction * cameraComponent.distance;
+                transformComponent.translation = cameraComponent.position;
+            }
+            else
+            {
+                float forward = 0;
+                float sideways = 0;
+
+                if (enableInput && inputManager->IsKeyHeld(KEY_W)) forward = 1;
+                if (enableInput && inputManager->IsKeyHeld(KEY_S)) forward = -1;
+                if (enableInput && inputManager->IsKeyHeld(KEY_D)) sideways = 1;
+                if (enableInput && inputManager->IsKeyHeld(KEY_A)) sideways = -1;
+
+                transformComponent.translation += (forward * cameraComponent.direction + sideways * cameraComponent.right) * cameraComponent.speed * deltaTime;
+
+                cameraComponent.position = transformComponent.translation;
+                cameraComponent.target = cameraComponent.position + cameraComponent.direction;
+            }
 
             cameraComponent.view = glm::lookAt(cameraComponent.position, cameraComponent.target, worldUp);
             cameraComponent.viewInv = glm::inverse(cameraComponent.view);
 
-            cameraComponent.proj = glm::perspective(glm::radians(cameraComponent.fov), cameraComponent.width / cameraComponent.height, cameraComponent.nearPlane, cameraComponent.farPlane);
+            if (cameraComponent.isOrthographic)
+            {
+                float aspectRatio = cameraComponent.width / cameraComponent.height;
+                float halfH = cameraComponent.orthoSize * 0.5f;
+                float halfW = halfH * aspectRatio;
+                cameraComponent.proj = glm::ortho(-halfW, halfW, -halfH, halfH, -cameraComponent.farPlane, cameraComponent.farPlane);
+            }
+            else
+            {
+                cameraComponent.proj = glm::perspective(glm::radians(cameraComponent.fov), cameraComponent.width / cameraComponent.height, cameraComponent.nearPlane, cameraComponent.farPlane);
+            }
+
             cameraComponent.projInv = glm::inverse(cameraComponent.proj);
 
             cameraComponent.viewProj = cameraComponent.proj * cameraComponent.view;
             cameraComponent.viewProjInv = glm::inverse(cameraComponent.viewProj);
 
-            cameraComponent.frustum.Update(cameraComponent.viewProj);
+            if (cameraComponent.isOrthographic)
+            {
+                float aspectRatio = cameraComponent.width / cameraComponent.height;
+                float halfH = cameraComponent.orthoSize * 0.5f;
+                float halfW = halfH * aspectRatio;
 
-            /*
-            float fovY = glm::radians(cameraComponent.fov);
-            float aspectRatio = cameraComponent.width / cameraComponent.height;
-            float halfV = cameraComponent.farPlane * tanf(fovY * 0.5f);
-            float halfH = halfV * aspectRatio;
-
-            // Near
-            cameraComponent.frustum.planes[0] = FrustumCollider::CreatePlane(
-                cameraComponent.direction,
-                cameraComponent.position + cameraComponent.direction * cameraComponent.nearPlane
-            );
-
-            // Far
-            cameraComponent.frustum.planes[1] = FrustumCollider::CreatePlane(
-                -cameraComponent.direction,
-                cameraComponent.position + cameraComponent.direction * cameraComponent.farPlane
-            );
-
-            // Left
-            cameraComponent.frustum.planes[2] = FrustumCollider::CreatePlane(
-                -glm::cross(cameraComponent.up, glm::normalize(cameraComponent.direction * cameraComponent.farPlane - cameraComponent.right * halfH)),
-                cameraComponent.position
-            );
-
-            // Right
-            cameraComponent.frustum.planes[3] = FrustumCollider::CreatePlane(
-                -glm::cross(glm::normalize(cameraComponent.direction * cameraComponent.farPlane + cameraComponent.right * halfH), cameraComponent.up),
-                cameraComponent.position
-            );
-
-            // Top
-            cameraComponent.frustum.planes[4] = FrustumCollider::CreatePlane(
-                -glm::cross(cameraComponent.right, glm::normalize(cameraComponent.direction * cameraComponent.farPlane + cameraComponent.up * halfV)),
-                cameraComponent.position
-            );
-
-            // Bottom
-            cameraComponent.frustum.planes[5] = FrustumCollider::CreatePlane(
-                -glm::cross(glm::normalize(cameraComponent.direction * cameraComponent.farPlane - cameraComponent.up * halfV), cameraComponent.right),
-                cameraComponent.position
-            );
-            */
+                cameraComponent.frustum.planes[0] = FrustumCollider::CreatePlane(
+                    cameraComponent.direction,
+                    cameraComponent.position + cameraComponent.direction * cameraComponent.nearPlane
+                );
+                cameraComponent.frustum.planes[1] = FrustumCollider::CreatePlane(
+                    -cameraComponent.right,
+                    cameraComponent.position + cameraComponent.right * halfW
+                );
+                cameraComponent.frustum.planes[2] = FrustumCollider::CreatePlane(
+                    cameraComponent.right,
+                    cameraComponent.position - cameraComponent.right * halfW
+                );
+                cameraComponent.frustum.planes[3] = FrustumCollider::CreatePlane(
+                    -cameraComponent.up,
+                    cameraComponent.position + cameraComponent.up * halfH
+                );
+                cameraComponent.frustum.planes[4] = FrustumCollider::CreatePlane(
+                    cameraComponent.up,
+                    cameraComponent.position - cameraComponent.up * halfH
+                );
+                cameraComponent.frustum.planes[5] = FrustumCollider::CreatePlane(
+                    -cameraComponent.direction,
+                    cameraComponent.position + cameraComponent.direction * cameraComponent.farPlane
+                );
+            }
+            else
+            {
+                cameraComponent.frustum.Update(cameraComponent.viewProj);
+            }
 
             cameraPool->SetBit<CHANGED_BIT>(entity);
             transformPool->SetBit<UPDATE_BIT>(entity);

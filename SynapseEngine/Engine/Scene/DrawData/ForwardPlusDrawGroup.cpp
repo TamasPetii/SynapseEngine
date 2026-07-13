@@ -7,22 +7,22 @@ namespace Syn
         VkBufferUsageFlags storageUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
         VkBufferUsageFlags indirectUsage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 
-        tileGridBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, 16, storageUsage, 3000, 6000 });
+        tileGridBuffer.Initialize({ "ForwardPlusDrawGroup_TileGridBuffer", BufferStrategy::GpuOnly, frameCount, 16, storageUsage, 3000, 6000 });
 		tileGridBuffer.UpdateCapacityAll(1); 
 
-        clusterListBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, 32, storageUsage, 48000, 96000 });
+        clusterListBuffer.Initialize({ "ForwardPlusDrawGroup_ClusterListBuffer", BufferStrategy::GpuOnly, frameCount, 32, storageUsage, 48000, 96000 });
         clusterListBuffer.UpdateCapacityAll(1);
 
-        clusterCountBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectUsage, 1, 1});
+        clusterCountBuffer.Initialize({ "ForwardPlusDrawGroup_ClusterCountBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectUsage, 1, 1});
         clusterCountBuffer.UpdateCapacityAll(1);
 
-        dispatchArgsBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(ForwardPlusDispatchArgs), indirectUsage, 1, 1 });
+        dispatchArgsBuffer.Initialize({ "ForwardPlusDrawGroup_DispatchArgsBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(ForwardPlusDispatchArgs), indirectUsage, 1, 1 });
         dispatchArgsBuffer.UpdateCapacityAll(1);
 
-        pointLightIndexBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 10000, 20000 });
+        pointLightIndexBuffer.Initialize({ "ForwardPlusDrawGroup_PointLightIndexBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 10000, 20000 });
         pointLightIndexBuffer.UpdateCapacityAll(1);
         
-        spotLightIndexBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 10000, 20000 });
+        spotLightIndexBuffer.Initialize({ "ForwardPlusDrawGroup_SpotLightIndexBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 10000, 20000 });
         spotLightIndexBuffer.UpdateCapacityAll(1);
     }
 

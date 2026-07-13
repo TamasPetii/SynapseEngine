@@ -4,6 +4,7 @@
 #include "LightingSettings.h"
 #include "PostProcessSettings.h"
 #include "DebugSettings.h"
+#include "EnvironmentSettings.h"
 
 namespace Syn
 {
@@ -15,5 +16,6 @@ namespace Syn
         LightingSettings lighting;
         PostProcessSettings postProcess;
         DebugSettings debug;
+        EnvironmentSettings environment;
     };
 }

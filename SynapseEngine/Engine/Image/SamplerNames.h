@@ -14,5 +14,6 @@ namespace Syn
         static constexpr const char* MaxReduction = "MaxReduction";
         static constexpr const char* BloomSampler = "BloomSampler";
         static constexpr const char* ShadowSampler = "ShadowSampler";
+        static constexpr const char* SkyboxSampler = "SkyboxSampler";
     };
 }

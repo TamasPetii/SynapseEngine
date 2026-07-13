@@ -27,6 +27,11 @@ namespace Syn {
     class Serializer;
     class MaterialManager;
     class ImageManager;
+    class ModelManager;
+    class AnimationManager;
+    class IRenderStatCollector;
+    class FrameStatisticsManager;
+    class PreviewManager;
 }
 
 namespace Syn
@@ -62,6 +67,9 @@ namespace Syn
     public:
         MaterialManager* GetMaterialManager();
         ImageManager* GetImageManager();
+        ModelManager* GetModelManager();
+        AnimationManager* GetAnimationManager();
+        PreviewManager* GetPreviewManager();
         std::shared_ptr<Syn::MemorySink> GetMemorySink() const { return _memorySink; }
     private:
         void Init(const EngineInitParams& params);
@@ -93,6 +101,8 @@ namespace Syn
         std::unique_ptr<ICpuProfiler> _cpuProfiler;
 		std::unique_ptr<Serializer> _serializer;
         std::shared_ptr<MemorySink> _memorySink;
+		std::unique_ptr<IRenderStatCollector> _renderStatCollector;
+		std::unique_ptr<FrameStatisticsManager> _frameStatisticsManager;
 
         std::function<void(uint32_t)> _onGuiFlushCallback;
     };

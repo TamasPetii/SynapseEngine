@@ -16,12 +16,12 @@ bool TestConeCulling(vec3 apex, vec3 axis, float cutoff, vec3 cameraEye) {
     return dot(view, axis) >= cutoff;
 }
 
-bool TestConeCulling(GpuMeshletCollider collider, vec3 cameraEye) {
-    return TestConeCulling(collider.apex, collider.axis, collider.cutoff, cameraEye);
-}
-
 bool TestConeCulling(vec3 axis, float cutoff, vec3 lightDir) {
     return dot(lightDir, axis) >= cutoff;
+}
+
+bool TestConeCulling(GpuMeshletCollider collider, vec3 cameraEye) {
+    return TestConeCulling(collider.apex, collider.axis, collider.cutoff, cameraEye);
 }
 
 bool TestConeCullingLight(GpuMeshletCollider collider, vec3 lightDir) {

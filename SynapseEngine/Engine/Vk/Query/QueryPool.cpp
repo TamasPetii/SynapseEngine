@@ -32,6 +32,10 @@ namespace Syn::Vk
     bool QueryPool::GetResults(uint32_t firstQuery, uint32_t count, std::vector<uint64_t>& outResults, bool wait) {
         auto device = ServiceLocator::GetVkContext()->GetDevice();
 
+        uint32_t stride = GetStride();
+        uint32_t statsPerQuery = stride / sizeof(uint64_t);
+        uint32_t requiredElements = count * statsPerQuery;
+
         if (outResults.size() < count) {
             outResults.resize(count);
         }
@@ -49,7 +53,7 @@ namespace Syn::Vk
             count,
             outResults.size() * sizeof(uint64_t),
             outResults.data(),
-            sizeof(uint64_t),
+            stride,
             flags
         );
 

@@ -1,5 +1,6 @@
 #pragma once
 #include <cstring>
+#include <string>
 #include "../VkCommon.h"
 
 namespace Syn::Vk {
@@ -7,6 +8,7 @@ namespace Syn::Vk {
     class BufferFactory;
 
     struct SYN_API BufferConfig {
+        std::string debugName = "";
         VkDeviceSize size = 0;
         VkBufferUsageFlags usage = 0;
         VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_AUTO;

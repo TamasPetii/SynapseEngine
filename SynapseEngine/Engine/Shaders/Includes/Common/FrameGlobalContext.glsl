@@ -5,6 +5,8 @@
 #include "../SharedGpuTypes.glsl"
 
 struct FrameGlobalContext {
+    uint64_t textureMetadataBufferAddr;
+
     uint64_t globalDrawCountBufferAddr; 
     uint64_t globalInstanceIndexBufferAddr; 
     uint64_t globalIndirectCommandBufferAddr; 
@@ -15,6 +17,9 @@ struct FrameGlobalContext {
     uint64_t cameraVisibleIndexBufferAddr;
     uint64_t cameraBufferAddr;
     uint64_t cameraSparseMapBufferAddr;
+
+    uint64_t tagSparseMapBufferAddr;
+    uint64_t tagDataBufferAddr;
 
     uint64_t transformBufferAddr;
     uint64_t transformSparseMapBufferAddr;

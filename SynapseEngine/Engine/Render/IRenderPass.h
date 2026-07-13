@@ -32,6 +32,7 @@ namespace Syn
         virtual void Initialize() {};
         virtual void Execute(const RenderContext& context) {};
         virtual bool ShouldExecute(const RenderContext& context) const { return true; }
+        virtual bool ShouldCollectStatistics() const { return false; }
         virtual std::string GetName() const = 0;
         virtual std::string GetGroup() const { return PassGroupNames::UndefinedPasses; }
     };

@@ -79,7 +79,8 @@ namespace Syn {
                 safeEntry.stagingBuffer.reset();
 
                 SetResourceState(entryId, ResourceState::Ready);
-                _version.fetch_add(1, std::memory_order_release);
+                MarkDirty(entryId);
+
                 Info("Animation loaded, extracted, and RAM freed: {}", safeEntry.path);
             },
             .needsGraphics = false
@@ -90,28 +91,32 @@ namespace Syn {
 
     void AnimationManager::FinalizeResource(EntryType& entry)
     {
-        uint32_t entryIndex = _pathToId.at(entry.path);
-
         auto& gpuData = *(entry.resource->transientGpuData);
         auto& cpuData = entry.resource->cpuData;
 
         _cpuExtractor->Extract(gpuData, cpuData);
 
-        GpuAnimationAddresses addresses{};
-        const auto& hw = entry.resource->hardwareBuffers;
-
-        addresses.vertexSkinData = hw.vertexSkinData->GetDeviceAddress();
-        addresses.nodeTransforms = hw.nodeTransforms->GetDeviceAddress();
-        addresses.frameGlobalColliders = hw.frameGlobalColliders->GetDeviceAddress();
-        addresses.frameMeshColliders = hw.frameMeshColliders->GetDeviceAddress();
-        addresses.frameMeshletColliders = hw.frameMeshletColliders->GetDeviceAddress();
-        addresses.descriptor = entry.resource->cpuData.descriptor;
-		addresses.globalCollider = entry.resource->cpuData.globalCollider;
-        addresses.isReady = 1;
-
-        WriteAddress(entryIndex, addresses);
-
         entry.resource->transientGpuData.reset();
         entry.resource->transientCpuData.reset();
+    }
+
+    void AnimationManager::FlushDirtyResources()
+    {
+        ProcessDirtyReadyEntries([this](uint32_t index, const EntryType& entry) {
+            GpuAnimationAddresses addresses{};
+            const auto& hw = entry.resource->hardwareBuffers;
+
+            addresses.vertexSkinData = hw.vertexSkinData->GetDeviceAddress();
+            addresses.nodeTransforms = hw.nodeTransforms->GetDeviceAddress();
+            addresses.frameGlobalColliders = hw.frameGlobalColliders->GetDeviceAddress();
+            addresses.frameMeshColliders = hw.frameMeshColliders->GetDeviceAddress();
+            addresses.frameMeshletColliders = hw.frameMeshletColliders->GetDeviceAddress();
+
+            addresses.descriptor = entry.resource->cpuData.descriptor;
+            addresses.globalCollider = entry.resource->cpuData.globalCollider;
+            addresses.isReady = 1;
+
+            WriteAddress(index, addresses);
+            });
     }
 }

@@ -47,22 +47,22 @@ namespace Syn
 
         VkBufferUsageFlags indirectUsage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 
-        indirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
+        indirectBuffer.Initialize({ "SpotLightDrawGroup_IndirectBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
         indirectBuffer.UpdateCapacityAll(1);
 
-        sphereSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
+        sphereSingleCmdBuffer.Initialize({ "SpotLightDrawGroup_SphereSingleCmdBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
         sphereSingleCmdBuffer.UpdateCapacityAll(1);
 
-        coneSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
+        coneSingleCmdBuffer.Initialize({ "SpotLightDrawGroup_ConeSingleCmdBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
         coneSingleCmdBuffer.UpdateCapacityAll(1);
 
-		pyramidSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
+		pyramidSingleCmdBuffer.Initialize({ "SpotLightDrawGroup_PyramidSingleCmdBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
 		pyramidSingleCmdBuffer.UpdateCapacityAll(1);
 
-        aabbSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
+        aabbSingleCmdBuffer.Initialize({ "SpotLightDrawGroup_AABBSingleCmdBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
         aabbSingleCmdBuffer.UpdateCapacityAll(1);
 
-        billboardSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
+        billboardSingleCmdBuffer.Initialize({ "SpotLightDrawGroup_BillboardSingleCmdBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
         billboardSingleCmdBuffer.UpdateCapacityAll(1);
 
         for (uint32_t i = 0; i < frameCount; ++i) {

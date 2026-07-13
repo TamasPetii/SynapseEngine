@@ -83,5 +83,8 @@ namespace Syn
 
         static constexpr const char* SelectionOutlineData = "SelectionOutlineData";
         static constexpr const char* HierarchySparseMap = "HierarchySparseMap";
+
+        static constexpr const char* TagSparseMap = "TagSparseMap";
+        static constexpr const char* TagData = "TagData";
     };
 }

@@ -120,11 +120,6 @@ void main() {
         float mainCamScreenSize = CalculateSphereScreenSizePerspective(worldCollider.center, worldCollider.radius, camera.view, camera.proj, cameraNear, screenRes);
         if (mainCamScreenSize < 1.0) continue;
 
-        if (ctx.enableChunkOcclusionCulling == 1) {
-            float shadowScreenSizePixels = 0.0;
-            // Todo:
-         }
-
         uint rawLod = (mainCamScreenSize > 512.0) ? 0 : (mainCamScreenSize > 256.0) ? 1 : (mainCamScreenSize > 128.0) ? 2 : 3;
         uint lod = min(rawLod + ctx.pointLightShadowLodBias, 3u);
 

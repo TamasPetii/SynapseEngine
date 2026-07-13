@@ -25,11 +25,11 @@ namespace Syn {
 
     bool TagApiImpl::IsEntityEnabled(EntityID entity) const {
         return EditorApiUtils::ReadComponent<TagComponent>(_sceneManager, entity, 
-            [](const auto& c) { return c.enabled; }, true);
+            [](const auto& c) { return c.localEnabled; }, true);
     }
 
     void TagApiImpl::SetEntityEnabled(EntityID entity, bool enabled) {
         EditorApiUtils::ModifyComponent<TagComponent>(_sceneManager, entity, 
-            [&](auto& c, auto pool) { c.enabled = enabled; });
+            [&](auto& c, auto pool) { c.localEnabled = enabled; });
     }
 }

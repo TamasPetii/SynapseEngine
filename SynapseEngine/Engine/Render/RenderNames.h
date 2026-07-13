@@ -5,12 +5,12 @@ namespace Syn
 {
     struct SYN_API RenderPipelineNames
     {
-        static constexpr const char* DeferredPipeline = "DeferredPipeline";
+        static constexpr const char* ScenePipeline = "ScenePipeline";
     };
 
     struct SYN_API RenderTargetGroupNames
     {
-        static constexpr const char* Deferred = "Deferred";
+        static constexpr const char* Main = "Main";
     };
 
     struct SYN_API RenderTargetNames
@@ -38,6 +38,8 @@ namespace Syn
 
         static constexpr const char* PointLightShadowAtlas = "PointLightShadowAtlas";
         static constexpr const char* PointLightShadowDepthPyramid = "PointLightShadowDepthPyramid";
+
+        static constexpr const char* PreviewAtlas = "PreviewAtlas";
     };
 
     struct SYN_API RenderTargetViewNames

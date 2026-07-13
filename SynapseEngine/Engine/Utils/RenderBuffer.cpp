@@ -1,4 +1,5 @@
 #include "RenderBuffer.h"
+#include <format>
 
 namespace Syn
 {
@@ -25,11 +26,19 @@ namespace Syn
         gpuConfig.useDeviceAddress = (_config.usage & VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT) != 0;
 
         for (uint32_t i = 0; i < _config.frames; ++i) {
+            if (!_config.debugName.empty()) {
+                mappedConfig.debugName = std::format("{}_Mapped_F{}", _config.debugName, i);
+            }
+
             if (_config.strategy != BufferStrategy::GpuOnly) {
                 _mapped.push_back(std::make_unique<WindowedBuffer>(mappedConfig, _config.elementSize, _config.upWindow, _config.downWindow));
             }
             else {
                 _mapped.push_back(nullptr);
+            }
+
+            if (!_config.debugName.empty()) {
+                gpuConfig.debugName = std::format("{}_GPU_F{}", _config.debugName, i);
             }
 
             if (_config.strategy != BufferStrategy::MappedOnly) {

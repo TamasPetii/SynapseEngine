@@ -17,14 +17,18 @@
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
 
 #include "Engine/System/Core/TransformSystem.h"
+#include "Engine/System/Core/TransformSetupSystem.h"
 #include "Engine/System/Core/HierarchySystem.h"
 #include "Engine/System/Core/SelectionOutlineSystem.h"
-#include "Engine/System/Rendering/RenderSystem.h"
+#include "Engine/System/Core/TagSystem.h"
+#include "Engine/System/Core/TagSetupSystem.h"
 #include "Engine/System/Core/CameraSystem.h"
+#include "Engine/System/Rendering/RenderSystem.h"
 #include "Engine/System/Rendering/ModelSystem.h"
 #include "Engine/System/Rendering/MaterialSystem.h"
 #include "Engine/System/Rendering/ModelFrustumCullingSystem.h"
 #include "Engine/System/Rendering/AnimationSystem.h"
+#include "Engine/System/Rendering/MaterialOverrideSystem.h"
 #include "Engine/System/Physics/PhysicsSystem.h"
 
 #include "Engine/System/Light/Point/PointLightSystem.h"
@@ -134,8 +138,13 @@ namespace Syn
 
     void Scene::InitializeSystems()
     {
+        RegisterSystem<TransformSetupSystem>();
         RegisterSystem<TransformSystem>();
         RegisterSystem<TransformModelLinkSystem>();
+
+        RegisterSystem<TagSetupSystem>();
+        RegisterSystem<TagSystem>();
+
         RegisterSystem<StaticSpatialSahSystem>();
         RegisterSystem<MaterialSystem>();
         RegisterSystem<CameraSystem>();
@@ -143,6 +152,7 @@ namespace Syn
         RegisterSystem<ModelSystem>();
         RegisterSystem<ModelFrustumCullingSystem>();
         RegisterSystem<AnimationSystem>();
+        RegisterSystem<MaterialOverrideSystem>();
 
         RegisterSystem<PointLightSystem>();
         RegisterSystem<PointLightShadowSystem>();
@@ -175,6 +185,7 @@ namespace Syn
 
 		RegisterSystem<HierarchySystem>();
         RegisterSystem<SelectionOutlineSystem>();
+
 
     }
 
@@ -229,6 +240,9 @@ namespace Syn
 
         RegisterComponentSparseMapBuffer<HierarchyComponent>(BufferNames::HierarchySparseMap);
         RegisterComponentBuffer<HierarchyComponent, uint32_t>(BufferNames::SelectionOutlineData);
+
+        RegisterComponentSparseMapBuffer<TagComponent>(BufferNames::TagSparseMap);
+        RegisterComponentBuffer<TagComponent, uint32_t>(BufferNames::TagData);
 
         RegisterComponentSparseMapBuffer<TransformComponent>(BufferNames::TransformSparseMap);
         RegisterComponentBuffer<TransformComponent, TransformComponentGPU>(BufferNames::TransformData);   
@@ -485,6 +499,38 @@ namespace Syn
     {
         _currentFrameIndex = frameIndex;
         _currentDeltaTime = deltaTime;
+
+        auto modelSnapshot = ServiceLocator::GetModelManager()->GetSnapshotAndVersion();
+        auto animSnapshot = ServiceLocator::GetAnimationManager()->GetSnapshotAndVersion();
+        auto materialSnapshot = ServiceLocator::GetMaterialManager()->GetSnapshotAndVersion();
+
+        _systemContext.deltaTime = deltaTime;
+        _systemContext.frameIndex = frameIndex;
+
+        _systemContext.modelManagerVersion = modelSnapshot.version;
+        _systemContext.materialManagerVersion = materialSnapshot.version;
+        _systemContext.animationManagerVersion = animSnapshot.version;
+
+        _systemContext.modelSnapshots = modelSnapshot.snapshots;
+        _systemContext.materialSnapshots = materialSnapshot.snapshots;
+        _systemContext.animationSnapshots = animSnapshot.snapshots;
+
+        _systemContext.materialRenderTypes.clear();
+        _systemContext.materialRenderTypes.resize(materialSnapshot.snapshots.size());
+
+        std::transform(materialSnapshot.snapshots.begin(), materialSnapshot.snapshots.end(), _systemContext.materialRenderTypes.begin(),
+            [](const auto& snapshot) -> MaterialRenderType {
+                if (!snapshot.resource) 
+                    return MaterialRenderType::Opaque1Sided;
+
+                bool isTrans = snapshot.resource->isTransparent;
+                bool isDouble = snapshot.resource->doubleSided;
+
+                if (isTrans && isDouble)  return MaterialRenderType::Transparent2Sided;
+                if (isTrans)             return MaterialRenderType::Transparent1Sided;
+                if (isDouble)            return MaterialRenderType::Opaque2Sided;
+                return MaterialRenderType::Opaque1Sided;
+            });
 
         auto screenWidth = ServiceLocator::GetFrameContext()->screenWidth;
         auto screenHeight = ServiceLocator::GetFrameContext()->screenHeight;

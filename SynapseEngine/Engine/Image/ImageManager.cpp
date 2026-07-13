@@ -10,15 +10,20 @@
 #include "Engine/Image/Source/Procedural/DefaultImageSource.h"
 #include "Engine/Vk/Descriptor/DescriptorLayoutBuilder.h";
 
-namespace Syn {
-
+namespace Syn 
+{
     ImageManager::ImageManager(
+        uint32_t framesInFlight,
         std::shared_ptr<ImageBuilder> builder,
         std::unique_ptr<IGpuImageUploader> uploader,
-        std::unique_ptr<ICpuImageExtractor> cpuExtractor)
-		: _builder(builder), 
+        std::unique_ptr<ICpuImageExtractor> cpuExtractor,
+        ImageReadyOrChangedCallback imageReadyCallback)
+		: AddressResourceManager<Texture, uint32_t>(framesInFlight, 1024, 256, 512),
+		_framesInFlight(framesInFlight),
+        _builder(builder), 
         _uploader(std::move(uploader)), 
-        _cpuExtractor(std::move(cpuExtractor))
+        _cpuExtractor(std::move(cpuExtractor)),
+        _imageReadyOrChangedCallback(std::move(imageReadyCallback))
     {
         InitializeBindlessSetup();
     }
@@ -43,6 +48,41 @@ namespace Syn {
 
         CreateSamplers();
         LoadDefaultImageSync();
+    }
+
+    void ImageManager::Update() {
+        BaseResourceManager<Texture>::Update();
+
+        std::lock_guard<std::mutex> lock(_staleMutex);
+
+        for (auto it = _staleGpuBuffers.begin(); it != _staleGpuBuffers.end();) {
+            if (it->framesToLive > 0) {
+                it->framesToLive--;
+                ++it;
+            }
+            else {
+                it = _staleGpuBuffers.erase(it);
+            }
+        }
+
+        for (auto it = _staleMappedBuffers.begin(); it != _staleMappedBuffers.end();) {
+            if (it->framesToLive > 0) {
+                it->framesToLive--;
+                ++it;
+            }
+            else {
+                it = _staleMappedBuffers.erase(it);
+            }
+        }
+    }
+
+    void ImageManager::RecordSync(VkCommandBuffer cmd) {
+        if (auto staleBuffers = _bindlessBuffer->RecordSync(cmd); staleBuffers.mapped || staleBuffers.gpu) {
+            std::lock_guard<std::mutex> lock(_staleMutex);
+
+            _staleMappedBuffers.push_back({ staleBuffers.mapped, _framesInFlight });
+            _staleGpuBuffers.push_back({ staleBuffers.gpu, _framesInFlight });
+        }
     }
 
     void ImageManager::CreateSamplers() {
@@ -176,6 +216,19 @@ namespace Syn {
             config.compareOp = VK_COMPARE_OP_LESS;
             RegisterSampler(SamplerNames::ShadowSampler, config);
         }
+
+        {
+            Vk::SamplerConfig config{};
+            config.magFilter = VK_FILTER_LINEAR;
+            config.minFilter = VK_FILTER_LINEAR;
+            config.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+            config.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+            config.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+            config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+            config.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+            config.anisotropyEnable = true;
+            RegisterSampler(SamplerNames::SkyboxSampler, config);
+        }
     }
 
     uint32_t ImageManager::RegisterSampler(const std::string& name, const Vk::SamplerConfig& config) {
@@ -266,8 +319,8 @@ namespace Syn {
                 entry.stagingBuffer.reset();
 
                 SetResourceState(entryId, ResourceState::Ready);
+                MarkDirty(entryId);
 
-                _version.fetch_add(1, std::memory_order_release);
                 Info("Image '{}' is ready", entry.path);
             },
             .needsGraphics = needsGraphics
@@ -280,16 +333,42 @@ namespace Syn {
     {
         _cpuExtractor->Extract(*(entry.resource->transientGpuData), entry.resource->cpuData);
 
-        uint32_t descriptorIndex = _pathToId.at(entry.path);
-        if (descriptorIndex != 0) {
-            _bindlessBuffer->WriteSampledImage(
-                BINDING_TEXTURES,
-                descriptorIndex,
-                entry.resource->image->GetView()
-            );
-        }
-
         entry.resource->transientCpuData.reset();
         entry.resource->transientGpuData.reset();
+    }
+
+    void ImageManager::FlushDirtyResources() {
+        //Just to handle bistro test, this will be deleted!!
+        auto isNormalMap = [](const std::string& path) {
+            std::string lowerPath = path;
+            std::transform(lowerPath.begin(), lowerPath.end(), lowerPath.begin(), ::tolower);
+            return lowerPath.find("_normal") != std::string::npos;
+            };
+
+        ProcessDirtyReadyEntries(
+            [this, &isNormalMap](uint32_t index, const EntryType& entry) {
+                if (!entry.resource->image) return;
+
+                _bindlessBuffer->WriteSampledImage(
+                    BINDING_TEXTURES,
+                    index,
+                    entry.resource->image->GetView()
+                );
+
+                uint32_t samplerIndex = GetSamplerIndex("LinearAniso");
+                bool invertTangent = isNormalMap(entry.path);
+
+                uint32_t textureData = (samplerIndex & 0x7FFFFFFF);
+                if (invertTangent) {
+                    textureData |= (1u << 31);
+                }
+
+                WriteAddress(index, textureData);
+
+                if (_imageReadyOrChangedCallback) {
+                    _imageReadyOrChangedCallback(index);
+                }
+            }
+        );
     }
 }

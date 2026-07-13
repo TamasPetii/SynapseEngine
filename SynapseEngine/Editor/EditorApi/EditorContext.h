@@ -1,8 +1,11 @@
 #pragma once
 #include <memory>
+#include <unordered_map>
+#include <typeindex>
 #include "Engine/Engine.h"
 #include "Editor/Manager/GuiTextureManager.h"
 
+#include "EditorCore/Api/IApi.h" 
 #include "EditorCore/Api/ISelectionApi.h"
 #include "EditorCore/Api/ITagApi.h"
 #include "EditorCore/Api/ITransformApi.h"
@@ -16,39 +19,42 @@
 #include "EditorCore/Api/ISettingsApi.h"
 #include "EditorCore/Api/IPointLightApi.h"
 #include "EditorCore/Api/ISpotLightApi.h"
+#include "EditorCore/Api/ITextureApi.h"
+#include "EditorCore/Api/IModelApi.h"
+#include "EditorCore/Api/ICameraApi.h"
+#include "EditorCore/Api/IBoxColliderApi.h"
+#include "EditorCore/Api/ISphereColliderApi.h"
+#include "EditorCore/Api/ICapsuleColliderApi.h"
+#include "EditorCore/Api/IConvexColliderApi.h"
+#include "EditorCore/Api/IMeshColliderApi.h"
+#include "EditorCore/Api/IRigidBodyApi.h"
+#include "EditorCore/Api/IModelComponentApi.h"
+#include "EditorCore/Api/IAnimationApi.h"
+#include "EditorCore/Api/IMaterialOverrideApi.h"
+#include "EditorCore/Api/IPreviewApi.h"
 
 namespace Syn {
     class EditorContext {
     public:
         EditorContext(Engine* engine, GuiTextureManager* textureManager);
-        ~EditorContext();
 
-        ISelectionApi* GetSelectionApi() const { return _selectionApi.get(); }
-        ITagApi* GetTagApi() const { return _tagApi.get(); }
-        ITransformApi* GetTransformApi() const { return _transformApi.get(); }
-        IDirectionLightApi* GetDirectionLightApi() const { return _directionLightApi.get(); }
-        IFileSystemApi* GetFileSystemApi() const { return _fileSystemApi.get(); }
-        IHierarchyApi* GetHierarchyApi() const { return _hierarchyApi.get(); }
-        ILoggerApi* GetLoggerApi() const { return _loggerApi.get(); }
-        IMaterialApi* GetMaterialApi() const { return _materialApi.get(); }
-        IRenderApi* GetRenderApi() const { return _renderApi.get(); }
-        ISceneApi* GetSceneApi() const { return _sceneApi.get(); }
-        ISettingsApi* GetSettingsApi() const { return _settingsApi.get(); }
-        IPointLightApi* GetPointLightApi() const { return _pointLightApi.get(); }
-        ISpotLightApi* GetSpotLightApi() const { return _spotLightApi.get(); }
+        template <typename T>
+        T* GetApi() const {
+            auto it = _apis.find(std::type_index(typeid(T)));
+
+            if (it != _apis.end()) {
+                return static_cast<T*>(it->second.get());
+            }
+
+            return nullptr;
+        }
+
     private:
-        std::unique_ptr<ISelectionApi> _selectionApi;
-        std::unique_ptr<ITagApi> _tagApi;
-        std::unique_ptr<ITransformApi> _transformApi;
-        std::unique_ptr<IFileSystemApi> _fileSystemApi;
-        std::unique_ptr<IHierarchyApi> _hierarchyApi;
-        std::unique_ptr<ILoggerApi> _loggerApi;
-        std::unique_ptr<IMaterialApi> _materialApi;
-        std::unique_ptr<IRenderApi> _renderApi;
-        std::unique_ptr<ISceneApi> _sceneApi;
-        std::unique_ptr<ISettingsApi> _settingsApi;
-        std::unique_ptr<IDirectionLightApi> _directionLightApi;
-        std::unique_ptr<IPointLightApi> _pointLightApi;
-        std::unique_ptr<ISpotLightApi> _spotLightApi;
+        template <typename Interface, typename Implementation, typename... Args>
+        void RegisterApi(Args&&... args) {
+            _apis[std::type_index(typeid(Interface))] = std::make_unique<Implementation>(std::forward<Args>(args)...);
+        }
+
+        std::unordered_map<std::type_index, std::unique_ptr<IApi>> _apis;
     };
 }

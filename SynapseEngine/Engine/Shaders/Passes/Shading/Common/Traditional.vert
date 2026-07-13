@@ -35,6 +35,15 @@ void main() {
 
     // 3. Fetch Model Component & Material Lookup
     uint modelDenseIndex = GET_SPARSE_INDEX(ctx.modelSparseMapBufferAddr, entityId);
+    uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
+
+    if (transformDenseIndex == INVALID_INDEX || modelDenseIndex == INVALID_INDEX) {
+        gl_Position = vec4(0.0, 0.0, 0.0, 0.0);
+        outUV = vec2(0.0);
+        outId = uvec3(0u);
+        return; 
+    }
+
     ModelComponent comp = GET_MODEL_COMP(ctx.modelBufferAddr, modelDenseIndex);
     
     // 4. Fetch Model Addresses & Raw Vertex Data
@@ -45,7 +54,6 @@ void main() {
     GpuVertexAttributes attr = GET_VERTEX_ATTR(addrs.vertexAttributes, realVertexIndex);
 
     // 5. Fetch Transform and Camera
-    uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
     TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
 
     uint cameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
@@ -108,7 +116,7 @@ void main() {
     gl_Position = camera.viewProjVulkan * transform.transform * finalModelMat * vec4(v.position, 1.0);
 
     outNormal = (transform.transformIT * finalModelMatIT * vec4(attr.normal, 0.0)).xyz;
-    outTangent = vec4((transform.transform * finalModelMat * vec4(attr.tangent, 0.0)).xyz, 1.0); // Todo: Invert Normal from model!
+    outTangent = vec4((transform.transform * finalModelMat * vec4(attr.tangent, 0.0)).xyz, 1.0);
     outUV = vec2(attr.uv_x, 1.0 - attr.uv_y);
 
     uint packedEntity = PACK_VISIBILITY_ENTITY(entityId, VIS_PIPELINE_TRADITIONAL);

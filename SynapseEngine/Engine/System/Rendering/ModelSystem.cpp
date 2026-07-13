@@ -1,11 +1,13 @@
 #include "ModelSystem.h"
 #include "MaterialSystem.h"
 #include "Engine/ServiceLocator.h"
-#include "Engine/Mesh/ModelManager.h"
 #include "Engine/FrameContext.h"
+#include "Engine/Component/Core/TagComponent.h"
 
 namespace Syn
 {
+    constexpr bool ENABLE_DEBUG_LOGGING = false;
+
     std::vector<TypeID> ModelSystem::GetReadDependencies() const {
         return { 
             TypeInfo<MaterialSystem>::ID
@@ -22,8 +24,7 @@ namespace Syn
         auto modelPool = registry->GetPool<ModelComponent>();
         if (!modelPool) return;
 
-        auto modelManager = ServiceLocator::GetModelManager();
-        uint32_t currentVersion = modelManager->GetVersion();
+        uint32_t currentVersion = scene->GetSystemContext().modelManagerVersion;
 
         this->EmplaceTask(subflow, SystemPhaseNames::Update, [this, scene, currentVersion]() {
             if (_lastModelManagerVersion != currentVersion) {
@@ -45,6 +46,7 @@ namespace Syn
         auto registry = scene->GetRegistry();
         auto componentBufferManager = scene->GetComponentBufferManager();
         auto modelPool= registry->GetPool<ModelComponent>();
+        auto tagPool = registry->GetPool<TagComponent>();
         if (!modelPool) return;
 
         auto modelDataBuffer = componentBufferManager->GetComponentBuffer(BufferNames::ModelData, frameIndex);
@@ -53,12 +55,19 @@ namespace Syn
 
         bool forceUpload = this->ShouldForceUpload();
 
-        auto processUpload = [modelPool, modelDataBuffer, modelDataBufferHandler, forceUpload](EntityID entity) {
+        auto processUpload = [modelPool, tagPool, modelDataBuffer, modelDataBufferHandler, forceUpload, scene](EntityID entity) {
             auto& modelComponent = modelPool->Get(entity);
             auto modelIndex = modelPool->GetMapping().Get(entity);
 
             if (forceUpload || modelDataBuffer.versions[modelIndex] != modelComponent.version)
             {
+                if constexpr (ENABLE_DEBUG_LOGGING) {
+                    std::string name = "Unknown";
+                    if (tagPool && tagPool->Has(entity)) name = tagPool->Get(entity).name;
+
+                    Info("[ModelSystem UPLOAD] Entity: {} ({}) | Material offset: {}", (uint32_t)entity, name, modelComponent.materialOffset);
+                }
+
                 modelDataBuffer.versions[modelIndex] = modelComponent.version;
                 modelDataBufferHandler[modelIndex] = ModelComponentGPU(entity, modelComponent);
             }
@@ -66,7 +75,11 @@ namespace Syn
             };
 
         ForEachStream(modelPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
-        if (uploadDynamic) ForEachDynamic(modelPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
-        if (uploadStatic) ForEachStatic(modelPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
+
+        if (uploadDynamic) 
+            ForEachDynamic(modelPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
+
+        if (uploadStatic)
+            ForEachStatic(modelPool, subflow, SystemPhaseNames::UploadGPU, processUpload);
     }
 }

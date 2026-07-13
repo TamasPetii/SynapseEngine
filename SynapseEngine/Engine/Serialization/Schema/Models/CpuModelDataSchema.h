@@ -7,6 +7,7 @@
 #include "GpuMeshletDrawDataSchema.h"
 #include "MaterialInfoSchema.h"
 #include "MeshDrawBlueprintSchema.h"
+#include "MeshInstanceDescriptorSchema.h"
 
 #include "Engine/Mesh/Data/Cpu/CpuModelData.h"
 
@@ -66,6 +67,8 @@ namespace Syn
                 BlitVector<GpuMeshletDrawDescriptor> mlDrawDescs{ m.meshletDrawDescriptors };
                 ar.Property("meshletDrawDescriptors", mlDrawDescs);
             
+                ar.Property("meshNodeDescriptors", m.meshNodeDescriptors);
+
                 auto serializeNestedBlit = [&ar](const char* arrayName, auto& nestedVec) {
                     uint32_t outerSize = static_cast<uint32_t>(nestedVec.size());
                     ar.EnterArray(arrayName, outerSize);
@@ -103,6 +106,7 @@ namespace Syn
 
                 ar.Property("batchedIndicesPerLod", m.batchedIndicesPerLod);
                 ar.Property("physicsIndicesPerLod", m.physicsIndicesPerLod);
+                ar.Property("meshNodeDescriptors", m.meshNodeDescriptors);
             }
         }
     };

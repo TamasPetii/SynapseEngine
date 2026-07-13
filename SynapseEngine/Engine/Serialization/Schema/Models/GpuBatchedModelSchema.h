@@ -6,6 +6,7 @@
 #include "GpuIndexedDrawDataSchema.h"
 #include "GpuMeshletDrawDataSchema.h"
 #include "MaterialInfoSchema.h"
+#include "MeshInstanceDescriptorSchema.h"
 
 #include "Engine/Mesh/Data/Gpu/GpuNodeTransform.h"
 #include "Engine/Mesh/Data/Gpu/GpuBatchedModel.h"
@@ -54,6 +55,7 @@ namespace Syn
             ar.Property("globalIndexCount", m.globalIndexCount);
             ar.Property("globalAverageLodIndexCount", m.globalAverageLodIndexCount);
             ar.Property("globalMeshCount", m.globalMeshCount);
+            ar.Property("meshNodeDescriptors", m.meshNodeDescriptors);
         }
     };
 }

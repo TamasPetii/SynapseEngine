@@ -48,15 +48,18 @@ void main() {
     uint lightEntity = GET_SPOT_VISIBLE_SHADOW_LIGHT(ctx.spotLightVisibleShadowIndexBufferAddr, lightIdx);
     uint lightShadowDenseIdx = GET_SPARSE_INDEX(ctx.spotLightShadowSparseMapBufferAddr, lightEntity);
     uint lightDenseIdx = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, lightEntity);
+    uint modelDenseIndex = GET_SPARSE_INDEX(ctx.modelSparseMapBufferAddr, entityId);
 
     // 2. Initialize payload and shared memory
     if (threadIdx == 0) {
+
         survivingMeshletCount = 0;
         payload.drawId = gl_DrawID;
         payload.entityId = entityId;
         payload.transformDenseIdx = transformDenseIndex;
         payload.lightShadowDenseIdx = lightShadowDenseIdx;
         payload.cascadeIdx = 0;
+        payload.modelDenseIndex = modelDenseIndex;
     }
 
     barrier();
@@ -72,7 +75,7 @@ void main() {
     uint currentMeshletIdx = meshletGroupOffset + threadIdx;
     bool isVisible = (currentMeshletIdx < submeshData.meshletCount);
 
-    if (transformDenseIndex == INVALID_INDEX || lightShadowDenseIdx == INVALID_INDEX || lightDenseIdx == INVALID_INDEX) {
+    if (transformDenseIndex == INVALID_INDEX || lightShadowDenseIdx == INVALID_INDEX || lightDenseIdx == INVALID_INDEX || modelDenseIndex == INVALID_INDEX) {
         isVisible = false;
     }
 
@@ -101,7 +104,7 @@ void main() {
 
         // 6. Backface Cone Culling
         if (pc.disableConeCulling == 0 && ctx.enableMeshletConeCulling == 1) {
-            if (TestConeCulling(worldCollider, spotCollider.worldPos)) {
+            if (TestConeCullingLight(worldCollider, spotCollider.worldPos)) {
                 isVisible = false;
             }
         }

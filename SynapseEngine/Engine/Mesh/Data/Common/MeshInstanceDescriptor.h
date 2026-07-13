@@ -1,11 +1,13 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include <cstdint>
+#include <string>
 
 namespace Syn
 {
 	struct SYN_API MeshInstanceDescriptor
 	{
+		std::string name;
 		uint16_t meshIndex;
 		uint16_t nodeIndex;
 		uint16_t parentNodeIndex;

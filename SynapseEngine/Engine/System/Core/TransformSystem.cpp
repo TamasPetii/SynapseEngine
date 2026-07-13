@@ -6,9 +6,15 @@
 #include <print>
 #include "Engine/Component/Rendering/ModelComponent.h"
 #include "Engine/System/Rendering/ModelSystem.h"
+#include "TransformSetupSystem.h"
 
 namespace Syn
 {
+    std::vector<TypeID> TransformSystem::GetReadDependencies() const
+    {
+        return { TypeInfo<TransformSetupSystem>::ID };
+    }
+
     std::vector<TypeID> TransformSystem::GetWriteDependencies() const
     {
         return { TypeInfo<TransformSystem>::ID };
@@ -18,24 +24,65 @@ namespace Syn
     {
         auto registry = scene->GetRegistry();
         auto transformPool = registry->GetPool<TransformComponent>();
-        if (!transformPool) return;
+        auto hierarchyPool = registry->GetPool<HierarchyComponent>();
+        auto hierarchyManager = scene->GetHierarchyManager();
 
-        ParallelForEachIf<UPDATE_BIT>(transformPool, subflow, SystemPhaseNames::Update, [transformPool](EntityID entity) {
-            auto& transformComponent = transformPool->Get(entity);
+        if (!transformPool || !hierarchyPool || !hierarchyManager) return;
 
-            transformComponent.transform = glm::mat4(1.0f);
-            transformComponent.transform = glm::translate(transformComponent.transform, transformComponent.translation);
-            transformComponent.transform = glm::rotate(transformComponent.transform, glm::radians(transformComponent.rotation.z), glm::vec3(0, 0, 1));
-            transformComponent.transform = glm::rotate(transformComponent.transform, glm::radians(transformComponent.rotation.y), glm::vec3(0, 1, 0));
-            transformComponent.transform = glm::rotate(transformComponent.transform, glm::radians(transformComponent.rotation.x), glm::vec3(1, 0, 0));
-            transformComponent.transform = glm::scale(transformComponent.transform, transformComponent.scale);
-            transformComponent.transformIT = glm::transpose(glm::inverse(transformComponent.transform));
+        auto* workQueue = hierarchyManager->EnsureWorkQueue<TransformComponent>();
+        uint32_t maxLevel = hierarchyManager->GetMaxActiveLevel();
+        std::vector<tf::Task> levelTasks;
 
-            if (transformPool->IsDynamic(entity))
-                transformPool->SetBit<CHANGED_BIT>(entity);
+        for (uint32_t level = 0; level < maxLevel; ++level)
+        {
+            tf::Task levelTask = this->EmplaceTask(subflow, "TransformMath_" + std::to_string(level), [=](tf::Subflow& nested_subflow) {
 
-            transformComponent.version++;
-            });
+                auto currentQueue = workQueue->GetQueue(level);
+
+                if (currentQueue.empty()) return;
+
+                nested_subflow.for_each(currentQueue.begin(), currentQueue.end(), [=](EntityID entity) {
+
+                    auto& transformComponent = transformPool->Get(entity);
+
+                    glm::mat4 localMat = glm::translate(glm::mat4(1.0f), transformComponent.translation);
+                    localMat = glm::rotate(localMat, glm::radians(transformComponent.rotation.z), glm::vec3(0, 0, 1));
+                    localMat = glm::rotate(localMat, glm::radians(transformComponent.rotation.y), glm::vec3(0, 1, 0));
+                    localMat = glm::rotate(localMat, glm::radians(transformComponent.rotation.x), glm::vec3(1, 0, 0));
+                    localMat = glm::scale(localMat, transformComponent.scale);
+
+                    if (hierarchyPool->Has(entity))
+                    {
+                        EntityID parent = hierarchyPool->Get(entity).parent;
+
+                        if (parent != NULL_ENTITY && transformPool->Has(parent)) {
+                            auto& parentTransform = transformPool->Get(parent);
+                            transformComponent.transform = parentTransform.transform * localMat;
+                        }
+                        else {
+                            transformComponent.transform = localMat;
+                        }
+                    }
+                    else
+                    {
+                        transformComponent.transform = localMat;
+                    }
+
+                    transformComponent.transformIT = glm::transpose(glm::inverse(transformComponent.transform));
+
+                    if (transformPool->IsDynamic(entity)) {
+                        transformPool->SetBit<CHANGED_BIT>(entity);
+                    }
+
+                    transformComponent.version++;
+                    });
+                });
+
+            if (!levelTasks.empty()) {
+                levelTasks.back().precede(levelTask);
+            }
+            levelTasks.push_back(levelTask);
+        }
     }
 
     void TransformSystem::UploadComponents(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow, bool uploadDynamic, bool uploadStatic)

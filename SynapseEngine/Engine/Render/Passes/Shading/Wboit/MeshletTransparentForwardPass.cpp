@@ -99,7 +99,7 @@ namespace Syn {
     }
 
     void MeshletTransparentForwardPass::PrepareFrame(const RenderContext& context) {
-        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
         _graphicsState.renderArea = extent;
 
@@ -140,7 +140,7 @@ namespace Syn {
 
         auto drawData = scene->GetSceneDrawData();
         auto componentBufferManager = scene->GetComponentBufferManager();
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         auto animationManager = ServiceLocator::GetAnimationManager();
 
         uint32_t fIdx = context.frameIndex;
@@ -162,7 +162,7 @@ namespace Syn {
         //Using prevous frame's depth pyramid!
         uint fIdx = context.frameIndex;
         uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, prevFrameIndex);
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, prevFrameIndex);
 
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
         auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);

@@ -20,7 +20,7 @@ namespace Syn
             ScopedArchiveObject obj(ar, name);
             auto& settings = const_cast<std::remove_const_t<U>&>(val);
 
-            // Hardware Devices (A frameworköd automatikusan kezeli az enumokat!)
+            // Hardware Devices
             ar.Property("geometryCullingDevice", settings.geometryCullingDevice);
             ar.Property("spotLightCullingDevice", settings.spotLightCullingDevice);
             ar.Property("pointLightCullingDevice", settings.pointLightCullingDevice);
@@ -167,6 +167,23 @@ namespace Syn
             ar.Property("outlinePrimaryColor", settings.outlinePrimaryColor);
             ar.Property("outlineSecondaryColor", settings.outlineSecondaryColor);
             ar.Property("outlineThickness", settings.outlineThickness);
+
+            // Infinite Grid
+            ar.Property("enableInfiniteGrid", settings.enableInfiniteGrid);
+            ar.Property("gridScale", settings.gridScale);
+            ar.Property("fadeDistance", settings.fadeDistance);
+            ar.Property("gridThickness", settings.gridThickness);
+            ar.Property("axisThickness", settings.axisThickness);
+            ar.Property("gridShowXZ", settings.gridShowXZ);
+            ar.Property("gridShowXY", settings.gridShowXY);
+            ar.Property("gridShowYZ", settings.gridShowYZ);
+            ar.Property("gridShowAxisX", settings.gridShowAxisX);
+            ar.Property("gridShowAxisY", settings.gridShowAxisY);
+            ar.Property("gridShowAxisZ", settings.gridShowAxisZ);
+            ar.Property("gridColor", settings.gridColor);
+            ar.Property("axisXColor", settings.axisXColor);
+            ar.Property("axisYColor", settings.axisYColor);
+            ar.Property("axisZColor", settings.axisZColor);
         }
     };
 

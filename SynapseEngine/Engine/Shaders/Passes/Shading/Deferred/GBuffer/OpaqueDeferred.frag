@@ -42,24 +42,24 @@ void main() {
     vec2 finalUV = inUV * mat.uvScale;
 
     // 2. Evaluate Albedo & Alpha
-    vec4 albedoAlpha = EvaluateAlbedoAlpha(mat, finalUV);
+    vec4 albedoAlpha = EvaluateAlbedoAlpha(ctx.textureMetadataBufferAddr, mat, finalUV);
     if (albedoAlpha.a < ctx.alphaLimitDiscard) {
         discard;
     }
 
     // 3. Evaluate Normals & TBN
-    vec3 finalNormal = EvaluateNormal(mat, finalUV, inNormal, inTangent);
+    vec3 finalNormal = EvaluateNormal(ctx.textureMetadataBufferAddr, mat, finalUV, inNormal, inTangent);
 
     // 4. Evaluate Metalness & Roughness
-    vec2 metalRough = EvaluateMetallicRoughness(mat, finalUV);
+    vec2 metalRough = EvaluateMetallicRoughness(ctx.textureMetadataBufferAddr, mat, finalUV);
     float finalMetalness = metalRough.x;
     float finalRoughness = clamp(metalRough.y, 0.04, 1.0);
 
     // 5. Evaluate Emissive
-    vec3 finalEmissive = EvaluateEmissive(mat, finalUV);
+    vec3 finalEmissive = EvaluateEmissive(ctx.textureMetadataBufferAddr, mat, finalUV);
 
     // 6. Evaluate Ambient Occlusion
-    float finalAo = EvaluateAO(mat, finalUV);
+    float finalAo = EvaluateAO(ctx.textureMetadataBufferAddr, mat, finalUV);
 
     // 7. Write Standard Outputs
     outColorMetallic   = vec4(albedoAlpha.rgb, finalMetalness);

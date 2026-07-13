@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <memory>
-#include "Editor/View/IGuiWindow.h"
+#include "Editor/Workspace/IGuiWindow.h"
 
 namespace Syn 
 {
@@ -17,6 +17,8 @@ namespace Syn
         virtual ~IWorkspace() = default;
 
         virtual void Initialize() = 0;
+        virtual void OnActivate() {}
+        virtual void OnDeactivate() {}
 
         virtual void UpdateAndDraw() {
             for (auto& window : _windows) {

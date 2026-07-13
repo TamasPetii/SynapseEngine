@@ -15,11 +15,16 @@ namespace Syn {
     ModelManager::ModelManager(uint32_t framesInFlight,
         std::shared_ptr<StaticMeshBuilder> builder,
         std::unique_ptr<IGpuModelUploader> uploader,
-        MaterialLoadCallback materialLoadCallback)
+        MaterialLoadCallback materialLoadCallback,
+        PreviewAllocateCallback previewAllocateCallback,
+        PreviewMarkDirtyCallback previewMarkDirtyCallback
+    )
         : AddressResourceManager<StaticMesh, GpuModelAddresses>(framesInFlight, 1024, 256, 512),
         _builder(builder), 
         _uploader(std::move(uploader)), 
-        _materialLoadCallback(std::move(materialLoadCallback))
+        _materialLoadCallback(std::move(materialLoadCallback)),
+        _previewAllocateCallback(std::move(previewAllocateCallback)),
+        _previewMarkDirtyCallback(std::move(previewMarkDirtyCallback))
     {
     }
 
@@ -118,6 +123,7 @@ namespace Syn {
 
                 uint32_t globalMatId = loadedMaterialIds[localMatIndex];
                 entry.resource->cpuData.meshMaterialIndices.push_back(globalMatId);
+                transientGpu.meshMaterialIndices.push_back(globalMatId);
             }
         }
 
@@ -142,7 +148,8 @@ namespace Syn {
                 safeEntry.stagingBuffer.reset();
 
                 SetResourceState(entryId, ResourceState::Ready);
-                _version.fetch_add(1, std::memory_order_release);
+                MarkDirty(entryId);
+
                 Info("Model loaded, hardware buffers ready and transient RAM freed: {}", safeEntry.path);
             },
             .needsGraphics = false
@@ -153,34 +160,89 @@ namespace Syn {
 
     void ModelManager::FinalizeResource(EntryType& entry)
     {
-        uint32_t entryIndex = _pathToId.at(entry.path);
-
-        GpuModelAddresses addresses{};
-        const auto& hw = entry.resource->hardwareBuffers;
-        const auto& cpuData = entry.resource->cpuData;
-
-        addresses.vertexPositions = hw.vertexPositions->GetDeviceAddress();
-        addresses.vertexAttributes = hw.vertexAttributes->GetDeviceAddress();
-        addresses.indices = hw.indices->GetDeviceAddress();
-        addresses.meshDescriptors = hw.meshDescriptors->GetDeviceAddress();
-        addresses.meshColliders = hw.meshColliders->GetDeviceAddress();
-        addresses.lodDescriptors = hw.lodDescriptors->GetDeviceAddress();
-        addresses.meshletVertexIndices = hw.meshletVertexIndices->GetDeviceAddress();
-        addresses.meshletTriangleIndices = hw.meshletTriangleIndices->GetDeviceAddress();
-        addresses.meshletDescriptors = hw.meshletDescriptors->GetDeviceAddress();
-        addresses.meshletDrawDescriptors = hw.meshletDrawDescriptors->GetDeviceAddress();
-        addresses.meshletColliders = hw.meshletColliders->GetDeviceAddress();
-        addresses.nodeTransforms = hw.nodeTransforms->GetDeviceAddress();
-        addresses.globalCollider = cpuData.globalCollider;
-        addresses.vertexCount = cpuData.globalVertexCount;
-        addresses.indexCount = cpuData.globalIndexCount;
-        addresses.meshCount = cpuData.globalMeshCount;
-        addresses.averageLodIndexCount = cpuData.globalAverageLodIndexCount;
-        addresses.isReady = 1;
-
-        WriteAddress(entryIndex, addresses);
-    
+        uint32_t index = _pathToId.at(entry.path);
+        if (_previewAllocateCallback) _previewAllocateCallback(index);
         entry.resource->transientGpuData.reset();
         entry.resource->transientCpuData.reset();
+    }
+
+    void ModelManager::FlushDirtyResources() 
+    {
+        ProcessDirtyReadyEntries([this](uint32_t index, const EntryType& entry) {
+
+            GpuModelAddresses addresses{};
+            const auto& hw = entry.resource->hardwareBuffers;
+            const auto& cpuData = entry.resource->cpuData;
+
+            addresses.vertexPositions = hw.vertexPositions->GetDeviceAddress();
+            addresses.vertexAttributes = hw.vertexAttributes->GetDeviceAddress();
+            addresses.indices = hw.indices->GetDeviceAddress();
+            addresses.meshMaterialIndices = hw.meshMaterialIndices->GetDeviceAddress();
+            addresses.meshDescriptors = hw.meshDescriptors->GetDeviceAddress();
+            addresses.meshColliders = hw.meshColliders->GetDeviceAddress();
+            addresses.lodDescriptors = hw.lodDescriptors->GetDeviceAddress();
+            addresses.meshletVertexIndices = hw.meshletVertexIndices->GetDeviceAddress();
+            addresses.meshletTriangleIndices = hw.meshletTriangleIndices->GetDeviceAddress();
+            addresses.meshletDescriptors = hw.meshletDescriptors->GetDeviceAddress();
+            addresses.meshletDrawDescriptors = hw.meshletDrawDescriptors->GetDeviceAddress();
+            addresses.meshletColliders = hw.meshletColliders->GetDeviceAddress();
+            addresses.nodeTransforms = hw.nodeTransforms->GetDeviceAddress();
+
+            addresses.globalCollider = cpuData.globalCollider;
+            addresses.vertexCount = cpuData.globalVertexCount;
+            addresses.indexCount = cpuData.globalIndexCount;
+            addresses.meshCount = cpuData.globalMeshCount;
+            addresses.averageLodIndexCount = cpuData.globalAverageLodIndexCount;
+            addresses.isReady = 1;
+
+            WriteAddress(index, addresses);
+
+            if (_previewMarkDirtyCallback) _previewMarkDirtyCallback(index);
+            });
+    }
+
+    std::vector<uint32_t> ModelManager::GetModelsUsingMaterials(uint32_t materialId) const {
+        std::lock_guard lock(_mutex);
+        std::vector<uint32_t> result;
+
+        for (uint32_t i = 0; i < _entries.size(); ++i) {
+            if (_entries[i].state == ResourceState::Ready && _entries[i].resource) {
+                const auto& model = *_entries[i].resource;
+
+                for (auto meshMaterialIndex : model.cpuData.meshMaterialIndices)
+                {
+                    if (meshMaterialIndex == materialId)
+                    {
+                        result.push_back(i);
+                        break;
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    void ModelManager::NotifyMaterialReady(uint32_t materialId) {
+        std::lock_guard lock(_pendingMaterialMutex);
+        _pendingMaterials.insert(materialId);
+    }
+
+    void ModelManager::ProcessPendingNotifications() {
+        std::unordered_set<uint32_t> materialsToProcess;
+
+        {
+            std::lock_guard lock(_pendingMaterialMutex);
+            materialsToProcess.swap(_pendingMaterials);
+        }
+
+        if (materialsToProcess.empty()) return;
+
+        for (uint32_t materialId : materialsToProcess) {
+            for (uint32_t modelId : GetModelsUsingMaterials(materialId)) {
+                if (_previewMarkDirtyCallback) 
+                        _previewMarkDirtyCallback(modelId);
+            }
+        }
     }
 }

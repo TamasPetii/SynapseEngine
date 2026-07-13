@@ -35,6 +35,13 @@ void main() {
 
     // 3. Fetch Model Component & Material Lookup
     uint modelDenseIndex = GET_SPARSE_INDEX(ctx.modelSparseMapBufferAddr, entityId);
+    uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
+
+    if (transformDenseIndex == INVALID_INDEX || modelDenseIndex == INVALID_INDEX) {
+        gl_Position = vec4(0.0, 0.0, 0.0, 0.0);
+        return; 
+    }
+
     ModelComponent comp = GET_MODEL_COMP(ctx.modelBufferAddr, modelDenseIndex);
     
     // 4. Fetch Model Addresses & Raw Vertex Data
@@ -44,7 +51,6 @@ void main() {
     GpuVertexPosition v = GET_VERTEX_POS(addrs.vertexPositions, realVertexIndex);
 
     // 5. Fetch Transform and Camera
-    uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, entityId);
     TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
 
     uint cameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);

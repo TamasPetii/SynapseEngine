@@ -5,6 +5,7 @@
 #include "Engine/Material/MaterialManager.h"
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Animation/AnimationManager.h"
+#include "Engine/Image/ImageManager.h"
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Render/ComputeGroupSize.h"
 #include "Engine/Scene/BufferNames.h"
@@ -25,7 +26,7 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         auto settings = scene->GetSettings();
         auto compManager = scene->GetComponentBufferManager();
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
         uint32_t fIdx = context.frameIndex;
         uint32_t width = rtGroup->GetWidth();
@@ -36,8 +37,11 @@ namespace Syn {
         auto modelManager = ServiceLocator::GetModelManager();
         auto materialManager = ServiceLocator::GetMaterialManager();
         auto animationManager = ServiceLocator::GetAnimationManager();
+		auto imageManager = ServiceLocator::GetImageManager();
 
         FrameGlobalContext ctx = {};
+
+		ctx.textureMetadataBufferAddr = imageManager->GetAddressBufferDeviceAddress();
 
         ctx.globalDrawCountBufferAddr = drawData->Models.drawCountBuffer.GetAddress(fIdx);
         ctx.globalInstanceIndexBufferAddr = drawData->Models.instanceBuffer.GetAddress(fIdx);
@@ -49,10 +53,13 @@ namespace Syn {
         ctx.cameraVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::CameraVisibleData, fIdx);
         ctx.cameraBufferAddr = compManager->GetBufferAddr(BufferNames::CameraData, fIdx);
         ctx.cameraSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::CameraSparseMap, fIdx);
-
+        
         ctx.transformBufferAddr = compManager->GetBufferAddr(BufferNames::TransformData, fIdx);
         ctx.transformSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::TransformSparseMap, fIdx);
 		ctx.transformModelLinkBufferAddr = compManager->GetBufferAddr(BufferNames::TransformModelLinkData, fIdx);
+
+        ctx.tagSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::TagSparseMap, fIdx);
+        ctx.tagDataBufferAddr = compManager->GetBufferAddr(BufferNames::TagData, fIdx);
 
 		ctx.staticChunkDataBufferAddr = drawData->Chunks.chunkDataBuffer.GetAddress(fIdx);
         ctx.staticChunkVisibleIndexBufferAddr = drawData->Chunks.chunkVisibilityBuffer.GetAddress(fIdx);
@@ -277,5 +284,22 @@ namespace Syn {
         ServiceLocator::GetAnimationManager()->RecordSync(context.cmd);
         ServiceLocator::GetModelManager()->RecordSync(context.cmd);
         ServiceLocator::GetMaterialManager()->RecordSync(context.cmd);
+        ServiceLocator::GetImageManager()->RecordSync(context.cmd);
+
+        Vk::GlobalBarrierInfo globalBarrier{};
+
+        globalBarrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT | VK_PIPELINE_STAGE_2_HOST_BIT |  VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        globalBarrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT | VK_ACCESS_2_HOST_WRITE_BIT | VK_ACCESS_2_SHADER_WRITE_BIT;
+
+        globalBarrier.dstStage = VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_EXT |
+                                 VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_EXT |
+                                 VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT |
+                                 VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT |
+                                 VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT |
+                                 VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
+
+        globalBarrier.dstAccess = VK_ACCESS_2_SHADER_READ_BIT | VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT | VK_ACCESS_2_MEMORY_READ_BIT;
+
+        Vk::BufferUtils::InsertGlobalBarrier(context.cmd, globalBarrier);
     }
 }

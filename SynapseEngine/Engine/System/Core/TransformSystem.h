@@ -10,6 +10,7 @@ namespace Syn
         std::string GetName() const override { return "TransformSystem"; }
         std::string GetGroup() const override { return SystemGroupNames::CoreSystems; }
 
+        std::vector<TypeID> GetReadDependencies() const override;
         std::vector<TypeID> GetWriteDependencies() const override;
     protected:
         std::string GetSparseBufferName() const override { return BufferNames::TransformSparseMap; }

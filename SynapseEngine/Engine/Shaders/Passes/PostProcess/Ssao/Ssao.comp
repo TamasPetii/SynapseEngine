@@ -1,0 +1,91 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_KHR_shader_subgroup_quad : require
+
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Ssao.glsl"
+#include "../../../Includes/Common/Camera.glsl"
+#include "../../../Includes/Utils/DepthMath.glsl"
+
+layout(local_size_x = 8, local_size_y = 8, local_size_z = 1) in;
+
+layout(set = 2, binding = 0) uniform sampler2D inHizPyramid;
+layout(set = 2, binding = 1) uniform sampler2D inNoiseTexture;
+layout(set = 2, binding = 2, r16f) uniform writeonly image2D outAoImage;
+
+#include "../../../Includes/PushConstants/SsaoPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+   SsaoPC pc;
+};
+
+void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    ivec2 pos = ivec2(gl_GlobalInvocationID.xy);
+    if (pos.x >= int(ctx.screenWidth) || pos.y >= int(ctx.screenHeight)) return;
+
+    vec2 uv = (vec2(pos) + vec2(0.5)) / vec2(ctx.screenWidth, ctx.screenHeight);
+    
+    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
+
+    float baseDepthNorm = textureLod(inHizPyramid, uv, 0).x; 
+    
+    // Skip skybox/background
+    if (baseDepthNorm >= 0.999) {
+        imageStore(outAoImage, pos, vec4(1.0, 0.0, 0.0, 0.0));
+        return;
+    }
+
+    vec3 viewPos = GetViewPosFromLinearZ(uv, baseDepthNorm, camera);
+    vec2 offsetU = vec2(1.0 / float(ctx.screenWidth), 0.0);
+    vec2 offsetV = vec2(0.0, 1.0 / float(ctx.screenHeight));
+    
+    // Reconstruct view-space normal from depth gradients
+    vec3 viewPosRight = GetViewPosFromLinearZ(uv + offsetU, textureLodOffset(inHizPyramid, uv, 0.0, ivec2(1, 0)).x, camera);
+    vec3 viewPosDown  = GetViewPosFromLinearZ(uv + offsetV, textureLodOffset(inHizPyramid, uv, 0.0, ivec2(0, 1)).x, camera);
+    vec3 viewNormal   = normalize(cross(viewPosRight - viewPos, viewPos - viewPosDown));
+
+    vec2 noiseScale = vec2(ctx.screenWidth / pc.noiseTextureWidth, ctx.screenHeight / pc.noiseTextureHeight);
+    vec3 randomVec = normalize(texture(inNoiseTexture, uv * noiseScale).xyz * 2.0 - 1.0);
+
+    vec3 tangent = normalize(randomVec - viewNormal * dot(randomVec, viewNormal));
+    vec3 bitangent = cross(viewNormal, tangent);
+    const mat3 TBN = mat3(tangent, bitangent, viewNormal);
+
+    vec3 viewDir = normalize(-viewPos);
+    float nDotV = max(dot(viewNormal, viewDir), 0.0);
+    float distanceScale = clamp(abs(viewPos.z) * 0.05, 1.0, 5.0);
+    float smartBias = pc.bias * mix(4.0, 1.0, nDotV) * distanceScale;
+
+    float occlusion = 0.0;
+    for(int i = 0; i < int(pc.sampleCount); ++i) {
+        vec3 samplePos = TBN * GET_SSAO_KERNEL_DATA(ctx.ssaoKernelBufferAddr, i).xyz; 
+        samplePos = viewPos + samplePos * pc.aoRadius;
+
+        vec4 offset = camera.projVulkan * vec4(samplePos, 1.0);
+        offset.xyz /= offset.w;
+        offset.xyz = offset.xyz * 0.5 + 0.5;
+
+        float sampleDepth = GetViewPosFromLinearZ(offset.xy, textureLod(inHizPyramid, offset.xy, 0).x, camera).z;
+        float rangeCheck = smoothstep(0.0, 1.0, pc.aoRadius / abs(viewPos.z - sampleDepth));
+
+        if (sampleDepth >= samplePos.z + smartBias && abs(viewPos.z - sampleDepth) < pc.maxOcclusionDistance) {
+            occlusion += 1.0 * rangeCheck;
+        }
+    }
+    float finalAo = clamp(1.0 - (occlusion / float(pc.sampleCount)) * pc.aoIntensity, 0.0, 1.0);
+
+    /*
+    float ao_horizontal = subgroupQuadSwapHorizontal(finalAo);
+    float ao_vertical   = subgroupQuadSwapVertical(finalAo);
+    float ao_diagonal   = subgroupQuadSwapDiagonal(finalAo);
+    float blurredAo = (finalAo + ao_horizontal + ao_vertical + ao_diagonal) * 0.25;
+    */
+
+    imageStore(outAoImage, pos, vec4(finalAo, 0.0, 0.0, 0.0));
+}

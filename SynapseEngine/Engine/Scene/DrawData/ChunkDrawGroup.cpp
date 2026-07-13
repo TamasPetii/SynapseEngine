@@ -22,34 +22,34 @@ namespace Syn
         VkBufferUsageFlags storageUsage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
         VkBufferUsageFlags indirectUsage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT |  VK_BUFFER_USAGE_TRANSFER_DST_BIT;
 
-        chunkDataBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(ChunkDataGPU), storageUsage });
+        chunkDataBuffer.Initialize({ "ChunkDrawGroup_ChunkDataBuffer", BufferStrategy::Hybrid, frameCount, sizeof(ChunkDataGPU), storageUsage });
         chunkDataBuffer.UpdateCapacityAll(1);
 
-        chunkVisibilityBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(uint32_t), storageUsage });
+        chunkVisibilityBuffer.Initialize({ "ChunkDrawGroup_ChunkVisibilityBuffer", BufferStrategy::Hybrid, frameCount, sizeof(uint32_t), storageUsage });
         chunkVisibilityBuffer.UpdateCapacityAll(1);
 
-        chunkAabbSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
+        chunkAabbSingleCmdBuffer.Initialize({ "ChunkDrawGroup_ChunkAabbSingleCmdBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
         chunkAabbSingleCmdBuffer.UpdateCapacityAll(1);
 
-        chunkIndirectDispatchBuffer.Initialize({ BufferStrategy::Hybrid, frameCount, sizeof(VkDispatchIndirectCommand), indirectUsage });
+        chunkIndirectDispatchBuffer.Initialize({ "ChunkDrawGroup_ChunkIndirectDispatchBuffer", BufferStrategy::Hybrid, frameCount, sizeof(VkDispatchIndirectCommand), indirectUsage });
         chunkIndirectDispatchBuffer.UpdateCapacityAll(1);
 
-        sceneAabbBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(SceneAABB), storageUsage });
+        sceneAabbBuffer.Initialize({ "ChunkDrawGroup_SceneAabbBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(SceneAABB), storageUsage });
         sceneAabbBuffer.UpdateCapacityAll(1);
 
-        mortonRadixSortTempBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, 1, storageUsage | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 10000, 20000 });
+        mortonRadixSortTempBuffer.Initialize({ "ChunkDrawGroup_MortonRadixSortTempBuffer", BufferStrategy::GpuOnly, frameCount, 1, storageUsage | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 10000, 20000 });
         mortonRadixSortTempBuffer.UpdateCapacityAll(1);
 
-        mortonIndirectDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectUsage });
+        mortonIndirectDispatchBuffer.Initialize({ "ChunkDrawGroup_MortonIndirectDispatchBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectUsage });
         mortonIndirectDispatchBuffer.UpdateCapacityAll(1);
 
-        mortonIndirectDrawBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
+        mortonIndirectDrawBuffer.Initialize({ "ChunkDrawGroup_MortonIndirectDrawBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
         mortonIndirectDrawBuffer.UpdateCapacityAll(1);
 
-        mortonChunkVisibleIndirectDispatchBuffer.Initialize({ BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectUsage });
+        mortonChunkVisibleIndirectDispatchBuffer.Initialize({ "ChunkDrawGroup_MortonChunkVisibleIndirectDispatchBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectUsage });
         mortonChunkVisibleIndirectDispatchBuffer.UpdateCapacityAll(1);
 
-        mortonAabbSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
+        mortonAabbSingleCmdBuffer.Initialize({ "ChunkDrawGroup_MortonAabbSingleCmdBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
         mortonAabbSingleCmdBuffer.UpdateCapacityAll(1);
 
         for (uint32_t i = 0; i < frameCount; ++i) {

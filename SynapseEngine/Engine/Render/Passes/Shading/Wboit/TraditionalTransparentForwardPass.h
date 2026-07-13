@@ -11,6 +11,7 @@ namespace Syn {
         std::string GetName() const override { return _passName; }
         std::string GetGroup() const override { return PassGroupNames::WboitPasses; }
         void Initialize() override;
+        bool ShouldCollectStatistics() const override { return true; }
     protected:
 		bool ShouldExecute(const RenderContext& context) const override;
         void BindDescriptors(const RenderContext& context) override;

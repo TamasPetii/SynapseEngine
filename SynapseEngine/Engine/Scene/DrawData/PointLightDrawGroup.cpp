@@ -33,16 +33,16 @@ namespace Syn
 
         VkBufferUsageFlags usage = VK_BUFFER_USAGE_INDIRECT_BUFFER_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 
-        indirectBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), usage });
+        indirectBuffer.Initialize({ "PointLightDrawGroup_IndirectBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), usage });
         indirectBuffer.UpdateCapacityAll(1);
 
-        sphereSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), usage });
+        sphereSingleCmdBuffer.Initialize({ "PointLightDrawGroup_SphereSingleCmdBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), usage });
         sphereSingleCmdBuffer.UpdateCapacityAll(1);
 
-        aabbSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), usage });
+        aabbSingleCmdBuffer.Initialize({ "PointLightDrawGroup_AabbSingleCmdBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), usage });
         aabbSingleCmdBuffer.UpdateCapacityAll(1);
 
-        billboardSingleCmdBuffer.Initialize({ BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), usage });
+        billboardSingleCmdBuffer.Initialize({ "PointLightDrawGroup_BillboardSingleCmdBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), usage });
         billboardSingleCmdBuffer.UpdateCapacityAll(1);
 
         for (uint32_t i = 0; i < frameCount; ++i) {

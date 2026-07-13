@@ -51,7 +51,7 @@ namespace Syn {
     void CompositePass::PrepareFrame(const RenderContext& context) {
         auto vkContext = ServiceLocator::GetVkContext();
         auto swapChain = vkContext->GetSwapChain();
-        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
         auto inputImage = group->GetImage(RenderTargetNames::Main);
         auto swapchainImage = swapChain->GetImage(context.swapchainImageIndex);
@@ -92,7 +92,7 @@ namespace Syn {
 
     void CompositePass::BindDescriptors(const RenderContext& context) {
         auto imageManager = ServiceLocator::GetImageManager();
-        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
         auto inputImage = group->GetImage(RenderTargetNames::Main);
         auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge);

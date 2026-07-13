@@ -4,18 +4,21 @@
 #include <GLFW/glfw3.h>
 #include <filesystem>
 
-#include "Editor/Workspace/SceneWorkspace.h"
-#include "Editor/Workspace/ModelWorkspace.h"
-#include "Editor/Workspace/MaterialWorkspace.h"
-#include "Editor/Workspace/TextureWorkspace.h"
+#include "Editor/Workspace/SceneWorkspace/SceneWorkspace.h"
+#include "Editor/Workspace/ModelWorkspace/ModelWorkspace.h"
+#include "Editor/Workspace/MaterialWorkspace/MaterialWorkspace.h"
+#include "Editor/Workspace/TextureWorkspace/TextureWorkspace.h"
 
-#include "Editor/View/MainMenu/MainMenuView.h"
-#include "EditorCore/ViewModels/MainMenu/MainMenuViewModel.h"
+#include "Editor/Workspace/Common/MainMenu/MainMenuView.h"
+#include "EditorCore/ViewModels/Common/MainMenu/MainMenuViewModel.h"
 
 #include "Manager/GuiTextureManager.h"
 #include "Manager/EditorIcons.h"
 #include "Engine/Utils/PathUtils.h"
-#include "Editor/View/IGuiWindow.h"
+#include "Editor/Workspace/IGuiWindow.h"
+
+#include "Engine/Image/Loader/SvgImageLoader.h"
+#include "Engine/Logger/SynLog.h"
 
 Synapse::Synapse(const Syn::ApplicationConfig& config)
     : Syn::Application(config)
@@ -64,6 +67,16 @@ void Synapse::OnInit() {
 
     _engine = std::make_unique<Syn::Engine>(params);
 
+    std::string iconPath = Syn::PathUtils::GetAbsolutePathString(std::string(ASSET_PATH) + "/dark_icon.svg");
+    Syn::SvgImageLoader svgLoader;
+    if (auto rawImageOpt = svgLoader.LoadFile(iconPath)) {
+        const auto& rawImage = rawImageOpt.value();
+        GetWindow().SetIcon(rawImage.width, rawImage.height, rawImage.pixels.data());
+    }
+    else {
+        Syn::Error("Failed to load window icon from: {}", iconPath);
+    }
+
 #ifndef SYN_PERFORMANCE
 
     auto vkContext = _engine->GetVkContext();
@@ -89,9 +102,11 @@ void Synapse::OnInit() {
     );
 
     ImGuiIO& io = ImGui::GetIO();
-    io.Fonts->AddFontDefault();
+    ImFontConfig defaultConfig;
+    defaultConfig.SizePixels = 13.0f;
+    io.Fonts->AddFontDefault(&defaultConfig);
+
     _iconManager->InitializeFontAwesome(io, Syn::PathUtils::GetAbsolutePathString(FONT_PATH), 16.0f);
-    _guiManager->CreateFontTexture();
     _iconManager->LoadEngineIcons(Syn::PathUtils::GetAbsolutePathString(ICON_PATH));
 
     std::string absoluteAssetsPath = std::filesystem::absolute(ASSET_PATH).generic_string();
@@ -99,7 +114,7 @@ void Synapse::OnInit() {
     using MainMenuWin = Syn::EditorWindow<Syn::MainMenuView, Syn::MainMenuViewModel>;
     _guiManager->AddGlobalWindow<MainMenuWin>(
         Syn::MainMenuView{},
-        Syn::MainMenuViewModel{ _editorContext->GetSceneApi(), _guiManager->GetFileDialog() }
+        Syn::MainMenuViewModel{ _editorContext->GetApi<Syn::ISceneApi>(), _guiManager->GetFileDialog() }
     );
 
     _guiManager->AddWorkspace(Syn::EditorWorkspace::Scene, std::make_unique<Syn::SceneWorkspace>(

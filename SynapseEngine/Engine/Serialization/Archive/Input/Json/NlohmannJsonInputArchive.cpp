@@ -79,6 +79,10 @@ namespace Syn
         ReadValue(name, value);
     }
 
+    void NlohmannJsonInputArchive::PropertyUint16(const char* name, uint16_t& value) {
+        ReadValue(name, value);
+    }
+
     void NlohmannJsonInputArchive::PropertyInt32(const char* name, int32_t& value) {
         ReadValue(name, value);
     }

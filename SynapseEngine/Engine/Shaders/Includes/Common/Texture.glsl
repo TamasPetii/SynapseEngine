@@ -6,6 +6,21 @@
 layout(set = 0, binding = 0) uniform sampler globalSamplers[];
 layout(set = 0, binding = 1) uniform texture2D bindlessTextures[];
 
+layout(buffer_reference, std430, buffer_reference_align = 4) readonly restrict buffer TextureMetadataBuffer {
+    uint data[];
+};
+
+#define GET_TEXTURE_METADATA(addr, texID) TextureMetadataBuffer(addr).data[texID]
+
+uint UnpackTextureMetadataSampler(uint meta) {
+    return meta & 0x7FFFFFFF;
+}
+
+void UnpackTextureMetadata(uint meta, out uint samplerID, out bool invertTangent) {
+    samplerID = meta & 0x7FFFFFFF;
+    invertTangent = bool(meta >> 31);
+}
+
 #define SAMPLER_LINEAR_REPEAT        0
 #define SAMPLER_LINEAR_CLAMP_EDGE    1
 #define SAMPLER_NEAREST_REPEAT       2

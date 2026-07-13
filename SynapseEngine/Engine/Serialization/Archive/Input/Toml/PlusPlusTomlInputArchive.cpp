@@ -77,6 +77,10 @@ namespace Syn
         value = static_cast<uint8_t>(GetNextNode(name)->as_integer()->get());
     }
 
+    void PlusPlusTomlInputArchive::PropertyUint16(const char* name, uint16_t& value) {
+        value = static_cast<uint16_t>(GetNextNode(name)->as_integer()->get());
+    }
+
     void PlusPlusTomlInputArchive::PropertyInt32(const char* name, int32_t& value) { 
         value = static_cast<int32_t>(GetNextNode(name)->as_integer()->get());
     }

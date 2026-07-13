@@ -9,7 +9,7 @@ namespace Syn::UI {
         ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(12.0f, 12.0f));
 
-        ImGuiChildFlags childFlags = ImGuiChildFlags_Borders;
+        ImGuiChildFlags childFlags = ImGuiChildFlags_Borders | ImGuiChildFlags_AlwaysUseWindowPadding;
 
         if (isOpen) {
             childFlags |= ImGuiChildFlags_AutoResizeY;
@@ -20,7 +20,7 @@ namespace Syn::UI {
         float height = isOpen ? 0.0f : closedHeight;
 
         std::string childId = std::string("##Card_") + label;
-        ImGui::BeginChild(childId.c_str(), ImVec2(0, height), childFlags, ImGuiWindowFlags_AlwaysUseWindowPadding | ImGuiWindowFlags_NoScrollbar);
+        ImGui::BeginChild(childId.c_str(), ImVec2(0, height), childFlags, ImGuiWindowFlags_NoScrollbar);
 
         ImVec2 startPos = ImGui::GetCursorPos();
         float availX = ImGui::GetContentRegionAvail().x;

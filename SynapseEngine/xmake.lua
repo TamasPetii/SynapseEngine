@@ -119,6 +119,7 @@ local vcpkg_packages = {
     "vcpkg::tinyxml2",
     "vcpkg::yaml-cpp",
     "vcpkg::tomlplusplus",
+    "vcpkg::nanosvg"
 }
 
 for _, pkg in ipairs(vcpkg_packages) do
@@ -170,6 +171,30 @@ target("Editor")
     add_headerfiles("Editor/**.h", "Editor/**.hpp")
     add_deps("Engine", "EditorCore")
     set_rundir("$(projectdir)")
+
+    on_load(function (target)
+        local asset_dir = path.join(os.projectdir(), "Assets")
+        
+        if not os.isdir(asset_dir) then
+            import("net.http")
+            import("utils.archive.extract")
+
+            local zip_path = path.join(os.projectdir(), "Assets.zip")
+            local url = "https://github.com/TamasPetii/SynapseEngine/releases/latest/download/Assets.zip"
+
+            http.download(url, zip_path)
+
+            print(" Download complete! Extracting to: " .. os.projectdir())
+            
+            extract(zip_path, os.projectdir())
+
+            os.rm(zip_path)
+            
+            print("=================================================")
+            print(" Assets successfully downloaded and installed!")
+            print("=================================================")
+        end
+    end)
 
 target("UnitTests")
     set_kind("binary")

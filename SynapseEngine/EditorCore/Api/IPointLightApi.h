@@ -1,9 +1,10 @@
 #pragma once
 #include <glm/glm.hpp>
+#include "IApi.h"
 #include "EditorCore/Types/EntityHandle.h"
 
 namespace Syn {
-    class IPointLightApi {
+    class IPointLightApi : public IApi {
     public:
         virtual ~IPointLightApi() = default;
 

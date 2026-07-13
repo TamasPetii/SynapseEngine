@@ -8,6 +8,7 @@
 #include "../../../Includes/Common/FrameGlobalContext.glsl"
 #include "../../../Includes/Common/Camera.glsl"
 #include "../../../Includes/Common/Transform.glsl"
+#include "../../../Includes/Common/Tag.glsl"
 #include "../../../Includes/Common/Model.glsl"
 #include "../../../Includes/Common/Mesh.glsl"
 #include "../../../Includes/Common/Material.glsl"
@@ -59,14 +60,25 @@ void main() {
     for (uint i = gl_LocalInvocationID.x; i < chunk.entityCount; i += gl_WorkGroupSize.x) 
     {     
         uint denseIndex = chunk.firstEntityIndex + i;
-        TransformModelLink link = GET_TRANSFORM_MODEL_LINK(ctx.transformModelLinkBufferAddr, denseIndex);
-        
+
+        TransformModelLink link = GET_TRANSFORM_MODEL_LINK(ctx.transformModelLinkBufferAddr, denseIndex);  
         if (link.modelDenseIndex == INVALID_INDEX) continue;
         uint entityId = link.entityIndex;
+
+        uint tagSparseIndex = GET_SPARSE_INDEX(ctx.tagSparseMapBufferAddr, entityId);
+        if (tagSparseIndex == INVALID_INDEX) return;
+
+        uint entityFlags = GET_TAG_DATA(ctx.tagDataBufferAddr, tagSparseIndex);
+        bool isActive = (entityFlags & (1u << 0)) != 0;
+
+        if (!isActive) return;
 
         TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, denseIndex);
         ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, link.modelDenseIndex);
         
+        bool castShadow = (modelComp.flags & (1u << 0)) != 0;
+        if (modelComp.modelIndex == INVALID_INDEX || !castShadow) return;
+
         ModelAllocationInfo mAlloc = GET_MODEL_ALLOC(ctx.globalModelAllocationBufferAddr, modelComp.modelIndex);
         GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, modelComp.modelIndex);
 
@@ -100,11 +112,6 @@ void main() {
         // 6. Calculate LOD based on Main Camera screen size
         float mainCamScreenSize = CalculateSphereScreenSizePerspective(worldCollider.center, worldCollider.radius, camera.view, camera.proj, cameraNear, screenRes);
         if (mainCamScreenSize < 1.0) continue;
-
-        if (ctx.enableModelOcclusionCulling == 1) {
-            float shadowScreenSizePixels = 0.0;
-            //Todo
-        }
 
         // 7. Encode Payload for sort/draw phase
         uint entityData = (entityId & 0x7FFFFFFF);

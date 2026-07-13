@@ -12,6 +12,7 @@ namespace Syn
         totalStagingSize += getAlignedSize(data.vertexData.vertexPositions.size() * sizeof(GpuVertexPosition));
         totalStagingSize += getAlignedSize(data.vertexData.vertexAttributes.size() * sizeof(GpuVertexAttributes));
         totalStagingSize += getAlignedSize(data.indexedData.indices.size() * sizeof(uint32_t));
+        totalStagingSize += getAlignedSize(data.meshMaterialIndices.size() * sizeof(uint32_t));
         totalStagingSize += getAlignedSize(data.indexedData.meshDescriptors.size() * sizeof(GpuMeshDescriptor));
         totalStagingSize += getAlignedSize(data.indexedData.meshColliders.size() * sizeof(GpuMeshCollider));
         totalStagingSize += getAlignedSize(data.indexedData.lodDescriptors.size() * sizeof(GpuMeshLodDescriptor));
@@ -64,6 +65,7 @@ namespace Syn
         uploadVector(data.vertexData.vertexPositions, vertexFlags, result.hardwareBuffers.vertexPositions);
         uploadVector(data.vertexData.vertexAttributes, vertexFlags, result.hardwareBuffers.vertexAttributes);
         uploadVector(data.indexedData.indices, indexFlags, result.hardwareBuffers.indices);
+        uploadVector(data.meshMaterialIndices, ssboFlags, result.hardwareBuffers.meshMaterialIndices);
 
         // Traditional Pipeline
         uploadVector(data.indexedData.meshDescriptors, ssboFlags, result.hardwareBuffers.meshDescriptors);

@@ -67,7 +67,7 @@ namespace Syn {
     }
 
     void DeferredSpotLightPass::PrepareFrame(const RenderContext& context) {
-        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
         _graphicsState.renderArea = extent;
@@ -93,7 +93,7 @@ namespace Syn {
         auto scene = context.scene;
         auto bufferManager = scene->GetComponentBufferManager();
         auto modelManager = ServiceLocator::GetModelManager();
-        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
         uint32_t fIdx = context.frameIndex;
         auto pyramid = modelManager->GetResource(MeshSourceNames::ProxyPyramid);
@@ -106,7 +106,7 @@ namespace Syn {
     }
 
     void DeferredSpotLightPass::BindDescriptors(const RenderContext& context) {
-        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Deferred, context.frameIndex);
+        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         auto imageManager = ServiceLocator::GetImageManager();
         auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge)->Handle();
 		auto ssaoSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge)->Handle();

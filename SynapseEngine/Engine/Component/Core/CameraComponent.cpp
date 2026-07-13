@@ -15,6 +15,9 @@ namespace Syn
 		, position{ 0.f, 0.f, 0.f }
 		, target{ 0.f, 0.f, -1.f }
 		, up{ 0.f, 1.f, 0.f }
+		, useOrbit(false)
+		, isOrthographic{ false }
+		, orthoSize{ 100.f }
 	{
 		direction = glm::normalize(target - position);
 		right = glm::normalize(glm::cross(direction, up));

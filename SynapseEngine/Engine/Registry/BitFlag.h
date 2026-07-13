@@ -8,7 +8,8 @@ namespace Syn {
 	constexpr uint32_t INDEX_CHANGED_BIT = 3;
 	constexpr uint32_t DIRTY_STATIC_BIT = 4;
 	constexpr uint32_t FORCE_STATIC_GPU_UPLOAD = 5;
-	constexpr uint32_t CUSTOM_CHANGED_BIT1 = 6;
-	constexpr uint32_t CUSTOM_CHANGED_BIT2 = 7;
-	constexpr uint32_t CUSTOM_CHANGED_BIT3 = 8;
+	constexpr uint32_t QUEUED_BIT = 6;
+	constexpr uint32_t CUSTOM_CHANGED_BIT1 = 7;
+	constexpr uint32_t CUSTOM_CHANGED_BIT2 = 8;
+	constexpr uint32_t CUSTOM_CHANGED_BIT3 = 9;
 }

@@ -160,4 +160,15 @@ namespace Syn {
     void GlfwWindow::SetCallbacks(const WindowCallbacks& callbacks) {
         _data.callbacks = callbacks;
     }
+
+    void GlfwWindow::SetIcon(uint32_t width, uint32_t height, const uint8_t* pixels) {
+        if (!_window || !pixels) return;
+
+        GLFWimage image;
+        image.width = static_cast<int>(width);
+        image.height = static_cast<int>(height);
+        image.pixels = const_cast<unsigned char*>(pixels);
+
+        glfwSetWindowIcon(_window, 1, &image);
+    }
 }

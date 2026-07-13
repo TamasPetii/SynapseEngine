@@ -26,6 +26,9 @@
 #include <atomic>
 #include <algorithm>
 
+#include "Engine/Component/Core/TagComponent.h"
+#include "Engine/System/Core/TagSystem.h"
+
 namespace Syn
 {
     constexpr bool ENABLE_DEBUG_LOGGING = false;
@@ -65,6 +68,7 @@ namespace Syn
             TypeInfo<MaterialSystem>::ID,
             TypeInfo<CameraSystem>::ID,
             TypeInfo<StaticSpatialSahSystem>::ID,
+            TypeInfo<TagSystem>::ID
         };
     }
 
@@ -106,6 +110,7 @@ namespace Syn
         auto overridePool = registry->GetPool<MaterialOverrideComponent>();
         auto shadowPool = registry->GetPool<SpotLightShadowComponent>();
         auto spotLightPool = registry->GetPool<SpotLightComponent>();
+        auto tagPool = registry->GetPool<TagComponent>();
 
         EntityID cameraEntity = scene->GetSceneCameraEntity();
         if (!modelPool || !transformPool || !cameraPool || cameraEntity == NULL_ENTITY || !shadowPool || !spotLightPool) return;
@@ -120,17 +125,24 @@ namespace Syn
         auto animationManager = ServiceLocator::GetAnimationManager();
         auto materialManager = ServiceLocator::GetMaterialManager();
 
-        auto modelSnapshot = modelManager->GetResourceSnapshot();
-        auto animSnapshot = animationManager->GetResourceSnapshot();
-        auto matTypeSnapshot = materialManager->GetRenderTypeSnapshot();
+        auto& modelSnapshot = scene->GetSystemContext().modelSnapshots;
+        auto& animSnapshot = scene->GetSystemContext().animationSnapshots;
+        auto& matTypeSnapshot = scene->GetSystemContext().materialRenderTypes;
 
         // Extract Entity Data (Runs once per entity)
-        auto withEntityData = [modelPool, transformPool, animPool, overridePool, modelSnapshot, animSnapshot, drawData]
+        auto withEntityData = [modelPool, transformPool, animPool, overridePool, modelSnapshot, tagPool, animSnapshot, drawData]
         (EntityID entity, auto&& nextFunc) {
             if (!modelPool->Has(entity)) return;
 
             const auto& modelComp = modelPool->Get(entity);
             if (modelComp.modelIndex == NULL_INDEX || modelComp.modelIndex >= drawData->Models.modelAllocations.Size()) return;
+
+            if (tagPool && tagPool->Has(entity)) {
+                const auto& tag = tagPool->Get(entity);
+                if (!tag.globalEnabled || !modelComp.castShadow) {
+                    return;
+                }
+            }
 
             const auto& snapshotEntry = modelSnapshot[modelComp.modelIndex];
             if (snapshotEntry.resource == nullptr || snapshotEntry.state != ResourceState::Ready) return;

@@ -9,6 +9,7 @@
 
 #include "../../../Includes/Core.glsl"
 #include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Tag.glsl"
 #include "../../../Includes/Common/Camera.glsl"
 #include "../../../Includes/Common/PointLight.glsl"
 #include "../../../Includes/Utils/CullingMath.glsl"
@@ -32,6 +33,13 @@ void main() {
     if (globalId >= ctx.pointLightCount) return;
 
     PointLightColliderGPU collider = GET_POINT_LIGHT_COLLIDER(ctx.pointLightColliderBufferAddr, globalId);
+  
+    uint tagSparseIndex = GET_SPARSE_INDEX(ctx.tagSparseMapBufferAddr, collider.entityIndex);
+    if (tagSparseIndex == INVALID_INDEX) return;
+    uint entityFlags = GET_TAG_DATA(ctx.tagDataBufferAddr, tagSparseIndex);
+
+    bool isActive = (entityFlags & (1u << 0)) != 0;
+    if (!isActive) return;
 
     uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);

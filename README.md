@@ -8,8 +8,17 @@ Synapse Engine is a research-oriented real-time rendering engine focusing on eli
 
 The system integrates a segmented data-oriented ECS with a hierarchical GPU culling architecture, modern mesh shader support, and an advanced virtualized shadow map system for directional, spot, and point lights (supporting both CPU and GPU-driven paths). The engine now utilizes an MVI architecture for its tooling and features a robust cross-platform build system using `xmake` for Windows and Linux.
 
-![Synapse Engine Editor UI](Docs/Images/EditorUI.png)
-*Synapse Engine running with the integrated ImGui editor, showcasing the MVI architecture.*
+![Synapse Engine Scene Workspace](Docs/Images/SceneWorkspace.png)
+*Synapse Engine running with the integrated ImGui editor (Scene Workspace), showcasing the MVI architecture.*
+
+![Synapse Engine Model Workspace](Docs/Images/ModelWorkspace.png)
+*Model Workspace*
+
+![Synapse Engine Material Workspace](Docs/Images/MaterialWorkspace.png)
+*Material Workspace*
+
+![Synapse Engine Texture Workspace](Docs/Images/TextureWorkspace.png)
+*Texture Workspace*
 
 ## Core Concepts
 

@@ -5,8 +5,6 @@
 #include "Engine/System/Core/TransformSystem.h"
 #include "Engine/System/Rendering/ModelSystem.h"
 #include "Engine/Mesh/Utils/MeshUtils.h"
-#include "Engine/Mesh/ModelManager.h"
-#include "Engine/Animation/AnimationManager.h"
 #include <algorithm>
 #include <print>
 
@@ -63,10 +61,8 @@ namespace Syn
             return;
         }
 
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto modelSnapshot = modelManager->GetResourceSnapshot();
-        auto animationManager = ServiceLocator::GetAnimationManager();
-        auto animSnapshot = animationManager->GetResourceSnapshot();
+        auto& modelSnapshot = scene->GetSystemContext().modelSnapshots;
+        auto& animSnapshot = scene->GetSystemContext().animationSnapshots;
 
         _spatialItems.clear();
         _spatialItems.resize(staticEntities.size());

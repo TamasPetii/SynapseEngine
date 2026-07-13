@@ -200,10 +200,12 @@ namespace Syn
         {
             const DenseIndex swapTarget = static_cast<DenseIndex>(_staticEnd - 1);
 
-            Base::FlagIndexChanged(swapTarget);
-            Base::SwapBackend(index, swapTarget, onSwap);
-
-            MarkStaticDirty(index);
+            if (index != swapTarget)
+            {
+                Base::FlagIndexChanged(swapTarget);
+                Base::SwapBackend(index, swapTarget, onSwap);
+                MarkStaticDirty(index);
+            }
 
             index = swapTarget;
             _staticEnd--;

@@ -24,6 +24,9 @@
 #include "DirectionLightShadowAtlasSystem.h"
 #include "DirectionLightShadowSystem.h"
 
+#include "Engine/Component/Core/TagComponent.h"
+#include "Engine/System/Core/TagSystem.h"
+
 namespace Syn
 {
 	constexpr bool ENABLE_DEBUG_LOGGING = false;
@@ -60,6 +63,7 @@ namespace Syn
             TypeInfo<MaterialSystem>::ID,
             TypeInfo<CameraSystem>::ID,
             TypeInfo<StaticSpatialSahSystem>::ID, 
+            TypeInfo<TagSystem>::ID
         };
     }
 
@@ -94,6 +98,7 @@ namespace Syn
         auto animPool = registry->GetPool<AnimationComponent>();
         auto overridePool = registry->GetPool<MaterialOverrideComponent>();
         auto shadowPool = registry->GetPool<DirectionLightShadowComponent>();
+        auto tagPool = registry->GetPool<TagComponent>();
 
         EntityID cameraEntity = scene->GetSceneCameraEntity();
         if (!modelPool || !transformPool || !cameraPool || cameraEntity == NULL_ENTITY || !shadowPool)
@@ -110,19 +115,28 @@ namespace Syn
         auto animationManager = ServiceLocator::GetAnimationManager();
         auto materialManager = ServiceLocator::GetMaterialManager();
 
-        auto modelSnapshot = modelManager->GetResourceSnapshot();
-        auto animSnapshot = animationManager->GetResourceSnapshot();
-        auto matTypeSnapshot = materialManager->GetRenderTypeSnapshot();
+        auto& modelSnapshot = scene->GetSystemContext().modelSnapshots;
+        auto& animSnapshot = scene->GetSystemContext().animationSnapshots;
+        auto& matTypeSnapshot = scene->GetSystemContext().materialRenderTypes;
 
         // Extract entity properties (runs exactly once per entity)
-        auto withEntityData = [modelPool, transformPool, animPool, overridePool, modelSnapshot, animSnapshot, drawData]
+        auto withEntityData = [modelPool, transformPool, animPool, overridePool, modelSnapshot, tagPool, animSnapshot, drawData]
             (EntityID entity, auto&& nextFunc) {
                 if (!modelPool->Has(entity))
                     return;
 
                 const auto& modelComp = modelPool->Get(entity);
+
                 if (modelComp.modelIndex == NULL_INDEX || modelComp.modelIndex >= drawData->Models.modelAllocations.Size())
                     return;
+
+                if (tagPool && tagPool->Has(entity)) {
+                    const auto& tag = tagPool->Get(entity);
+
+                    if (!tag.globalEnabled || !modelComp.castShadow) {
+                        return;
+                    }
+                }
 
                 const auto& snapshotEntry = modelSnapshot[modelComp.modelIndex];
                 if (snapshotEntry.resource == nullptr || snapshotEntry.state != ResourceState::Ready)
@@ -426,7 +440,7 @@ namespace Syn
             auto& mainGroup = drawData->Models;
             auto& shadowGroup = drawData->DirectionLightShadow;
 
-            if (settings->culling.directionLightShadowCullingDevice == CPU)
+            if (settings->culling.directionLightShadowCullingDevice == CPU )
             {
                 // Sync CPU counters to indirect commands
                 for (uint32_t i = 0; i < mainGroup.activeTraditionalCount; ++i) {
@@ -437,10 +451,14 @@ namespace Syn
                     shadowGroup.meshletCmds[i].groupCountX = shadowGroup.paddedMeshletCounts[i * 16];
                 }
 
-                // Upload instances
-                size_t instanceSize = mainGroup.totalAllocatedInstances * SHADOW_MULTIPLIER * sizeof(uint32_t);
-                if (instanceSize > 0) {
-                    shadowGroup.instanceBuffer.Write(frameIndex, shadowGroup.instances.Data(), instanceSize, 0);
+                uint32_t activeShadowLightCount = drawData->DirectionLightShadow.visibleLightCount;
+                if (activeShadowLightCount != 0)
+                {
+                    // Upload instances
+                    size_t instanceSize = mainGroup.totalAllocatedInstances * SHADOW_MULTIPLIER * sizeof(uint32_t);
+                    if (instanceSize > 0) {
+                        shadowGroup.instanceBuffer.Write(frameIndex, shadowGroup.instances.Data(), instanceSize, 0);
+                    }
                 }
             }
 

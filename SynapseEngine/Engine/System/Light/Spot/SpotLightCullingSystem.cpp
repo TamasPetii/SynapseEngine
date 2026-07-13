@@ -8,12 +8,16 @@
 #include "Engine/Collision/Tester/CollisionTester.h"
 #include <atomic>
 
+#include "Engine/Component/Core/TagComponent.h"
+#include "Engine/System/Core/TagSystem.h"
+
 namespace Syn
 {
     std::vector<TypeID> SpotLightCullingSystem::GetReadDependencies() const {
         return {
             TypeInfo<SpotLightSystem>::ID,
-            TypeInfo<CameraSystem>::ID
+            TypeInfo<CameraSystem>::ID,
+            TypeInfo<TagSystem>::ID
         };
     }
 
@@ -31,6 +35,7 @@ namespace Syn
         auto pool = registry->GetPool<SpotLightComponent>();
         auto shadowPool = registry->GetPool<SpotLightShadowComponent>();
         auto cameraPool = registry->GetPool<CameraComponent>();
+        auto tagPool = registry->GetPool<TagComponent>();
         EntityID cameraEntity = scene->GetSceneCameraEntity();
 
         if (!pool || !cameraPool || cameraEntity == NULL_ENTITY) return;
@@ -56,7 +61,13 @@ namespace Syn
 
         glm::vec2 screenRes = glm::vec2(cameraComp.width, cameraComp.height);
 
-        auto cullFunc = [this, settings, pool, cameraComp, drawData, screenRes, shadowPool](EntityID entity) {
+        auto cullFunc = [this, settings, pool, cameraComp, drawData, screenRes, shadowPool, tagPool](EntityID entity) {
+            if (tagPool && tagPool->Has(entity)) {
+                if (!tagPool->Get(entity).globalEnabled) {
+                    return;
+                }
+            }
+            
             const auto& lightComp = pool->Get(entity);
 
             bool visibility = true;

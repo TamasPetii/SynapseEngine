@@ -7,6 +7,7 @@ struct ShadowTaskPayload {
     uint transformDenseIdx;
     uint lightShadowDenseIdx;
     uint cascadeIdx;
+    uint modelDenseIndex;
     uint meshletIndices[32];
 };
 

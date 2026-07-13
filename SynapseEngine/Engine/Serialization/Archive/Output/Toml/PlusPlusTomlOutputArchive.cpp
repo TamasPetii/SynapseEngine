@@ -73,6 +73,10 @@ namespace Syn
         WriteValue(name, static_cast<int64_t>(value));
     }
 
+    void PlusPlusTomlOutputArchive::PropertyUint16(const char* name, uint16_t value) {
+        WriteValue(name, static_cast<int64_t>(value));
+    }
+
     void PlusPlusTomlOutputArchive::PropertyInt32(const char* name, int32_t value) { 
         WriteValue(name, value);
     }

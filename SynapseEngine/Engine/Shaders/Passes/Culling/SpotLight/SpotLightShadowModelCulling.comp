@@ -8,6 +8,7 @@
 #include "../../../Includes/Common/FrameGlobalContext.glsl"
 #include "../../../Includes/Common/Camera.glsl"
 #include "../../../Includes/Common/Transform.glsl"
+#include "../../../Includes/Common/Tag.glsl"
 #include "../../../Includes/Common/Model.glsl"
 #include "../../../Includes/Common/Mesh.glsl"
 #include "../../../Includes/Common/Animation.glsl"
@@ -45,10 +46,19 @@ void main()
     // 2. Resolve Entity and Model Data
     TransformModelLink link = GET_TRANSFORM_MODEL_LINK(ctx.transformModelLinkBufferAddr, transformDenseIndex);
     if (link.modelDenseIndex == INVALID_INDEX) return;
-
     uint entityId = link.entityIndex;
+
+    uint tagSparseIndex = GET_SPARSE_INDEX(ctx.tagSparseMapBufferAddr, entityId);
+    if (tagSparseIndex == INVALID_INDEX) return;
+
+    uint entityFlags = GET_TAG_DATA(ctx.tagDataBufferAddr, tagSparseIndex);
+    bool isActive = (entityFlags & (1u << 0)) != 0;
+    if (!isActive) return;
+
     ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, link.modelDenseIndex);
-    if (modelComp.modelIndex == INVALID_INDEX) return;
+    bool castShadow = (modelComp.flags & (1u << 0)) != 0;
+    if (modelComp.modelIndex == INVALID_INDEX || !castShadow) return;
+
 
     // 3. Resolve Transform, Camera & Colliders
     TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
@@ -96,14 +106,6 @@ void main()
 
     if (mainCamScreenSize < 1.0) 
         return;
-
-    // 7. Occlusion Culling (HZB)
-    if (ctx.enableModelOcclusionCulling == 1) {
-        float shadowScreenSizePixels = 0.0;  
-        if (false && IsSphereOccludedAtlasPerspective(worldCollider.center, worldCollider.radius, shadowComp.view, shadowComp.proj, shadowComp.planes.x, shadowComp.planes.y, shadowComp.atlasRect, shadowDepthPyramid, float(ctx.spotLightShadowAtlasSize), ctx.spotLightShadowHizMipLevels, shadowScreenSizePixels)) {
-            return;
-        }
-    }
 
     uint entityData = (entityId & 0x7FFFFFFF);
     entityData = SET_BIT_TO(entityData, 31, visibility == INTERSECTION_INSIDE);

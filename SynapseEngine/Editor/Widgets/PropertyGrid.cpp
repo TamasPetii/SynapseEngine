@@ -10,7 +10,7 @@ namespace Syn::UI {
 
         bool isOpen = ImGui::BeginTable(id, 2, flags);
         if (isOpen) {
-            ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthFixed, 100.0f);
+            ImGui::TableSetupColumn("Label", ImGuiTableColumnFlags_WidthFixed);
             ImGui::TableSetupColumn("Value", ImGuiTableColumnFlags_WidthStretch);
         }
         else {
@@ -59,61 +59,83 @@ namespace Syn::UI {
     bool PropertyDragFloat(const char* label, float& value, float v_speed, float v_min, float v_max, const char* format, int indentLevel) {
         BeginProperty(label, indentLevel);
         std::string widgetId = std::string("##") + label;
-        return ImGui::DragFloat(widgetId.c_str(), &value, v_speed, v_min, v_max, format);
+        bool changed = ImGui::DragFloat(widgetId.c_str(), &value, v_speed, v_min, v_max, format);
+        return changed || ImGui::IsItemDeactivatedAfterEdit();
     }
 
     bool PropertyDragFloat2(const char* label, glm::vec2& values, float v_speed, float v_min, float v_max, const char* format, int indentLevel) {
         BeginProperty(label, indentLevel);
         std::string widgetId = std::string("##") + label;
-        return ImGui::DragFloat2(widgetId.c_str(), &values.x, v_speed, v_min, v_max, format);
+        ImGui::BeginGroup();
+        bool changed = ImGui::DragFloat2(widgetId.c_str(), &values.x, v_speed, v_min, v_max, format);
+        ImGui::EndGroup();
+        return changed || ImGui::IsItemDeactivatedAfterEdit();
     }
 
     bool PropertyDragFloat3(const char* label, glm::vec3& values, float v_speed, float v_min, float v_max, const char* format, int indentLevel) {
         BeginProperty(label, indentLevel);
         std::string widgetId = std::string("##") + label;
-        return ImGui::DragFloat3(widgetId.c_str(), &values.x, v_speed, v_min, v_max, format);
+        ImGui::BeginGroup();
+        bool changed = ImGui::DragFloat3(widgetId.c_str(), &values.x, v_speed, v_min, v_max, format);
+        ImGui::EndGroup();
+        return changed || ImGui::IsItemDeactivatedAfterEdit();
     }
 
     bool PropertyDragFloat4(const char* label, glm::vec4& values, float v_speed, float v_min, float v_max, const char* format, int indentLevel) {
         BeginProperty(label, indentLevel);
         std::string widgetId = std::string("##") + label;
-        return ImGui::DragFloat4(widgetId.c_str(), &values.x, v_speed, v_min, v_max, format);
+        ImGui::BeginGroup();
+        bool changed = ImGui::DragFloat4(widgetId.c_str(), &values.x, v_speed, v_min, v_max, format);
+        ImGui::EndGroup();
+        return changed || ImGui::IsItemDeactivatedAfterEdit();
     }
 
     bool PropertySliderFloat(const char* label, float& value, float v_min, float v_max, const char* format, int indentLevel) {
         BeginProperty(label, indentLevel);
         std::string widgetId = std::string("##") + label;
-        return ImGui::SliderFloat(widgetId.c_str(), &value, v_min, v_max, format);
+        bool changed = ImGui::SliderFloat(widgetId.c_str(), &value, v_min, v_max, format);
+        return changed || ImGui::IsItemDeactivatedAfterEdit();
     }
 
     bool PropertySliderFloat2(const char* label, glm::vec2& values, float v_min, float v_max, const char* format, int indentLevel) {
         BeginProperty(label, indentLevel);
         std::string widgetId = std::string("##") + label;
-        return ImGui::SliderFloat2(widgetId.c_str(), &values.x, v_min, v_max, format);
+        ImGui::BeginGroup();
+        bool changed = ImGui::SliderFloat2(widgetId.c_str(), &values.x, v_min, v_max, format);
+        ImGui::EndGroup();
+        return changed || ImGui::IsItemDeactivatedAfterEdit();
     }
 
     bool PropertySliderFloat3(const char* label, glm::vec3& values, float v_min, float v_max, const char* format, int indentLevel) {
         BeginProperty(label, indentLevel);
         std::string widgetId = std::string("##") + label;
-        return ImGui::SliderFloat3(widgetId.c_str(), &values.x, v_min, v_max, format);
+        ImGui::BeginGroup();
+        bool changed = ImGui::SliderFloat3(widgetId.c_str(), &values.x, v_min, v_max, format);
+        ImGui::EndGroup();
+        return changed || ImGui::IsItemDeactivatedAfterEdit();
     }
 
     bool PropertySliderFloat4(const char* label, glm::vec4& values, float v_min, float v_max, const char* format, int indentLevel) {
         BeginProperty(label, indentLevel);
         std::string widgetId = std::string("##") + label;
-        return ImGui::SliderFloat4(widgetId.c_str(), &values.x, v_min, v_max, format);
+        ImGui::BeginGroup();
+        bool changed = ImGui::SliderFloat4(widgetId.c_str(), &values.x, v_min, v_max, format);
+        ImGui::EndGroup();
+        return changed || ImGui::IsItemDeactivatedAfterEdit();
     }
 
     bool PropertyColor3(const char* label, glm::vec3& color, int indentLevel) {
         BeginProperty(label, indentLevel);
         std::string widgetId = std::string("##") + label;
-        return ImGui::ColorEdit3(widgetId.c_str(), &color.x);
+        bool changed = ImGui::ColorEdit3(widgetId.c_str(), &color.x);
+        return changed || ImGui::IsItemDeactivatedAfterEdit();
     }
 
     bool PropertyColor4(const char* label, glm::vec4& color, int indentLevel) {
         BeginProperty(label, indentLevel);
         std::string widgetId = std::string("##") + label;
-        return ImGui::ColorEdit4(widgetId.c_str(), &color.x);
+        bool changed = ImGui::ColorEdit4(widgetId.c_str(), &color.x);
+        return changed || ImGui::IsItemDeactivatedAfterEdit();
     }
 
     bool PropertyCheckbox(const char* label, bool& value, int indentLevel) {
@@ -122,4 +144,18 @@ namespace Syn::UI {
         return ImGui::Checkbox(widgetId.c_str(), &value);
     }
 
+    bool BeginPropertyCombo(const char* label, const char* preview_value, int indentLevel) {
+        BeginProperty(label, indentLevel);
+        std::string widgetId = std::string("##") + label;
+        return ImGui::BeginCombo(widgetId.c_str(), preview_value);
+    }
+
+    void EndPropertyCombo() {
+        ImGui::EndCombo();
+    }
+
+    void PropertyText(const char* label, const char* text, int indentLevel) {
+        BeginProperty(label, indentLevel);
+        ImGui::TextUnformatted(text);
+    }
 }

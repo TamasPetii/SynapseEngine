@@ -122,12 +122,13 @@ namespace Syn
         bool hasUpdate = pool->template IsStateBitSet<UPDATE_BIT>();
         bool hasIndex = pool->template IsStateBitSet<INDEX_CHANGED_BIT>();
         bool hasStaticUpload = pool->template IsStateBitSet<FORCE_STATIC_GPU_UPLOAD>();
+        bool queued = pool->template IsStateBitSet<QUEUED_BIT>();
         bool hasCustom1 = pool->template IsStateBitSet<CUSTOM_CHANGED_BIT1>();
         bool hasCustom2 = pool->template IsStateBitSet<CUSTOM_CHANGED_BIT2>();
         bool hasCustom3 = pool->template IsStateBitSet<CUSTOM_CHANGED_BIT3>();
         bool hasDirtyStatics = !pool->GetStorage().GetDirtyStatics().empty();
 
-        if (!hasChanged && !hasUpdate && !hasIndex && !hasCustom1 && !hasCustom2 && !hasCustom3 && !hasDirtyStatics && !hasStaticUpload) return;
+        if (!hasChanged && !hasUpdate && !hasIndex && !hasCustom1 && !hasCustom2 && !hasCustom3 && !hasDirtyStatics && !hasStaticUpload && !queued) return;
 
         //Info("{} -> OnFinish: Cleaning up frame. (Changed: {}, Update: {}, Index: {}, DirtyStatics: {})", GetName(), hasChanged, hasUpdate, hasIndex, hasDirtyStatics);
 
@@ -136,6 +137,7 @@ namespace Syn
             if (pool->template IsBitSet<UPDATE_BIT>(entity)) pool->template ResetBit<UPDATE_BIT>(entity);
             if (pool->template IsBitSet<INDEX_CHANGED_BIT>(entity)) pool->template ResetBit<INDEX_CHANGED_BIT>(entity);
 
+            if (pool->template IsBitSet<QUEUED_BIT>(entity)) pool->template ResetBit<QUEUED_BIT>(entity);
             if (pool->template IsBitSet<CUSTOM_CHANGED_BIT1>(entity)) pool->template ResetBit<CUSTOM_CHANGED_BIT1>(entity);
             if (pool->template IsBitSet<CUSTOM_CHANGED_BIT2>(entity)) pool->template ResetBit<CUSTOM_CHANGED_BIT2>(entity);
             if (pool->template IsBitSet<CUSTOM_CHANGED_BIT3>(entity)) pool->template ResetBit<CUSTOM_CHANGED_BIT3>(entity);

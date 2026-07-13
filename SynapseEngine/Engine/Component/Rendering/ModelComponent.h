@@ -11,7 +11,6 @@ namespace Syn
 
 		bool castShadow;
 		bool receiveShadow;
-		bool hasDirectxNormals;
 		uint32_t modelIndex;
 		uint32_t materialOffset = UINT32_MAX;
 	};

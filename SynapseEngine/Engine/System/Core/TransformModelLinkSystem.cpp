@@ -3,6 +3,7 @@
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/System/Core/TransformSystem.h"
 #include "Engine/System/Rendering/ModelSystem.h"
+#include "Engine/System/Core/TagSystem.h"
 #include <print>
 
 namespace Syn

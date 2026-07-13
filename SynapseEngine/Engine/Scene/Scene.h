@@ -16,7 +16,8 @@
 #include "DrawData/SceneDrawData.h"
 #include "Engine/Scene/Source/ISceneSource.h"
 #include "Engine/Physics/IPhysicsEngine.h"
-#include "HierarchyManager.h"
+#include "Hierarchy/HierarchyManager.h"
+#include "Engine/System/SystemContext.h"
 
 namespace Syn
 {
@@ -53,6 +54,8 @@ namespace Syn
 
 		EntityID GetSelectedEntity() const { return _selectedEntity; }
 		void SetSelectedEntity(EntityID entity) { _selectedEntity = entity; }
+
+        const SystemContext& GetSystemContext() const { return _systemContext; }
     private:
         void InitializeSystems();
         void InitializeComponentBuffers();
@@ -90,6 +93,8 @@ namespace Syn
 
         float _currentDeltaTime = 0.0f;
         uint32_t _currentFrameIndex = 0;
+
+        SystemContext _systemContext;
     private:
         friend class SceneInsider;
     };
