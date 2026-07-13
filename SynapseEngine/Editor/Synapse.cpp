@@ -4,18 +4,18 @@
 #include <GLFW/glfw3.h>
 #include <filesystem>
 
-#include "Editor/Workspace/SceneWorkspace.h"
-#include "Editor/Workspace/ModelWorkspace.h"
-#include "Editor/Workspace/MaterialWorkspace.h"
-#include "Editor/Workspace/TextureWorkspace.h"
+#include "Editor/Workspace/SceneWorkspace/SceneWorkspace.h"
+#include "Editor/Workspace/ModelWorkspace/ModelWorkspace.h"
+#include "Editor/Workspace/MaterialWorkspace/MaterialWorkspace.h"
+#include "Editor/Workspace/TextureWorkspace/TextureWorkspace.h"
 
-#include "Editor/View/MainMenu/MainMenuView.h"
-#include "EditorCore/ViewModels/MainMenu/MainMenuViewModel.h"
+#include "Editor/Workspace/Common/MainMenu/MainMenuView.h"
+#include "EditorCore/ViewModels/Common/MainMenu/MainMenuViewModel.h"
 
 #include "Manager/GuiTextureManager.h"
 #include "Manager/EditorIcons.h"
 #include "Engine/Utils/PathUtils.h"
-#include "Editor/View/IGuiWindow.h"
+#include "Editor/Workspace/IGuiWindow.h"
 
 #include "Engine/Image/Loader/SvgImageLoader.h"
 #include "Engine/Logger/SynLog.h"

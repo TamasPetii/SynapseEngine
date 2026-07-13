@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <memory>
-#include "Editor/View/IGuiWindow.h"
+#include "Editor/Workspace/IGuiWindow.h"
 
 namespace Syn 
 {

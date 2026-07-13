@@ -4,7 +4,7 @@
 #include <memory>
 #include "GuiTextureManager.h"
 #include "EditorCore/Api/IFileDialogApi.h"
-#include "Editor/View/IGuiWindow.h"
+#include "Editor/Workspace/IGuiWindow.h"
 #include "Editor/Workspace/IWorkspace.h"
 #include <unordered_map>
 

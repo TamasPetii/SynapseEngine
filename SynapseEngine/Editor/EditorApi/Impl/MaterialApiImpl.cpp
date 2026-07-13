@@ -1,5 +1,5 @@
 #include "MaterialApiImpl.h"
-#include "EditorCore/ViewModels/MaterialGraph/MaterialGraphState.h"
+#include "EditorCore/ViewModels/MaterialWorkspace/MaterialGraph/MaterialGraphState.h"
 #include "Engine/Scene/Insiders/SceneInsider.h"
 #include "Engine/Component/Core/TagComponent.h"
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
