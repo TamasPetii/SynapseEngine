@@ -27,7 +27,7 @@ install_manifest.txt
 
 *.dae
 *.jpg
-*.png
+#*.png
 *.obj
 *.fbx
 *.mtl
