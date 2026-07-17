@@ -58,6 +58,6 @@ namespace Syn
             partitioner
         );
 
-        ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
+        ServiceLocator::Get<tf::Executor>()->run(taskflow).wait();
     }
 }

@@ -14,7 +14,7 @@ namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/ChunkBuilderPC.glsl"
 
     void ChunkBuilderPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 

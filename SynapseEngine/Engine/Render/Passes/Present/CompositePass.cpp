@@ -12,7 +12,7 @@
 namespace Syn {
 
     void CompositePass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
 
         _shaderProgram = shaderManager->CreateProgram("CompositeProgram", {
             ShaderNames::FullscreenVert,
@@ -49,7 +49,7 @@ namespace Syn {
     }
 
     void CompositePass::PrepareFrame(const RenderContext& context) {
-        auto vkContext = ServiceLocator::GetVkContext();
+        auto vkContext = ServiceLocator::Get<Vk::Context>();
         auto swapChain = vkContext->GetSwapChain();
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
@@ -91,7 +91,7 @@ namespace Syn {
     }
 
     void CompositePass::BindDescriptors(const RenderContext& context) {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
         auto inputImage = group->GetImage(RenderTargetNames::Main);

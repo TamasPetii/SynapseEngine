@@ -7,7 +7,7 @@ namespace Syn
 {
     PointLightDrawGroup::PointLightDrawGroup(uint32_t frameCount)
     {
-        auto modelManager = ServiceLocator::GetModelManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
         auto sphere = modelManager->GetResource(MeshSourceNames::Sphere);
 

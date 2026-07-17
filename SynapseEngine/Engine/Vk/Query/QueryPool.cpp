@@ -8,7 +8,7 @@ namespace Syn::Vk
     QueryPool::QueryPool(VkQueryType type, uint32_t queryCount, VkQueryPipelineStatisticFlags pipelineStats)
         : _type(type), _queryCount(queryCount)
     {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         VkQueryPoolCreateInfo poolInfo = { VK_STRUCTURE_TYPE_QUERY_POOL_CREATE_INFO };
         poolInfo.queryType = type;
@@ -20,7 +20,7 @@ namespace Syn::Vk
 
     QueryPool::~QueryPool() {
         if (_handle != VK_NULL_HANDLE) {
-            auto device = ServiceLocator::GetVkContext()->GetDevice();
+            auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
             vkDestroyQueryPool(device->Handle(), _handle, nullptr);
         }
     }
@@ -30,7 +30,7 @@ namespace Syn::Vk
     }
 
     bool QueryPool::GetResults(uint32_t firstQuery, uint32_t count, std::vector<uint64_t>& outResults, bool wait) {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         uint32_t stride = GetStride();
         uint32_t statsPerQuery = stride / sizeof(uint64_t);

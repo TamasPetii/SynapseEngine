@@ -21,7 +21,7 @@ namespace Syn {
     }
 
     void MortonRadixSortPass::Initialize() {
-        auto vulkanContext = ServiceLocator::GetVkContext();
+        auto vulkanContext = ServiceLocator::Get<Vk::Context>();
         VkPhysicalDevice physicalDevice = vulkanContext->GetPhysicalDevice()->Handle();
         VkDevice device = vulkanContext->GetDevice()->Handle();
 

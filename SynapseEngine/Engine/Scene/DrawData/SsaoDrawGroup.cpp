@@ -37,7 +37,7 @@ namespace Syn
             kernelBuffer.Write(i, kernel.data(), sizeof(SsaoKernel), 0);
         }
 
-		ServiceLocator::GetImageManager()->LoadImageFromSourceSync("SsaoNoiseTexture", []() {
+		ServiceLocator::Get<ImageManager>()->LoadImageFromSourceSync("SsaoNoiseTexture", []() {
 			return std::make_unique<SsaoNoiseImageSource>();
 			});
     }

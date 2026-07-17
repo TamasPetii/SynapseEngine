@@ -9,7 +9,7 @@ namespace Syn {
 #include "Engine/Shaders/Includes/PushConstants/ClusterLightWritePC.glsl"
 
     void ClusterSpotLightSinglePass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 

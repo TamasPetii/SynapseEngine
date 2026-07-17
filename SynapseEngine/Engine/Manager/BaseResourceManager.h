@@ -197,7 +197,7 @@ namespace Syn {
         newEntry.isSyncLoad = !isAsync;
 
         if (isAsync) {
-            auto executor = ServiceLocator::GetTaskExecutor();
+            auto executor = ServiceLocator::Get<tf::Executor>();
             newEntry.cpuFuture = executor->async(std::move(task));
             _entries.push_back(std::move(newEntry));
 
@@ -258,7 +258,7 @@ namespace Syn {
 
     template <typename TResource>
     void BaseResourceManager<TResource>::SubmitGpuRequest(const EntryType& entry, Vk::GpuUploadRequest&& request) {
-        auto uploader = ServiceLocator::GetGpuUploader();
+        auto uploader = ServiceLocator::Get<Vk::GpuUploader>();
         if (entry.isSyncLoad) {
             uploader->UploadSync(std::move(request));
         }

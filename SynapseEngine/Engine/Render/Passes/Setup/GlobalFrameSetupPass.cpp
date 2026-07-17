@@ -34,10 +34,10 @@ namespace Syn {
 
         drawData->ForwardPlus.CheckResize(settings->lighting.tileSize, width, height, fIdx);
 
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto materialManager = ServiceLocator::GetMaterialManager();
-        auto animationManager = ServiceLocator::GetAnimationManager();
-		auto imageManager = ServiceLocator::GetImageManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
+        auto materialManager = ServiceLocator::Get<MaterialManager>();
+        auto animationManager = ServiceLocator::Get<AnimationManager>();
+		auto imageManager = ServiceLocator::Get<ImageManager>();
 
         FrameGlobalContext ctx = {};
 
@@ -281,10 +281,10 @@ namespace Syn {
 
         //Todo: Kiszervezni lambdába innen!
 		drawData->CoherentToGpuBufferSync(context.cmd, fIdx);
-        ServiceLocator::GetAnimationManager()->RecordSync(context.cmd);
-        ServiceLocator::GetModelManager()->RecordSync(context.cmd);
-        ServiceLocator::GetMaterialManager()->RecordSync(context.cmd);
-        ServiceLocator::GetImageManager()->RecordSync(context.cmd);
+        ServiceLocator::Get<AnimationManager>()->RecordSync(context.cmd);
+        ServiceLocator::Get<ModelManager>()->RecordSync(context.cmd);
+        ServiceLocator::Get<MaterialManager>()->RecordSync(context.cmd);
+        ServiceLocator::Get<ImageManager>()->RecordSync(context.cmd);
 
         Vk::GlobalBarrierInfo globalBarrier{};
 

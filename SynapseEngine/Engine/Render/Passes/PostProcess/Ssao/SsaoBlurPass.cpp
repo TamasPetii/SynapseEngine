@@ -21,7 +21,7 @@ namespace Syn {
     }
 
     void SsaoBlurPass::Initialize() {
-        _shaderProgram = ServiceLocator::GetShaderManager()->CreateProgram("SsaoBlurProgram", {
+        _shaderProgram = ServiceLocator::Get<ShaderManager>()->CreateProgram("SsaoBlurProgram", {
             ShaderNames::SsaoBlurComp
             });
     }
@@ -58,7 +58,7 @@ namespace Syn {
 
     void SsaoBlurPass::BindDescriptors(const RenderContext& context) {
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
         auto ssaoAo = rtGroup->GetImage(RenderTargetNames::SsaoAo);
@@ -85,7 +85,7 @@ namespace Syn {
 
     void SsaoBlurPass::Dispatch(const RenderContext& context) {
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto ssaoAo = rtGroup->GetImage(RenderTargetNames::SsaoAo);
 
         uint32_t width = rtGroup->GetWidth();

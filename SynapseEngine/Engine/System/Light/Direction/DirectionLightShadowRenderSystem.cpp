@@ -55,7 +55,7 @@ namespace Syn
                 RebuildShadowBuffers(scene);
 
                 // Ensure the GPU buffers are synced for all frames in flight
-                uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
+                uint32_t framesInFlight = ServiceLocator::Get<FrameContext>()->framesInFlight;
                 this->SetFramesToUpload(framesInFlight);
             }
             });

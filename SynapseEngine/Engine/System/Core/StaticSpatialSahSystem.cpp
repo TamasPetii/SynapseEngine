@@ -72,7 +72,7 @@ namespace Syn
         chunkGroup->visibleChunkIds.resize(staticEntities.size());
 
         chunkGroup->chunkCounter.store(0, std::memory_order_relaxed);
-        uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
+        uint32_t framesInFlight = ServiceLocator::Get<FrameContext>()->framesInFlight;
         this->SetFramesToUpload(framesInFlight);
         
         auto gatherTaskOpt = this->ForEachIndex(size_t(0), staticEntities.size(), size_t(1), subflow, "GatherSpatialItems",

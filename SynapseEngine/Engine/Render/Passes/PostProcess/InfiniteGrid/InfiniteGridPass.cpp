@@ -15,7 +15,7 @@ namespace Syn {
     }
 
     void InfiniteGridPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;

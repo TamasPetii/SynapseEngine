@@ -21,7 +21,7 @@ namespace Syn {
     }
 
     void SpotLightAabbWireframePass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
@@ -106,7 +106,7 @@ namespace Syn {
     void SpotLightAabbWireframePass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         auto compManager = scene->GetComponentBufferManager();
-        auto modelManager = ServiceLocator::GetModelManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
         uint32_t fIdx = context.frameIndex;
 
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);

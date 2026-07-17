@@ -42,8 +42,8 @@ namespace Syn {
     }
 
     void TraditionalOpaqueForwardPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = true;
@@ -136,7 +136,7 @@ namespace Syn {
 
     void TraditionalOpaqueForwardPass::BindDescriptors(const RenderContext& context)
     {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         uint fIdx = context.frameIndex;
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, fIdx);

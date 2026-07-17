@@ -23,7 +23,7 @@ namespace Syn::Vk {
     }
 
     Image::~Image() {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         for (auto& [name, view] : _imageViews) {
             if (view != VK_NULL_HANDLE) {

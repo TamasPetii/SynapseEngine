@@ -5,7 +5,7 @@
 namespace Syn {
 
     void PreviewPostTransitionPass::PrepareFrame(const RenderContext& context) {
-        auto pm = ServiceLocator::GetPreviewManager();
+        auto pm = ServiceLocator::Get<PreviewManager>();
 
         _imageTransitions.push_back({
             .image = pm->GetAtlasImage(),

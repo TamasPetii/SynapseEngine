@@ -27,7 +27,7 @@ namespace Syn {
         _currentFrameIndex = currentFrameIndex;
 
         if (_deletionQueues.empty()) {
-            uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
+            uint32_t framesInFlight = ServiceLocator::Get<FrameContext>()->framesInFlight;
             _deletionQueues.resize(framesInFlight);
         }
     }
@@ -42,7 +42,7 @@ namespace Syn {
 
     void GuiTextureManager::FlushQueue(uint32_t frameIndex) {
         if (_deletionQueues.empty()) {
-            auto ctx = ServiceLocator::GetFrameContext();
+            auto ctx = ServiceLocator::Get<FrameContext>();
             uint32_t framesInFlight = ctx ? ctx->framesInFlight : 3;
             _deletionQueues.resize(framesInFlight);
         }

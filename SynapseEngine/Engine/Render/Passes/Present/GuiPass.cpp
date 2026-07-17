@@ -15,7 +15,7 @@ namespace Syn
     void GuiPass::PrepareFrame(const RenderContext& context) {
         if (!context.onRenderGui) return;
 
-        auto vkContext = ServiceLocator::GetVkContext();
+        auto vkContext = ServiceLocator::Get<Vk::Context>();
         auto swapChain = vkContext->GetSwapChain();
 
         auto swapchainImage = swapChain->GetImage(context.swapchainImageIndex);

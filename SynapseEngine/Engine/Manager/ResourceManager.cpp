@@ -55,13 +55,13 @@ namespace Syn {
 
 	void ResourceManager::InitPreviewManager() {
 		_previewManager = std::make_unique<PreviewManager>(2048, 128);
-		ServiceLocator::ProvidePreviewManager(_previewManager.get());
+		ServiceLocator::Provide<PreviewManager>(_previewManager.get());
 	}
 
 	void ResourceManager::InitShaderManager()
 	{
 		_shaderManager = std::make_unique<ShaderManager>();
-		ServiceLocator::ProvideShaderManager(_shaderManager.get());
+		ServiceLocator::Provide<ShaderManager>(_shaderManager.get());
 	}
 
 	void ResourceManager::InitImageManager()
@@ -78,7 +78,7 @@ namespace Syn {
 		_imageBuilder->RegisterLoader(std::make_shared<SvgImageLoader>(), 1);
 		_imageBuilder->RegisterLoader(std::make_shared<HdriImageLoader>(), 1);
 
-		ServiceLocator::ProvideImageBuilder(_imageBuilder.get());
+		ServiceLocator::Provide<ImageBuilder>(_imageBuilder.get());
 
 		_imageManager = std::make_unique<ImageManager>(
 			_framesInFlight,
@@ -86,14 +86,14 @@ namespace Syn {
 			std::make_unique<DefaultGpuImageUploader>(),
 			std::make_unique<DefaultCpuImageExtractor>(),
 			[](uint32_t imageId) {
-				auto matManager = ServiceLocator::GetMaterialManager();
+				auto matManager = ServiceLocator::Get<MaterialManager>();
 				if (matManager) {
 					matManager->NotifyImageReady(imageId);
 				}
 			}
 		);
 
-		ServiceLocator::ProvideImageManager(_imageManager.get());
+		ServiceLocator::Provide<ImageManager>(_imageManager.get());
 	}
 
 	void ResourceManager::InitMaterialManager()
@@ -128,14 +128,14 @@ namespace Syn {
 				if (_previewManager) _previewManager->MarkDirty(PreviewResourceType::Material, id);
 			},
 			[](uint32_t materialId) {
-				auto modelManager = ServiceLocator::GetModelManager();
+				auto modelManager = ServiceLocator::Get<ModelManager>();
 				if (modelManager) {
 					modelManager->NotifyMaterialReady(materialId);
 				}
 			}
 		);
 
-		ServiceLocator::ProvideMaterialManager(_materialManager.get());
+		ServiceLocator::Provide<MaterialManager>(_materialManager.get());
 	}
 
 	void ResourceManager::InitModelManager()
@@ -162,7 +162,7 @@ namespace Syn {
 		_staticMeshBuilder->RegisterCpuModelProcessor(std::make_unique<VertexWeldingProcessor>());
 		_staticMeshBuilder->RegisterCpuModelProcessor(std::make_unique<MemoryCleanupProcessor>());
 
-		ServiceLocator::ProvideStaticMeshBuilder(_staticMeshBuilder.get());
+		ServiceLocator::Provide<StaticMeshBuilder>(_staticMeshBuilder.get());
 
 		_modelManager = std::make_unique<ModelManager>(
 			_framesInFlight,
@@ -179,7 +179,7 @@ namespace Syn {
 			}
 		);
 
-		ServiceLocator::ProvideModelManager(_modelManager.get());
+		ServiceLocator::Provide<ModelManager>(_modelManager.get());
 
 		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::Sphere, []() { return MeshFactory::CreateSphere(); });
 		_modelManager->LoadModelFromStaticMeshSync(MeshSourceNames::ProxySphere, []() { return MeshFactory::CreateProxySphere(); });
@@ -213,7 +213,7 @@ namespace Syn {
 		_animationBuilder->RegisterProcessor(std::make_unique<AnimationBakeProcessor>());
 		_animationBuilder->RegisterProcessor(std::make_unique<AnimationColliderProcessor>());
 
-		ServiceLocator::ProvideAnimationBuilder(_animationBuilder.get());
+		ServiceLocator::Provide<AnimationBuilder>(_animationBuilder.get());
 
 		_animationManager = std::make_unique<AnimationManager>(
 			_framesInFlight,
@@ -222,17 +222,16 @@ namespace Syn {
 			std::make_unique<DefaultCpuAnimationExtractor>()
 		);
 
-		ServiceLocator::ProvideAnimationManager(_animationManager.get());
+		ServiceLocator::Provide<AnimationManager>(_animationManager.get());
 	}
 
     ResourceManager::~ResourceManager() {
-        ServiceLocator::ProvideShaderManager(nullptr);
-        ServiceLocator::ProvideResourceManager(nullptr);
-		ServiceLocator::ProvideStaticMeshBuilder(nullptr);
-		ServiceLocator::ProvideModelManager(nullptr);
-		ServiceLocator::ProvideImageBuilder(nullptr);
-		ServiceLocator::ProvideImageManager(nullptr);
-		ServiceLocator::ProvideMaterialManager(nullptr);
-		
+        ServiceLocator::Provide<ShaderManager>(nullptr);
+        ServiceLocator::Provide<ResourceManager>(nullptr);
+		ServiceLocator::Provide<StaticMeshBuilder>(nullptr);
+		ServiceLocator::Provide<ModelManager>(nullptr);
+		ServiceLocator::Provide<ImageBuilder>(nullptr);
+		ServiceLocator::Provide<ImageManager>(nullptr);
+		ServiceLocator::Provide<MaterialManager>(nullptr);	
     }
 }

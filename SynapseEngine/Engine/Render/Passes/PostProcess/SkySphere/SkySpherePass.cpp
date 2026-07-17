@@ -24,8 +24,8 @@ namespace Syn {
     }
 
     void SkySpherePass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = true;
@@ -104,7 +104,7 @@ namespace Syn {
 
     void SkySpherePass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         uint32_t fIdx = context.frameIndex;
 
         const auto& envSettings = scene->GetSettings()->environment;
@@ -130,7 +130,7 @@ namespace Syn {
 
     void SkySpherePass::BindDescriptors(const RenderContext& context)
     {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto bindlessBuffer = imageManager->GetBindlessBuffer();
 
         bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);

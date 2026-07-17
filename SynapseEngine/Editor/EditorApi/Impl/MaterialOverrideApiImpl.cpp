@@ -18,7 +18,7 @@ namespace Syn {
         uint32_t modelIdx = EditorApiUtils::ReadComponent<ModelComponent>(_sceneManager, entity, [](const auto& c) { return c.modelIndex; }, UINT32_MAX);
         if (modelIdx == UINT32_MAX) return 0;
 
-        auto modelManager = ServiceLocator::GetModelManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
         if (!modelManager) return 0;
 
         auto snapshots = modelManager->GetResourceSnapshot();
@@ -64,7 +64,7 @@ namespace Syn {
     std::vector<std::pair<uint32_t, std::string>> MaterialOverrideApiImpl::GetAvailableMaterials() const {
         std::vector<std::pair<uint32_t, std::string>> result;
 
-        auto matManager = ServiceLocator::GetMaterialManager();
+        auto matManager = ServiceLocator::Get<MaterialManager>();
         if (!matManager) return result;
 
         auto paths = matManager->GetResourcePaths();

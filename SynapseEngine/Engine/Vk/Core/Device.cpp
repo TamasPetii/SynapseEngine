@@ -30,6 +30,9 @@ namespace Syn::Vk {
         VkPhysicalDeviceShaderObjectFeaturesEXT shaderObjectFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_OBJECT_FEATURES_EXT };
         shaderObjectFeatures.shaderObject = VK_TRUE;
 
+        VkPhysicalDeviceDescriptorHeapFeaturesEXT heapFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_HEAP_FEATURES_EXT };
+        heapFeatures.descriptorHeap = VK_TRUE;
+
         VkPhysicalDeviceDescriptorBufferFeaturesEXT descriptorBufferFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_FEATURES_EXT };
         descriptorBufferFeatures.descriptorBuffer = VK_TRUE;
         descriptorBufferFeatures.descriptorBufferPushDescriptors = VK_TRUE;
@@ -94,14 +97,15 @@ namespace Syn::Vk {
         deviceFeatures.features.pipelineStatisticsQuery = VK_TRUE;
         deviceFeatures.features.shaderInt64 = VK_TRUE;
 		deviceFeatures.features.shaderClipDistance = VK_TRUE;
-        
+       
         deviceFeatures.pNext = &features11;
         features11.pNext = &features12;
         features12.pNext = &features13;
         features13.pNext = &meshFeatures;
         meshFeatures.pNext = &shaderObjectFeatures;
         shaderObjectFeatures.pNext = &descriptorBufferFeatures;
-        descriptorBufferFeatures.pNext = &mutableFeatures;
+        descriptorBufferFeatures.pNext = &heapFeatures;
+        heapFeatures.pNext = &mutableFeatures;
         mutableFeatures.pNext = &dynamicState1;
         dynamicState1.pNext = &dynamicState2;
         dynamicState2.pNext = &dynamicState3;

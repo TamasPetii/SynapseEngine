@@ -23,7 +23,7 @@ namespace Syn {
     }
 
     void GeometryHizDownsamplePass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
         _shaderProgram = shaderManager->CreateProgram("HizDownsampleProgram", {
             ShaderNames::HizDownsample
             });
@@ -43,7 +43,7 @@ namespace Syn {
     }
 
     void GeometryHizDownsamplePass::Dispatch(const RenderContext& context) {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge);
 
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);

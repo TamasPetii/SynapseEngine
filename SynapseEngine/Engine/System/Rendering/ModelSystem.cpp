@@ -29,7 +29,7 @@ namespace Syn
         this->EmplaceTask(subflow, SystemPhaseNames::Update, [this, scene, currentVersion]() {
             if (_lastModelManagerVersion != currentVersion) {
                 _lastModelManagerVersion = currentVersion;
-                this->SetFramesToUpload(ServiceLocator::GetFrameContext()->framesInFlight);
+                this->SetFramesToUpload(ServiceLocator::Get<FrameContext>()->framesInFlight);
             }
             });
 

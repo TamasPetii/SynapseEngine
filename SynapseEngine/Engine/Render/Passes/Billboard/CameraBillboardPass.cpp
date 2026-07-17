@@ -28,7 +28,7 @@ namespace Syn {
     }
 
     void CameraBillboardPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
@@ -70,7 +70,7 @@ namespace Syn {
             .colorAttachmentCount = 2
         };
 
-        _iconTexture = ServiceLocator::GetImageManager()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/Engine/Icons/CameraIcon.png"));
+        _iconTexture = ServiceLocator::Get<ImageManager>()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/Engine/Icons/CameraIcon.png"));
     }
 
     void CameraBillboardPass::PrepareFrame(const RenderContext& context) {
@@ -109,7 +109,7 @@ namespace Syn {
     }
 
     void CameraBillboardPass::BindDescriptors(const RenderContext& context) {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto texture = imageManager->GetResource(_iconTexture);
         auto sampler = imageManager->GetSampler(SamplerNames::LinearClampEdge)->Handle();
 

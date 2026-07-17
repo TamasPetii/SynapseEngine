@@ -42,8 +42,8 @@ namespace Syn {
     }
 
     void MeshletOpaqueForwardPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = true;
@@ -140,7 +140,7 @@ namespace Syn {
 
     void MeshletOpaqueForwardPass::BindDescriptors(const RenderContext& context)
     {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto drawData = context.scene->GetSceneDrawData();
 
         //Using prevous frame's depth pyramid!

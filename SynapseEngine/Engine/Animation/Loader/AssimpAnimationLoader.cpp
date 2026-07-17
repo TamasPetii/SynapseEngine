@@ -49,7 +49,7 @@ namespace Syn
         ProcessAnimationTracks(scene, rawAnim, nodeNameMap, taskflow);
         ProcessBoneWeights(scene, rawAnim, nodeNameMap, taskflow);
 
-        ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
+        ServiceLocator::Get<tf::Executor>()->run(taskflow).wait();
 
         return rawAnim;
     }

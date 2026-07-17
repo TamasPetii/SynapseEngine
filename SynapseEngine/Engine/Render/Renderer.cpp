@@ -13,7 +13,7 @@ namespace Syn {
     Renderer::Renderer(uint32_t framesInFlight)
         : _framesInFlight(framesInFlight)
     {
-        auto vkContext = ServiceLocator::GetVkContext();
+        auto vkContext = ServiceLocator::Get<Vk::Context>();
         auto device = vkContext->GetDevice();
 
         _graphicsQueue = device->GetGraphicsQueue();
@@ -38,12 +38,12 @@ namespace Syn {
     }
 
     Renderer::~Renderer() {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
         device->WaitIdle();
     }
 
     void Renderer::WaitForFrame(uint32_t frameIndex) {
-        auto device = ServiceLocator::GetVkContext()->GetDevice()->Handle();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice()->Handle();
 
         VkFence fences[] = { _inFlightFences[frameIndex]->Handle(), _presentFences[frameIndex]->Handle() };
         VkResult result = vkWaitForFences(device, 2, fences, VK_TRUE, UINT64_MAX);
@@ -55,8 +55,8 @@ namespace Syn {
     }
 
     Vk::CommandBuffer* Renderer::BeginFrame(uint32_t frameIndex) {
-        auto device = ServiceLocator::GetVkContext()->GetDevice()->Handle();
-        auto swapChain = ServiceLocator::GetVkContext()->GetSwapChain();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice()->Handle();
+        auto swapChain = ServiceLocator::Get<Vk::Context>()->GetSwapChain();
 
         VkFence fences[] = { _inFlightFences[frameIndex]->Handle(), _presentFences[frameIndex]->Handle() };
         vkResetFences(device, 2, fences);
@@ -101,7 +101,7 @@ namespace Syn {
 
         _graphicsQueue->Submit(&submitInfo, _inFlightFences[frameIndex]->Handle());
 
-        auto swapChain = ServiceLocator::GetVkContext()->GetSwapChain();
+        auto swapChain = ServiceLocator::Get<Vk::Context>()->GetSwapChain();
         swapChain->Present(_imageIndex, _renderFinishedSemaphores[frameIndex]->Handle(), _presentFences[frameIndex]->Handle());
     }
 }

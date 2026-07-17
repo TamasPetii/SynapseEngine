@@ -25,7 +25,7 @@ namespace Syn {
     }
 
     void SsaoPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
         _shaderProgram = shaderManager->CreateProgram("SsaoProgram", {
             ShaderNames::SsaoComp
             });
@@ -37,7 +37,7 @@ namespace Syn {
 
     void SsaoPass::BindDescriptors(const RenderContext& context) {
         auto currGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         auto noiseTexture = imageManager->GetResource(ImageNames::SsaoNoiseTexture);
         auto depthPyramid = currGroup->GetImage(RenderTargetNames::DepthPyramid);
@@ -75,7 +75,7 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, fIdx);
 
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto noiseTexture = imageManager->GetResource(ImageNames::SsaoNoiseTexture);
 
         Vk::PushConstant<SsaoPC> pc{};

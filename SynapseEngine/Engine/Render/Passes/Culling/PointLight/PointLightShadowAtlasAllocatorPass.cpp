@@ -13,7 +13,7 @@ namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/PointLightShadowCullingPC.glsl"
 
     void PointLightShadowAtlasAllocatorPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
         _shaderProgram = shaderManager->CreateProgram("PointLightShadowAtlasAllocatorProgram", {
             ShaderNames::PointLightShadowAtlasAllocatorComp
             }, { .useDescriptorBuffers = false });

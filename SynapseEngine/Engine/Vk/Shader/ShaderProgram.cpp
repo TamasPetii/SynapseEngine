@@ -14,7 +14,7 @@ namespace Syn::Vk {
     }
 
     ShaderProgram::~ShaderProgram() {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         for (auto shaderObj : _shaderObjects) {
             if (shaderObj != VK_NULL_HANDLE) {
@@ -66,7 +66,7 @@ namespace Syn::Vk {
     }
 
     void ShaderProgram::CreatePipelineLayoutAndShaders() {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         std::map<uint32_t, std::map<uint32_t, VkDescriptorSetLayoutBinding>> mergedBindings;
 
@@ -148,7 +148,7 @@ namespace Syn::Vk {
             }
         }
 
-        auto physicalDevice = ServiceLocator::GetVkContext()->GetPhysicalDevice();
+        auto physicalDevice = ServiceLocator::Get<Vk::Context>()->GetPhysicalDevice();
         uint32_t maxPushConstantSize = physicalDevice->GetProperties().limits.maxPushConstantsSize;
 
         VkPushConstantRange universalPushConstant{};

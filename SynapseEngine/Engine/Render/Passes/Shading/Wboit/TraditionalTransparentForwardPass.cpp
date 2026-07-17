@@ -37,8 +37,8 @@ namespace Syn {
     }
 
     void TraditionalTransparentForwardPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = true;
@@ -135,10 +135,10 @@ namespace Syn {
         if (!scene) return;
 
         auto drawData = scene->GetSceneDrawData();
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto materialManager = ServiceLocator::GetMaterialManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
+        auto materialManager = ServiceLocator::Get<MaterialManager>();
         auto componentBufferManager = scene->GetComponentBufferManager();
-        auto animationManager = ServiceLocator::GetAnimationManager();
+        auto animationManager = ServiceLocator::Get<AnimationManager>();
 
         uint32_t fIdx = context.frameIndex;
         
@@ -151,7 +151,7 @@ namespace Syn {
     }
 
     void TraditionalTransparentForwardPass::BindDescriptors(const RenderContext& context) {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         uint fIdx = context.frameIndex;
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, fIdx);

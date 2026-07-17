@@ -8,7 +8,7 @@ namespace Syn::Vk
     VkDescriptorSetLayout DescriptorUtils::_emptyStandardLayout = VK_NULL_HANDLE;
 
     void DescriptorUtils::Cleanup() {
-        auto device = ServiceLocator::GetVkContext()->GetDevice()->Handle();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice()->Handle();
         if (_emptyBufferLayout != VK_NULL_HANDLE) {
             vkDestroyDescriptorSetLayout(device, _emptyBufferLayout, nullptr);
             _emptyBufferLayout = VK_NULL_HANDLE;
@@ -20,7 +20,7 @@ namespace Syn::Vk
     }
 
     VkDescriptorSetLayout DescriptorUtils::GetEmptyDescriptorSetLayout(bool useDescriptorBuffers) {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         VkDescriptorSetLayout& targetLayout = useDescriptorBuffers ? _emptyBufferLayout : _emptyStandardLayout;
 

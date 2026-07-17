@@ -14,7 +14,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
         _shaderProgram = shaderManager->CreateProgram("SpotLightShadowFinalizeProgram", {
             ShaderNames::SpotLightShadowFinalizeComp
             }, config);

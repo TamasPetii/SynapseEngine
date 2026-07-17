@@ -128,7 +128,7 @@ namespace Syn
         ProcessMeshVertices(scene, outModel, taskflow);
         ProcessMeshIndices(scene, outModel, taskflow);
 
-        ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
+        ServiceLocator::Get<tf::Executor>()->run(taskflow).wait();
     }
 
     void AssimpMeshLoader::ProcessMaterials(const aiScene* scene, RawModel& outModel, tf::Taskflow& taskflow)

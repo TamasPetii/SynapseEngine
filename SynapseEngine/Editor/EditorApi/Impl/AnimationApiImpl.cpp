@@ -30,7 +30,7 @@ namespace Syn {
     std::vector<std::pair<uint32_t, std::string>> AnimationApiImpl::GetAvailableAnimations() const {
         std::vector<std::pair<uint32_t, std::string>> result;
 
-        auto animManager = ServiceLocator::GetAnimationManager();
+        auto animManager = ServiceLocator::Get<AnimationManager>();
         if (!animManager) {
             return result;
         }

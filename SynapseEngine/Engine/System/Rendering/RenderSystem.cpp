@@ -133,7 +133,7 @@ namespace Syn
             {
                 RebuildGlobalBuffers(scene);
 
-                uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
+                uint32_t framesInFlight = ServiceLocator::Get<FrameContext>()->framesInFlight;
                 this->SetFramesToUpload(framesInFlight);
                 scene->GetSceneDrawData()->RequestGlobalSync(framesInFlight);
             }

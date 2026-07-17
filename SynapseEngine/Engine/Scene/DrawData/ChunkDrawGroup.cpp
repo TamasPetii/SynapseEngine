@@ -7,7 +7,7 @@ namespace Syn
 {
     ChunkDrawGroup::ChunkDrawGroup(uint32_t frameCount)
     {
-        auto modelManager = ServiceLocator::GetModelManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);
 
         wireframeCmdTemplate.vertexCount = cube->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;

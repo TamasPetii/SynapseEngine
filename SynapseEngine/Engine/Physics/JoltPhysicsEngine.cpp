@@ -37,7 +37,7 @@ namespace Syn
         tempAllocator = std::make_unique<JPH::TempAllocatorImpl>(params.tempAllocatorSizeMB * 1024 * 1024);
 
         jobSystem = std::make_unique<JobSystemTaskflow>(
-            *ServiceLocator::GetTaskExecutor(),
+            *ServiceLocator::Get<tf::Executor>(),
             JPH::cMaxPhysicsJobs,
             JPH::cMaxPhysicsBarriers
         );

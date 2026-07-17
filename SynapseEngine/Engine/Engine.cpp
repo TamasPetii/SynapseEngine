@@ -77,23 +77,23 @@ namespace Syn
 		_frameContext.deltaTime = deltaTime;
 		uint32_t currentFrame = _frameContext.currentFrameIndex;
 
-		ServiceLocator::GetCpuProfiler()->BeginFrame(currentFrame);
+		ServiceLocator::Get<ICpuProfiler>()->BeginFrame(currentFrame);
 
 		//Updates
-		ServiceLocator::GetAnimationManager()->Update();
-		ServiceLocator::GetModelManager()->Update();
-		ServiceLocator::GetMaterialManager()->Update();
-		ServiceLocator::GetImageManager()->Update();
+		ServiceLocator::Get<AnimationManager>()->Update();
+		ServiceLocator::Get<ModelManager>()->Update();
+		ServiceLocator::Get<MaterialManager>()->Update();
+		ServiceLocator::Get<ImageManager>()->Update();
 
 		//Notifications
-		ServiceLocator::GetMaterialManager()->ProcessPendingNotifications();
-		ServiceLocator::GetModelManager()->ProcessPendingNotifications();
+		ServiceLocator::Get<MaterialManager>()->ProcessPendingNotifications();
+		ServiceLocator::Get<ModelManager>()->ProcessPendingNotifications();
 
-		ServiceLocator::GetGpuUploader()->ProcessUploads();
+		ServiceLocator::Get<Vk::GpuUploader>()->ProcessUploads();
 
 		_sceneManager->Update(_frameContext.deltaTime, currentFrame);
 	
-		ServiceLocator::GetInputManager()->UpdatePrevious();
+		ServiceLocator::Get<InputManager>()->UpdatePrevious();
 	}
 
 	void Engine::Render()
@@ -105,8 +105,8 @@ namespace Syn
 
 		_renderManager->WaitForFrame(currentFrame);
 
-		ServiceLocator::GetGpuProfiler()->ResolveFrame(currentFrame);
-		ServiceLocator::GetFrameStatisticsManager()->ResolveFrame(currentFrame, ServiceLocator::GetRenderStatCollector());
+		ServiceLocator::Get<IGpuProfiler>()->ResolveFrame(currentFrame);
+		ServiceLocator::Get<FrameStatisticsManager>()->ResolveFrame(currentFrame, ServiceLocator::Get<IRenderStatCollector>());
 
 		if (_onGuiFlushCallback)
 			_onGuiFlushCallback(currentFrame);
@@ -117,8 +117,8 @@ namespace Syn
 
 		_sceneManager->Finish();
 
-		ServiceLocator::GetCpuProfiler()->ResolveFrame(currentFrame);
-		ServiceLocator::GetPreviewManager()->ClearAllDirtyResources();
+		ServiceLocator::Get<ICpuProfiler>()->ResolveFrame(currentFrame);
+		ServiceLocator::Get<PreviewManager>()->ClearAllDirtyResources();
 
 		AdvanceFrameIndex();
 	}
@@ -128,7 +128,7 @@ namespace Syn
 		_onGuiFlushCallback = params.onGuiFlushCallback;
 
 		_inputManager = std::make_unique<InputManager>();
-		ServiceLocator::ProvideInputManager(_inputManager.get());
+		ServiceLocator::Provide<InputManager>(_inputManager.get());
 
 		InitFrameContext(1);
 		InitLogger();
@@ -163,23 +163,23 @@ namespace Syn
 		};
 
 		_vkContext = std::make_unique<Vk::Context>(vkContextParams);
-		ServiceLocator::ProvideVkContext(_vkContext.get());
+		ServiceLocator::Provide<Vk::Context>(_vkContext.get());
 		_vkContext->InitSwapChain(vkContextParams);
 
 		_gpuUploader = std::make_unique<Vk::GpuUploader>();
-		ServiceLocator::ProvideGpuUploader(_gpuUploader.get());
+		ServiceLocator::Provide<Vk::GpuUploader>(_gpuUploader.get());
 	}
 
 	void Engine::InitResourceManager()
 	{
 		_resourceManager = std::make_unique<ResourceManager>(_frameContext.framesInFlight);
-		ServiceLocator::ProvideResourceManager(_resourceManager.get());
+		ServiceLocator::Provide<ResourceManager>(_resourceManager.get());
 	}
 
 	void Engine::InitFrameContext(uint32_t framesInFlight) {
 		_frameContext.framesInFlight = framesInFlight;
 		_frameContext.currentFrameIndex = 0;
-		ServiceLocator::ProvideFrameContext(&_frameContext);
+		ServiceLocator::Provide<FrameContext>(&_frameContext);
 	}
 
 	void Engine::AdvanceFrameIndex() {
@@ -199,11 +199,11 @@ namespace Syn
 
 			std::string logReport = "";
 
-			if (auto cpuProfiler = ServiceLocator::GetCpuProfiler()) {
+			if (auto cpuProfiler = ServiceLocator::Get<ICpuProfiler>()) {
 				logReport += cpuProfiler->GenerateReport(prevFrame, "CPU") + "\n";
 			}
 
-			if (auto gpuProfiler = ServiceLocator::GetGpuProfiler()) {
+			if (auto gpuProfiler = ServiceLocator::Get<IGpuProfiler>()) {
 				logReport += gpuProfiler->GenerateReport(prevFrame, "GPU") + "\n";
 			}
 			std::println("{}\n", logReport);
@@ -218,16 +218,16 @@ namespace Syn
 	{
 		float timestampPeriod = _vkContext->GetPhysicalDevice()->GetProperties().limits.timestampPeriod;
 		_gpuProfiler = std::make_unique<DefaultGpuProfiler>(_frameContext.framesInFlight, timestampPeriod);
-		ServiceLocator::ProvideGpuProfiler(_gpuProfiler.get());
+		ServiceLocator::Provide<IGpuProfiler>(_gpuProfiler.get());
 
 		_cpuProfiler = std::make_unique<DefaultCpuProfiler>(_frameContext.framesInFlight);
-		ServiceLocator::ProvideCpuProfiler(_cpuProfiler.get());
+		ServiceLocator::Provide<ICpuProfiler>(_cpuProfiler.get());
 
 		_renderStatCollector = std::make_unique<DefaultRenderStatCollector>(_frameContext.framesInFlight);
-		ServiceLocator::ProvideRenderStatCollector(_renderStatCollector.get());
+		ServiceLocator::Provide<IRenderStatCollector>(_renderStatCollector.get());
 
 		_frameStatisticsManager = std::make_unique<FrameStatisticsManager>(_frameContext.framesInFlight);
-		ServiceLocator::ProvideFrameStatisticsManager(_frameStatisticsManager.get());
+		ServiceLocator::Provide<FrameStatisticsManager>(_frameStatisticsManager.get());
 	}
 
 	void Engine::InitRenderManager(const EngineInitParams& params)
@@ -251,7 +251,6 @@ namespace Syn
 		_gpuUploader.reset();
 		_taskExecutor.reset();
 		_serializer.reset();
-		ServiceLocator::Shutdown();
 		Vk::DescriptorUtils::Cleanup();
 		_vkContext.reset(); //This has to be the last one!
 	}
@@ -277,7 +276,7 @@ namespace Syn
 
 		_taskExecutor = std::make_unique<tf::Executor>(workerThreads);
 
-		ServiceLocator::ProvideTaskExecutor(_taskExecutor.get());
+		ServiceLocator::Provide<tf::Executor>(_taskExecutor.get());
 	}
 
 	void Engine::OnChar(unsigned int codepoint)
@@ -331,7 +330,7 @@ namespace Syn
 		auto loader = std::make_unique<ManifestSceneLoader>();
 
 		_sceneManager = std::make_unique<Syn::SceneManager>(std::move(writer), std::move(loader));
-		ServiceLocator::ProvideSceneManager(_sceneManager.get());
+		ServiceLocator::Provide<SceneManager>(_sceneManager.get());
 
 		_sceneManager->RegisterScene(SceneNames::Main, [frames]() {
 			return std::make_unique<Scene>(frames, std::make_unique<TestSceneSource>());
@@ -350,7 +349,7 @@ namespace Syn
 
 	void Engine::InitPhysicsEngine()
 	{
-		ServiceLocator::ProvidePhysicsFactory([]() {
+		ServiceLocator::Provide<PhysicsFactory>([]() {
 			auto physicsEngine = std::make_unique<JoltPhysicsEngine>();
 			physicsEngine->Init();
 
@@ -376,27 +375,27 @@ namespace Syn
 
 		_serializer = std::make_unique<Serializer>(std::move(service));
 
-		ServiceLocator::ProvideSerializer(_serializer.get());
+		ServiceLocator::Provide<Serializer>(_serializer.get());
 	}
 
 	MaterialManager* Engine::GetMaterialManager() {
-		return ServiceLocator::GetMaterialManager();
+		return ServiceLocator::Get<MaterialManager>();
 	}
 
 	ImageManager* Engine::GetImageManager() {
-		return ServiceLocator::GetImageManager();
+		return ServiceLocator::Get<ImageManager>();
 	}
 
 	ModelManager* Engine::GetModelManager() {
-		return ServiceLocator::GetModelManager();
+		return ServiceLocator::Get<ModelManager>();
 	}
 
 	AnimationManager* Engine::GetAnimationManager() {
-		return ServiceLocator::GetAnimationManager();
+		return ServiceLocator::Get<AnimationManager>();
 	}
 
 	PreviewManager* Engine::GetPreviewManager()
 	{
-		return ServiceLocator::GetPreviewManager();
+		return ServiceLocator::Get<PreviewManager>();
 	}
 }

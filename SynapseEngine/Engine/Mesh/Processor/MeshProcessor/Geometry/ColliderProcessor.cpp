@@ -34,7 +34,7 @@ namespace Syn
             partitioner
         );
 
-        ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
+        ServiceLocator::Get<tf::Executor>()->run(taskflow).wait();
         taskflow.clear();
 
         std::vector<MeshletJob> meshletJobs;
@@ -53,7 +53,7 @@ namespace Syn
             partitioner
         );
 
-        ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
+        ServiceLocator::Get<tf::Executor>()->run(taskflow).wait();
         taskflow.clear();
 
         // (Map-Reduce)
@@ -167,7 +167,7 @@ namespace Syn
             partitioner
         );
 
-        ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
+        ServiceLocator::Get<tf::Executor>()->run(taskflow).wait();
         taskflow.clear();
 
         //AABB REDUCE
@@ -208,7 +208,7 @@ namespace Syn
             partitioner
         );
 
-        ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
+        ServiceLocator::Get<tf::Executor>()->run(taskflow).wait();
 
         // SPHERE REDUCE
         float finalMaxRadiusSq = 0.0f;

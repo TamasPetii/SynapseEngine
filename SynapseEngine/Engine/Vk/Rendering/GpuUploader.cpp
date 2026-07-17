@@ -6,7 +6,7 @@
 namespace Syn::Vk {
 
     GpuUploader::GpuUploader() {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
         _transferQueue = device->GetTransferQueue();
         _graphicsQueue = device->GetGraphicsQueue();
 
@@ -78,7 +78,7 @@ namespace Syn::Vk {
     void GpuUploader::UploadSync(GpuUploadRequest request) {
         std::lock_guard lock(_mutex);
 
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
         Vk::ThreadSafeQueue* queue = request.needsGraphics ? _graphicsQueue : _transferQueue;
         Vk::CommandPool* pool = request.needsGraphics ? _graphicsPool.get() : _transferPool.get();
 

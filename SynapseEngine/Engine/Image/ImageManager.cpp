@@ -29,7 +29,7 @@ namespace Syn
     }
 
     ImageManager::~ImageManager() {
-        auto device = ServiceLocator::GetVkContext()->GetDevice()->Handle();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice()->Handle();
 
         if (_bindlessLayout != VK_NULL_HANDLE) {
             vkDestroyDescriptorSetLayout(device, _bindlessLayout, nullptr);

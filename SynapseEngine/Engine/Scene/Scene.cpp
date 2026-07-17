@@ -103,7 +103,7 @@ namespace Syn
 		_registry->EnsurePool<RigidBodyComponent>();
 		_registry->EnsurePool<HierarchyComponent>();
 
-        _physicsEngine = ServiceLocator::GetPhysicsFactory()();
+        _physicsEngine = ServiceLocator::Get<PhysicsFactory>()();
 
         _hierarchyManager = std::make_unique<HierarchyManager>(_registry.get());
 
@@ -447,7 +447,7 @@ namespace Syn
 
                 std::string groupName = sys->GetGroup();
 
-                CpuProfileScope profile(ServiceLocator::GetCpuProfiler(), _currentFrameIndex, groupName, profilerName);
+                CpuProfileScope profile(ServiceLocator::Get<ICpuProfiler>(), _currentFrameIndex, groupName, profilerName);
 
                 switch (phase)
                 {
@@ -500,9 +500,9 @@ namespace Syn
         _currentFrameIndex = frameIndex;
         _currentDeltaTime = deltaTime;
 
-        auto modelSnapshot = ServiceLocator::GetModelManager()->GetSnapshotAndVersion();
-        auto animSnapshot = ServiceLocator::GetAnimationManager()->GetSnapshotAndVersion();
-        auto materialSnapshot = ServiceLocator::GetMaterialManager()->GetSnapshotAndVersion();
+        auto modelSnapshot = ServiceLocator::Get<ModelManager>()->GetSnapshotAndVersion();
+        auto animSnapshot = ServiceLocator::Get<AnimationManager>()->GetSnapshotAndVersion();
+        auto materialSnapshot = ServiceLocator::Get<MaterialManager>()->GetSnapshotAndVersion();
 
         _systemContext.deltaTime = deltaTime;
         _systemContext.frameIndex = frameIndex;
@@ -532,8 +532,8 @@ namespace Syn
                 return MaterialRenderType::Opaque1Sided;
             });
 
-        auto screenWidth = ServiceLocator::GetFrameContext()->screenWidth;
-        auto screenHeight = ServiceLocator::GetFrameContext()->screenHeight;
+        auto screenWidth = ServiceLocator::Get<FrameContext>()->screenWidth;
+        auto screenHeight = ServiceLocator::Get<FrameContext>()->screenHeight;
 
         if (_sceneCameraEntity != NULL_ENTITY && _registry->HasComponent<CameraComponent>(_sceneCameraEntity))
         {
@@ -547,7 +547,7 @@ namespace Syn
             _registry->GetComponent<CameraComponent>(_debugCameraEntity).height = (float)screenHeight;
         }
 
-        ServiceLocator::GetTaskExecutor()->run(_updateTaskflow).wait();
+        ServiceLocator::Get<tf::Executor>()->run(_updateTaskflow).wait();
     }
 
     void Scene::UpdateGPU(uint32_t frameIndex)
@@ -555,11 +555,11 @@ namespace Syn
         _currentFrameIndex = frameIndex;
         _componentBufferManager->Update(frameIndex);
 
-        ServiceLocator::GetTaskExecutor()->run(_gpuTaskflow).wait();
+        ServiceLocator::Get<tf::Executor>()->run(_gpuTaskflow).wait();
     }
 
     void Scene::Finish()
     {
-        ServiceLocator::GetTaskExecutor()->run(_finishTaskflow).wait();
+        ServiceLocator::Get<tf::Executor>()->run(_finishTaskflow).wait();
     }
 }

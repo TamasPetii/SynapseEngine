@@ -40,8 +40,8 @@ namespace Syn {
     }
 
     void TraditionalOpaqueDeferredPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = true;
@@ -129,10 +129,10 @@ namespace Syn {
         if (!scene) return;
 
         auto drawData = scene->GetSceneDrawData();
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto materialManager = ServiceLocator::GetMaterialManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
+        auto materialManager = ServiceLocator::Get<MaterialManager>();
         auto componentBufferManager = scene->GetComponentBufferManager();
-        auto animationManager = ServiceLocator::GetAnimationManager();
+        auto animationManager = ServiceLocator::Get<AnimationManager>();
 
         uint32_t fIdx = context.frameIndex;
 
@@ -145,7 +145,7 @@ namespace Syn {
 
     void TraditionalOpaqueDeferredPass::BindDescriptors(const RenderContext& context)
     {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto bindlessBuffer = imageManager->GetBindlessBuffer();
         bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }

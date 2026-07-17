@@ -21,7 +21,7 @@ namespace Syn {
     }
 
     void BloomCompositePass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
         _shaderProgram = shaderManager->CreateProgram("BloomCompositeProgram", {
             ShaderNames::BloomComposite
             });
@@ -51,7 +51,7 @@ namespace Syn {
         auto rt = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         auto main = rt->GetImage(RenderTargetNames::Main);
         auto bloom = rt->GetImage(RenderTargetNames::Bloom);
-        auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::LinearClampEdge);
+        auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::LinearClampEdge);
 
         Vk::PushDescriptorWriter writer;
 

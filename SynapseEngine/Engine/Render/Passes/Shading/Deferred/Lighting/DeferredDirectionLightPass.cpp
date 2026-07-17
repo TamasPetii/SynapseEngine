@@ -23,7 +23,7 @@ namespace Syn {
     }
 
     void DeferredDirectionLightPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
@@ -91,7 +91,7 @@ namespace Syn {
 
     void DeferredDirectionLightPass::BindDescriptors(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge)->Handle();
         auto ssaoSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge)->Handle();
 

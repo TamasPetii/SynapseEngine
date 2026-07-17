@@ -20,7 +20,7 @@ namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/ClusterSetupPC.glsl"
 
     void ClusterSetupPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
@@ -47,7 +47,7 @@ namespace Syn {
     }
 
     void ClusterSetupPass::BindDescriptors(const RenderContext& context) {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
         //Using current frame's depth pyramid!

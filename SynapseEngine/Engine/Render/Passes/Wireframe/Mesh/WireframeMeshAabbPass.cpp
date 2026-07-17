@@ -20,7 +20,7 @@ namespace Syn {
     }
 
     void WireframeMeshAabbPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
 
         _shaderProgram = shaderManager->CreateProgram("WireframeProgram", {
             ShaderNames::WireframeMeshVert,
@@ -89,9 +89,9 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         if (drawData->Models.activeDescriptorCount == 0) return;
 
-        auto modelManager = ServiceLocator::GetModelManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
         auto compManager = scene->GetComponentBufferManager();
-        auto animationManager = ServiceLocator::GetAnimationManager();
+        auto animationManager = ServiceLocator::Get<AnimationManager>();
         uint32_t fIdx = context.frameIndex;
 
         auto cube = modelManager->GetResource(MeshSourceNames::Cube);

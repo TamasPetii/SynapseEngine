@@ -17,8 +17,8 @@ namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/MaterialPreviewPC.glsl"
 
     void MaterialPreviewPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = true;
@@ -65,8 +65,8 @@ namespace Syn {
         _dirtyMaterials.clear();
         _renderInfo.reset();
 
-        auto pm = ServiceLocator::GetPreviewManager();
-        auto modelManager = ServiceLocator::GetModelManager();
+        auto pm = ServiceLocator::Get<PreviewManager>();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
 
         _dirtyMaterials = pm->GetDirtyResources(PreviewResourceType::Material);
         if (_dirtyMaterials.empty()) return;
@@ -92,7 +92,7 @@ namespace Syn {
     void MaterialPreviewPass::BindDescriptors(const RenderContext& context) {
         if (_dirtyMaterials.empty()) return;
 
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto bindlessBuffer = imageManager->GetBindlessBuffer();
         bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
@@ -100,8 +100,8 @@ namespace Syn {
     void MaterialPreviewPass::Draw(const RenderContext& context) {
         if (_dirtyMaterials.empty() || !_renderInfo.has_value()) return;
 
-        auto pm = ServiceLocator::GetPreviewManager();
-        auto modelManager = ServiceLocator::GetModelManager();
+        auto pm = ServiceLocator::Get<PreviewManager>();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
 
         Vk::PushConstant<MaterialPreviewPC> pc;
         pc->frameGlobalContextBufferAddr = context.scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex);

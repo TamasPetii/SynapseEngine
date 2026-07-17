@@ -28,7 +28,7 @@ namespace Syn {
     }
 
     void GeometryModelCullingPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
@@ -59,9 +59,9 @@ namespace Syn {
 
         auto drawData = scene->GetSceneDrawData();
         auto compManager = scene->GetComponentBufferManager();
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto materialManager = ServiceLocator::GetMaterialManager();
-        auto animationManager = ServiceLocator::GetAnimationManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
+        auto materialManager = ServiceLocator::Get<MaterialManager>();
+        auto animationManager = ServiceLocator::Get<AnimationManager>();
 
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
@@ -73,7 +73,7 @@ namespace Syn {
     }
 
     void GeometryModelCullingPass::BindDescriptors(const RenderContext& context) {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         //Using prevous frame's depth pyramid!
         uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;

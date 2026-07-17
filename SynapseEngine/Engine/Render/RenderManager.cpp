@@ -41,7 +41,7 @@ namespace Syn {
 
         if (_frameNeedsResize[frameIndex]) 
         {
-            ServiceLocator::GetVkContext()->GetDevice()->WaitIdle();
+            ServiceLocator::Get<Vk::Context>()->GetDevice()->WaitIdle();
             _renderTargetManager->Resize(frameIndex, _newWidth, _newHeight);
             _frameNeedsResize[frameIndex] = false;
         }
@@ -51,8 +51,8 @@ namespace Syn {
         if (!cmd) 
             return;
 
-        ServiceLocator::GetGpuProfiler()->BeginFrame(cmd->Handle(), frameIndex);
-        ServiceLocator::GetRenderStatCollector()->BeginFrame(cmd->Handle(), frameIndex);
+        ServiceLocator::Get<IGpuProfiler>()->BeginFrame(cmd->Handle(), frameIndex);
+        ServiceLocator::Get<IRenderStatCollector>()->BeginFrame(cmd->Handle(), frameIndex);
 
         if (_preRenderCallback) {
             _preRenderCallback(cmd->Handle(), frameIndex, scene);
@@ -82,7 +82,7 @@ namespace Syn {
             _frameNeedsResize[i] = true;
         }
 
-        ServiceLocator::GetFrameContext()->screenWidth = width;
-		ServiceLocator::GetFrameContext()->screenHeight = height;
+        ServiceLocator::Get<FrameContext>()->screenWidth = width;
+		ServiceLocator::Get<FrameContext>()->screenHeight = height;
     }
 }

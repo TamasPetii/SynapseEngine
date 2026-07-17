@@ -22,8 +22,8 @@ namespace Syn {
     }
 
     void WireframeMeshletAabbPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
@@ -93,7 +93,7 @@ namespace Syn {
         auto drawData = scene->GetSceneDrawData();
         if (drawData->Models.activeMeshletCount == 0) return;
 
-        auto modelManager = ServiceLocator::GetModelManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
         uint32_t fIdx = context.frameIndex;
         
 
@@ -113,7 +113,7 @@ namespace Syn {
     }
 
     void WireframeMeshletAabbPass::BindDescriptors(const RenderContext& context) {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
         auto prevRtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, prevFrameIndex);

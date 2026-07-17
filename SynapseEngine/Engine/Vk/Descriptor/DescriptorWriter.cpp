@@ -30,7 +30,7 @@ namespace Syn::Vk {
     }
 
     void DescriptorWriter::UpdateSet(VkDescriptorSet set) {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         std::vector<VkWriteDescriptorSet> writes;
         writes.reserve(_imageWrites.size() + _bufferWrites.size());

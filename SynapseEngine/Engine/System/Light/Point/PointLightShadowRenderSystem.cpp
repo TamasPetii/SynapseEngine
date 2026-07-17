@@ -54,7 +54,7 @@ namespace Syn
             if (_needsRebuild) {
                 RebuildShadowBuffers(scene);
 
-                uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
+                uint32_t framesInFlight = ServiceLocator::Get<FrameContext>()->framesInFlight;
                 this->SetFramesToUpload(framesInFlight);
             }
             });

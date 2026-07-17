@@ -16,7 +16,7 @@ namespace Syn
     }
 
     void TransparentCompositePass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
@@ -77,7 +77,7 @@ namespace Syn
 
     void TransparentCompositePass::BindDescriptors(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto linearSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge)->Handle();
 
         auto accumImg = group->GetImage(RenderTargetNames::TransparentAccum);

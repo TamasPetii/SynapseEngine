@@ -47,7 +47,7 @@ namespace Syn
         animation->transientCpuData = std::make_unique<CookedAnimation>();
         animation->transientGpuData = std::make_unique<GpuBatchedAnimation>();
 
-        auto serializer = ServiceLocator::GetSerializer();
+        auto serializer = ServiceLocator::Get<Serializer>();
 
         bool useCache = false;
         if (std::filesystem::exists(cachePath) && std::filesystem::exists(srcPath)) {

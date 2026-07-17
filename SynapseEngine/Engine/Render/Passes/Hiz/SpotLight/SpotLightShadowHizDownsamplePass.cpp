@@ -25,7 +25,7 @@ namespace Syn {
     }
 
     void SpotLightShadowHizDownsamplePass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
         _shaderProgram = shaderManager->CreateProgram("SpotLightShadowHizDownsampleProgram", {
             ShaderNames::HizDownsample
             });
@@ -45,7 +45,7 @@ namespace Syn {
     }
 
     void SpotLightShadowHizDownsamplePass::Dispatch(const RenderContext& context) {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge);
 
         auto drawData = context.scene->GetSceneDrawData();

@@ -98,7 +98,7 @@ namespace Syn {
 
     void GuiManager::BeginFrame() {
         
-        if (auto frameCtx = ServiceLocator::GetFrameContext())
+        if (auto frameCtx = ServiceLocator::Get<FrameContext>())
             _textureManager->SetCurrentFrame(frameCtx->currentFrameIndex);
 
         ImGui_ImplVulkan_NewFrame();

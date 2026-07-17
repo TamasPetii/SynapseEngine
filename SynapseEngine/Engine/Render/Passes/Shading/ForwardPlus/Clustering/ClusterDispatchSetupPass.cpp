@@ -8,7 +8,7 @@ namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/ClusterDispatchSetupPC.glsl"
 
     void ClusterDispatchSetupPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 

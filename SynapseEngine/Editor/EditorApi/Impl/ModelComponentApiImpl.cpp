@@ -36,7 +36,7 @@ namespace Syn {
     std::vector<std::pair<uint32_t, std::string>> ModelComponentApiImpl::GetAvailableModels() const {
         std::vector<std::pair<uint32_t, std::string>> result;
 
-        auto modelManager = ServiceLocator::GetModelManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
         if (!modelManager) return result;
 
         auto paths = modelManager->GetResourcePaths();

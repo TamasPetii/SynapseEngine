@@ -47,7 +47,7 @@ namespace Syn
         Info("SceneManager: Loading scene from file path: {}", path.string());
 
         auto source = std::make_unique<FileSceneSource>(path, _loader.get());
-        uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
+        uint32_t framesInFlight = ServiceLocator::Get<FrameContext>()->framesInFlight;
 
         _pendingScene = std::make_unique<Scene>(framesInFlight, std::move(source));
         _isSceneChangePending = true;
@@ -76,7 +76,7 @@ namespace Syn
         {
             if (_activeScene)
             {
-                ServiceLocator::GetVkContext()->GetDevice()->WaitIdle();
+                ServiceLocator::Get<Vk::Context>()->GetDevice()->WaitIdle();
             }
 
             if (_pendingScene)

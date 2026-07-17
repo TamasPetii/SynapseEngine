@@ -13,7 +13,7 @@ namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/ClusterLightCountPC.glsl"
 
     void ClusterPointLightCountPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;

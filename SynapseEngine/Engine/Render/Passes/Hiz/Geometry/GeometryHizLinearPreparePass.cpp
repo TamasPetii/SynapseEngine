@@ -24,7 +24,7 @@ namespace Syn {
     }
 
     void GeometryHizLinearPreparePass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
         _shaderProgram = shaderManager->CreateProgram("HizLinearizeDepthProgram", {
             ShaderNames::HizLinearizeDepth
             });
@@ -69,7 +69,7 @@ namespace Syn {
 
         uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
 
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         auto currGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 

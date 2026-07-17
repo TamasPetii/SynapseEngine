@@ -16,8 +16,8 @@ namespace Syn {
 #include "Engine/Shaders/Includes/PushConstants/ModelPreviewPC.glsl"
 
     void ModelPreviewPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = true;
@@ -65,7 +65,7 @@ namespace Syn {
         _renderInfo.reset();
         _colorAttachments.clear();
 
-        auto pm = ServiceLocator::GetPreviewManager();
+        auto pm = ServiceLocator::Get<PreviewManager>();
 
         _dirtyModels = pm->GetDirtyResources(PreviewResourceType::Model);
         if (_dirtyModels.empty()) return;
@@ -101,7 +101,7 @@ namespace Syn {
     void ModelPreviewPass::BindDescriptors(const RenderContext& context) {
         if (_dirtyModels.empty()) return;
 
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto bindlessBuffer = imageManager->GetBindlessBuffer();
         bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
@@ -109,8 +109,8 @@ namespace Syn {
     void ModelPreviewPass::Draw(const RenderContext& context) {
         if (_dirtyModels.empty() || !_renderInfo.has_value()) return;
 
-        auto pm = ServiceLocator::GetPreviewManager();
-        auto modelManager = ServiceLocator::GetModelManager();
+        auto pm = ServiceLocator::Get<PreviewManager>();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
 
         Vk::PushConstant<ModelPreviewPC> pc;
         pc->frameGlobalContextBufferAddr = context.scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex);

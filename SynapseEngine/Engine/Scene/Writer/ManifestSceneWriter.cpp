@@ -39,7 +39,7 @@ namespace Syn
         snapshot.materialManifest = std::move(matManifest);
 		snapshot.textureManifest = std::move(textureManifest);
 
-        auto serializer = ServiceLocator::GetSerializer();
+        auto serializer = ServiceLocator::Get<Serializer>();
         bool success = false;
         if (serializer)
             success = serializer->SaveToFile(path, snapshot);
@@ -54,7 +54,7 @@ namespace Syn
         auto modelPool = scene.GetRegistry()->GetPool<ModelComponent>();
         if (!modelPool) return;
 
-        auto modelManager = ServiceLocator::GetModelManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
         uint32_t maxModelId = static_cast<uint32_t>(modelManager->GetResourceCount());
 
         std::vector<uint8_t> usedModels(maxModelId, 0);
@@ -97,7 +97,7 @@ namespace Syn
         auto modelPool = scene.GetRegistry()->GetPool<ModelComponent>();
         if (!animPool || !modelPool) return;
 
-        auto animManager = ServiceLocator::GetAnimationManager();
+        auto animManager = ServiceLocator::Get<AnimationManager>();
         uint32_t maxAnimId = animManager->GetResourceCount();
 
         std::vector<uint8_t> usedAnims(maxAnimId, 0);
@@ -149,8 +149,8 @@ namespace Syn
         auto modelPool = scene.GetRegistry()->GetPool<ModelComponent>();
         auto matPool = scene.GetRegistry()->GetPool<MaterialOverrideComponent>();
 
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto matManager = ServiceLocator::GetMaterialManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
+        auto matManager = ServiceLocator::Get<MaterialManager>();
 
         uint32_t maxMatId = matManager->GetResourceCount();
         std::vector<uint8_t> usedMats(maxMatId, 0);
@@ -238,7 +238,7 @@ namespace Syn
 
     void ManifestSceneWriter::ProcessTextures(std::vector<MaterialManifestEntry>& inOutMatManifest, std::vector<TextureManifestEntry>& outTexManifest, std::vector<uint32_t>& outLocalToGlobalTex)
     {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         uint32_t maxTexId = imageManager->GetResourceCount();
 
         std::vector<uint8_t> usedTex(maxTexId, 0);

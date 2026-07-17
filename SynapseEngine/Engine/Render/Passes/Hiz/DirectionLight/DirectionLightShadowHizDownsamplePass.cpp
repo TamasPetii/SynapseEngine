@@ -24,7 +24,7 @@ namespace Syn {
     }
 
     void DirectionLightShadowHizDownsamplePass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
         _shaderProgram = shaderManager->CreateProgram("DirectionLightShadowHizDownsampleProgram", {
             ShaderNames::HizDownsample
             });
@@ -44,7 +44,7 @@ namespace Syn {
     }
 
     void DirectionLightShadowHizDownsamplePass::Dispatch(const RenderContext& context) {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge);
 
         auto drawData = context.scene->GetSceneDrawData();

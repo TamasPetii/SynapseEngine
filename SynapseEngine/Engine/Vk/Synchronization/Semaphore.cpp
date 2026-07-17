@@ -8,7 +8,7 @@ namespace Syn::Vk {
 
     Semaphore::~Semaphore() {
         if (_handle != VK_NULL_HANDLE) {
-            auto device = ServiceLocator::GetVkContext()->GetDevice();
+            auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
             vkDestroySemaphore(device->Handle(), _handle, nullptr);
             _handle = VK_NULL_HANDLE;
         }
@@ -22,7 +22,7 @@ namespace Syn::Vk {
     Semaphore& Semaphore::operator=(Semaphore&& other) noexcept {
         if (this != &other) {
             if (_handle != VK_NULL_HANDLE) {
-                auto device = ServiceLocator::GetVkContext()->GetDevice();
+                auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
                 vkDestroySemaphore(device->Handle(), _handle, nullptr);
             }
 

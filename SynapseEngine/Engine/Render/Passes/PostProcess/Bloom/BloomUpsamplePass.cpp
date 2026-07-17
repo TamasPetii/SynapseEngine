@@ -23,7 +23,7 @@ namespace Syn {
     }
 
     void BloomUpsamplePass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
         _shaderProgram = shaderManager->CreateProgram("BloomUpsampleProgram", {
             ShaderNames::BloomUpsample
             });
@@ -43,7 +43,7 @@ namespace Syn {
     }
 
     void BloomUpsamplePass::Dispatch(const RenderContext& context) {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto sampler = imageManager->GetSampler(SamplerNames::LinearClampEdge);
 
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);

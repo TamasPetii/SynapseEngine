@@ -19,11 +19,11 @@ namespace Syn
 
     void SelectionOutlinePass::Initialize()
     {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = ServiceLocator::GetShaderManager()->CreateProgram("SelectionOutlineProgram", {
+        _shaderProgram = ServiceLocator::Get<ShaderManager>()->CreateProgram("SelectionOutlineProgram", {
             ShaderNames::FullscreenVert,
             ShaderNames::SelectionOutlineFrag
             }, config);
@@ -117,7 +117,7 @@ namespace Syn
 
     void SelectionOutlinePass::BindDescriptors(const RenderContext& context)
     {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
  
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         auto entityTexture = rtGroup->GetImage(RenderTargetNames::EntityIndex);

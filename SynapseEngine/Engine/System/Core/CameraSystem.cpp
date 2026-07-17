@@ -35,7 +35,7 @@ namespace Syn
 
         if (!cameraPool || !transformPool) return;
 
-        auto inputManager = ServiceLocator::GetInputManager();
+        auto inputManager = ServiceLocator::Get<InputManager>();
 
         auto processEntity = [cameraPool, transformPool, inputManager, scene, deltaTime](EntityID entity) {
             if (!transformPool->Has(entity)) 

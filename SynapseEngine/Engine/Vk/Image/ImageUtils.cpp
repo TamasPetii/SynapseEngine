@@ -152,7 +152,7 @@ namespace Syn::Vk {
     }
 
     void ImageUtils::GenerateMipMaps(VkCommandBuffer cmd, VkImage image, VkFormat format, uint32_t width, uint32_t height, uint32_t mipLevels) {
-        auto physicalDevice = ServiceLocator::GetVkContext()->GetPhysicalDevice();
+        auto physicalDevice = ServiceLocator::Get<Vk::Context>()->GetPhysicalDevice();
         VkFormatProperties formatProperties;
         vkGetPhysicalDeviceFormatProperties(physicalDevice->Handle(), format, &formatProperties);
 

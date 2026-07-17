@@ -23,7 +23,7 @@ namespace Syn {
     }
 
     void MaterialPreviewBloomPass::Initialize() {
-        auto sm = ServiceLocator::GetShaderManager();
+        auto sm = ServiceLocator::Get<ShaderManager>();
         _prefilterProgram = sm->CreateProgram("PrevBloomPrefilter", { ShaderNames::BloomPrefilter });
         _downsampleProgram = sm->CreateProgram("PrevBloomDown", { ShaderNames::BloomDownsample });
         _upsampleProgram = sm->CreateProgram("PrevBloomUp", { ShaderNames::BloomUpsample });
@@ -31,7 +31,7 @@ namespace Syn {
     }
 
     void MaterialPreviewBloomPass::Execute(const RenderContext& context) {
-        auto pm = ServiceLocator::GetPreviewManager();
+        auto pm = ServiceLocator::Get<PreviewManager>();
 
         std::vector<uint32_t> dirtyMaterials = pm->GetDirtyResources(PreviewResourceType::Material);
         if (dirtyMaterials.empty()) return;
@@ -217,7 +217,7 @@ namespace Syn {
     void MaterialPreviewBloomPass::DispatchPrefilter(const RenderContext& context, Vk::Image* colorImage, Vk::Image* bloomImage) {
         _prefilterProgram->Bind(context.cmd);
 
-        auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::LinearClampEdge);
+        auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::LinearClampEdge);
 
         Vk::PushDescriptorWriter writer;
         writer.AddCombinedImageSampler(0, colorImage->GetView(Vk::ImageViewNames::Default), sampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -238,7 +238,7 @@ namespace Syn {
     void MaterialPreviewBloomPass::DispatchDownsample(const RenderContext& context, Vk::Image* bloomImage) {
         _downsampleProgram->Bind(context.cmd);
 
-        auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::LinearClampEdge);
+        auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::LinearClampEdge);
         Vk::PushDescriptorWriter pushWriter;
         glm::vec2 currentInSize = glm::vec2(bloomImage->GetExtent().width, bloomImage->GetExtent().height);
 
@@ -296,7 +296,7 @@ namespace Syn {
     void MaterialPreviewBloomPass::DispatchUpsample(const RenderContext& context, Vk::Image* bloomImage) {
         _upsampleProgram->Bind(context.cmd);
 
-        auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::LinearClampEdge);
+        auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::LinearClampEdge);
         Vk::PushDescriptorWriter pushWriter;
         glm::vec2 baseSize = glm::vec2(bloomImage->GetExtent().width, bloomImage->GetExtent().height);
 
@@ -340,7 +340,7 @@ namespace Syn {
     void MaterialPreviewBloomPass::DispatchComposite(const RenderContext& context, Vk::Image* colorImage, Vk::Image* bloomImage) {
         _compositeProgram->Bind(context.cmd);
         
-        auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::LinearClampEdge);
+        auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::LinearClampEdge);
         Vk::PushDescriptorWriter writer;
         writer.AddCombinedImageSampler(0, bloomImage->GetView(std::string(Vk::ImageViewNames::Default) + std::string(Vk::ImageViewNames::Mip) + "0"), sampler->Handle(), VK_IMAGE_LAYOUT_GENERAL);
         writer.AddStorageImage(1, colorImage->GetView(Vk::ImageViewNames::Default), VK_IMAGE_LAYOUT_GENERAL);

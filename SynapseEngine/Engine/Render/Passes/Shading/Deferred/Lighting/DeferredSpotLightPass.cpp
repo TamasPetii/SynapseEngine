@@ -27,7 +27,7 @@ namespace Syn {
     }
 
     void DeferredSpotLightPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
@@ -92,7 +92,7 @@ namespace Syn {
     void DeferredSpotLightPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         auto bufferManager = scene->GetComponentBufferManager();
-        auto modelManager = ServiceLocator::GetModelManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
         uint32_t fIdx = context.frameIndex;
@@ -107,7 +107,7 @@ namespace Syn {
 
     void DeferredSpotLightPass::BindDescriptors(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge)->Handle();
 		auto ssaoSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge)->Handle();
 

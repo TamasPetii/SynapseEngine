@@ -25,7 +25,7 @@ namespace Syn {
     }
 
     void DirectionLightShadowHizCopyPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
         _shaderProgram = shaderManager->CreateProgram("DirectionLightShadowHizCopyProgram", {
 			ShaderNames::HizCopyComp
             });
@@ -56,7 +56,7 @@ namespace Syn {
     }
 
     void DirectionLightShadowHizCopyPass::BindDescriptors(const RenderContext& context) {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto drawData = context.scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
 

@@ -7,7 +7,7 @@
 namespace Syn::Vk {
 
     void ImageFactory::Allocate(Image* image) {
-        auto context = ServiceLocator::GetVkContext();
+        auto context = ServiceLocator::Get<Vk::Context>();
         auto device = context->GetDevice();
         VmaAllocator allocator = device->GetAllocator();
 
@@ -42,7 +42,7 @@ namespace Syn::Vk {
     }
 
     void ImageFactory::CreateViews(Image* image) {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         if (!image->_config.imageViewConfigs.contains(ImageViewNames::Default)) {
             ImageViewConfig defaultConfig;

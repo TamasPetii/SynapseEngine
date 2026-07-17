@@ -17,7 +17,7 @@ namespace Syn {
     }
 
     void PointLightShadowRadixSortPass::Initialize() {
-        auto vulkanContext = ServiceLocator::GetVkContext();
+        auto vulkanContext = ServiceLocator::Get<Vk::Context>();
 
         VrdxSorterCreateInfo sorterInfo = {};
         sorterInfo.physicalDevice = vulkanContext->GetPhysicalDevice()->Handle();

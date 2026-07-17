@@ -44,8 +44,8 @@ namespace Syn {
     }
 
     void MeshletOpaqueDeferredPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = true;
@@ -132,14 +132,14 @@ namespace Syn {
 
     void MeshletOpaqueDeferredPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto materialManager = ServiceLocator::GetMaterialManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
+        auto materialManager = ServiceLocator::Get<MaterialManager>();
 
         auto drawData = scene->GetSceneDrawData();
         auto componentBufferManager = scene->GetComponentBufferManager();
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
 
-        auto animationManager = ServiceLocator::GetAnimationManager();
+        auto animationManager = ServiceLocator::Get<AnimationManager>();
 
         uint32_t fIdx = context.frameIndex;
 
@@ -153,7 +153,7 @@ namespace Syn {
 
     void MeshletOpaqueDeferredPass::BindDescriptors(const RenderContext& context)
     {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         //Using prevous frame's depth pyramid!
         uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;

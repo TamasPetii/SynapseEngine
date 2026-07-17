@@ -23,7 +23,7 @@ namespace Syn
             partitioner
         );
 
-        ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
+        ServiceLocator::Get<tf::Executor>()->run(taskflow).wait();
     }
 
     void AnimationBakeProcessor::BakeFrame(uint32_t frameIndex, CookedAnimation& anim)

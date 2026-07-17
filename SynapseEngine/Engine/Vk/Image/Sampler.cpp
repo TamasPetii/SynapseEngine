@@ -7,7 +7,7 @@ namespace Syn::Vk {
     Sampler::Sampler(const SamplerConfig& config)
         : _config(config) {
 
-        auto context = ServiceLocator::GetVkContext();
+        auto context = ServiceLocator::Get<Vk::Context>();
         auto device = context->GetDevice();
         auto physicalDevice = context->GetPhysicalDevice();
 
@@ -48,7 +48,7 @@ namespace Syn::Vk {
 
     Sampler::~Sampler() {
         if (_handle != VK_NULL_HANDLE) {
-            auto device = ServiceLocator::GetVkContext()->GetDevice();
+            auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
             vkDestroySampler(device->Handle(), _handle, nullptr);
             _handle = VK_NULL_HANDLE;
         }

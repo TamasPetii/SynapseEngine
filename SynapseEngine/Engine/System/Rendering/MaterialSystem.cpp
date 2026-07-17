@@ -173,7 +173,7 @@ namespace Syn
             for (auto e : pool->GetStorage().GetStreamEntities()) processSharedEntity(e);
             
             if (needsRebuild || needsUpload) {
-                uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
+                uint32_t framesInFlight = ServiceLocator::Get<FrameContext>()->framesInFlight;
                 this->SetFramesToUpload(framesInFlight);
                 scene->GetSceneDrawData()->RequestGlobalSync(framesInFlight);
 

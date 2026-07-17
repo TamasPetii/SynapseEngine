@@ -20,7 +20,7 @@ namespace Syn
 
         template<typename T>
         std::future<bool> SaveToFileAsync(std::filesystem::path path, const T& data) {
-            auto executor = ServiceLocator::GetTaskExecutor();
+            auto executor = ServiceLocator::Get<tf::Executor>();
 
             return executor->async([this, p = path, d = data]() -> bool {
                 return this->SaveToFile(p, d);
@@ -55,7 +55,7 @@ namespace Syn
 
         template<typename T>
         std::future<std::optional<T>> LoadFromFileAsync(std::filesystem::path path) {
-            auto executor = ServiceLocator::GetTaskExecutor();
+            auto executor = ServiceLocator::Get<tf::Executor>();
 
             return executor->async([this, p = path]() -> std::optional<T> {
                 T loadedData{};

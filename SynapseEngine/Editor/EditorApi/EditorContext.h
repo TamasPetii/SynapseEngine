@@ -32,6 +32,7 @@
 #include "EditorCore/Api/IAnimationApi.h"
 #include "EditorCore/Api/IMaterialOverrideApi.h"
 #include "EditorCore/Api/IPreviewApi.h"
+#include "Engine/Registry/Type/TypeInfo.h"
 
 namespace Syn {
     class EditorContext {
@@ -39,8 +40,11 @@ namespace Syn {
         EditorContext(Engine* engine, GuiTextureManager* textureManager);
 
         template <typename T>
-        T* GetApi() const {
-            auto it = _apis.find(std::type_index(typeid(T)));
+        T* GetApi() const 
+        {
+            const TypeID id = TypeInfo<T>::ID;
+
+            auto it = _apis.find(id);
 
             if (it != _apis.end()) {
                 return static_cast<T*>(it->second.get());
@@ -52,9 +56,10 @@ namespace Syn {
     private:
         template <typename Interface, typename Implementation, typename... Args>
         void RegisterApi(Args&&... args) {
-            _apis[std::type_index(typeid(Interface))] = std::make_unique<Implementation>(std::forward<Args>(args)...);
+            const TypeID id = TypeInfo<Interface>::ID;
+            _apis[id] = std::make_unique<Implementation>(std::forward<Args>(args)...);
         }
 
-        std::unordered_map<std::type_index, std::unique_ptr<IApi>> _apis;
+        std::unordered_map<TypeID, std::unique_ptr<IApi>> _apis;
     };
 }

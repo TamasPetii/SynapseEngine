@@ -43,9 +43,9 @@ namespace Syn
         EntityID& debugCam = SceneInsider::GetDebugCameraEntity(scene, SceneInsider::GetKey());
         HierarchyManager* hm = scene.GetHierarchyManager();
 
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto animationManager = ServiceLocator::GetAnimationManager();
-        auto materialManager = ServiceLocator::GetMaterialManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
+        auto animationManager = ServiceLocator::Get<AnimationManager>();
+        auto materialManager = ServiceLocator::Get<MaterialManager>();
 
         json config;
         std::string path = PathUtils::GetAbsolutePathString("Engine/Scene/Source/Procedural/test_config.json");
@@ -104,7 +104,7 @@ namespace Syn
             modelManager->GetResourceIndex(MeshSourceNames::Torus)
         };
 
-        auto skyTextureId = ServiceLocator::GetImageManager()->LoadImageSync(PathUtils::GetAbsolutePathString(envPath + "MainScene.hdr"));
+        auto skyTextureId = ServiceLocator::Get<ImageManager>()->LoadImageSync(PathUtils::GetAbsolutePathString(envPath + "MainScene.hdr"));
         scene.GetSettings()->environment.skyTextureId = skyTextureId;
 
         EntityID rootCameras = scene.CreateEntity();

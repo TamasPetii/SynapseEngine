@@ -13,7 +13,7 @@ namespace Syn {
     }
 
     void BenchmarkViewModel::SyncWithEngine() {
-        auto frameCtx = ServiceLocator::GetFrameContext();
+        auto frameCtx = ServiceLocator::Get<FrameContext>();
         if (!frameCtx) return;
 
         float fps = frameCtx->deltaTime > 0.0f ? (1.0f / frameCtx->deltaTime) : 0.0f;
@@ -27,13 +27,13 @@ namespace Syn {
 
         uint32_t prevFrame = (frameCtx->currentFrameIndex + frameCtx->framesInFlight - 1) % frameCtx->framesInFlight;
 
-        if (auto cpuProfiler = ServiceLocator::GetCpuProfiler()) {
+        if (auto cpuProfiler = ServiceLocator::Get<ICpuProfiler>()) {
             auto rawTimings = cpuProfiler->GetTimings(prevFrame);
             _state.totalCpuTimeMs = CalculateGlobalTotal(rawTimings);
             _state.cpuTimings = ProcessTimings(rawTimings, true);
         }
 
-        if (auto gpuProfiler = ServiceLocator::GetGpuProfiler()) {
+        if (auto gpuProfiler = ServiceLocator::Get<IGpuProfiler>()) {
             auto rawTimings = gpuProfiler->GetTimings(prevFrame);
             _state.totalGpuTimeMs = CalculateGlobalTotal(rawTimings);
             _state.gpuTimings = ProcessTimings(rawTimings, false);

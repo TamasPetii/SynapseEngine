@@ -5,14 +5,15 @@
 #include <chrono>
 #include <taskflow/taskflow.hpp>
 #include <functional>
+#include <memory>
 
-namespace Syn::Vk { 
+namespace Syn::Vk {
     class Context;
     class GpuUploader;
 }
 
 namespace Syn {
-	struct FrameContext;
+    struct FrameContext;
     class ShaderManager;
     class ResourceManager;
     class StaticMeshBuilder;
@@ -25,17 +26,29 @@ namespace Syn {
     class AnimationManager;
     class AnimationBuilder;
     class IPhysicsEngine;
-	class IGpuProfiler;
+    class IGpuProfiler;
     class ICpuProfiler;
     class Serializer;
     class IRenderStatCollector;
-	class FrameStatisticsManager;
+    class FrameStatisticsManager;
     class PreviewManager;
 
     using PhysicsFactory = std::function<std::unique_ptr<IPhysicsEngine>()>;
+
+    template <typename T>
+    struct ServiceTrait {
+        using ProvideType = T*;
+        using ReturnType = T*;
+    };
+
+    template <>
+    struct ServiceTrait<PhysicsFactory> {
+        using ProvideType = PhysicsFactory;
+        using ReturnType = PhysicsFactory&;
+    };
 }
 
-namespace Syn 
+namespace Syn
 {
     class SYN_API ServiceLocator {
     public:
@@ -43,95 +56,79 @@ namespace Syn
         ServiceLocator(const ServiceLocator&) = delete;
         ServiceLocator& operator=(const ServiceLocator&) = delete;
 
-        static void Shutdown();
+        template <typename T>
+        static void Provide(typename ServiceTrait<T>::ProvideType service);
 
-        static void ProvideVkContext(Vk::Context* context) { _vkContext = context; }
-        static Vk::Context* GetVkContext() { return _vkContext; }
-
-        static void ProvideResourceManager(ResourceManager* manager) { _resourceManager = manager; }
-        static ResourceManager* GetResourceManager() { return _resourceManager; }
-
-        static void ProvideShaderManager(ShaderManager* manager) { _shaderManager = manager; }
-        static ShaderManager* GetShaderManager() { return _shaderManager; }
-
-        static void ProvideStaticMeshBuilder(StaticMeshBuilder* builder) { _staticMeshBuilder = builder; }
-        static StaticMeshBuilder* GetStaticMeshBuilder() { return _staticMeshBuilder; }
-
-        static void ProvideFrameContext(FrameContext* context) { _frameContext = context; }
-        static FrameContext* GetFrameContext() { return _frameContext; }
-
-		static void ProvideModelManager(ModelManager* manager) { _modelManager = manager; }
-		static ModelManager* GetModelManager() { return _modelManager; }
-
-		static void ProvideTaskExecutor(tf::Executor* executor) { _taskExecutor = executor; }
-		static tf::Executor* GetTaskExecutor() { return _taskExecutor; }
-
-		static void ProvideImageManager(ImageManager* manager) { _imageManager = manager; }
-		static ImageManager* GetImageManager() { return _imageManager; }
-
-		static void ProvideImageBuilder(ImageBuilder* builder) { _imageBuilder = builder; }
-		static ImageBuilder* GetImageBuilder() { return _imageBuilder; }
-
-        static void ProvideGpuUploader(Vk::GpuUploader* uploader) { _gpuUploader = uploader; }
-        static Vk::GpuUploader* GetGpuUploader() { return _gpuUploader; }
-
-        static void ProvideInputManager(InputManager* manager) { _inputManager = manager; }
-        static InputManager* GetInputManager() { return _inputManager; }
-
-        static void ProvideSceneManager(SceneManager* manager) { _sceneManager = manager; }
-        static SceneManager* GetSceneManager() { return _sceneManager; }
-
-        static void ProvideMaterialManager(MaterialManager* manager) { _materialManager = manager; }
-        static MaterialManager* GetMaterialManager() { return _materialManager; }
-
-        static void ProvideAnimationBuilder(AnimationBuilder* builder) { _animationBuilder = builder; }
-        static AnimationBuilder* GetAnimationBuilder() { return _animationBuilder; }
-
-        static void ProvideAnimationManager(AnimationManager* manager) { _animationManager = manager; }
-        static AnimationManager* GetAnimationManager() { return _animationManager; }
-
-		static void ProvideGpuProfiler(IGpuProfiler* profiler) { _gpuProfiler = profiler; }
-		static IGpuProfiler* GetGpuProfiler() { return _gpuProfiler; }
-
-		static void ProvideCpuProfiler(ICpuProfiler* profiler) { _cpuProfiler = profiler; }
-		static ICpuProfiler* GetCpuProfiler() { return _cpuProfiler; }
-
-        static void ProvideSerializer(Serializer* serializer) { _serializer = serializer; }
-        static Serializer* GetSerializer() { return _serializer; }
-
-        static void ProvidePhysicsFactory(PhysicsFactory factory) { _physicsFactory = std::move(factory); }
-        static PhysicsFactory& GetPhysicsFactory() { return _physicsFactory; }
-
-		static void ProvideRenderStatCollector(IRenderStatCollector* collector) { _renderStatCollector = collector; }
-		static IRenderStatCollector* GetRenderStatCollector() { return _renderStatCollector; }
-
-		static void ProvideFrameStatisticsManager(FrameStatisticsManager* manager) { _frameStatisticsManager = manager; }
-		static FrameStatisticsManager* GetFrameStatisticsManager() { return _frameStatisticsManager; }
-
-        static void ProvidePreviewManager(PreviewManager* manager) { _previewManager = manager; }
-        static PreviewManager* GetPreviewManager() { return _previewManager; }
+        template <typename T>
+        static typename ServiceTrait<T>::ReturnType Get();
     private:
         static Vk::Context* _vkContext;
         static Vk::GpuUploader* _gpuUploader;
-		static ShaderManager* _shaderManager;
-		static ResourceManager* _resourceManager;
-		static ModelManager* _modelManager;
+        static ShaderManager* _shaderManager;
+        static ResourceManager* _resourceManager;
+        static ModelManager* _modelManager;
         static FrameContext* _frameContext;
-		static tf::Executor* _taskExecutor;
-		static ImageManager* _imageManager;
-		static ImageBuilder* _imageBuilder;
-		static StaticMeshBuilder* _staticMeshBuilder;
+        static tf::Executor* _taskExecutor;
+        static ImageManager* _imageManager;
+        static ImageBuilder* _imageBuilder;
+        static StaticMeshBuilder* _staticMeshBuilder;
         static InputManager* _inputManager;
         static SceneManager* _sceneManager;
         static MaterialManager* _materialManager;
         static AnimationBuilder* _animationBuilder;
         static AnimationManager* _animationManager;
-		static IGpuProfiler* _gpuProfiler;
-		static ICpuProfiler* _cpuProfiler;
+        static IGpuProfiler* _gpuProfiler;
+        static ICpuProfiler* _cpuProfiler;
         static Serializer* _serializer;
         static PhysicsFactory _physicsFactory;
-		static IRenderStatCollector* _renderStatCollector;
-		static FrameStatisticsManager* _frameStatisticsManager;
+        static IRenderStatCollector* _renderStatCollector;
+        static FrameStatisticsManager* _frameStatisticsManager;
         static PreviewManager* _previewManager;
     };
+
+    template <> SYN_API void ServiceLocator::Provide<Vk::Context>(Vk::Context*);
+    template <> SYN_API void ServiceLocator::Provide<Vk::GpuUploader>(Vk::GpuUploader*);
+    template <> SYN_API void ServiceLocator::Provide<ShaderManager>(ShaderManager*);
+    template <> SYN_API void ServiceLocator::Provide<ResourceManager>(ResourceManager*);
+    template <> SYN_API void ServiceLocator::Provide<StaticMeshBuilder>(StaticMeshBuilder*);
+    template <> SYN_API void ServiceLocator::Provide<FrameContext>(FrameContext*);
+    template <> SYN_API void ServiceLocator::Provide<ModelManager>(ModelManager*);
+    template <> SYN_API void ServiceLocator::Provide<tf::Executor>(tf::Executor*);
+    template <> SYN_API void ServiceLocator::Provide<ImageManager>(ImageManager*);
+    template <> SYN_API void ServiceLocator::Provide<ImageBuilder>(ImageBuilder*);
+    template <> SYN_API void ServiceLocator::Provide<InputManager>(InputManager*);
+    template <> SYN_API void ServiceLocator::Provide<SceneManager>(SceneManager*);
+    template <> SYN_API void ServiceLocator::Provide<MaterialManager>(MaterialManager*);
+    template <> SYN_API void ServiceLocator::Provide<AnimationBuilder>(AnimationBuilder*);
+    template <> SYN_API void ServiceLocator::Provide<AnimationManager>(AnimationManager*);
+    template <> SYN_API void ServiceLocator::Provide<IGpuProfiler>(IGpuProfiler*);
+    template <> SYN_API void ServiceLocator::Provide<ICpuProfiler>(ICpuProfiler*);
+    template <> SYN_API void ServiceLocator::Provide<Serializer>(Serializer*);
+    template <> SYN_API void ServiceLocator::Provide<IRenderStatCollector>(IRenderStatCollector*);
+    template <> SYN_API void ServiceLocator::Provide<FrameStatisticsManager>(FrameStatisticsManager*);
+    template <> SYN_API void ServiceLocator::Provide<PreviewManager>(PreviewManager*);
+    template <> SYN_API void ServiceLocator::Provide<PhysicsFactory>(PhysicsFactory);
+
+    template <> SYN_API Vk::Context* ServiceLocator::Get<Vk::Context>();
+    template <> SYN_API Vk::GpuUploader* ServiceLocator::Get<Vk::GpuUploader>();
+    template <> SYN_API ShaderManager* ServiceLocator::Get<ShaderManager>();
+    template <> SYN_API ResourceManager* ServiceLocator::Get<ResourceManager>();
+    template <> SYN_API StaticMeshBuilder* ServiceLocator::Get<StaticMeshBuilder>();
+    template <> SYN_API FrameContext* ServiceLocator::Get<FrameContext>();
+    template <> SYN_API ModelManager* ServiceLocator::Get<ModelManager>();
+    template <> SYN_API tf::Executor* ServiceLocator::Get<tf::Executor>();
+    template <> SYN_API ImageManager* ServiceLocator::Get<ImageManager>();
+    template <> SYN_API ImageBuilder* ServiceLocator::Get<ImageBuilder>();
+    template <> SYN_API InputManager* ServiceLocator::Get<InputManager>();
+    template <> SYN_API SceneManager* ServiceLocator::Get<SceneManager>();
+    template <> SYN_API MaterialManager* ServiceLocator::Get<MaterialManager>();
+    template <> SYN_API AnimationBuilder* ServiceLocator::Get<AnimationBuilder>();
+    template <> SYN_API AnimationManager* ServiceLocator::Get<AnimationManager>();
+    template <> SYN_API IGpuProfiler* ServiceLocator::Get<IGpuProfiler>();
+    template <> SYN_API ICpuProfiler* ServiceLocator::Get<ICpuProfiler>();
+    template <> SYN_API Serializer* ServiceLocator::Get<Serializer>();
+    template <> SYN_API IRenderStatCollector* ServiceLocator::Get<IRenderStatCollector>();
+    template <> SYN_API FrameStatisticsManager* ServiceLocator::Get<FrameStatisticsManager>();
+    template <> SYN_API PreviewManager* ServiceLocator::Get<PreviewManager>();
+    template <> SYN_API PhysicsFactory& ServiceLocator::Get<PhysicsFactory>();
 }

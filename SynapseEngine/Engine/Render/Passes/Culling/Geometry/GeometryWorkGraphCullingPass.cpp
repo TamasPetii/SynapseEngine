@@ -23,7 +23,7 @@ namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/ModelMeshCullingPC.glsl"
 
     GeometryWorkGraphCullingPass::~GeometryWorkGraphCullingPass() {
-        auto device = ServiceLocator::GetVkContext()->GetDevice()->Handle();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice()->Handle();
 
         if (_graphPipeline != VK_NULL_HANDLE) {
             vkDestroyPipeline(device, _graphPipeline, nullptr);
@@ -39,8 +39,8 @@ namespace Syn {
     }
 
     void GeometryWorkGraphCullingPass::Initialize() {
-        auto device = ServiceLocator::GetVkContext()->GetDevice()->Handle();
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice()->Handle();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
@@ -161,7 +161,7 @@ namespace Syn {
     }
 
     void GeometryWorkGraphCullingPass::BindDescriptors(const RenderContext& context) {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, prevFrameIndex);

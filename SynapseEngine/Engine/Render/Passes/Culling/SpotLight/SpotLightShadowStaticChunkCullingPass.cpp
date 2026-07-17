@@ -25,7 +25,7 @@ namespace Syn {
     }
 
     void SpotLightShadowStaticChunkCullingPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
@@ -53,7 +53,7 @@ namespace Syn {
     }
 
     void SpotLightShadowStaticChunkCullingPass::BindDescriptors(const RenderContext& context) {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
         auto depthPyramid = context.scene->GetSceneDrawData()->SpotLightShadow.shadowDepthPyramid[prevFrameIndex].get();
         auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);

@@ -28,8 +28,8 @@ namespace Syn
         EntityID& sceneCam = SceneInsider::GetSceneCameraEntity(scene, SceneInsider::GetKey());
         HierarchyManager* hm = scene.GetHierarchyManager();
 
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto materialManager = ServiceLocator::GetMaterialManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
+        auto materialManager = ServiceLocator::Get<MaterialManager>();
 
         Syn::Info("Populating Model Preview Scene...");
 
@@ -129,7 +129,7 @@ namespace Syn
 
         hm->AttachChild(rootEnvironment, previewModel);
 
-        auto skyTextureId = ServiceLocator::GetImageManager()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/Engine/Environment/ModelPreview.hdr"));
+        auto skyTextureId = ServiceLocator::Get<ImageManager>()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/Engine/Environment/ModelPreview.hdr"));
         scene.GetSettings()->environment.skyTextureId = skyTextureId;
         scene.GetSettings()->debug.enableInfiniteGrid = true;
 

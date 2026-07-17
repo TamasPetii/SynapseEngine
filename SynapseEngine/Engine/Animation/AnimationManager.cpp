@@ -25,7 +25,7 @@ namespace Syn {
         std::string uniqueName = filePath + "_" + std::to_string(baseModelId);
 
         return InternalLoadAsync(uniqueName, [this, filePath, baseModelId]() {
-            auto modelManager = ServiceLocator::GetModelManager();
+            auto modelManager = ServiceLocator::Get<ModelManager>();
 
             modelManager->WaitForResource(baseModelId);
 
@@ -47,7 +47,7 @@ namespace Syn {
         std::string uniqueName = filePath + "_" + std::to_string(baseModelId);
 
         return InternalLoadSync(uniqueName, [this, filePath, baseModelId]() {
-            auto modelManager = ServiceLocator::GetModelManager();
+            auto modelManager = ServiceLocator::Get<ModelManager>();
             auto baseModel = modelManager->GetResource(baseModelId);
 
             if (!baseModel) 

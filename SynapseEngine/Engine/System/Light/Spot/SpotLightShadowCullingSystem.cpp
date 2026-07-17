@@ -121,9 +121,9 @@ namespace Syn
         const auto& cameraComp = cameraPool->Get(cameraEntity);
         glm::vec2 screenRes = glm::vec2(cameraComp.width, cameraComp.height);
 
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto animationManager = ServiceLocator::GetAnimationManager();
-        auto materialManager = ServiceLocator::GetMaterialManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
+        auto animationManager = ServiceLocator::Get<AnimationManager>();
+        auto materialManager = ServiceLocator::Get<MaterialManager>();
 
         auto& modelSnapshot = scene->GetSystemContext().modelSnapshots;
         auto& animSnapshot = scene->GetSystemContext().animationSnapshots;

@@ -10,7 +10,7 @@ namespace Syn::Vk {
     DescriptorBuffer::DescriptorBuffer(VkDescriptorSetLayout layout)
         : _layout(layout)
     {
-        auto context = ServiceLocator::GetVkContext();
+        auto context = ServiceLocator::Get<Vk::Context>();
         auto device = context->GetDevice();
         auto physicalDevice = context->GetPhysicalDevice();
 
@@ -53,7 +53,7 @@ namespace Syn::Vk {
 
     void DescriptorBuffer::FillSampledImages(uint32_t binding, uint32_t count, VkImageView view, VkImageLayout layout)
     {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         VkDescriptorImageInfo imageInfo{ VK_NULL_HANDLE, view, layout };
 
@@ -81,7 +81,7 @@ namespace Syn::Vk {
     {
         std::lock_guard<std::mutex> lock(_bufferMutex);
 
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         VkDeviceSize bindingOffset;
         vkGetDescriptorSetLayoutBindingOffsetEXT(device->Handle(), _layout, binding, &bindingOffset);
@@ -127,7 +127,7 @@ namespace Syn::Vk {
 
     void DescriptorBuffer::WriteBuffer(uint32_t binding, uint32_t arrayElement, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range, VkDescriptorType type)
     {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         VkBufferDeviceAddressInfo bdaInfo{ VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO };
         bdaInfo.buffer = buffer;

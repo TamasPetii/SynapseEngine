@@ -27,7 +27,7 @@ namespace Syn::Vk {
 
     VkDescriptorSetLayout DescriptorLayoutBuilder::Build(DescriptorLayoutType type)
     {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         VkDescriptorSetLayoutCreateInfo layoutInfo{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO };
         layoutInfo.bindingCount = static_cast<uint32_t>(_bindings.size());

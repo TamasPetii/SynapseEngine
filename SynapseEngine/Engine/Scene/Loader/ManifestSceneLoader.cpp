@@ -44,7 +44,7 @@ namespace Syn
 
     bool ManifestSceneLoader::DeserializeSnapshot(const std::filesystem::path& path, FullSceneSnapshot& outSnapshot)
     {
-        auto serializer = ServiceLocator::GetSerializer();
+        auto serializer = ServiceLocator::Get<Serializer>();
         if (!serializer)
         {
             Error("ManifestSceneLoader: Serializer cannot be resolved via ServiceLocator!");
@@ -62,7 +62,7 @@ namespace Syn
 
     void ManifestSceneLoader::LoadAndMapModels(const std::vector<std::string>& modelManifest, std::vector<uint32_t>& outLocalToGlobalModels)
     {
-        auto modelManager = ServiceLocator::GetModelManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
         outLocalToGlobalModels.reserve(modelManifest.size());
 
         for (const auto& modelPath : modelManifest)
@@ -74,7 +74,7 @@ namespace Syn
 
     void ManifestSceneLoader::LoadAndMapAnimations(const std::vector<AnimationManifestEntry>& animManifest, const std::vector<uint32_t>& localToGlobalModels, std::vector<uint32_t>& outLocalToGlobalAnims)
     {
-        auto animManager = ServiceLocator::GetAnimationManager();
+        auto animManager = ServiceLocator::Get<AnimationManager>();
         outLocalToGlobalAnims.reserve(animManifest.size());
 
         for (const auto& animEntry : animManifest)
@@ -94,7 +94,7 @@ namespace Syn
 
     void ManifestSceneLoader::LoadAndMapTextures(const std::vector<TextureManifestEntry>& texManifest, std::vector<uint32_t>& outLocalToGlobalTex)
     {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         outLocalToGlobalTex.reserve(texManifest.size());
 
         for (const auto& entry : texManifest)
@@ -106,7 +106,7 @@ namespace Syn
 
     void ManifestSceneLoader::RemapAndLoadMaterials(std::vector<MaterialManifestEntry>& matManifest, const std::vector<uint32_t>& localToGlobalTex, std::vector<uint32_t>& outLocalToGlobalMats)
     {
-        auto matManager = ServiceLocator::GetMaterialManager();
+        auto matManager = ServiceLocator::Get<MaterialManager>();
         outLocalToGlobalMats.reserve(matManifest.size());
 
         auto applyRemap = [&](uint32_t& localTexIndex) {

@@ -26,7 +26,7 @@ namespace Syn {
     }
 
     void SpotLightShadowHizCopyPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
         _shaderProgram = shaderManager->CreateProgram("SpotLightShadowHizCopyProgram", {
             ShaderNames::SpotHizLinearizeSingleDepth
             });
@@ -57,7 +57,7 @@ namespace Syn {
     }
 
     void SpotLightShadowHizCopyPass::BindDescriptors(const RenderContext& context) {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto drawData = context.scene->GetSceneDrawData();
         uint32_t fIdx = context.frameIndex;
 

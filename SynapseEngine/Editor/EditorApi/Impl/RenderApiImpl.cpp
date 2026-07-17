@@ -15,14 +15,14 @@ namespace Syn {
         auto renderManager = _engine->GetRenderManager();
         if (!renderManager || renderManager->IsResizePending()) return InvalidTextureHandle;
 
-        auto frameCtx = ServiceLocator::GetFrameContext();
+        auto frameCtx = ServiceLocator::Get<FrameContext>();
         uint32_t currentFrame = frameCtx ? frameCtx->currentFrameIndex : 0;
         std::string cacheKey = std::format("{}_{}_{}_{}", groupName, targetName, viewName, currentFrame);
 
         if (_viewportTextures.find(cacheKey) == _viewportTextures.end()) {
             if (targetName == RenderTargetNames::DirectionLightShadowDepthPyramid) {
                 auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
-                auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::NearestClampEdge);
+                auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::NearestClampEdge);
                 TextureHandle handle = _textureManager->RegisterTexture(
                     drawData->DirectionLightShadow.shadowDepthPyramid[currentFrame]->GetView(viewName),
                     sampler->Handle()
@@ -31,7 +31,7 @@ namespace Syn {
             }
             else if (targetName == RenderTargetNames::SpotLightShadowDepthPyramid) {
                 auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
-                auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::NearestClampEdge);
+                auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::NearestClampEdge);
                 TextureHandle handle = _textureManager->RegisterTexture(
                     drawData->SpotLightShadow.shadowDepthPyramid[currentFrame]->GetView(viewName),
                     sampler->Handle()
@@ -40,7 +40,7 @@ namespace Syn {
             }
             else if (targetName == RenderTargetNames::PointLightShadowDepthPyramid) {
                 auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
-                auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::NearestClampEdge);
+                auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::NearestClampEdge);
                 TextureHandle handle = _textureManager->RegisterTexture(
                     drawData->PointLightShadow.shadowDepthPyramid[currentFrame]->GetView(viewName),
                     sampler->Handle()
@@ -48,8 +48,8 @@ namespace Syn {
                 _viewportTextures[cacheKey] = handle;
             }
             else if (targetName == RenderTargetNames::PreviewAtlas) {
-                auto imageView = ServiceLocator::GetPreviewManager()->GetAtlasImage()->GetView(viewName);
-                auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::LinearClampEdge);
+                auto imageView = ServiceLocator::Get<PreviewManager>()->GetAtlasImage()->GetView(viewName);
+                auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::LinearClampEdge);
                 TextureHandle handle = _textureManager->RegisterTexture(
                     imageView,
                     sampler->Handle()
@@ -67,7 +67,7 @@ namespace Syn {
                 auto view = image->GetView(viewName);
                 if (!view) return InvalidTextureHandle;
 
-                auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::NearestClampEdge);
+                auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::NearestClampEdge);
                 TextureHandle handle = _textureManager->RegisterTexture(image->GetView(viewName), sampler->Handle());
                 _viewportTextures[cacheKey] = handle;
             }
@@ -111,7 +111,7 @@ namespace Syn {
         if (!renderManager) return { NULL_ENTITY, 0 };
 
         auto rtManager = renderManager->GetRenderTargetManager();
-        auto frameCtx = ServiceLocator::GetFrameContext();
+        auto frameCtx = ServiceLocator::Get<FrameContext>();
         uint32_t currentFrame = frameCtx ? frameCtx->currentFrameIndex : 0;
 
         auto group = rtManager->GetGroup(RenderTargetGroupNames::Main, currentFrame);
@@ -152,7 +152,7 @@ namespace Syn {
             .needsGraphics = true
         };
 
-        ServiceLocator::GetGpuUploader()->UploadSync(std::move(request));
+        ServiceLocator::Get<Vk::GpuUploader>()->UploadSync(std::move(request));
 
         EntityID selectedEntity = NULL_ENTITY;
         uint32_t selectedMesh = 0;

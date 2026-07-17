@@ -6,7 +6,7 @@
 namespace Syn::Vk {
 
     DescriptorPool::DescriptorPool(uint32_t maxSets, std::span<const VkDescriptorPoolSize> poolSizes, VkDescriptorPoolCreateFlags poolFlags) {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         VkDescriptorPoolCreateInfo poolInfo{ VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO };
         poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
@@ -19,7 +19,7 @@ namespace Syn::Vk {
 
     DescriptorPool::~DescriptorPool() {
         if (_handle != VK_NULL_HANDLE) {
-            auto device = ServiceLocator::GetVkContext()->GetDevice();
+            auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
             vkDestroyDescriptorPool(device->Handle(), _handle, nullptr);
         }
     }
@@ -29,7 +29,7 @@ namespace Syn::Vk {
     }
 
     std::vector<VkDescriptorSet> DescriptorPool::AllocateSets(std::span<const VkDescriptorSetLayout> layouts) {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         VkDescriptorSetAllocateInfo allocInfo{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO };
         allocInfo.descriptorPool = _handle;
@@ -42,7 +42,7 @@ namespace Syn::Vk {
     }
 
     VkDescriptorSet DescriptorPool::AllocateVariableSet(VkDescriptorSetLayout layout, uint32_t variableCount) {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         VkDescriptorSetVariableDescriptorCountAllocateInfo variableInfo{ VK_STRUCTURE_TYPE_DESCRIPTOR_SET_VARIABLE_DESCRIPTOR_COUNT_ALLOCATE_INFO };
         variableInfo.descriptorSetCount = 1;

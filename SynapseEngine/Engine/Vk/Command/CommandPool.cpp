@@ -11,7 +11,7 @@ namespace Syn::Vk {
     {
 		SYN_ASSERT(queue, "Queue pointer cannot be null!");
 
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         VkCommandPoolCreateInfo poolInfo{ VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO };
         poolInfo.queueFamilyIndex = _queue->GetFamilyIndex();
@@ -22,14 +22,14 @@ namespace Syn::Vk {
 
     CommandPool::~CommandPool() {
         if (_handle != VK_NULL_HANDLE) {
-            auto device = ServiceLocator::GetVkContext()->GetDevice();
+            auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
             vkDestroyCommandPool(device->Handle(), _handle, nullptr);
             _handle = VK_NULL_HANDLE;
         }
     }
 
     std::vector<std::unique_ptr<CommandBuffer>> CommandPool::AllocateBuffers(uint32_t count, VkCommandBufferLevel level) {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         VkCommandBufferAllocateInfo allocInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
         allocInfo.commandPool = _handle;
@@ -54,7 +54,7 @@ namespace Syn::Vk {
     }
 
     void CommandPool::SubmitImmediate(const std::function<void(VkCommandBuffer cmd)>& function) {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         VkCommandBufferAllocateInfo allocInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO };
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;

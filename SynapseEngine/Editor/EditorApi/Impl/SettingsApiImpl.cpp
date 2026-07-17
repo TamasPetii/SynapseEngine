@@ -18,7 +18,7 @@ namespace Syn {
     std::vector<std::pair<uint32_t, std::string>> SettingsApiImpl::GetAvailableSkyTextures() const {
         std::vector<std::pair<uint32_t, std::string>> result;
 
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         if (!imageManager) return result;
 
         auto paths = imageManager->GetResourcePaths();

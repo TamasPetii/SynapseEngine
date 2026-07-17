@@ -26,7 +26,7 @@ namespace Syn {
     }
 
     void PointLightShadowHizCopyPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
         _shaderProgram = shaderManager->CreateProgram("PointLightShadowHizCopyProgram", {
             ShaderNames::PointHizLinearizeSingleDepth
             });
@@ -58,7 +58,7 @@ namespace Syn {
         auto drawData = context.scene->GetSceneDrawData();
         auto& atlas = drawData->PointLightShadow.shadowAtlas[context.frameIndex];
         auto& depthPyramid = drawData->PointLightShadow.shadowDepthPyramid[context.frameIndex];
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         Vk::PushDescriptorWriter pushWriter;
 

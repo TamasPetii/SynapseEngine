@@ -53,7 +53,7 @@ namespace Syn
         std::filesystem::path cachePath = saveDir / srcPath.filename();
         cachePath.replace_extension(".synmodel");
 
-        auto serializer = ServiceLocator::GetSerializer();
+        auto serializer = ServiceLocator::Get<Serializer>();
 
         bool useCache = false;
         if (std::filesystem::exists(cachePath) && std::filesystem::exists(srcPath)) {

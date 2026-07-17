@@ -20,8 +20,8 @@ namespace Syn
 
     void RenderPipeline::Execute(const RenderContext& context)
     {
-        auto profiler = ServiceLocator::GetGpuProfiler();
-		auto statCollector = ServiceLocator::GetRenderStatCollector();
+        auto profiler = ServiceLocator::Get<IGpuProfiler>();
+		auto statCollector = ServiceLocator::Get<IRenderStatCollector>();
 
         if (context.scene)
         {
@@ -48,7 +48,7 @@ namespace Syn
             }
         }
 
-        auto image = ServiceLocator::GetVkContext()->GetSwapChain()->GetImage(context.swapchainImageIndex);
+        auto image = ServiceLocator::Get<Vk::Context>()->GetSwapChain()->GetImage(context.swapchainImageIndex);
 		image->TransitionLayout(context.cmd, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT, VK_ACCESS_2_NONE, false);
     }
 }

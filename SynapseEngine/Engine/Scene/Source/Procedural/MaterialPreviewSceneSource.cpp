@@ -29,8 +29,8 @@ namespace Syn
         EntityID& sceneCam = SceneInsider::GetSceneCameraEntity(scene, SceneInsider::GetKey());
         HierarchyManager* hm = scene.GetHierarchyManager();
 
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto materialManager = ServiceLocator::GetMaterialManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
+        auto materialManager = ServiceLocator::Get<MaterialManager>();
 
         Syn::Info("Populating Material Preview Scene...");
 
@@ -164,7 +164,7 @@ namespace Syn
             };
 
         // 2. Center object: Suzanne
-        auto skyTextureId = ServiceLocator::GetImageManager()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/Engine/Environment/MaterialPreview.hdr"));
+        auto skyTextureId = ServiceLocator::Get<ImageManager>()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/Engine/Environment/MaterialPreview.hdr"));
         scene.GetSettings()->environment.skyTextureId = skyTextureId;
 
         uint32_t monkeyId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString("Assets/Engine/Models/Monkey/Untitled.obj"));

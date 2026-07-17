@@ -5,7 +5,7 @@
 namespace Syn::Vk {
 
     Fence::Fence(bool signaled) {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         VkFenceCreateInfo info{ VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
 
@@ -18,24 +18,24 @@ namespace Syn::Vk {
 
     Fence::~Fence() {
         if (_handle != VK_NULL_HANDLE) {
-            auto device = ServiceLocator::GetVkContext()->GetDevice();
+            auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
             vkDestroyFence(device->Handle(), _handle, nullptr);
             _handle = VK_NULL_HANDLE;
         }
     }
 
     void Fence::Reset() {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
         SYN_VK_ASSERT_MSG(vkResetFences(device->Handle(), 1, &_handle), "Failed to reset Fence");
     }
 
     void Fence::Wait(uint64_t timeout) {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
         SYN_VK_ASSERT_MSG(vkWaitForFences(device->Handle(), 1, &_handle, VK_TRUE, timeout), "Failed to wait for Fence");
     }
 
     bool Fence::IsSignaled() const {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
         VkResult result = vkGetFenceStatus(device->Handle(), _handle);
 
         if (result == VK_SUCCESS) return true;
