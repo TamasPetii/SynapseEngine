@@ -16,4 +16,10 @@ namespace Syn
         static constexpr const char* ShadowSampler = "ShadowSampler";
         static constexpr const char* SkyboxSampler = "SkyboxSampler";
     };
+
+    struct SYN_API SamplerWrapModeNames
+    {
+        static constexpr const char* Repeat = "Repeat";
+        static constexpr const char* ClampEdge = "ClampEdge";
+    };
 }

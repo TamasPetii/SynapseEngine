@@ -264,7 +264,7 @@ namespace Syn
 
             MaterialInfo floorMatInfo{};
             floorMatInfo.color = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
-            uint32_t floorMatId = materialManager->LoadMaterial("FloorMat", floorMatInfo);
+            uint32_t floorMatId = materialManager->LoadMaterialSync("FloorMat", floorMatInfo);
             registry.GetComponent<MaterialOverrideComponent>(floorEntity).materials.push_back(floorMatId);
 
             hm->AttachChild(rootEnvironment, floorEntity);
@@ -328,7 +328,7 @@ namespace Syn
                 matInfo.roughnessFactor = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                 matInfo.aoStrength = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 
-                sharedMaterialIds.push_back(materialManager->LoadMaterial("SharedMat_" + std::to_string(j), matInfo));
+                sharedMaterialIds.push_back(materialManager->LoadMaterialSync("SharedMat_" + std::to_string(j), matInfo));
             }
         }
 
@@ -343,7 +343,7 @@ namespace Syn
                 matInfo.emissiveFactor = glm::vec3(r, g, b);
                 matInfo.metallicFactor = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                 matInfo.roughnessFactor = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-                overrideComp.materials.push_back(materialManager->LoadMaterial("UniqueMat_" + std::to_string(index), matInfo));
+                overrideComp.materials.push_back(materialManager->LoadMaterialSync("UniqueMat_" + std::to_string(index), matInfo));
             }
             else if (!sharedMaterialIds.empty()) {
                 overrideComp.materials.push_back(sharedMaterialIds[rand() % sharedMaterialIds.size()]);

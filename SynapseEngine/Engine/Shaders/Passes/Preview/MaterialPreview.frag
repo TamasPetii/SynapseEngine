@@ -55,11 +55,12 @@ void main() {
 
     vec4 albedoAlpha = EvaluateAlbedoAlpha(ctx.textureMetadataBufferAddr, mat, sphereUV);
 
-    if (albedoAlpha.a < ctx.alphaLimitDiscard) {
+    if (IS_ALPHA_TESTED(mat) && albedoAlpha.a < ctx.alphaLimitDiscard) {
         discard;
     }
 
-    vec3 finalNormal = EvaluateNormal(ctx.textureMetadataBufferAddr, mat, sphereUV, localNormal, inTangent);
+    bool frontFacing = IS_DOUBLE_SIDED(mat) ? gl_FrontFacing : true;
+    vec3 finalNormal = EvaluateNormal(ctx.textureMetadataBufferAddr, mat, sphereUV, localNormal, inTangent, frontFacing);
     vec2 metalRough = EvaluateMetallicRoughness(ctx.textureMetadataBufferAddr, mat, sphereUV);
     vec3 emissive = EvaluateEmissive(ctx.textureMetadataBufferAddr, mat, sphereUV);
     float ao = EvaluateAO(ctx.textureMetadataBufferAddr, mat, sphereUV);

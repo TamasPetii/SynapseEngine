@@ -130,7 +130,7 @@ namespace Syn
 		_inputManager = std::make_unique<InputManager>();
 		ServiceLocator::Provide<InputManager>(_inputManager.get());
 
-		InitFrameContext(1);
+		InitFrameContext(2);
 		InitLogger();
 		InitVulkan(params);
 		InitTaskExecutor();

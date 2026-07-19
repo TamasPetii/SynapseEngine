@@ -49,7 +49,7 @@ namespace Syn::Vk {
         }
     }
 
-    std::vector<uint32_t> ShaderCompiler::Compile(const std::string& filepath, VkShaderStageFlagBits stage) {
+    std::vector<uint32_t> ShaderCompiler::Compile(const std::string& filepath, VkShaderStageFlagBits stage, std::span<const std::string> defines) {
         namespace fs = std::filesystem;
 
         fs::path sourcePath(filepath);
@@ -68,6 +68,10 @@ namespace Syn::Vk {
         std::replace(cacheFilename.begin(), cacheFilename.end(), '\\', '_');
         std::replace(cacheFilename.begin(), cacheFilename.end(), ':', '_');
         
+        for (const auto& def : defines) {
+            cacheFilename += "_" + def;
+        }
+
         #if defined(SYN_DEBUG)
                 cacheFilename += "_debug";
         #elif defined(SYN_RELEASE)
@@ -121,6 +125,10 @@ namespace Syn::Vk {
         options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_4);
         options.SetTargetSpirv(shaderc_spirv_version_1_6);
         options.SetIncluder(std::make_unique<ShaderIncluder>());
+
+        for (const auto& def : defines) {
+            options.AddMacroDefinition(def);
+        }
 
 #ifdef SYN_DEBUG
         options.SetGenerateDebugInfo();

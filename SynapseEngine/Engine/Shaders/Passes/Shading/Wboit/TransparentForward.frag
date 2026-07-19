@@ -45,12 +45,13 @@ void main()
 
     // 2. Evaluate Albedo & Alpha
     vec4 albedoAlpha = EvaluateAlbedoAlpha(ctx.textureMetadataBufferAddr, mat, finalUV);
-    if (albedoAlpha.a < ctx.alphaLimitDiscard) {
+    if (IS_ALPHA_TESTED(mat) && albedoAlpha.a < ctx.alphaLimitDiscard) {
         discard;
     }
 
     // 3. Evaluate Normals & TBN
-    vec3 finalNormal = EvaluateNormal(ctx.textureMetadataBufferAddr, mat, finalUV, inNormal, inTangent);
+    bool frontFacing = IS_DOUBLE_SIDED(mat) ? gl_FrontFacing : true;
+    vec3 finalNormal = EvaluateNormal(ctx.textureMetadataBufferAddr, mat, finalUV, inNormal, inTangent, frontFacing);
 
     // 4. Evaluate Metalness & Roughness
     vec2 metalRough = EvaluateMetallicRoughness(ctx.textureMetadataBufferAddr, mat, finalUV);

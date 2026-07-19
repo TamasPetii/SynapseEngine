@@ -5,7 +5,7 @@
 namespace Syn::Vk {
     class SYN_API ShaderCompiler {
     public:
-        static std::vector<uint32_t> Compile(const std::string& filepath, VkShaderStageFlagBits stage);
+        static std::vector<uint32_t> Compile(const std::string& filepath, VkShaderStageFlagBits stage, std::span<const std::string> defines = {});
     private:
         static std::string LoadFile(const std::string& filepath);
         static shaderc_shader_kind MapStageToKind(VkShaderStageFlagBits stage);

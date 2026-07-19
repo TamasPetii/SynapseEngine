@@ -27,7 +27,23 @@ namespace Syn {
     TraditionalTransparentForwardPass::TraditionalTransparentForwardPass(MaterialRenderType renderType)
         : _renderType(renderType)
     {
-        _passName = (_renderType == MaterialRenderType::Transparent1Sided) ? "Traditional_Transparent_Forward_1Sided" : "Traditional_Transparent_Forward_2Sided";
+        switch (_renderType) {
+        case MaterialRenderType::Transparent1Sided:
+            _passName = "MeshletTransparentForward1Sided";
+            break;
+        case MaterialRenderType::Transparent2Sided:
+            _passName = "MeshletTransparentForward2Sided";
+            break;
+        case MaterialRenderType::AlphaTestedTransparent1Sided:
+            _passName = "MeshletAlphaTestedTransparentForward1Sided";
+            break;
+        case MaterialRenderType::AlphaTestedTransparent2Sided:
+            _passName = "MeshletAlphaTestedTransparentForward2Sided";
+            break;
+        default:
+            assert(false && "Invalid RenderType for Transparent Pass!");
+            break;
+        }
     }
 
     bool TraditionalTransparentForwardPass::ShouldExecute(const RenderContext& context) const
@@ -52,7 +68,7 @@ namespace Syn {
             ShaderNames::TransparentForwardFrag
             }, config);
 
-        VkCullModeFlags cullMode = (_renderType == MaterialRenderType::Transparent2Sided) ? VK_CULL_MODE_NONE : VK_CULL_MODE_BACK_BIT;
+        VkCullModeFlags cullMode = (_renderType == MaterialRenderType::Transparent2Sided || _renderType == MaterialRenderType::AlphaTestedTransparent2Sided) ? VK_CULL_MODE_NONE : VK_CULL_MODE_BACK_BIT;
 
         _graphicsState = {
             .raster = {

@@ -1,6 +1,7 @@
 #include "AssimpMeshLoader.h"
 #include "Engine/Utils/AssimpUtils.h"
 #include "Engine/Mesh/Utils/MeshUtils.h"
+#include "Engine/Image/SamplerNames.h"
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -144,8 +145,22 @@ namespace Syn
                     if (matAI->GetTextureCount(type) > 0) {
 
                         aiString path;
-                        matAI->GetTexture(type, 0, &path);
+                        aiTextureMapMode mapMode[3];
+
+                        matAI->GetTexture(type, 0, &path, nullptr, nullptr, nullptr, nullptr, mapMode);
                         outPayload.path = path.C_Str();
+
+                        auto mapModeToStr = [](aiTextureMapMode mode) {
+                            switch (mode) {
+                            case aiTextureMapMode_Clamp: return SamplerWrapModeNames::ClampEdge;
+                            case aiTextureMapMode_Mirror: return SamplerWrapModeNames::Repeat;
+                            default: return SamplerWrapModeNames::Repeat;
+                            }
+                            };
+
+                        outPayload.wrapModeU = mapModeToStr(mapMode[0]);
+                        outPayload.wrapModeV = mapModeToStr(mapMode[1]);
+                        outPayload.wrapModeW = mapModeToStr(mapMode[2]);
 
                         const aiTexture* embeddedTexture = scene->GetEmbeddedTexture(path.C_Str());
 
@@ -199,6 +214,10 @@ namespace Syn
                     extractTexture(aiTextureType_AMBIENT, matInfo.ambientOcclusion);
                 }
 
+                if (extractTexture(aiTextureType_OPACITY, matInfo.opacity)) {
+                    matInfo.isAlphaTested = true;
+                }
+
                 aiColor4D color;
 
                 if (AI_SUCCESS == matAI->Get(AI_MATKEY_BASE_COLOR, color)) {
@@ -229,7 +248,7 @@ namespace Syn
 
                 ai_real opacity = 1.0f;
                 if (AI_SUCCESS == matAI->Get(AI_MATKEY_OPACITY, opacity)) {
-                    if (false && opacity < 0.98f) {
+                    if (opacity > 0.0f && opacity < 0.99f) {
                         matInfo.isTransparent = true;
                     }
                 }

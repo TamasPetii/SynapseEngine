@@ -17,6 +17,7 @@
 #include "../../../Includes/Utils/Occlusion.glsl"
 #include "../../../Includes/Common/StaticChunk.glsl"
 #include "../../../Includes/Common/Animation.glsl"
+#include "../../../Includes/Utils/CullingUtils.glsl"
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
@@ -109,26 +110,18 @@ void main() {
         }
 
         // 7. Fast-path: Process simple/small models directly
-        const uint MAX_MESH_COUNT = 16u;
-        const uint MAX_VERTEX_COUNT = 25000u;
         uint safeMeshCount = mAlloc.meshAllocationCount / 4;
-
-        if (safeMeshCount <= MAX_MESH_COUNT && addrs.vertexCount < MAX_VERTEX_COUNT) 
+        if (IsModelSimpleEnoughForFastPath(safeMeshCount, addrs.vertexCount)) 
         {
             // Calculate LOD
-            uint lod = (screenSizePixels > 512.0) ? 0 : 
-                       (screenSizePixels > 256.0) ? 1 : 
-                       (screenSizePixels > 128.0) ? 2 : 3;
+            uint lod = CalculateLodFromScreenSize(screenSizePixels);
             
             for(uint m = 0; m < safeMeshCount; ++m) {
                 uint matIdx = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, modelComp.materialOffset + m);
                 Material mat = GET_MATERIAL(ctx.materialBufferAddr, matIdx);
 
                 // Determine Material Render Type (Opaque/Transparent + 1/2 Sided)
-                uint matType = 0;
-                if (IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat))       matType = 3;
-                else if (IS_TRANSPARENT(mat) && !IS_DOUBLE_SIDED(mat)) matType = 2;
-                else if (!IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat)) matType = 1;
+                uint matType = GetMaterialRenderType(mat);
 
                 MeshAllocationInfo meshAlloc = GET_MESH_ALLOC(ctx.globalMeshAllocationBufferAddr, mAlloc.meshAllocationOffset + (m * 4) + lod);
 

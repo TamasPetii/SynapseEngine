@@ -524,12 +524,21 @@ namespace Syn
                     return MaterialRenderType::Opaque1Sided;
 
                 bool isTrans = snapshot.resource->isTransparent;
+                bool isAlpha = snapshot.resource->isAlphaTested;
                 bool isDouble = snapshot.resource->doubleSided;
 
-                if (isTrans && isDouble)  return MaterialRenderType::Transparent2Sided;
-                if (isTrans)             return MaterialRenderType::Transparent1Sided;
-                if (isDouble)            return MaterialRenderType::Opaque2Sided;
-                return MaterialRenderType::Opaque1Sided;
+                if (isTrans) {
+                    if (isAlpha) 
+                        return isDouble ? MaterialRenderType::AlphaTestedTransparent2Sided : MaterialRenderType::AlphaTestedTransparent1Sided;
+                    else
+                        return isDouble ? MaterialRenderType::Transparent2Sided : MaterialRenderType::Transparent1Sided;
+                }
+                else {
+                    if (isAlpha) 
+                        return isDouble ? MaterialRenderType::AlphaTestedOpaque2Sided : MaterialRenderType::AlphaTestedOpaque1Sided;
+                    else
+                        return isDouble ? MaterialRenderType::Opaque2Sided : MaterialRenderType::Opaque1Sided;
+                }
             });
 
         auto screenWidth = ServiceLocator::Get<FrameContext>()->screenWidth;

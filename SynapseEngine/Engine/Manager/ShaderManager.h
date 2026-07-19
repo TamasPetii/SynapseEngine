@@ -16,9 +16,9 @@ namespace Syn {
         ShaderManager(const ShaderManager&) = delete;
         ShaderManager& operator=(const ShaderManager&) = delete;
 
-        Vk::Shader* LoadShader(const std::string& filepath);
-        Vk::Shader* LoadShader(const std::string& filepath, VkShaderStageFlagBits stage);
-        Vk::Shader* GetShader(const std::string& filepath) const;
+        Vk::Shader* LoadShader(const std::string& filepath, std::span<const std::string> defines = {});
+        Vk::Shader* LoadShader(const std::string& filepath, VkShaderStageFlagBits stage, std::span<const std::string> defines = {});
+        Vk::Shader* GetShader(const std::string& filepath, std::span<const std::string> defines = {}) const;
 
         Vk::ShaderProgram* CreateProgram(const std::string& programName, const std::vector<std::string>& shaderFiles, const Vk::ShaderProgramConfig& config = {});
         Vk::ShaderProgram* GetProgram(const std::string& programName) const;

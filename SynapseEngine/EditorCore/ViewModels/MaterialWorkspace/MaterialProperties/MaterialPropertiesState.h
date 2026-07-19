@@ -45,5 +45,8 @@ namespace Syn
 
         std::string aoName = "None";
         std::string aoSamplerName = "Default";
+
+        std::string opacityName = "None";
+        std::string opacitySamplerName = "Default";
     };
 }

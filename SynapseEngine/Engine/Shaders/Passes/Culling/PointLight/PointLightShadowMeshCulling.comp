@@ -13,6 +13,7 @@
 #include "../../../Includes/Common/PointLight.glsl"
 #include "../../../Includes/Utils/CullingMath.glsl"
 #include "../../../Includes/Utils/Occlusion.glsl"
+#include "../../../Includes/Utils/CullingUtils.glsl"
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
@@ -89,12 +90,8 @@ void main() {
         uint matIdx = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, modelComp.materialOffset + m);
         Material mat = GET_MATERIAL(ctx.materialBufferAddr, matIdx);
 
-        uint matType = 0;
-        if (IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat))       matType = 3;
-        else if (IS_TRANSPARENT(mat) && !IS_DOUBLE_SIDED(mat)) matType = 2;
-        else if (!IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat)) matType = 1;
-
-        if (matType > 1) continue;
+        uint matType = GetMaterialRenderType(mat);
+        if (matType > 3) continue;
 
         GpuMeshCollider localMeshCollider = GET_MESH_COLLIDER(addrs.meshColliders, m);
 
@@ -120,7 +117,7 @@ void main() {
         float mainCamScreenSize = CalculateSphereScreenSizePerspective(worldCollider.center, worldCollider.radius, camera.view, camera.proj, cameraNear, screenRes);
         if (mainCamScreenSize < 1.0) continue;
 
-        uint rawLod = (mainCamScreenSize > 512.0) ? 0 : (mainCamScreenSize > 256.0) ? 1 : (mainCamScreenSize > 128.0) ? 2 : 3;
+        uint rawLod = CalculateLodFromScreenSize(mainCamScreenSize);
         uint lod = min(rawLod + ctx.pointLightShadowLodBias, 3u);
 
         // 10. Emit to Radix Sort Buffers

@@ -19,7 +19,7 @@ namespace Syn {
         , metallicRoughnessTexture(UINT32_MAX)
         , emissiveTexture(UINT32_MAX)
         , ambientOcclusionTexture(UINT32_MAX)
-        , padding0(0)
+        , opacityTexture(UINT32_MAX)
         , padding1(0)
         , padding2(0)
     {
@@ -54,7 +54,7 @@ namespace Syn {
         , metallicRoughnessTexture(PackTextureAndSampler(material.metallicRoughnessTexture, material.metallicRoughnessSampler))
         , emissiveTexture(PackTextureAndSampler(material.emissiveTexture, material.emissiveSampler))
         , ambientOcclusionTexture(PackTextureAndSampler(material.ambientOcclusionTexture, material.ambientOcclusionSampler))
-        , padding0(0)
+        , opacityTexture(PackTextureAndSampler(material.opacityTexture, material.opacitySampler))
         , padding1(0)
         , padding2(0)
     {
@@ -62,6 +62,7 @@ namespace Syn {
 
         if (material.doubleSided)   flags |= (1 << 0);
         if (material.isTransparent) flags |= (1 << 1);
+        if (material.isAlphaTested) flags |= (1 << 2);
 
         this->packedFlags = flags;
     }

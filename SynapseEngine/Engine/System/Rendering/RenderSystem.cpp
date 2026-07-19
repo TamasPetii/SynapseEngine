@@ -330,70 +330,6 @@ namespace Syn
         if (drawData->Models.paddedMeshletCounts.Size() < drawData->Models.activeMeshletCount * paddingFactor) {
             drawData->Models.paddedMeshletCounts.Resize(drawData->Models.activeMeshletCount * paddingFactor);
         }
-
-        if (false)
-        {
-            std::stringstream ss;
-            const char* matNames[] = { "Opaque1Sided", "Opaque2Sided", "Transparent1Sided", "Transparent2Sided" };
-
-            ss << "================================================================================\n";
-            ss << " RENDER SYSTEM REBUILD REPORT\n";
-            ss << "--------------------------------------------------------------------------------\n";
-            ss << " Summary:\n";
-            ss << "   - Active Descriptors:      " << drawData->Models.activeDescriptorCount << "\n";
-            ss << "   - Traditional Commands:    " << drawData->Models.activeTraditionalCount << "\n";
-            ss << "   - Meshlet Commands:        " << drawData->Models.activeMeshletCount << "\n";
-            ss << "   - Total Allocated Inst:    " << drawData->Models.totalAllocatedInstances << "\n";
-            ss << "--------------------------------------------------------------------------------\n";
-            ss << " Global Command Breakdowns (Offsets & Counts):\n";
-
-            ss << "   [Traditional Pipeline]\n";
-            for (int t = 0; t < MaterialRenderType::Count; ++t) {
-                ss << "     - " << matNames[t] << ": Offset = " << drawData->Models.traditionalCmdOffsets[t]
-                    << " | Count = " << drawData->Models.traditionalCmdCounts[t] << "\n";
-            }
-
-            ss << "   [Meshlet Pipeline]\n";
-            for (int t = 0; t < MaterialRenderType::Count; ++t) {
-                ss << "     - " << matNames[t] << ": Offset = " << drawData->Models.meshletCmdOffsets[t]
-                    << " | Count = " << drawData->Models.meshletCmdCounts[t] << "\n";
-            }
-            ss << "--------------------------------------------------------------------------------\n";
-
-            for (uint32_t modelId = 0; modelId < drawData->Models.modelAllocations.Size(); ++modelId)
-            {
-                const auto& mAlloc = drawData->Models.modelAllocations[modelId];
-                if (mAlloc.maxInstances == 0) continue;
-
-                ss << " Model [" << modelId << "] - MaxInstances: " << mAlloc.maxInstances
-                    << ", MeshOffset: " << mAlloc.meshAllocationOffset
-                    << ", MeshCount: " << mAlloc.meshAllocationCount << "\n";
-
-                for (uint32_t i = 0; i < mAlloc.meshAllocationCount; ++i)
-                {
-                    uint32_t meshAllocIdx = mAlloc.meshAllocationOffset + i;
-
-                    if (meshAllocIdx >= drawData->Models.meshAllocations.Size()) continue;
-
-                    const auto& meshAlloc = drawData->Models.meshAllocations[meshAllocIdx];
-                    const auto& desc = drawData->Models.descriptors[meshAlloc.descriptorIndex];
-
-                    ss << "   MeshAlloc [" << i << "] -> DescIdx: " << meshAlloc.descriptorIndex
-                        << ", Pipeline: " << (meshAlloc.isMeshletPipeline ? "MESHLET" : "TRADITIONAL") << "\n";
-
-                    for (int t = 0; t < MaterialRenderType::Count; ++t) {
-                        if (meshAlloc.activeTypes[t] == 1) {
-                            ss << "     -> " << matNames[t]
-                                << " | IndirectIdx: " << meshAlloc.indirectIndices[t]
-                                << " | InstOffset: " << meshAlloc.instanceOffsets[t] << "\n";
-                        }
-                    }
-                }
-            }
-            ss << "================================================================================";
-
-            Info("\n{}", ss.str());
-        }
     }
 
     void RenderSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
@@ -441,7 +377,7 @@ namespace Syn
             if (meshAllocSize > 0)
                 drawData->Models.meshAllocBuffer.Write(frameIndex, drawData->Models.meshAllocations.Data(), meshAllocSize, 0);
 
-            uint32_t counts[8] = { 0 };
+            uint32_t counts[MaterialRenderType::Count * 2] = { 0 };
             for (int i = 0; i < MaterialRenderType::Count; ++i) {
                 counts[i] = drawData->Models.traditionalCmdCounts[i];
                 counts[MaterialRenderType::Count + i] = drawData->Models.meshletCmdCounts[i];

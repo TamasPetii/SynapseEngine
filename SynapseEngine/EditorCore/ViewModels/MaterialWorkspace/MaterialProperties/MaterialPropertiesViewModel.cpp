@@ -70,6 +70,9 @@ namespace Syn {
 
             _state.aoName = getTexName(matData.ambientOcclusionTexture);
             _state.aoSamplerName = getSamplerName(matData.ambientOcclusionSampler);
+
+            _state.opacityName = getTexName(matData.opacityTexture);
+            _state.opacitySamplerName = getSamplerName(matData.opacitySampler);
         }
         else {
             _state.hasSelection = false;

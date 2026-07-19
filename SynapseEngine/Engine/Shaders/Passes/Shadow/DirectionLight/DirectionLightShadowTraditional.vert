@@ -15,6 +15,9 @@
 
 #include "../../../Includes/PushConstants/DirectionLightShadowTraditionalMeshletPassPC.glsl"
 
+layout(location = 0) out vec2 outUV;
+layout(location = 1) out flat uint outMaterialId;
+
 layout(push_constant) uniform PushConstants {
    DirectionLightShadowTraditionalMeshletPassPC pc;
 };
@@ -122,4 +125,16 @@ void main() {
 
     // Atlas Positioning
     gl_Position = clipPos;
+
+    // 8. Resolve Material Index for the current sub-mesh
+    uint flatMaterialIndex = comp.materialOffset + meshIndex;
+    uint resolvedMaterialId = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, flatMaterialIndex);
+    outMaterialId = resolvedMaterialId;
+
+    #ifdef ENABLE_ALPHA_TEST
+    GpuVertexAttributes attr = GET_VERTEX_ATTR(addrs.vertexAttributes, realVertexIndex);
+    outUV = vec2(attr.uv_x, 1.0 - attr.uv_y);
+    #else
+    outUV = vec2(0.0);
+    #endif
 }

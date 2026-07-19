@@ -24,7 +24,9 @@ namespace Syn {
         );
         ~MaterialManager() = default;
 
-        uint32_t LoadMaterial(const std::string& name, const MaterialInfo& info);
+        uint32_t LoadMaterialAsync(const std::string& name, const MaterialInfo& info);
+        uint32_t LoadMaterialSync(const std::string& name, const MaterialInfo& info);
+
         uint32_t LoadMaterialDirect(const std::string& name, const Material& material);
         std::vector<uint32_t> GetMaterialsUsingTexture(uint32_t textureId) const;
         void NotifyImageReady(uint32_t imageId);
@@ -35,6 +37,7 @@ namespace Syn {
         void FinalizeResource(EntryType& entry) override;
     private:
         void LoadDefaultMaterialSync();
+        std::shared_ptr<Material> CreateMaterialFromInfo(const MaterialInfo& info);
     private:
         TextureLoadCallback _textureLoadCallback;
         PreviewAllocateCallback _previewAllocateCallback;

@@ -25,7 +25,7 @@ namespace Syn
         drawCallKeyBuffer.Initialize({ "PointLightShadowDrawGroup_DrawCallKeyBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 65536, 131072 });
         drawCallKeyBuffer.UpdateCapacityAll(1);
 
-        indirectBuffer.Initialize({ "PointLightShadowDrawGroup_IndirectBuffer", BufferStrategy::Hybrid, frameCount, sizeof(VkDrawIndirectCommand) * 8, indirectStorageUsage, 1024, 2048 });
+        indirectBuffer.Initialize({ "PointLightShadowDrawGroup_IndirectBuffer", BufferStrategy::Hybrid, frameCount, sizeof(VkDrawIndirectCommand) * MaterialRenderType::Count * 2, indirectStorageUsage, 1024, 2048 });
         indirectBuffer.UpdateCapacityAll(1);
 
         visibleCountDispatchBuffer.Initialize({ "PointLightShadowDrawGroup_VisibleCountDispatchBuffer", BufferStrategy::Hybrid, frameCount, sizeof(uint32_t), storageUsage, 1, 1 });
@@ -34,7 +34,7 @@ namespace Syn
         visibleMeshCountDispatchBuffer.Initialize({ "PointLightShadowDrawGroup_VisibleMeshCountDispatchBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(uint32_t), storageUsage, 1, 1 });
         visibleMeshCountDispatchBuffer.UpdateCapacityAll(1);
 
-        descriptorBuffer.Initialize({ "PointLightShadowDrawGroup_DescriptorBuffer", BufferStrategy::Hybrid, frameCount, sizeof(MeshDrawDescriptor) * 8, storageUsage, 1024, 2048 });
+        descriptorBuffer.Initialize({ "PointLightShadowDrawGroup_DescriptorBuffer", BufferStrategy::Hybrid, frameCount, sizeof(MeshDrawDescriptor) * MaterialRenderType::Count * 2, storageUsage, 1024, 2048 });
         descriptorBuffer.UpdateCapacityAll(1);
 
         modelCullingIndirectDispatchBuffer.Initialize({ "PointLightShadowDrawGroup_ModelCullingIndirectDispatchBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });

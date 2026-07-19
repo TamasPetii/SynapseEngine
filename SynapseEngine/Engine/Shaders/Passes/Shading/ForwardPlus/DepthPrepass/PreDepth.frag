@@ -20,6 +20,10 @@ layout(location = 1) in flat uvec3 inId;
 
 layout(location = 0) out uvec2 outId;
 
+#ifndef ENABLE_ALPHA_TEST
+layout(early_fragment_tests) in;
+#endif
+
 void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
@@ -39,9 +43,11 @@ void main() {
     // 2. Evaluate Albedo & Alpha
     vec4 albedoAlpha = EvaluateAlbedoAlpha(ctx.textureMetadataBufferAddr, mat, finalUV);
 
-    if (albedoAlpha.a < ctx.alphaLimitDiscard) {
+    #ifdef ENABLE_ALPHA_TEST
+    if (IS_ALPHA_TESTED(mat) && albedoAlpha.a < ctx.alphaLimitDiscard) {
         discard;
     }
+    #endif
 
     outId = uvec2(packedEntity, finalPayload);
 }

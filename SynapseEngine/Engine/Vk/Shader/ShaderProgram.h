@@ -9,6 +9,8 @@ namespace Syn::Vk {
     struct ShaderProgramConfig {
         DescriptorLayoutOverride layoutOverride = nullptr;
         bool useDescriptorBuffers = false;
+
+        std::vector<std::string> defines;
     };
 
     class SYN_API ShaderProgram {

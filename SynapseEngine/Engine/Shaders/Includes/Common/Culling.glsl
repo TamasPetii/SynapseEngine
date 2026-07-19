@@ -24,9 +24,9 @@ struct MeshAllocationInfo {
     uint descriptorIndex; 
     uint isMeshletPipeline; 
     uint padding[2]; 
-    uint indirectIndices[4];
-    uint instanceOffsets[4];
-    uint activeTypes[4];
+    uint indirectIndices[8];
+    uint instanceOffsets[8];
+    uint activeTypes[8];
 };
 
 layout(buffer_reference, std430) readonly restrict buffer ModelAllocBuffer   { ModelAllocationInfo data[]; };

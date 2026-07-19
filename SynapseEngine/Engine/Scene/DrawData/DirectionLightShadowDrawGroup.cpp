@@ -21,7 +21,7 @@ namespace Syn
         instanceBuffer.Initialize({ "DirectionLightShadowDrawGroup_InstanceBuffer", BufferStrategy::Hybrid, frameCount, sizeof(uint32_t), storageUsage, 16384 * SHADOW_MULTIPLIER, 32768 * SHADOW_MULTIPLIER});
         instanceBuffer.UpdateCapacityAll(1);
 
-        indirectBuffer.Initialize({ "DirectionLightShadowDrawGroup_IndirectBuffer", BufferStrategy::Hybrid, frameCount, sizeof(VkDrawIndirectCommand) * 8, indirectStorageUsage, 1024, 2048 });
+        indirectBuffer.Initialize({ "DirectionLightShadowDrawGroup_IndirectBuffer", BufferStrategy::Hybrid, frameCount, sizeof(VkDrawIndirectCommand) * MaterialRenderType::Count * 2, indirectStorageUsage, 1024, 2048 });
         indirectBuffer.UpdateCapacityAll(1);
 
         modelDispatchBuffer.Initialize({ "DirectionLightShadowDrawGroup_ModelDispatchBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });

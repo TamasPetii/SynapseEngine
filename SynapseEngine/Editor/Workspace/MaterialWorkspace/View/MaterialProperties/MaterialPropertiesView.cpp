@@ -47,6 +47,7 @@ namespace Syn {
 
                     if (Syn::UI::PropertyCheckbox("Double Sided", editedMat.doubleSided)) isModified = true;
                     if (Syn::UI::PropertyCheckbox("Transparent", editedMat.isTransparent)) isModified = true;
+                    if (Syn::UI::PropertyCheckbox("Alpha Tested", editedMat.isAlphaTested)) isModified = true;
 
                     Syn::UI::EndPropertyGrid();
                 }
@@ -83,9 +84,13 @@ namespace Syn {
                         editedMat.emissiveTexture, state.emissiveName, state.availableTextures,
                         editedMat.emissiveSampler, state.emissiveSamplerName, state.availableSamplers, isModified);
 
-                    DrawTextureSlot("AO",
+                    DrawTextureSlot("AmbientOcclusion",
                         editedMat.ambientOcclusionTexture, state.aoName, state.availableTextures,
                         editedMat.ambientOcclusionSampler, state.aoSamplerName, state.availableSamplers, isModified);
+
+                    DrawTextureSlot("Opacity",
+                        editedMat.opacityTexture, state.opacityName, state.availableTextures,
+                        editedMat.opacitySampler, state.opacitySamplerName, state.availableSamplers, isModified);
 
                     Syn::UI::EndPropertyGrid();
                 }

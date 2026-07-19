@@ -39,6 +39,10 @@ layout(push_constant) uniform PushConstants {
    TraditionalMeshletPassPC pc;
 };
 
+#ifndef ENABLE_ALPHA_TEST
+layout(early_fragment_tests) in;
+#endif
+
 void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
@@ -50,12 +54,16 @@ void main() {
 
     // 2. Evaluate Albedo & Alpha
     vec4 albedoAlpha = EvaluateAlbedoAlpha(ctx.textureMetadataBufferAddr, mat, finalUV);
-    if (albedoAlpha.a < ctx.alphaLimitDiscard) {
+
+    #ifdef ENABLE_ALPHA_TEST
+    if (IS_ALPHA_TESTED(mat) && albedoAlpha.a < ctx.alphaLimitDiscard) {
         discard;
     }
+    #endif
 
-    // 3. Evaluate Normals & TBN
-    vec3 finalNormal = EvaluateNormal(ctx.textureMetadataBufferAddr, mat, finalUV, inNormal, inTangent);
+    // 3. Evaluate Normals & TBNű
+    bool frontFacing = IS_DOUBLE_SIDED(mat) ? gl_FrontFacing : true;
+    vec3 finalNormal = EvaluateNormal(ctx.textureMetadataBufferAddr, mat, finalUV, inNormal, inTangent, frontFacing);
 
     // 4. Evaluate Metalness & Roughness
     vec2 metalRough = EvaluateMetallicRoughness(ctx.textureMetadataBufferAddr, mat, finalUV);

@@ -6,7 +6,7 @@
 namespace Syn::Vk {
     class SYN_API Shader {
     public:
-        Shader(const std::string& filepath, VkShaderStageFlagBits stage);
+        Shader(const std::string& filepath, VkShaderStageFlagBits stage, std::span<const std::string> defines = {});
         ~Shader() = default;
 
         Shader(const Shader&) = delete;

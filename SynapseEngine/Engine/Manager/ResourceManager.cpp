@@ -169,7 +169,7 @@ namespace Syn {
 			_staticMeshBuilder,
 			std::make_unique<DefaultGpuModelUploader>(),
 			[this](const std::string& name, const MaterialInfo& info) -> uint32_t {
-				return _materialManager->LoadMaterial(name, info);
+				return _materialManager->LoadMaterialSync(name, info);
 			},
 			[this](uint32_t id) {
 				if (_previewManager) _previewManager->AllocateTile(PreviewResourceType::Model, id);

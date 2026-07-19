@@ -3,10 +3,20 @@
 #include <iostream>
 #include <filesystem>
 
-namespace Syn {
+namespace Syn 
+{
+    static std::string GenerateShaderKey(const std::string& filepath, std::span<const std::string> defines) {
+        std::string key = filepath;
+        for (const auto& def : defines) {
+            key += "|" + def;
+        }
+        return key;
+    }
 
-    Vk::Shader* ShaderManager::LoadShader(const std::string& filepath) {
-        auto it = _shaders.find(filepath);
+    Vk::Shader* ShaderManager::LoadShader(const std::string& filepath, std::span<const std::string> defines) {
+        std::string key = GenerateShaderKey(filepath, defines);
+
+        auto it = _shaders.find(key);
         if (it != _shaders.end()) {
             return it->second.get();
         }
@@ -17,19 +27,21 @@ namespace Syn {
             return nullptr;
         }
 
-        return LoadShader(filepath, stage);
+        return LoadShader(filepath, stage, defines);
     }
 
-    Vk::Shader* ShaderManager::LoadShader(const std::string& filepath, VkShaderStageFlagBits stage) {
-        auto it = _shaders.find(filepath);
+    Vk::Shader* ShaderManager::LoadShader(const std::string& filepath, VkShaderStageFlagBits stage, std::span<const std::string> defines) {
+        std::string key = GenerateShaderKey(filepath, defines);
+
+        auto it = _shaders.find(key);
         if (it != _shaders.end()) {
             return it->second.get();
         }
 
-        auto shader = std::make_unique<Vk::Shader>(filepath, stage);
+        auto shader = std::make_unique<Vk::Shader>(filepath, stage, defines);
         Vk::Shader* ptr = shader.get();
 
-        _shaders[filepath] = std::move(shader);
+        _shaders[key] = std::move(shader);
 
         return ptr;
     }
@@ -44,7 +56,7 @@ namespace Syn {
         shadersForProgram.reserve(shaderFiles.size());
 
         for (const auto& file : shaderFiles) {
-            Vk::Shader* shader = LoadShader(file);
+            Vk::Shader* shader = LoadShader(file, config.defines);
             if (shader) {
                 shadersForProgram.push_back(shader);
             }
@@ -66,8 +78,10 @@ namespace Syn {
         return nullptr;
     }
 
-    Vk::Shader* ShaderManager::GetShader(const std::string& filepath) const  {
-        auto it = _shaders.find(filepath);
+    Vk::Shader* ShaderManager::GetShader(const std::string& filepath, std::span<const std::string> defines) const {
+        std::string key = GenerateShaderKey(filepath, defines);
+
+        auto it = _shaders.find(key);
         if (it != _shaders.end()) {
             return it->second.get();
         }

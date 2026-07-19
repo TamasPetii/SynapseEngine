@@ -30,11 +30,12 @@ void main() {
     Material mat = GET_MATERIAL(ctx.materialBufferAddr, inMaterialId);
 
     vec4 albedoAlpha = EvaluateAlbedoAlpha(ctx.textureMetadataBufferAddr, mat, inUV);
-    if (albedoAlpha.a < ctx.alphaLimitDiscard) {
+    if (IS_ALPHA_TESTED(mat) && albedoAlpha.a < ctx.alphaLimitDiscard) {
         discard;
     }
 
-    vec3 finalNormal = EvaluateNormal(ctx.textureMetadataBufferAddr, mat, inUV, inNormal, inTangent);
+    bool frontFacing = IS_DOUBLE_SIDED(mat) ? gl_FrontFacing : true;
+    vec3 finalNormal = EvaluateNormal(ctx.textureMetadataBufferAddr, mat, inUV, inNormal, inTangent, frontFacing);
     vec2 metalRough = EvaluateMetallicRoughness(ctx.textureMetadataBufferAddr, mat, inUV);
     vec3 emissive = EvaluateEmissive(ctx.textureMetadataBufferAddr, mat, inUV);
     float ao = EvaluateAO(ctx.textureMetadataBufferAddr, mat, inUV);

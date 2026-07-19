@@ -19,7 +19,7 @@ struct Material {
     uint metallicRoughnessTexture; 
     uint emissiveTexture; 
     uint ambientOcclusionTexture; 
-    uint padding0; 
+    uint opacityTexture; 
     uint padding1; 
     uint padding2; 
 };
@@ -39,6 +39,7 @@ layout(buffer_reference, std430) readonly restrict buffer MaterialLookupBuffer {
 
 #define IS_DOUBLE_SIDED(mat)    HAS_FLAG((mat).packedFlags, 0)
 #define IS_TRANSPARENT(mat)     HAS_FLAG((mat).packedFlags, 1)
+#define IS_ALPHA_TESTED(mat)     HAS_FLAG((mat).packedFlags, 2)
 
 #define HAS_ALBEDO_TEX(mat)             HAS_VALID_TEXTURE((mat).albedoTexture)
 #define HAS_NORMAL_TEX(mat)             HAS_VALID_TEXTURE((mat).normalTexture)
@@ -47,5 +48,6 @@ layout(buffer_reference, std430) readonly restrict buffer MaterialLookupBuffer {
 #define HAS_METALLIC_ROUGHNESS_TEX(mat) HAS_VALID_TEXTURE((mat).metallicRoughnessTexture)
 #define HAS_EMISSIVE_TEX(mat)           HAS_VALID_TEXTURE((mat).emissiveTexture)
 #define HAS_AO_TEX(mat)                 HAS_VALID_TEXTURE((mat).ambientOcclusionTexture)
+#define HAS_OPACITY_TEX(mat)            HAS_VALID_TEXTURE((mat).opacityTexture)
 
 #endif

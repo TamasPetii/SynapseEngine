@@ -116,7 +116,7 @@ namespace Syn
         MaterialInfo floorMatInfo{};
         floorMatInfo.color = glm::vec4(0.15f, 0.15f, 0.15f, 1.0f);
         floorMatInfo.roughnessFactor = 0.9f;
-        uint32_t floorMatId = materialManager->LoadMaterial("Preview_FloorMat", floorMatInfo);
+        uint32_t floorMatId = materialManager->LoadMaterialSync("Preview_FloorMat", floorMatInfo);
 
         // Geometries
 

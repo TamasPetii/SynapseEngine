@@ -18,6 +18,7 @@ namespace Syn
         float aoStrength = 1.0f;
         bool doubleSided = false;
         bool isTransparent = false;
+        bool isAlphaTested = false;
 
         uint32_t albedoTexture = UINT32_MAX;
         uint32_t albedoSampler = UINT32_MAX;
@@ -39,6 +40,9 @@ namespace Syn
 
         uint32_t ambientOcclusionTexture = UINT32_MAX;
         uint32_t ambientOcclusionSampler = UINT32_MAX;
+
+        uint32_t opacityTexture = UINT32_MAX;
+        uint32_t opacitySampler = UINT32_MAX;
     };
 
     struct SYN_API GpuMaterial {
@@ -60,7 +64,7 @@ namespace Syn
         uint32_t metallicRoughnessTexture;
         uint32_t emissiveTexture;
         uint32_t ambientOcclusionTexture;
-        uint32_t padding0;
+        uint32_t opacityTexture;
         uint32_t padding1;
         uint32_t padding2;
     };

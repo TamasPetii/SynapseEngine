@@ -17,6 +17,7 @@
 #include "../../../Includes/Utils/CullingMath.glsl"
 #include "../../../Includes/Utils/Occlusion.glsl"
 #include "../../../Includes/Common/Tag.glsl"
+#include "../../../Includes/Utils/CullingUtils.glsl"
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
@@ -131,31 +132,23 @@ void main()
     payload |= ((lightIdx & 0x7u) << 28);
     payload = SET_BIT_TO(payload, 31, visibility == INTERSECTION_INSIDE);
 
-    const uint MAX_MESH_COUNT = 16u;
-    const uint MAX_VERTEX_COUNT = 25000u;
     uint safeMeshCount = mAlloc.meshAllocationCount / 4;
 
     // 10. Fast-Path: Process models with low mesh/vertex counts directly
-    if (safeMeshCount <= MAX_MESH_COUNT && addrs.vertexCount < MAX_VERTEX_COUNT) {
+    if (IsModelSimpleEnoughForFastPath(safeMeshCount, addrs.vertexCount)) {
         
         // Map screen size to base LOD and apply shadow bias
-        uint rawLod = (mainCamScreenSize > 512.0) ? 0 :
-                      (mainCamScreenSize > 256.0) ? 1 :
-                      (mainCamScreenSize > 128.0) ? 2 : 3;
-
+        uint rawLod = CalculateLodFromScreenSize(mainCamScreenSize);
         uint lod = min(rawLod + ctx.directionLightShadowLodBias, 3u);
         
         for(uint m = 0; m < safeMeshCount; ++m) {
             uint matIdx = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, modelComp.materialOffset + m);
             Material mat = GET_MATERIAL(ctx.materialBufferAddr, matIdx);
 
-            uint matType = 0;
-            if (IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat))       matType = 3;
-            else if (IS_TRANSPARENT(mat) && !IS_DOUBLE_SIDED(mat)) matType = 2;
-            else if (!IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat)) matType = 1;
+            uint matType = GetMaterialRenderType(mat);
 
             // Shadows are only cast by Opaque materials
-            if (matType > 1) 
+            if (matType > 3) 
                 continue;
 
             MeshAllocationInfo meshAlloc = GET_MESH_ALLOC(ctx.globalMeshAllocationBufferAddr, mAlloc.meshAllocationOffset + (m * 4) + lod);

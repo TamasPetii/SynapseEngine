@@ -21,12 +21,25 @@ vec4 EvaluateAlbedoAlpha(uint64_t textureMetadataBufferAddr, const Material mat,
         uint sampID = ResolveSampler(textureMetadataBufferAddr, mat.albedoTexture, texID);
         finalColor *= SampleTexture2D(texID, sampID, uv);
     }
+
+    if (HAS_OPACITY_TEX(mat)) { 
+        uint texID = UNPACK_TEXTURE_ID(mat.opacityTexture);
+        uint sampID = ResolveSampler(textureMetadataBufferAddr, mat.opacityTexture, texID);
+        
+        float opacityMask = SampleTexture2D(texID, sampID, uv).r;
+        finalColor.a = opacityMask;
+    }
+
     return finalColor;
 }
 
-vec3 EvaluateNormal(uint64_t textureMetadataBufferAddr, Material mat, vec2 uv, vec3 vertexNormal, vec4 vertexTangent) {
+vec3 EvaluateNormal(uint64_t textureMetadataBufferAddr, Material mat, vec2 uv, vec3 vertexNormal, vec4 vertexTangent, bool isFrontFacing) {
     vec3 normal = normalize(vertexNormal);
     
+    if (!isFrontFacing) {
+        normal = -normal;
+    }
+
     if (!HAS_NORMAL_TEX(mat)) {
         return normal;
     }

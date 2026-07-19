@@ -9,9 +9,13 @@
 #include "../../../Includes/Common/Transform.glsl"
 #include "../../../Includes/Common/Animation.glsl"
 #include "../../../Includes/Common/DirectionLight.glsl"
+#include "../../../Includes/Common/Material.glsl"
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = 64, max_primitives = 64) out;
+
+layout(location = 0) out vec2 outUV[];
+layout(location = 1) out flat uint outMaterialId[]; 
 
 #include "../../../Includes/Payload/ShadowTaskPayload.glsl"
 taskPayloadSharedEXT ShadowTaskPayload payload;
@@ -57,6 +61,8 @@ void main() {
         uint globalVtxIdx = GET_MESHLET_VERTEX_INDEX(addrs.meshletVertexIndices, meshlet.vertexIndicesOffset + i);
         GpuVertexPosition v = GET_VERTEX_POS(addrs.vertexPositions, globalVtxIdx);
 
+
+
         uint nodeIndex = UNPACK_UINT16_X(v.packedIndex);
         GpuNodeTransform staticNode = GET_NODE_TRANSFORM(addrs.nodeTransforms, nodeIndex);
         mat4 finalMat = staticNode.globalTransform;
@@ -101,6 +107,18 @@ void main() {
 
         // Map into specific shadow atlas region
         gl_MeshVerticesEXT[i].gl_Position = clipPos;
+
+        #ifdef ENABLE_ALPHA_TEST
+        GpuVertexAttributes attr = GET_VERTEX_ATTR(addrs.vertexAttributes, globalVtxIdx);
+        outUV[i] = vec2(attr.uv_x, 1.0 - attr.uv_y);
+        #else
+        outUV[i] = vec2(0.0);
+        #endif
+
+        uint meshIndex = UNPACK_UINT16_Y(v.packedIndex);
+        uint materialOffset = GET_MODEL_COMP(ctx.modelBufferAddr, payload.modelDenseIndex).materialOffset;
+        uint materialId = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, materialOffset + meshIndex);
+        outMaterialId[i] = materialId;
    }
 
     // 6. Process primitive indices
