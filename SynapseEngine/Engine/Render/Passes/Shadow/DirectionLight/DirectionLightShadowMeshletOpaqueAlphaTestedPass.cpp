@@ -39,10 +39,16 @@ namespace Syn {
 
     void DirectionLightShadowMeshletOpaqueAlphaTestedPass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         Vk::ShaderProgramConfig config;
-        config.useDescriptorBuffers = false;
-        config.defines = { "ENABLE_ALPHA_TEST" };
+        config.layoutOverride = [imageManager](uint32_t setIndex) {
+            if (setIndex == 0) {
+                return imageManager->GetBindlessLayout();
+            }
+            return VkDescriptorSetLayout{};
+            };
+        config.defines = { ShaderDefines::EnableAlphaTest };
 
         _shaderProgram = shaderManager->CreateProgram("DirectionLightShadowMeshletOpaqueAlphaTestedProgram", {
             ShaderNames::DirectionLightShadowMeshletTask,
@@ -126,6 +132,9 @@ namespace Syn {
         );
 
         //pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
+
+        auto bindlessBuffer = imageManager->GetBindlessBuffer();
+        bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
     void DirectionLightShadowMeshletOpaqueAlphaTestedPass::Draw(const RenderContext& context)

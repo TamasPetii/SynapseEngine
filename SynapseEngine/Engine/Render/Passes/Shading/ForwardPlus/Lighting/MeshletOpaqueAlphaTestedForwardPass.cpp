@@ -47,7 +47,7 @@ namespace Syn {
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = true;
-        config.defines = { "ENABLE_ALPHA_TEST" };
+        config.defines = { ShaderDefines::EnableAlphaTest };
         config.layoutOverride = [imageManager](uint32_t setIndex) {
             if (setIndex == 0) {
                 return imageManager->GetBindlessLayout();

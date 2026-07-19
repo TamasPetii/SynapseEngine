@@ -3,6 +3,7 @@
 #include "Engine/Vk/Context.h"
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Vk/Image/ImageFactory.h"
+#include "Engine/Image/ImageManager.h"
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Scene/Scene.h"
@@ -38,8 +39,13 @@ namespace Syn {
         auto imageManager = ServiceLocator::Get<ImageManager>();
 
         Vk::ShaderProgramConfig config;
-        config.useDescriptorBuffers = false;
-        config.defines = { "ENABLE_ALPHA_TEST" };
+        config.layoutOverride = [imageManager](uint32_t setIndex) {
+            if (setIndex == 0) {
+                return imageManager->GetBindlessLayout();
+            }
+            return VkDescriptorSetLayout{};
+            };
+        config.defines = { ShaderDefines::EnableAlphaTest };
 
         _shaderProgram = shaderManager->CreateProgram("DirectionLightShadowOpaqueAlphaTestedProgram", {
             ShaderNames::DirectionLightShadowTraditionalVert,
@@ -108,7 +114,9 @@ namespace Syn {
 
     void DirectionLightShadowTraditionalOpaqueAlphaTestedPass::BindDescriptors(const RenderContext& context)
     {
-
+        auto imageManager = ServiceLocator::Get<ImageManager>();
+        auto bindlessBuffer = imageManager->GetBindlessBuffer();
+        bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
     void DirectionLightShadowTraditionalOpaqueAlphaTestedPass::Draw(const RenderContext& context)

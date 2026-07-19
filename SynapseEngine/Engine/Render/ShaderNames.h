@@ -3,6 +3,11 @@
 
 namespace Syn
 {
+    struct ShaderDefines
+    {
+        static constexpr const char* EnableAlphaTest = "ENABLE_ALPHA_TEST";
+    };
+
     struct SYN_API ShaderNames
     {
         static constexpr const char* FullscreenVert = "Engine/Shaders/Passes/Common/Fullscreen.vert";
