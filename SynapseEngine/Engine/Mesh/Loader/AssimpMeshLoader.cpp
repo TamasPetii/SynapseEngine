@@ -139,7 +139,11 @@ namespace Syn
                 aiMaterial* matAI = scene->mMaterials[matIndex];
                 MaterialInfo& matInfo = outModel.materials[matIndex];
 
-                matInfo.name = matAI->GetName().C_Str();
+                std::string matName = matAI->GetName().C_Str();
+                if (matName.empty()) matName = "Material";
+                matInfo.name = matName + "_" + std::to_string(matIndex);
+
+                //matInfo.name = modelName + "_" + matName + "_" + std::to_string(matIndex);
 
                 auto extractTexture = [&](aiTextureType type, TexturePayload& outPayload) -> bool {
                     if (matAI->GetTextureCount(type) > 0) {

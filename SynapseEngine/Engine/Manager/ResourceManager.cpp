@@ -150,6 +150,7 @@ namespace Syn {
 		);
 
 		_staticMeshBuilder->RegisterLoader(std::make_shared<AssimpMeshLoader>(), 1);
+		_staticMeshBuilder->RegisterLoader(std::make_shared<TinyGltfLoader>(), 0);
 
 		_staticMeshBuilder->RegisterMeshProcessor(std::make_unique<NormalProcessor>());
 		_staticMeshBuilder->RegisterMeshProcessor(std::make_unique<TangentProcessor>());

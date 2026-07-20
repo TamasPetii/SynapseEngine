@@ -66,7 +66,7 @@ namespace Syn
             Syn::Warning("scene_config.json not found, using default settings.");
         }
 
-        const std::string modelPath = "Assets/Engine/Models/";
+        const std::string modelPath = "../External/glTF-Sample-Assets/Models/";
         const std::string envPath = "Assets/Engine/Environment/";
 
         bool spawnSponza = config.value("/environment/spawn_sponza"_json_pointer, true);
@@ -182,7 +182,7 @@ namespace Syn
 
         if (spawnMonkey)
         {
-            uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Monkey/Untitled.obj"));
+            uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Suzanne/glTF/Suzanne.gltf"));
 
             EntityID monkeyId = scene.CreateEntity();
             registry.AddComponent<TagComponent>(monkeyId);
@@ -206,7 +206,7 @@ namespace Syn
 
         if (spawnSponza)
         {
-            uint32_t sponzaId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Sponza/sponza.obj"));
+            uint32_t sponzaId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Sponza/glTF/Sponza.gltf"));
 
             EntityID sponzaEntity = scene.CreateEntity();
             registry.AddComponent<TagComponent>(sponzaEntity);
@@ -219,7 +219,7 @@ namespace Syn
             registry.AddComponent<RigidBodyComponent>(sponzaEntity);
 
             registry.GetComponent<TransformComponent>(sponzaEntity).translation = glm::vec3(0.0f, 0.0f, 0.0f);
-            registry.GetComponent<TransformComponent>(sponzaEntity).scale = glm::vec3(0.2f, 0.2f, 0.2f);
+            registry.GetComponent<TransformComponent>(sponzaEntity).scale = glm::vec3(25.0f, 25.0f, 25.0f);
             registry.GetComponent<ModelComponent>(sponzaEntity).modelIndex = sponzaId;
             registry.GetComponent<RigidBodyComponent>(sponzaEntity).motionType = PhysicsMotionType::Static;
 
@@ -272,6 +272,7 @@ namespace Syn
 
         if (charCount > 0)
         {
+            /*
             uint32_t mutantId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Monster/Mutant/Mutant.dae"));
 
             std::vector<uint32_t> animationIds;
@@ -309,6 +310,7 @@ namespace Syn
 
                 hm->AttachChild(rootCharacters, characterEntity);
             }
+            */
         }
 
         std::vector<uint32_t> sharedMaterialIds;
