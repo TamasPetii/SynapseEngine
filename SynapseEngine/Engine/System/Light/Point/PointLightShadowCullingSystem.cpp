@@ -13,6 +13,8 @@
 #include "Engine/System/Rendering/MaterialSystem.h"
 #include "Engine/System/Core/StaticSpatialSahSystem.h"
 
+#include "Engine/Component/Rendering/PipelineOverrideComponent.h"
+#include "Engine/System/Rendering/PipelineOverrideSystem.h"
 #include "Engine/Component/Light/Point/PointLightComponent.h"
 #include "Engine/Component/Light/Point/PointLightShadowComponent.h"
 #include "Engine/Component/Rendering/ModelComponent.h"
@@ -45,6 +47,7 @@ namespace Syn
         uint32_t animFrameIndex;
         const Animation* animResource;
         std::span<const uint32_t> materialOverrides;
+        std::span<const uint32_t> pipelineOverrides;
     };
 
     std::vector<TypeID> PointLightShadowCullingSystem::GetReadDependencies() const {
@@ -60,7 +63,8 @@ namespace Syn
             TypeInfo<MaterialSystem>::ID,
             TypeInfo<CameraSystem>::ID,
             TypeInfo<StaticSpatialSahSystem>::ID,
-            TypeInfo<TagSystem>::ID
+            TypeInfo<TagSystem>::ID,
+            TypeInfo<PipelineOverrideSystem>::ID
         };
     }
 
@@ -100,6 +104,7 @@ namespace Syn
         auto cameraPool = registry->GetPool<CameraComponent>();
         auto animPool = registry->GetPool<AnimationComponent>();
         auto overridePool = registry->GetPool<MaterialOverrideComponent>();
+        auto pipeOverridePool = registry->GetPool<PipelineOverrideComponent>();
         auto shadowPool = registry->GetPool<PointLightShadowComponent>();
         auto lightPool = registry->GetPool<PointLightComponent>();
         auto tagPool = registry->GetPool<TagComponent>();
@@ -122,7 +127,7 @@ namespace Syn
         auto& matTypeSnapshot = scene->GetSystemContext().materialRenderTypes;
 
         // Extract Entity Data (Runs once per entity)
-        auto withEntityData = [modelPool, transformPool, animPool, overridePool, modelSnapshot, tagPool, animSnapshot, drawData]
+        auto withEntityData = [modelPool, transformPool, animPool, overridePool, pipeOverridePool, modelSnapshot, tagPool, animSnapshot, drawData]
         (EntityID entity, auto&& nextFunc) {
             if (!modelPool->Has(entity)) return;
 
@@ -163,6 +168,11 @@ namespace Syn
                 overrides = overridePool->Get(entity).materials;
             }
 
+            std::span<const uint32_t> pipeOverrides;
+            if (pipeOverridePool && pipeOverridePool->Has(entity)) {
+                pipeOverrides = pipeOverridePool->Get(entity).pipelines;
+            }
+
             const StaticMesh* modelResource = static_cast<const StaticMesh*>(snapshotEntry.resource.get());
 
             GpuMeshCollider globalLocalCollider = hasAnimation ?
@@ -171,10 +181,17 @@ namespace Syn
             GpuMeshCollider worldCollider = MeshUtils::TransformCollider(globalLocalCollider, transformComp.transform);
 
             EntityCullData data{
-                .entity = entity, .transform = transformComp.transform, .globalWorldCollider = worldCollider,
-                .meshCount = modelAlloc.meshAllocationCount / 4, .modelResource = modelResource,
-                .modelAlloc = &modelAlloc, .hasAnimation = hasAnimation, .animFrameIndex = animFrameIndex,
-                .animResource = animResource, .materialOverrides = overrides
+                .entity = entity, 
+                .transform = transformComp.transform, 
+                .globalWorldCollider = worldCollider,
+                .meshCount = modelAlloc.meshAllocationCount / 4, 
+                .modelResource = modelResource,
+                .modelAlloc = &modelAlloc, 
+                .hasAnimation = hasAnimation, 
+                .animFrameIndex = animFrameIndex,
+                .animResource = animResource, 
+                .materialOverrides = overrides,
+                .pipelineOverrides = pipeOverrides
             };
             nextFunc(data);
             };
@@ -191,6 +208,11 @@ namespace Syn
 
                 MaterialRenderType matType = (matIdx < matTypeSnapshot.size()) ? matTypeSnapshot[matIdx] : MaterialRenderType::Opaque1Sided;
                 if (matType != MaterialRenderType::Opaque1Sided && matType != MaterialRenderType::Opaque2Sided) continue;
+
+                uint32_t pipeIdx = static_cast<uint32_t>(data.modelResource->cpuData.baseDrawCommands[m * 4].pipelineRenderType);
+                if (!data.pipelineOverrides.empty() && m < data.pipelineOverrides.size() && data.pipelineOverrides[m] != UINT32_MAX) {
+                    pipeIdx = data.pipelineOverrides[m];
+                }
 
                 GpuMeshCollider worldCollider;
                 if (data.meshCount > 1) {
@@ -248,8 +270,8 @@ namespace Syn
 
                 if (meshAlloc.activeTypes[matType])
                 {
-                    uint32_t indirectIdx = meshAlloc.indirectIndices[matType];
-                    uint32_t isMeshlet = (meshAlloc.isMeshletPipeline == MeshDrawBlueprint::PIPELINE_MESHLET) ? 1 : 0;
+                    uint32_t indirectIdx = meshAlloc.indirectIndices[pipeIdx][matType];
+                    uint32_t isMeshlet = (pipeIdx == static_cast<uint32_t>(PipelineRenderType::Meshlet)) ? 1 : 0;
                     uint32_t drawCallKey = (isMeshlet << 31) | (indirectIdx & 0x7FFFFFFF);
 
                     uint32_t entityData = static_cast<uint32_t>(data.entity) & 0x7FFFFFFF;

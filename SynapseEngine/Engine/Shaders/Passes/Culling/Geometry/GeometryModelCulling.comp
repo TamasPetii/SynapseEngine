@@ -115,13 +115,14 @@ void main()
             uint matType = GetMaterialRenderType(mat);
 
             MeshAllocationInfo meshAlloc = GET_MESH_ALLOC(ctx.globalMeshAllocationBufferAddr, mAlloc.meshAllocationOffset + (m * 4) + lod);
-            
-            if (meshAlloc.activeTypes[matType] == 1) {
+            uint pipeIdx = GET_PIPELINE_INDEX(ctx.pipelineLookupBufferAddr, modelComp.pipelineOffset + m);
+
+            if (meshAlloc.activeTypes[pipeIdx][matType] == 1) {
                 uint slotIndex = 0;
-                uint indirectIdx = meshAlloc.indirectIndices[matType];
+                uint indirectIdx = meshAlloc.indirectIndices[pipeIdx][matType];
 
                 // Append instance to the appropriate indirect draw command using atomic additions
-                if (meshAlloc.isMeshletPipeline == PIPELINE_MESHLET) {
+                if (pipeIdx == PIPELINE_MESHLET) {
                     uint64_t meshletBaseAddr = ctx.globalIndirectCommandBufferAddr + (ctx.globalTraditionalCommandsCount * 16ul);
                     slotIndex = atomicAdd(GET_MESHLET_CMD(meshletBaseAddr, indirectIdx).groupCountX, 1);
                 } else {
@@ -130,7 +131,7 @@ void main()
 
                 // Write Instance ID (and encode full visibility flag in the MSB)
                 uint payload = SET_BIT_TO(entityId, 31, visibility == INTERSECTION_INSIDE);
-                GET_INSTANCE(ctx.globalInstanceIndexBufferAddr, meshAlloc.instanceOffsets[matType] + slotIndex) = payload;
+                GET_INSTANCE(ctx.globalInstanceIndexBufferAddr, meshAlloc.instanceOffsets[pipeIdx][matType] + slotIndex) = payload;
             }
         }
         return;

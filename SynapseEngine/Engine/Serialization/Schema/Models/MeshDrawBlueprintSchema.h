@@ -21,9 +21,9 @@ namespace Syn
             ScopedArchiveObject obj(ar, name);
             auto& b = const_cast<std::remove_const_t<U>&>(val);
 
-            ar.Property("isMeshletPipeline", b.isMeshletPipeline);
+            ar.Property("pipelineRenderType", b.pipelineRenderType);
 
-            if (b.isMeshletPipeline == MeshDrawBlueprint::PIPELINE_TRADITIONAL) {
+            if (b.pipelineRenderType == PipelineRenderType::Traditional) {
                 ar.Property("vertexCount", b.traditionalCmd.vertexCount);
                 ar.Property("instanceCount", b.traditionalCmd.instanceCount);
                 ar.Property("firstVertex", b.traditionalCmd.firstVertex);

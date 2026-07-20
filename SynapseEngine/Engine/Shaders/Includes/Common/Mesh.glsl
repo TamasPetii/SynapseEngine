@@ -105,7 +105,9 @@ layout(buffer_reference, std430) readonly restrict buffer VertexIndicesBuffer   
 layout(buffer_reference, std430) readonly restrict buffer TriangleIndicesBuffer  { uint8_t data[]; };
 layout(buffer_reference, std430) readonly restrict buffer DebugMeshletInstanceBuffer    { DebugMeshletInstance data[]; };
 layout(buffer_reference, std430) readonly restrict buffer MaterialIndices        { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer PipelineIndices { uint data[]; };
 
+#define GET_PIPELINE_INDEX(addr, idx)         PipelineIndices(addr).data[idx]
 #define GET_VERTEX_POS(addr, idx)             PositionBuffer(addr).data[idx]
 #define GET_VERTEX_ATTR(addr, idx)            AttributeBuffer(addr).data[idx]
 #define GET_INDEX(addr, idx)                  IndexBuffer(addr).data[idx]

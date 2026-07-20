@@ -141,9 +141,11 @@ void main() {
                 if (matType > 3) continue;
 
                 MeshAllocationInfo meshAlloc = GET_MESH_ALLOC(ctx.globalMeshAllocationBufferAddr, mAlloc.meshAllocationOffset + (m * 4) + lod);
-                if (meshAlloc.activeTypes[matType] == 1) {
-                    uint indirectIdx = meshAlloc.indirectIndices[matType];
-                    uint isMeshlet = (meshAlloc.isMeshletPipeline == PIPELINE_MESHLET) ? 1u : 0u;
+                uint pipeIdx = GET_PIPELINE_INDEX(ctx.pipelineLookupBufferAddr, modelComp.pipelineOffset + m);
+
+                if (meshAlloc.activeTypes[pipeIdx][matType] == 1) {
+                    uint indirectIdx = meshAlloc.indirectIndices[pipeIdx][matType];
+                    uint isMeshlet = (pipeIdx == PIPELINE_MESHLET) ? 1u : 0u;
 
                     uint drawCallKey = (isMeshlet << 31) | (indirectIdx & 0x7FFFFFFF);
                     uvec2 gpuPayload = uvec2(entityData, lightIdx);

@@ -140,13 +140,14 @@ void main() {
 
         // 12. Fetch Mesh Allocation and emit Draw Command
         MeshAllocationInfo meshAlloc = GET_MESH_ALLOC(ctx.globalMeshAllocationBufferAddr, mAlloc.meshAllocationOffset + (m * 4) + lod);
-        
-        if (meshAlloc.activeTypes[matType] == 1) {
+        uint pipeIdx = GET_PIPELINE_INDEX(ctx.pipelineLookupBufferAddr, modelComp.pipelineOffset + m);
+
+        if (meshAlloc.activeTypes[pipeIdx][matType] == 1) {
             uint slotIndex = 0;
-            uint indirectIdx = meshAlloc.indirectIndices[matType];
+            uint indirectIdx = meshAlloc.indirectIndices[pipeIdx][matType];
 
             // Append instance to the appropriate indirect draw command using atomic additions
-            if (meshAlloc.isMeshletPipeline == PIPELINE_MESHLET) {
+            if (pipeIdx == PIPELINE_MESHLET) {
                 uint64_t meshletBaseAddr = ctx.directionLightShadowIndirectGeometryCommandBufferAddr + (ctx.globalTraditionalCommandsCount * 16ul);
                 slotIndex = atomicAdd(GET_MESHLET_CMD(meshletBaseAddr, indirectIdx).groupCountX, 1);
             } else {
@@ -157,7 +158,7 @@ void main() {
             uint finalPayload = SET_BIT_TO(rawPayload, 31, visibility == INTERSECTION_INSIDE);
             
             // Write the encoded payload to the instance buffer
-            uint bufferIndex = (meshAlloc.instanceOffsets[matType] * ctx.directionLightShadowMultiplier) + slotIndex;
+            uint bufferIndex = (meshAlloc.instanceOffsets[pipeIdx][matType] * ctx.directionLightShadowMultiplier) + slotIndex;
             GET_INSTANCE(ctx.directionLightShadowInstanceBufferAddr, bufferIndex) = finalPayload;
         }
     }

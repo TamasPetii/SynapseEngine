@@ -7,7 +7,8 @@ struct ModelComponent {
     uint entityIndex; 
     uint modelIndex; 
     uint flags; 
-    uint materialOffset;  
+    uint materialOffset; 
+    uint pipelineOffset;
 };
 
 layout(buffer_reference, std430) readonly restrict buffer ModelComponentBuffer { ModelComponent data[]; };

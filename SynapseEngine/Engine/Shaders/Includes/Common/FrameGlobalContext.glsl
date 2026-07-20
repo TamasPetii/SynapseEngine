@@ -41,6 +41,7 @@ struct FrameGlobalContext {
 
     uint64_t materialLookupBufferAddr; 
     uint64_t materialBufferAddr; 
+    uint64_t pipelineLookupBufferAddr;
 
     uint64_t directionLightIndirectCommandBufferAddr;
     uint64_t directionLightVisibleIndexBufferAddr;

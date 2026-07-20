@@ -7,6 +7,9 @@
 
 #define PIPELINE_TRADITIONAL 0u
 #define PIPELINE_MESHLET     1u
+#define PIPELINE_COUNT 2u
+
+#define MATERIAL_RENDER_COUNT 8u
 
 struct VisibleModelData { 
     uint entityId; 
@@ -22,17 +25,15 @@ struct ModelAllocationInfo {
 
 struct MeshAllocationInfo { 
     uint descriptorIndex; 
-    uint isMeshletPipeline; 
-    uint padding[2]; 
-    uint indirectIndices[8];
-    uint instanceOffsets[8];
-    uint activeTypes[8];
+    uint padding[3]; 
+    uint indirectIndices[PIPELINE_COUNT][MATERIAL_RENDER_COUNT];
+    uint instanceOffsets[PIPELINE_COUNT][MATERIAL_RENDER_COUNT];
+    uint activeTypes[PIPELINE_COUNT][MATERIAL_RENDER_COUNT];
 };
 
 layout(buffer_reference, std430) readonly restrict buffer ModelAllocBuffer   { ModelAllocationInfo data[]; };
 layout(buffer_reference, std430) readonly restrict buffer MeshAllocBuffer    { MeshAllocationInfo data[]; };
 layout(buffer_reference, std430) restrict buffer VisibleModelList            { VisibleModelData data[]; };
-
 
 #define GET_MODEL_ALLOC(addr, idx)      ModelAllocBuffer(addr).data[idx]
 #define GET_MESH_ALLOC(addr, idx)       MeshAllocBuffer(addr).data[idx]

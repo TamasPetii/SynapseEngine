@@ -9,6 +9,8 @@
 #include "Engine/System/Rendering/MaterialSystem.h"
 #include "Engine/System/Core/StaticSpatialSahSystem.h"
 
+#include "Engine/Component/Rendering/PipelineOverrideComponent.h"
+#include "Engine/System/Rendering/PipelineOverrideSystem.h"
 #include "Engine/Component/Light/Direction/DirectionLightComponent.h"
 #include "Engine/Component/Light/Direction/DirectionLightShadowComponent.h"
 #include "Engine/Component/Rendering/ModelComponent.h"
@@ -48,6 +50,7 @@ namespace Syn
         uint32_t animFrameIndex;
         const Animation* animResource;
         std::span<const uint32_t> materialOverrides;
+        std::span<const uint32_t> pipelineOverrides;
     };
 
     std::vector<TypeID> DirectionLightShadowCullingSystem::GetReadDependencies() const {
@@ -63,7 +66,8 @@ namespace Syn
             TypeInfo<MaterialSystem>::ID,
             TypeInfo<CameraSystem>::ID,
             TypeInfo<StaticSpatialSahSystem>::ID, 
-            TypeInfo<TagSystem>::ID
+            TypeInfo<TagSystem>::ID,
+            TypeInfo<PipelineOverrideSystem>::ID
         };
     }
 
@@ -97,6 +101,7 @@ namespace Syn
         auto cameraPool = registry->GetPool<CameraComponent>();
         auto animPool = registry->GetPool<AnimationComponent>();
         auto overridePool = registry->GetPool<MaterialOverrideComponent>();
+        auto pipeOverridePool = registry->GetPool<PipelineOverrideComponent>();
         auto shadowPool = registry->GetPool<DirectionLightShadowComponent>();
         auto tagPool = registry->GetPool<TagComponent>();
 
@@ -120,7 +125,7 @@ namespace Syn
         auto& matTypeSnapshot = scene->GetSystemContext().materialRenderTypes;
 
         // Extract entity properties (runs exactly once per entity)
-        auto withEntityData = [modelPool, transformPool, animPool, overridePool, modelSnapshot, tagPool, animSnapshot, drawData]
+        auto withEntityData = [modelPool, transformPool, animPool, overridePool, pipeOverridePool, modelSnapshot, tagPool, animSnapshot, drawData]
             (EntityID entity, auto&& nextFunc) {
                 if (!modelPool->Has(entity))
                     return;
@@ -166,6 +171,11 @@ namespace Syn
                     overrides = overridePool->Get(entity).materials;
                 }
 
+                std::span<const uint32_t> pipeOverrides;
+                if (pipeOverridePool && pipeOverridePool->Has(entity)) {
+                    pipeOverrides = pipeOverridePool->Get(entity).pipelines;
+                }
+
                 const StaticMesh* modelResource = static_cast<const StaticMesh*>(snapshotEntry.resource.get());
 
                 // Calculate Global World Collider
@@ -187,7 +197,8 @@ namespace Syn
                     .hasAnimation = hasAnimation,
                     .animFrameIndex = animFrameIndex,
                     .animResource = animResource,
-                    .materialOverrides = overrides
+                    .materialOverrides = overrides,
+                    .pipelineOverrides = pipeOverrides
                 };
 
                 nextFunc(data);
@@ -208,6 +219,12 @@ namespace Syn
                 // Process opaque materials only
                 if (matType != MaterialRenderType::Opaque1Sided && matType != MaterialRenderType::Opaque2Sided) {
                     continue;
+                }
+
+                // Pipeline override lookup
+                uint32_t pipeIdx = static_cast<uint32_t>(data.modelResource->cpuData.baseDrawCommands[m * 4].pipelineRenderType);
+                if (!data.pipelineOverrides.empty() && m < data.pipelineOverrides.size() && data.pipelineOverrides[m] != UINT32_MAX) {
+                    pipeIdx = data.pipelineOverrides[m];
                 }
 
                 bool isVisible = true;
@@ -253,10 +270,10 @@ namespace Syn
                     if (meshAlloc.activeTypes[matType])
                     {
                         uint32_t slotIndex = 0;
-                        uint32_t indirectIdx = meshAlloc.indirectIndices[matType];
+                        uint32_t indirectIdx = meshAlloc.indirectIndices[pipeIdx][matType];
 
                         // Increment atomic padded counters
-                        if (meshAlloc.isMeshletPipeline == MeshDrawBlueprint::PIPELINE_MESHLET) {
+                        if (pipeIdx == static_cast<uint32_t>(PipelineRenderType::Meshlet)) {
                             std::atomic_ref<uint32_t> countRef(drawData->DirectionLightShadow.paddedMeshletCounts[indirectIdx * 16]);
                             slotIndex = countRef.fetch_add(1, std::memory_order_relaxed);
                         }
@@ -266,7 +283,7 @@ namespace Syn
                         }
 
                         // Write Bit-Packed Payload
-                        uint32_t bufferIndex = (meshAlloc.instanceOffsets[matType] * SHADOW_MULTIPLIER) + slotIndex;
+                        uint32_t bufferIndex = (meshAlloc.instanceOffsets[pipeIdx][matType] * SHADOW_MULTIPLIER) + slotIndex;
                         if (bufferIndex < drawData->DirectionLightShadow.instances.Size())
                         {
                             // [Bit 31: FullyInside (1 bit)] [Bits 28-30: LightIdx (3 bit)] [Bits 26-27: CascadeIdx (2 bit)] [Bits 0-25: EntityID (26 bit)]

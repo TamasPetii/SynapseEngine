@@ -1,0 +1,23 @@
+#pragma once
+#include "Engine/SynApi.h"
+#include "Engine/System/ComponentSystem.h"
+#include "Engine/Component/Rendering/ModelComponent.h"
+#include <vector>
+
+namespace Syn
+{
+    class SYN_API PipelineSystem : public ISystem
+    {
+    public:
+        std::string GetName() const override { return "PipelineSystem"; }
+        std::string GetGroup() const override { return SystemGroupNames::RenderingSystems; }
+
+        std::vector<TypeID> GetWriteDependencies() const override;
+    protected:
+        void OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) override;
+        void OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow) override;
+    private:
+        uint32_t _lastModelManagerVersion = 0;
+        std::vector<uint32_t> _flatPipelineIndices;
+    };
+}

@@ -15,6 +15,7 @@
 #include "Engine/Component/Light/Point/PointLightComponent.h"
 #include "Engine/Component/Light/Spot/SpotLightComponent.h"
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
+#include "Engine/Component/Rendering/PipelineOverrideComponent.h"
 
 #include "Engine/System/Core/TransformSystem.h"
 #include "Engine/System/Core/TransformSetupSystem.h"
@@ -29,6 +30,8 @@
 #include "Engine/System/Rendering/ModelFrustumCullingSystem.h"
 #include "Engine/System/Rendering/AnimationSystem.h"
 #include "Engine/System/Rendering/MaterialOverrideSystem.h"
+#include "Engine/System/Rendering/PipelineSystem.h"
+#include "Engine/System/Rendering/PipelineOverrideSystem.h"
 #include "Engine/System/Physics/PhysicsSystem.h"
 
 #include "Engine/System/Light/Point/PointLightSystem.h"
@@ -89,6 +92,7 @@ namespace Syn
         _registry->EnsurePool<AnimationComponent>();
         _registry->EnsurePool<ModelComponent>();
         _registry->EnsurePool<MaterialOverrideComponent>();
+        _registry->EnsurePool<PipelineOverrideComponent>();
         _registry->EnsurePool<DirectionLightComponent>();
         _registry->EnsurePool<DirectionLightShadowComponent>();
         _registry->EnsurePool<PointLightComponent>();
@@ -147,12 +151,14 @@ namespace Syn
 
         RegisterSystem<StaticSpatialSahSystem>();
         RegisterSystem<MaterialSystem>();
+        RegisterSystem<PipelineSystem>();
         RegisterSystem<CameraSystem>();
         RegisterSystem<RenderSystem>();
         RegisterSystem<ModelSystem>();
         RegisterSystem<ModelFrustumCullingSystem>();
         RegisterSystem<AnimationSystem>();
         RegisterSystem<MaterialOverrideSystem>();
+        RegisterSystem<PipelineOverrideSystem>();
 
         RegisterSystem<PointLightSystem>();
         RegisterSystem<PointLightShadowSystem>();

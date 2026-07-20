@@ -18,6 +18,7 @@ namespace Syn
         RenderBuffer modelAllocBuffer;
         RenderBuffer meshAllocBuffer;
         RenderBuffer materialIndexBuffer;
+        RenderBuffer pipelineIndexBuffer;
         RenderBuffer drawCountBuffer;
         RenderBuffer computeCountBuffer;
 
@@ -37,10 +38,10 @@ namespace Syn
         uint32_t totalAllocatedInstances = 0;
         size_t requiredMaterialBufferSize = 0;
 
-        uint32_t traditionalCmdOffsets[MaterialRenderType::Count] = { 0 };
-        uint32_t traditionalCmdCounts[MaterialRenderType::Count] = { 0 };
-        uint32_t meshletCmdOffsets[MaterialRenderType::Count] = { 0 };
-        uint32_t meshletCmdCounts[MaterialRenderType::Count] = { 0 };   
+        uint32_t traditionalCmdOffsets[MaterialRenderType::MaterialRenderTypeCount] = { 0 };
+        uint32_t traditionalCmdCounts[MaterialRenderType::MaterialRenderTypeCount] = { 0 };
+        uint32_t meshletCmdOffsets[MaterialRenderType::MaterialRenderTypeCount] = { 0 };
+        uint32_t meshletCmdCounts[MaterialRenderType::MaterialRenderTypeCount] = { 0 };
 
         VkDispatchIndirectCommand dispatchCmdTemplate{};
     };

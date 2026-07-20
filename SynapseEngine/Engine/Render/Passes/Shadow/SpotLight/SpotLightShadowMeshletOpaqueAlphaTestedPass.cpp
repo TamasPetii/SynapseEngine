@@ -152,7 +152,7 @@ namespace Syn {
         if (maxCommandCount > 0) {
             VkDeviceSize traditionalBytes = drawData->Models.activeTraditionalCount * sizeof(VkDrawIndirectCommand);
             VkDeviceSize indirectOffset = traditionalBytes + (commandOffsetIdx * sizeof(VkDrawMeshTasksIndirectCommandEXT));
-            VkDeviceSize countOffset = (MaterialRenderType::Count + _renderType) * sizeof(uint32_t);
+            VkDeviceSize countOffset = (MaterialRenderType::MaterialRenderTypeCount + _renderType) * sizeof(uint32_t);
 
             vkCmdDrawMeshTasksIndirectCountEXT(
                 context.cmd,

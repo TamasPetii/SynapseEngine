@@ -12,6 +12,6 @@ namespace Syn
         Transparent2Sided = 5,
         AlphaTestedTransparent1Sided = 6,
         AlphaTestedTransparent2Sided = 7,
-        Count = 8
+        MaterialRenderTypeCount = 8
     };
 }

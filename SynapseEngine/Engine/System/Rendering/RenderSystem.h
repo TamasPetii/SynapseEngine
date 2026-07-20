@@ -8,7 +8,7 @@
 namespace Syn
 {
     struct SYN_API MeshMatCapacity {
-        uint32_t capacities[MaterialRenderType::Count] = { 0 };
+        uint32_t capacities[PipelineRenderType::PipelineRenderTypeCount][MaterialRenderType::MaterialRenderTypeCount] = { 0 };
     };
 
     class SYN_API RenderSystem : public ISystem

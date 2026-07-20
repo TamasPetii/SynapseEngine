@@ -87,6 +87,7 @@ namespace Syn {
         
         ctx.materialLookupBufferAddr = drawData->Models.materialIndexBuffer.GetAddress(fIdx);
         ctx.materialBufferAddr = materialManager->GetAddressBufferDeviceAddress();
+        ctx.pipelineLookupBufferAddr = drawData->Models.pipelineIndexBuffer.GetAddress(fIdx);
 
         //Direction Light Buffers
         ctx.directionLightIndirectCommandBufferAddr = drawData->DirectionLights.indirectBuffer.GetAddress(fIdx);

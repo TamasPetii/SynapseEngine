@@ -13,6 +13,7 @@ namespace Syn
 		bool receiveShadow;
 		uint32_t modelIndex;
 		uint32_t materialOffset = UINT32_MAX;
+		uint32_t pipelineOffset = UINT32_MAX;
 	};
 
 	struct SYN_API ModelComponentGPU
@@ -23,6 +24,7 @@ namespace Syn
 		uint32_t modelIndex;
 		uint32_t flags;
 		uint32_t materialOffset;
+		uint32_t pipelineOffset;
 	};
 
 	struct SYN_API VisibleModelData {

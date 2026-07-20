@@ -12,6 +12,8 @@
 #include "Engine/System/Core/TagSystem.h"
 
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
+#include "Engine/Component/Rendering/PipelineOverrideComponent.h"
+#include "Engine/System/Rendering/PipelineOverrideSystem.h"
 
 #include "Engine/Mesh/Utils/MeshUtils.h"
 #include "Engine/Collision/Tester/CollisionTester.h"
@@ -32,7 +34,8 @@ namespace Syn
             TypeInfo<AnimationSystem>::ID,
             TypeInfo<MaterialSystem>::ID,
             TypeInfo<StaticSpatialSahSystem>::ID,
-            TypeInfo<TagSystem>::ID
+            TypeInfo<TagSystem>::ID,
+            TypeInfo<PipelineOverrideSystem>::ID
         };
     }
 
@@ -42,6 +45,7 @@ namespace Syn
         auto drawData = scene->GetSceneDrawData();
         auto matTypeSnapshot = scene->GetSystemContext().materialRenderTypes;
         auto overridePool = scene->GetRegistry()->GetPool<MaterialOverrideComponent>();
+        auto pipeOverridePool = scene->GetRegistry()->GetPool<PipelineOverrideComponent>();
 
         tf::Task initTask = this->EmplaceTask(subflow, "Update Init", [drawData]() {
             for (uint32_t i = 0; i < drawData->Models.activeTraditionalCount; ++i) {
@@ -77,7 +81,7 @@ namespace Syn
 
         glm::vec2 screenRes = glm::vec2(cameraComp.width, cameraComp.height);
 
-        auto cullFunc = [settings, drawData, modelPool, transformPool, modelSnapshot, cameraComp, animPool, tagPool, animSnapshot, matTypeSnapshot, overridePool, screenRes]
+        auto cullFunc = [settings, drawData, modelPool, transformPool, modelSnapshot, cameraComp, animPool, tagPool, animSnapshot, matTypeSnapshot, overridePool, pipeOverridePool, screenRes]
         (EntityID entity, IntersectionType chunkVisibility) {
             if (tagPool && tagPool->Has(entity)) {
                 if (!tagPool->Get(entity).globalEnabled) {
@@ -146,6 +150,11 @@ namespace Syn
                 overrides = overridePool->Get(entity).materials;
             }
 
+            std::span<const uint32_t> pipeOverrides;
+            if (pipeOverridePool && pipeOverridePool->Has(entity)) {
+                pipeOverrides = pipeOverridePool->Get(entity).pipelines;
+            }
+
             for (uint32_t m = 0; m < meshCount; ++m)
             {
                 bool isVisible = true;
@@ -193,6 +202,11 @@ namespace Syn
 
                     MaterialRenderType matType = (matIdx < matTypeSnapshot.size()) ? matTypeSnapshot[matIdx] : MaterialRenderType::Opaque1Sided;
 
+                    uint32_t pipeIdx = static_cast<uint32_t>(resource->cpuData.baseDrawCommands[m * 4].pipelineRenderType);
+                    if (!pipeOverrides.empty() && m < pipeOverrides.size() && pipeOverrides[m] != UINT32_MAX) {
+                        pipeIdx = pipeOverrides[m];
+                    }
+
                     if constexpr (ENABLE_DEBUG_LOGGING) {
                         std::string name = "Unknown";
                         if (tagPool && tagPool->Has(entity)) name = tagPool->Get(entity).name;
@@ -202,9 +216,9 @@ namespace Syn
                     if (meshAlloc.activeTypes[matType])
                     {
                         uint32_t slotIndex = 0;
-                        uint32_t indirectIdx = meshAlloc.indirectIndices[matType];
+                        uint32_t indirectIdx = meshAlloc.indirectIndices[pipeIdx][matType];
 
-                        if (meshAlloc.isMeshletPipeline == MeshDrawBlueprint::PIPELINE_MESHLET)
+                        if (pipeIdx == static_cast<uint32_t>(PipelineRenderType::Meshlet))
                         {
                             std::atomic_ref<uint32_t> countRef(drawData->Models.paddedMeshletCounts[indirectIdx * 16]);
                             slotIndex = countRef.fetch_add(1, std::memory_order_relaxed);
@@ -215,7 +229,7 @@ namespace Syn
                             slotIndex = countRef.fetch_add(1, std::memory_order_relaxed);
                         }
 
-                        uint32_t bufferIndex = meshAlloc.instanceOffsets[matType] + slotIndex;
+                        uint32_t bufferIndex = meshAlloc.instanceOffsets[pipeIdx][matType] + slotIndex;
                         if (bufferIndex < drawData->Models.instances.Size()) {
                             uint32_t payload = static_cast<uint32_t>(entity);
 

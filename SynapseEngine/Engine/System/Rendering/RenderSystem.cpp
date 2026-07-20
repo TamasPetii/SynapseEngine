@@ -6,6 +6,8 @@
 #include "Engine/FrameContext.h"
 #include "MaterialSystem.h"
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
+#include "Engine/Component/Rendering/PipelineOverrideComponent.h"
+#include "Engine/System/Rendering/PipelineOverrideSystem.h"
 
 namespace Syn
 {
@@ -13,7 +15,8 @@ namespace Syn
     {
         return { 
             TypeInfo<ModelSystem>::ID,
-            TypeInfo<MaterialSystem>::ID
+            TypeInfo<MaterialSystem>::ID,
+            TypeInfo<PipelineOverrideSystem>::ID
         };
     }
 
@@ -27,13 +30,15 @@ namespace Syn
         auto registry = scene->GetRegistry();
         auto pool = registry->GetPool<ModelComponent>();
         auto overridePool = registry->GetPool<MaterialOverrideComponent>();
+        auto pipeOverridePool = registry->GetPool<PipelineOverrideComponent>();
+
         if (!pool) return;
 
         uint32_t totalModels = static_cast<uint32_t>(scene->GetSystemContext().modelSnapshots.size());
         uint32_t currentModelManagerVersion = scene->GetSystemContext().modelManagerVersion;
         uint32_t currentMaterialManagerVersion = scene->GetSystemContext().materialManagerVersion;
 
-        this->EmplaceTask(subflow, SystemPhaseNames::Update, [this, scene, pool, overridePool, totalModels, currentModelManagerVersion, currentMaterialManagerVersion]() {
+        this->EmplaceTask(subflow, SystemPhaseNames::Update, [this, scene, pool, overridePool, pipeOverridePool, totalModels, currentModelManagerVersion, currentMaterialManagerVersion]() {
             auto& modelSnapshots = scene->GetSystemContext().modelSnapshots;
             auto& matTypeSnapshot = scene->GetSystemContext().materialRenderTypes;
             
@@ -82,32 +87,47 @@ namespace Syn
 
                 std::vector<MeshMatCapacity> currentCounts(meshCount);
                 const auto& defaultMatIndices = model->cpuData.meshMaterialIndices;
+                const auto& blueprints = model->cpuData.baseDrawCommands;
 
                 for (EntityID e : _entitiesPerModel[modelId]) {
                     std::span<const uint32_t> overrides;
+                    std::span<const uint32_t> pipeOverrides;
 
                     if (overridePool && overridePool->Has(e)) {
                         overrides = overridePool->Get(e).materials;
                     }
 
+                    if (pipeOverridePool && pipeOverridePool->Has(e)) {
+                        pipeOverrides = pipeOverridePool->Get(e).pipelines;
+                    }
+
                     for (uint32_t m = 0; m < meshCount; ++m) {
                         uint32_t matIdx = defaultMatIndices[m];
-
                         if (m < overrides.size() && overrides[m] != UINT32_MAX) {
                             matIdx = overrides[m];
                         }
-
                         MaterialRenderType type = (matIdx < matTypeSnapshot.size()) ? matTypeSnapshot[matIdx] : MaterialRenderType::Opaque1Sided;
-                        currentCounts[m].capacities[type]++;
+
+                        uint32_t lod0Index = m * 4;
+                        uint32_t defaultPipe = blueprints[lod0Index].pipelineRenderType;
+
+                        uint32_t activePipe = defaultPipe;
+                        if (m < pipeOverrides.size() && pipeOverrides[m] != UINT32_MAX) {
+                            activePipe = pipeOverrides[m];
+                        }
+
+                        currentCounts[m].capacities[activePipe][type]++;
                     }
                 }
 
                 uint32_t totalModelCapRequired = 0;
                 for (uint32_t m = 0; m < meshCount; ++m) {
-                    for (int t = 0; t < MaterialRenderType::Count; ++t) {
-                        if (currentCounts[m].capacities[t] > _meshMatCapacities[modelId][m].capacities[t]) {
-                            _meshMatCapacities[modelId][m].capacities[t] = currentCounts[m].capacities[t] + windowSize;
-                            capacityExceeded = true;
+                    for (int p = 0; p < PipelineRenderType::PipelineRenderTypeCount; ++p) {
+                        for (int t = 0; t < MaterialRenderType::MaterialRenderTypeCount; ++t) {
+                            if (currentCounts[m].capacities[p][t] > _meshMatCapacities[modelId][m].capacities[p][t]) {
+                                _meshMatCapacities[modelId][m].capacities[p][t] = currentCounts[m].capacities[p][t] + windowSize;
+                                capacityExceeded = true;
+                            }
                         }
                     }
                 }
@@ -116,8 +136,11 @@ namespace Syn
                 for (uint32_t m = 0; m < meshCount; ++m) {
                     uint32_t meshTotal = 0;
 
-                    for (int t = 0; t < MaterialRenderType::Count; ++t)
-                        meshTotal += _meshMatCapacities[modelId][m].capacities[t];
+                    for (int p = 0; p < PipelineRenderType::PipelineRenderTypeCount; ++p) {
+                        for (int t = 0; t < MaterialRenderType::MaterialRenderTypeCount; ++t) {
+                            meshTotal += _meshMatCapacities[modelId][m].capacities[p][t];
+                        }
+                    }
 
                     if (meshTotal > maxModelInstances)
                         maxModelInstances = meshTotal;
@@ -152,8 +175,8 @@ namespace Syn
         uint32_t totalMaxMeshletInstances = 0;
 
         // 1. Pass: Count commands
-        uint32_t tradCmdCounts[MaterialRenderType::Count] = { 0 };
-        uint32_t meshletCmdCounts[MaterialRenderType::Count] = { 0 };
+        uint32_t tradCmdCounts[MaterialRenderType::MaterialRenderTypeCount] = { 0 };
+        uint32_t meshletCmdCounts[MaterialRenderType::MaterialRenderTypeCount] = { 0 };
 
         for (uint32_t modelId = 0; modelId < _modelCapacities.size(); ++modelId)
         {
@@ -166,26 +189,27 @@ namespace Syn
             const auto& blueprints = model->cpuData.baseDrawCommands;
             for (size_t i = 0; i < blueprints.size(); ++i) {
                 uint32_t meshIndex = static_cast<uint32_t>(i / 4);
-                bool isMeshlet = (blueprints[i].isMeshletPipeline == MeshDrawBlueprint::PIPELINE_MESHLET);
 
-                for (int t = 0; t < MaterialRenderType::Count; ++t) {
-                    if (_meshMatCapacities[modelId][meshIndex].capacities[t] > 0) {
-                        if (isMeshlet) 
-                            meshletCmdCounts[t]++;
-                        else 
-                            tradCmdCounts[t]++;
+                for (int p = 0; p < PipelineRenderType::PipelineRenderTypeCount; ++p) {
+                    for (int t = 0; t < MaterialRenderType::MaterialRenderTypeCount; ++t) {
+                        if (_meshMatCapacities[modelId][meshIndex].capacities[p][t] > 0) {
+                            if (p == 1)
+                                meshletCmdCounts[t]++;
+                            else
+                                tradCmdCounts[t]++;
+                        }
                     }
                 }
             }
         }
 
         // 2. Pass: Distribution of offset ---
-        uint32_t tradOffsets[MaterialRenderType::Count];
-        uint32_t meshletOffsets[MaterialRenderType::Count];
+        uint32_t tradOffsets[MaterialRenderType::MaterialRenderTypeCount];
+        uint32_t meshletOffsets[MaterialRenderType::MaterialRenderTypeCount];
         drawData->Models.activeTraditionalCount = 0;
         drawData->Models.activeMeshletCount = 0;
 
-        for (int t = 0; t < MaterialRenderType::Count; ++t) {
+        for (int t = 0; t < MaterialRenderType::MaterialRenderTypeCount; ++t) {
             drawData->Models.traditionalCmdOffsets[t] = drawData->Models.activeTraditionalCount;
             drawData->Models.traditionalCmdCounts[t] = tradCmdCounts[t];
             tradOffsets[t] = drawData->Models.activeTraditionalCount;
@@ -262,50 +286,56 @@ namespace Syn
 
                 MeshAllocationInfo meshAlloc{};
                 meshAlloc.descriptorIndex = drawData->Models.activeDescriptorCount;
-                meshAlloc.isMeshletPipeline = blueprint.isMeshletPipeline;
 
-                for (int t = 0; t < MaterialRenderType::Count; ++t) {
-                    meshAlloc.activeTypes[t] = 0;
-                    meshAlloc.indirectIndices[t] = UINT32_MAX;
+                for (int p = 0; p < PipelineRenderType::PipelineRenderTypeCount; ++p) {
+                    for (int t = 0; t < MaterialRenderType::MaterialRenderTypeCount; ++t) {
+                        meshAlloc.activeTypes[p][t] = 0;
+                        meshAlloc.indirectIndices[p][t] = UINT32_MAX;
+                    }
                 }
 
-                for (int type = 0; type < MaterialRenderType::Count; ++type)
+                for (int p = 0; p < PipelineRenderType::PipelineRenderTypeCount; ++p) 
                 {
-                    uint32_t allocatedForThisType = _meshMatCapacities[modelId][meshIndex].capacities[type];
-                    if (allocatedForThisType == 0) continue;
+                    bool isMeshlet = (p == 1);
 
-                    meshAlloc.activeTypes[type] = 1;
-                    meshAlloc.instanceOffsets[type] = globalInstanceOffset;
+                    for (int type = 0; type < MaterialRenderType::MaterialRenderTypeCount; ++type)
+                    {
+                        uint32_t allocatedForThisType = _meshMatCapacities[modelId][meshIndex].capacities[p][type];
+                        if (allocatedForThisType == 0) continue;
 
-                    MeshDrawDescriptor desc{};
-                    desc.modelIndex = modelId;
-                    desc.meshIndex = meshIndex;
-                    desc.lodIndex = static_cast<uint32_t>(i % 4);
-                    desc.instanceOffset = globalInstanceOffset;
-                    desc.maxInstances = allocatedForThisType;
-                    desc.isMeshletPipeline = blueprint.isMeshletPipeline;
+                        meshAlloc.activeTypes[p][type] = 1;
+                        meshAlloc.instanceOffsets[p][type] = globalInstanceOffset;
 
-                    if (blueprint.isMeshletPipeline == MeshDrawBlueprint::PIPELINE_MESHLET) {
-                        uint32_t flatIndirectIdx = meshletOffsets[type]++;
-                        meshAlloc.indirectIndices[type] = flatIndirectIdx;
+                        MeshDrawDescriptor desc{};
+                        desc.modelIndex = modelId;
+                        desc.meshIndex = meshIndex;
+                        desc.lodIndex = static_cast<uint32_t>(i % 4);
+                        desc.instanceOffset = globalInstanceOffset;
+                        desc.maxInstances = allocatedForThisType;
+                        desc.pipelineRenderType = p;
 
-                        uint32_t globalDescIdx = drawData->Models.activeTraditionalCount + flatIndirectIdx;
-                        desc.indirectIndex = globalDescIdx;
+                        if (isMeshlet) {
+                            uint32_t flatIndirectIdx = meshletOffsets[type]++;
+                            meshAlloc.indirectIndices[p][type] = flatIndirectIdx;
 
-                        drawData->Models.meshletCmds[flatIndirectIdx] = blueprint.meshletCmd;
-                        drawData->Models.descriptors[desc.indirectIndex] = desc;
+                            uint32_t globalDescIdx = drawData->Models.activeTraditionalCount + flatIndirectIdx;
+                            desc.indirectIndex = globalDescIdx;
+
+                            drawData->Models.meshletCmds[flatIndirectIdx] = blueprint.meshletCmd;
+                            drawData->Models.descriptors[desc.indirectIndex] = desc;
+                        }
+                        else {
+                            uint32_t flatIndirectIdx = tradOffsets[type]++;
+                            meshAlloc.indirectIndices[p][type] = flatIndirectIdx;
+
+                            uint32_t globalDescIdx = flatIndirectIdx;
+                            desc.indirectIndex = globalDescIdx;
+
+                            drawData->Models.traditionalCmds[flatIndirectIdx] = blueprint.traditionalCmd;
+                            drawData->Models.descriptors[desc.indirectIndex] = desc;
+                        }
+                        globalInstanceOffset += allocatedForThisType;
                     }
-                    else {
-                        uint32_t flatIndirectIdx = tradOffsets[type]++;
-                        meshAlloc.indirectIndices[type] = flatIndirectIdx;
-
-                        uint32_t globalDescIdx = flatIndirectIdx;
-                        desc.indirectIndex = globalDescIdx;
-
-                        drawData->Models.traditionalCmds[flatIndirectIdx] = blueprint.traditionalCmd;
-                        drawData->Models.descriptors[desc.indirectIndex] = desc;
-                    }
-                    globalInstanceOffset += allocatedForThisType;
                 }
 
                 drawData->Models.meshAllocations[drawData->Models.activeDescriptorCount] = meshAlloc;
@@ -377,10 +407,10 @@ namespace Syn
             if (meshAllocSize > 0)
                 drawData->Models.meshAllocBuffer.Write(frameIndex, drawData->Models.meshAllocations.Data(), meshAllocSize, 0);
 
-            uint32_t counts[MaterialRenderType::Count * 2] = { 0 };
-            for (int i = 0; i < MaterialRenderType::Count; ++i) {
+            uint32_t counts[MaterialRenderType::MaterialRenderTypeCount * 2] = { 0 };
+            for (int i = 0; i < MaterialRenderType::MaterialRenderTypeCount; ++i) {
                 counts[i] = drawData->Models.traditionalCmdCounts[i];
-                counts[MaterialRenderType::Count + i] = drawData->Models.meshletCmdCounts[i];
+                counts[MaterialRenderType::MaterialRenderTypeCount + i] = drawData->Models.meshletCmdCounts[i];
             }
             drawData->Models.drawCountBuffer.Write(frameIndex, counts, sizeof(counts), 0);
             });

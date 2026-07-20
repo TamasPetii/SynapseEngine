@@ -153,19 +153,20 @@ void main() {
                     continue;
 
                 MeshAllocationInfo meshAlloc = GET_MESH_ALLOC(ctx.globalMeshAllocationBufferAddr, mAlloc.meshAllocationOffset + (m * 4) + lod);
-                
-                if (meshAlloc.activeTypes[matType] == 1) {
-                    uint slotIndex = 0;
-                    uint indirectIdx = meshAlloc.indirectIndices[matType];
+                uint pipeIdx = GET_PIPELINE_INDEX(ctx.pipelineLookupBufferAddr, modelComp.pipelineOffset + m);
 
-                    if (meshAlloc.isMeshletPipeline == PIPELINE_MESHLET) {
+                if (meshAlloc.activeTypes[pipeIdx][matType] == 1) {
+                    uint slotIndex = 0;
+                    uint indirectIdx = meshAlloc.indirectIndices[pipeIdx][matType];
+
+                    if (pipeIdx == PIPELINE_MESHLET) {
                         uint64_t meshletBaseAddr = ctx.directionLightShadowIndirectGeometryCommandBufferAddr + (ctx.globalTraditionalCommandsCount * 16ul);
                         slotIndex = atomicAdd(GET_MESHLET_CMD(meshletBaseAddr, indirectIdx).groupCountX, 1);
                     } else {
                         slotIndex = atomicAdd(GET_TRADITIONAL_CMD(ctx.directionLightShadowIndirectGeometryCommandBufferAddr, indirectIdx).instanceCount, 1);
                     }
 
-                    uint bufferIndex = (meshAlloc.instanceOffsets[matType] * ctx.directionLightShadowMultiplier) + slotIndex;
+                    uint bufferIndex = (meshAlloc.instanceOffsets[pipeIdx][matType] * ctx.directionLightShadowMultiplier) + slotIndex;
                     GET_INSTANCE(ctx.directionLightShadowInstanceBufferAddr, bufferIndex) = payload;
                 }
             }
