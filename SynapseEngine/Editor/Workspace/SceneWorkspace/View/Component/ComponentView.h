@@ -21,6 +21,7 @@
 #include "Rendering/ModelComponentView.h"
 #include "Rendering/AnimationView.h"
 #include "Rendering/MaterialOverrideView.h"
+#include "Rendering/PipelineOverrideView.h"
 
 namespace Syn {
     class ComponentView : public IView<ComponentViewModel> {
@@ -42,5 +43,6 @@ namespace Syn {
 		ModelComponentView _modelComponentView;
 		AnimationView _animationView;
         MaterialOverrideView _materialOverrideView;
+        PipelineOverrideView _pipelineOverrideView;
     };
 }

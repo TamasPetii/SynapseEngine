@@ -6,10 +6,17 @@
 #include "Engine/Component/Rendering/PipelineOverrideComponent.h"
 #include "Engine/Component/Core/TagComponent.h"
 #include "Engine/System/Rendering/PipelineOverrideSystem.h"
+#include "Engine/System/Rendering/MaterialSystem.h"
 
 namespace Syn
 {
     constexpr bool ENABLE_DEBUG_LOGGING = false;
+
+    std::vector<TypeID> PipelineSystem::GetReadDependencies() const {
+        return {
+            TypeInfo<MaterialSystem>::ID
+        };
+    }
 
     std::vector<TypeID> PipelineSystem::GetWriteDependencies() const {
         return {

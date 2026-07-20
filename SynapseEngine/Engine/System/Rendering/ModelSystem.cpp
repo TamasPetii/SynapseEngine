@@ -1,5 +1,6 @@
 #include "ModelSystem.h"
 #include "MaterialSystem.h"
+#include "PipelineSystem.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/FrameContext.h"
 #include "Engine/Component/Core/TagComponent.h"
@@ -10,7 +11,8 @@ namespace Syn
 
     std::vector<TypeID> ModelSystem::GetReadDependencies() const {
         return { 
-            TypeInfo<MaterialSystem>::ID
+            TypeInfo<MaterialSystem>::ID,
+            TypeInfo<PipelineSystem>::ID
         };
     }
 

@@ -13,6 +13,7 @@ namespace Syn
         std::string GetGroup() const override { return SystemGroupNames::RenderingSystems; }
 
         std::vector<TypeID> GetWriteDependencies() const override;
+        std::vector<TypeID> GetReadDependencies() const override;
     protected:
         void OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) override;
         void OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow) override;

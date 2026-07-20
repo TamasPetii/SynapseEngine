@@ -19,7 +19,8 @@ namespace Syn
         IRigidBodyApi* rigidBodyApi,
 		IModelComponentApi* modelComponentApi,
 		IAnimationApi* animationApi,
-        IMaterialOverrideApi* materialOverrideApi
+        IMaterialOverrideApi* materialOverrideApi,
+        IPipelineOverrideApi* pipelineOverrideApi
     )
         : 
         _selectionApi(selectionApi),
@@ -37,7 +38,8 @@ namespace Syn
         _rigidBodyViewModel(selectionApi, rigidBodyApi),
 		_modelComponentViewModel(selectionApi, modelComponentApi),
 		_animationViewModel(selectionApi, animationApi),
-        _materialOverrideViewModel(selectionApi, materialOverrideApi)
+        _materialOverrideViewModel(selectionApi, materialOverrideApi),
+        _pipelineOverrideViewModel(selectionApi, pipelineOverrideApi)
     {}
 
     const ComponentState& ComponentViewModel::GetState() const {
@@ -68,6 +70,7 @@ namespace Syn
 			_modelComponentViewModel.SyncWithEngine();
 			_animationViewModel.SyncWithEngine();
             _materialOverrideViewModel.SyncWithEngine();
+            _pipelineOverrideViewModel.SyncWithEngine();
         }
     }
 
@@ -119,6 +122,9 @@ namespace Syn
             }
             else if constexpr (std::is_same_v<T, MaterialOverrideIntent>) {
                 _materialOverrideViewModel.Dispatch(arg);
+            }
+            else if constexpr (std::is_same_v<T, PipelineOverrideIntent>) {
+                _pipelineOverrideViewModel.Dispatch(arg);
             }
         }, intent);
     }

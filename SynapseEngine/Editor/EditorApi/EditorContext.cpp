@@ -25,6 +25,7 @@
 #include "Impl/AnimationApiImpl.h"
 #include "Impl/MaterialOverrideApiImpl.h"
 #include "Impl/PreviewApiImpl.h"
+#include "Impl/PipelineOverrideApiImpl.h"
 
 namespace Syn {
     EditorContext::EditorContext(Engine* engine, GuiTextureManager* textureManager) {
@@ -55,6 +56,7 @@ namespace Syn {
         RegisterApi<IModelComponentApi, ModelComponentApiImpl>(sm);
         RegisterApi<IAnimationApi, AnimationApiImpl>(sm);
         RegisterApi<IMaterialOverrideApi, MaterialOverrideApiImpl>(sm);
+        RegisterApi<IPipelineOverrideApi, PipelineOverrideApiImpl>(sm);
         RegisterApi<IPreviewApi, PreviewApiImpl>(engine->GetPreviewManager(), textureManager, engine->GetImageManager());
     }
 }

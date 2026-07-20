@@ -28,8 +28,9 @@ namespace Syn {
 
             //Rendering
 			_modelComponentView.Draw(vm.GetModelComponentViewModel());
-            _materialOverrideView.Draw(vm.GetMaterialOverrideViewModel());
             _animationView.Draw(vm.GetAnimationViewModel());
+            _pipelineOverrideView.Draw(vm.GetPipelineOverrideViewModel());
+            _materialOverrideView.Draw(vm.GetMaterialOverrideViewModel());
 
             //Lights
             _directionLightView.Draw(vm.GetDirectionLightViewModel());

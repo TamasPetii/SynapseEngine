@@ -11,6 +11,7 @@
 #include "Engine/Manager/ShaderManager.h"
 #include "Engine/Mesh/MeshSourceNames.h"
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
+#include "Engine/Component/Rendering/PipelineOverrideComponent.h"
 #include "Engine/Material/MaterialManager.h"
 #include "Engine/Animation/AnimationManager.h"
 #include "Engine/Component/Rendering/AnimationComponent.h"
@@ -187,6 +188,7 @@ namespace Syn
             EntityID monkeyId = scene.CreateEntity();
             registry.AddComponent<TagComponent>(monkeyId);
             registry.AddComponent<MaterialOverrideComponent>(monkeyId);
+            registry.AddComponent<PipelineOverrideComponent>(monkeyId);
             registry.GetComponent<TagComponent>(monkeyId).name = "Suzanne_Monkey";
             registry.GetComponent<TagComponent>(monkeyId).tag = "Model";
             registry.AddComponent<TransformComponent>(monkeyId);
@@ -199,6 +201,7 @@ namespace Syn
             registry.GetPool<TransformComponent>()->SetCategory(monkeyId, StorageCategory::Static);
             registry.GetPool<ModelComponent>()->SetCategory(monkeyId, StorageCategory::Static);
             registry.GetPool<MaterialOverrideComponent>()->SetCategory(monkeyId, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(monkeyId, StorageCategory::Static);
             registry.GetPool<TagComponent>()->SetCategory(monkeyId, StorageCategory::Static);
 
             hm->AttachChild(rootEnvironment, monkeyId);
@@ -211,6 +214,7 @@ namespace Syn
             EntityID sponzaEntity = scene.CreateEntity();
             registry.AddComponent<TagComponent>(sponzaEntity);
             registry.AddComponent<MaterialOverrideComponent>(sponzaEntity);
+            registry.AddComponent<PipelineOverrideComponent>(sponzaEntity);
             registry.GetComponent<TagComponent>(sponzaEntity).name = "Classic_Sponza";
             registry.GetComponent<TagComponent>(sponzaEntity).tag = "Model";
             registry.AddComponent<TransformComponent>(sponzaEntity);
@@ -228,6 +232,7 @@ namespace Syn
             registry.GetPool<RigidBodyComponent>()->SetCategory(sponzaEntity, StorageCategory::Stream);
             registry.GetPool<MeshColliderComponent>()->SetCategory(sponzaEntity, StorageCategory::Stream);
             registry.GetPool<MaterialOverrideComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
             registry.GetPool<TagComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
 
             hm->AttachChild(rootEnvironment, sponzaEntity);
@@ -244,6 +249,7 @@ namespace Syn
             registry.AddComponent<RigidBodyComponent>(floorEntity);
             registry.AddComponent<BoxColliderComponent>(floorEntity);
             registry.AddComponent<MaterialOverrideComponent>(floorEntity);
+            registry.AddComponent<PipelineOverrideComponent>(floorEntity);
 
             auto& floorTransform = registry.GetComponent<TransformComponent>(floorEntity);
             floorTransform.translation = glm::vec3(0.0f, -1.0f, 0.0f);
@@ -260,6 +266,7 @@ namespace Syn
             registry.GetPool<RigidBodyComponent>()->SetCategory(floorEntity, StorageCategory::Static);
             registry.GetPool<BoxColliderComponent>()->SetCategory(floorEntity, StorageCategory::Static);
             registry.GetPool<MaterialOverrideComponent>()->SetCategory(floorEntity, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(floorEntity, StorageCategory::Static);
             registry.GetPool<TagComponent>()->SetCategory(floorEntity, StorageCategory::Static);
 
             MaterialInfo floorMatInfo{};
@@ -286,6 +293,7 @@ namespace Syn
                 registry.AddComponent<ModelComponent>(characterEntity);
                 registry.AddComponent<AnimationComponent>(characterEntity);
                 registry.AddComponent<MaterialOverrideComponent>(characterEntity);
+                registry.AddComponent<PipelineOverrideComponent>(characterEntity);
 
                 registry.GetComponent<TransformComponent>(characterEntity).translation = glm::vec3((rand() % 400) - 200.0f, 0.0f, (rand() % 400) - 200.0f);
                 registry.GetComponent<TransformComponent>(characterEntity).scale = glm::vec3(5.f);
@@ -296,6 +304,7 @@ namespace Syn
                 animComp.speed = 0.5f + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * 1.5f;
 
                 registry.GetPool<MaterialOverrideComponent>()->SetCategory(characterEntity, StorageCategory::Static);
+                registry.GetPool<PipelineOverrideComponent>()->SetCategory(characterEntity, StorageCategory::Static);
                 registry.GetPool<TagComponent>()->SetCategory(characterEntity, StorageCategory::Static);
                 registry.GetPool<TransformComponent>()->SetCategory(characterEntity, StorageCategory::Static);
                 registry.GetPool<ModelComponent>()->SetCategory(characterEntity, StorageCategory::Static);
@@ -352,6 +361,7 @@ namespace Syn
             registry.AddComponent<TransformComponent>(e);
             registry.AddComponent<ModelComponent>(e);
             registry.AddComponent<MaterialOverrideComponent>(e);
+            registry.AddComponent<PipelineOverrideComponent>(e);
 
             auto& transform = registry.GetComponent<TransformComponent>(e);
             transform.translation = glm::vec3((rand() % 800) - 400.0f, (rand() % 800) + 5, (rand() % 800) - 400.0f);
@@ -360,6 +370,7 @@ namespace Syn
             registry.GetComponent<ModelComponent>(e).modelIndex = geoIds[rand() % geoIds.size()];
 
             registry.GetPool<MaterialOverrideComponent>()->SetCategory(e, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TagComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
@@ -382,12 +393,14 @@ namespace Syn
             registry.AddComponent<RigidBodyComponent>(e);
             registry.AddComponent<BoxColliderComponent>(e);
             registry.AddComponent<MaterialOverrideComponent>(e);
+            registry.AddComponent<PipelineOverrideComponent>(e);
 
             registry.GetComponent<TransformComponent>(e).translation = glm::vec3((rand() % 400) - 200.0f, (rand() % 400) + 5, (rand() % 400) - 200.0f);
             registry.GetComponent<ModelComponent>(e).modelIndex = cubeMeshId;
             registry.GetComponent<RigidBodyComponent>(e).motionType = PhysicsMotionType::Dynamic;
 
             registry.GetPool<MaterialOverrideComponent>()->SetCategory(e, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TagComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
             registry.GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
@@ -408,12 +421,14 @@ namespace Syn
             registry.AddComponent<RigidBodyComponent>(e);
             registry.AddComponent<SphereColliderComponent>(e);
             registry.AddComponent<MaterialOverrideComponent>(e);
+            registry.AddComponent<PipelineOverrideComponent>(e);
 
             registry.GetComponent<TransformComponent>(e).translation = glm::vec3((rand() % 400) - 200.0f, (rand() % 400) + 5, (rand() % 400) - 200.0f);
             registry.GetComponent<ModelComponent>(e).modelIndex = sphereMeshId;
             registry.GetComponent<RigidBodyComponent>(e).motionType = PhysicsMotionType::Dynamic;
 
             registry.GetPool<MaterialOverrideComponent>()->SetCategory(e, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TagComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
             registry.GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
@@ -434,6 +449,7 @@ namespace Syn
             registry.AddComponent<RigidBodyComponent>(e);
             registry.AddComponent<CapsuleColliderComponent>(e);
             registry.AddComponent<MaterialOverrideComponent>(e);
+            registry.AddComponent<PipelineOverrideComponent>(e);
 
             registry.GetComponent<TransformComponent>(e).translation = glm::vec3((rand() % 400) - 200.0f, (rand() % 400) + 5, (rand() % 400) - 200.0f);
             registry.GetComponent<TransformComponent>(e).rotation = glm::vec3(rand() % 360, rand() % 360, rand() % 360);
@@ -442,6 +458,7 @@ namespace Syn
             registry.GetComponent<RigidBodyComponent>(e).motionType = PhysicsMotionType::Dynamic;
 
             registry.GetPool<MaterialOverrideComponent>()->SetCategory(e, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TagComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
             registry.GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);

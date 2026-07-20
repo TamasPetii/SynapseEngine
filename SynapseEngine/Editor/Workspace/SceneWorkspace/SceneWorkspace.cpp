@@ -63,7 +63,8 @@ namespace Syn {
                 _context->GetApi<IRigidBodyApi>(),
                 _context->GetApi<IModelComponentApi>(),
                 _context->GetApi<IAnimationApi>(),
-                _context->GetApi<IMaterialOverrideApi>()
+                _context->GetApi<IMaterialOverrideApi>(),
+                _context->GetApi<IPipelineOverrideApi>()
             }
         );
 

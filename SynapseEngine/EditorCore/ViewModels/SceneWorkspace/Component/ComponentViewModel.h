@@ -20,6 +20,7 @@
 #include "Rendering/Model/ModelComponentViewModel.h"
 #include "Rendering/Animation/AnimationViewModel.h"
 #include "Rendering/MaterialOverride/MaterialOverrideViewModel.h"
+#include "Rendering/PipelineOverride/PipelineOverrideViewModel.h"
 
 #include "EditorCore/Api/ISelectionApi.h"
 #include "EditorCore/Api/ITagApi.h"
@@ -36,6 +37,7 @@
 #include "EditorCore/Api/IModelComponentApi.h"
 #include "EditorCore/Api/IAnimationApi.h"
 #include "EditorCore/Api/IMaterialOverrideApi.h"
+#include "EditorCore/Api/IPipelineOverrideApi.h"
 
 namespace Syn {
     class ComponentViewModel : public IViewModel<ComponentState, ComponentIntent> {
@@ -57,7 +59,8 @@ namespace Syn {
             IRigidBodyApi* rigidBodyApi,
             IModelComponentApi* modelComponentApi,
             IAnimationApi* animationApi,
-            IMaterialOverrideApi* materialOverrideApi
+            IMaterialOverrideApi* materialOverrideApi,
+            IPipelineOverrideApi* pipelineOverrideApi
             );
 
         ~ComponentViewModel() override = default;
@@ -81,6 +84,7 @@ namespace Syn {
 		ModelComponentViewModel& GetModelComponentViewModel() { return _modelComponentViewModel; }
 		AnimationViewModel& GetAnimationViewModel() { return _animationViewModel; }
         MaterialOverrideViewModel& GetMaterialOverrideViewModel() { return _materialOverrideViewModel; }
+        PipelineOverrideViewModel& GetPipelineOverrideViewModel() { return _pipelineOverrideViewModel; }
     private:
 		ISelectionApi* _selectionApi = nullptr;
         ComponentState _state;
@@ -102,5 +106,6 @@ namespace Syn {
 		ModelComponentViewModel _modelComponentViewModel;
 		AnimationViewModel _animationViewModel;
         MaterialOverrideViewModel _materialOverrideViewModel;
+        PipelineOverrideViewModel _pipelineOverrideViewModel;
     };
 }
