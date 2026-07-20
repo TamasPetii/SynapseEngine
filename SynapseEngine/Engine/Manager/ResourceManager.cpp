@@ -31,6 +31,7 @@
 #include "Engine/Animation/Converter/DefaultGpuAnimationConverter.h"
 #include "Engine/Animation/Converter/DefaultAnimationCooker.h"
 #include "Engine/Animation/Loader/AssimpAnimationLoader.h"
+#include "Engine/Animation/Loader/TinyGltfAnimationLoader.h"
 #include "Engine/Animation/Processor/Geometry/AnimationBakeProcessor.h"
 #include "Engine/Animation/Processor/Geometry/AnimationColliderProcessor.h"
 #include "Engine/Animation/Uploader/DefaultGpuAnimationUploader.h"
@@ -211,6 +212,7 @@ namespace Syn {
 		);
 
 		_animationBuilder->RegisterLoader(std::make_shared<AssimpAnimationLoader>(), 1);
+		_animationBuilder->RegisterLoader(std::make_shared<TinyGltfAnimationLoader>(), 0);
 		_animationBuilder->RegisterProcessor(std::make_unique<AnimationBakeProcessor>());
 		_animationBuilder->RegisterProcessor(std::make_unique<AnimationColliderProcessor>());
 

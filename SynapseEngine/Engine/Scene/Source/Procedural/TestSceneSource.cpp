@@ -272,15 +272,8 @@ namespace Syn
 
         if (charCount > 0)
         {
-            /*
-            uint32_t mutantId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Monster/Mutant/Mutant.dae"));
-
-            std::vector<uint32_t> animationIds;
-            animationIds.push_back(animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "Monster/Breakdance 1990/Breakdance 1990.dae"), mutantId));
-            animationIds.push_back(animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "Monster/Breakdance Ending 1/Breakdance Ending 1.dae"), mutantId));
-            animationIds.push_back(animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "Monster/Dancing/Dancing.dae"), mutantId));
-            animationIds.push_back(animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "Monster/Hip Hop Dancing/Hip Hop Dancing.dae"), mutantId));
-            animationIds.push_back(animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "Monster/Hip Hop Dancing_2/Hip Hop Dancing.dae"), mutantId));
+            uint32_t mutantId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "CesiumMan/glTF/CesiumMan.gltf"));
+            uint32_t animationId = animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "CesiumMan/glTF/CesiumMan.gltf"), mutantId);
 
             // Animated Characters
             for (int i = 0; i < charCount; i++)
@@ -299,7 +292,7 @@ namespace Syn
                 registry.GetComponent<ModelComponent>(characterEntity).modelIndex = mutantId;
 
                 auto& animComp = registry.GetComponent<AnimationComponent>(characterEntity);
-                animComp.animationIndex = animationIds[rand() % animationIds.size()];
+                animComp.animationIndex = animationId;
                 animComp.speed = 0.5f + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * 1.5f;
 
                 registry.GetPool<MaterialOverrideComponent>()->SetCategory(characterEntity, StorageCategory::Static);
@@ -310,7 +303,6 @@ namespace Syn
 
                 hm->AttachChild(rootCharacters, characterEntity);
             }
-            */
         }
 
         std::vector<uint32_t> sharedMaterialIds;
