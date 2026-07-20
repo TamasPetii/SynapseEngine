@@ -50,6 +50,7 @@ namespace Syn
             ar.Property("metallicRoughness", m.metallicRoughness);
             ar.Property("emissive", m.emissive);
             ar.Property("ambientOcclusion", m.ambientOcclusion);
+            ar.Property("opacity", m.opacity);
 
             ar.Property("color", m.color);
             ar.Property("emissiveFactor", m.emissiveFactor);
@@ -60,6 +61,7 @@ namespace Syn
             ar.Property("aoStrength", m.aoStrength);
             ar.Property("doubleSided", m.doubleSided);
             ar.Property("isTransparent", m.isTransparent);
+            ar.Property("isAlphaTested", m.isAlphaTested);
         }
     };
 }

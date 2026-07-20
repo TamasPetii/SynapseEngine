@@ -13,10 +13,10 @@
 #include "../../../Includes/Common/Material.glsl"
 #include "../../../Includes/Common/DirectionLight.glsl"
 
-#include "../../../Includes/PushConstants/DirectionLightShadowTraditionalMeshletPassPC.glsl"
-
 layout(location = 0) out vec2 outUV;
 layout(location = 1) out flat uint outMaterialId;
+
+#include "../../../Includes/PushConstants/DirectionLightShadowTraditionalMeshletPassPC.glsl"
 
 layout(push_constant) uniform PushConstants {
    DirectionLightShadowTraditionalMeshletPassPC pc;
@@ -127,14 +127,14 @@ void main() {
     gl_Position = clipPos;
 
     // 8. Resolve Material Index for the current sub-mesh
+    #ifdef ENABLE_ALPHA_TEST
     uint flatMaterialIndex = comp.materialOffset + meshIndex;
     uint resolvedMaterialId = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, flatMaterialIndex);
-    outMaterialId = resolvedMaterialId;
-
-    #ifdef ENABLE_ALPHA_TEST
     GpuVertexAttributes attr = GET_VERTEX_ATTR(addrs.vertexAttributes, realVertexIndex);
+    outMaterialId = resolvedMaterialId;
     outUV = vec2(attr.uv_x, 1.0 - attr.uv_y);
     #else
+    outMaterialId = 0;
     outUV = vec2(0.0);
     #endif
 }

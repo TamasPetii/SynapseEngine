@@ -14,6 +14,9 @@
 #include "../../../Includes/Common/Material.glsl"
 #include "../../../Includes/Common/PointLight.glsl"
 
+layout(location = 0) out vec2 outUV;
+layout(location = 1) out flat uint outMaterialId;
+
 #include "../../../Includes/PushConstants/PointLightShadowTraditionalMeshletPassPC.glsl"
 
 layout(push_constant) uniform PushConstants {
@@ -55,6 +58,7 @@ void main() {
 
     // 6. Evaluate Static Hierarchy (Default pose)
     uint nodeIndex = UNPACK_UINT16_X(v.packedIndex);
+    uint meshIndex = UNPACK_UINT16_Y(v.packedIndex);
     GpuNodeTransform staticNodeTransform = GET_NODE_TRANSFORM(addrs.nodeTransforms, nodeIndex);
     mat4 finalModelMat = staticNodeTransform.globalTransform;
 
@@ -115,4 +119,18 @@ void main() {
     // Atlas Positioning
     clipPos.xy = clipPos.xy * scale + offset * clipPos.w;
     gl_Position = clipPos;
+
+    #ifdef ENABLE_ALPHA_TEST
+
+    uint flatMaterialIndex = comp.materialOffset + meshIndex;
+    uint resolvedMaterialId = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, flatMaterialIndex);
+    outMaterialId = resolvedMaterialId;
+
+    GpuVertexAttributes attr = GET_VERTEX_ATTR(addrs.vertexAttributes, realVertexIndex);
+    outUV = vec2(attr.uv_x, 1.0 - attr.uv_y);
+
+    #else
+    outMaterialId = 0;
+    outUV = vec2(0.0);
+    #endif
 }

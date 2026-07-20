@@ -184,6 +184,7 @@ struct FrameGlobalContext {
     uint staticChunkCount;
     uint modelCount;
     uint directionLightCount;
+    uint activeDirectionLightCount;
     uint pointLightCount;
     uint spotLightCount;
 

@@ -110,15 +110,15 @@ void main() {
 
         #ifdef ENABLE_ALPHA_TEST
         GpuVertexAttributes attr = GET_VERTEX_ATTR(addrs.vertexAttributes, globalVtxIdx);
-        outUV[i] = vec2(attr.uv_x, 1.0 - attr.uv_y);
-        #else
-        outUV[i] = vec2(0.0);
-        #endif
-
         uint meshIndex = UNPACK_UINT16_Y(v.packedIndex);
         uint materialOffset = GET_MODEL_COMP(ctx.modelBufferAddr, payload.modelDenseIndex).materialOffset;
         uint materialId = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, materialOffset + meshIndex);
         outMaterialId[i] = materialId;
+        outUV[i] = vec2(attr.uv_x, 1.0 - attr.uv_y);
+        #else
+        outMaterialId[i] = 0;
+        outUV[i] = vec2(0.0);
+        #endif
    }
 
     // 6. Process primitive indices

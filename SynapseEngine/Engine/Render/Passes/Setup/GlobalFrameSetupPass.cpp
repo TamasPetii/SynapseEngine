@@ -257,6 +257,7 @@ namespace Syn {
         ctx.directionLightCount = static_cast<uint32_t>(directionLightPool->Size());
         ctx.pointLightCount = static_cast<uint32_t>(pointLightPool->Size());
         ctx.spotLightCount = static_cast<uint32_t>(spotLightPool->Size());
+        ctx.activeDirectionLightCount = drawData->DirectionLights.cmdTemplate.instanceCount;
 
         ctx.enableGeometryBvhCulling = !(settings->culling.geometrySpatialAcceleration == SpatialAccelerationType::None) ? 1 : 0;
         ctx.enableDirectionLightBvhCulling = !(settings->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::None) ? 1 : 0;

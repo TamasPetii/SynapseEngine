@@ -24,6 +24,7 @@ namespace Syn
             ar.Property("aoStrength", mat.aoStrength);
             ar.Property("doubleSided", mat.doubleSided);
             ar.Property("isTransparent", mat.isTransparent);
+            ar.Property("isAlphaTested", mat.isAlphaTested);
 
             ar.Property("albedoTexture", mat.albedoTexture);
             ar.Property("normalTexture", mat.normalTexture);
@@ -32,6 +33,7 @@ namespace Syn
             ar.Property("metallicRoughnessTexture", mat.metallicRoughnessTexture);
             ar.Property("emissiveTexture", mat.emissiveTexture);
             ar.Property("ambientOcclusionTexture", mat.ambientOcclusionTexture);
+            ar.Property("opacityTexture", mat.opacityTexture);
 
             ar.Property("albedoSampler", mat.albedoSampler);
             ar.Property("normalSampler", mat.normalSampler);
@@ -40,6 +42,7 @@ namespace Syn
             ar.Property("metallicRoughnessSampler", mat.metallicRoughnessSampler);
             ar.Property("emissiveSampler", mat.emissiveSampler);
             ar.Property("ambientOcclusionSampler", mat.ambientOcclusionSampler);
+            ar.Property("opacitySampler", mat.opacitySampler);
         }
     };
 }

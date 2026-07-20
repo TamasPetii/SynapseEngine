@@ -109,7 +109,7 @@ void main() {
     // 7. Simulate Lighting
     vec3 totalRadiance = vec3(0.0);
 
-    for(uint i = 0; i < ctx.directionLightCount && ctx.enableForwardPlusDirectionalLights == 1; ++i) {
+    for(uint i = 0; i < ctx.activeDirectionLightCount && ctx.enableForwardPlusDirectionalLights == 1; ++i) {
         uint entityId = GET_DIRECTION_VISIBLE_LIGHT(ctx.directionLightVisibleIndexBufferAddr, i); 
         uint lightDenseIndex = GET_SPARSE_INDEX(ctx.directionLightSparseMapBufferAddr, entityId);   
         

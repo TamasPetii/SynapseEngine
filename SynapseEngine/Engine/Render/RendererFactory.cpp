@@ -167,11 +167,15 @@
 
 #include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowInitPass.h"
 #include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowTraditionalOpaquePass.h"
+#include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowTraditionalOpaqueAlphaTestedPass.h"
 #include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowMeshletOpaquePass.h"
+#include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowMeshletOpaqueAlphaTestedPass.h"
 
 #include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowInitPass.h"
 #include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowTraditionalOpaquePass.h"
+#include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowTraditionalOpaqueAlphaTestedPass.h"
 #include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowMeshletOpaquePass.h"
+#include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowMeshletOpaqueAlphaTestedPass.h"
 
 #include "Engine/Render/Passes/PostProcess/Ssao/SsaoInitPass.h"
 #include "Engine/Render/Passes/PostProcess/Ssao/SsaoPass.h"
@@ -259,10 +263,10 @@ namespace Syn
         pipeline->AddPass(std::make_unique<DirectionLightShadowInitPass>());
         pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
-        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
-        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
         pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
+        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
         pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
         pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
 
@@ -272,6 +276,10 @@ namespace Syn
         pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
         pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
+        pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
+        pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
         
         //Point Light Shadow Passes
         pipeline->AddPass(std::make_unique<PointLightShadowInitPass>());
@@ -279,15 +287,19 @@ namespace Syn
         pipeline->AddPass(std::make_unique<PointLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
         pipeline->AddPass(std::make_unique<PointLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<PointLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
+        pipeline->AddPass(std::make_unique<PointLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<PointLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
+        pipeline->AddPass(std::make_unique<PointLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<PointLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
 
 		//Forward+ Depth Opaque Prepasses
 		pipeline->AddPass(std::make_unique<OpaqueDepthTransitionPrepass>());
 		pipeline->AddPass(std::make_unique<MeshletOpaqueDepthPrepass>(MaterialRenderType::Opaque1Sided));
 		pipeline->AddPass(std::make_unique<MeshletOpaqueDepthPrepass>(MaterialRenderType::Opaque2Sided));
-        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedOpaque1Sided));
-        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedOpaque2Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueDepthPrepass>(MaterialRenderType::Opaque1Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueDepthPrepass>(MaterialRenderType::Opaque2Sided));
+        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedOpaque2Sided));
         pipeline->AddPass(std::make_unique<TraditionalOpaqueAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedOpaque1Sided));
         pipeline->AddPass(std::make_unique<TraditionalOpaqueAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedOpaque2Sided));
 
@@ -295,10 +307,10 @@ namespace Syn
 		pipeline->AddPass(std::make_unique<OpaqueDeferredTransitionPass>());
 		pipeline->AddPass(std::make_unique<MeshletOpaqueDeferredPass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<MeshletOpaqueDeferredPass>(MaterialRenderType::Opaque2Sided));
-        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedDeferredPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
-        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedDeferredPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueDeferredPass>(MaterialRenderType::Opaque1Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueDeferredPass>(MaterialRenderType::Opaque2Sided));
+        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedDeferredPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedDeferredPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
         pipeline->AddPass(std::make_unique<TraditionalOpaqueAlphaTestedDeferredPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
         pipeline->AddPass(std::make_unique<TraditionalOpaqueAlphaTestedDeferredPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
 
@@ -309,10 +321,10 @@ namespace Syn
 		pipeline->AddPass(std::make_unique<TransparentDepthTransitionPrepass>());
         pipeline->AddPass(std::make_unique<MeshletTransparentDepthPrepass>(MaterialRenderType::Transparent1Sided));
         pipeline->AddPass(std::make_unique<MeshletTransparentDepthPrepass>(MaterialRenderType::Transparent2Sided));
-        pipeline->AddPass(std::make_unique<MeshletTransparentAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedTransparent1Sided));
-        pipeline->AddPass(std::make_unique<MeshletTransparentAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedTransparent2Sided));
         pipeline->AddPass(std::make_unique<TraditionalTransparentDepthPrepass>(MaterialRenderType::Transparent1Sided));
         pipeline->AddPass(std::make_unique<TraditionalTransparentDepthPrepass>(MaterialRenderType::Transparent2Sided));
+        pipeline->AddPass(std::make_unique<MeshletTransparentAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedTransparent1Sided));
+        pipeline->AddPass(std::make_unique<MeshletTransparentAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedTransparent2Sided));
         pipeline->AddPass(std::make_unique<TraditionalTransparentAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedTransparent1Sided));
         pipeline->AddPass(std::make_unique<TraditionalTransparentAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedTransparent2Sided));
 
@@ -320,14 +332,12 @@ namespace Syn
         pipeline->AddPass(std::make_unique<GeometryHizLinearPreparePass>());
         pipeline->AddPass(std::make_unique<GeometryHizDownsamplePass>());
 
-        /*
         pipeline->AddPass(std::make_unique<DirectionLightShadowHizCopyPass>());
         pipeline->AddPass(std::make_unique<DirectionLightShadowHizDownsamplePass>());
         pipeline->AddPass(std::make_unique<SpotLightShadowHizCopyPass>());
         pipeline->AddPass(std::make_unique<SpotLightShadowHizDownsamplePass>());
         pipeline->AddPass(std::make_unique<PointLightShadowHizCopyPass>());
         pipeline->AddPass(std::make_unique<PointLightShadowHizDownsamplePass>()); 
-        */
 
         pipeline->AddPass(std::make_unique<ShadowAtlasTransitionPass>());
 
@@ -359,10 +369,10 @@ namespace Syn
         pipeline->AddPass(std::make_unique<OpaqueForwardTransitionPass>());
 		pipeline->AddPass(std::make_unique<MeshletOpaqueForwardPass>(MaterialRenderType::Opaque1Sided));
 		pipeline->AddPass(std::make_unique<MeshletOpaqueForwardPass>(MaterialRenderType::Opaque2Sided));
-        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedForwardPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
-        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedForwardPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueForwardPass>(MaterialRenderType::Opaque1Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueForwardPass>(MaterialRenderType::Opaque2Sided));
+        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedForwardPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedForwardPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
         pipeline->AddPass(std::make_unique<TraditionalOpaqueAlphaTestedForwardPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
         pipeline->AddPass(std::make_unique<TraditionalOpaqueAlphaTestedForwardPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
 
@@ -402,10 +412,10 @@ namespace Syn
 		pipeline->AddPass(std::make_unique<TransparentForwardTransitionPass>());
         pipeline->AddPass(std::make_unique<MeshletTransparentForwardPass>(MaterialRenderType::Transparent1Sided));
 		pipeline->AddPass(std::make_unique<MeshletTransparentForwardPass>(MaterialRenderType::Transparent2Sided));
-        pipeline->AddPass(std::make_unique<MeshletTransparentForwardPass>(MaterialRenderType::AlphaTestedTransparent1Sided));
-        pipeline->AddPass(std::make_unique<MeshletTransparentForwardPass>(MaterialRenderType::AlphaTestedTransparent2Sided));
 		pipeline->AddPass(std::make_unique<TraditionalTransparentForwardPass>(MaterialRenderType::Transparent1Sided));
 		pipeline->AddPass(std::make_unique<TraditionalTransparentForwardPass>(MaterialRenderType::Transparent2Sided));
+        pipeline->AddPass(std::make_unique<MeshletTransparentForwardPass>(MaterialRenderType::AlphaTestedTransparent1Sided));
+        pipeline->AddPass(std::make_unique<MeshletTransparentForwardPass>(MaterialRenderType::AlphaTestedTransparent2Sided));
         pipeline->AddPass(std::make_unique<TraditionalTransparentForwardPass>(MaterialRenderType::AlphaTestedTransparent1Sided));
         pipeline->AddPass(std::make_unique<TraditionalTransparentForwardPass>(MaterialRenderType::AlphaTestedTransparent2Sided));
 
