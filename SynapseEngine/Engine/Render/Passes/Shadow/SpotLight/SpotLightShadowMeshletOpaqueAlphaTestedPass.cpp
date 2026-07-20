@@ -57,7 +57,7 @@ namespace Syn {
             ShaderNames::SpotLightShadowFrag
             }, config);
 
-        VkCullModeFlags cullMode = (_renderType == MaterialRenderType::Opaque2Sided) ? VK_CULL_MODE_NONE : VK_CULL_MODE_BACK_BIT;
+        VkCullModeFlags cullMode = (_renderType == MaterialRenderType::AlphaTestedOpaque2Sided) ? VK_CULL_MODE_NONE : VK_CULL_MODE_BACK_BIT;
 
         _graphicsState = {
             .raster = {

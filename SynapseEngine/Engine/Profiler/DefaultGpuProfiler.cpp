@@ -12,14 +12,14 @@ namespace Syn {
         _queryCounters.resize(framesInFlight, 0);
 
         for (uint32_t i = 0; i < framesInFlight; ++i) {
-            _pools[i] = std::make_unique<Vk::TimestampQueryPool>(256);
+            _pools[i] = std::make_unique<Vk::TimestampQueryPool>(MAX_QUERIES_PER_FRAME);
         }
     }
 
     void DefaultGpuProfiler::BeginFrame(VkCommandBuffer cmd, uint32_t frameIndex) {
         _queryCounters[frameIndex] = 0;
         _activeMeasurements[frameIndex].clear();
-        _pools[frameIndex]->Reset(cmd, 0, 256);
+        _pools[frameIndex]->Reset(cmd, 0, MAX_QUERIES_PER_FRAME);
     }
 
     uint32_t DefaultGpuProfiler::StartPass(VkCommandBuffer cmd, uint32_t frameIndex, const std::string& groupName, const std::string& name) {

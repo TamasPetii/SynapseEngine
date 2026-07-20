@@ -182,7 +182,7 @@ namespace Syn
 
         if (spawnMonkey)
         {
-            uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Suzanne/glTF/Suzanne.gltf"));
+            uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "../External/glTF-Sample-Assets/Models/Suzanne/glTF/Suzanne.gltf"));
 
             EntityID monkeyId = scene.CreateEntity();
             registry.AddComponent<TagComponent>(monkeyId);

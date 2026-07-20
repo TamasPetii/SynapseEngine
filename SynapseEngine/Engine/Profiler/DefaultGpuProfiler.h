@@ -31,6 +31,8 @@ namespace Syn {
         void ResolveFrame(uint32_t frameIndex) override;
         const std::vector<GroupTiming>& GetTimings(uint32_t frameIndex) const override;
     private:
+        static constexpr uint32_t MAX_QUERIES_PER_FRAME = 1024;
+
         float _timestampPeriod = 1.0f;
         uint32_t _framesInFlight;
         std::vector<uint32_t> _queryCounters;

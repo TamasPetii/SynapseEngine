@@ -30,7 +30,7 @@ namespace Syn {
         void ResolveFrame(uint32_t frameIndex) override;
         const std::vector<RenderPassStats>& GetStats(uint32_t frameIndex) const override;
     private:
-        static constexpr uint32_t MAX_QUERIES_PER_FRAME = 512;
+        static constexpr uint32_t MAX_QUERIES_PER_FRAME = 1024;
 
         uint32_t _framesInFlight;
         std::vector<uint32_t> _queryCounters;
