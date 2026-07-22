@@ -55,5 +55,11 @@ namespace Syn
 
         outCpuData.indices = gpuData.indexedData.indices;
         outCpuData.meshNodeDescriptors = gpuData.meshNodeDescriptors;
+
+        outCpuData.nodeTransforms.reserve(gpuData.nodeTransforms.size());
+        for (const auto& node : gpuData.nodeTransforms)
+        {
+            outCpuData.nodeTransforms.push_back(node.transform);
+        }
     }
 }

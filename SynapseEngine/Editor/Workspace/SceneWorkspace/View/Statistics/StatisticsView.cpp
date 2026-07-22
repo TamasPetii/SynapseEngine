@@ -67,7 +67,7 @@ namespace Syn
     void StatisticsView::RenderOverviewCard(const StatisticsState& state) {
         ImGui::Spacing();
 
-        float meshletDrawPercent = state.cpuStats.totalMaxMeshlets > 0 ? (static_cast<float>(state.totalMSInvocations) / state.cpuStats.totalMaxMeshlets) : 0.0f;
+        float meshletDrawPercent = state.cpuStats.totalMaxMeshlets > 0 ? ((static_cast<float>(state.totalMSInvocations) / 32.0f) / state.cpuStats.totalMaxMeshlets) : 0.0f;
         float vertexEfficiency = state.cpuStats.maxPossibleVertices > 0 ? (static_cast<float>(state.totalVSInvocations) / state.cpuStats.maxPossibleVertices) : 0.0f;
 
         ImGui::PushStyleColor(ImGuiCol_PlotHistogram, ImVec4(0.2f, 0.7f, 0.3f, 1.0f));

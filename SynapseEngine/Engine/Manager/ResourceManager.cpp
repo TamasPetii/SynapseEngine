@@ -39,6 +39,7 @@
 #include "Engine/Mesh/Processor/CpuModelProcessor/CpuModelProcessorPipeline.h"
 #include "Engine/Mesh/Processor/CpuModelProcessor/BatchedIndicesProcessor.h"
 #include "Engine/Mesh/Processor/CpuModelProcessor/VertexWeldingProcessor.h"
+#include "Engine/Mesh/Processor/CpuModelProcessor/VertexTransformProcessor.h"
 #include "Engine/Mesh/Processor/CpuModelProcessor/MemoryCleanupProcessor.h"
 
 #include "Engine/Mesh/MeshSourceNames.h"
@@ -161,6 +162,7 @@ namespace Syn {
 		_staticMeshBuilder->RegisterMeshProcessor(std::make_unique<ColliderProcessor>());
 
 		_staticMeshBuilder->RegisterCpuModelProcessor(std::make_unique<BatchedIndicesProcessor>());
+		_staticMeshBuilder->RegisterCpuModelProcessor(std::make_unique<VertexTransformProcessor>());
 		_staticMeshBuilder->RegisterCpuModelProcessor(std::make_unique<VertexWeldingProcessor>());
 		_staticMeshBuilder->RegisterCpuModelProcessor(std::make_unique<MemoryCleanupProcessor>());
 

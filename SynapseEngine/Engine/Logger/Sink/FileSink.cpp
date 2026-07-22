@@ -25,7 +25,7 @@ namespace Syn
         std::scoped_lock lock(_mtx);
 
         if (_file.is_open()) {
-            _file << msg.ToString();
+            _file << msg.ToString() << "\n";
             _file.flush();
         }
     }

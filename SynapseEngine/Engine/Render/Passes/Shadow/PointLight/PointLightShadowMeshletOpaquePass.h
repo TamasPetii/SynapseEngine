@@ -9,7 +9,7 @@ namespace Syn {
         PointLightShadowMeshletOpaquePass(MaterialRenderType renderType);
 
         std::string GetName() const override { return _passName; }
-        std::string GetGroup() const override { return PassGroupNames::ShadowPasses; }
+        std::string GetGroup() const override { return PassGroupNames::PointLightShadowPasses; }
 
         void Initialize() override;
         bool ShouldCollectStatistics() const override { return true; }

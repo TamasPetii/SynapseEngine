@@ -30,7 +30,7 @@ namespace Syn
         std::vector<uint32_t> indices;
 
         //Todo: Optional
-
+        std::vector<glm::mat4> nodeTransforms;
         std::vector<uint32_t> meshletVertexIndices;
 		std::vector<uint8_t> meshletTriangleIndices;     
         std::vector<GpuMeshletDescriptor> meshletDescriptors;

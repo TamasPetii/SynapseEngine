@@ -6,7 +6,7 @@ namespace Syn {
     class SYN_API SpotLightShadowInitPass : public GraphicsPass {
     public:
         std::string GetName() const override { return "SpotLightShadowInitPass"; }
-        std::string GetGroup() const override { return PassGroupNames::ShadowPasses; }
+        std::string GetGroup() const override { return PassGroupNames::SpotLightShadowPasses; }
     protected:
         void PrepareFrame(const RenderContext& context) override;
     };
