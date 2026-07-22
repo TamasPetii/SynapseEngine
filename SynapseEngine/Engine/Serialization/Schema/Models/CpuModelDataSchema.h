@@ -32,14 +32,14 @@ namespace Syn
 
             if (ar.IsBinary()) 
             {
-                BlitVector<glm::mat4> nodeTransform{ m.nodeTransforms };
-                ar.Property("nodeTransforms", nodeTransform);
-
                 BlitVector<glm::vec3> verts{ m.vertices };
                 ar.Property("vertices", verts);
 
                 BlitVector<uint32_t> inds{ m.indices };
                 ar.Property("indices", inds);
+
+                BlitVector<glm::mat4> nodeTransform{ m.nodeTransforms };
+                ar.Property("nodeTransforms", nodeTransform);
 
                 BlitVector<glm::vec3> physVerts{ m.physicsVertices };
                 ar.Property("physicsVertices", physVerts);
@@ -95,8 +95,8 @@ namespace Syn
             else {
                 ar.Property("vertices", m.vertices);
                 ar.Property("indices", m.indices);
-                ar.Property("physicsVertices", m.physicsVertices);
                 ar.Property("nodeTransforms", m.nodeTransforms);
+                ar.Property("physicsVertices", m.physicsVertices);
 
                 ar.Property("meshColliders", m.meshColliders);
                 ar.Property("meshDescriptors", m.meshDescriptors);

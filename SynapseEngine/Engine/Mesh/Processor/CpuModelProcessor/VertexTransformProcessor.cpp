@@ -16,6 +16,10 @@ namespace Syn
     {
         if (cpuData.vertices.empty() || cpuData.nodeTransforms.empty()) return;
 
+        if (cpuData.worldPositions.size() != cpuData.vertices.size()) {
+            cpuData.worldPositions.resize(cpuData.vertices.size());
+        }
+
         std::vector<VertexTransformJob> jobs;
         jobs.reserve(cpuData.meshDescriptors.size() / 4);
 
@@ -48,8 +52,8 @@ namespace Syn
             [&cpuData](const VertexTransformJob& job) {
                 for (uint32_t i = 0; i < job.vertexCount; ++i)
                 {
-                    glm::vec3& pos = cpuData.vertices[job.vertexOffset + i];
-                    pos = glm::vec3(job.transform * glm::vec4(pos, 1.0f));
+                    const glm::vec3& localPos = cpuData.vertices[job.vertexOffset + i];
+                    cpuData.worldPositions[job.vertexOffset + i] = glm::vec3(job.transform * glm::vec4(localPos, 1.0f));
                 }
             },
             partitioner

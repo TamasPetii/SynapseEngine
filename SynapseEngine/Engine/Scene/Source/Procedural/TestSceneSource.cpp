@@ -184,6 +184,7 @@ namespace Syn
 
         if (spawnMonkey)
         {
+
             uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Suzanne/glTF/Suzanne.gltf"));
             //uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString("C:/Users/User/Desktop/Models/Dragon/dragon.obj"));
         
@@ -281,8 +282,11 @@ namespace Syn
 
         if (charCount > 0)
         {
-            uint32_t mutantId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "CesiumMan/glTF/CesiumMan.gltf"));
-            uint32_t animationId = animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "CesiumMan/glTF/CesiumMan.gltf"), mutantId);
+            //uint32_t mutantId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "CesiumMan/glTF/CesiumMan.gltf"));
+            //uint32_t animationId = animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "CesiumMan/glTF/CesiumMan.gltf"), mutantId);
+
+            uint32_t mutantId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "BrainStem/glTF/BrainStem.gltf"));
+            uint32_t animationId = animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "BrainStem/glTF/BrainStem.gltf"), mutantId);
 
             // Animated Characters
             for (int i = 0; i < charCount; i++)

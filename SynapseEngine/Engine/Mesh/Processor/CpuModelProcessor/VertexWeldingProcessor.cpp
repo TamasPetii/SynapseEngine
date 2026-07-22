@@ -33,7 +33,7 @@ namespace Syn
 
             for (uint32_t originalIndex : cpuData.batchedIndicesPerLod[lod])
             {
-                const glm::vec3& position = cpuData.vertices[originalIndex];
+                const glm::vec3& position = cpuData.worldPositions[originalIndex];
 
                 auto it = uniqueVertices.find(position);
                 uint32_t newPhysicsVertexIndex;
