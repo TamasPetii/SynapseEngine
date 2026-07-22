@@ -9,6 +9,8 @@
 #include <Jolt/Physics/Body/BodyCreationSettings.h>
 #include <Jolt/Core/JobSystemWithBarrier.h>
 #include <Jolt/Physics/Collision/Shape/ScaledShape.h>
+#include <Jolt/Renderer/DebugRenderer.h>
+#include "JoltLineExtractor.h"
 #include "JobSystemTaskflow.h"
 #include "Engine/ServiceLocator.h"
 #include <memory>
@@ -298,5 +300,23 @@ namespace Syn
         JPH::EActivation activation = (motionType == PhysicsMotionType::Static) ? JPH::EActivation::DontActivate : JPH::EActivation::Activate;
 
         physicsSystem->GetBodyInterface().SetMotionType(JPH::BodyID(bodyId), jMotion, activation);
+    }
+
+    void JoltPhysicsEngine::GetDebugDrawData(PhysicsDrawData& outData)
+    {
+        if (!physicsSystem) return;
+
+        JoltLineExtractor extractor;
+
+        JPH::BodyManager::DrawSettings settings;
+        settings.mDrawShape = true;
+        settings.mDrawShapeWireframe = true;
+        settings.mDrawBoundingBox = false;
+        settings.mDrawCenterOfMassTransform = false;
+
+        physicsSystem->DrawBodies(settings, &extractor);
+        physicsSystem->DrawConstraints(&extractor);
+
+        extractor.BuildDrawData(outData);
     }
 }

@@ -6,11 +6,15 @@
 
 #include "Engine/System/Core/TransformSystem.h"
 #include "Engine/System/Physics/RigidBodySystem.h"
+#include "Engine/System/Physics/PhysicsDebugSystem.h"
 
 namespace Syn
 {
     std::vector<TypeID> PhysicsSystem::GetReadDependencies() const {
-        return { TypeInfo<RigidBodySystem>::ID };
+        return { 
+            TypeInfo<PhysicsDebugSystem>::ID,
+            TypeInfo<RigidBodySystem>::ID
+        };
     }
 
     std::vector<TypeID> PhysicsSystem::GetWriteDependencies() const {

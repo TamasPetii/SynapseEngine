@@ -3,6 +3,7 @@
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Mesh/MeshSourceNames.h"
 #include "Engine/Material/MaterialRenderType.h"
+#include "Engine/Physics/PhysicsTypes.h"
 
 namespace Syn
 {
@@ -23,21 +24,6 @@ namespace Syn
         modelSphereCmdTemplate.firstVertex = sphere->cpuData.baseDrawCommands[0].traditionalCmd.firstVertex;
         modelSphereCmdTemplate.firstInstance = 0;
 
-        boxColliderCmdTemplate.vertexCount = cube->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;
-        boxColliderCmdTemplate.instanceCount = 0;
-        boxColliderCmdTemplate.firstVertex = cube->cpuData.baseDrawCommands[0].traditionalCmd.firstVertex;
-        boxColliderCmdTemplate.firstInstance = 0;
-
-        sphereColliderCmdTemplate.vertexCount = sphere->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;
-        sphereColliderCmdTemplate.instanceCount = 0;
-        sphereColliderCmdTemplate.firstVertex = sphere->cpuData.baseDrawCommands[0].traditionalCmd.firstVertex;
-        sphereColliderCmdTemplate.firstInstance = 0;
-
-        capsuleColliderCmdTemplate.vertexCount = capsule->cpuData.baseDrawCommands[0].traditionalCmd.vertexCount;
-        capsuleColliderCmdTemplate.instanceCount = 0;
-        capsuleColliderCmdTemplate.firstVertex = capsule->cpuData.baseDrawCommands[0].traditionalCmd.firstVertex;
-        capsuleColliderCmdTemplate.firstInstance = 0;
-
         modelAabbCmds.data.assign(1, modelAabbCmdTemplate);
         modelSphereCmds.data.assign(1, modelSphereCmdTemplate);
 
@@ -50,20 +36,17 @@ namespace Syn
         modelSphereIndirectBuffer.Initialize({ "DebugDrawGroup_ModelSphereIndirectBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand) * MaterialRenderType::MaterialRenderTypeCount * 2, indirectUsage, 1024, 2048 });
         modelSphereIndirectBuffer.UpdateCapacityAll(1);
 
-        boxColliderIndirectBuffer.Initialize({ "DebugDrawGroup_BoxColliderIndirectBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
-        boxColliderIndirectBuffer.UpdateCapacityAll(1);
+        joltDebugVertexBuffer.Initialize({ "DebugDrawGroup_JoltDebugVertexBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(PhysicsDebugVertex), storageUsage, 100000, 200000 });
+        joltDebugVertexBuffer.UpdateCapacityAll(1);
 
-        sphereColliderIndirectBuffer.Initialize({ "DebugDrawGroup_SphereColliderIndirectBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
-        sphereColliderIndirectBuffer.UpdateCapacityAll(1);
+        joltDebugIndexBuffer.Initialize({ "DebugDrawGroup_JoltIndex", BufferStrategy::MappedOnly, frameCount, sizeof(uint32_t), storageUsage, 200000, 400000 });
+        joltDebugIndexBuffer.UpdateCapacityAll(1);
 
-        capsuleColliderIndirectBuffer.Initialize({ "DebugDrawGroup_CapsuleColliderIndirectBuffer", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage });
-        capsuleColliderIndirectBuffer.UpdateCapacityAll(1);
+        joltDebugInstanceBuffer.Initialize({ "DebugDrawGroup_JoltInstance", BufferStrategy::MappedOnly, frameCount, sizeof(PhysicsDebugInstance), storageUsage, 10000, 20000 });
+        joltDebugInstanceBuffer.UpdateCapacityAll(1);
 
-        for (uint32_t i = 0; i < frameCount; ++i) {
-            boxColliderIndirectBuffer.Write(i, &boxColliderCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
-            sphereColliderIndirectBuffer.Write(i, &sphereColliderCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
-            capsuleColliderIndirectBuffer.Write(i, &capsuleColliderCmdTemplate, sizeof(VkDrawIndirectCommand), 0);
-        }
+        joltDebugIndirectBuffer.Initialize({ "DebugDrawGroup_JoltIndirect", BufferStrategy::MappedOnly, frameCount, sizeof(VkDrawIndirectCommand), indirectUsage, 10000, 20000 });
+        joltDebugIndirectBuffer.UpdateCapacityAll(1);
     }
 
     void DebugDrawGroup::CoherentToGpuBufferSync(VkCommandBuffer cmd, uint32_t frameIndex) {

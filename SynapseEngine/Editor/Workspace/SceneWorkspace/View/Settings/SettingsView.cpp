@@ -331,9 +331,7 @@ namespace Syn {
                     Syn::UI::PropertySeparator();
 
                     drawSectionHeader("Physics Colliders");
-                    changed |= Syn::UI::PropertyCheckbox("Box Collider", settings.debug.enableBoxColliderWireframe);
-                    changed |= Syn::UI::PropertyCheckbox("Sphere Collider", settings.debug.enableSphereColliderWireframe);
-                    changed |= Syn::UI::PropertyCheckbox("Capsule Collider", settings.debug.enableCapsuleColliderWireframe);
+                    changed |= Syn::UI::PropertyCheckbox("Physics Debug", settings.debug.enablePhysicsWireframe);
 
                     Syn::UI::PropertySeparator();
 

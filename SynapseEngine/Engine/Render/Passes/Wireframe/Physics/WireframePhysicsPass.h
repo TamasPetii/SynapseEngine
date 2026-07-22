@@ -3,10 +3,11 @@
 #include "Engine/Render/Passes/GraphicsPass.h"
 
 namespace Syn {
-    class SYN_API SphereColliderWireframePass : public GraphicsPass {
+    class SYN_API WireframePhysicsPass : public GraphicsPass {
     public:
-        std::string GetName() const override { return "SphereColliderWireframePass"; }
+        std::string GetName() const override { return "WireframePhysicsPass"; }
         std::string GetGroup() const override { return PassGroupNames::WireframePasses; }
+
         void Initialize() override;
         bool ShouldCollectStatistics() const override { return true; }
     protected:
@@ -14,7 +15,5 @@ namespace Syn {
         void PrepareFrame(const RenderContext& context) override;
         void PushConstants(const RenderContext& context) override;
         void Draw(const RenderContext& context) override;
-    private:
-        uint32_t _activeColliderCount = 0;
     };
 }

@@ -44,9 +44,7 @@ namespace Syn
         bool enableSpotLightPyramidWireframe;
 
         // Physics Colliders
-        bool enableBoxColliderWireframe;
-        bool enableSphereColliderWireframe;
-        bool enableCapsuleColliderWireframe;
+        bool enablePhysicsWireframe;
 
         // Editor Billboards
         bool enableBillboardCameras;

@@ -102,6 +102,7 @@ namespace Syn
         void SetBodyFriction(PhysicsBodyID bodyId, float friction) override;
         void SetBodyRestitution(PhysicsBodyID bodyId, float restitution) override;
         void SetBodyMotionType(PhysicsBodyID bodyId, PhysicsMotionType motionType) override;
+        void GetDebugDrawData(PhysicsDrawData& outData) override;
     private:
         PhysicsBodyID CreateBodyFromShape(JPH::ShapeRefC shape, const glm::vec3& position, const glm::quat& rotation, const PhysicsBodySettings& settings);
     private:

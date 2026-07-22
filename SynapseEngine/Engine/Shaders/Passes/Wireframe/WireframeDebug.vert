@@ -94,41 +94,6 @@ void main() {
         
         lightColor = chunkFullyInside ? vec3(0.1, 1.0, 0.1) : vec3(1.0, 0.5, 0.0);
     }
-    else if (pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_BOX_COLLIDER) {
-        BoxColliderComponent collider = GET_BOX_COLLIDER(ctx.boxColliderDataBufferAddr, gl_InstanceIndex);
-
-        uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, collider.entityIndex);
-        TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
-
-        vec3 localPos = (v.position * collider.halfExtents) + collider.localOffset;
-        worldPos = (transform.transform * vec4(localPos, 1.0)).xyz;
-
-        lightColor = vec3(0.0, 1.0, 0.0);
-    }
-    else if (pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_SPHERE_COLLIDER) {
-        SphereColliderComponent collider = GET_SPHERE_COLLIDER(ctx.sphereColliderDataBufferAddr, gl_InstanceIndex);
-
-        uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, collider.entityIndex);
-        TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
-
-        vec3 localPos = (v.position * collider.radius) + collider.localOffset;
-        worldPos = (transform.transform * vec4(localPos, 1.0)).xyz;
-        
-        lightColor = vec3(0.0, 1.0, 1.0);
-    }
-    else if (pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_CAPSULE_COLLIDER) {
-        CapsuleColliderComponent collider = GET_CAPSULE_COLLIDER(ctx.capsuleColliderDataBufferAddr, gl_InstanceIndex);
-
-        uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, collider.entityIndex);
-        TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
-
-        vec3 unitPos = v.position * 2.0;
-        vec3 scale = vec3(collider.radius, collider.halfHeight, collider.radius);
-        vec3 localPos = (unitPos * scale) + collider.localOffset;
-        worldPos = (transform.transform * vec4(localPos, 1.0)).xyz;
-
-        lightColor = vec3(1.0, 0.5, 0.0);
-    }
 
     uint cameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraDenseIndex);

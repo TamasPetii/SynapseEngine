@@ -61,6 +61,7 @@
 #include "Engine/System/Physics/ConvexColliderSystem.h"
 #include "Engine/System/Physics/MeshColliderSystem.h"
 #include "Engine/System/Physics/RigidBodySystem.h"
+#include "Engine/System/Physics/PhysicsDebugSystem.h"
 #include "Engine/System/Core/StaticSpatialSahSystem.h"
 #include "Engine/System/Core/TransformModelLinkSystem.h"
 #include "Engine/Profiler/ICpuProfiler.h"
@@ -182,6 +183,7 @@ namespace Syn
         RegisterSystem<DirectionLightShadowAtlasSystem>();
 
         RegisterSystem<PhysicsSystem>();
+        RegisterSystem<PhysicsDebugSystem>();
 		RegisterSystem<BoxColliderSystem>();
 		RegisterSystem<SphereColliderSystem>();
 		RegisterSystem<CapsuleColliderSystem>();

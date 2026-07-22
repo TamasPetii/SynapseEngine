@@ -36,5 +36,7 @@ namespace Syn
         virtual void SetBodyFriction(PhysicsBodyID bodyId, float friction) = 0;
         virtual void SetBodyRestitution(PhysicsBodyID bodyId, float restitution) = 0;
         virtual void SetBodyMotionType(PhysicsBodyID bodyId, PhysicsMotionType motionType) = 0;
+
+        virtual void GetDebugDrawData(PhysicsDrawData& outData) = 0;
     };
 }

@@ -152,9 +152,7 @@
 #include "Engine/Render/Passes/Wireframe/Light/SpotLightPyramidWireframePass.h"
 #include "Engine/Render/Passes/Wireframe/Chunk/StaticChunkAabbWireframePass.h"
 #include "Engine/Render/Passes/Wireframe/Chunk/MortonChunkAabbWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/Collider/BoxColliderWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/Collider/SphereColliderWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/Collider/CapsuleColliderWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/Physics/WireframePhysicsPass.h"
 #include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletAabbPass.h"
 #include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletSpherePass.h"
 #include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletConePass.h"
@@ -399,9 +397,7 @@ namespace Syn
         pipeline->AddPass(std::make_unique<SpotLightPyramidWireframePass>());
         pipeline->AddPass(std::make_unique<StaticChunkAabbWireframePass>());
         pipeline->AddPass(std::make_unique<MortonChunkAabbWireframePass>());
-        pipeline->AddPass(std::make_unique<BoxColliderWireframePass>());
-        pipeline->AddPass(std::make_unique<SphereColliderWireframePass>());
-        pipeline->AddPass(std::make_unique<CapsuleColliderWireframePass>());
+        pipeline->AddPass(std::make_unique<WireframePhysicsPass>());
 
         //Billboard Passes
         pipeline->AddPass(std::make_unique<BillboardTransitionPass>());

@@ -151,9 +151,7 @@ namespace Syn
             ar.Property("enableSpotLightPyramidWireframe", settings.enableSpotLightPyramidWireframe);
 
             // Physics Colliders
-            ar.Property("enableBoxColliderWireframe", settings.enableBoxColliderWireframe);
-            ar.Property("enableSphereColliderWireframe", settings.enableSphereColliderWireframe);
-            ar.Property("enableCapsuleColliderWireframe", settings.enableCapsuleColliderWireframe);
+            ar.Property("enablePhysicsWireframe", settings.enablePhysicsWireframe);
 
             // Billboards
             ar.Property("enableBillboardCameras", settings.enableBillboardCameras);

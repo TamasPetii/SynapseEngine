@@ -10,6 +10,12 @@ namespace Syn
         RenderBuffer modelAabbIndirectBuffer;
         RenderBuffer modelSphereIndirectBuffer;
 
+        size_t joltDebugIndirectCount = 0;
+        RenderBuffer joltDebugVertexBuffer;
+        RenderBuffer joltDebugIndexBuffer;
+        RenderBuffer joltDebugInstanceBuffer;
+        RenderBuffer joltDebugIndirectBuffer;
+
         CpuData<VkDrawIndirectCommand> modelAabbCmds;
         CpuData<VkDrawIndirectCommand> modelSphereCmds;
 
@@ -17,13 +23,5 @@ namespace Syn
         VkDrawIndirectCommand modelSphereCmdTemplate{};
 
         uint32_t totalMaxMeshletInstances = 0;
-
-        RenderBuffer boxColliderIndirectBuffer;
-        RenderBuffer sphereColliderIndirectBuffer;
-        RenderBuffer capsuleColliderIndirectBuffer;
-
-        VkDrawIndirectCommand boxColliderCmdTemplate{};
-        VkDrawIndirectCommand sphereColliderCmdTemplate{};
-        VkDrawIndirectCommand capsuleColliderCmdTemplate{};
     };
 }

@@ -1,6 +1,8 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include <cstdint>
+#include <glm/glm.hpp>
+#include <vulkan/vulkan.h>
 
 namespace Syn
 {
@@ -33,5 +35,22 @@ namespace Syn
         float restitution = 0.0f;
 
         bool isSensor = false;
+    };
+
+    struct PhysicsDebugVertex {
+        glm::vec4 position;
+    };
+
+    struct PhysicsDebugInstance {
+        glm::mat4 transform;
+        uint32_t color;
+        uint32_t pad0, pad1, pad2;
+    };
+
+    struct PhysicsDrawData {
+        std::vector<PhysicsDebugVertex> vertices;
+        std::vector<uint32_t> indices;
+        std::vector<PhysicsDebugInstance> instances;
+        std::vector<VkDrawIndirectCommand> indirectCmds;
     };
 }
