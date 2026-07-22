@@ -105,9 +105,6 @@ namespace Syn
 
 		_renderManager->WaitForFrame(currentFrame);
 
-		ServiceLocator::Get<IGpuProfiler>()->ResolveFrame(currentFrame);
-		ServiceLocator::Get<FrameStatisticsManager>()->ResolveFrame(currentFrame, ServiceLocator::Get<IRenderStatCollector>());
-
 		if (_onGuiFlushCallback)
 			_onGuiFlushCallback(currentFrame);
 
@@ -234,6 +231,18 @@ namespace Syn
 	{
 		_renderManager = std::move(RendererFactory::CreateSceneRenderer(_frameContext.framesInFlight));
 		_renderManager->SetGuiRenderCallback(params.onRenderGuiCallback);
+
+		_renderManager->SetPreRenderCallback([](VkCommandBuffer cmd, uint32_t frameIndex, Scene* scene) {
+			auto gpuProfiler = ServiceLocator::Get<IGpuProfiler>();
+			auto renderStatCollector = ServiceLocator::Get<IRenderStatCollector>();
+			auto frameStatManager = ServiceLocator::Get<FrameStatisticsManager>();
+
+			gpuProfiler->ResolveFrame(frameIndex);
+			renderStatCollector->ResolveFrame(frameIndex);
+			frameStatManager->ResolveFrame(cmd, scene, frameIndex, renderStatCollector->GetStats(frameIndex));
+			gpuProfiler->BeginFrame(cmd, frameIndex);
+			renderStatCollector->BeginFrame(cmd, frameIndex);
+			});
 	}
 
 	void Engine::Shutdown() 

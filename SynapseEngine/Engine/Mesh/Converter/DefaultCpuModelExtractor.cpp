@@ -10,6 +10,7 @@ namespace Syn
         outCpuData.globalIndexCount = gpuData.globalIndexCount;
         outCpuData.globalMeshCount = gpuData.globalMeshCount;
         outCpuData.globalAverageLodIndexCount = gpuData.globalAverageLodIndexCount;
+        outCpuData.globalLod0IndexCount = gpuData.globalLod0IndexCount;
 
         size_t totalLodCount = gpuData.indexedData.meshDescriptors.size();
 

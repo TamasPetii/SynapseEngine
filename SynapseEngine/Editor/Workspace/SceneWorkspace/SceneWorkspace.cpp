@@ -22,6 +22,9 @@
 #include "View/Logger/LoggerView.h"
 #include "EditorCore/ViewModels/SceneWorkspace/Logger/LoggerViewModel.h"
 
+#include "View/Statistics/StatisticsView.h"
+#include "EditorCore/ViewModels/SceneWorkspace/Statistics/StatisticsViewModel.h"
+
 #include "Engine/Scene/SceneNames.h"
 
 namespace Syn {
@@ -100,6 +103,12 @@ namespace Syn {
         AddWindow<BenchmarkWin>(
             BenchmarkView{},
             BenchmarkViewModel{}
+        );
+
+        using StatisticsWin = EditorWindow<StatisticsView, StatisticsViewModel>;
+        AddWindow<StatisticsWin>(
+            StatisticsView{},
+            StatisticsViewModel{}
         );
 
         using LoggerWin = EditorWindow<LoggerView, LoggerViewModel>;

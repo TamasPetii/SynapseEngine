@@ -98,6 +98,9 @@ namespace Syn::Vk {
         deviceFeatures.features.shaderInt64 = VK_TRUE;
 		deviceFeatures.features.shaderClipDistance = VK_TRUE;
        
+        VkPhysicalDeviceDeviceGeneratedCommandsFeaturesEXT dgcFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_GENERATED_COMMANDS_FEATURES_EXT };
+        dgcFeatures.deviceGeneratedCommands = VK_TRUE;
+
         deviceFeatures.pNext = &features11;
         features11.pNext = &features12;
         features12.pNext = &features13;
@@ -110,7 +113,8 @@ namespace Syn::Vk {
         dynamicState1.pNext = &dynamicState2;
         dynamicState2.pNext = &dynamicState3;
         dynamicState3.pNext = &maintenance1Features;
-        maintenance1Features.pNext = nullptr;
+        maintenance1Features.pNext = &dgcFeatures;
+        dgcFeatures.pNext = nullptr;
 
         /*
         maintenance1Features.pNext = &enqueueFeatures;

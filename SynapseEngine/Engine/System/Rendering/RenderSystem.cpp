@@ -174,6 +174,9 @@ namespace Syn
         uint32_t totalMaterialIndicesCapacity = 0;
         uint32_t totalMaxMeshletInstances = 0;
 
+        uint64_t maxTotalVertices = 0;
+        uint64_t maxTotalIndices = 0;
+
         // 1. Pass: Count commands
         uint32_t tradCmdCounts[MaterialRenderType::MaterialRenderTypeCount] = { 0 };
         uint32_t meshletCmdCounts[MaterialRenderType::MaterialRenderTypeCount] = { 0 };
@@ -261,6 +264,9 @@ namespace Syn
             auto model = modelSnapshots[modelId].resource;
             if (!model) continue;
 
+            maxTotalVertices += static_cast<uint64_t>(capacity) * model->cpuData.globalVertexCount;
+            maxTotalIndices += static_cast<uint64_t>(capacity) * model->cpuData.globalLod0IndexCount;
+
             uint32_t maxMeshletsForModel = 0;
             uint32_t meshCount = model->cpuData.globalMeshCount;
             for (uint32_t m = 0; m < meshCount; ++m) {
@@ -346,6 +352,10 @@ namespace Syn
         drawData->Models.totalAllocatedInstances = globalInstanceOffset;
         drawData->Debug.totalMaxMeshletInstances = totalMaxMeshletInstances;
         drawData->Models.requiredMaterialBufferSize = totalMaterialIndicesCapacity;
+
+        drawData->Models.maxPossibleVertices = maxTotalVertices;
+        drawData->Models.maxPossibleIndices = maxTotalIndices;
+        drawData->Models.maxPossibleTriangles = maxTotalIndices / 3;
 
         if (drawData->Models.instances.Size() < globalInstanceOffset) {
             drawData->Models.instances.Resize(globalInstanceOffset);

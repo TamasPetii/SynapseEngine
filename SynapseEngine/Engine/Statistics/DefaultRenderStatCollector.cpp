@@ -11,15 +11,15 @@ namespace Syn {
         _resolvedStats.resize(framesInFlight);
         _queryCounters.resize(framesInFlight, 0);
 
-        VkQueryPipelineStatisticFlags flags =
+        VkQueryPipelineStatisticFlags flags = 
             VK_QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_VERTICES_BIT |
             VK_QUERY_PIPELINE_STATISTIC_INPUT_ASSEMBLY_PRIMITIVES_BIT |
             VK_QUERY_PIPELINE_STATISTIC_VERTEX_SHADER_INVOCATIONS_BIT |
             VK_QUERY_PIPELINE_STATISTIC_CLIPPING_INVOCATIONS_BIT |
             VK_QUERY_PIPELINE_STATISTIC_CLIPPING_PRIMITIVES_BIT |
-            VK_QUERY_PIPELINE_STATISTIC_FRAGMENT_SHADER_INVOCATIONS_BIT /* |
+            VK_QUERY_PIPELINE_STATISTIC_FRAGMENT_SHADER_INVOCATIONS_BIT |
             VK_QUERY_PIPELINE_STATISTIC_TASK_SHADER_INVOCATIONS_BIT_EXT | 
-            VK_QUERY_PIPELINE_STATISTIC_MESH_SHADER_INVOCATIONS_BIT_EXT */;
+            VK_QUERY_PIPELINE_STATISTIC_MESH_SHADER_INVOCATIONS_BIT_EXT;
 
         for (uint32_t i = 0; i < framesInFlight; ++i) {
             _pools[i] = std::make_unique<Vk::PipelineStatisticsQueryPool>(MAX_QUERIES_PER_FRAME, flags);

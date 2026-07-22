@@ -90,6 +90,10 @@ namespace Syn
                 {
                     const auto& lodData = cookedMesh.lods[lodLevel];
 
+                    if (lodLevel == 0) {
+                        result.globalLod0IndexCount += static_cast<uint32_t>(lodData.indices.size());
+                    }
+
                     {
                         GpuMeshDescriptor meshDesc{};
                         meshDesc.vertexOffset = currentMeshVertexOffset;

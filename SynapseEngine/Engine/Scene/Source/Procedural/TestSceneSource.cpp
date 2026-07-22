@@ -86,6 +86,7 @@ namespace Syn
         int physCapsuleCount = config.value("/entities/physics_capsules"_json_pointer, 0);
 
         int dirLightCount = config.value("/lights/directional_count"_json_pointer, 1);
+        int dirLightShadowCount = config.value("/lights/directional_shadow_count"_json_pointer, 1);
         int pointLightCount = config.value("/lights/point_count"_json_pointer, 50);
         int pointShadowCount = config.value("/lights/point_shadow_count"_json_pointer, 5);
         int spotLightCount = config.value("/lights/spot_count"_json_pointer, 50);
@@ -183,8 +184,9 @@ namespace Syn
 
         if (spawnMonkey)
         {
-            uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "../External/glTF-Sample-Assets/Models/Suzanne/glTF/Suzanne.gltf"));
-
+            uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Suzanne/glTF/Suzanne.gltf"));
+            //uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString("C:/Users/User/Desktop/Models/Dragon/dragon.obj"));
+        
             EntityID monkeyId = scene.CreateEntity();
             registry.AddComponent<TagComponent>(monkeyId);
             registry.AddComponent<MaterialOverrideComponent>(monkeyId);
@@ -482,7 +484,7 @@ namespace Syn
             auto& light = registry.GetComponent<DirectionLightComponent>(e);
             light.color = glm::vec3(1.0f, 0.95f, 0.85f) * 0.55f;
             light.strength = 5.0f;
-            light.useShadow = true;
+            light.useShadow = dirLightShadowCount != 0;
 
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
             registry.GetPool<DirectionLightComponent>()->SetCategory(e, StorageCategory::Stream);

@@ -4,8 +4,6 @@
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
 #include "Engine/FrameContext.h"
-#include "Engine/Profiler/IGpuProfiler.h"
-#include "Engine/Statistics/IRenderStatCollector.h"
 
 namespace Syn {
 
@@ -51,8 +49,9 @@ namespace Syn {
         if (!cmd) 
             return;
 
-        ServiceLocator::Get<IGpuProfiler>()->BeginFrame(cmd->Handle(), frameIndex);
-        ServiceLocator::Get<IRenderStatCollector>()->BeginFrame(cmd->Handle(), frameIndex);
+        if (_preRenderCallback) {
+            _preRenderCallback(cmd->Handle(), frameIndex, scene);
+        }
 
         if (_preRenderCallback) {
             _preRenderCallback(cmd->Handle(), frameIndex, scene);

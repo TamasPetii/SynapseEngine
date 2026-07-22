@@ -12,6 +12,7 @@ namespace Syn
     {
         uint32_t globalVertexCount = 0;
         uint32_t globalIndexCount = 0;
+        uint32_t globalLod0IndexCount = 0;
         uint32_t globalMeshCount = 0;
         uint32_t globalAverageLodIndexCount = 0;
 

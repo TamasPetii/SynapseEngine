@@ -37,6 +37,7 @@ constexpr const char* ASSET_PATH = "Assets";
 #define SYN_ICON_MICROCHIP      ICON_FA_MICROCHIP
 #define SYN_ICON_DESKTOP        ICON_FA_DESKTOP
 #define SYN_ICON_TACHOMETER     ICON_FA_TACHOMETER_ALT
+#define SYN_ICON_CUT            ICON_FA_CUT
 
 // Generic / Editor
 #define SYN_ICON_GAMEPAD        ICON_FA_GAMEPAD

@@ -38,6 +38,10 @@ namespace Syn
         uint32_t totalAllocatedInstances = 0;
         size_t requiredMaterialBufferSize = 0;
 
+        uint64_t maxPossibleVertices = 0;
+        uint64_t maxPossibleIndices = 0;
+        uint64_t maxPossibleTriangles = 0;
+
         uint32_t traditionalCmdOffsets[MaterialRenderType::MaterialRenderTypeCount] = { 0 };
         uint32_t traditionalCmdCounts[MaterialRenderType::MaterialRenderTypeCount] = { 0 };
         uint32_t meshletCmdOffsets[MaterialRenderType::MaterialRenderTypeCount] = { 0 };

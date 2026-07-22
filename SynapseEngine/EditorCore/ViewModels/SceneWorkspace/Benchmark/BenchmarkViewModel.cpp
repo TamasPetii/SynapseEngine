@@ -97,7 +97,7 @@ namespace Syn {
                 if (!matchesSearch) continue;
 
                 if (!_state.filters.showUpdate && phaseName.find(SystemPhaseNames::Update) != std::string::npos) continue;
-                if (!_state.filters.showUploadGPU && phaseName.find(SystemPhaseNames::UploadGPU) != std::string::npos) continue; // Catches GPU and Sparse Map
+                if (!_state.filters.showUploadGPU && phaseName.find(SystemPhaseNames::UploadGPU) != std::string::npos) continue;
                 if (!_state.filters.showFinish && phaseName.find(SystemPhaseNames::Finish) != std::string::npos) continue;
 
                 std::string key = rawGroup.name + "_" + phaseName + "_" + entryName;

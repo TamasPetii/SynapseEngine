@@ -53,6 +53,7 @@ namespace Syn
             ar.Property("globalCollider", m.globalCollider);
             ar.Property("globalVertexCount", m.globalVertexCount);
             ar.Property("globalIndexCount", m.globalIndexCount);
+            ar.Property("globalLod0IndexCount", m.globalLod0IndexCount);
             ar.Property("globalAverageLodIndexCount", m.globalAverageLodIndexCount);
             ar.Property("globalMeshCount", m.globalMeshCount);
             ar.Property("meshNodeDescriptors", m.meshNodeDescriptors);
