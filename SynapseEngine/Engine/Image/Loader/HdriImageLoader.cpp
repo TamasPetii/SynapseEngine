@@ -1,6 +1,8 @@
 #include "HdriImageLoader.h"
 #include <stb_image.h>
 #include <iostream>
+#include <string>
+#include <cstring>
 #include "Engine/Logger/SynLog.h"
 
 namespace Syn

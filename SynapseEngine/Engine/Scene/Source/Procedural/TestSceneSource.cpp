@@ -184,10 +184,11 @@ namespace Syn
 
         if (spawnMonkey)
         {
-
-            uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Suzanne/glTF/Suzanne.gltf"));
+            //uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Suzanne/glTF/Suzanne.gltf"));
             //uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString("C:/Users/User/Desktop/Models/Dragon/dragon.obj"));
         
+            uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "DamagedHelmet/glTF/DamagedHelmet.gltf"));
+
             EntityID monkeyId = scene.CreateEntity();
             registry.AddComponent<TagComponent>(monkeyId);
             registry.AddComponent<MaterialOverrideComponent>(monkeyId);
@@ -402,7 +403,7 @@ namespace Syn
             registry.AddComponent<MaterialOverrideComponent>(e);
             registry.AddComponent<PipelineOverrideComponent>(e);
 
-            registry.GetComponent<TransformComponent>(e).translation = glm::vec3((rand() % 400) - 200.0f, (rand() % 400) + 5, (rand() % 400) - 200.0f);
+            registry.GetComponent<TransformComponent>(e).translation = glm::vec3((rand() % 100) - 50, (rand() % 200) + 5, (rand() % 100) - 50);
             registry.GetComponent<ModelComponent>(e).modelIndex = cubeMeshId;
             registry.GetComponent<RigidBodyComponent>(e).motionType = PhysicsMotionType::Dynamic;
 
@@ -430,7 +431,7 @@ namespace Syn
             registry.AddComponent<MaterialOverrideComponent>(e);
             registry.AddComponent<PipelineOverrideComponent>(e);
 
-            registry.GetComponent<TransformComponent>(e).translation = glm::vec3((rand() % 400) - 200.0f, (rand() % 400) + 5, (rand() % 400) - 200.0f);
+            registry.GetComponent<TransformComponent>(e).translation = glm::vec3((rand() % 100) - 50, (rand() % 200) + 5, (rand() % 100) - 50);
             registry.GetComponent<ModelComponent>(e).modelIndex = sphereMeshId;
             registry.GetComponent<RigidBodyComponent>(e).motionType = PhysicsMotionType::Dynamic;
 
@@ -458,7 +459,7 @@ namespace Syn
             registry.AddComponent<MaterialOverrideComponent>(e);
             registry.AddComponent<PipelineOverrideComponent>(e);
 
-            registry.GetComponent<TransformComponent>(e).translation = glm::vec3((rand() % 400) - 200.0f, (rand() % 400) + 5, (rand() % 400) - 200.0f);
+            registry.GetComponent<TransformComponent>(e).translation = glm::vec3((rand() % 100) - 50, (rand() % 200) + 5, (rand() % 100) - 50);
             registry.GetComponent<TransformComponent>(e).rotation = glm::vec3(rand() % 360, rand() % 360, rand() % 360);
 
             registry.GetComponent<ModelComponent>(e).modelIndex = capsuleMeshId;

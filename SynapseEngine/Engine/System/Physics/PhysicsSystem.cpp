@@ -48,7 +48,11 @@ namespace Syn
             });
 
         tf::Task simulateTask = this->EmplaceTask(subflow, "SimulatePhysics", [physicsEngine, deltaTime]() {
-            physicsEngine->Update(deltaTime);
+
+            const float maxDeltaTime = 1.0f / 15.0f;
+            float safeDeltaTime = std::min(deltaTime, maxDeltaTime);
+
+            physicsEngine->Update(safeDeltaTime);
             });
 
         std::optional<tf::Task> postUpdateTask = this->ForEach(entities, subflow, "SyncDynamicsToECS",
