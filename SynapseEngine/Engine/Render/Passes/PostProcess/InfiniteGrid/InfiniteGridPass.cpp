@@ -20,7 +20,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("InfiniteGridProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("InfiniteGridProgram", {
             ShaderNames::FullscreenVert,
             ShaderNames::InfiniteGridFrag
             }, config);

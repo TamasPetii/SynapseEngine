@@ -13,7 +13,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("ClusterSpotLightSingleProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("ClusterSpotLightSingleProgram", {
             ShaderNames::ClusterSpotLightSingle
             }, config);
     }

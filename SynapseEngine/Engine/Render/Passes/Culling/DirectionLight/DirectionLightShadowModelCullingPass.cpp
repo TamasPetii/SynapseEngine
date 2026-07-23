@@ -36,7 +36,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("DirectionLightShadowModelCullingProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("DirectionLightShadowModelCullingProgram", {
             ShaderNames::DirectionLightShadowModelCullingComp
             }, config);
     }

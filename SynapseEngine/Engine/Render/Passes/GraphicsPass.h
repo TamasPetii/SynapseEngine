@@ -21,7 +21,8 @@ namespace Syn
         virtual void Draw(const RenderContext& context) {};
     protected:
         bool _useDynamicRendering = true;
-        Vk::ShaderProgram* _shaderProgram;
+        uint32_t _shaderProgramId = UINT32_MAX;
+        Vk::ShaderProgram* _shaderProgram = nullptr;;
         Vk::GraphicsPipelineConfig _graphicsState;
         std::vector<PassImageTransition> _imageTransitions;
         std::vector<VkRenderingAttachmentInfo> _colorAttachments;

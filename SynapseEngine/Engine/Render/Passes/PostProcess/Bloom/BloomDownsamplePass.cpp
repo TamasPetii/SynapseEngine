@@ -24,7 +24,7 @@ namespace Syn {
 
     void BloomDownsamplePass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
-        _shaderProgram = shaderManager->CreateProgram("BloomDownsampleProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("BloomDownsampleProgram", {
             ShaderNames::BloomDownsample
             });
     }

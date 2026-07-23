@@ -18,7 +18,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("ChunkBuilderProgram", { 
+        _shaderProgramId = shaderManager->LoadProgramAsync("ChunkBuilderProgram", { 
             ShaderNames::ChunkBuilder 
         }, config);
     }

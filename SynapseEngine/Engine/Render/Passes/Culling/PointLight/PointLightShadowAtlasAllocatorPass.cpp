@@ -14,7 +14,7 @@ namespace Syn {
 
     void PointLightShadowAtlasAllocatorPass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
-        _shaderProgram = shaderManager->CreateProgram("PointLightShadowAtlasAllocatorProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("PointLightShadowAtlasAllocatorProgram", {
             ShaderNames::PointLightShadowAtlasAllocatorComp
             }, { .useDescriptorBuffers = false });
     }

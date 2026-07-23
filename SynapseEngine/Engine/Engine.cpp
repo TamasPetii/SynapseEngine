@@ -80,6 +80,7 @@ namespace Syn
 		ServiceLocator::Get<ICpuProfiler>()->BeginFrame(currentFrame);
 
 		//Updates
+		ServiceLocator::Get<ShaderManager>()->Update();
 		ServiceLocator::Get<AnimationManager>()->Update();
 		ServiceLocator::Get<ModelManager>()->Update();
 		ServiceLocator::Get<MaterialManager>()->Update();

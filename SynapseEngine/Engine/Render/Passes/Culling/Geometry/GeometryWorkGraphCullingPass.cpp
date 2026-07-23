@@ -39,13 +39,14 @@ namespace Syn {
     }
 
     void GeometryWorkGraphCullingPass::Initialize() {
+        /*
         auto device = ServiceLocator::Get<Vk::Context>()->GetDevice()->Handle();
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("GeometryWorkGraphCullingProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("GeometryWorkGraphCullingProgram", {
                     ShaderNames::GeometryWorkGraphModelCullingComp,
                     ShaderNames::GeometryWorkGraphStaticChunkCullingComp,
                     ShaderNames::GeometryWorkGraphStaticModelCullingComp,
@@ -117,6 +118,8 @@ namespace Syn {
         vkGetExecutionGraphPipelineNodeIndexAMDX(device, _graphPipeline, &nodeInfos[0], &_dynamicModelRootIndex);
         vkGetExecutionGraphPipelineNodeIndexAMDX(device, _graphPipeline, &nodeInfos[1], &_staticChunkRootIndex);
         vkGetExecutionGraphPipelineNodeIndexAMDX(device, _graphPipeline, &nodeInfos[3], &_mortonChunkRootIndex);
+
+        */
     }
 
     void GeometryWorkGraphCullingPass::Execute(const RenderContext& context) {

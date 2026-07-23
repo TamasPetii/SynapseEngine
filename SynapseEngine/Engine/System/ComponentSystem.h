@@ -89,7 +89,7 @@ namespace Syn
                     //Todo: Paged sparse map??
                     auto sparseIndices = pool->GetMapping().GetSparseIndices();
                     void* dst = mappingBufferView.buffer->Map();
-                    std::memcpy(dst, sparseIndices.data(), sparseIndices.size() * sizeof(DenseIndex));
+                    memcpy(dst, sparseIndices.data(), sparseIndices.size() * sizeof(DenseIndex));
                     mappingBufferView.versions[0] = pool->GetMappingVersion();
                 }
                 });

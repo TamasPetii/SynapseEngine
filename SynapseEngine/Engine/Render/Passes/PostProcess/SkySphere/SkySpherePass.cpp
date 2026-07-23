@@ -34,7 +34,7 @@ namespace Syn {
             return VkDescriptorSetLayout{};
             };
 
-        _shaderProgram = shaderManager->CreateProgram("SkySphereProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("SkySphereProgram", {
             ShaderNames::SkySphereVert,
             ShaderNames::SkySphereFrag
             }, config);

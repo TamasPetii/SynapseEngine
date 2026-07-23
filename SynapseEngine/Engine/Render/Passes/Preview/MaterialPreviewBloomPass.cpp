@@ -24,13 +24,35 @@ namespace Syn {
 
     void MaterialPreviewBloomPass::Initialize() {
         auto sm = ServiceLocator::Get<ShaderManager>();
-        _prefilterProgram = sm->CreateProgram("PrevBloomPrefilter", { ShaderNames::BloomPrefilter });
-        _downsampleProgram = sm->CreateProgram("PrevBloomDown", { ShaderNames::BloomDownsample });
-        _upsampleProgram = sm->CreateProgram("PrevBloomUp", { ShaderNames::BloomUpsample });
-        _compositeProgram = sm->CreateProgram("PrevBloomComp", { ShaderNames::BloomComposite });
+        _prefilterProgramId = sm->LoadProgramAsync("PrevBloomPrefilter", { ShaderNames::BloomPrefilter });
+        _downsampleProgramId = sm->LoadProgramAsync("PrevBloomDown", { ShaderNames::BloomDownsample });
+        _upsampleProgramId = sm->LoadProgramAsync("PrevBloomUp", { ShaderNames::BloomUpsample });
+        _compositeProgramId = sm->LoadProgramAsync("PrevBloomComp", { ShaderNames::BloomComposite });
     }
 
     void MaterialPreviewBloomPass::Execute(const RenderContext& context) {
+
+        auto sm = ServiceLocator::Get<ShaderManager>();
+
+        if (!_prefilterProgram && _prefilterProgramId != UINT32_MAX) {
+            _prefilterProgram = sm->GetResource(_prefilterProgramId).get();
+        }
+
+        if (!_downsampleProgram && _downsampleProgramId != UINT32_MAX) {
+            _downsampleProgram = sm->GetResource(_downsampleProgramId).get();
+        }
+
+        if (!_upsampleProgram && _upsampleProgramId != UINT32_MAX) {
+            _upsampleProgram = sm->GetResource(_upsampleProgramId).get();
+        }
+
+        if (!_compositeProgram && _compositeProgramId != UINT32_MAX) {
+            _compositeProgram = sm->GetResource(_compositeProgramId).get();
+        }
+
+        if (!_prefilterProgram || !_downsampleProgram || !_upsampleProgram || !_compositeProgram)
+            return;
+
         auto pm = ServiceLocator::Get<PreviewManager>();
 
         std::vector<uint32_t> dirtyMaterials = pm->GetDirtyResources(PreviewResourceType::Material);

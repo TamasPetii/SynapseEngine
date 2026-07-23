@@ -40,7 +40,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("PointLightShadowTraditionalProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("PointLightShadowTraditionalProgram", {
             ShaderNames::PointLightShadowTraditionalVert,
             ShaderNames::PointLightShadowFrag
             }, config);

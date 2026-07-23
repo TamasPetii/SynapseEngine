@@ -22,7 +22,7 @@ namespace Syn {
 
     void BloomPrefilterPass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
-        _shaderProgram = shaderManager->CreateProgram("BloomPrefilter", { 
+        _shaderProgramId = shaderManager->LoadProgramAsync("BloomPrefilter", { 
             ShaderNames::BloomPrefilter 
             });
     }

@@ -21,6 +21,7 @@ namespace Syn
         virtual void Dispatch(const RenderContext& context) {};
     protected:
         std::vector<PassImageTransition> _imageTransitions;
-        Vk::ShaderProgram* _shaderProgram;
+        uint32_t _shaderProgramId = UINT32_MAX;
+        Vk::ShaderProgram* _shaderProgram = nullptr;
     };
 }

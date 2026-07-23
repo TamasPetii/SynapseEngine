@@ -22,7 +22,7 @@ namespace Syn {
 
     void BloomCompositePass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
-        _shaderProgram = shaderManager->CreateProgram("BloomCompositeProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("BloomCompositeProgram", {
             ShaderNames::BloomComposite
             });
     }

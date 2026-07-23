@@ -27,7 +27,7 @@ namespace Syn {
 
     void PointLightShadowHizCopyPass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
-        _shaderProgram = shaderManager->CreateProgram("PointLightShadowHizCopyProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("PointLightShadowHizCopyProgram", {
             ShaderNames::PointHizLinearizeSingleDepth
             });
     }

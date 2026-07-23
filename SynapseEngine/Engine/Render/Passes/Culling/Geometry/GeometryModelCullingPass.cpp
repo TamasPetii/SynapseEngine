@@ -33,7 +33,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("GeometryModelCullingProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("GeometryModelCullingProgram", {
             ShaderNames::GeometryModelCullingComp
             }, config);
     }

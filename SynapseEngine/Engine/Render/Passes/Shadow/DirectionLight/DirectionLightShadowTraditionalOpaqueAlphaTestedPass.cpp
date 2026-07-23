@@ -47,7 +47,7 @@ namespace Syn {
             };
         config.defines = { ShaderDefines::EnableAlphaTest };
 
-        _shaderProgram = shaderManager->CreateProgram("DirectionLightShadowOpaqueAlphaTestedProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("DirectionLightShadowOpaqueAlphaTestedProgram", {
             ShaderNames::DirectionLightShadowTraditionalVert,
             ShaderNames::DirectionLightShadowFrag
             }, config);

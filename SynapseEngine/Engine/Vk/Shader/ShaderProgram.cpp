@@ -3,6 +3,7 @@
 #include "Engine/Vk/Context.h"
 #include "Engine/Vk/Descriptor/DescriptorUtils.h"
 #include "Engine/Logger/SynLog.h"
+#include <map>
 
 namespace Syn::Vk {
 
@@ -10,7 +11,6 @@ namespace Syn::Vk {
         _config(config)
     {
         _shaders.assign(shaders.begin(), shaders.end());
-        CreatePipelineLayoutAndShaders();
     }
 
     ShaderProgram::~ShaderProgram() {
@@ -91,7 +91,7 @@ namespace Syn::Vk {
 
         _bindLayouts.resize(maxSetIndex + 1, VK_NULL_HANDLE);
 
-        for (uint32_t set = 0; set <= maxSetIndex; ++set) 
+        for (uint32_t set = 0; set <= maxSetIndex; ++set)
         {
             if (_config.layoutOverride) {
                 VkDescriptorSetLayout overridenLayout = _config.layoutOverride(set);

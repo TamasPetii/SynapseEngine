@@ -51,7 +51,7 @@ namespace Syn {
             return VkDescriptorSetLayout{};
             };
 
-        _shaderProgram = shaderManager->CreateProgram("TraditionalOpaqueAlphaTestedDeferredProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("TraditionalOpaqueAlphaTestedDeferredProgram", {
             ShaderNames::TraditionalVert,
             ShaderNames::OpaqueDeferredFrag
             }, config);

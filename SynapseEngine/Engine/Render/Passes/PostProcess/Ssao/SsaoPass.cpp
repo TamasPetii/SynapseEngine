@@ -26,7 +26,7 @@ namespace Syn {
 
     void SsaoPass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
-        _shaderProgram = shaderManager->CreateProgram("SsaoProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("SsaoProgram", {
             ShaderNames::SsaoComp
             });
     }

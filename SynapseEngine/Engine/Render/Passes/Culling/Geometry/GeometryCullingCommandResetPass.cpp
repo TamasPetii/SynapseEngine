@@ -20,7 +20,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("GeometryCullingCommandResetProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("GeometryCullingCommandResetProgram", {
             ShaderNames::GeometryCullingCommandResetComp
             }, config);
     }

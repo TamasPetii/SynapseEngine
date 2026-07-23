@@ -19,7 +19,7 @@ namespace Syn
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("ClusterSpotLightCountProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("ClusterSpotLightCountProgram", {
             ShaderNames::ClusterSpotLightCount
             }, config);
     }

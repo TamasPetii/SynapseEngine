@@ -15,7 +15,7 @@ namespace Syn {
         config.useDescriptorBuffers = false;
 
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
-        _shaderProgram = shaderManager->CreateProgram("PointLightShadowFinalizeProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("PointLightShadowFinalizeProgram", {
             ShaderNames::PointLightShadowFinalizeComp
             }, config);
     }

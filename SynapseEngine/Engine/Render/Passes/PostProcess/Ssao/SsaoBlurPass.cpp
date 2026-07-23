@@ -21,7 +21,9 @@ namespace Syn {
     }
 
     void SsaoBlurPass::Initialize() {
-        _shaderProgram = ServiceLocator::Get<ShaderManager>()->CreateProgram("SsaoBlurProgram", {
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
+
+        _shaderProgramId = shaderManager->LoadProgramAsync("SsaoBlurProgram", {
             ShaderNames::SsaoBlurComp
             });
     }

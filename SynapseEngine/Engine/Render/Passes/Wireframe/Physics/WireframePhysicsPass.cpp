@@ -17,7 +17,7 @@ namespace Syn {
     void WireframePhysicsPass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
 
-        _shaderProgram = shaderManager->CreateProgram("JoltDebugProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("JoltDebugProgram", {
             ShaderNames::WireframePhysicsVert,
             ShaderNames::WireframeFrag
             });

@@ -43,7 +43,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("DirectionLightShadowMeshletProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("DirectionLightShadowMeshletProgram", {
             ShaderNames::DirectionLightShadowMeshletTask,
             ShaderNames::DirectionLightShadowMeshletMesh,
             ShaderNames::DirectionLightShadowFrag

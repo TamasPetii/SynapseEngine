@@ -18,7 +18,7 @@ namespace Syn {
 
     void WireframeMeshSetupPass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
-        _shaderProgram = shaderManager->CreateProgram("WireframeSetupProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("WireframeSetupProgram", {
             ShaderNames::WireframeSetup
             });
     }

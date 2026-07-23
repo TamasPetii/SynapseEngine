@@ -3,6 +3,7 @@
 #include "Engine/Vk/Context.h"
 #include "Engine/Profiler/IGpuProfiler.h"
 #include "Engine/Statistics/IRenderStatCollector.h"
+#include "Engine/Manager/ShaderManager.h"
 
 namespace Syn
 {
@@ -20,6 +21,14 @@ namespace Syn
 
     void RenderPipeline::Execute(const RenderContext& context)
     {
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
+        if (shaderManager->IsCompiling())
+        {
+            auto image = ServiceLocator::Get<Vk::Context>()->GetSwapChain()->GetImage(context.swapchainImageIndex);
+            image->TransitionLayout(context.cmd, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT, VK_ACCESS_2_NONE, false);
+            return;
+        }
+
         auto profiler = ServiceLocator::Get<IGpuProfiler>();
 		auto statCollector = ServiceLocator::Get<IRenderStatCollector>();
 

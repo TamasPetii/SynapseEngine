@@ -26,7 +26,7 @@ namespace Syn {
 
     void SpotLightShadowHizDownsamplePass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
-        _shaderProgram = shaderManager->CreateProgram("SpotLightShadowHizDownsampleProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("SpotLightShadowHizDownsampleProgram", {
             ShaderNames::HizDownsample
             });
     }

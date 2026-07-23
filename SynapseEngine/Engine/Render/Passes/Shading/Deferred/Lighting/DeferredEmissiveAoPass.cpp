@@ -27,7 +27,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("DeferredEmissiveAoProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("DeferredEmissiveAoProgram", {
             ShaderNames::FullscreenVert,
             ShaderNames::DeferredEmissiveAoFrag
             }, config);

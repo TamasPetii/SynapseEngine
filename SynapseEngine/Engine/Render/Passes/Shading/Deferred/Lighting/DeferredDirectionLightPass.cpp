@@ -28,7 +28,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("DeferredDirectionLightProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("DeferredDirectionLightProgram", {
             ShaderNames::DeferredDirectionLightVert,
             ShaderNames::DeferredDirectionLightFrag
             }, config);

@@ -26,7 +26,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("SpotLightShadowStaticModelCullingProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("SpotLightShadowStaticModelCullingProgram", {
             ShaderNames::SpotLightShadowStaticModelCullingComp
             }, config);
     }

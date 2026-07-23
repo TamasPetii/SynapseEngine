@@ -52,7 +52,7 @@ namespace Syn {
             return VkDescriptorSetLayout{};
             };
 
-        _shaderProgram = shaderManager->CreateProgram("TraditionalOpaqueForwardProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("TraditionalOpaqueForwardProgram", {
             ShaderNames::TraditionalVert,
             ShaderNames::OpaqueForwardFrag
             }, config);

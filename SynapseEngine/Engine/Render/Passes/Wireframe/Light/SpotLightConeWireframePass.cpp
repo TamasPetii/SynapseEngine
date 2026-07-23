@@ -25,7 +25,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram(
+        _shaderProgramId = shaderManager->LoadProgramAsync(
             "WireframeLightProgram",
             {
                 ShaderNames::WireframeDebugVert,

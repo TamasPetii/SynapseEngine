@@ -34,7 +34,7 @@ namespace Syn
             return VkDescriptorSetLayout{};
             };
 
-        _shaderProgram = shaderManager->CreateProgram("DebugVisibilityProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("DebugVisibilityProgram", {
             ShaderNames::FullscreenVert,
             ShaderNames::DebugVisibilityFrag
             }, config);

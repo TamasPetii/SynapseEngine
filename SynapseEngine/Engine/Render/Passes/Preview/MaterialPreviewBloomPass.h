@@ -20,6 +20,11 @@ namespace Syn {
         void DispatchUpsample(const RenderContext& context, Vk::Image* bloomImage);
         void DispatchComposite(const RenderContext& context, Vk::Image* colorImage, Vk::Image* bloomImage);
 
+        uint32_t _prefilterProgramId = UINT32_MAX;
+        uint32_t _downsampleProgramId = UINT32_MAX;
+        uint32_t _upsampleProgramId = UINT32_MAX;
+        uint32_t _compositeProgramId = UINT32_MAX;
+
         Vk::ShaderProgram* _prefilterProgram;
         Vk::ShaderProgram* _downsampleProgram;
         Vk::ShaderProgram* _upsampleProgram;

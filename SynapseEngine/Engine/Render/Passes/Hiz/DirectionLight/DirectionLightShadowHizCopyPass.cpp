@@ -26,7 +26,7 @@ namespace Syn {
 
     void DirectionLightShadowHizCopyPass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
-        _shaderProgram = shaderManager->CreateProgram("DirectionLightShadowHizCopyProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("DirectionLightShadowHizCopyProgram", {
 			ShaderNames::HizCopyComp
             });
     }

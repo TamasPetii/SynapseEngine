@@ -25,7 +25,7 @@ namespace Syn {
 
     void GeometryHizLinearPreparePass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
-        _shaderProgram = shaderManager->CreateProgram("HizLinearizeDepthProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("HizLinearizeDepthProgram", {
             ShaderNames::HizLinearizeDepth
             });
     }

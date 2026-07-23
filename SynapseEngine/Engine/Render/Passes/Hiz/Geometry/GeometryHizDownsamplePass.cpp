@@ -24,7 +24,7 @@ namespace Syn {
 
     void GeometryHizDownsamplePass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
-        _shaderProgram = shaderManager->CreateProgram("HizDownsampleProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("HizDownsampleProgram", {
             ShaderNames::HizDownsample
             });
     }

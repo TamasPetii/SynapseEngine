@@ -22,7 +22,7 @@ namespace Syn {
     void WireframeMeshAabbPass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
 
-        _shaderProgram = shaderManager->CreateProgram("WireframeProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("WireframeProgram", {
             ShaderNames::WireframeMeshVert,
             ShaderNames::WireframeFrag
             });

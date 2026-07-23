@@ -51,7 +51,7 @@ namespace Syn {
             };
         config.defines = { ShaderDefines::EnableAlphaTest };
 
-        _shaderProgram = shaderManager->CreateProgram("SpotLightShadowMeshletAlphaTestedProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("SpotLightShadowMeshletAlphaTestedProgram", {
             ShaderNames::SpotLightShadowMeshletTask,
             ShaderNames::SpotLightShadowMeshletMesh,
             ShaderNames::SpotLightShadowFrag

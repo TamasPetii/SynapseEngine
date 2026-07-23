@@ -26,7 +26,7 @@ namespace Syn {
             return VkDescriptorSetLayout{};
             };
 
-        _shaderProgram = shaderManager->CreateProgram("ModelPreviewProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("ModelPreviewProgram", {
             ShaderNames::ModelPreviewVert,
             ShaderNames::ModelPreviewFrag,
             }, config);

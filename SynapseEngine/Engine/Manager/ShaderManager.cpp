@@ -1,10 +1,10 @@
 #include "ShaderManager.h"
 #include "Engine/Vk/Shader/ShaderUtils.h"
-#include <iostream>
-#include <filesystem>
+#include "Engine/ServiceLocator.h"
+#include "Engine/Vk/Context.h"
+#include "Engine/Logger/SynLog.h"
 
-namespace Syn 
-{
+namespace Syn {
     static std::string GenerateShaderKey(const std::string& filepath, std::span<const std::string> defines) {
         std::string key = filepath;
         for (const auto& def : defines) {
@@ -13,83 +13,103 @@ namespace Syn
         return key;
     }
 
-    Vk::Shader* ShaderManager::LoadShader(const std::string& filepath, std::span<const std::string> defines) {
-        std::string key = GenerateShaderKey(filepath, defines);
-
-        auto it = _shaders.find(key);
-        if (it != _shaders.end()) {
-            return it->second.get();
-        }
-
+    const Vk::Shader* ShaderManager::LoadShaderCPU(const std::string& filepath, std::span<const std::string> defines) {
         VkShaderStageFlagBits stage = Vk::ShaderUtils::GetStageFromExtension(filepath);
         if (stage == 0) {
             SYN_ASSERT(false, std::string("Unknown shader extension: " + filepath).c_str());
             return nullptr;
         }
 
-        return LoadShader(filepath, stage, defines);
+        return LoadShaderCPU(filepath, stage, defines);
     }
 
-    Vk::Shader* ShaderManager::LoadShader(const std::string& filepath, VkShaderStageFlagBits stage, std::span<const std::string> defines) {
+    const Vk::Shader* ShaderManager::LoadShaderCPU(const std::string& filepath, VkShaderStageFlagBits stage, std::span<const std::string> defines) {
         std::string key = GenerateShaderKey(filepath, defines);
 
-        auto it = _shaders.find(key);
-        if (it != _shaders.end()) {
+        std::lock_guard lock(_shaderCacheMutex);
+
+        auto it = _cpuShaders.find(key);
+        if (it != _cpuShaders.end()) {
             return it->second.get();
         }
 
         auto shader = std::make_unique<Vk::Shader>(filepath, stage, defines);
-        Vk::Shader* ptr = shader.get();
+        const Vk::Shader* ptr = shader.get();
 
-        _shaders[key] = std::move(shader);
+        _cpuShaders[key] = std::move(shader);
 
         return ptr;
     }
 
-    Vk::ShaderProgram* ShaderManager::CreateProgram(const std::string& programName, const std::vector<std::string>& shaderFiles, const Vk::ShaderProgramConfig& config) {
-        auto it = _programs.find(programName);
-        if (it != _programs.end()) {
-            return it->second.get();
-        }
+    uint32_t ShaderManager::LoadProgramAsync(const std::string& programName, const std::vector<std::string>& shaderFiles, const Vk::ShaderProgramConfig& config) {
+        return InternalLoadAsync(programName, [this, shaderFiles, config]() {
+            std::vector<const Vk::Shader*> shadersForProgram;
+            shadersForProgram.reserve(shaderFiles.size());
 
-        std::vector<const Vk::Shader*> shadersForProgram;
-        shadersForProgram.reserve(shaderFiles.size());
-
-        for (const auto& file : shaderFiles) {
-            Vk::Shader* shader = LoadShader(file, config.defines);
-            if (shader) {
-                shadersForProgram.push_back(shader);
+            for (const auto& file : shaderFiles) {
+                const Vk::Shader* shader = LoadShaderCPU(file, config.defines);
+                if (shader) {
+                    shadersForProgram.push_back(shader);
+                }
             }
-        }
 
-        auto program = std::make_unique<Vk::ShaderProgram>(shadersForProgram, config);
-        Vk::ShaderProgram* ptr = program.get();
-
-        _programs[programName] = std::move(program);
-
-        return ptr;
+            return std::make_shared<Vk::ShaderProgram>(shadersForProgram, config);
+            });
     }
 
-    Vk::ShaderProgram* ShaderManager::GetProgram(const std::string& programName) const {
-        auto it = _programs.find(programName);
-        if (it != _programs.end()) {
-            return it->second.get();
-        }
-        return nullptr;
+    uint32_t ShaderManager::LoadProgramSync(const std::string& programName, const std::vector<std::string>& shaderFiles, const Vk::ShaderProgramConfig& config) {
+        return InternalLoadSync(programName, [this, shaderFiles, config]() {
+            std::vector<const Vk::Shader*> shadersForProgram;
+            shadersForProgram.reserve(shaderFiles.size());
+
+            for (const auto& file : shaderFiles) {
+                const Vk::Shader* shader = LoadShaderCPU(file, config.defines);
+                if (shader) {
+                    shadersForProgram.push_back(shader);
+                }
+            }
+            return std::make_shared<Vk::ShaderProgram>(shadersForProgram, config);
+            });
     }
 
-    Vk::Shader* ShaderManager::GetShader(const std::string& filepath, std::span<const std::string> defines) const {
-        std::string key = GenerateShaderKey(filepath, defines);
+    void ShaderManager::StartGpuUpload(EntryType& entry) {
+        uint32_t entryId = GetResourceIndex(entry.path);
+        auto program = entry.resource;
 
-        auto it = _shaders.find(key);
-        if (it != _shaders.end()) {
-            return it->second.get();
-        }
-        return nullptr;
+        Vk::GpuUploadRequest request{
+            .uploadCallback = [program](VkCommandBuffer cmd) {
+                program->CreatePipelineLayoutAndShaders();
+            },
+            .onFinished = [this, entryId]() {
+                SetResourceState(entryId, ResourceState::Ready);
+                MarkDirty(entryId);
+            },
+            .needsGraphics = false
+        };
+
+        SubmitGpuRequest(entry, std::move(request));
     }
+
+    void ShaderManager::FinalizeResource(EntryType& entry) {}
 
     void ShaderManager::Clear() {
-        _programs.clear();
-        _shaders.clear();
+        std::lock_guard lock(_mutex);
+        std::lock_guard cacheLock(_shaderCacheMutex);
+
+        _entries.clear();
+        _pathToId.clear();
+        _cpuShaders.clear();
+        _hasDirty = true;
+    }
+
+    bool ShaderManager::IsCompiling() const {
+        std::lock_guard lock(_mutex);
+        for (const auto& entry : _entries) {
+            if (entry.state == ResourceState::LoadingCPU || entry.state == ResourceState::UploadingGPU) {
+                std::cout << entry.path << std::endl;
+                return true;
+            }
+        }
+        return false;
     }
 }

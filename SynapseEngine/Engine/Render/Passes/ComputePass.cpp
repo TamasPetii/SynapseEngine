@@ -1,8 +1,13 @@
 #include "ComputePass.h"
+#include "Engine/ServiceLocator.h"
+#include "Engine/Manager/ShaderManager.h"
 
 namespace Syn {
     void ComputePass::Execute(const RenderContext& context)
     {
+        if (!_shaderProgram && _shaderProgramId != UINT32_MAX)
+            _shaderProgram = ServiceLocator::Get<ShaderManager>()->GetResource(_shaderProgramId).get();
+
         _imageTransitions.clear();
 
         PrepareFrame(context);

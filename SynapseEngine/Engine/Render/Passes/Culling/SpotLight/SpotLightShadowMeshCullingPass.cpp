@@ -34,7 +34,7 @@ namespace Syn {
         config.useDescriptorBuffers = false;
 
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
-        _shaderProgram = shaderManager->CreateProgram("SpotLightShadowMeshCullingProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("SpotLightShadowMeshCullingProgram", {
             ShaderNames::SpotLightShadowMeshCullingComp
             }, config);
     }

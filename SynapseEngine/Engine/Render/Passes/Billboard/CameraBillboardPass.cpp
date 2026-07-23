@@ -27,13 +27,14 @@ namespace Syn {
         return context.scene->GetSettings()->debug.enableBillboardCameras;
     }
 
-    void CameraBillboardPass::Initialize() {
+    void CameraBillboardPass::Initialize() 
+    {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram(
+        _shaderProgramId = shaderManager->LoadProgramAsync(
             "CameraBillboardProgram",
             {
                 ShaderNames::BillboardVert,

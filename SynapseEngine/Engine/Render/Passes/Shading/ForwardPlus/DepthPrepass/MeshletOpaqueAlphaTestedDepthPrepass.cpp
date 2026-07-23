@@ -54,7 +54,7 @@ namespace Syn {
             return VkDescriptorSetLayout{};
             };
 
-        _shaderProgram = shaderManager->CreateProgram("MeshletOpaqueAlphaTestedDepthPrepassProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("MeshletOpaqueAlphaTestedDepthPrepassProgram", {
             ShaderNames::MeshletTask,
             ShaderNames::MeshletPreDepthMesh,
             ShaderNames::PreDepthFrag

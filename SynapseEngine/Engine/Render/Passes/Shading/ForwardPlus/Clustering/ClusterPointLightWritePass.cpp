@@ -19,7 +19,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("ClusterPointLightWriteProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("ClusterPointLightWriteProgram", {
             ShaderNames::ClusterPointLightWrite
             }, config);
     }

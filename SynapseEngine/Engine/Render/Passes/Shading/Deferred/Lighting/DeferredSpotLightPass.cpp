@@ -32,7 +32,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("DeferredSpotLightProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("DeferredSpotLightProgram", {
             ShaderNames::DeferredSpotLightVert,
             ShaderNames::DeferredSpotLightFrag
             }, config);

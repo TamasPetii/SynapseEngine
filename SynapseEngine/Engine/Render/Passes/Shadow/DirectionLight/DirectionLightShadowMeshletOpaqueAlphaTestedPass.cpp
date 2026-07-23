@@ -50,7 +50,7 @@ namespace Syn {
             };
         config.defines = { ShaderDefines::EnableAlphaTest };
 
-        _shaderProgram = shaderManager->CreateProgram("DirectionLightShadowMeshletOpaqueAlphaTestedProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("DirectionLightShadowMeshletOpaqueAlphaTestedProgram", {
             ShaderNames::DirectionLightShadowMeshletTask,
             ShaderNames::DirectionLightShadowMeshletMesh,
             ShaderNames::DirectionLightShadowFrag

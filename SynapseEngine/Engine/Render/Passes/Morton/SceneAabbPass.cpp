@@ -16,7 +16,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("StaticSceneAABBProgram", { 
+        _shaderProgramId = shaderManager->LoadProgramAsync("StaticSceneAABBProgram", { 
             ShaderNames::StaticSceneAABB
         }, config);
     }

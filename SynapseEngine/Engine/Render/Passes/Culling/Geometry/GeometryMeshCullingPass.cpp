@@ -30,7 +30,7 @@ namespace Syn {
         config.useDescriptorBuffers = false;
 
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
-        _shaderProgram = shaderManager->CreateProgram("GeometryMeshCullingProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("GeometryMeshCullingProgram", {
             ShaderNames::GeometryMeshCullingComp
             }, config);
     }

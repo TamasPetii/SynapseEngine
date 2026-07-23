@@ -27,7 +27,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("WireframeMeshletConeProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("WireframeMeshletConeProgram", {
             ShaderNames::MeshletTask,
             ShaderNames::WireframeMeshletMesh,
             ShaderNames::WireframeFrag

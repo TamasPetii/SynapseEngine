@@ -20,10 +20,11 @@ namespace Syn
     void SelectionOutlinePass::Initialize()
     {
         auto imageManager = ServiceLocator::Get<ImageManager>();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = ServiceLocator::Get<ShaderManager>()->CreateProgram("SelectionOutlineProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("SelectionOutlineProgram", {
             ShaderNames::FullscreenVert,
             ShaderNames::SelectionOutlineFrag
             }, config);

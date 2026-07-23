@@ -14,7 +14,7 @@ namespace Syn {
     void CompositePass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
 
-        _shaderProgram = shaderManager->CreateProgram("CompositeProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("CompositeProgram", {
             ShaderNames::FullscreenVert,
             ShaderNames::CompositeFrag
             });

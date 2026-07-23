@@ -44,7 +44,7 @@ namespace Syn {
             return VkDescriptorSetLayout{};
             };
 
-        _shaderProgram = shaderManager->CreateProgram("TraditionalTransparentAlphaTestedDepthPrepassProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("TraditionalTransparentAlphaTestedDepthPrepassProgram", {
             ShaderNames::TraditionalPreDepthVert,
             ShaderNames::PreDepthFrag
             }, config);

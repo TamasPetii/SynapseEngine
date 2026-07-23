@@ -40,7 +40,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("DirectionLightShadowProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("DirectionLightShadowProgram", {
             ShaderNames::DirectionLightShadowTraditionalVert,
             ShaderNames::DirectionLightShadowFrag
             }, config);

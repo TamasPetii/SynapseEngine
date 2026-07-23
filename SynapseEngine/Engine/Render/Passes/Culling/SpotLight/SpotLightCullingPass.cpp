@@ -25,7 +25,7 @@ namespace Syn {
 
     void SpotLightCullingPass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
-        _shaderProgram = shaderManager->CreateProgram("SpotLightCullingProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("SpotLightCullingProgram", {
             ShaderNames::SpotLightCulling
             }, { .useDescriptorBuffers = false });
     }

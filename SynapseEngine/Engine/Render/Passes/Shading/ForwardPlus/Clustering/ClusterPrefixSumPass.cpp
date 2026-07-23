@@ -15,7 +15,7 @@ namespace Syn
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("ClusterPrefixSumProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("ClusterPrefixSumProgram", {
             ShaderNames::ClusterPrefixSum
             }, config);
     }

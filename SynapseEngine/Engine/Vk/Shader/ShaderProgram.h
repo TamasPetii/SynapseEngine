@@ -1,6 +1,9 @@
 #pragma once
 #include "../VkCommon.h"
 #include "Shader.h"
+#include <memory>
+#include <functional>
+#include <span>
 
 namespace Syn::Vk {
 
@@ -22,11 +25,10 @@ namespace Syn::Vk {
         ShaderProgram& operator=(const ShaderProgram&) = delete;
 
         void Bind(VkCommandBuffer cmd) const;
+        void CreatePipelineLayoutAndShaders();
 
         VkPipelineLayout GetLayout() const { return _pipelineLayout; }
         const std::vector<const Shader*>& GetShaders() const { return _shaders; }
-    private:
-        void CreatePipelineLayoutAndShaders();
     private:
         VkPipelineLayout _pipelineLayout = VK_NULL_HANDLE;
         std::vector<const Shader*> _shaders;

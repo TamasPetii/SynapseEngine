@@ -18,7 +18,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("MortonGeneratorProgram", { 
+        _shaderProgramId = shaderManager->LoadProgramAsync("MortonGeneratorProgram", { 
             ShaderNames::MortonGenerator 
         }, config);
     }

@@ -55,7 +55,7 @@ namespace Syn {
             return VkDescriptorSetLayout{};
             };
 
-        _shaderProgram = shaderManager->CreateProgram("MeshletOpaqueAlphaTestedForwardProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("MeshletOpaqueAlphaTestedForwardProgram", {
             ShaderNames::MeshletTask,
             ShaderNames::MeshletMesh,
             ShaderNames::OpaqueForwardFrag

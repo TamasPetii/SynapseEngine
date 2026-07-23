@@ -26,7 +26,7 @@ namespace Syn {
 
     void PointLightShadowHizDownsamplePass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
-        _shaderProgram = shaderManager->CreateProgram("PointLightShadowHizDownsampleProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("PointLightShadowHizDownsampleProgram", {
             ShaderNames::HizDownsample
             });
     }

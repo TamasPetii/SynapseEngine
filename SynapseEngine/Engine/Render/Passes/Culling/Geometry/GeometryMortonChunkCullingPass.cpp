@@ -22,7 +22,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("GeometryMortonChunkCullingProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("GeometryMortonChunkCullingProgram", {
             ShaderNames::GeometryMortonChunkCullingComp
             }, config);
     }

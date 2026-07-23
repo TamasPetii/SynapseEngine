@@ -12,7 +12,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("ClusterDispatchSetupProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("ClusterDispatchSetupProgram", {
             ShaderNames::ClusterDispatchSetup
             }, config);
     }

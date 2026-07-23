@@ -40,7 +40,7 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("SpotLightShadowProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("SpotLightShadowProgram", {
             ShaderNames::SpotLightShadowTraditionalVert,
             ShaderNames::SpotLightShadowFrag
             }, config);

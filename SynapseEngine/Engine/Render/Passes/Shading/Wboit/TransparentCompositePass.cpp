@@ -21,7 +21,7 @@ namespace Syn
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("TransparentCompositeProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("TransparentCompositeProgram", {
             ShaderNames::FullscreenVert,
             ShaderNames::TransparentCompositeFrag
             }, config);
