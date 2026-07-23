@@ -24,15 +24,15 @@ namespace Syn {
         return result;
     }
 
-    uint32_t MaterialApiImpl::GetSelectedMaterial() const { 
+    uint32_t MaterialApiImpl::GetSelectedMaterial() const {
         return _selectedMaterial;
     }
 
-    void MaterialApiImpl::SetSelectedMaterial(uint32_t id) { 
+    void MaterialApiImpl::SetSelectedMaterial(uint32_t id) {
         _selectedMaterial = id;
     }
 
-    uint64_t MaterialApiImpl::GetVersion() const { 
+    uint64_t MaterialApiImpl::GetVersion() const {
         return _materialManager ? _materialManager->GetVersion() : 0;
     }
 
@@ -58,6 +58,11 @@ namespace Syn {
         case GraphPinType::MetallicRoughness: return mat->metallicRoughnessTexture;
         case GraphPinType::Emissive: return mat->emissiveTexture;
         case GraphPinType::AmbientOcclusion: return mat->ambientOcclusionTexture;
+        case GraphPinType::Clearcoat: return mat->clearcoatTexture;
+        case GraphPinType::ClearcoatRoughness: return mat->clearcoatRoughnessTexture;
+        case GraphPinType::ClearcoatNormal: return mat->clearcoatNormalTexture;
+        case GraphPinType::Specular: return mat->specularTexture;
+        case GraphPinType::SpecularColor: return mat->specularColorTexture;
         default: return INVALID_MATERIAL_ID;
         }
     }
@@ -76,6 +81,11 @@ namespace Syn {
         case GraphPinType::MetallicRoughness: mat->metallicRoughnessTexture = textureId; break;
         case GraphPinType::Emissive: mat->emissiveTexture = textureId; break;
         case GraphPinType::AmbientOcclusion: mat->ambientOcclusionTexture = textureId; break;
+        case GraphPinType::Clearcoat: mat->clearcoatTexture = textureId; break;
+        case GraphPinType::ClearcoatRoughness: mat->clearcoatRoughnessTexture = textureId; break;
+        case GraphPinType::ClearcoatNormal: mat->clearcoatNormalTexture = textureId; break;
+        case GraphPinType::Specular: mat->specularTexture = textureId; break;
+        case GraphPinType::SpecularColor: mat->specularColorTexture = textureId; break;
         default: break;
         }
     }

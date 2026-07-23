@@ -42,6 +42,11 @@ namespace Syn {
         mat.doubleSided = info.doubleSided;
         mat.isTransparent = info.isTransparent;
         mat.isAlphaTested = info.isAlphaTested;
+        mat.clearcoatFactor = info.clearcoatFactor;
+        mat.clearcoatRoughness = info.clearcoatRoughnessFactor;
+        mat.ior = info.ior;
+        mat.specularFactor = info.specularFactor;
+        mat.specularColor = info.specularColorFactor;
 
         mat.albedoTexture = getTexId(info.albedo);
         mat.normalTexture = getTexId(info.normal);
@@ -51,6 +56,11 @@ namespace Syn {
         mat.emissiveTexture = getTexId(info.emissive);
         mat.ambientOcclusionTexture = getTexId(info.ambientOcclusion);
         mat.opacityTexture = getTexId(info.opacity);
+        mat.clearcoatTexture = getTexId(info.clearcoat);
+        mat.clearcoatRoughnessTexture = getTexId(info.clearcoatRoughness);
+        mat.clearcoatNormalTexture = getTexId(info.clearcoatNormal);
+        mat.specularTexture = getTexId(info.specular);
+        mat.specularColorTexture = getTexId(info.specularColor);
 
         return std::make_shared<Material>(mat);
     }

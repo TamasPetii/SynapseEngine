@@ -178,6 +178,12 @@ namespace Syn {
         case GraphPinType::MetallicRoughness: return "MetallicRoughness";
         case GraphPinType::Emissive: return "Emissive";
         case GraphPinType::AmbientOcclusion: return "Ambient Occlusion";
+        case GraphPinType::Clearcoat: return "Clearcoat";
+        case GraphPinType::ClearcoatRoughness: return "CC Roughness";
+        case GraphPinType::ClearcoatNormal: return "CC Normal";
+        case GraphPinType::Specular: return "Specular";
+        case GraphPinType::SpecularColor: return "Specular Color";
+
         default: return "Unknown";
         }
     }

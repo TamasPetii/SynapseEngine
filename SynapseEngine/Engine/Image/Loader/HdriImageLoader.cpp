@@ -58,7 +58,7 @@ namespace Syn
             }
         }
         else {
-            std::memcpy(destPixels, data, imageSizeInBytes);
+            memcpy(destPixels, data, imageSizeInBytes);
         }
 
         stbi_image_free(data);

@@ -222,6 +222,35 @@ namespace Syn
                     matInfo.isAlphaTested = true;
                 }
 
+                ai_real specularFactor;
+                if (AI_SUCCESS == matAI->Get(AI_MATKEY_SPECULAR_FACTOR, specularFactor)) {
+                    matInfo.specularFactor = static_cast<float>(specularFactor);
+                }
+
+                aiColor3D specularColor;
+                if (AI_SUCCESS == matAI->Get(AI_MATKEY_COLOR_SPECULAR, specularColor)) {
+                    matInfo.specularColorFactor = glm::vec3(specularColor.r, specularColor.g, specularColor.b);
+                }
+
+                if (!extractTexture(aiTextureType_SPECULAR, matInfo.specular)) {
+                    extractTexture(aiTextureType_REFLECTION, matInfo.specular);
+                }
+
+                ai_real clearcoatFactor, clearcoatRoughnessFactor, iorVal;
+                if (AI_SUCCESS == matAI->Get(AI_MATKEY_CLEARCOAT_FACTOR, clearcoatFactor)) {
+                    matInfo.clearcoatFactor = static_cast<float>(clearcoatFactor);
+                }
+
+                if (AI_SUCCESS == matAI->Get(AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR, clearcoatRoughnessFactor)) {
+                    matInfo.clearcoatRoughnessFactor = static_cast<float>(clearcoatRoughnessFactor);
+                }
+
+                if (AI_SUCCESS == matAI->Get(AI_MATKEY_REFRACTI, iorVal)) {
+                    matInfo.ior = static_cast<float>(iorVal);
+                }
+
+                extractTexture(aiTextureType_CLEARCOAT, matInfo.clearcoat);
+
                 aiColor4D color;
 
                 if (AI_SUCCESS == matAI->Get(AI_MATKEY_BASE_COLOR, color)) {

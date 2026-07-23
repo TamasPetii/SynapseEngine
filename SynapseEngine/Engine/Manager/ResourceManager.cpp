@@ -157,7 +157,7 @@ namespace Syn {
 		_staticMeshBuilder->RegisterMeshProcessor(std::make_unique<NormalProcessor>());
 		_staticMeshBuilder->RegisterMeshProcessor(std::make_unique<TangentProcessor>());
 		_staticMeshBuilder->RegisterMeshProcessor(std::make_unique<MeshoptimizerLodProcessor>());
-		//_staticMeshBuilder->RegisterProcessor(std::make_unique<MeshoptimizerOptimizerProcessor>());
+		//_staticMeshBuilder->RegisterMeshProcessor(std::make_unique<MeshoptimizerOptimizerProcessor>());
 		_staticMeshBuilder->RegisterMeshProcessor(std::make_unique<MeshoptimizerMeshletProcessor>());
 		_staticMeshBuilder->RegisterMeshProcessor(std::make_unique<ColliderProcessor>());
 

@@ -32,6 +32,11 @@ namespace Syn
         TexturePayload emissive;
         TexturePayload ambientOcclusion;
         TexturePayload opacity;
+        TexturePayload clearcoat;
+        TexturePayload clearcoatRoughness;
+        TexturePayload clearcoatNormal;
+        TexturePayload specular;
+        TexturePayload specularColor;
 
         glm::vec4 color = glm::vec4(1.0f);
         glm::vec3 emissiveFactor = glm::vec3(0.0f);
@@ -43,5 +48,11 @@ namespace Syn
         bool doubleSided = false;
         bool isTransparent = false;
         bool isAlphaTested = false;
+
+        float clearcoatFactor = 0.0f;
+        float clearcoatRoughnessFactor = 0.0f;
+        float ior = 1.5f;
+        float specularFactor = 1.0f;
+        glm::vec3 specularColorFactor = glm::vec3(1.0f);
     };
 }

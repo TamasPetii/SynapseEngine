@@ -45,6 +45,15 @@ namespace Syn {
 
                     Syn::UI::PropertySeparator();
 
+                    if (Syn::UI::PropertyDragFloat("Clearcoat", editedMat.clearcoatFactor, 0.01f, 0.0f, 1.0f, "%.2f")) isModified = true;
+                    if (Syn::UI::PropertyDragFloat("CC Roughness", editedMat.clearcoatRoughness, 0.01f, 0.0f, 1.0f, "%.2f")) isModified = true;
+
+                    if (Syn::UI::PropertyDragFloat("IOR", editedMat.ior, 0.01f, 1.0f, 3.0f, "%.2f")) isModified = true;
+                    if (Syn::UI::PropertyDragFloat("Specular Factor", editedMat.specularFactor, 0.01f, 0.0f, 1.0f, "%.2f")) isModified = true;
+                    if (Syn::UI::PropertyColor3("Specular Color", editedMat.specularColor)) isModified = true;
+
+                    Syn::UI::PropertySeparator();
+
                     if (Syn::UI::PropertyCheckbox("Double Sided", editedMat.doubleSided)) isModified = true;
                     if (Syn::UI::PropertyCheckbox("Transparent", editedMat.isTransparent)) isModified = true;
                     if (Syn::UI::PropertyCheckbox("Alpha Tested", editedMat.isAlphaTested)) isModified = true;
@@ -91,6 +100,26 @@ namespace Syn {
                     DrawTextureSlot("Opacity",
                         editedMat.opacityTexture, state.opacityName, state.availableTextures,
                         editedMat.opacitySampler, state.opacitySamplerName, state.availableSamplers, isModified);
+
+                    DrawTextureSlot("Clearcoat",
+                        editedMat.clearcoatTexture, state.clearcoatName, state.availableTextures,
+                        editedMat.clearcoatSampler, state.clearcoatSamplerName, state.availableSamplers, isModified);
+
+                    DrawTextureSlot("CC Roughness",
+                        editedMat.clearcoatRoughnessTexture, state.clearcoatRoughnessName, state.availableTextures,
+                        editedMat.clearcoatRoughnessSampler, state.clearcoatRoughnessSamplerName, state.availableSamplers, isModified);
+
+                    DrawTextureSlot("CC Normal",
+                        editedMat.clearcoatNormalTexture, state.clearcoatNormalName, state.availableTextures,
+                        editedMat.clearcoatNormalSampler, state.clearcoatNormalSamplerName, state.availableSamplers, isModified);
+
+                    DrawTextureSlot("Specular",
+                        editedMat.specularTexture, state.specularName, state.availableTextures,
+                        editedMat.specularSampler, state.specularSamplerName, state.availableSamplers, isModified);
+
+                    DrawTextureSlot("Specular Color",
+                        editedMat.specularColorTexture, state.specularColorName, state.availableTextures,
+                        editedMat.specularColorSampler, state.specularColorSamplerName, state.availableSamplers, isModified);
 
                     Syn::UI::EndPropertyGrid();
                 }

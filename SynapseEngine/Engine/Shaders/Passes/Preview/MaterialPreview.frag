@@ -68,6 +68,16 @@ void main() {
     float finalMetalness = clamp(metalRough.x, 0.0, 1.0);
     float finalRoughness = clamp(metalRough.y, 0.04, 1.0);
 
+    float clearcoatFactor, clearcoatRoughness;
+    vec3 clearcoatNormal;
+    EvaluateClearcoat(ctx.textureMetadataBufferAddr, mat, sphereUV, localNormal, inTangent, frontFacing, clearcoatFactor, clearcoatRoughness, clearcoatNormal);
+
+    float specularFactor;
+    vec3 specularColor;
+    EvaluateSpecular(ctx.textureMetadataBufferAddr, mat, sphereUV, specularFactor, specularColor);
+    
+    float ior = mat.ior;
+
     vec3 totalRadiance = vec3(0.0);
     
     // Key Light
@@ -76,7 +86,8 @@ void main() {
     float keyLightStrength = 2.5;
     totalRadiance += ShadePhysicallyBased(
         albedoAlpha.rgb, finalNormal, viewDir, keyLightDir, 
-        finalRoughness, finalMetalness, keyLightColor, 1.0, keyLightStrength
+        finalRoughness, finalMetalness, ior, specularFactor, specularColor, clearcoatFactor, clearcoatRoughness, clearcoatNormal,
+        keyLightColor, 1.0, keyLightStrength
     );
 
     // Fill Light
@@ -85,14 +96,13 @@ void main() {
     float fillLightStrength = 1.0;
     totalRadiance += ShadePhysicallyBased(
         albedoAlpha.rgb, finalNormal, viewDir, fillLightDir, 
-        finalRoughness, finalMetalness, fillLightColor, 1.0, fillLightStrength
+        finalRoughness, finalMetalness, ior, specularFactor, specularColor, clearcoatFactor, clearcoatRoughness, clearcoatNormal,
+        fillLightColor, 1.0, fillLightStrength
     );
 
     // Ambient & Bloom
     totalRadiance += SimulateAmbientLight(albedoAlpha.rgb, ao, ctx.ambientStrength);
     totalRadiance += SimulateBloom(emissive, 1.0, ctx.emissiveStrength);
-
-    
 
     vec3 finalColor = mix(bgColor, totalRadiance, IS_TRANSPARENT(mat) ? albedoAlpha.a : 1.0);
     outColor = vec4(finalColor, 1.0);

@@ -53,7 +53,10 @@ namespace Syn {
         std::vector<GraphPinType> pinTypes = {
             GraphPinType::Albedo, GraphPinType::Normal, GraphPinType::Metalness,
             GraphPinType::Roughness, GraphPinType::MetallicRoughness,
-            GraphPinType::Emissive, GraphPinType::AmbientOcclusion
+            GraphPinType::Emissive, GraphPinType::AmbientOcclusion,
+            GraphPinType::Clearcoat, GraphPinType::ClearcoatRoughness,
+            GraphPinType::ClearcoatNormal, GraphPinType::Specular,
+            GraphPinType::SpecularColor
         };
 
         auto allTextures = _textureApi ? _textureApi->GetAllTextures() : std::vector<TextureItemData>();

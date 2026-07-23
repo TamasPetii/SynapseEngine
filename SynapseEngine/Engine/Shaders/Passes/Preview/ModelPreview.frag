@@ -43,6 +43,16 @@ void main() {
     float finalMetalness = clamp(metalRough.x, 0.0, 1.0);
     float finalRoughness = clamp(metalRough.y, 0.04, 1.0);
 
+    float clearcoatFactor, clearcoatRoughness;
+    vec3 clearcoatNormal;
+    EvaluateClearcoat(ctx.textureMetadataBufferAddr, mat, inUV, inNormal, inTangent, frontFacing, clearcoatFactor, clearcoatRoughness, clearcoatNormal);
+
+    float specularFactor;
+    vec3 specularColor;
+    EvaluateSpecular(ctx.textureMetadataBufferAddr, mat, inUV, specularFactor, specularColor);
+    
+    float ior = mat.ior;
+
     vec3 viewDir = vec3(0.0, 0.0, 1.0); 
     vec3 totalRadiance = vec3(0.0);
 
@@ -52,7 +62,8 @@ void main() {
     float keyLightStrength = 2.5;
     totalRadiance += ShadePhysicallyBased(
         albedoAlpha.rgb, finalNormal, viewDir, keyLightDir, 
-        finalRoughness, finalMetalness, keyLightColor, 1.0, keyLightStrength
+        finalRoughness, finalMetalness, ior, specularFactor, specularColor, clearcoatFactor, clearcoatRoughness, clearcoatNormal,
+        keyLightColor, 1.0, keyLightStrength
     );
 
     // Fill Light
@@ -61,7 +72,8 @@ void main() {
     float fillLightStrength = 1.0;
     totalRadiance += ShadePhysicallyBased(
         albedoAlpha.rgb, finalNormal, viewDir, fillLightDir, 
-        finalRoughness, finalMetalness, fillLightColor, 1.0, fillLightStrength
+        finalRoughness, finalMetalness, ior, specularFactor, specularColor, clearcoatFactor, clearcoatRoughness, clearcoatNormal,
+        fillLightColor, 1.0, fillLightStrength
     );
 
     // Ambient és Bloom

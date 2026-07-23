@@ -48,5 +48,20 @@ namespace Syn
 
         std::string opacityName = "None";
         std::string opacitySamplerName = "Default";
+
+        std::string clearcoatName = "None";
+        std::string clearcoatSamplerName = "Default";
+
+        std::string clearcoatRoughnessName = "None";
+        std::string clearcoatRoughnessSamplerName = "Default";
+
+        std::string clearcoatNormalName = "None";
+        std::string clearcoatNormalSamplerName = "Default";
+
+        std::string specularName = "None";
+        std::string specularSamplerName = "Default";
+
+        std::string specularColorName = "None";
+        std::string specularColorSamplerName = "Default";
     };
 }

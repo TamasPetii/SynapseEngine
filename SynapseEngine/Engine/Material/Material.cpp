@@ -12,6 +12,11 @@ namespace Syn {
         , roughness(1.0f)
         , aoStrength(1.0f)
         , packedFlags(0)
+        , clearcoatFactor(0.0f)
+        , clearcoatRoughness(0.0f)
+        , specularColor(1.0f, 1.0f, 1.0f)
+        , specularFactor(1.0f)
+        , ior(1.5f)
         , albedoTexture(UINT32_MAX)
         , normalTexture(UINT32_MAX)
         , metalnessTexture(UINT32_MAX)
@@ -20,13 +25,17 @@ namespace Syn {
         , emissiveTexture(UINT32_MAX)
         , ambientOcclusionTexture(UINT32_MAX)
         , opacityTexture(UINT32_MAX)
+        , clearcoatTexture(UINT32_MAX)
+        , clearcoatRoughnessTexture(UINT32_MAX)
+        , clearcoatNormalTexture(UINT32_MAX)
+        , specularTexture(UINT32_MAX)
+        , specularColorTexture(UINT32_MAX)
         , padding1(0)
         , padding2(0)
-    {
-    }
+    {}
 
     SYN_INLINE uint32_t PackTextureAndSampler(uint32_t textureIdx, uint32_t samplerIdx) {
-        if (textureIdx == UINT32_MAX) 
+        if (textureIdx == UINT32_MAX)
             return UINT32_MAX;
 
         uint32_t tex = textureIdx & 0x00FFFFFF;
@@ -47,6 +56,11 @@ namespace Syn {
         , metalness(material.metalness)
         , roughness(material.roughness)
         , aoStrength(material.aoStrength)
+        , clearcoatFactor(material.clearcoatFactor)
+        , clearcoatRoughness(material.clearcoatRoughness)
+        , specularColor(material.specularColor)
+        , specularFactor(material.specularFactor)
+        , ior(material.ior)
         , albedoTexture(PackTextureAndSampler(material.albedoTexture, material.albedoSampler))
         , normalTexture(PackTextureAndSampler(material.normalTexture, material.normalSampler))
         , metalnessTexture(PackTextureAndSampler(material.metalnessTexture, material.metalnessSampler))
@@ -55,6 +69,11 @@ namespace Syn {
         , emissiveTexture(PackTextureAndSampler(material.emissiveTexture, material.emissiveSampler))
         , ambientOcclusionTexture(PackTextureAndSampler(material.ambientOcclusionTexture, material.ambientOcclusionSampler))
         , opacityTexture(PackTextureAndSampler(material.opacityTexture, material.opacitySampler))
+        , clearcoatTexture(PackTextureAndSampler(material.clearcoatTexture, material.clearcoatSampler))
+        , clearcoatRoughnessTexture(PackTextureAndSampler(material.clearcoatRoughnessTexture, material.clearcoatRoughnessSampler))
+        , clearcoatNormalTexture(PackTextureAndSampler(material.clearcoatNormalTexture, material.clearcoatNormalSampler))
+        , specularTexture(PackTextureAndSampler(material.specularTexture, material.specularSampler))
+        , specularColorTexture(PackTextureAndSampler(material.specularColorTexture, material.specularColorSampler))
         , padding1(0)
         , padding2(0)
     {

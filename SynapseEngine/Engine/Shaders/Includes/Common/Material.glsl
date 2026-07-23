@@ -4,24 +4,34 @@
 #include "../Core.glsl"
 
 struct Material { 
-    vec4 color; 
-    vec3 emissiveColor; 
-    float emissiveIntensity; 
-    vec2 uvScale; 
-    float metalness; 
+    vec4 color;
+    vec3 emissiveColor;
+    float emissiveIntensity;
+    vec2 uvScale;
+    float metalness;
     float roughness;
     float aoStrength;
-    uint packedFlags; 
+    uint packedFlags;
+    float clearcoatFactor;
+    float clearcoatRoughness;
+    vec3 specularColor;
+    float specularFactor;
+    float ior;
     uint albedoTexture;
-    uint normalTexture; 
-    uint metalnessTexture; 
-    uint roughnessTexture; 
-    uint metallicRoughnessTexture; 
-    uint emissiveTexture; 
-    uint ambientOcclusionTexture; 
-    uint opacityTexture; 
-    uint padding1; 
-    uint padding2; 
+    uint normalTexture;
+    uint metalnessTexture;
+    uint roughnessTexture;
+    uint metallicRoughnessTexture;
+    uint emissiveTexture;
+    uint ambientOcclusionTexture;
+    uint opacityTexture;
+    uint clearcoatTexture;
+    uint clearcoatRoughnessTexture;
+    uint clearcoatNormalTexture;
+    uint specularTexture;
+    uint specularColorTexture;
+    uint padding1;
+    uint padding2;
 };
 
 layout(buffer_reference, std430) readonly restrict buffer MaterialBuffer { Material data[]; };
@@ -39,7 +49,7 @@ layout(buffer_reference, std430) readonly restrict buffer MaterialLookupBuffer {
 
 #define IS_DOUBLE_SIDED(mat)    HAS_FLAG((mat).packedFlags, 0)
 #define IS_TRANSPARENT(mat)     HAS_FLAG((mat).packedFlags, 1)
-#define IS_ALPHA_TESTED(mat)     HAS_FLAG((mat).packedFlags, 2)
+#define IS_ALPHA_TESTED(mat)    HAS_FLAG((mat).packedFlags, 2)
 
 #define HAS_ALBEDO_TEX(mat)             HAS_VALID_TEXTURE((mat).albedoTexture)
 #define HAS_NORMAL_TEX(mat)             HAS_VALID_TEXTURE((mat).normalTexture)
@@ -49,5 +59,11 @@ layout(buffer_reference, std430) readonly restrict buffer MaterialLookupBuffer {
 #define HAS_EMISSIVE_TEX(mat)           HAS_VALID_TEXTURE((mat).emissiveTexture)
 #define HAS_AO_TEX(mat)                 HAS_VALID_TEXTURE((mat).ambientOcclusionTexture)
 #define HAS_OPACITY_TEX(mat)            HAS_VALID_TEXTURE((mat).opacityTexture)
+
+#define HAS_CLEARCOAT_TEX(mat)          HAS_VALID_TEXTURE((mat).clearcoatTexture)
+#define HAS_CLEARCOAT_ROUGHNESS_TEX(mat) HAS_VALID_TEXTURE((mat).clearcoatRoughnessTexture)
+#define HAS_CLEARCOAT_NORMAL_TEX(mat)   HAS_VALID_TEXTURE((mat).clearcoatNormalTexture)
+#define HAS_SPECULAR_TEX(mat)           HAS_VALID_TEXTURE((mat).specularTexture)
+#define HAS_SPECULAR_COLOR_TEX(mat)     HAS_VALID_TEXTURE((mat).specularColorTexture)
 
 #endif

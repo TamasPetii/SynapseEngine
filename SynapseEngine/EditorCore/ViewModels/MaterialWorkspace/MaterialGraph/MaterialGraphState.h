@@ -21,6 +21,11 @@ namespace Syn {
         MetallicRoughness = 4,
         Emissive = 5,
         AmbientOcclusion = 6,
+        Clearcoat = 7,
+        ClearcoatRoughness = 8,
+        ClearcoatNormal = 9,
+        Specular = 10,
+        SpecularColor = 11,
         TextureOutput = 99
     };
 

@@ -73,6 +73,15 @@ void main() {
     // 5. Evaluate Emissive
     vec3 finalEmissive = EvaluateEmissive(ctx.textureMetadataBufferAddr, mat, finalUV);
 
+    float clearcoatFactor, clearcoatRoughness;
+    vec3 clearcoatNormal;
+    EvaluateClearcoat(ctx.textureMetadataBufferAddr, mat, finalUV, inNormal, inTangent, frontFacing, clearcoatFactor, clearcoatRoughness, clearcoatNormal);
+
+    float specularFactor;
+    vec3 specularColor;
+    EvaluateSpecular(ctx.textureMetadataBufferAddr, mat, finalUV, specularFactor, specularColor);
+
+    float ior = mat.ior;
 
     uint cameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);
     CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraDenseIndex);
@@ -130,13 +139,9 @@ void main() {
         );
 
         vec3 lightContribution = SimulateDirectionalLight(
-            ctx.directionLightDataBufferAddr,
-            lightDenseIndex,
-            albedoAlpha.rgb,
-            finalNormal,
-            viewDir,
-            finalRoughness,
-            finalMetalness
+            ctx.directionLightDataBufferAddr, lightDenseIndex,
+            albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness,
+            ior, specularFactor, specularColor, clearcoatFactor, clearcoatRoughness, clearcoatNormal
         );
 
         /*
@@ -167,14 +172,9 @@ void main() {
         );
 
         vec3 lightContribution = SimulatePointLight(
-            ctx.pointLightDataBufferAddr, 
-            lightDenseIndex, 
-            worldPos, 
-            albedoAlpha.rgb, 
-            finalNormal, 
-            viewDir, 
-            finalRoughness, 
-            finalMetalness
+            ctx.pointLightDataBufferAddr, lightDenseIndex, worldPos, 
+            albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness,
+            ior, specularFactor, specularColor, clearcoatFactor, clearcoatRoughness, clearcoatNormal
         );
         
         totalRadiance += shadowFactor * lightContribution;
@@ -199,14 +199,9 @@ void main() {
         );
 
         vec3 lightContribution = SimulateSpotLight(
-            ctx.spotLightDataBufferAddr,
-            lightDenseIndex,
-            worldPos,
-            albedoAlpha.rgb,
-            finalNormal,
-            viewDir,
-            finalRoughness,
-            finalMetalness
+            ctx.spotLightDataBufferAddr, lightDenseIndex, worldPos,
+            albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness,
+            ior, specularFactor, specularColor, clearcoatFactor, clearcoatRoughness, clearcoatNormal
         );
 
         totalRadiance += shadowFactor * lightContribution;

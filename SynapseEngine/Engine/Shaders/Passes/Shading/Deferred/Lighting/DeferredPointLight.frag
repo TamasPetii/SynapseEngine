@@ -59,6 +59,13 @@ void main()
     vec3 normal    = normalize(normalRoughness.xyz);
     float roughness = clamp(normalRoughness.a, 0.04, 1.0);
 
+    float defaultIor = 1.5;
+    float defaultSpecularFactor = 1.0;
+    vec3 defaultSpecularColor = vec3(1.0);
+    float defaultClearcoatFactor = 0.0;
+    float defaultClearcoatRoughness = 0.0;
+    vec3 defaultClearcoatNormal = normal;
+
     // 5. Physically Based Rendering (PBR) Light Calculation
     vec3 viewDir = normalize(camera.eye.xyz - position);
 
@@ -72,7 +79,23 @@ void main()
         pointLightShadowAtlas
     );
 
-    vec3 radiance = SimulatePointLight(ctx.pointLightDataBufferAddr, inLightDenseIndex, position, albedo, normal, viewDir, roughness, metallic);
+    vec3 radiance = SimulatePointLight(
+        ctx.pointLightDataBufferAddr,
+        inLightDenseIndex,
+        position, 
+        albedo,
+        normal,
+        viewDir,
+        roughness,
+        metallic,
+        defaultIor, 
+        defaultSpecularFactor, 
+        defaultSpecularColor,
+        defaultClearcoatFactor, 
+        defaultClearcoatRoughness, 
+        defaultClearcoatNormal
+    );
+
     radiance *= shadowFactor;
 
     if (ctx.enableSsao == 1 && ctx.enableSsaoLight == 1) {

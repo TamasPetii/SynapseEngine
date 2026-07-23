@@ -26,6 +26,12 @@ namespace Syn
             ar.Property("isTransparent", mat.isTransparent);
             ar.Property("isAlphaTested", mat.isAlphaTested);
 
+            ar.Property("clearcoatFactor", mat.clearcoatFactor);
+            ar.Property("clearcoatRoughness", mat.clearcoatRoughness);
+            ar.Property("ior", mat.ior);
+            ar.Property("specularFactor", mat.specularFactor);
+            ar.Property("specularColor", mat.specularColor);
+
             ar.Property("albedoTexture", mat.albedoTexture);
             ar.Property("normalTexture", mat.normalTexture);
             ar.Property("metalnessTexture", mat.metalnessTexture);
@@ -35,6 +41,12 @@ namespace Syn
             ar.Property("ambientOcclusionTexture", mat.ambientOcclusionTexture);
             ar.Property("opacityTexture", mat.opacityTexture);
 
+            ar.Property("clearcoatTexture", mat.clearcoatTexture);
+            ar.Property("clearcoatRoughnessTexture", mat.clearcoatRoughnessTexture);
+            ar.Property("clearcoatNormalTexture", mat.clearcoatNormalTexture);
+            ar.Property("specularTexture", mat.specularTexture);
+            ar.Property("specularColorTexture", mat.specularColorTexture);
+
             ar.Property("albedoSampler", mat.albedoSampler);
             ar.Property("normalSampler", mat.normalSampler);
             ar.Property("metalnessSampler", mat.metalnessSampler);
@@ -43,6 +55,12 @@ namespace Syn
             ar.Property("emissiveSampler", mat.emissiveSampler);
             ar.Property("ambientOcclusionSampler", mat.ambientOcclusionSampler);
             ar.Property("opacitySampler", mat.opacitySampler);
+
+            ar.Property("clearcoatSampler", mat.clearcoatSampler);
+            ar.Property("clearcoatRoughnessSampler", mat.clearcoatRoughnessSampler);
+            ar.Property("clearcoatNormalSampler", mat.clearcoatNormalSampler);
+            ar.Property("specularSampler", mat.specularSampler);
+            ar.Property("specularColorSampler", mat.specularColorSampler);
         }
     };
 }

@@ -138,6 +138,54 @@ namespace Syn
                 if (matGltf.alphaMode == "MASK") {
                     extractTexture(pbr.baseColorTexture.index, matInfo.opacity);
                 }
+
+                if (matGltf.extensions.find("KHR_materials_clearcoat") != matGltf.extensions.end()) {
+                    const auto& ext = matGltf.extensions.at("KHR_materials_clearcoat");
+
+                    if (ext.Has("clearcoatFactor"))
+                        matInfo.clearcoatFactor = static_cast<float>(ext.Get("clearcoatFactor").GetNumberAsDouble());
+
+                    if (ext.Has("clearcoatRoughnessFactor"))
+                        matInfo.clearcoatRoughnessFactor = static_cast<float>(ext.Get("clearcoatRoughnessFactor").GetNumberAsDouble());
+
+                    if (ext.Has("clearcoatTexture"))
+                        extractTexture(ext.Get("clearcoatTexture").Get("index").GetNumberAsInt(), matInfo.clearcoat);
+
+                    if (ext.Has("clearcoatRoughnessTexture"))
+                        extractTexture(ext.Get("clearcoatRoughnessTexture").Get("index").GetNumberAsInt(), matInfo.clearcoatRoughness);
+
+                    if (ext.Has("clearcoatNormalTexture"))
+                        extractTexture(ext.Get("clearcoatNormalTexture").Get("index").GetNumberAsInt(), matInfo.clearcoatNormal);
+                }
+
+                if (matGltf.extensions.find("KHR_materials_ior") != matGltf.extensions.end()) {
+                    const auto& ext = matGltf.extensions.at("KHR_materials_ior");
+
+                    if (ext.Has("ior"))
+                        matInfo.ior = static_cast<float>(ext.Get("ior").GetNumberAsDouble());
+                }
+
+                if (matGltf.extensions.find("KHR_materials_specular") != matGltf.extensions.end()) {
+                    const auto& ext = matGltf.extensions.at("KHR_materials_specular");
+
+                    if (ext.Has("specularFactor"))
+                        matInfo.specularFactor = static_cast<float>(ext.Get("specularFactor").GetNumberAsDouble());
+
+                    if (ext.Has("specularColorFactor")) {
+                        const auto& colorArr = ext.Get("specularColorFactor");
+                        matInfo.specularColorFactor = glm::vec3(
+                            colorArr.Get(0).GetNumberAsDouble(),
+                            colorArr.Get(1).GetNumberAsDouble(),
+                            colorArr.Get(2).GetNumberAsDouble()
+                        );
+                    }
+
+                    if (ext.Has("specularTexture"))
+                        extractTexture(ext.Get("specularTexture").Get("index").GetNumberAsInt(), matInfo.specular);
+
+                    if (ext.Has("specularColorTexture"))
+                        extractTexture(ext.Get("specularColorTexture").Get("index").GetNumberAsInt(), matInfo.specularColor);
+                }
             });
     }
 

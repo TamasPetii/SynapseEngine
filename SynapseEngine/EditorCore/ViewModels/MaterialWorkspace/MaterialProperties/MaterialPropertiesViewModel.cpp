@@ -73,6 +73,21 @@ namespace Syn {
 
             _state.opacityName = getTexName(matData.opacityTexture);
             _state.opacitySamplerName = getSamplerName(matData.opacitySampler);
+
+            _state.clearcoatName = getTexName(matData.clearcoatTexture);
+            _state.clearcoatSamplerName = getSamplerName(matData.clearcoatSampler);
+
+            _state.clearcoatRoughnessName = getTexName(matData.clearcoatRoughnessTexture);
+            _state.clearcoatRoughnessSamplerName = getSamplerName(matData.clearcoatRoughnessSampler);
+
+            _state.clearcoatNormalName = getTexName(matData.clearcoatNormalTexture);
+            _state.clearcoatNormalSamplerName = getSamplerName(matData.clearcoatNormalSampler);
+
+            _state.specularName = getTexName(matData.specularTexture);
+            _state.specularSamplerName = getSamplerName(matData.specularSampler);
+
+            _state.specularColorName = getTexName(matData.specularColorTexture);
+            _state.specularColorSamplerName = getSamplerName(matData.specularColorSampler);
         }
         else {
             _state.hasSelection = false;
