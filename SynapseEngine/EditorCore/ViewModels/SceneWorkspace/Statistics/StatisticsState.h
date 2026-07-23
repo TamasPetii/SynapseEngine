@@ -1,11 +1,36 @@
 #pragma once
 #include "Engine/Statistics/IRenderStatCollector.h"
-#include "Engine/Statistics/FrameStatisticsManager.h" 
 #include <vector>
 #include <string>
 
 namespace Syn
 {
+    enum class StatCategory {
+        All,
+        Scene,
+        DirectionalShadow,
+        PointShadow,
+        SpotShadow
+    };
+
+    struct CpuRenderStats {
+        uint32_t totalModels = 0;
+        uint32_t totalDrawDescriptors = 0;
+        uint32_t traditionalDrawDescriptors = 0;
+        uint32_t meshletDrawDescriptors = 0;
+        uint32_t totalAllocatedInstances = 0;
+        uint32_t totalMaxMeshlets = 0;
+
+        uint64_t maxPossibleVertices = 0;
+        uint64_t maxPossibleIndices = 0;
+        uint64_t maxPossibleTriangles = 0;
+
+        uint32_t totalLights = 0;
+        uint32_t visibleLights = 0;
+        uint32_t visibleShadowLights = 0;
+        uint32_t appendedInstances = 0;
+    };
+
     struct UiStatGroup {
         std::string name;
         uint64_t inputAssemblyVertices = 0;
@@ -20,7 +45,7 @@ namespace Syn
     };
 
     struct StatisticsState {
-        StatCategory activeTab = StatCategory::Scene;
+        StatCategory activeTab = StatCategory::All;
 
         CpuRenderStats cpuStats;
         std::vector<UiStatGroup> groupedGpuStats;

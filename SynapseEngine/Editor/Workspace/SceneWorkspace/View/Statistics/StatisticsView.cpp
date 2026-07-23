@@ -16,9 +16,13 @@ namespace Syn
         if (ImGui::Begin(SYN_ICON_TACHOMETER " Render Statistics"))
         {
             float spacing = ImGui::GetStyle().ItemSpacing.x;
-            float tabWidth = (ImGui::GetContentRegionAvail().x - spacing * 3.0f) * 0.25f;
+            float tabWidth = (ImGui::GetContentRegionAvail().x - spacing * 4.0f) * 0.2f;
 
             ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 4.0f);
+            if (Syn::UI::ToggleButton(SYN_ICON_LIST " All", state.activeTab == StatCategory::All, ImVec2(tabWidth, 32.0f))) {
+                vm.Dispatch(StatisticsSwitchTabIntent{ StatCategory::All });
+            }
+            ImGui::SameLine();
             if (Syn::UI::ToggleButton(SYN_ICON_GLOBE " Scene", state.activeTab == StatCategory::Scene, ImVec2(tabWidth, 32.0f))) {
                 vm.Dispatch(StatisticsSwitchTabIntent{ StatCategory::Scene });
             }
@@ -161,7 +165,7 @@ namespace Syn
 
         float currentY = ImGui::GetCursorScreenPos().y;
         float tableHeight = mainContentBottomY - currentY - 12.0f;
-        if (tableHeight < 150.0f) tableHeight = 150.0f;
+        if (tableHeight < 350.0f) tableHeight = 350.0f;
 
         ImGui::BeginChild("StatsTableContainer", ImVec2(0, tableHeight), ImGuiChildFlags_Borders, ImGuiWindowFlags_NoScrollbar);
 

@@ -2,6 +2,7 @@
 #include "EditorCore/ViewModels/IViewModel.h"
 #include "StatisticsState.h"
 #include "StatisticsIntent.h"
+#include "Engine/Statistics/FrameStatisticsManager.h"
 #include <vector>
 #include <map>
 #include <span>
@@ -20,7 +21,7 @@ namespace Syn {
         void ProcessStats(std::span<const RenderPassStats> rawStats);
 
         StatisticsState _state;
-        std::map<StatCategory, CpuRenderStats> _lastCpuStatsMap;
+        RawCpuRenderStats _lastRawCpuStats;
         std::vector<RenderPassStats> _lastRawStats;
     };
 }

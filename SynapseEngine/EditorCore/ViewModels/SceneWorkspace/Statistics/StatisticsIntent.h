@@ -1,7 +1,7 @@
 #pragma once
 #include <variant>
 #include <string>
-#include "Engine/Statistics/FrameStatisticsManager.h"
+#include "StatisticsState.h"
 
 namespace Syn {
     struct StatisticsSetSearchQueryIntent {

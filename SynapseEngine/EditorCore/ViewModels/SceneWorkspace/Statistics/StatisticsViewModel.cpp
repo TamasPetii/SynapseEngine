@@ -1,6 +1,7 @@
 #include "StatisticsViewModel.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/FrameContext.h"
+#include "Engine/Render/PassGroupNames.h"
 #include <algorithm>
 #include <map>
 #include <cctype>
@@ -18,10 +19,9 @@ namespace Syn {
 
         uint32_t prevFrame = (frameCtx->currentFrameIndex + frameCtx->framesInFlight - 1) % frameCtx->framesInFlight;
 
-        _lastCpuStatsMap = statsManager->GetCpuStats(prevFrame);
+        _lastRawCpuStats = statsManager->GetCpuStats(prevFrame);
         _lastRawStats = statsManager->GetGpuStats(prevFrame);
 
-        _state.cpuStats = _lastCpuStatsMap[_state.activeTab];
         ProcessStats(_lastRawStats);
     }
 
@@ -35,32 +35,78 @@ namespace Syn {
         _state.totalClippingInvocations = 0;
         _state.totalClippingPrimitives = 0;
 
+        _state.cpuStats.totalModels = _lastRawCpuStats.totalModels;
+        _state.cpuStats.traditionalDrawDescriptors = _lastRawCpuStats.activeTraditionalCount;
+        _state.cpuStats.meshletDrawDescriptors = _lastRawCpuStats.activeMeshletCount;
+        _state.cpuStats.totalDrawDescriptors = _state.cpuStats.traditionalDrawDescriptors + _state.cpuStats.meshletDrawDescriptors;
+        _state.cpuStats.totalAllocatedInstances = _lastRawCpuStats.totalAllocatedInstances;
+        _state.cpuStats.totalMaxMeshlets = _lastRawCpuStats.totalMaxMeshletInstances;
+        _state.cpuStats.maxPossibleIndices = _lastRawCpuStats.maxPossibleIndices;
+
+        if (_state.activeTab == StatCategory::All) {
+            _state.cpuStats.totalLights = _lastRawCpuStats.totalDirLights + _lastRawCpuStats.totalSpotLights + _lastRawCpuStats.totalPointLights;
+            _state.cpuStats.visibleLights = _lastRawCpuStats.visibleDirLights + _lastRawCpuStats.visibleSpotLights + _lastRawCpuStats.visiblePointLights;
+            _state.cpuStats.visibleShadowLights = _lastRawCpuStats.shadowDirLights + _lastRawCpuStats.shadowSpotLights + _lastRawCpuStats.shadowPointLights;
+            _state.cpuStats.appendedInstances = _lastRawCpuStats.appendedDirInstances + _lastRawCpuStats.appendedSpotInstances + _lastRawCpuStats.appendedPointInstances;
+            _state.cpuStats.maxPossibleVertices = _lastRawCpuStats.maxPossibleVertices + _lastRawCpuStats.maxDirVertices + _lastRawCpuStats.maxSpotVertices + _lastRawCpuStats.maxPointVertices;
+            _state.cpuStats.maxPossibleTriangles = _lastRawCpuStats.maxPossibleTriangles + _lastRawCpuStats.maxDirTriangles + _lastRawCpuStats.maxSpotTriangles + _lastRawCpuStats.maxPointTriangles;
+        }
+        else if (_state.activeTab == StatCategory::Scene) {
+            _state.cpuStats.totalLights = _lastRawCpuStats.totalDirLights + _lastRawCpuStats.totalSpotLights + _lastRawCpuStats.totalPointLights;
+            _state.cpuStats.visibleLights = _lastRawCpuStats.visibleDirLights + _lastRawCpuStats.visibleSpotLights + _lastRawCpuStats.visiblePointLights;
+            _state.cpuStats.visibleShadowLights = _lastRawCpuStats.shadowDirLights + _lastRawCpuStats.shadowSpotLights + _lastRawCpuStats.shadowPointLights;
+            _state.cpuStats.appendedInstances = 0;
+            _state.cpuStats.maxPossibleVertices = _lastRawCpuStats.maxPossibleVertices;
+            _state.cpuStats.maxPossibleTriangles = _lastRawCpuStats.maxPossibleTriangles;
+        }
+        else if (_state.activeTab == StatCategory::DirectionalShadow) {
+            _state.cpuStats.totalLights = _lastRawCpuStats.totalDirLights;
+            _state.cpuStats.visibleLights = _lastRawCpuStats.visibleDirLights;
+            _state.cpuStats.visibleShadowLights = _lastRawCpuStats.shadowDirLights;
+            _state.cpuStats.appendedInstances = _lastRawCpuStats.appendedDirInstances;
+            _state.cpuStats.maxPossibleVertices = _lastRawCpuStats.maxDirVertices;
+            _state.cpuStats.maxPossibleTriangles = _lastRawCpuStats.maxDirTriangles;
+        }
+        else if (_state.activeTab == StatCategory::SpotShadow) {
+            _state.cpuStats.totalLights = _lastRawCpuStats.totalSpotLights;
+            _state.cpuStats.visibleLights = _lastRawCpuStats.visibleSpotLights;
+            _state.cpuStats.visibleShadowLights = _lastRawCpuStats.shadowSpotLights;
+            _state.cpuStats.appendedInstances = _lastRawCpuStats.appendedSpotInstances;
+            _state.cpuStats.maxPossibleVertices = _lastRawCpuStats.maxSpotVertices;
+            _state.cpuStats.maxPossibleTriangles = _lastRawCpuStats.maxSpotTriangles;
+        }
+        else if (_state.activeTab == StatCategory::PointShadow) {
+            _state.cpuStats.totalLights = _lastRawCpuStats.totalPointLights;
+            _state.cpuStats.visibleLights = _lastRawCpuStats.visiblePointLights;
+            _state.cpuStats.visibleShadowLights = _lastRawCpuStats.shadowPointLights;
+            _state.cpuStats.appendedInstances = _lastRawCpuStats.appendedPointInstances;
+            _state.cpuStats.maxPossibleVertices = _lastRawCpuStats.maxPointVertices;
+            _state.cpuStats.maxPossibleTriangles = _lastRawCpuStats.maxPointTriangles;
+        }
+
         std::map<std::string, UiStatGroup> groupMap;
 
         for (const auto& pass : rawStats) {
-            std::string lowerGroup = pass.groupName;
-            std::transform(lowerGroup.begin(), lowerGroup.end(), lowerGroup.begin(), ::tolower);
+            bool isDir = (pass.groupName == PassGroupNames::DirectionLightShadowPasses ||
+                pass.groupName == PassGroupNames::DirectionLightShadowCullingPasses ||
+                pass.groupName == PassGroupNames::DirectionalLightCullingPasses);
 
-            bool isDir = lowerGroup.find("direction") != std::string::npos || lowerGroup.find("dir") != std::string::npos;
-            bool isSpot = lowerGroup.find("spot") != std::string::npos;
-            bool isPoint = lowerGroup.find("point") != std::string::npos;
+            bool isSpot = (pass.groupName == PassGroupNames::SpotLightShadowPasses ||
+                pass.groupName == PassGroupNames::SpotLightCullingPasses);
+
+            bool isPoint = (pass.groupName == PassGroupNames::PointLightShadowPasses ||
+                pass.groupName == PassGroupNames::PointLightCullingPasses);
+
+            bool isScene = !isDir && !isSpot && !isPoint;
 
             bool isMatch = false;
-            if (_state.activeTab == StatCategory::DirectionalShadow && isDir) isMatch = true;
+            if (_state.activeTab == StatCategory::All) isMatch = true;
+            else if (_state.activeTab == StatCategory::DirectionalShadow && isDir) isMatch = true;
             else if (_state.activeTab == StatCategory::SpotShadow && isSpot) isMatch = true;
             else if (_state.activeTab == StatCategory::PointShadow && isPoint) isMatch = true;
-            else if (_state.activeTab == StatCategory::Scene && !isDir && !isSpot && !isPoint) isMatch = true;
+            else if (_state.activeTab == StatCategory::Scene && isScene) isMatch = true;
 
             if (!isMatch) continue;
-
-            _state.totalInputVertices += pass.inputAssemblyVertices;
-            _state.totalInputPrimitives += pass.inputAssemblyPrimitives;
-            _state.totalVSInvocations += pass.vertexShaderInvocations;
-            _state.totalFSInvocations += pass.fragmentShaderInvocations;
-            _state.totalMSInvocations += pass.meshShaderInvocations;
-            _state.totalTSInvocations += pass.taskShaderInvocations;
-            _state.totalClippingInvocations += pass.clippingInvocations;
-            _state.totalClippingPrimitives += pass.clippingPrimitives;
 
             bool matchesSearch = _state.searchQuery.empty();
             if (!matchesSearch) {
@@ -70,6 +116,15 @@ namespace Syn {
             }
 
             if (!matchesSearch) continue;
+
+            _state.totalInputVertices += pass.inputAssemblyVertices;
+            _state.totalInputPrimitives += pass.inputAssemblyPrimitives;
+            _state.totalVSInvocations += pass.vertexShaderInvocations;
+            _state.totalFSInvocations += pass.fragmentShaderInvocations;
+            _state.totalMSInvocations += pass.meshShaderInvocations;
+            _state.totalTSInvocations += pass.taskShaderInvocations;
+            _state.totalClippingInvocations += pass.clippingInvocations;
+            _state.totalClippingPrimitives += pass.clippingPrimitives;
 
             auto& group = groupMap[pass.groupName];
             group.name = pass.groupName;
@@ -102,7 +157,6 @@ namespace Syn {
             }
             else if constexpr (std::is_same_v<T, StatisticsSwitchTabIntent>) {
                 _state.activeTab = arg.tab;
-                _state.cpuStats = _lastCpuStatsMap[_state.activeTab];
                 ProcessStats(_lastRawStats);
             }
             }, intent);

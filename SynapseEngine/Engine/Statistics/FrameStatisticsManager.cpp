@@ -40,8 +40,10 @@ namespace Syn {
         std::vector<VkBuffer> buffersToWait = {
             drawData->SpotLights.indirectBuffer.GetHandle(frameIndex),
             drawData->SpotLightShadow.visibleCountDispatchBuffer.GetHandle(frameIndex),
+            drawData->SpotLightShadow.visibleMeshCountDispatchBuffer.GetHandle(frameIndex),
             drawData->PointLights.indirectBuffer.GetHandle(frameIndex),
-            drawData->PointLightShadow.visibleCountDispatchBuffer.GetHandle(frameIndex)
+            drawData->PointLightShadow.visibleCountDispatchBuffer.GetHandle(frameIndex),
+            drawData->PointLightShadow.visibleMeshCountDispatchBuffer.GetHandle(frameIndex)
         };
 
         for (VkBuffer buffer : buffersToWait) {
@@ -63,6 +65,11 @@ namespace Syn {
         copyInfo.dstOffset = offsetof(GpuCullingReadback, spotVisibleShadowLights);
         Vk::BufferUtils::CopyBuffer(cmd, copyInfo);
 
+        copyInfo.srcBuffer = drawData->SpotLightShadow.visibleMeshCountDispatchBuffer.GetHandle(frameIndex);
+        copyInfo.srcOffset = 0;
+        copyInfo.dstOffset = offsetof(GpuCullingReadback, spotVisibleShadowInstances);
+        Vk::BufferUtils::CopyBuffer(cmd, copyInfo);
+
         copyInfo.srcBuffer = drawData->PointLights.indirectBuffer.GetHandle(frameIndex);
         copyInfo.srcOffset = offsetof(VkDrawIndirectCommand, instanceCount);
         copyInfo.dstOffset = offsetof(GpuCullingReadback, pointVisibleLights);
@@ -71,6 +78,11 @@ namespace Syn {
         copyInfo.srcBuffer = drawData->PointLightShadow.visibleCountDispatchBuffer.GetHandle(frameIndex);
         copyInfo.srcOffset = 0;
         copyInfo.dstOffset = offsetof(GpuCullingReadback, pointVisibleShadowLights);
+        Vk::BufferUtils::CopyBuffer(cmd, copyInfo);
+
+        copyInfo.srcBuffer = drawData->PointLightShadow.visibleMeshCountDispatchBuffer.GetHandle(frameIndex);
+        copyInfo.srcOffset = 0;
+        copyInfo.dstOffset = offsetof(GpuCullingReadback, pointVisibleShadowInstances);
         Vk::BufferUtils::CopyBuffer(cmd, copyInfo);
 
         Vk::BufferBarrierInfo transferToHostBarrier{};
@@ -91,8 +103,8 @@ namespace Syn {
         if (!scene) return;
 
         auto drawData = scene->GetSceneDrawData();
-        auto& currentStatsMap = _cpuStatsPerFrame[frameIndex];
-        currentStatsMap.clear();
+        auto& stats = _cpuStatsPerFrame[frameIndex];
+        stats = RawCpuRenderStats{};
 
         GpuCullingReadback gpuReadbackData{};
         if (auto mappedBuf = _readbackBuffer.GetMapped(frameIndex)) {
@@ -106,100 +118,41 @@ namespace Syn {
         auto spotLightPool = scene->GetRegistry()->GetPool<SpotLightComponent>();
         auto pointLightPool = scene->GetRegistry()->GetPool<PointLightComponent>();
 
-        uint32_t totalDirLights = static_cast<uint32_t>(dirLightPool ? dirLightPool->Size() : 0);
-        uint32_t totalSpotLights = static_cast<uint32_t>(spotLightPool ? spotLightPool->Size() : 0);
-        uint32_t totalPointLights = static_cast<uint32_t>(pointLightPool ? pointLightPool->Size() : 0);
+        stats.totalModels = drawData->Models.activeDescriptorCount;
+        stats.activeTraditionalCount = drawData->Models.activeTraditionalCount;
+        stats.activeMeshletCount = drawData->Models.activeMeshletCount;
+        stats.totalAllocatedInstances = drawData->Models.totalAllocatedInstances;
+        stats.totalMaxMeshletInstances = drawData->Debug.totalMaxMeshletInstances;
+        stats.maxPossibleVertices = drawData->Models.maxPossibleVertices;
+        stats.maxPossibleIndices = drawData->Models.maxPossibleIndices;
+        stats.maxPossibleTriangles = drawData->Models.maxPossibleTriangles;
 
-        uint32_t visibleDirLights = drawData->DirectionLights.cmdTemplate.instanceCount;
-        uint32_t visibleSpotLights = gpuReadbackData.spotVisibleLights;
-        uint32_t visiblePointLights = gpuReadbackData.pointVisibleLights;
+        stats.totalDirLights = static_cast<uint32_t>(dirLightPool ? dirLightPool->Size() : 0);
+        stats.totalSpotLights = static_cast<uint32_t>(spotLightPool ? spotLightPool->Size() : 0);
+        stats.totalPointLights = static_cast<uint32_t>(pointLightPool ? pointLightPool->Size() : 0);
 
-        uint32_t shadowDirLights = drawData->DirectionLightShadow.visibleLightCount;
-        uint32_t shadowSpotLights = gpuReadbackData.spotVisibleShadowLights;
-        uint32_t shadowPointLights = gpuReadbackData.pointVisibleShadowLights;
+        stats.visibleDirLights = drawData->DirectionLights.cmdTemplate.instanceCount;
+        stats.visibleSpotLights = gpuReadbackData.spotVisibleLights;
+        stats.visiblePointLights = gpuReadbackData.pointVisibleLights;
 
-        {
-            CpuRenderStats stats{};
-            stats.totalModels = drawData->Models.activeDescriptorCount;
-            stats.traditionalDrawDescriptors = drawData->Models.activeTraditionalCount;
-            stats.meshletDrawDescriptors = drawData->Models.activeMeshletCount;
-            stats.totalDrawDescriptors = stats.traditionalDrawDescriptors + stats.meshletDrawDescriptors;
-            stats.totalAllocatedInstances = drawData->Models.totalAllocatedInstances;
-            stats.totalMaxMeshlets = drawData->Debug.totalMaxMeshletInstances;
+        stats.shadowDirLights = drawData->DirectionLightShadow.visibleLightCount;
+        stats.shadowSpotLights = gpuReadbackData.spotVisibleShadowLights;
+        stats.shadowPointLights = gpuReadbackData.pointVisibleShadowLights;
 
-            stats.maxPossibleVertices = drawData->Models.maxPossibleVertices;
-            stats.maxPossibleIndices = drawData->Models.maxPossibleIndices;
-            stats.maxPossibleTriangles = drawData->Models.maxPossibleTriangles;
+        stats.appendedDirInstances = stats.shadowDirLights * CASCADES_PER_LIGHT;
+        stats.appendedSpotInstances = gpuReadbackData.spotVisibleShadowInstances;
+        stats.appendedPointInstances = gpuReadbackData.pointVisibleShadowInstances;
 
-            stats.totalLights = totalDirLights + totalSpotLights + totalPointLights;
-            stats.visibleLights = visibleDirLights + visibleSpotLights + visiblePointLights;
-            stats.visibleShadowLights = shadowDirLights + shadowSpotLights + shadowPointLights;
+        stats.maxDirVertices = stats.maxPossibleVertices * SHADOW_MULTIPLIER;
+        stats.maxSpotVertices = stats.maxPossibleVertices * SPOT_SHADOW_MULTIPLIER;
+        stats.maxPointVertices = stats.maxPossibleVertices * POINT_SHADOW_MULTIPLIER;
 
-            currentStatsMap[StatCategory::Scene] = stats;
-        }
-
-        {
-            CpuRenderStats stats{};
-            stats.totalModels = drawData->Models.activeDescriptorCount;
-            stats.traditionalDrawDescriptors = drawData->Models.activeTraditionalCount;
-            stats.meshletDrawDescriptors = drawData->Models.activeMeshletCount;
-            stats.totalDrawDescriptors = stats.traditionalDrawDescriptors + stats.meshletDrawDescriptors;
-            stats.totalAllocatedInstances = drawData->Models.totalAllocatedInstances;
-            stats.totalMaxMeshlets = drawData->Debug.totalMaxMeshletInstances;
-
-            stats.totalLights = totalDirLights;
-            stats.visibleLights = visibleDirLights;
-            stats.visibleShadowLights = shadowDirLights;
-            stats.appendedInstances = shadowDirLights * CASCADES_PER_LIGHT;
-
-            stats.maxPossibleVertices = drawData->Models.maxPossibleVertices * SHADOW_MULTIPLIER;
-            stats.maxPossibleTriangles = drawData->Models.maxPossibleTriangles * SHADOW_MULTIPLIER;
-
-            currentStatsMap[StatCategory::DirectionalShadow] = stats;
-        }
-
-        {
-            CpuRenderStats stats{};
-            stats.totalModels = drawData->Models.activeDescriptorCount;
-            stats.traditionalDrawDescriptors = drawData->Models.activeTraditionalCount;
-            stats.meshletDrawDescriptors = drawData->Models.activeMeshletCount;
-            stats.totalDrawDescriptors = stats.traditionalDrawDescriptors + stats.meshletDrawDescriptors;
-            stats.totalAllocatedInstances = drawData->Models.totalAllocatedInstances;
-            stats.totalMaxMeshlets = drawData->Debug.totalMaxMeshletInstances;
-
-            stats.totalLights = totalSpotLights;
-            stats.visibleLights = visibleSpotLights;
-            stats.visibleShadowLights = shadowSpotLights;
-            stats.appendedInstances = shadowSpotLights * SPOT_SHADOW_MULTIPLIER;
-
-            stats.maxPossibleVertices = drawData->Models.maxPossibleVertices * SPOT_SHADOW_MULTIPLIER;
-            stats.maxPossibleTriangles = drawData->Models.maxPossibleTriangles * SPOT_SHADOW_MULTIPLIER;
-
-            currentStatsMap[StatCategory::SpotShadow] = stats;
-        }
-
-        {
-            CpuRenderStats stats{};
-            stats.totalModels = drawData->Models.activeDescriptorCount;
-            stats.traditionalDrawDescriptors = drawData->Models.activeTraditionalCount;
-            stats.meshletDrawDescriptors = drawData->Models.activeMeshletCount;
-            stats.totalDrawDescriptors = stats.traditionalDrawDescriptors + stats.meshletDrawDescriptors;
-            stats.totalAllocatedInstances = drawData->Models.totalAllocatedInstances;
-            stats.totalMaxMeshlets = drawData->Debug.totalMaxMeshletInstances;
-
-            stats.totalLights = totalPointLights;
-            stats.visibleLights = visiblePointLights;
-            stats.visibleShadowLights = shadowPointLights;
-            stats.appendedInstances = shadowPointLights * POINT_SHADOW_MULTIPLIER;
-
-            stats.maxPossibleVertices = drawData->Models.maxPossibleVertices * POINT_SHADOW_MULTIPLIER;
-            stats.maxPossibleTriangles = drawData->Models.maxPossibleTriangles * POINT_SHADOW_MULTIPLIER;
-
-            currentStatsMap[StatCategory::PointShadow] = stats;
-        }
+        stats.maxDirTriangles = stats.maxPossibleTriangles * SHADOW_MULTIPLIER;
+        stats.maxSpotTriangles = stats.maxPossibleTriangles * SPOT_SHADOW_MULTIPLIER;
+        stats.maxPointTriangles = stats.maxPossibleTriangles * POINT_SHADOW_MULTIPLIER;
     }
 
-    const std::map<StatCategory, CpuRenderStats>& FrameStatisticsManager::GetCpuStats(uint32_t frameIndex) const {
+    const RawCpuRenderStats& FrameStatisticsManager::GetCpuStats(uint32_t frameIndex) const {
         return _cpuStatsPerFrame[frameIndex];
     }
 
