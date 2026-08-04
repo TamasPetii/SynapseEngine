@@ -125,15 +125,19 @@ namespace Syn {
         return std::vector<uint32_t>(dirtySet.begin(), dirtySet.end());
     }
 
-    void PreviewManager::ClearDirtyResources(PreviewResourceType type) {
+    void PreviewManager::MarkCompleted(PreviewResourceType type, uint32_t resourceId) {
         std::lock_guard<std::mutex> lock(_mutex);
-        _dirtyResources[type].clear();
+        _completedResources[type].push_back(resourceId);
     }
 
-    void PreviewManager::ClearAllDirtyResources() {
+    void PreviewManager::FlushCompletedResources() {
         std::lock_guard<std::mutex> lock(_mutex);
-        for (auto& [type, set] : _dirtyResources) {
-            set.clear();
+
+        for (auto& [type, resources] : _completedResources) {
+            for (uint32_t id : resources) {
+                _dirtyResources[type].erase(id);
+            }
+            resources.clear();
         }
 
         if (_warmupFramesRemaining > 0) {

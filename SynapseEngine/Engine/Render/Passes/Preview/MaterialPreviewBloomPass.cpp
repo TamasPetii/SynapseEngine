@@ -231,9 +231,9 @@ namespace Syn {
             scratchBackToGen.baseArrayLayer = 0;
             scratchBackToGen.layerCount = 1;
             Vk::ImageUtils::InsertBarrier(context.cmd, scratchBackToGen);
-        }
 
-        pm->ClearDirtyResources(PreviewResourceType::Material);
+            pm->MarkCompleted(PreviewResourceType::Material, matId);
+        }
     }
 
     void MaterialPreviewBloomPass::DispatchPrefilter(const RenderContext& context, Vk::Image* colorImage, Vk::Image* bloomImage) {

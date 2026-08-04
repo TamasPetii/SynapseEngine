@@ -117,7 +117,7 @@ namespace Syn
 		_sceneManager->Finish();
 
 		ServiceLocator::Get<ICpuProfiler>()->ResolveFrame(currentFrame);
-		ServiceLocator::Get<PreviewManager>()->ClearAllDirtyResources();
+		ServiceLocator::Get<PreviewManager>()->FlushCompletedResources();
 
 		AdvanceFrameIndex();
 	}
@@ -361,8 +361,8 @@ namespace Syn
 	void Engine::InitPhysicsEngine()
 	{
 		ServiceLocator::Provide<PhysicsFactory>([]() {
-			//auto physicsEngine = std::make_unique<JoltPhysicsEngine>();
-			auto physicsEngine = std::make_unique<Box3DPhysicsEngine>();
+			auto physicsEngine = std::make_unique<JoltPhysicsEngine>();
+			//auto physicsEngine = std::make_unique<Box3DPhysicsEngine>();
 			physicsEngine->Init();
 
 			return physicsEngine;

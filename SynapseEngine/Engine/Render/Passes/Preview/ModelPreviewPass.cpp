@@ -179,6 +179,8 @@ namespace Syn {
                 
                 vkCmdDraw(context.cmd, cmd.traditionalCmd.vertexCount, 1, cmd.traditionalCmd.firstVertex, cmd.traditionalCmd.firstInstance);
             }
+
+            pm->MarkCompleted(PreviewResourceType::Model, modelId);
         }
     }
 }

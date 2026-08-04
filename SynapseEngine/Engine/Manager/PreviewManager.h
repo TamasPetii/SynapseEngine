@@ -31,9 +31,9 @@ namespace Syn {
 
         void MarkAllActiveDirty();
         void MarkDirty(PreviewResourceType type, uint32_t resourceId);
+        void MarkCompleted(PreviewResourceType type, uint32_t resourceId);
+        void FlushCompletedResources();
         std::vector<uint32_t> GetDirtyResources(PreviewResourceType type);
-        void ClearDirtyResources(PreviewResourceType type);
-        void ClearAllDirtyResources();
 
         void GetViewportAndScissor(PreviewResourceType type, uint32_t resourceId, VkViewport& outViewport, VkRect2D& outScissor) const;
         void GetNormalizedUVs(PreviewResourceType type, uint32_t resourceId, glm::vec2& outUv0, glm::vec2& outUv1) const;
@@ -64,5 +64,6 @@ namespace Syn {
         std::queue<uint32_t> _freeTiles;
         std::unordered_map<uint64_t, uint32_t> _resourceToTile;
         std::unordered_map<PreviewResourceType, std::unordered_set<uint32_t>> _dirtyResources;
+        std::unordered_map<PreviewResourceType, std::vector<uint32_t>> _completedResources;
     };
 }
