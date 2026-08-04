@@ -375,7 +375,7 @@ namespace Syn
             transform.rotation = glm::vec3(rand() % 360, rand() % 360, rand() % 360);
 
             registry.GetComponent<ModelComponent>(e).modelIndex = geoIds[rand() % geoIds.size()];
-            //registry.GetComponent<PipelineOverrideComponent>(e).pipelines = {static_cast<uint32_t>(rand() % 2)};
+            registry.GetComponent<PipelineOverrideComponent>(e).pipelines = {static_cast<uint32_t>(rand() % 2)};
 
             registry.GetPool<MaterialOverrideComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<PipelineOverrideComponent>()->SetCategory(e, StorageCategory::Static);

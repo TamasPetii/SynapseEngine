@@ -32,7 +32,8 @@
 #include "Engine/Scene/Source/File/FileSceneSource.h"
 
 #include "Engine/Render/RendererFactory.h"
-#include "Engine/Physics/JoltPhysicsEngine.h"
+#include "Engine/Physics/Jolt/JoltPhysicsEngine.h"
+#include "Engine/Physics/Box3D/Box3DPhysicsEngine.h"
 
 #include "Engine/Profiler/DefaultGpuProfiler.h"
 #include "Engine/Profiler/DefaultCpuProfiler.h"
@@ -360,7 +361,8 @@ namespace Syn
 	void Engine::InitPhysicsEngine()
 	{
 		ServiceLocator::Provide<PhysicsFactory>([]() {
-			auto physicsEngine = std::make_unique<JoltPhysicsEngine>();
+			//auto physicsEngine = std::make_unique<JoltPhysicsEngine>();
+			auto physicsEngine = std::make_unique<Box3DPhysicsEngine>();
 			physicsEngine->Init();
 
 			return physicsEngine;

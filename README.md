@@ -305,6 +305,8 @@ cd ../..
 Configure the project using the GCC 14 toolchain and build it.
 
 ```bash
+cd SynapseEngine
+
 xmake f -p linux -a x64 -m release --cc=gcc-14 --cxx=g++-14 -y
 
 xmake

@@ -121,7 +121,8 @@ local vcpkg_packages = {
     "vcpkg::yaml-cpp",
     "vcpkg::tomlplusplus",
     "vcpkg::nanosvg",
-    "vcpkg::tinygltf"
+    "vcpkg::tinygltf",
+    "vcpkg::box3d"
 }
 
 for _, pkg in ipairs(vcpkg_packages) do

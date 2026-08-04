@@ -74,7 +74,7 @@ namespace Syn
 
         tf::GuidedPartitioner partitioner(1);
 
-        subflow.for_each_index(size_t(0), model.globalMeshCount, size_t(1),
+        subflow.for_each_index(size_t(0), static_cast<size_t>(model.globalMeshCount), size_t(1),
             [&](size_t m) {
                 //Todo: Change to new cpu model!
                 const auto& meshDesc = model.meshDescriptors[m * 4];
