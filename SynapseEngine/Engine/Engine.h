@@ -32,6 +32,7 @@ namespace Syn {
     class IRenderStatCollector;
     class FrameStatisticsManager;
     class PreviewManager;
+	class IAudioEngine;
 }
 
 namespace Syn
@@ -81,6 +82,7 @@ namespace Syn
         void InitTaskExecutor();
         void InitSceneManager();
         void InitPhysicsEngine();
+        void InitAudioEngine();
         void InitProfilers();
         void InitSerializer();
         void Shutdown();
@@ -103,6 +105,7 @@ namespace Syn
         std::shared_ptr<MemorySink> _memorySink;
 		std::unique_ptr<IRenderStatCollector> _renderStatCollector;
 		std::unique_ptr<FrameStatisticsManager> _frameStatisticsManager;
+        std::unique_ptr<IAudioEngine> _audioEngine;
 
         std::function<void(uint32_t)> _onGuiFlushCallback;
     };

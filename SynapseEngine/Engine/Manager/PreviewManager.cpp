@@ -1,6 +1,8 @@
 #include "PreviewManager.h"
 #include "Engine/Logger/SynLog.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
+#include "Engine/ServiceLocator.h"
+#include "Engine/FrameContext.h"
 
 namespace Syn {
 
@@ -44,6 +46,15 @@ namespace Syn {
         _resolution = newResolution;
         _tilesPerRow = _resolution / _tileSize;
         uint32_t newTotalTiles = _tilesPerRow * _tilesPerRow;
+
+
+        uint32_t framesInFlight = ServiceLocator::Get<FrameContext>()->framesInFlight;
+
+        if (_atlasImage)
+            _staleImages.push_back({ std::move(_atlasImage), framesInFlight });
+
+        if (_atlasDepthImage)
+            _staleImages.push_back({ std::move(_atlasDepthImage), framesInFlight });
 
         Vk::ImageConfig config{};
         config.width = _resolution;
@@ -138,6 +149,16 @@ namespace Syn {
                 _dirtyResources[type].erase(id);
             }
             resources.clear();
+        }
+
+        for (auto it = _staleImages.begin(); it != _staleImages.end();) {
+            if (it->framesToLive > 0) {
+                it->framesToLive--;
+                ++it;
+            }
+            else {
+                it = _staleImages.erase(it);
+            }
         }
 
         if (_warmupFramesRemaining > 0) {

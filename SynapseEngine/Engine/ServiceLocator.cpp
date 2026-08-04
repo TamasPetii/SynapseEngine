@@ -1,6 +1,6 @@
 #include "ServiceLocator.h"
 
-namespace Syn 
+namespace Syn
 {
     Vk::Context* ServiceLocator::_vkContext = nullptr;
     Vk::GpuUploader* ServiceLocator::_gpuUploader = nullptr;
@@ -17,6 +17,9 @@ namespace Syn
     MaterialManager* ServiceLocator::_materialManager = nullptr;
     AnimationBuilder* ServiceLocator::_animationBuilder = nullptr;
     AnimationManager* ServiceLocator::_animationManager = nullptr;
+    AudioBuilder* ServiceLocator::_audioBuilder = nullptr;
+    AudioManager* ServiceLocator::_audioManager = nullptr;
+    IAudioEngine* ServiceLocator::_audioEngine = nullptr;
     IGpuProfiler* ServiceLocator::_gpuProfiler = nullptr;
     ICpuProfiler* ServiceLocator::_cpuProfiler = nullptr;
     Serializer* ServiceLocator::_serializer = nullptr;
@@ -40,6 +43,9 @@ namespace Syn
     template <> void ServiceLocator::Provide<MaterialManager>(MaterialManager* s) { _materialManager = s; }
     template <> void ServiceLocator::Provide<AnimationBuilder>(AnimationBuilder* s) { _animationBuilder = s; }
     template <> void ServiceLocator::Provide<AnimationManager>(AnimationManager* s) { _animationManager = s; }
+    template <> void ServiceLocator::Provide<AudioBuilder>(AudioBuilder* s) { _audioBuilder = s; }
+    template <> void ServiceLocator::Provide<AudioManager>(AudioManager* s) { _audioManager = s; }
+    template <> void ServiceLocator::Provide<IAudioEngine>(IAudioEngine* s) { _audioEngine = s; }
     template <> void ServiceLocator::Provide<IGpuProfiler>(IGpuProfiler* s) { _gpuProfiler = s; }
     template <> void ServiceLocator::Provide<ICpuProfiler>(ICpuProfiler* s) { _cpuProfiler = s; }
     template <> void ServiceLocator::Provide<Serializer>(Serializer* s) { _serializer = s; }
@@ -63,6 +69,9 @@ namespace Syn
     template <> MaterialManager* ServiceLocator::Get<MaterialManager>() { return _materialManager; }
     template <> AnimationBuilder* ServiceLocator::Get<AnimationBuilder>() { return _animationBuilder; }
     template <> AnimationManager* ServiceLocator::Get<AnimationManager>() { return _animationManager; }
+    template <> AudioBuilder* ServiceLocator::Get<AudioBuilder>() { return _audioBuilder; }
+    template <> AudioManager* ServiceLocator::Get<AudioManager>() { return _audioManager; }
+    template <> IAudioEngine* ServiceLocator::Get<IAudioEngine>() { return _audioEngine; }
     template <> IGpuProfiler* ServiceLocator::Get<IGpuProfiler>() { return _gpuProfiler; }
     template <> ICpuProfiler* ServiceLocator::Get<ICpuProfiler>() { return _cpuProfiler; }
     template <> Serializer* ServiceLocator::Get<Serializer>() { return _serializer; }
@@ -70,5 +79,4 @@ namespace Syn
     template <> FrameStatisticsManager* ServiceLocator::Get<FrameStatisticsManager>() { return _frameStatisticsManager; }
     template <> PreviewManager* ServiceLocator::Get<PreviewManager>() { return _previewManager; }
     template <> PhysicsFactory& ServiceLocator::Get<PhysicsFactory>() { return _physicsFactory; }
-
 }

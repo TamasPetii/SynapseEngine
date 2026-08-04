@@ -18,6 +18,11 @@ namespace Syn {
         Image = 2
     };
 
+    struct SYN_API StaleImage {
+        std::unique_ptr<Vk::Image> image;
+        uint32_t framesToLive;
+    };
+
     class SYN_API PreviewManager {
     public:
         using AtlasResizedCallback = std::function<void(VkImageView, VkSampler)>;
@@ -60,6 +65,8 @@ namespace Syn {
         std::unique_ptr<Vk::Image> _atlasDepthImage;
         std::unique_ptr<Vk::Image> _scratchColorImage;
         std::unique_ptr<Vk::Image> _scratchBloomImage;
+
+        std::vector<StaleImage> _staleImages;
 
         std::queue<uint32_t> _freeTiles;
         std::unordered_map<uint64_t, uint32_t> _resourceToTile;

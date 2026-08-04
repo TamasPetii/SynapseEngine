@@ -42,6 +42,12 @@
 #include "Engine/Mesh/Processor/CpuModelProcessor/VertexTransformProcessor.h"
 #include "Engine/Mesh/Processor/CpuModelProcessor/MemoryCleanupProcessor.h"
 
+#include "Engine/Audio/Loader/DefaultAudioLoaderRegistry.h"
+#include "Engine/Audio/Loader/MiniaudioLoader.h"
+#include "Engine/Audio/Processor/DefaultAudioProcessorPipeline.h"
+#include "Engine/Audio/Converter/DefaultAudioCooker.h"
+#include "Engine/Audio/Converter/DefaultCpuAudioExtractor.h"
+
 #include "Engine/Mesh/MeshSourceNames.h"
 
 namespace Syn {
@@ -53,6 +59,7 @@ namespace Syn {
 		InitMaterialManager();
 		InitModelManager();
 		InitAnimationManager();
+		InitAudioManager();
     }
 
 	void ResourceManager::InitPreviewManager() {
@@ -230,6 +237,24 @@ namespace Syn {
 		ServiceLocator::Provide<AnimationManager>(_animationManager.get());
 	}
 
+	void ResourceManager::InitAudioManager()
+	{
+		_audioBuilder = std::make_shared<AudioBuilder>(
+			std::make_unique<DefaultAudioLoaderRegistry>(),
+			std::make_unique<DefaultAudioProcessorPipeline>(),
+			std::make_unique<DefaultAudioCooker>(),
+			std::make_unique<DefaultCpuAudioExtractor>()
+		);
+
+		_audioBuilder->RegisterLoader(std::make_shared<MiniAudioLoader>(), 1);
+
+		ServiceLocator::Provide<AudioBuilder>(_audioBuilder.get());
+
+		_audioManager = std::make_unique<AudioManager>(_audioBuilder);
+
+		ServiceLocator::Provide<AudioManager>(_audioManager.get());
+	}
+
     ResourceManager::~ResourceManager() {
         ServiceLocator::Provide<ShaderManager>(nullptr);
         ServiceLocator::Provide<ResourceManager>(nullptr);
@@ -238,5 +263,7 @@ namespace Syn {
 		ServiceLocator::Provide<ImageBuilder>(nullptr);
 		ServiceLocator::Provide<ImageManager>(nullptr);
 		ServiceLocator::Provide<MaterialManager>(nullptr);	
+		ServiceLocator::Provide<AudioBuilder>(nullptr);
+		ServiceLocator::Provide<AudioManager>(nullptr);
     }
 }

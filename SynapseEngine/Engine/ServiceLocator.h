@@ -25,6 +25,9 @@ namespace Syn {
     class MaterialManager;
     class AnimationManager;
     class AnimationBuilder;
+    class AudioBuilder;
+    class AudioManager;
+    class IAudioEngine;
     class IPhysicsEngine;
     class IGpuProfiler;
     class ICpuProfiler;
@@ -77,6 +80,9 @@ namespace Syn
         static MaterialManager* _materialManager;
         static AnimationBuilder* _animationBuilder;
         static AnimationManager* _animationManager;
+        static AudioBuilder* _audioBuilder;
+        static AudioManager* _audioManager;
+        static IAudioEngine* _audioEngine;
         static IGpuProfiler* _gpuProfiler;
         static ICpuProfiler* _cpuProfiler;
         static Serializer* _serializer;
@@ -101,6 +107,9 @@ namespace Syn
     template <> SYN_API void ServiceLocator::Provide<MaterialManager>(MaterialManager*);
     template <> SYN_API void ServiceLocator::Provide<AnimationBuilder>(AnimationBuilder*);
     template <> SYN_API void ServiceLocator::Provide<AnimationManager>(AnimationManager*);
+    template <> SYN_API void ServiceLocator::Provide<AudioBuilder>(AudioBuilder*);
+    template <> SYN_API void ServiceLocator::Provide<AudioManager>(AudioManager*);
+    template <> SYN_API void ServiceLocator::Provide<IAudioEngine>(IAudioEngine*);
     template <> SYN_API void ServiceLocator::Provide<IGpuProfiler>(IGpuProfiler*);
     template <> SYN_API void ServiceLocator::Provide<ICpuProfiler>(ICpuProfiler*);
     template <> SYN_API void ServiceLocator::Provide<Serializer>(Serializer*);
@@ -124,6 +133,9 @@ namespace Syn
     template <> SYN_API MaterialManager* ServiceLocator::Get<MaterialManager>();
     template <> SYN_API AnimationBuilder* ServiceLocator::Get<AnimationBuilder>();
     template <> SYN_API AnimationManager* ServiceLocator::Get<AnimationManager>();
+    template <> SYN_API AudioBuilder* ServiceLocator::Get<AudioBuilder>();
+    template <> SYN_API AudioManager* ServiceLocator::Get<AudioManager>();
+    template <> SYN_API IAudioEngine* ServiceLocator::Get<IAudioEngine>();
     template <> SYN_API IGpuProfiler* ServiceLocator::Get<IGpuProfiler>();
     template <> SYN_API ICpuProfiler* ServiceLocator::Get<ICpuProfiler>();
     template <> SYN_API Serializer* ServiceLocator::Get<Serializer>();

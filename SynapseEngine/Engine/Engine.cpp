@@ -20,6 +20,9 @@
 #include "Engine/Mesh/Source/MeshSources.h"
 #include "Engine/Mesh/Factory/MeshFactory.h"
 
+#include "Engine/Audio/Engine/MiniAudioEngine.h"
+#include "Engine/Audio/AudioManager.h"
+
 #include "Engine/Render/RenderManager.h"
 #include "Engine/Render/RenderPipeline.h"
 
@@ -86,6 +89,7 @@ namespace Syn
 		ServiceLocator::Get<ModelManager>()->Update();
 		ServiceLocator::Get<MaterialManager>()->Update();
 		ServiceLocator::Get<ImageManager>()->Update();
+		ServiceLocator::Get<AudioManager>()->Update();
 
 		//Notifications
 		ServiceLocator::Get<MaterialManager>()->ProcessPendingNotifications();
@@ -135,6 +139,7 @@ namespace Syn
 		InitTaskExecutor();
 		InitSerializer();
 		InitResourceManager();
+		InitAudioEngine();
 		InitRenderManager(params);
 		InitSceneManager();
 		InitPhysicsEngine();
@@ -247,6 +252,14 @@ namespace Syn
 			});
 	}
 
+	void Engine::InitAudioEngine()
+	{
+		_audioEngine = std::make_unique<MiniAudioEngine>();
+		_audioEngine->Init();
+
+		ServiceLocator::Provide<IAudioEngine>(_audioEngine.get());
+	}
+
 	void Engine::Shutdown() 
 	{
 		_vkContext->GetDevice()->WaitIdle();
@@ -258,6 +271,13 @@ namespace Syn
 		_cpuProfiler.reset();
 		_renderStatCollector.reset();
 		_frameStatisticsManager.reset();
+
+		if (_audioEngine) {
+			_audioEngine->Shutdown();
+			_audioEngine.reset();
+			ServiceLocator::Provide<IAudioEngine>(nullptr);
+		}
+
 		_resourceManager.reset();
 		_gpuUploader.reset();
 		_taskExecutor.reset();

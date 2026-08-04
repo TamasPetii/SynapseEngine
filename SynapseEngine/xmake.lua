@@ -122,7 +122,8 @@ local vcpkg_packages = {
     "vcpkg::tomlplusplus",
     "vcpkg::nanosvg",
     "vcpkg::tinygltf",
-    "vcpkg::box3d"
+    "vcpkg::box3d",
+    "vcpkg::miniaudio"
 }
 
 for _, pkg in ipairs(vcpkg_packages) do

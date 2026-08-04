@@ -24,9 +24,12 @@
 #include "Engine/Component/Physics/ConvexColliderComponent.h"
 #include "Engine/Component/Physics/MeshColliderComponent.h"
 #include "Engine/Component/Physics/RigidBodyComponent.h"
+#include "Engine/Component/Audio/AudioSourceComponent.h"
+#include "Engine/Component/Audio/AudioListenerComponent.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Logger/SynLog.h"
 #include "Engine/Utils/PathUtils.h"
+#include "Engine/Audio/AudioManager.h"
 
 #include <random>
 #include <fstream>
@@ -47,6 +50,7 @@ namespace Syn
         auto modelManager = ServiceLocator::Get<ModelManager>();
         auto animationManager = ServiceLocator::Get<AnimationManager>();
         auto materialManager = ServiceLocator::Get<MaterialManager>();
+        auto audioManager = ServiceLocator::Get<AudioManager>();
 
         json config;
         std::string path = PathUtils::GetAbsolutePathString("Engine/Scene/Source/Procedural/test_config.json");
@@ -157,6 +161,36 @@ namespace Syn
         registry.GetPool<TransformComponent>()->SetCategory(rootLights, StorageCategory::Static);
         registry.GetPool<TagComponent>()->SetCategory(rootLights, StorageCategory::Static);
 
+        EntityID rootAudios = scene.CreateEntity();
+        registry.AddComponent<TagComponent>(rootAudios);
+        registry.GetComponent<TagComponent>(rootAudios).name = "Audios";
+        registry.GetComponent<TagComponent>(rootAudios).tag = "Root";
+        registry.AddComponent<TransformComponent>(rootAudios);
+        registry.GetPool<TransformComponent>()->SetCategory(rootAudios, StorageCategory::Static);
+        registry.GetPool<TagComponent>()->SetCategory(rootAudios, StorageCategory::Static);
+
+        { // Audios (2D Background Music)
+            EntityID bgAudio = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(bgAudio);
+            registry.GetComponent<TagComponent>(bgAudio).name = "Background_Music";
+            registry.GetComponent<TagComponent>(bgAudio).tag = "Audio";
+            registry.AddComponent<TransformComponent>(bgAudio);
+            registry.AddComponent<AudioSourceComponent>(bgAudio);
+
+            auto& bgSource = registry.GetComponent<AudioSourceComponent>(bgAudio);
+            bgSource.soundIndex = audioManager->LoadAudioSync(PathUtils::GetAbsolutePathString("Assets/Engine/Audio/creepy.mp3"));
+            bgSource.isSpatialized = false;
+            bgSource.loop = true;
+            bgSource.play = true;
+            bgSource.volume = 0.1f;
+
+            registry.GetPool<TransformComponent>()->SetCategory(bgAudio, StorageCategory::Static);
+            registry.GetPool<AudioSourceComponent>()->SetCategory(bgAudio, StorageCategory::Static);
+            registry.GetPool<TagComponent>()->SetCategory(bgAudio, StorageCategory::Static);
+
+            hm->AttachChild(rootAudios, bgAudio);
+        }
+
         // Cameras (Main & Debug)
         {
             sceneCam = scene.CreateEntity();
@@ -165,9 +199,11 @@ namespace Syn
             registry.GetComponent<TagComponent>(sceneCam).tag = "Camera";
             registry.AddComponent<CameraComponent>(sceneCam);
             registry.AddComponent<TransformComponent>(sceneCam);
+			registry.AddComponent<AudioListenerComponent>(sceneCam);
             registry.GetPool<CameraComponent>()->SetCategory(sceneCam, StorageCategory::Stream);
             registry.GetPool<TransformComponent>()->SetCategory(sceneCam, StorageCategory::Stream);
             registry.GetPool<TagComponent>()->SetCategory(sceneCam, StorageCategory::Static);
+            registry.GetPool<AudioListenerComponent>()->SetCategory(sceneCam, StorageCategory::Stream);
             hm->AttachChild(rootCameras, sceneCam);
 
             debugCam = scene.CreateEntity();
@@ -197,16 +233,27 @@ namespace Syn
             registry.GetComponent<TagComponent>(monkeyId).tag = "Model";
             registry.AddComponent<TransformComponent>(monkeyId);
             registry.AddComponent<ModelComponent>(monkeyId);
+            registry.AddComponent<AudioSourceComponent>(monkeyId);
 
             registry.GetComponent<TransformComponent>(monkeyId).translation = glm::vec3(0.0f, 0.0f, 0.0f);
             registry.GetComponent<TransformComponent>(monkeyId).scale = glm::vec3(5.0f, 5.0f, 5.0f);
             registry.GetComponent<ModelComponent>(monkeyId).modelIndex = monkeyModelIndex;
+
+            auto& monkeyAudio = registry.GetComponent<AudioSourceComponent>(monkeyId);
+            monkeyAudio.soundIndex = audioManager->LoadAudioSync(PathUtils::GetAbsolutePathString("Assets/Engine/Audio/alien.wav"));
+            monkeyAudio.isSpatialized = true;
+            monkeyAudio.loop = true;
+            monkeyAudio.play = true;
+            monkeyAudio.volume = 1.0f;
+            monkeyAudio.minDistance = 2.0f;
+            monkeyAudio.maxDistance = 50.0f;
 
             registry.GetPool<TransformComponent>()->SetCategory(monkeyId, StorageCategory::Static);
             registry.GetPool<ModelComponent>()->SetCategory(monkeyId, StorageCategory::Static);
             registry.GetPool<MaterialOverrideComponent>()->SetCategory(monkeyId, StorageCategory::Static);
             registry.GetPool<PipelineOverrideComponent>()->SetCategory(monkeyId, StorageCategory::Static);
             registry.GetPool<TagComponent>()->SetCategory(monkeyId, StorageCategory::Static);
+            registry.GetPool<AudioSourceComponent>()->SetCategory(monkeyId, StorageCategory::Static);
 
             hm->AttachChild(rootEnvironment, monkeyId);
         }

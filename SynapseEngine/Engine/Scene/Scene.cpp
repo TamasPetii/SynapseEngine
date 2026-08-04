@@ -33,6 +33,7 @@
 #include "Engine/System/Rendering/PipelineSystem.h"
 #include "Engine/System/Rendering/PipelineOverrideSystem.h"
 #include "Engine/System/Physics/PhysicsSystem.h"
+#include "Engine/System/Audio/AudioSystem.h"
 
 #include "Engine/System/Light/Point/PointLightSystem.h"
 #include "Engine/System/Light/Point/PointLightShadowSystem.h"
@@ -193,8 +194,7 @@ namespace Syn
 
 		RegisterSystem<HierarchySystem>();
         RegisterSystem<SelectionOutlineSystem>();
-
-
+        RegisterSystem<AudioSystem>();
     }
 
     void Scene::InitializeComponentBuffers()
@@ -511,6 +511,7 @@ namespace Syn
         auto modelSnapshot = ServiceLocator::Get<ModelManager>()->GetSnapshotAndVersion();
         auto animSnapshot = ServiceLocator::Get<AnimationManager>()->GetSnapshotAndVersion();
         auto materialSnapshot = ServiceLocator::Get<MaterialManager>()->GetSnapshotAndVersion();
+		auto audioSnapshot = ServiceLocator::Get<AudioManager>()->GetSnapshotAndVersion();
 
         _systemContext.deltaTime = deltaTime;
         _systemContext.frameIndex = frameIndex;
@@ -518,10 +519,12 @@ namespace Syn
         _systemContext.modelManagerVersion = modelSnapshot.version;
         _systemContext.materialManagerVersion = materialSnapshot.version;
         _systemContext.animationManagerVersion = animSnapshot.version;
+        _systemContext.audioManagerVersion = audioSnapshot.version;
 
         _systemContext.modelSnapshots = modelSnapshot.snapshots;
         _systemContext.materialSnapshots = materialSnapshot.snapshots;
         _systemContext.animationSnapshots = animSnapshot.snapshots;
+        _systemContext.soundSnapshots = audioSnapshot.snapshots;
 
         _systemContext.materialRenderTypes.clear();
         _systemContext.materialRenderTypes.resize(materialSnapshot.snapshots.size());

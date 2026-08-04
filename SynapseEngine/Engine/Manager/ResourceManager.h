@@ -9,6 +9,9 @@
 #include "PreviewManager.h"
 #include <memory>
 
+#include "Engine/Audio/Builder/AudioBuilder.h"
+#include "Engine/Audio/AudioManager.h"
+
 namespace Syn {
 
     class SYN_API ResourceManager {
@@ -25,6 +28,7 @@ namespace Syn {
         void InitMaterialManager();
         void InitAnimationManager();
         void InitPreviewManager();
+        void InitAudioManager();
     private:
         std::unique_ptr<ShaderManager> _shaderManager;
         std::unique_ptr<MaterialManager> _materialManager;
@@ -39,6 +43,9 @@ namespace Syn {
         std::unique_ptr<AnimationManager> _animationManager;
 
         std::unique_ptr<PreviewManager> _previewManager;
+
+        std::shared_ptr<AudioBuilder> _audioBuilder;
+        std::unique_ptr<AudioManager> _audioManager;
 
 		uint32_t _framesInFlight;
     };
