@@ -1,74 +1,78 @@
 #include "OpaqueInitPass.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
+#include <map>
+#include <set>
 
 namespace Syn {
 
-    void OpaqueInitPass::PrepareFrame(const RenderContext& context) {
+    void OpaqueInitPass::Execute(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         if (!group) return;
 
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
-        _graphicsState.renderArea = extent;
 
         struct TargetClearInfo {
             std::string name;
             VkClearValue clearValue;
+            bool isDepth = false;
         };
 
-        std::vector<TargetClearInfo> colorTargets = {
+        std::vector<TargetClearInfo> targetsToClear = {
             { RenderTargetNames::Main, VkClearValue{.color = {.float32 = {0.0f, 0.0f, 0.0f, 1.0f}}} },
             { RenderTargetNames::ColorMetallic, VkClearValue{.color = {.float32 = {0.0f, 0.0f, 0.0f, 0.0f}}} },
             { RenderTargetNames::NormalRoughness, VkClearValue{.color = {.float32 = {0.0f, 0.0f, 0.0f, 0.0f}}} },
             { RenderTargetNames::EmissiveAo, VkClearValue{.color = {.float32 = {0.0f, 0.0f, 0.0f, 0.0f}}} },
-            { RenderTargetNames::EntityIndex,      VkClearValue{.color = {.uint32 = {0xFFFFFFFF, 0, 0, 0}}} }
+            { RenderTargetNames::EntityIndex, VkClearValue{.color = {.uint32 = {0xFFFFFFFF, 0, 0, 0}}} },
+            { RenderTargetNames::OpaqueDepth, VkClearValue{.depthStencil = {1.0f, 0}}, true },
+
+            { RenderTargetNames::MainMSAA, VkClearValue{.color = {.float32 = {0.0f, 0.0f, 0.0f, 1.0f}}} },
+            { RenderTargetNames::EntityIndexMSAA, VkClearValue{.color = {.uint32 = {0xFFFFFFFF, 0, 0, 0}}} },
+            { RenderTargetNames::OpaqueDepthMSAA, VkClearValue{.depthStencil = {1.0f, 0}}, true }
         };
 
-        for (const auto& target : colorTargets)
-        {
-            if (auto img = group->GetImage(target.name))
-            {
-                _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
-                        .imageView = img->GetView(Vk::ImageViewNames::Default),
-                        .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                        .clearValue = target.clearValue,
-                        .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-                        .storeOp = VK_ATTACHMENT_STORE_OP_STORE
-                    }));
+        std::map<VkSampleCountFlagBits, std::vector<VkRenderingAttachmentInfo>> colorAttachmentsMap;
+        std::map<VkSampleCountFlagBits, VkRenderingAttachmentInfo> depthAttachmentsMap;
 
-                _imageTransitions.push_back({
-                    .image = img,
-                    .newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                    .dstStage = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
-                    .dstAccess = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
-                    .discardContent = true
+        for (const auto& target : targetsToClear) {
+            if (auto img = group->GetImage(target.name)) {
+                VkImageLayout newLayout = target.isDepth ? VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL : VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+                VkPipelineStageFlags2 dstStage = target.isDepth ? (VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT) : VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT;
+                VkAccessFlags2 dstAccess = target.isDepth ? VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT : VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT;
+
+                img->TransitionLayout(context.cmd, newLayout, dstStage, dstAccess, true);
+
+                VkRenderingAttachmentInfo attach = Vk::RenderUtils::CreateAttachment({
+                    .imageView = img->GetView(Vk::ImageViewNames::Default),
+                    .layout = newLayout,
+                    .clearValue = target.clearValue,
+                    .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+                    .storeOp = VK_ATTACHMENT_STORE_OP_STORE
                     });
+
+                VkSampleCountFlagBits samples = img->GetConfig().samples;
+                if (target.isDepth) {
+                    depthAttachmentsMap[samples] = attach;
+                }
+                else {
+                    colorAttachmentsMap[samples].push_back(attach);
+                }
             }
         }
 
-        if (auto depthImg = group->GetImage(RenderTargetNames::OpaqueDepth))
-        {
-            _depthAttachment = Vk::RenderUtils::CreateAttachment({
-                .imageView = depthImg->GetView(Vk::ImageViewNames::Default),
-                .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-                .clearValue = VkClearValue{.depthStencil = {1.0f, 0}},
-                .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
-                .storeOp = VK_ATTACHMENT_STORE_OP_STORE
-                });
+        std::set<VkSampleCountFlagBits> allSamples;
+        for (const auto& pair : colorAttachmentsMap) allSamples.insert(pair.first);
+        for (const auto& pair : depthAttachmentsMap) allSamples.insert(pair.first);
 
-            _imageTransitions.push_back({
-                .image = depthImg,
-                .newLayout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-                .dstStage = VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT,
-                .dstAccess = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-                .discardContent = true
-                });
+        for (VkSampleCountFlagBits samples : allSamples) {
+            Vk::RenderingInfoConfig renderInfo{
+                .renderArea = extent,
+                .colorAttachments = colorAttachmentsMap[samples],
+                .depthAttachment = depthAttachmentsMap.contains(samples) ? &depthAttachmentsMap[samples] : nullptr,
+                .layerCount = 1
+            };
+
+            Vk::RenderUtils::BeginRendering(context.cmd, renderInfo);
+            Vk::RenderUtils::EndRendering(context.cmd);
         }
-
-        _renderInfo = Vk::RenderingInfoConfig{
-            .renderArea = extent,
-            .colorAttachments = _colorAttachments,
-            .depthAttachment = _depthAttachment.has_value() ? &_depthAttachment.value() : nullptr,
-            .layerCount = 1
-        };
     }
 }

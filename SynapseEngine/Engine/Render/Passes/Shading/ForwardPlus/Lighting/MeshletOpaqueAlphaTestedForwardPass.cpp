@@ -97,25 +97,25 @@ namespace Syn {
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
         _graphicsState.renderArea = extent;
 
-        std::vector<std::string> targets = {
-            RenderTargetNames::Main
-        };
+        uint32_t msaaSamples = context.scene->GetSettings()->lighting.msaaSamples;
+        _graphicsState.raster.samples = static_cast<VkSampleCountFlagBits>(msaaSamples);
 
-        for (const auto& name : targets)
-        {
-            _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
-                    .imageView = group->GetImage(name)->GetView(Vk::ImageViewNames::Default),
-                    .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                    .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-                    .storeOp = VK_ATTACHMENT_STORE_OP_STORE
-                }));
-        }
+        _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
+            .imageView = group->GetImage(RenderTargetNames::MainMSAA)->GetView(Vk::ImageViewNames::Default),
+            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+            .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+            .resolveImageView = group->GetImage(RenderTargetNames::Main)->GetView(Vk::ImageViewNames::Default),
+            .resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT
+            }));
 
         _depthAttachment = Vk::RenderUtils::CreateAttachment({
-            .imageView = group->GetImage(RenderTargetNames::OpaqueDepth)->GetView(Vk::ImageViewNames::Default),
+            .imageView = group->GetImage(RenderTargetNames::OpaqueDepthMSAA)->GetView(Vk::ImageViewNames::Default),
             .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
             .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-            .storeOp = VK_ATTACHMENT_STORE_OP_STORE
+            .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+            .resolveMode = VK_RESOLVE_MODE_NONE
             });
 
         _renderInfo = Vk::RenderingInfoConfig{

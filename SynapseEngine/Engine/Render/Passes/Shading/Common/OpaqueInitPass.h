@@ -7,7 +7,7 @@ namespace Syn {
     public:
         std::string GetName() const override { return "OpaqueInitPass"; }
         std::string GetGroup() const override { return PassGroupNames::ShadingSetupPasses; }
-    protected:
-        void PrepareFrame(const RenderContext& context) override;
+
+        void Execute(const RenderContext& context) override;
     };
 }

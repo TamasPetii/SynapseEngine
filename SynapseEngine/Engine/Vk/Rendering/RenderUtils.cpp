@@ -17,6 +17,12 @@ namespace Syn::Vk {
             info.loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
         }
 
+        if (config.resolveImageView != VK_NULL_HANDLE) {
+            info.resolveMode = config.resolveMode;
+            info.resolveImageView = config.resolveImageView;
+            info.resolveImageLayout = config.resolveImageLayout;
+        }
+
         return info;
     }
 

@@ -88,6 +88,7 @@ namespace Syn
 
             active.isInitialized = true;
 
+            ma_sound_set_attenuation_model(&active.sound, ma_attenuation_model_linear);
             ma_sound_set_looping(&active.sound, component.loop ? MA_TRUE : MA_FALSE);
             ma_sound_start(&active.sound);
 
@@ -124,6 +125,7 @@ namespace Syn
             ma_sound_set_position(&active.sound, position.x, position.y, position.z);
             ma_sound_set_min_distance(&active.sound, component.minDistance);
             ma_sound_set_max_distance(&active.sound, component.maxDistance);
+            ma_sound_set_attenuation_model(&active.sound, ma_attenuation_model_linear);
         }
     }
 

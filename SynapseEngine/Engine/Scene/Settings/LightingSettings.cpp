@@ -6,6 +6,7 @@ namespace Syn
     LightingSettings::LightingSettings()
         : pipelineType(PipelineType::ForwardPlus)
         , tileSize(ComputeGroupSize::Image64D)
+        , msaaSamples(4)
         , ambientStrength(0.05f)
         , emissiveStrength(1.00f)
         , enableDeferredEmissiveAo(true)

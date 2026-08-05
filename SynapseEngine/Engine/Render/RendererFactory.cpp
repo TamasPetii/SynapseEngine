@@ -452,6 +452,9 @@ namespace Syn
         uint32_t initWidth = 4;
         uint32_t initHeight = 4;
 
+        uint32_t msaaSamples = 4;
+        VkSampleCountFlagBits sampleCount = static_cast<VkSampleCountFlagBits>(msaaSamples);
+
         Vk::ImageConfig mainImageSpec{};
         mainImageSpec.width = initWidth;
         mainImageSpec.height = initHeight;
@@ -460,6 +463,10 @@ namespace Syn
         mainImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
         mainImageSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::Main, mainImageSpec);
+
+        Vk::ImageConfig mainMsaaSpec = mainImageSpec;
+        mainMsaaSpec.samples = sampleCount;
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::MainMSAA, mainMsaaSpec);
 
         Vk::ImageConfig colorImageSpec{};
         colorImageSpec.width = initWidth;
@@ -535,6 +542,10 @@ namespace Syn
         transparentAccumSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::TransparentAccum, transparentAccumSpec);
 
+        Vk::ImageConfig transparentAccumMsaaSpec = transparentAccumSpec;
+        transparentAccumMsaaSpec.samples = sampleCount;
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::TransparentAccumMSAA, transparentAccumMsaaSpec);
+
         Vk::ImageConfig transparentRevealSpec{};
         transparentRevealSpec.width = initWidth;
         transparentRevealSpec.height = initHeight;
@@ -544,6 +555,10 @@ namespace Syn
         transparentRevealSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::TransparentReveal, transparentRevealSpec);
 
+        Vk::ImageConfig transparentRevealMsaaSpec = transparentRevealSpec;
+        transparentRevealMsaaSpec.samples = sampleCount;
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::TransparentRevealMSAA, transparentRevealMsaaSpec);
+
         Vk::ImageConfig entityImageSpec{};
         entityImageSpec.width = initWidth;
         entityImageSpec.height = initHeight;
@@ -552,6 +567,10 @@ namespace Syn
         entityImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         entityImageSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::EntityIndex, entityImageSpec);
+
+        Vk::ImageConfig entityImageMsaaSpec = entityImageSpec;
+        entityImageMsaaSpec.samples = sampleCount;
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::EntityIndexMSAA, entityImageMsaaSpec);
 
         Vk::ImageConfig depthPyramidImageSpec{};
         depthPyramidImageSpec.width = initWidth;
@@ -605,6 +624,10 @@ namespace Syn
         opaqueDepthSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         opaqueDepthSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
         rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::OpaqueDepth, opaqueDepthSpec);
+
+        Vk::ImageConfig opaqueDepthMsaaSpec = opaqueDepthSpec;
+        opaqueDepthMsaaSpec.samples = sampleCount;
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::OpaqueDepthMSAA, opaqueDepthMsaaSpec);
 
         Vk::ImageConfig transparentDepthSpec{};
         transparentDepthSpec.width = initWidth;

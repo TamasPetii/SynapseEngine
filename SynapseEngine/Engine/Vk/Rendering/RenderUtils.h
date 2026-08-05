@@ -46,6 +46,10 @@ namespace Syn::Vk {
         std::optional<VkClearValue> clearValue = std::nullopt;
         VkAttachmentLoadOp loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         VkAttachmentStoreOp storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+        VkImageView resolveImageView = VK_NULL_HANDLE;
+        VkImageLayout resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        VkResolveModeFlagBits resolveMode = VK_RESOLVE_MODE_NONE;
     };
 
     struct RenderingInfoConfig {

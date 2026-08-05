@@ -16,16 +16,21 @@ namespace Syn
     struct SYN_API RenderTargetNames
     {
         static constexpr const char* Main = "Main";
+        static constexpr const char* MainMSAA = "MainMSAA";
         static constexpr const char* ColorMetallic = "ColorMetallic";
         static constexpr const char* NormalRoughness = "NormalRoughness";
         static constexpr const char* EmissiveAo = "EmissiveAo";
         static constexpr const char* EntityIndex = "EntityIndex";
+        static constexpr const char* EntityIndexMSAA = "EntityIndexMSAA";
         static constexpr const char* DepthPyramid = "DepthPyramid";
         static constexpr const char* Bloom = "Bloom";
         static constexpr const char* TransparentAccum = "TransparentAccum";
+        static constexpr const char* TransparentAccumMSAA = "TransparentAccumMSAA";
         static constexpr const char* TransparentReveal = "TransparentReveal";
+        static constexpr const char* TransparentRevealMSAA = "TransparentRevealMSAA";
 
         static constexpr const char* OpaqueDepth = "OpaqueDepth";
+        static constexpr const char* OpaqueDepthMSAA = "OpaqueDepthMSAA";
         static constexpr const char* TransparentDepth = "TransparentDepth";
         static constexpr const char* SsaoAo = "SsaoAo";
         static constexpr const char* SsaoAoIntermediate = "SsaoAoIntermediate";

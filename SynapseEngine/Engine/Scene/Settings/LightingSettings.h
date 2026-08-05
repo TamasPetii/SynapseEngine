@@ -16,6 +16,7 @@ namespace Syn
 
         PipelineType pipelineType;
         uint32_t tileSize;
+        uint32_t msaaSamples;
 
         float ambientStrength;
         float emissiveStrength;
