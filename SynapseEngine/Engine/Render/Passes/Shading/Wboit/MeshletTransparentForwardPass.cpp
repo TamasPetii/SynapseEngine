@@ -120,35 +120,63 @@ namespace Syn {
         _graphicsState.renderArea = extent;
 
         uint32_t msaaSamples = context.scene->GetSettings()->lighting.msaaSamples;
+        if (context.scene->GetSettings()->lighting.pipelineType == PipelineType::Deferred) {
+            msaaSamples = 1;
+        }
         _graphicsState.raster.samples = static_cast<VkSampleCountFlagBits>(msaaSamples);
 
-        _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
-            .imageView = group->GetImage(RenderTargetNames::TransparentAccumMSAA)->GetView(Vk::ImageViewNames::Default),
-            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-            .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-            .resolveImageView = group->GetImage(RenderTargetNames::TransparentAccum)->GetView(Vk::ImageViewNames::Default),
-            .resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            .resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT
-            }));
+        if (msaaSamples > 1) {
+            _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
+                .imageView = group->GetImage(RenderTargetNames::TransparentAccumMSAA)->GetView(Vk::ImageViewNames::Default),
+                .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+                .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+                .resolveImageView = group->GetImage(RenderTargetNames::TransparentAccum)->GetView(Vk::ImageViewNames::Default),
+                .resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT
+                }));
 
-        _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
-            .imageView = group->GetImage(RenderTargetNames::TransparentRevealMSAA)->GetView(Vk::ImageViewNames::Default),
-            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-            .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-            .resolveImageView = group->GetImage(RenderTargetNames::TransparentReveal)->GetView(Vk::ImageViewNames::Default),
-            .resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            .resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT
-            }));
+            _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
+                .imageView = group->GetImage(RenderTargetNames::TransparentRevealMSAA)->GetView(Vk::ImageViewNames::Default),
+                .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+                .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+                .resolveImageView = group->GetImage(RenderTargetNames::TransparentReveal)->GetView(Vk::ImageViewNames::Default),
+                .resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT
+                }));
 
-        _depthAttachment = Vk::RenderUtils::CreateAttachment({
-            .imageView = group->GetImage(RenderTargetNames::OpaqueDepthMSAA)->GetView(Vk::ImageViewNames::Default),
-            .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-            .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-            .resolveMode = VK_RESOLVE_MODE_NONE
-            });
+            _depthAttachment = Vk::RenderUtils::CreateAttachment({
+                .imageView = group->GetImage(RenderTargetNames::OpaqueDepthMSAA)->GetView(Vk::ImageViewNames::Default),
+                .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+                .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+                .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+                .resolveMode = VK_RESOLVE_MODE_NONE
+                });
+
+        }
+        else {
+            _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
+                .imageView = group->GetImage(RenderTargetNames::TransparentAccum)->GetView(Vk::ImageViewNames::Default),
+                .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+                .storeOp = VK_ATTACHMENT_STORE_OP_STORE
+                }));
+
+            _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
+                .imageView = group->GetImage(RenderTargetNames::TransparentReveal)->GetView(Vk::ImageViewNames::Default),
+                .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+                .storeOp = VK_ATTACHMENT_STORE_OP_STORE
+                }));
+
+            _depthAttachment = Vk::RenderUtils::CreateAttachment({
+                .imageView = group->GetImage(RenderTargetNames::OpaqueDepth)->GetView(Vk::ImageViewNames::Default),
+                .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+                .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+                .storeOp = VK_ATTACHMENT_STORE_OP_STORE
+                });
+        }
 
         _renderInfo = Vk::RenderingInfoConfig{
             .renderArea = extent,
