@@ -22,6 +22,8 @@
 #include "Rendering/AnimationView.h"
 #include "Rendering/MaterialOverrideView.h"
 #include "Rendering/PipelineOverrideView.h"
+#include "Audio/AudioSourceView.h"
+#include "Audio/AudioListenerView.h"
 
 namespace Syn {
     class ComponentView : public IView<ComponentViewModel> {
@@ -44,5 +46,7 @@ namespace Syn {
 		AnimationView _animationView;
         MaterialOverrideView _materialOverrideView;
         PipelineOverrideView _pipelineOverrideView;
+		AudioSourceView _audioSourceView;
+        AudioListenerView _audioListenerView;
     };
 }

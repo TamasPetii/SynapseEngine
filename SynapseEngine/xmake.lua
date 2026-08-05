@@ -123,7 +123,8 @@ local vcpkg_packages = {
     "vcpkg::nanosvg",
     "vcpkg::tinygltf",
     "vcpkg::box3d",
-    "vcpkg::miniaudio"
+    "vcpkg::miniaudio",
+    "vcpkg::shader-slang"
 }
 
 for _, pkg in ipairs(vcpkg_packages) do

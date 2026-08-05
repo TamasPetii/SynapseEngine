@@ -20,7 +20,9 @@ namespace Syn
 		IModelComponentApi* modelComponentApi,
 		IAnimationApi* animationApi,
         IMaterialOverrideApi* materialOverrideApi,
-        IPipelineOverrideApi* pipelineOverrideApi
+        IPipelineOverrideApi* pipelineOverrideApi,
+        IAudioSourceApi* audioSourceApi,
+        IAudioListenerApi* audioListenerApi
     )
         : 
         _selectionApi(selectionApi),
@@ -39,7 +41,9 @@ namespace Syn
 		_modelComponentViewModel(selectionApi, modelComponentApi),
 		_animationViewModel(selectionApi, animationApi),
         _materialOverrideViewModel(selectionApi, materialOverrideApi),
-        _pipelineOverrideViewModel(selectionApi, pipelineOverrideApi)
+        _pipelineOverrideViewModel(selectionApi, pipelineOverrideApi),
+		_audioSourceViewModel(selectionApi, audioSourceApi),
+        _audioListenerViewModel(selectionApi, audioListenerApi)
     {}
 
     const ComponentState& ComponentViewModel::GetState() const {
@@ -71,6 +75,8 @@ namespace Syn
 			_animationViewModel.SyncWithEngine();
             _materialOverrideViewModel.SyncWithEngine();
             _pipelineOverrideViewModel.SyncWithEngine();
+            _audioSourceViewModel.SyncWithEngine();
+            _audioListenerViewModel.SyncWithEngine();
         }
     }
 
@@ -125,6 +131,12 @@ namespace Syn
             }
             else if constexpr (std::is_same_v<T, PipelineOverrideIntent>) {
                 _pipelineOverrideViewModel.Dispatch(arg);
+            }
+			else if constexpr (std::is_same_v<T, AudioSourceIntent>) {
+				_audioSourceViewModel.Dispatch(arg);
+			}
+            else if constexpr (std::is_same_v<T, AudioListenerIntent>) {
+                _audioListenerViewModel.Dispatch(arg);
             }
         }, intent);
     }

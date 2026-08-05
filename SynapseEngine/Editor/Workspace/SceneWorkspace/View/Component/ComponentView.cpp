@@ -45,6 +45,10 @@ namespace Syn {
             _meshColliderView.Draw(vm.GetMeshColliderViewModel());
             _rigidBodyView.Draw(vm.GetRigidBodyViewModel());
 
+            //Audio
+            _audioListenerView.Draw(vm.GetAudioListenerViewModel());
+			_audioSourceView.Draw(vm.GetAudioSourceViewModel());
+
             ImGui::Spacing();
             ImGui::Separator();
             ImGui::Spacing();

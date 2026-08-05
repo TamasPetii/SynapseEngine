@@ -33,6 +33,8 @@
 #include "EditorCore/Api/IMaterialOverrideApi.h"
 #include "EditorCore/Api/IPreviewApi.h"
 #include "EditorCore/Api/IPipelineOverrideApi.h"
+#include "EditorCore/Api/IAudioSourceApi.h"
+#include "EditorCore/Api/IAudioListenerApi.h"
 #include "Engine/Registry/Type/TypeInfo.h"
 
 namespace Syn {

@@ -21,6 +21,8 @@
 #include "Rendering/Animation/AnimationViewModel.h"
 #include "Rendering/MaterialOverride/MaterialOverrideViewModel.h"
 #include "Rendering/PipelineOverride/PipelineOverrideViewModel.h"
+#include "Audio/AudioSource/AudioSourceViewModel.h"
+#include "Audio/AudioListener/AudioListenerViewModel.h"
 
 #include "EditorCore/Api/ISelectionApi.h"
 #include "EditorCore/Api/ITagApi.h"
@@ -38,6 +40,8 @@
 #include "EditorCore/Api/IAnimationApi.h"
 #include "EditorCore/Api/IMaterialOverrideApi.h"
 #include "EditorCore/Api/IPipelineOverrideApi.h"
+#include "EditorCore/Api/IAudioSourceApi.h"
+#include "EditorCore/Api/IAudioListenerApi.h"
 
 namespace Syn {
     class ComponentViewModel : public IViewModel<ComponentState, ComponentIntent> {
@@ -60,7 +64,9 @@ namespace Syn {
             IModelComponentApi* modelComponentApi,
             IAnimationApi* animationApi,
             IMaterialOverrideApi* materialOverrideApi,
-            IPipelineOverrideApi* pipelineOverrideApi
+            IPipelineOverrideApi* pipelineOverrideApi,
+			IAudioSourceApi* audioSourceApi,
+            IAudioListenerApi* audioListenerApi
             );
 
         ~ComponentViewModel() override = default;
@@ -85,6 +91,8 @@ namespace Syn {
 		AnimationViewModel& GetAnimationViewModel() { return _animationViewModel; }
         MaterialOverrideViewModel& GetMaterialOverrideViewModel() { return _materialOverrideViewModel; }
         PipelineOverrideViewModel& GetPipelineOverrideViewModel() { return _pipelineOverrideViewModel; }
+		AudioSourceViewModel& GetAudioSourceViewModel() { return _audioSourceViewModel; }
+        AudioListenerViewModel& GetAudioListenerViewModel() { return _audioListenerViewModel; }
     private:
 		ISelectionApi* _selectionApi = nullptr;
         ComponentState _state;
@@ -107,5 +115,7 @@ namespace Syn {
 		AnimationViewModel _animationViewModel;
         MaterialOverrideViewModel _materialOverrideViewModel;
         PipelineOverrideViewModel _pipelineOverrideViewModel;
+		AudioSourceViewModel _audioSourceViewModel;
+        AudioListenerViewModel _audioListenerViewModel;
     };
 }

@@ -67,7 +67,9 @@ namespace Syn {
                 _context->GetApi<IModelComponentApi>(),
                 _context->GetApi<IAnimationApi>(),
                 _context->GetApi<IMaterialOverrideApi>(),
-                _context->GetApi<IPipelineOverrideApi>()
+                _context->GetApi<IPipelineOverrideApi>(),
+				_context->GetApi<IAudioSourceApi>(),
+                _context->GetApi<IAudioListenerApi>()
             }
         );
 

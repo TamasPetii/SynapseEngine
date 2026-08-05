@@ -26,6 +26,8 @@
 #include "Impl/MaterialOverrideApiImpl.h"
 #include "Impl/PreviewApiImpl.h"
 #include "Impl/PipelineOverrideApiImpl.h"
+#include "Impl/AudioSourceApiImpl.h"
+#include "Impl/AudioListenerApiImpl.h"
 
 namespace Syn {
     EditorContext::EditorContext(Engine* engine, GuiTextureManager* textureManager) {
@@ -58,5 +60,7 @@ namespace Syn {
         RegisterApi<IMaterialOverrideApi, MaterialOverrideApiImpl>(sm);
         RegisterApi<IPipelineOverrideApi, PipelineOverrideApiImpl>(sm);
         RegisterApi<IPreviewApi, PreviewApiImpl>(engine->GetPreviewManager(), textureManager, engine->GetImageManager());
+        RegisterApi<IAudioSourceApi, AudioSourceApiImpl>(sm);
+        RegisterApi<IAudioListenerApi, AudioListenerApiImpl>(sm);
     }
 }

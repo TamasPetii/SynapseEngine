@@ -40,6 +40,7 @@ constexpr const char* ASSET_PATH = "Assets";
 #define SYN_ICON_CUT            ICON_FA_CUT
 
 // Generic / Editor
+#define SYN_ICON_AUDIO          ICON_FA_VOLUME_UP
 #define SYN_ICON_GAMEPAD        ICON_FA_GAMEPAD
 #define SYN_ICON_ARROWS_ALT     ICON_FA_ARROWS_ALT
 #define SYN_ICON_LAYER_GROUP    ICON_FA_LAYER_GROUP

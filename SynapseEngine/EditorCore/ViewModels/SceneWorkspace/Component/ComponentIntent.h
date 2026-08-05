@@ -15,6 +15,8 @@
 #include "Physics/ConvexCollider/ConvexColliderIntent.h"
 #include "Physics/MeshCollider/MeshColliderIntent.h"
 #include "Physics/RigidBody/RigidBodyIntent.h"
+#include "Audio/AudioSource/AudioSourceIntent.h"
+#include "Audio/AudioListener/AudioListenerIntent.h"
 #include <variant>
 
 namespace Syn {
@@ -34,6 +36,8 @@ namespace Syn {
         MeshColliderIntent,
         RigidBodyIntent,
         MaterialOverrideIntent,
-        PipelineOverrideIntent
+        PipelineOverrideIntent, 
+        AudioSourceIntent,
+        AudioListenerIntent
     >;
 }
