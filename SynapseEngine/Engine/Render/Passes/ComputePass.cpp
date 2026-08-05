@@ -1,6 +1,6 @@
 #include "ComputePass.h"
 #include "Engine/ServiceLocator.h"
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/ShaderManager.h"
 
 namespace Syn {
     void ComputePass::Execute(const RenderContext& context)

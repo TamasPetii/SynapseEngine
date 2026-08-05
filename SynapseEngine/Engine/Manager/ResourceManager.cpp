@@ -1,7 +1,18 @@
 #include "ResourceManager.h"
 #include "Engine/ServiceLocator.h"
 
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/Loader/ShaderLoaderRegistry.h"
+#include "Engine/Shader/Loader/GlslShaderLoader.h"
+#include "Engine/Shader/Compiler/ShaderCompilerRegistry.h"
+#include "Engine/Shader/Compiler/Shaderc/ShadercShaderCompiler.h"
+#include "Engine/Shader/Reflector/ShaderReflectorRegistry.h"
+#include "Engine/Shader/Reflector/SpirvShaderReflector.h"
+#include "Engine/Shader/Processor/ShaderProcessorPipeline.h"
+#include "Engine/Shader/Converter/DefaultShaderCooker.h"
+#include "Engine/Shader/Converter/DefaultGpuShaderConverter.h"
+#include "Engine/Shader/Converter/DefaultCpuShaderExtractor.h"
+#include "Engine/Shader/Resolver/DefaultShaderDependencyResolver.h"
+
 #include "Engine/Mesh/Builder/StaticMeshBuilder.h"
 #include "Engine/Mesh/Uploader/DefaultGpuModelUploader.h"
 #include "Engine/Mesh/Converter/DefaultModelCooker.h"
@@ -69,7 +80,27 @@ namespace Syn {
 
 	void ResourceManager::InitShaderManager()
 	{
-		_shaderManager = std::make_unique<ShaderManager>();
+		auto loaderRegistry = std::make_unique<ShaderLoaderRegistry>();
+		loaderRegistry->Register(std::make_shared<GlslShaderLoader>(), 1);
+
+		auto compilerRegistry = std::make_unique<ShaderCompilerRegistry>();
+		compilerRegistry->Register(ShaderLanguage::GLSL, std::make_shared<ShadercShaderCompiler>());
+
+		auto reflectorRegistry = std::make_unique<ShaderReflectorRegistry>();
+		reflectorRegistry->Register(ShaderBytecodeFormat::SPIRV, std::make_shared<SpirvShaderReflector>());
+
+		_shaderBuilder = std::make_shared<ShaderBuilder>(
+			std::move(loaderRegistry),
+			std::make_unique<ShaderProcessorPipeline>(),
+			std::make_unique<DefaultShaderCooker>(),
+			std::make_unique<DefaultGpuShaderConverter>(std::move(compilerRegistry)),
+			std::make_unique<DefaultCpuShaderExtractor>(std::move(reflectorRegistry)),
+			std::make_unique<DefaultShaderDependencyResolver>()
+		);
+
+		ServiceLocator::Provide<ShaderBuilder>(_shaderBuilder.get());
+
+		_shaderManager = std::make_unique<ShaderManager>(_shaderBuilder);
 		ServiceLocator::Provide<ShaderManager>(_shaderManager.get());
 	}
 

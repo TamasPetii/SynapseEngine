@@ -5,6 +5,7 @@ namespace Syn
     Vk::Context* ServiceLocator::_vkContext = nullptr;
     Vk::GpuUploader* ServiceLocator::_gpuUploader = nullptr;
     ShaderManager* ServiceLocator::_shaderManager = nullptr;
+    ShaderBuilder* ServiceLocator::_shaderBuilder = nullptr;
     ResourceManager* ServiceLocator::_resourceManager = nullptr;
     StaticMeshBuilder* ServiceLocator::_staticMeshBuilder = nullptr;
     FrameContext* ServiceLocator::_frameContext = nullptr;
@@ -53,6 +54,7 @@ namespace Syn
     template <> void ServiceLocator::Provide<FrameStatisticsManager>(FrameStatisticsManager* s) { _frameStatisticsManager = s; }
     template <> void ServiceLocator::Provide<PreviewManager>(PreviewManager* s) { _previewManager = s; }
     template <> void ServiceLocator::Provide<PhysicsFactory>(PhysicsFactory f) { _physicsFactory = std::move(f); }
+    template <> void ServiceLocator::Provide<ShaderBuilder>(ShaderBuilder* s) { _shaderBuilder = s; }
 
     template <> Vk::Context* ServiceLocator::Get<Vk::Context>() { return _vkContext; }
     template <> Vk::GpuUploader* ServiceLocator::Get<Vk::GpuUploader>() { return _gpuUploader; }
@@ -79,4 +81,5 @@ namespace Syn
     template <> FrameStatisticsManager* ServiceLocator::Get<FrameStatisticsManager>() { return _frameStatisticsManager; }
     template <> PreviewManager* ServiceLocator::Get<PreviewManager>() { return _previewManager; }
     template <> PhysicsFactory& ServiceLocator::Get<PhysicsFactory>() { return _physicsFactory; }
+    template <> ShaderBuilder* ServiceLocator::Get<ShaderBuilder>() { return _shaderBuilder; }
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/SynApi.h"
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/ShaderManager.h"
+#include "Engine/Shader/Builder/ShaderBuilder.h"
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Material/MaterialManager.h"
@@ -30,7 +31,9 @@ namespace Syn {
         void InitPreviewManager();
         void InitAudioManager();
     private:
+        std::shared_ptr<ShaderBuilder> _shaderBuilder;
         std::unique_ptr<ShaderManager> _shaderManager;
+
         std::unique_ptr<MaterialManager> _materialManager;
 
 		std::shared_ptr<StaticMeshBuilder> _staticMeshBuilder;

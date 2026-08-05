@@ -7,10 +7,10 @@
 
 namespace Syn::Vk {
 
-    ShaderProgram::ShaderProgram(std::span<const Shader* const> shaders, const ShaderProgramConfig& config) :
+    ShaderProgram::ShaderProgram(std::span<const ShaderCreationInfo> creationInfos, const ShaderProgramConfig& config) :
         _config(config)
     {
-        _shaders.assign(shaders.begin(), shaders.end());
+        _pendingCreationInfo.assign(creationInfos.begin(), creationInfos.end());
     }
 
     ShaderProgram::~ShaderProgram() {
@@ -46,8 +46,8 @@ namespace Syn::Vk {
         };
 
         std::vector<VkShaderEXT> handlesToBind(allStages.size(), VK_NULL_HANDLE);
-        for (size_t i = 0; i < _shaders.size(); ++i) {
-            VkShaderStageFlagBits currentStage = _shaders[i]->GetStage();
+        for (size_t i = 0; i < _shaderObjects.size(); ++i) {
+            VkShaderStageFlagBits currentStage = _stages[i];
 
             for (size_t j = 0; j < allStages.size(); ++j) {
                 if (allStages[j] == currentStage) {
@@ -57,21 +57,17 @@ namespace Syn::Vk {
             }
         }
 
-        vkCmdBindShadersEXT(
-            cmd,
-            static_cast<uint32_t>(allStages.size()),
-            allStages.data(),
-            handlesToBind.data()
-        );
+        vkCmdBindShadersEXT(cmd, static_cast<uint32_t>(allStages.size()), allStages.data(), handlesToBind.data());
     }
 
     void ShaderProgram::CreatePipelineLayoutAndShaders() {
-        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
+        if (_pendingCreationInfo.empty()) return;
 
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
         std::map<uint32_t, std::map<uint32_t, VkDescriptorSetLayoutBinding>> mergedBindings;
 
-        for (const auto* shader : _shaders) {
-            const auto& resources = shader->GetResources();
+        for (const auto& info : _pendingCreationInfo) {
+            const auto& resources = *info.reflection;
             for (const auto& [set, bindings] : resources.descriptorSets) {
                 for (const auto& binding : bindings) {
                     auto& mergedBinding = mergedBindings[set][binding.binding];
@@ -91,7 +87,7 @@ namespace Syn::Vk {
 
         _bindLayouts.resize(maxSetIndex + 1, VK_NULL_HANDLE);
 
-        for (uint32_t set = 0; set <= maxSetIndex; ++set)
+        for (uint32_t set = 0; set <= maxSetIndex; ++set) 
         {
             if (_config.layoutOverride) {
                 VkDescriptorSetLayout overridenLayout = _config.layoutOverride(set);
@@ -167,23 +163,24 @@ namespace Syn::Vk {
 
         SYN_VK_ASSERT_MSG(vkCreatePipelineLayout(device->Handle(), &pipelineLayoutInfo, nullptr, &_pipelineLayout), "Failed to create merged Pipeline Layout");
 
-        _shaderObjects.resize(_shaders.size());
+        _shaderObjects.resize(_pendingCreationInfo.size());
+        _stages.resize(_pendingCreationInfo.size());
 
         bool hasTaskShader = false;
-        for (const auto* shader : _shaders) {
-            if (shader->GetStage() == VK_SHADER_STAGE_TASK_BIT_EXT) {
+        for (const auto& info : _pendingCreationInfo) {
+            if (info.stage == VK_SHADER_STAGE_TASK_BIT_EXT) {
                 hasTaskShader = true;
                 break;
             }
         }
 
-        for (size_t i = 0; i < _shaders.size(); ++i) {
-            const auto* shader = _shaders[i];
-            auto stage = shader->GetStage();
-            const auto& spirv = shader->GetSpirv();
+        for (size_t i = 0; i < _pendingCreationInfo.size(); ++i) {
+            const auto& info = _pendingCreationInfo[i];
+            _stages[i] = info.stage;
+            const auto& spirv = *info.spirv;
 
             VkShaderStageFlags nextStages = 0;
-            switch (stage) {
+            switch (info.stage) {
             case VK_SHADER_STAGE_VERTEX_BIT:
                 nextStages = VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT | VK_SHADER_STAGE_GEOMETRY_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
                 break;
@@ -212,13 +209,13 @@ namespace Syn::Vk {
 
             VkShaderCreateInfoEXT createInfo = { VK_STRUCTURE_TYPE_SHADER_CREATE_INFO_EXT };
             createInfo.nextStage = nextStages;
-            createInfo.stage = stage;
+            createInfo.stage = info.stage;
             createInfo.codeType = VK_SHADER_CODE_TYPE_SPIRV_EXT;
             createInfo.pCode = spirv.data();
             createInfo.codeSize = spirv.size() * sizeof(uint32_t);
             createInfo.pName = "main";
 
-            if (stage == VK_SHADER_STAGE_MESH_BIT_EXT && !hasTaskShader)
+            if (info.stage == VK_SHADER_STAGE_MESH_BIT_EXT && !hasTaskShader)
                 createInfo.flags = VK_SHADER_CREATE_NO_TASK_SHADER_BIT_EXT;
             else
                 createInfo.flags = 0;
@@ -232,6 +229,12 @@ namespace Syn::Vk {
             }
 
             SYN_VK_ASSERT_MSG(vkCreateShadersEXT(device->Handle(), 1, &createInfo, nullptr, &_shaderObjects[i]), "Failed to create Shader Object EXT from Program!");
+
+            if (info.outHandle) {
+                *info.outHandle = _shaderObjects[i];
+            }
         }
+
+        _pendingCreationInfo.clear();
     }
 }

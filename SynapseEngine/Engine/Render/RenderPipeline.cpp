@@ -3,7 +3,7 @@
 #include "Engine/Vk/Context.h"
 #include "Engine/Profiler/IGpuProfiler.h"
 #include "Engine/Statistics/IRenderStatCollector.h"
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/ShaderManager.h"
 
 namespace Syn
 {

@@ -1,5 +1,4 @@
 #include "RenderUtils.h"
-#include "Engine/Vk/Shader/Shader.h"
 
 namespace Syn::Vk {
 

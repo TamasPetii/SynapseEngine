@@ -8,7 +8,7 @@
 #include "Engine/Component/Rendering/ModelComponent.h"
 #include "Engine/Mesh/Factory/MeshFactory.h"
 #include "Engine/Mesh/ModelManager.h"
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/ShaderManager.h"
 #include "Engine/Mesh/MeshSourceNames.h"
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
 #include "Engine/Component/Rendering/PipelineOverrideComponent.h"

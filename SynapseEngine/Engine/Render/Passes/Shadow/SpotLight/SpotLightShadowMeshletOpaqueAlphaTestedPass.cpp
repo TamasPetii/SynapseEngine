@@ -1,7 +1,7 @@
 #include "SpotLightShadowMeshletOpaqueAlphaTestedPass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/ShaderManager.h"
 #include "Engine/Vk/Image/ImageFactory.h"
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Manager/ComponentBufferManager.h"

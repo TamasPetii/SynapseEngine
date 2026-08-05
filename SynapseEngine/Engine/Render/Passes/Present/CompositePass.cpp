@@ -1,7 +1,7 @@
 #include "CompositePass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/ShaderManager.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Vk/Image/ImageViewNames.h"

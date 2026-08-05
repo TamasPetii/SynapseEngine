@@ -15,6 +15,7 @@ namespace Syn::Vk {
 namespace Syn {
     struct FrameContext;
     class ShaderManager;
+    class ShaderBuilder;
     class ResourceManager;
     class StaticMeshBuilder;
     class ModelManager;
@@ -68,6 +69,7 @@ namespace Syn
         static Vk::Context* _vkContext;
         static Vk::GpuUploader* _gpuUploader;
         static ShaderManager* _shaderManager;
+        static ShaderBuilder* _shaderBuilder;
         static ResourceManager* _resourceManager;
         static ModelManager* _modelManager;
         static FrameContext* _frameContext;
@@ -95,6 +97,7 @@ namespace Syn
     template <> SYN_API void ServiceLocator::Provide<Vk::Context>(Vk::Context*);
     template <> SYN_API void ServiceLocator::Provide<Vk::GpuUploader>(Vk::GpuUploader*);
     template <> SYN_API void ServiceLocator::Provide<ShaderManager>(ShaderManager*);
+    template <> SYN_API void ServiceLocator::Provide<ShaderBuilder>(ShaderBuilder*);
     template <> SYN_API void ServiceLocator::Provide<ResourceManager>(ResourceManager*);
     template <> SYN_API void ServiceLocator::Provide<StaticMeshBuilder>(StaticMeshBuilder*);
     template <> SYN_API void ServiceLocator::Provide<FrameContext>(FrameContext*);
@@ -121,6 +124,7 @@ namespace Syn
     template <> SYN_API Vk::Context* ServiceLocator::Get<Vk::Context>();
     template <> SYN_API Vk::GpuUploader* ServiceLocator::Get<Vk::GpuUploader>();
     template <> SYN_API ShaderManager* ServiceLocator::Get<ShaderManager>();
+    template <> SYN_API ShaderBuilder* ServiceLocator::Get<ShaderBuilder>();
     template <> SYN_API ResourceManager* ServiceLocator::Get<ResourceManager>();
     template <> SYN_API StaticMeshBuilder* ServiceLocator::Get<StaticMeshBuilder>();
     template <> SYN_API FrameContext* ServiceLocator::Get<FrameContext>();

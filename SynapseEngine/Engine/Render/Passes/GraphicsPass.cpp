@@ -1,6 +1,6 @@
 #include "GraphicsPass.h"
 #include "Engine/ServiceLocator.h"
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/ShaderManager.h"
 
 namespace Syn {
     void GraphicsPass::Execute(const RenderContext& context)
