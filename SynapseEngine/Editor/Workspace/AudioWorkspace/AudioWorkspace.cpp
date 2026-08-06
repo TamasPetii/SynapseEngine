@@ -1,5 +1,6 @@
 #include "AudioWorkspace.h"
 #include "Editor/Manager/EditorIcons.h"
+#include "Engine/Scene/SceneNames.h"
 
 #include "Editor/Workspace/Common/ContentBrowser/ContentBrowserView.h"
 #include "EditorCore/ViewModels/Common/ContentBrowser/ContentBrowserViewModel.h"
@@ -13,6 +14,9 @@ namespace Syn {
         : _context(context), _iconManager(iconManager), _assetPath(assetPath) {}
 
     void AudioWorkspace::OnActivate() {
+        if (_context && _context->GetApi<ISceneApi>()) {
+            _context->GetApi<ISceneApi>()->ActivateScene(SceneNames::Empty);
+        }
     }
 
     void AudioWorkspace::Initialize() {

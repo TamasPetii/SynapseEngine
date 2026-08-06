@@ -13,10 +13,19 @@
 #include "View/TextureGraph/TextureGraphView.h"
 #include "EditorCore/ViewModels/TextureWorkspace/TextureGraph/TextureGraphViewModel.h"
 
+#include "Engine/Scene/SceneNames.h"
+
 namespace Syn {
 
     TextureWorkspace::TextureWorkspace(EditorContext* context, IconManager* iconManager, const std::string& assetPath)
         : _context(context), _iconManager(iconManager), _assetPath(assetPath) {}
+
+	void TextureWorkspace::OnActivate()
+	{
+		if (_context && _context->GetApi<ISceneApi>()) {
+			_context->GetApi<ISceneApi>()->ActivateScene(SceneNames::Empty);
+		}
+	}
 
     void TextureWorkspace::Initialize()
     {

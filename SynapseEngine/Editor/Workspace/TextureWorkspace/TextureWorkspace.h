@@ -12,7 +12,7 @@ namespace Syn {
         ~TextureWorkspace() override = default;
 
         void Initialize() override;
-
+        void OnActivate() override;
     private:
         EditorContext* _context;
         IconManager* _iconManager;
