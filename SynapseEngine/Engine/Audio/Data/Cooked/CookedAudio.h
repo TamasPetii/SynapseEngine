@@ -1,5 +1,6 @@
 #pragma once
 #include "Engine/SynApi.h"
+#include "Engine/Audio/Data/Common/AudioWaveformChunk.h"
 #include <vector>
 #include <cstdint>
 
@@ -13,5 +14,6 @@ namespace Syn
         bool isSpatialized = false;
 
         std::vector<float> samples;
+        std::vector<AudioWaveformChunk> waveform;
     };
 }

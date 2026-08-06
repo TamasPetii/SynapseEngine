@@ -9,5 +9,6 @@ namespace Syn
         outCpuData.totalFrames = cookedData.totalFrames;
         outCpuData.isSpatialized = cookedData.isSpatialized;
         outCpuData.samples = cookedData.samples;
+        outCpuData.waveform = cookedData.waveform;
     }
 }

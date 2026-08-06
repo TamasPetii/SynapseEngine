@@ -3,6 +3,7 @@
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/FrameContext.h"
+#include "Engine/Vk/Buffer/BufferFactory.h"
 
 namespace Syn {
 
@@ -34,6 +35,9 @@ namespace Syn {
             .perMipViews = true
             });
         _scratchBloomImage = std::make_unique<Vk::Image>(bloomConfig);
+
+        size_t stagingBufferSize = _tileSize * _tileSize * 8;
+        _scratchStagingBuffer = Vk::BufferFactory::CreateStaging(stagingBufferSize);
     }
 
     uint64_t PreviewManager::GetUniqueId(PreviewResourceType type, uint32_t resourceId) const {

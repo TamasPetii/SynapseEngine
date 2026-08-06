@@ -2,8 +2,13 @@
 
 namespace Syn
 {
-    AudioManager::AudioManager(std::shared_ptr<AudioBuilder> builder)
-        : _builder(std::move(builder))
+    AudioManager::AudioManager(std::shared_ptr<AudioBuilder> builder,
+        PreviewAllocateCallback previewAllocateCallback,
+        PreviewMarkDirtyCallback previewMarkDirtyCallback)
+        : 
+        _builder(std::move(builder)),
+        _previewAllocateCallback(std::move(previewAllocateCallback)),
+        _previewMarkDirtyCallback(std::move(previewMarkDirtyCallback))
     {}
 
     uint32_t AudioManager::LoadAudioAsync(const std::string& filePath)
@@ -47,13 +52,24 @@ namespace Syn
         std::lock_guard lock(_mutex);
         FinalizeResource(entry);
 
+        if (_previewMarkDirtyCallback) {
+            _previewMarkDirtyCallback(entryId);
+        }
+
         SetResourceState(entryId, ResourceState::Ready);
         MarkDirty(entryId);
     }
 
     void AudioManager::FinalizeResource(EntryType& entry)
     {
-        if (entry.resource) {
+        if (entry.resource) 
+        {
+            uint32_t entryId = _pathToId.at(entry.path);
+
+            if (_previewAllocateCallback) {
+                _previewAllocateCallback(entryId);
+            }
+
             entry.resource->transientCpuData.reset();
         }
     }

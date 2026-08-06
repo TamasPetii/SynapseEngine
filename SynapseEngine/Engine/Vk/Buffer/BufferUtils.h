@@ -21,6 +21,8 @@ namespace Syn::Vk {
 
         VkDeviceSize bufferOffset = 0;
 
+        VkOffset3D imageOffset = { 0, 0, 0 };
+
         uint32_t mipLevel = 0;
         uint32_t baseArrayLayer = 0;
         uint32_t layerCount = 1;

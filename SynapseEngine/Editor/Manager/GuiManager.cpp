@@ -125,6 +125,7 @@ namespace Syn {
             const char* wsMaterial = SYN_WS_MATERIAL;
             const char* wsTexture = SYN_WS_TEXTURE;
             const char* wsAnimation = SYN_WS_ANIMATION;
+            const char* wsAudio = SYN_WS_AUDIO;
 
             ImVec2 btnPadding = ImGui::GetStyle().FramePadding;
             float totalWidth = ImGui::CalcTextSize(wsScene).x 
@@ -132,7 +133,8 @@ namespace Syn {
                              + ImGui::CalcTextSize(wsModel).x 
                              + ImGui::CalcTextSize(wsMaterial).x 
                              + ImGui::CalcTextSize(wsTexture).x +
-                             + (btnPadding.x * 2.0f * 5.0f);
+                             + ImGui::CalcTextSize(wsAudio).x +
+                             + (btnPadding.x * 2.0f * 6.0f);
 
             ImGui::SetCursorPosX(ImGui::GetWindowWidth() - totalWidth - 10.0f);
 
@@ -171,6 +173,7 @@ namespace Syn {
             WorkspaceTab(wsModel, EditorWorkspace::Model);
             WorkspaceTab(wsMaterial, EditorWorkspace::Material);
             WorkspaceTab(wsTexture, EditorWorkspace::Texture);
+            WorkspaceTab(wsAudio, EditorWorkspace::Audio);
 
             ImGui::PopStyleColor();
             ImGui::PopStyleVar(2);
@@ -200,6 +203,7 @@ namespace Syn {
             case EditorWorkspace::Material: hostWindowName = "HostWindow_Material"; subDockspaceId = ImGui::GetID("DockSpace_Material"); break;
             case EditorWorkspace::Model:    hostWindowName = "HostWindow_Model";    subDockspaceId = ImGui::GetID("DockSpace_Model"); break;
             case EditorWorkspace::Animation:hostWindowName = "HostWindow_Animation"; subDockspaceId = ImGui::GetID("DockSpace_Animation"); break;
+            case EditorWorkspace::Audio:    hostWindowName = "HostWindow_Audio";    subDockspaceId = ImGui::GetID("DockSpace_Audio"); break;
             default:                        hostWindowName = "HostWindow_Default";  subDockspaceId = ImGui::GetID("DockSpace_Default"); break;
         }
 

@@ -36,6 +36,7 @@
 #include "EditorCore/Api/IPipelineOverrideApi.h"
 #include "EditorCore/Api/IAudioSourceApi.h"
 #include "EditorCore/Api/IAudioListenerApi.h"
+#include "EditorCore/Api/IAudioApi.h"
 #include "Engine/Registry/Type/TypeInfo.h"
 
 namespace Syn {

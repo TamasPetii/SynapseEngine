@@ -19,6 +19,7 @@
 #include "Engine/Render/Passes/Preview/ModelPreviewPass.h"
 #include "Engine/Render/Passes/Preview/AnimationPreviewPass.h"
 #include "Engine/Render/Passes/Preview/MaterialPreviewPass.h"
+#include "Engine/Render/Passes/Preview/AudioPreviewPass.h"
 #include "Engine/Render/Passes/Preview/MaterialPreviewBloomPass.h"
 
 #include "Engine/Render/Passes/Culling/Geometry/GeometryModelCullingPass.h"
@@ -438,6 +439,7 @@ namespace Syn
         pipeline->AddPass(std::make_unique<PreviewPreTransitionPass>());
         pipeline->AddPass(std::make_unique<MaterialPreviewPass>());
         pipeline->AddPass(std::make_unique<ModelPreviewPass>());
+        pipeline->AddPass(std::make_unique<AudioPreviewPass>());
         pipeline->AddPass(std::make_unique<AnimationPreviewPass>());
         pipeline->AddPass(std::make_unique<MaterialPreviewBloomPass>());
         pipeline->AddPass(std::make_unique<PreviewPostTransitionPass>());

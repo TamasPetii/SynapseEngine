@@ -33,6 +33,7 @@ namespace Syn {
     class FrameStatisticsManager;
     class PreviewManager;
 	class IAudioEngine;
+    class AudioManager;
 }
 
 namespace Syn
@@ -66,6 +67,7 @@ namespace Syn
         void SetInputEnabled(bool enabled) { _inputEnabled = enabled; }
         void OnChar(unsigned int codepoint);
     public:
+        AudioManager* GetAudioManager();
         MaterialManager* GetMaterialManager();
         ImageManager* GetImageManager();
         ModelManager* GetModelManager();

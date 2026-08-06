@@ -411,6 +411,10 @@ namespace Syn
 		ServiceLocator::Provide<Serializer>(_serializer.get());
 	}
 
+	AudioManager* Engine::GetAudioManager() {
+		return ServiceLocator::Get<AudioManager>();
+	}
+
 	MaterialManager* Engine::GetMaterialManager() {
 		return ServiceLocator::Get<MaterialManager>();
 	}

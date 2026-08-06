@@ -29,6 +29,7 @@
 #include "Impl/AudioSourceApiImpl.h"
 #include "Impl/AudioListenerApiImpl.h"
 #include "Impl/AnimationApiImpl.h"
+#include "Impl/AudioApiImpl.h"
 
 namespace Syn {
     EditorContext::EditorContext(Engine* engine, GuiTextureManager* textureManager) {
@@ -64,5 +65,6 @@ namespace Syn {
         RegisterApi<IAudioSourceApi, AudioSourceApiImpl>(sm);
         RegisterApi<IAudioListenerApi, AudioListenerApiImpl>(sm);
         RegisterApi<IAnimationApi, AnimationApiImpl>(engine->GetAnimationManager(), sm);
+        RegisterApi<IAudioApi, AudioApiImpl>(engine->GetAudioManager());
     }
 }

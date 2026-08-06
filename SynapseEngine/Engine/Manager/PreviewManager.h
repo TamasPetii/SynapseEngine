@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include "Engine/Vk/Image/Image.h"
+#include "Engine/Vk/Buffer/Buffer.h"
 #include <queue>
 #include <unordered_map>
 #include <unordered_set>
@@ -16,7 +17,8 @@ namespace Syn {
         Material = 0,
         Model = 1,
         Image = 2,
-        Animation = 3
+        Animation = 3,
+        Audio = 4
     };
 
     struct SYN_API StaleImage {
@@ -48,6 +50,7 @@ namespace Syn {
         Vk::Image* GetAtlasDepthImage() const { return _atlasDepthImage.get(); }
         Vk::Image* GetScratchColorImage() const { return _scratchColorImage.get(); }
         Vk::Image* GetScratchBloomImage() const { return _scratchBloomImage.get(); }
+        Vk::Buffer* GetScratchStagingBuffer() const { return _scratchStagingBuffer.get(); }
 
         uint32_t GetResolution() const { return _resolution; }
         std::vector<uint32_t> GetActiveResources(PreviewResourceType type) const;
@@ -66,6 +69,7 @@ namespace Syn {
         std::unique_ptr<Vk::Image> _atlasDepthImage;
         std::unique_ptr<Vk::Image> _scratchColorImage;
         std::unique_ptr<Vk::Image> _scratchBloomImage;
+        std::unique_ptr<Vk::Buffer> _scratchStagingBuffer;
 
         std::vector<StaleImage> _staleImages;
 

@@ -58,6 +58,7 @@
 #include "Engine/Audio/Processor/DefaultAudioProcessorPipeline.h"
 #include "Engine/Audio/Converter/DefaultAudioCooker.h"
 #include "Engine/Audio/Converter/DefaultCpuAudioExtractor.h"
+#include "Engine/Audio/Processor/AudioWaveformProcessor.h"
 
 #include "Engine/Mesh/MeshSourceNames.h"
 
@@ -284,10 +285,19 @@ namespace Syn {
 		);
 
 		_audioBuilder->RegisterLoader(std::make_shared<MiniAudioLoader>(), 1);
+		_audioBuilder->RegisterProcessor(std::make_unique<AudioWaveformProcessor>());
 
 		ServiceLocator::Provide<AudioBuilder>(_audioBuilder.get());
 
-		_audioManager = std::make_unique<AudioManager>(_audioBuilder);
+		_audioManager = std::make_unique<AudioManager>(
+			_audioBuilder,
+			[this](uint32_t id) {
+				if (_previewManager) _previewManager->AllocateTile(PreviewResourceType::Audio, id);
+			},
+			[this](uint32_t id) {
+				if (_previewManager) _previewManager->MarkDirty(PreviewResourceType::Audio, id);
+			}
+		);
 
 		ServiceLocator::Provide<AudioManager>(_audioManager.get());
 	}

@@ -10,7 +10,8 @@ namespace Syn
         Model,
         Material,
         Texture,
-        Animation
+        Animation,
+        Audio
     };
 
     class IWorkspace {

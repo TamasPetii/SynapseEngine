@@ -10,11 +10,15 @@
 namespace Syn
 {
     using AudioSourceFactory = std::function<std::unique_ptr<IAudioSource>()>;
+    using PreviewAllocateCallback = std::function<void(uint32_t resourceId)>;
+    using PreviewMarkDirtyCallback = std::function<void(uint32_t resourceId)>;
 
     class SYN_API AudioManager : public BaseResourceManager<Sound>
     {
     public:
-        AudioManager(std::shared_ptr<AudioBuilder> builder);
+        AudioManager(std::shared_ptr<AudioBuilder> builder, 
+            PreviewAllocateCallback previewAllocateCallback = nullptr,
+            PreviewMarkDirtyCallback previewMarkDirtyCallback = nullptr);
         ~AudioManager() override = default;
 
         uint32_t LoadAudioAsync(const std::string& filePath);
@@ -28,5 +32,7 @@ namespace Syn
         void FinalizeResource(EntryType& entry) override;
     private:
         std::shared_ptr<AudioBuilder> _builder;
+        PreviewAllocateCallback _previewAllocateCallback;
+        PreviewMarkDirtyCallback _previewMarkDirtyCallback;
     };
 }

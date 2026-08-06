@@ -77,6 +77,7 @@ constexpr const char* ASSET_PATH = "Assets";
 #define SYN_WS_MATERIAL         SYN_ICON_MAGIC " Material"
 #define SYN_WS_TEXTURE          SYN_ICON_IMAGE " Texture"
 #define SYN_WS_ANIMATION        SYN_ICON_RUNNING " Animation"
+#define SYN_WS_AUDIO            SYN_ICON_AUDIO " Audio"
 
 #define SYN_ICON_MODEL               ICON_FA_SHAPES
 #define SYN_ICON_ANIMATION           ICON_FA_RUNNING
