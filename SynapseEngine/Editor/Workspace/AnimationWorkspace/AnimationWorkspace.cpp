@@ -10,6 +10,9 @@
 #include "View/AnimationViewport/AnimationViewportView.h"
 #include "EditorCore/ViewModels/AnimationWorkspace/AnimationViewport/AnimationViewportViewModel.h"
 
+#include "View/AnimationSequencer/AnimationSequencerView.h"
+#include "EditorCore/ViewModels/AnimationWorkspace/AnimationSequencer/AnimationSequencerViewModel.h"
+
 #include "Engine/Scene/SceneNames.h"
 
 namespace Syn {
@@ -49,6 +52,14 @@ namespace Syn {
                 _context->GetApi<ISelectionApi>(),
                 _context->GetApi<ITransformApi>(),
                 _context->GetApi<ISettingsApi>(),
+                _context->GetApi<IAnimationApi>()
+            }
+        );
+
+        using AnimationSequencerWin = EditorWindow<AnimationSequencerView, AnimationSequencerViewModel>;
+        AddWindow<AnimationSequencerWin>(
+            AnimationSequencerView{},
+            AnimationSequencerViewModel{
                 _context->GetApi<IAnimationApi>()
             }
         );

@@ -11,6 +11,7 @@ constexpr const char* ASSET_PATH = "Assets";
 #define SYN_ICON_FILE           ICON_FA_FILE
 #define SYN_ICON_IMAGE          ICON_FA_IMAGE
 #define SYN_ICON_CODE           ICON_FA_CODE
+#define SYN_ICON_CLOCK          ICON_FA_CLOCK
 
 // Content browser icons
 #define SYN_ICON_ARROW_UP       ICON_FA_ARROW_UP
