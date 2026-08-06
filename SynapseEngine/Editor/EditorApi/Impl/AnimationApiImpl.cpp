@@ -3,6 +3,10 @@
 #include "Engine/Component/Core/TagComponent.h"
 #include "Engine/Component/Rendering/AnimationComponent.h" 
 #include "Editor/EditorApi/EditorApiUtils.h"
+#include "Engine/Component/Rendering/ModelComponent.h"
+#include "Engine/Component/Core/TransformComponent.h"
+#include "Engine/Component/Core/CameraComponent.h"
+#include "Engine/Mesh/ModelManager.h"
 #include "Engine/Logger/SynLog.h"
 #include <filesystem>
 #include <algorithm>
@@ -56,19 +60,82 @@ namespace Syn {
         auto tagPool = registry.GetPool<TagComponent>();
         if (!tagPool) return;
 
-        for (EntityID entity : tagPool->GetDenseEntities()) {
-            const auto& tag = tagPool->Get(entity);
-            if (tag.tag == "Preview" && registry.HasComponent<AnimationComponent>(entity)) {
-                EditorApiUtils::ModifyComponent<AnimationComponent>(
-                    _sceneManager,
-                    entity,
-                    [animationId](auto& animationComp, auto pool) {
-                        animationComp.animationIndex = animationId;
-                    }
-                );
+        uint32_t baseModelId = 0xFFFFFFFF;
+
+        if (animationId != INVALID_ANIMATION_ID && _animManager) {
+            auto animResource = _animManager->GetResource(animationId);
+            if (animResource) {
+                baseModelId = animResource->cpuData.baseModelId;
             }
         }
 
-        Syn::Info("AnimationApiImpl: Applied animation {} to preview object.", animationId);
+        for (EntityID entity : tagPool->GetDenseEntities()) {
+            const auto& tag = tagPool->Get(entity);
+            if (tag.tag == "Preview") {
+
+                if (registry.HasComponent<AnimationComponent>(entity)) {
+                    EditorApiUtils::ModifyComponent<AnimationComponent>(
+                        _sceneManager,
+                        entity,
+                        [animationId](auto& animatorComp, auto pool) {
+                            animatorComp.animationIndex = animationId;
+                            animatorComp.time = 0.0f;
+                        }
+                    );
+                }
+
+                if (registry.HasComponent<ModelComponent>(entity)) {
+                    EditorApiUtils::ModifyComponent<ModelComponent>(
+                        _sceneManager,
+                        entity,
+                        [baseModelId](auto& modelComp, auto pool) {
+                            modelComp.modelIndex = baseModelId;
+                        }
+                    );
+                }
+            }
+        }
+
+        if (baseModelId != 0xFFFFFFFF) {
+            auto modelManager = ServiceLocator::Get<ModelManager>();
+            if (modelManager) {
+                auto modelRes = modelManager->GetResource(baseModelId);
+                if (modelRes) {
+                    glm::vec3 center = modelRes->cpuData.globalCollider.center;
+                    float radius = modelRes->cpuData.globalCollider.radius * 1.05f;
+
+                    float targetSize = radius;
+                    if (targetSize > 100) targetSize = 100.0f;
+                    float scaleFactor = targetSize / (radius * 2.0f);
+
+                    for (EntityID entity : tagPool->GetDenseEntities()) {
+                        const auto& tag = tagPool->Get(entity);
+
+                        if (tag.tag == "Preview" && registry.HasComponent<TransformComponent>(entity)) {
+                            EditorApiUtils::ModifyComponent<TransformComponent>(
+                                _sceneManager,
+                                entity,
+                                [scaleFactor](auto& transformComp, auto pool) {
+                                    transformComp.scale = glm::vec3(scaleFactor);
+                                }
+                            );
+                        }
+
+                        if (tag.tag == "Camera" && registry.HasComponent<CameraComponent>(entity)) {
+                            EditorApiUtils::ModifyComponent<CameraComponent>(
+                                _sceneManager,
+                                entity,
+                                [targetSize](auto& camComp, auto pool) {
+                                    camComp.target = glm::vec3(0.0f);
+                                    camComp.distance = targetSize * 1.25f;
+                                }
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        Syn::Info("AnimationApiImpl: Applied animation {} and base model {} to preview object.", animationId, baseModelId);
     }
 }

@@ -1,4 +1,4 @@
-#include "ModelViewportView.h"
+#include "AnimationViewportView.h"
 #include "Engine/Vk/Image/ImageUtils.h"
 #include "Editor/Manager/EditorIcons.h"
 #include <ImGuizmo.h>
@@ -9,12 +9,12 @@
 
 namespace Syn {
 
-    void ModelViewportView::Draw(ModelViewportViewModel& vm) {
+    void AnimationViewportView::Draw(AnimationViewportViewModel& vm) {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{ 0, 0 });
 
-        ImGui::Begin(SYN_ICON_GAMEPAD " Model Viewport", nullptr);
+        ImGui::Begin(SYN_ICON_GAMEPAD " Animation Viewport", nullptr);
 
-        ModelViewportState state = vm.GetState();
+        AnimationViewportState state = vm.GetState();
 
         ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
         uint32_t currentWidth = static_cast<uint32_t>(viewportPanelSize.x);
@@ -22,7 +22,7 @@ namespace Syn {
 
         bool isResizing = (currentWidth > 0 && currentHeight > 0 && (currentWidth != state.width || currentHeight != state.height));
 
-        vm.Dispatch(ResizeModelViewportIntent{ currentWidth, currentHeight });
+        vm.Dispatch(ResizeAnimationViewportIntent{ currentWidth, currentHeight });
 
         ImVec2 imageStartPos = ImGui::GetCursorScreenPos();
 
@@ -49,7 +49,7 @@ namespace Syn {
                 ImVec2 mousePos = ImGui::GetMousePos();
                 uint32_t x = static_cast<uint32_t>(mousePos.x - imageStartPos.x);
                 uint32_t y = static_cast<uint32_t>(mousePos.y - imageStartPos.y);
-                vm.Dispatch(PickMeshIntent{ x, y });
+                vm.Dispatch(PickAnimationMeshIntent{ x, y });
             }
         }
 
@@ -59,7 +59,7 @@ namespace Syn {
         ImGui::PopStyleVar();
     }
 
-    void ModelViewportView::RenderFloatingToolbar(ModelViewportViewModel& vm, const ModelViewportState& state, ImVec2 startPos, ImVec2 size) {
+    void AnimationViewportView::RenderFloatingToolbar(AnimationViewportViewModel& vm, const AnimationViewportState& state, ImVec2 startPos, ImVec2 size) {
         float toolbarWidth = 40.0f;
         float toolbarHeight = 110.0f;
 
@@ -69,7 +69,7 @@ namespace Syn {
         ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 6.0f);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(4.0f, 6.0f));
 
-        if (ImGui::BeginChild("##ModelFloatingToolbar", ImVec2(toolbarWidth, toolbarHeight), ImGuiChildFlags_AlwaysUseWindowPadding, ImGuiWindowFlags_NoScrollbar)) {
+        if (ImGui::BeginChild("##AnimationFloatingToolbar", ImVec2(toolbarWidth, toolbarHeight), ImGuiChildFlags_AlwaysUseWindowPadding, ImGuiWindowFlags_NoScrollbar)) {
 
             ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(4.0f, 6.0f));
@@ -96,7 +96,7 @@ namespace Syn {
         ImGui::PopStyleColor();
     }
 
-    void ModelViewportView::DrawGizmoPopup(ModelViewportViewModel& vm, const ModelViewportState& state) {
+    void AnimationViewportView::DrawGizmoPopup(AnimationViewportViewModel& vm, const AnimationViewportState& state) {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8.0f, 8.0f));
         if (ImGui::BeginPopup("GizmoPopup")) {
             if (ImGui::BeginChild("##GizmoWindow", ImVec2(240, 210), false)) {
@@ -105,39 +105,39 @@ namespace Syn {
 
                 int mode = static_cast<int>(state.gizmoMode);
                 if (ImGui::RadioButton("Local##Gizmo", &mode, ImGuizmo::LOCAL))
-                    vm.Dispatch(ChangeModelGizmoModeIntent{ ImGuizmo::LOCAL });
+                    vm.Dispatch(ChangeAnimationGizmoModeIntent{ ImGuizmo::LOCAL });
 
                 ImGui::SameLine();
                 if (ImGui::RadioButton("World##Gizmo", &mode, ImGuizmo::WORLD))
-                    vm.Dispatch(ChangeModelGizmoModeIntent{ ImGuizmo::WORLD });
+                    vm.Dispatch(ChangeAnimationGizmoModeIntent{ ImGuizmo::WORLD });
 
                 int op = static_cast<int>(state.gizmoOperation);
                 if (ImGui::RadioButton("Translate##Gizmo", &op, ImGuizmo::TRANSLATE))
-                    vm.Dispatch(ChangeModelGizmoOperationIntent{ ImGuizmo::TRANSLATE });
+                    vm.Dispatch(ChangeAnimationGizmoOperationIntent{ ImGuizmo::TRANSLATE });
                 ImGui::SameLine();
                 if (ImGui::RadioButton("Rotate##Gizmo", &op, ImGuizmo::ROTATE))
-                    vm.Dispatch(ChangeModelGizmoOperationIntent{ ImGuizmo::ROTATE });
+                    vm.Dispatch(ChangeAnimationGizmoOperationIntent{ ImGuizmo::ROTATE });
                 ImGui::SameLine();
                 if (ImGui::RadioButton("Scale##Gizmo", &op, ImGuizmo::SCALE))
-                    vm.Dispatch(ChangeModelGizmoOperationIntent{ ImGuizmo::SCALE });
+                    vm.Dispatch(ChangeAnimationGizmoOperationIntent{ ImGuizmo::SCALE });
 
                 ImGui::SeparatorText("Snapping");
 
                 bool snap = state.useSnap;
                 if (ImGui::Checkbox("Enable##Snap", &snap))
-                    vm.Dispatch(ToggleModelSnapIntent{ snap });
+                    vm.Dispatch(ToggleAnimationSnapIntent{ snap });
 
                 glm::vec3 snapTrans = state.snapTranslate;
                 if (ImGui::DragFloat3("Translate##Snap", glm::value_ptr(snapTrans), 0.1f))
-                    vm.Dispatch(ChangeModelSnapTranslateIntent{ snapTrans });
+                    vm.Dispatch(ChangeAnimationSnapTranslateIntent{ snapTrans });
 
                 float snapRot = state.snapAngle;
                 if (ImGui::DragFloat("Rotate##Snap", &snapRot, 1.0f))
-                    vm.Dispatch(ChangeModelSnapRotateIntent{ snapRot });
+                    vm.Dispatch(ChangeAnimationSnapRotateIntent{ snapRot });
 
                 float snapScl = state.snapScale;
                 if (ImGui::DragFloat("Scale##Snap", &snapScl, 0.1f))
-                    vm.Dispatch(ChangeModelSnapScaleIntent{ snapScl });
+                    vm.Dispatch(ChangeAnimationSnapScaleIntent{ snapScl });
 
             }
             ImGui::EndChild();
@@ -146,7 +146,7 @@ namespace Syn {
         ImGui::PopStyleVar();
     }
 
-    void ModelViewportView::DrawImagePopup(ModelViewportViewModel& vm, const ModelViewportState& state) {
+    void AnimationViewportView::DrawImagePopup(AnimationViewportViewModel& vm, const AnimationViewportState& state) {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8.0f, 8.0f));
         if (ImGui::BeginPopup("ImagePopup")) {
             if (ImGui::BeginChild("##ViewportImage", ImVec2(280, 200), false)) {
@@ -154,7 +154,7 @@ namespace Syn {
                 auto RadioButton = [&](const char* label, const std::string& group, const std::string& target, const std::string& view) {
                     bool isActive = (state.currentTarget == target && state.currentView == view);
                     if (ImGui::RadioButton(label, isActive)) {
-                        vm.Dispatch(ChangeModelTargetIntent{ group, target, view });
+                        vm.Dispatch(ChangeAnimationTargetIntent{ group, target, view });
                     }
                     return isActive;
                     };
@@ -174,7 +174,7 @@ namespace Syn {
         ImGui::PopStyleVar();
     }
 
-    void ModelViewportView::DrawDebugPopup(ModelViewportViewModel& vm, const ModelViewportState& state) {
+    void AnimationViewportView::DrawDebugPopup(AnimationViewportViewModel& vm, const AnimationViewportState& state) {
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8.0f, 8.0f));
         if (ImGui::BeginPopup("DebugPopup")) {
             if (ImGui::BeginChild("##VisualizationWindow", ImVec2(220, 280), false)) {
@@ -183,7 +183,7 @@ namespace Syn {
 
                 bool enabled = state.enableDebugVisibility;
                 if (ImGui::Checkbox("Enable", &enabled)) {
-                    vm.Dispatch(ToggleModelDebugVisibilityIntent{ enabled });
+                    vm.Dispatch(ToggleAnimationDebugVisibilityIntent{ enabled });
                 }
 
                 ImGui::BeginDisabled(!state.enableDebugVisibility);
@@ -193,7 +193,7 @@ namespace Syn {
                 int mode = static_cast<int>(state.debugVisibilityMode);
                 auto RadioButton = [&](const char* label, int targetMode) {
                     if (ImGui::RadioButton(label, &mode, targetMode)) {
-                        vm.Dispatch(ChangeModelDebugVisibilityModeIntent{ static_cast<uint32_t>(targetMode) });
+                        vm.Dispatch(ChangeAnimationDebugVisibilityModeIntent{ static_cast<uint32_t>(targetMode) });
                     }
                     };
 
@@ -215,7 +215,7 @@ namespace Syn {
         ImGui::PopStyleVar();
     }
 
-    void ModelViewportView::DrawGizmo(ModelViewportViewModel& vm, const ModelViewportState& state, ImVec2 startPos, ImVec2 size) {
+    void AnimationViewportView::DrawGizmo(AnimationViewportViewModel& vm, const AnimationViewportState& state, ImVec2 startPos, ImVec2 size) {
         if (state.activeEntity == NULL_ENTITY)
             return;
 
@@ -246,15 +246,15 @@ namespace Syn {
         );
 
         if (ImGuizmo::IsUsing()) {
-            vm.Dispatch(ApplyModelGizmoTransformIntent{ transform });
+            vm.Dispatch(ApplyAnimationGizmoTransformIntent{ transform });
         }
     }
 
-    void ModelViewportView::HandleShortcuts(ModelViewportViewModel& vm) {
+    void AnimationViewportView::HandleShortcuts(AnimationViewportViewModel& vm) {
         if (ImGui::IsWindowFocused() || ImGui::IsWindowHovered()) {
-            if (ImGui::IsKeyPressed(ImGuiKey_1)) vm.Dispatch(ChangeModelGizmoOperationIntent{ ImGuizmo::TRANSLATE });
-            if (ImGui::IsKeyPressed(ImGuiKey_2)) vm.Dispatch(ChangeModelGizmoOperationIntent{ ImGuizmo::ROTATE });
-            if (ImGui::IsKeyPressed(ImGuiKey_3)) vm.Dispatch(ChangeModelGizmoOperationIntent{ ImGuizmo::SCALE });
+            if (ImGui::IsKeyPressed(ImGuiKey_1)) vm.Dispatch(ChangeAnimationGizmoOperationIntent{ ImGuizmo::TRANSLATE });
+            if (ImGui::IsKeyPressed(ImGuiKey_2)) vm.Dispatch(ChangeAnimationGizmoOperationIntent{ ImGuizmo::ROTATE });
+            if (ImGui::IsKeyPressed(ImGuiKey_3)) vm.Dispatch(ChangeAnimationGizmoOperationIntent{ ImGuizmo::SCALE });
         }
     }
 

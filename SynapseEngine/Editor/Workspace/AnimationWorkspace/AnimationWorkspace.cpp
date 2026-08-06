@@ -7,6 +7,9 @@
 #include "View/AnimationHierarchy/AnimationHierarchyView.h"
 #include "EditorCore/ViewModels/AnimationWorkspace/AnimationHierarchy/AnimationHierarchyViewModel.h"
 
+#include "View/AnimationViewport/AnimationViewportView.h"
+#include "EditorCore/ViewModels/AnimationWorkspace/AnimationViewport/AnimationViewportViewModel.h"
+
 #include "Engine/Scene/SceneNames.h"
 
 namespace Syn {
@@ -38,14 +41,6 @@ namespace Syn {
             }
         );
 
-        /*
-
-        using AnimationPropertiesWin = EditorWindow<AnimationPropertiesView, AnimationPropertiesViewModel>;
-        AddWindow<AnimationPropertiesWin>(
-            AnimationPropertiesView{},
-            AnimationPropertiesViewModel{ _context->GetApi<IAnimationApi>() }
-        );
-
         using AnimationViewportWin = EditorWindow<AnimationViewportView, AnimationViewportViewModel>;
         AddWindow<AnimationViewportWin>(
             AnimationViewportView{},
@@ -57,6 +52,5 @@ namespace Syn {
                 _context->GetApi<IAnimationApi>()
             }
         );
-        */
     }
 }
