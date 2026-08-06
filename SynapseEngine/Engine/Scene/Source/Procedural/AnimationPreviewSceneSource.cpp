@@ -138,6 +138,10 @@ namespace Syn
         auto skyTextureId = ServiceLocator::Get<ImageManager>()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/Engine/Environment/ModelPreview.hdr"));
         scene.GetSettings()->environment.skyTextureId = skyTextureId;
         scene.GetSettings()->debug.enableInfiniteGrid = true;
+        scene.GetSettings()->debug.enableBillboardCameras = false;
+        scene.GetSettings()->debug.enableBillboardPointLights = false;
+        scene.GetSettings()->debug.enableBillboardSpotLights = false;
+        scene.GetSettings()->debug.enableBillboardDirectionalLights = false;
 
         return true;
     }

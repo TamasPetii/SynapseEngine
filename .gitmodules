@@ -16,3 +16,9 @@
 [submodule "External/glTF-Sample-Assets"]
 	path = External/glTF-Sample-Assets
 	url = https://github.com/KhronosGroup/glTF-Sample-Assets.git
+[submodule "External/im-neo-sequencer"]
+	path = External/im-neo-sequencer
+	url = https://github.com/Daandelange/im-neo-sequencer.git
+[submodule "External/ImGuizmo"]
+	path = External/ImGuizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo.git

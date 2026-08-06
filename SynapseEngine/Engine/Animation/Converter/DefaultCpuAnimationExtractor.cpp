@@ -11,5 +11,6 @@ namespace Syn
         outCpuData.frameGlobalColliders = std::move(gpuData.frameGlobalColliders);
         outCpuData.frameMeshColliders = std::move(gpuData.frameMeshColliders);
         outCpuData.tracks = std::move(gpuData.tracks);
+        outCpuData.nodes = std::move(gpuData.nodes);
     }
 }

@@ -166,6 +166,10 @@ namespace Syn
         // 2. Center object: Suzanne
         auto skyTextureId = ServiceLocator::Get<ImageManager>()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/Engine/Environment/MaterialPreview.hdr"));
         scene.GetSettings()->environment.skyTextureId = skyTextureId;
+        scene.GetSettings()->debug.enableBillboardCameras = false;
+        scene.GetSettings()->debug.enableBillboardPointLights = false;
+        scene.GetSettings()->debug.enableBillboardSpotLights = false;
+        scene.GetSettings()->debug.enableBillboardDirectionalLights = false;
 
         uint32_t monkeyId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString("../External/glTF-Sample-Assets/Models/Suzanne/glTF/Suzanne.gltf"));
         CreatePreviewObject("Center_Monkey", monkeyId, glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(1.5f));

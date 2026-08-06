@@ -36,7 +36,9 @@ add_includedirs(
     "../External/vulkan_radix_sort/include",
     "../External/ImGuiFileDialog",
     "../External/imgui-node-editor",
-    "../External/IconFontCppHeaders"
+    "../External/IconFontCppHeaders",
+    "../External/ImGuizmo/src",
+    "../External/im-neo-sequencer"
 )
 
 add_defines('SYN_PROJECT_ROOT="' .. os.projectdir():gsub('\\', '/') .. '"')
@@ -115,7 +117,6 @@ local vcpkg_packages = {
     "vcpkg::spirv-reflect",
     "vcpkg::spirv-headers",
     "vcpkg::taskflow",
-    "vcpkg::imguizmo",
     "vcpkg::joltphysics[debugrenderer]",
     "vcpkg::tinyxml2",
     "vcpkg::yaml-cpp",
@@ -172,7 +173,13 @@ target("Editor")
         add_syslinks("pthread", "dl", "m")
     end
 
-    add_files("Editor/**.cpp", "../External/ImGuiFileDialog/*.cpp", "../External/imgui-node-editor/*.cpp")
+    add_files(
+        "Editor/**.cpp", 
+        "../External/ImGuiFileDialog/*.cpp", 
+        "../External/imgui-node-editor/*.cpp",
+        "../External/ImGuizmo/src/*.cpp",
+        "../External/im-neo-sequencer/*.cpp"
+    )
     add_headerfiles("Editor/**.h", "Editor/**.hpp")
     add_deps("Engine", "EditorCore")
     set_rundir("$(projectdir)")

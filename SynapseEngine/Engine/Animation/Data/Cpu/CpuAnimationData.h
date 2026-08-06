@@ -14,5 +14,6 @@ namespace Syn
         std::vector<GpuMeshCollider> frameGlobalColliders;
         std::vector<GpuMeshCollider> frameMeshColliders;
         std::vector<BoneTrack> tracks;
+        std::vector<AnimationNode> nodes;
     };
 }
