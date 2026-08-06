@@ -1,7 +1,7 @@
 #pragma once
 #include "Engine/SynApi.h"
-#include "Engine/Vk/Image/Image.h"
-#include "Engine/Vk/Buffer/Buffer.h"
+#include "Engine/Utils/StaleImage.h"
+#include "Engine/Utils/StaleBuffer.h"
 #include <queue>
 #include <unordered_map>
 #include <unordered_set>
@@ -19,11 +19,6 @@ namespace Syn {
         Image = 2,
         Animation = 3,
         Audio = 4
-    };
-
-    struct SYN_API StaleImage {
-        std::unique_ptr<Vk::Image> image;
-        uint32_t framesToLive;
     };
 
     class SYN_API PreviewManager {
@@ -50,7 +45,7 @@ namespace Syn {
         Vk::Image* GetAtlasDepthImage() const { return _atlasDepthImage.get(); }
         Vk::Image* GetScratchColorImage() const { return _scratchColorImage.get(); }
         Vk::Image* GetScratchBloomImage() const { return _scratchBloomImage.get(); }
-        Vk::Buffer* GetScratchStagingBuffer() const { return _scratchStagingBuffer.get(); }
+        void AddStaleBuffer(std::unique_ptr<Vk::Buffer> buffer);
 
         uint32_t GetResolution() const { return _resolution; }
         std::vector<uint32_t> GetActiveResources(PreviewResourceType type) const;
@@ -69,9 +64,9 @@ namespace Syn {
         std::unique_ptr<Vk::Image> _atlasDepthImage;
         std::unique_ptr<Vk::Image> _scratchColorImage;
         std::unique_ptr<Vk::Image> _scratchBloomImage;
-        std::unique_ptr<Vk::Buffer> _scratchStagingBuffer;
 
         std::vector<StaleImage> _staleImages;
+        std::vector<StaleBuffer> _staleBuffers;
 
         std::queue<uint32_t> _freeTiles;
         std::unordered_map<uint64_t, uint32_t> _resourceToTile;

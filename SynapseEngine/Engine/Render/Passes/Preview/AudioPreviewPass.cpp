@@ -6,15 +6,16 @@
 #include "Engine/Vk/Buffer/BufferFactory.h"
 #include "Engine/Vk/Image/ImageUtils.h"
 #include "Engine/Vk/Buffer/BufferUtils.h"
+#include <glm/gtc/type_ptr.hpp>
 #include <algorithm>
 
 namespace Syn {
 
-    void AudioPreviewPass::Initialize() {
-    }
+    void AudioPreviewPass::Initialize() {}
 
     void AudioPreviewPass::PrepareFrame(const RenderContext& context) {
         _dirtyAudios.clear();
+        _imageTransitions.clear();
 
         auto pm = ServiceLocator::Get<PreviewManager>();
         _dirtyAudios = pm->GetDirtyResources(PreviewResourceType::Audio);
@@ -36,8 +37,27 @@ namespace Syn {
         auto pm = ServiceLocator::Get<PreviewManager>();
         auto audioManager = ServiceLocator::Get<AudioManager>();
         auto atlas = pm->GetAtlasImage();
-
         auto audioSnapshot = audioManager->GetResourceSnapshot();
+
+        struct TileData {
+            uint32_t audioId;
+            std::vector<uint16_t> pixels;
+            VkRect2D scissor;
+        };
+
+        std::vector<TileData> generatedTiles;
+
+        auto floatToHalf = [](float v) -> uint16_t {
+            return glm::detail::toFloat16(v);
+            };
+
+        uint16_t bgVal = floatToHalf(0.13f);
+        uint16_t alphaVal = floatToHalf(1.0f);
+        uint16_t rVal = floatToHalf(0.26f);
+        uint16_t gVal = floatToHalf(0.59f);
+        uint16_t bVal = floatToHalf(0.98f);
+
+        size_t totalBytesNeeded = 0;
 
         for (uint32_t audioId : _dirtyAudios) {
             auto audioResource = audioSnapshot[audioId].resource;
@@ -52,12 +72,6 @@ namespace Syn {
 
             std::vector<uint16_t> pixels(width * height * 4, 0);
 
-            auto floatToHalf = [](float v) -> uint16_t {
-                return glm::detail::toFloat16(v);
-                };
-
-            uint16_t bgVal = floatToHalf(0.13f);
-            uint16_t alphaVal = floatToHalf(1.0f);
             for (size_t i = 0; i < pixels.size(); i += 4) {
                 pixels[i + 0] = bgVal;
                 pixels[i + 1] = bgVal;
@@ -70,10 +84,6 @@ namespace Syn {
             if (!cpuData.waveform.empty() && width > 0) {
                 float midY = height / 2.0f;
                 uint32_t waveformSize = static_cast<uint32_t>(cpuData.waveform.size());
-
-                uint16_t rVal = floatToHalf(0.26f);
-                uint16_t gVal = floatToHalf(0.59f);
-                uint16_t bVal = floatToHalf(0.98f);
 
                 for (uint32_t x = 0; x < width; ++x) {
                     float t = static_cast<float>(x) / static_cast<float>(width > 1 ? width - 1 : 1);
@@ -105,23 +115,43 @@ namespace Syn {
                 }
             }
 
-            auto stagingBuffer = pm->GetScratchStagingBuffer();
-            stagingBuffer->Write(pixels.data(), pixels.size() * sizeof(uint16_t));
+            totalBytesNeeded += pixels.size() * sizeof(uint16_t);
+            generatedTiles.push_back({ audioId, std::move(pixels), scissor });
+        }
 
+        if (generatedTiles.empty()) return;
+
+        std::vector<uint16_t> masterBuffer;
+        masterBuffer.reserve(totalBytesNeeded / sizeof(uint16_t));
+
+        for (const auto& tile : generatedTiles) {
+            masterBuffer.insert(masterBuffer.end(), tile.pixels.begin(), tile.pixels.end());
+        }
+
+        auto stagingBuffer = Vk::BufferFactory::CreateStaging(totalBytesNeeded);
+        stagingBuffer->Write(masterBuffer.data(), totalBytesNeeded);
+
+        VkDeviceSize currentBufferOffset = 0;
+
+        for (const auto& tile : generatedTiles) {
             Vk::BufferToImageCopyInfo copyInfo{};
             copyInfo.srcBuffer = stagingBuffer->Handle();
             copyInfo.dstImage = atlas->Handle();
-            copyInfo.width = width;
-            copyInfo.height = height;
+            copyInfo.width = tile.scissor.extent.width;
+            copyInfo.height = tile.scissor.extent.height;
             copyInfo.depth = 1;
-            copyInfo.imageOffset = { scissor.offset.x, scissor.offset.y, 0 };
+            copyInfo.bufferOffset = currentBufferOffset;
+            copyInfo.imageOffset = { tile.scissor.offset.x, tile.scissor.offset.y, 0 };
             copyInfo.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
             copyInfo.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
 
             Vk::BufferUtils::CopyBufferToImage(context.cmd, copyInfo);
 
-            pm->MarkCompleted(PreviewResourceType::Audio, audioId);
+            currentBufferOffset += tile.pixels.size() * sizeof(uint16_t);
+            pm->MarkCompleted(PreviewResourceType::Audio, tile.audioId);
         }
+
+        pm->AddStaleBuffer(std::move(stagingBuffer));
 
         atlas->TransitionLayout(
             context.cmd,

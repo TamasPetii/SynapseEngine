@@ -1,17 +1,13 @@
 #pragma once
 #include "BaseResourceManager.h"
 #include "Engine/Utils/RenderBuffer.h"
+#include "Engine/Utils/StaleBuffer.h"
 #include <vector>
 #include <mutex>
 #include <memory>
 
 namespace Syn 
 {
-    struct SYN_API StaleBuffer {
-        std::shared_ptr<Vk::Buffer> buffer;
-        uint32_t framesToLive;
-    };
-
     template <typename TResource, typename TAddressStruct>
     class AddressResourceManager : public BaseResourceManager<TResource> {
     public:

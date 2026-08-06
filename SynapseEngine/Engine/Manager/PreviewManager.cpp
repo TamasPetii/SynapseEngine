@@ -35,9 +35,6 @@ namespace Syn {
             .perMipViews = true
             });
         _scratchBloomImage = std::make_unique<Vk::Image>(bloomConfig);
-
-        size_t stagingBufferSize = _tileSize * _tileSize * 8;
-        _scratchStagingBuffer = Vk::BufferFactory::CreateStaging(stagingBufferSize);
     }
 
     uint64_t PreviewManager::GetUniqueId(PreviewResourceType type, uint32_t resourceId) const {
@@ -165,6 +162,16 @@ namespace Syn {
             }
         }
 
+        for (auto it = _staleBuffers.begin(); it != _staleBuffers.end();) {
+            if (it->framesToLive > 0) {
+                it->framesToLive--;
+                ++it;
+            }
+            else {
+                it = _staleBuffers.erase(it);
+            }
+        }
+
         if (_warmupFramesRemaining > 0) {
             --_warmupFramesRemaining;
             for (const auto& [id, tile] : _resourceToTile) {
@@ -237,5 +244,11 @@ namespace Syn {
             PreviewResourceType type = static_cast<PreviewResourceType>(id >> 32);
             _dirtyResources[type].insert(static_cast<uint32_t>(id & 0xFFFFFFFF));
         }
+    }
+
+    void PreviewManager::AddStaleBuffer(std::unique_ptr<Vk::Buffer> buffer) {
+        std::lock_guard<std::mutex> lock(_mutex);
+        uint32_t framesInFlight = ServiceLocator::Get<FrameContext>()->framesInFlight;
+        _staleBuffers.push_back({ std::move(buffer), framesInFlight });
     }
 }
