@@ -12,13 +12,44 @@ namespace Syn {
     void AnimationSequencerViewModel::SyncWithEngine() {
         if (!_animationApi) return;
 
-        _state.activeAnimationId = _animationApi->GetSelected();
+        uint32_t newSelectedId = _animationApi->GetSelected();
 
-        if (_state.activeAnimationId != 0xFFFFFFFF) {
-            _state.currentAnimData = _animationApi->GetAnimationCpuData(_state.activeAnimationId);
-        }
-        else {
-            _state.currentAnimData = nullptr;
+        if (_state.activeAnimationId != newSelectedId) {
+            _state.activeAnimationId = newSelectedId;
+
+            if (_state.activeAnimationId != 0xFFFFFFFF) {
+                _state.currentAnimData = _animationApi->GetAnimationCpuData(_state.activeAnimationId);
+
+                if (_state.currentAnimData) {
+                    _state.editableTracks = _state.currentAnimData->tracks;
+
+                    _state.trackUIStates.clear();
+                    _state.trackUIStates.reserve(_state.editableTracks.size());
+
+                    float sampleRate = _state.currentAnimData->descriptor.sampleRate;
+
+                    for (const auto& track : _state.editableTracks) {
+                        SequencerTrackUIState uiState;
+                        uiState.groupOpen = true;
+
+                        for (const auto& key : track.positions)
+                            uiState.positionFrames.push_back(static_cast<int32_t>(key.time * sampleRate));
+
+                        for (const auto& key : track.rotations)
+                            uiState.rotationFrames.push_back(static_cast<int32_t>(key.time * sampleRate));
+
+                        for (const auto& key : track.scales)
+                            uiState.scaleFrames.push_back(static_cast<int32_t>(key.time * sampleRate));
+
+                        _state.trackUIStates.push_back(std::move(uiState));
+                    }
+                }
+            }
+            else {
+                _state.currentAnimData = nullptr;
+                _state.editableTracks.clear();
+                _state.trackUIStates.clear();
+            }
         }
     }
 
@@ -31,6 +62,18 @@ namespace Syn {
             }
             else if constexpr (std::is_same_v<T, SelectSequencerTrackIntent>) {
                 _state.selectedTrackIndex = arg.trackIndex;
+            }
+            else if constexpr (std::is_same_v<T, ToggleSequencerGroupIntent>) {
+                if (arg.trackIndex < _state.trackUIStates.size()) {
+                    _state.trackUIStates[arg.trackIndex].groupOpen = arg.isOpen;
+                }
+            }
+            else if constexpr (std::is_same_v<T, UpdateTrackKeysIntent>) {
+                if (arg.trackIndex < _state.trackUIStates.size()) {
+                    _state.trackUIStates[arg.trackIndex].positionFrames = arg.positionFrames;
+                    _state.trackUIStates[arg.trackIndex].rotationFrames = arg.rotationFrames;
+                    _state.trackUIStates[arg.trackIndex].scaleFrames = arg.scaleFrames;
+                }
             }
             }, intent);
     }

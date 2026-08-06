@@ -13,11 +13,12 @@ namespace Syn {
         ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
 
         if (ImGui::Begin(SYN_ICON_CLOCK " Sequencer", nullptr, windowFlags)) {
+
             float mainContentBottomY = ImGui::GetWindowPos().y + ImGui::GetWindowContentRegionMax().y;
 
             if (Syn::UI::BeginCard("AnimationTimelineCard", SYN_ICON_FILM, _cardState)) {
 
-                if (state.currentAnimData) {
+                if (state.currentAnimData && !state.editableTracks.empty()) {
                     int32_t currentFrame = static_cast<int32_t>(state.currentFrame);
                     int32_t startFrame = 0;
                     int32_t endFrame = static_cast<int32_t>(state.currentAnimData->descriptor.frameCount);
@@ -26,66 +27,88 @@ namespace Syn {
                     float sequencerHeight = mainContentBottomY - currentY - 12.0f;
                     if (sequencerHeight < 150.0f) sequencerHeight = 150.0f;
 
-                    ImGui::BeginChild("AnimSequencerContainer", ImVec2(0, sequencerHeight), false, ImGuiWindowFlags_NoScrollbar);
+                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.08f, 0.08f, 0.08f, 0.6f));
+                    ImGui::PushStyleVar(ImGuiStyleVar_ChildRounding, 8.0f);
+                    ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
 
-                    if (ImGui::BeginNeoSequencer("AnimationSequencer", &currentFrame, &startFrame, &endFrame, ImGui::GetContentRegionAvail())) {
+                    ImGui::BeginChild("AnimSequencerContainer", ImVec2(0, sequencerHeight), false);
 
-                        float sampleRate = state.currentAnimData->descriptor.sampleRate;
+                    ImVec2 seqSize = ImVec2(ImGui::GetContentRegionAvail().x, 0.0f);
 
-                        for (size_t i = 0; i < state.currentAnimData->tracks.size(); ++i) {
-                            const auto& track = state.currentAnimData->tracks[i];
+                    ImGui::PushNeoSequencerStyleColor(ImGuiNeoSequencerCol_Bg, ImVec4(0.13f, 0.13f, 0.13f, 1.00f));
+                    ImGui::PushNeoSequencerStyleColor(ImGuiNeoSequencerCol_TopBarBg, ImVec4(0.11f, 0.11f, 0.11f, 1.00f));
+                    ImGui::PushNeoSequencerStyleColor(ImGuiNeoSequencerCol_SelectedTimeline, ImVec4(0.19f, 0.19f, 0.19f, 0.54f)); 
+                    ImGui::PushNeoSequencerStyleColor(ImGuiNeoSequencerCol_TimelineBorder, ImVec4(0.08f, 0.08f, 0.08f, 1.00f)); 
+                    ImGui::PushNeoSequencerStyleColor(ImGuiNeoSequencerCol_TimelinesBg, ImVec4(0.11f, 0.11f, 0.11f, 1.00f)); 
 
-                            bool groupOpen = true;
+                    ImGui::PushNeoSequencerStyleColor(ImGuiNeoSequencerCol_FramePointer, ImVec4(0.26f, 0.59f, 0.98f, 1.00f));
+                    ImGui::PushNeoSequencerStyleColor(ImGuiNeoSequencerCol_FramePointerHovered, ImVec4(0.36f, 0.69f, 1.00f, 1.00f));
+                    ImGui::PushNeoSequencerStyleColor(ImGuiNeoSequencerCol_FramePointerPressed, ImVec4(0.16f, 0.49f, 0.88f, 1.00f));
+
+                    ImGui::PushNeoSequencerStyleColor(ImGuiNeoSequencerCol_Keyframe, ImVec4(0.50f, 0.50f, 0.50f, 1.00f));
+                    ImGui::PushNeoSequencerStyleColor(ImGuiNeoSequencerCol_KeyframeHovered, ImVec4(0.95f, 0.96f, 0.98f, 1.00f));
+                    ImGui::PushNeoSequencerStyleColor(ImGuiNeoSequencerCol_KeyframePressed, ImVec4(0.26f, 0.59f, 0.98f, 1.00f)); 
+                    ImGui::PushNeoSequencerStyleColor(ImGuiNeoSequencerCol_KeyframeSelected, ImVec4(0.26f, 0.59f, 0.98f, 1.00f));
+
+                    ImGui::PushNeoSequencerStyleColor(ImGuiNeoSequencerCol_ZoomBarBg, ImVec4(0.05f, 0.05f, 0.05f, 0.54f));
+                    ImGui::PushNeoSequencerStyleColor(ImGuiNeoSequencerCol_ZoomBarSlider, ImVec4(0.20f, 0.20f, 0.20f, 1.00f));
+                    ImGui::PushNeoSequencerStyleColor(ImGuiNeoSequencerCol_ZoomBarSliderHovered, ImVec4(0.28f, 0.28f, 0.28f, 1.00f)); 
+
+                    if (ImGui::BeginNeoSequencer("AnimationSequencer", &currentFrame, &startFrame, &endFrame, seqSize)) {
+
+                        for (size_t i = 0; i < state.editableTracks.size(); ++i) {
+                            const auto& track = state.editableTracks[i];
+                            const auto& trackUI = state.trackUIStates[i];
+
+                            ImGui::PushID(static_cast<int>(i));
+
+                            bool groupOpen = trackUI.groupOpen;
                             if (ImGui::BeginNeoGroup(track.nodeName.c_str(), &groupOpen)) {
 
-                                {
-                                    std::vector<int32_t> keyframes;
-                                    keyframes.reserve(track.positions.size());
-                                    for (const auto& key : track.positions) {
-                                        keyframes.push_back(static_cast<int32_t>(key.time * sampleRate));
-                                    }
+                                std::vector<int32_t> posFrames = trackUI.positionFrames;
+                                std::vector<int32_t> rotFrames = trackUI.rotationFrames;
+                                std::vector<int32_t> scaleFrames = trackUI.scaleFrames;
 
-                                    if (ImGui::BeginNeoTimeline("Position", keyframes, nullptr)) {
-                                        ImGui::EndNeoTimeLine();
-                                    }
+                                if (ImGui::BeginNeoTimeline(("Position##" + std::to_string(i)).c_str(), posFrames, nullptr)) {
+                                    ImGui::EndNeoTimeLine();
                                 }
 
-                                {
-                                    std::vector<int32_t> keyframes;
-                                    keyframes.reserve(track.rotations.size());
-                                    for (const auto& key : track.rotations) {
-                                        keyframes.push_back(static_cast<int32_t>(key.time * sampleRate));
-                                    }
-
-                                    if (ImGui::BeginNeoTimeline("Rotation", keyframes, nullptr)) {
-                                        ImGui::EndNeoTimeLine();
-                                    }
+                                if (ImGui::BeginNeoTimeline(("Rotation##" + std::to_string(i)).c_str(), rotFrames, nullptr)) {
+                                    ImGui::EndNeoTimeLine();
                                 }
 
-                                {
-                                    std::vector<int32_t> keyframes;
-                                    keyframes.reserve(track.scales.size());
-                                    for (const auto& key : track.scales) {
-                                        keyframes.push_back(static_cast<int32_t>(key.time * sampleRate));
-                                    }
-
-                                    if (ImGui::BeginNeoTimeline("Scale", keyframes, nullptr)) {
-                                        ImGui::EndNeoTimeLine();
-                                    }
+                                if (ImGui::BeginNeoTimeline(("Scale##" + std::to_string(i)).c_str(), scaleFrames, nullptr)) {
+                                    ImGui::EndNeoTimeLine();
                                 }
 
                                 ImGui::EndNeoGroup();
+
+                                if (posFrames != trackUI.positionFrames ||
+                                    rotFrames != trackUI.rotationFrames ||
+                                    scaleFrames != trackUI.scaleFrames) {
+                                    vm.Dispatch(UpdateTrackKeysIntent{ static_cast<uint32_t>(i), posFrames, rotFrames, scaleFrames });
+                                }
                             }
+
+                            if (groupOpen != trackUI.groupOpen) {
+                                vm.Dispatch(ToggleSequencerGroupIntent{ static_cast<uint32_t>(i), groupOpen });
+                            }
+
+                            ImGui::PopID();
                         }
                         ImGui::EndNeoSequencer();
                     }
 
+                    ImGui::PopNeoSequencerStyleColor(15);
+
                     ImGui::EndChild();
+
+                    ImGui::PopStyleVar(2);
+                    ImGui::PopStyleColor();
 
                     if (currentFrame != state.currentFrame) {
                         vm.Dispatch(ChangeSequencerFrameIntent{ currentFrame });
                     }
-
                 }
                 else {
                     ImGui::Spacing();
