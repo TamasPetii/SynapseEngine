@@ -13,11 +13,15 @@ namespace Syn {
         uint32_t framesInFlight,
         std::shared_ptr<AnimationBuilder> builder,
         std::unique_ptr<IGpuAnimationUploader> uploader,
-        std::unique_ptr<ICpuAnimationExtractor> cpuExtractor)
+        std::unique_ptr<ICpuAnimationExtractor> cpuExtractor, 
+        PreviewAllocateCallback previewAllocateCallback,
+        PreviewMarkDirtyCallback previewMarkDirtyCallback)
         : AddressResourceManager<Animation, GpuAnimationAddresses>(framesInFlight, 1024, 256, 512),
         _builder(builder), 
         _uploader(std::move(uploader)), 
-        _cpuExtractor(std::move(cpuExtractor))
+        _cpuExtractor(std::move(cpuExtractor)),
+        _previewAllocateCallback(std::move(previewAllocateCallback)),
+        _previewMarkDirtyCallback(std::move(previewMarkDirtyCallback))
     {
     }
 
@@ -39,7 +43,13 @@ namespace Syn {
             if (!baseModel) 
                 return std::shared_ptr<Animation>(nullptr);
 
-            return _builder->BuildFromFile(filePath, baseModel->cpuData);
+            auto anim = _builder->BuildFromFile(filePath, baseModel->cpuData);
+
+            if (anim) {
+                anim->cpuData.baseModelId = baseModelId;
+            }
+
+            return anim;
             });
     }
 
@@ -53,7 +63,13 @@ namespace Syn {
             if (!baseModel) 
                 return std::shared_ptr<Animation>(nullptr);
 
-            return _builder->BuildFromFile(filePath, baseModel->cpuData);
+            auto anim = _builder->BuildFromFile(filePath, baseModel->cpuData);
+
+            if (anim) {
+                anim->cpuData.baseModelId = baseModelId;
+            }
+
+            return anim;
             });
     }
 
@@ -96,6 +112,9 @@ namespace Syn {
 
         _cpuExtractor->Extract(gpuData, cpuData);
 
+        uint32_t index = _pathToId.at(entry.path);
+        if (_previewAllocateCallback) _previewAllocateCallback(index);
+
         entry.resource->transientGpuData.reset();
         entry.resource->transientCpuData.reset();
     }
@@ -117,6 +136,8 @@ namespace Syn {
             addresses.isReady = 1;
 
             WriteAddress(index, addresses);
+
+            if (_previewMarkDirtyCallback) _previewMarkDirtyCallback(index);
             });
     }
 }

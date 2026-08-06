@@ -68,12 +68,14 @@ constexpr const char* ASSET_PATH = "Assets";
 #define SYN_ICON_DRAW_POLYGON   ICON_FA_DRAW_POLYGON
 #define SYN_ICON_SYNC           ICON_FA_SYNC
 #define SYN_ICON_PROJECT_DIAGRAM ICON_FA_PROJECT_DIAGRAM
+#define SYN_ICON_FILM           ICON_FA_FILM
 #define SYN_ICON_BRUSH			ICON_FA_BRUSH
 // Workspace Labels
 #define SYN_WS_SCENE            SYN_ICON_GLOBE " Scene"
 #define SYN_WS_MODEL            SYN_ICON_DRAW_POLYGON " Model"
 #define SYN_WS_MATERIAL         SYN_ICON_MAGIC " Material"
 #define SYN_WS_TEXTURE          SYN_ICON_IMAGE " Texture"
+#define SYN_WS_ANIMATION        SYN_ICON_RUNNING " Animation"
 
 #define SYN_ICON_MODEL               ICON_FA_SHAPES
 #define SYN_ICON_ANIMATION           ICON_FA_RUNNING

@@ -8,6 +8,7 @@
 #include "Editor/Workspace/ModelWorkspace/ModelWorkspace.h"
 #include "Editor/Workspace/MaterialWorkspace/MaterialWorkspace.h"
 #include "Editor/Workspace/TextureWorkspace/TextureWorkspace.h"
+#include "Editor/Workspace/AnimationWorkspace/AnimationWorkspace.h"
 
 #include "Editor/Workspace/Common/MainMenu/MainMenuView.h"
 #include "EditorCore/ViewModels/Common/MainMenu/MainMenuViewModel.h"
@@ -130,6 +131,10 @@ void Synapse::OnInit() {
     ));
 
     _guiManager->AddWorkspace(Syn::EditorWorkspace::Texture, std::make_unique<Syn::TextureWorkspace>(
+        _editorContext.get(), _iconManager.get(), absoluteAssetsPath
+    ));
+
+    _guiManager->AddWorkspace(Syn::EditorWorkspace::Animation, std::make_unique<Syn::AnimationWorkspace>(
         _editorContext.get(), _iconManager.get(), absoluteAssetsPath
     ));
 

@@ -1,9 +1,9 @@
 #pragma once
 #include "EditorCore/Command/ComponentChangeCommand.h"
-#include "EditorCore/Api/IAnimationApi.h"
+#include "EditorCore/Api/IAnimationCompApi.h"
 
 namespace Syn
 {
-    using ChangeAnimationSpeedCommand = ComponentChangeCommand<IAnimationApi, float, &IAnimationApi::SetAnimationSpeed>;
-    using ChangeAnimationIndexCommand = ComponentChangeCommand<IAnimationApi, uint32_t, &IAnimationApi::SetAnimationIndex>;
+    using ChangeAnimationSpeedCommand = ComponentChangeCommand<IAnimationCompApi, float, &IAnimationCompApi::SetAnimationSpeed>;
+    using ChangeAnimationIndexCommand = ComponentChangeCommand<IAnimationCompApi, uint32_t, &IAnimationCompApi::SetAnimationIndex>;
 }

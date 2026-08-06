@@ -37,7 +37,7 @@
 #include "EditorCore/Api/IMeshColliderApi.h"
 #include "EditorCore/Api/IRigidBodyApi.h"
 #include "EditorCore/Api/IModelComponentApi.h"
-#include "EditorCore/Api/IAnimationApi.h"
+#include "EditorCore/Api/IAnimationCompApi.h"
 #include "EditorCore/Api/IMaterialOverrideApi.h"
 #include "EditorCore/Api/IPipelineOverrideApi.h"
 #include "EditorCore/Api/IAudioSourceApi.h"
@@ -62,7 +62,7 @@ namespace Syn {
             IMeshColliderApi* meshColliderApi,
             IRigidBodyApi* rigidBodyApi,
             IModelComponentApi* modelComponentApi,
-            IAnimationApi* animationApi,
+            IAnimationCompApi* animationApi,
             IMaterialOverrideApi* materialOverrideApi,
             IPipelineOverrideApi* pipelineOverrideApi,
 			IAudioSourceApi* audioSourceApi,

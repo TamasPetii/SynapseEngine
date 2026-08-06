@@ -2,7 +2,7 @@
 
 namespace Syn
 {
-    AnimationViewModel::AnimationViewModel(ISelectionApi* selectionApi, IAnimationApi* animApi)
+    AnimationViewModel::AnimationViewModel(ISelectionApi* selectionApi, IAnimationCompApi* animApi)
         : _selectionApi(selectionApi), _animApi(animApi) {}
 
     const AnimationState& AnimationViewModel::GetState() const { return _state; }

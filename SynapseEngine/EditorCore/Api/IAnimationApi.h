@@ -1,23 +1,32 @@
 #pragma once
-#include "IApi.h"
-#include "EditorCore/Types/EntityHandle.h"
-#include <string>
-#include <vector>
 #include <cstdint>
+#include <vector>
+#include <string>
+#include "IApi.h"
+#include "Engine/Animation/Data/Cpu/CpuAnimationData.h"
 
-namespace Syn {
+namespace Syn
+{
+    constexpr uint32_t INVALID_ANIMATION_ID = 0xFFFFFFFF;
+
+    struct AnimationItemData {
+        uint32_t id;
+        std::string name;
+        std::string path;
+    };
+
     class IAnimationApi : public IApi {
     public:
         virtual ~IAnimationApi() = default;
 
-        virtual bool HasAnimation(EntityID entity) const = 0;
+        virtual std::vector<AnimationItemData> GetAllAnimations() const = 0;
+        virtual uint64_t GetVersion() const = 0;
 
-        virtual float GetAnimationSpeed(EntityID entity) const = 0;
-        virtual uint32_t GetAnimationIndex(EntityID entity) const = 0;
+        virtual void SetSelected(uint32_t animationId) = 0;
+        virtual uint32_t GetSelected() const = 0;
 
-        virtual void SetAnimationSpeed(EntityID entity, float speed) = 0;
-        virtual void SetAnimationIndex(EntityID entity, uint32_t index) = 0;
+        virtual const CpuAnimationData* GetAnimationCpuData(uint32_t animationId) const = 0;
 
-        virtual std::vector<std::pair<uint32_t, std::string>> GetAvailableAnimations() const = 0;
+        virtual void ApplyAnimationToPreviewObject(uint32_t animationId) = 0;
     };
 }

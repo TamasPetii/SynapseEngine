@@ -8,6 +8,7 @@ namespace Syn
 {
     struct SYN_API CpuAnimationData
     {
+		uint32_t baseModelId = UINT32_MAX;
 		GpuAnimationDescriptor descriptor;
 		GpuMeshCollider globalCollider;
         std::vector<GpuMeshCollider> frameGlobalColliders;

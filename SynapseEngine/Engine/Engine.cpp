@@ -29,6 +29,7 @@
 #include "Engine/Scene/Source/Procedural/MaterialPreviewSceneSource.h"
 #include "Engine/Scene/Source/Procedural/ModelPreviewSceneSource.h"
 #include "Engine/Scene/Source/File/FileSceneSource.h"
+#include "Engine/Scene/Source/Procedural/AnimationPreviewSceneSource.h"
 
 #include "Engine/Render/RendererFactory.h"
 #include "Engine/Physics/Jolt/JoltPhysicsEngine.h"
@@ -369,6 +370,10 @@ namespace Syn
 
 		_sceneManager->RegisterScene(SceneNames::ModelPreview, [frames]() {
 			return std::make_unique<Scene>(frames, std::make_unique<ModelPreviewSceneSource>());
+			});
+
+		_sceneManager->RegisterScene(SceneNames::AnimationPreview, [frames]() {
+			return std::make_unique<Scene>(frames, std::make_unique<AnimationPreviewSceneSource>());
 			});
 
 		_sceneManager->LoadScene(SceneNames::Main);

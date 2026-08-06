@@ -22,12 +22,13 @@
 #include "Impl/MeshColliderApiImpl.h"
 #include "Impl/RigidBodyApiImpl.h"
 #include "Impl/ModelComponentApiImpl.h"
-#include "Impl/AnimationApiImpl.h"
+#include "Impl/AnimationCompApiImpl.h"
 #include "Impl/MaterialOverrideApiImpl.h"
 #include "Impl/PreviewApiImpl.h"
 #include "Impl/PipelineOverrideApiImpl.h"
 #include "Impl/AudioSourceApiImpl.h"
 #include "Impl/AudioListenerApiImpl.h"
+#include "Impl/AnimationApiImpl.h"
 
 namespace Syn {
     EditorContext::EditorContext(Engine* engine, GuiTextureManager* textureManager) {
@@ -56,11 +57,12 @@ namespace Syn {
         RegisterApi<IMeshColliderApi, MeshColliderApiImpl>(sm);
         RegisterApi<IRigidBodyApi, RigidBodyApiImpl>(sm);
         RegisterApi<IModelComponentApi, ModelComponentApiImpl>(sm);
-        RegisterApi<IAnimationApi, AnimationApiImpl>(sm);
+        RegisterApi<IAnimationCompApi, AnimationCompApiImpl>(sm);
         RegisterApi<IMaterialOverrideApi, MaterialOverrideApiImpl>(sm);
         RegisterApi<IPipelineOverrideApi, PipelineOverrideApiImpl>(sm);
         RegisterApi<IPreviewApi, PreviewApiImpl>(engine->GetPreviewManager(), textureManager, engine->GetImageManager());
         RegisterApi<IAudioSourceApi, AudioSourceApiImpl>(sm);
         RegisterApi<IAudioListenerApi, AudioListenerApiImpl>(sm);
+        RegisterApi<IAnimationApi, AnimationApiImpl>(engine->GetAnimationManager(), sm);
     }
 }

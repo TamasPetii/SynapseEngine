@@ -124,9 +124,15 @@ namespace Syn {
             const char* wsModel = SYN_WS_MODEL;
             const char* wsMaterial = SYN_WS_MATERIAL;
             const char* wsTexture = SYN_WS_TEXTURE;
+            const char* wsAnimation = SYN_WS_ANIMATION;
 
             ImVec2 btnPadding = ImGui::GetStyle().FramePadding;
-            float totalWidth = ImGui::CalcTextSize(wsScene).x + ImGui::CalcTextSize(wsModel).x + ImGui::CalcTextSize(wsMaterial).x + ImGui::CalcTextSize(wsTexture).x + (btnPadding.x * 2.0f * 4.0f);
+            float totalWidth = ImGui::CalcTextSize(wsScene).x 
+                             + ImGui::CalcTextSize(wsAnimation).x 
+                             + ImGui::CalcTextSize(wsModel).x 
+                             + ImGui::CalcTextSize(wsMaterial).x 
+                             + ImGui::CalcTextSize(wsTexture).x +
+                             + (btnPadding.x * 2.0f * 5.0f);
 
             ImGui::SetCursorPosX(ImGui::GetWindowWidth() - totalWidth - 10.0f);
 
@@ -161,6 +167,7 @@ namespace Syn {
                 };
 
             WorkspaceTab(wsScene, EditorWorkspace::Scene);
+            WorkspaceTab(wsAnimation, EditorWorkspace::Animation);
             WorkspaceTab(wsModel, EditorWorkspace::Model);
             WorkspaceTab(wsMaterial, EditorWorkspace::Material);
             WorkspaceTab(wsTexture, EditorWorkspace::Texture);
@@ -192,6 +199,7 @@ namespace Syn {
             case EditorWorkspace::Texture:  hostWindowName = "HostWindow_Texture";  subDockspaceId = ImGui::GetID("DockSpace_Texture"); break;
             case EditorWorkspace::Material: hostWindowName = "HostWindow_Material"; subDockspaceId = ImGui::GetID("DockSpace_Material"); break;
             case EditorWorkspace::Model:    hostWindowName = "HostWindow_Model";    subDockspaceId = ImGui::GetID("DockSpace_Model"); break;
+            case EditorWorkspace::Animation:hostWindowName = "HostWindow_Animation"; subDockspaceId = ImGui::GetID("DockSpace_Animation"); break;
             default:                        hostWindowName = "HostWindow_Default";  subDockspaceId = ImGui::GetID("DockSpace_Default"); break;
         }
 

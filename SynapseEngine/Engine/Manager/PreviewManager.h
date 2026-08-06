@@ -15,7 +15,8 @@ namespace Syn {
     enum class PreviewResourceType : uint32_t {
         Material = 0,
         Model = 1,
-        Image = 2
+        Image = 2,
+        Animation = 3
     };
 
     struct SYN_API StaleImage {

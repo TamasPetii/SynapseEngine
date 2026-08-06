@@ -262,7 +262,13 @@ namespace Syn {
 			_framesInFlight,
 			_animationBuilder,
 			std::make_unique<DefaultGpuAnimationUploader>(),
-			std::make_unique<DefaultCpuAnimationExtractor>()
+			std::make_unique<DefaultCpuAnimationExtractor>(),
+			[this](uint32_t id) {
+				if (_previewManager) _previewManager->AllocateTile(PreviewResourceType::Animation, id);
+			},
+			[this](uint32_t id) {
+				if (_previewManager) _previewManager->MarkDirty(PreviewResourceType::Animation, id);
+			}
 		);
 
 		ServiceLocator::Provide<AnimationManager>(_animationManager.get());

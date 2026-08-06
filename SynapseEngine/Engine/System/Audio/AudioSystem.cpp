@@ -99,4 +99,25 @@ namespace Syn
             sourceTask.value().succeed(listenerTask);
         }
     }
+
+    void AudioSystem::OnEntityDestroyed(Scene* scene, EntityID entity)
+    {
+        auto audioEngine = ServiceLocator::Get<IAudioEngine>();
+        if (!audioEngine) return;
+
+        auto registry = scene->GetRegistry();
+
+        if (registry->HasComponent<AudioSourceComponent>(entity))
+        {
+            audioEngine->StopSound(entity);
+        }
+    }
+
+    void AudioSystem::OnClean(Scene* scene)
+    {
+        auto audioEngine = ServiceLocator::Get<IAudioEngine>();
+        if (!audioEngine) return;
+
+        audioEngine->StopAllSounds();
+    }
 }

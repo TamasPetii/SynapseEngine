@@ -18,7 +18,7 @@ namespace Syn
         void SetListenerTransform(const glm::vec3& position, const glm::vec3& forward, const glm::vec3& up) override;
         void UpdateSound(EntityID entity, const AudioSourceComponent& component, const CpuAudioData& audioData, const glm::vec3& position) override;
         void StopSound(EntityID entity) override;
-
+        void StopAllSounds() override;
     private:
         struct ActiveSound {
             ma_audio_buffer buffer;

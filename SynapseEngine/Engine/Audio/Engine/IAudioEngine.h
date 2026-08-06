@@ -20,5 +20,6 @@ namespace Syn
         virtual void SetListenerTransform(const glm::vec3& position, const glm::vec3& forward, const glm::vec3& up) = 0;
         virtual void UpdateSound(EntityID entity, const AudioSourceComponent& component, const CpuAudioData& audioData, const glm::vec3& position) = 0;
         virtual void StopSound(EntityID entity) = 0;
+        virtual void StopAllSounds() = 0;
     };
 }

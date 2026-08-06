@@ -6,6 +6,7 @@
 #include "Editor/Manager/GuiTextureManager.h"
 
 #include "EditorCore/Api/IApi.h" 
+#include "EditorCore/Api/IAnimationApi.h" 
 #include "EditorCore/Api/ISelectionApi.h"
 #include "EditorCore/Api/ITagApi.h"
 #include "EditorCore/Api/ITransformApi.h"
@@ -29,7 +30,7 @@
 #include "EditorCore/Api/IMeshColliderApi.h"
 #include "EditorCore/Api/IRigidBodyApi.h"
 #include "EditorCore/Api/IModelComponentApi.h"
-#include "EditorCore/Api/IAnimationApi.h"
+#include "EditorCore/Api/IAnimationCompApi.h"
 #include "EditorCore/Api/IMaterialOverrideApi.h"
 #include "EditorCore/Api/IPreviewApi.h"
 #include "EditorCore/Api/IPipelineOverrideApi.h"

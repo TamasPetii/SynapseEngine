@@ -4,10 +4,10 @@
 #include "../SharedGpuTypes.glsl"
 
 struct ModelPreviewPC {
+    mat4 mvp;
     uint64_t frameGlobalContextBufferAddr;
     uint modelId;
     uint meshIndex;
-    mat4 mvp;
 };
 
 #endif

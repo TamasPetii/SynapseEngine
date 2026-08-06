@@ -79,6 +79,11 @@ namespace Syn
 
     void Scene::DestroyEntity(EntityID entity) {
         if (!_registry->IsValid(entity)) return;
+        
+        for (auto& system : _systems) {
+            system->OnEntityDestroyed(this, entity);
+        }
+
         _hierarchyManager->OnEntityDestroyed(entity);
         _registry->DestroyEntity(entity);
     }
@@ -132,6 +137,10 @@ namespace Syn
 
     Scene::~Scene()
     {
+        for (auto& system : _systems) {
+            system->OnClean(this);
+        }
+
 		_physicsEngine->Shutdown();
         _physicsEngine.reset();
         _registry.reset();

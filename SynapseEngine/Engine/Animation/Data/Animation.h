@@ -8,8 +8,7 @@
 
 namespace Syn
 {
-    struct SYN_API Animation
-    {
+    struct SYN_API Animation {
         CpuAnimationData cpuData;
         GpuAnimationBuffers hardwareBuffers;
 

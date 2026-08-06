@@ -23,15 +23,7 @@ namespace Syn
     {
         if (!_isInitialized) return;
 
-        std::lock_guard lock(_mutex);
-        for (auto& [entity, active] : _activeSounds) {
-            if (active.isInitialized) {
-                ma_sound_stop(&active.sound);
-                ma_sound_uninit(&active.sound);
-                ma_audio_buffer_uninit(&active.buffer);
-            }
-        }
-        _activeSounds.clear();
+        StopAllSounds();
 
         ma_engine_uninit(&_engine);
         _isInitialized = false;
@@ -141,5 +133,20 @@ namespace Syn
             }
             _activeSounds.erase(it);
         }
+    }
+
+    void MiniAudioEngine::StopAllSounds()
+    {
+        if (!_isInitialized) return;
+
+        std::lock_guard lock(_mutex);
+        for (auto& [entity, active] : _activeSounds) {
+            if (active.isInitialized) {
+                ma_sound_stop(&active.sound);
+                ma_sound_uninit(&active.sound);
+                ma_audio_buffer_uninit(&active.buffer);
+            }
+        }
+        _activeSounds.clear();
     }
 }

@@ -11,12 +11,17 @@
 
 namespace Syn {
 
+    using PreviewAllocateCallback = std::function<void(uint32_t resourceId)>;
+    using PreviewMarkDirtyCallback = std::function<void(uint32_t resourceId)>;
+
     class SYN_API AnimationManager : public AddressResourceManager<Animation, GpuAnimationAddresses> {
     public:
         AnimationManager(uint32_t framesInFlight, 
             std::shared_ptr<AnimationBuilder> builder, 
             std::unique_ptr<IGpuAnimationUploader> uploader,
-            std::unique_ptr<ICpuAnimationExtractor> cpuExtractor);
+            std::unique_ptr<ICpuAnimationExtractor> cpuExtractor,
+            PreviewAllocateCallback previewAllocateCallback = nullptr,
+            PreviewMarkDirtyCallback previewMarkDirtyCallback = nullptr);
         ~AnimationManager() = default;
 
         uint32_t LoadAnimationAsync(const std::string& filePath, uint32_t baseModelId);
@@ -29,5 +34,8 @@ namespace Syn {
         std::shared_ptr<AnimationBuilder> _builder;
         std::unique_ptr<IGpuAnimationUploader> _uploader;
         std::unique_ptr<ICpuAnimationExtractor> _cpuExtractor;
+
+        PreviewAllocateCallback _previewAllocateCallback;
+        PreviewMarkDirtyCallback _previewMarkDirtyCallback;
     };
 }

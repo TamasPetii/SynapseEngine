@@ -5,12 +5,12 @@
 #include "AnimationIntent.h"
 #include "AnimationCommands.h"
 #include "EditorCore/Api/ISelectionApi.h"
-#include "EditorCore/Api/IAnimationApi.h"
+#include "EditorCore/Api/IAnimationCompApi.h"
 
 namespace Syn {
     class AnimationViewModel : public IViewModel<AnimationState, AnimationIntent> {
     public:
-        AnimationViewModel(ISelectionApi* selectionApi, IAnimationApi* animApi);
+        AnimationViewModel(ISelectionApi* selectionApi, IAnimationCompApi* animApi);
         ~AnimationViewModel() override = default;
 
         const AnimationState& GetState() const override;
@@ -19,7 +19,7 @@ namespace Syn {
 
     private:
         ISelectionApi* _selectionApi = nullptr;
-        IAnimationApi* _animApi = nullptr;
+        IAnimationCompApi* _animApi = nullptr;
         AnimationState _state;
 
         DragInteraction<float> _speedDrag;

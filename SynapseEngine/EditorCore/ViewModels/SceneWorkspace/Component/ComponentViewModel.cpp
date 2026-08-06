@@ -18,7 +18,7 @@ namespace Syn
         IMeshColliderApi* meshColliderApi,
         IRigidBodyApi* rigidBodyApi,
 		IModelComponentApi* modelComponentApi,
-		IAnimationApi* animationApi,
+        IAnimationCompApi* animationApi,
         IMaterialOverrideApi* materialOverrideApi,
         IPipelineOverrideApi* pipelineOverrideApi,
         IAudioSourceApi* audioSourceApi,
