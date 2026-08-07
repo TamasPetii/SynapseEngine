@@ -108,7 +108,7 @@ namespace Syn
             decodeInfo.srcBufferRange = byteSize;
 
             VkVideoPictureResourceInfoKHR dstPictureResource{ VK_STRUCTURE_TYPE_VIDEO_PICTURE_RESOURCE_INFO_KHR };
-            dstPictureResource.imageViewBinding = result.texture->GetView();
+            dstPictureResource.imageViewBinding = _texture->GetView();
             decodeInfo.dstPictureResource = dstPictureResource;
 
             vkCmdDecodeVideoKHR(cmd, &decodeInfo);

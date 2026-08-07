@@ -147,10 +147,8 @@ namespace Syn
 
                             streamState->isUploading = false;
 
-                            if (this->GetEntryState(streamId) != ResourceState::Ready) {
-                                this->SetResourceState(streamId, ResourceState::Ready);
-                                this->MarkDirty(streamId);
-                            }
+                            this->SetResourceState(streamId, ResourceState::Ready);
+                            this->MarkDirty(streamId);
                         },
                         .needsGraphics = false,
                         .needsVideo = true

@@ -3,6 +3,7 @@
 #include "Engine/Scene/Scene.h"
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Material/MaterialManager.h"
+#include "Engine/Video/VideoManager.h"
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Animation/AnimationManager.h"
 #include "Engine/Image/ImageManager.h"
@@ -287,6 +288,7 @@ namespace Syn {
         ServiceLocator::Get<ModelManager>()->RecordSync(context.cmd);
         ServiceLocator::Get<MaterialManager>()->RecordSync(context.cmd);
         ServiceLocator::Get<ImageManager>()->RecordSync(context.cmd);
+        ServiceLocator::Get<VideoManager>()->RecordSync(context.cmd);
 
         Vk::GlobalBarrierInfo globalBarrier{};
 

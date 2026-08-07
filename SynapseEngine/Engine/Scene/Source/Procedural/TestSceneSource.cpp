@@ -215,7 +215,7 @@ namespace Syn
             Material tvMaterial{};
             tvMaterial.color = glm::vec4(1.0f);
             tvMaterial.emissiveColor = glm::vec3(1.0f);
-            tvMaterial.emissiveIntensity = 1.0f;
+            tvMaterial.emissiveIntensity = 0.0f;
             tvMaterial.videoTexture = videoId;
 
             uint32_t tvMatId = materialManager->LoadMaterialDirect("VideoScreenMat", tvMaterial);

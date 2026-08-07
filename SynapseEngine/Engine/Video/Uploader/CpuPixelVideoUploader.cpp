@@ -42,7 +42,7 @@ namespace Syn
 
         Vk::BufferToImageCopyInfo copyInfo{};
         copyInfo.srcBuffer = result.bitstreamBuffer->Handle();
-        copyInfo.dstImage = result.texture->Handle();
+        copyInfo.dstImage = _texture->Handle();
         copyInfo.width = _width;
         copyInfo.height = _height;
         copyInfo.depth = 1;
