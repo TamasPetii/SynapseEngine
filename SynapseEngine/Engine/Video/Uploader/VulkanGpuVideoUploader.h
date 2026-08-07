@@ -26,6 +26,9 @@ namespace Syn
         std::vector<uint8_t> _extradata;
         std::shared_ptr<IH264ExtradataParser> _parser;
 
+        uint8_t _spsId = 0;
+        uint8_t _ppsId = 0;
+
         VkVideoSessionKHR _videoSession = VK_NULL_HANDLE;
         VkVideoSessionParametersKHR _sessionParams = VK_NULL_HANDLE;
         VkSamplerYcbcrConversion _ycbcrConversion = VK_NULL_HANDLE;

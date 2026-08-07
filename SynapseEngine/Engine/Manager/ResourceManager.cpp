@@ -64,6 +64,7 @@
 #include "Engine/Video/Loader/FFmpeg/FFmpegVideoLoader.h"
 #include "Engine/Video/Processor/VideoProcessorPipeline.h"
 #include "Engine/Video/Processor/AnnexBVideoProcessor.h"
+#include "Engine/Video/Processor/VulkanAnnexBVideoProcessor.h"
 #include "Engine/Video/Converter/DefaultVideoCooker.h"
 #include "Engine/Video/Converter/DefaultGpuVideoConverter.h"
 #include "Engine/Video/Uploader/VulkanGpuVideoUploader.h"
@@ -330,6 +331,8 @@ namespace Syn {
 		auto h264Parser = std::make_shared<H264ExtradataParser>();
 
 		if (useGpuDecoding) {
+			pipeline->AddProcessor(std::make_unique<VulkanAnnexBVideoProcessor>());
+
 			converterFactory = [](const VideoInfo& info) {
 				return std::make_unique<DefaultGpuVideoConverter>();
 				};
@@ -338,6 +341,8 @@ namespace Syn {
 				};
 		}
 		else {
+			pipeline->AddProcessor(std::make_unique<AnnexBVideoProcessor>());
+
 			converterFactory = [](const VideoInfo& info) {
 				return std::make_unique<FFmpegCpuVideoConverter>(AV_CODEC_ID_H264, info.width, info.height, info.extradata);
 				};

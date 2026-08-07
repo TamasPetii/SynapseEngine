@@ -14,6 +14,7 @@ namespace Syn::Vk {
         bufferInfo.size = buffer->_config.size;
         bufferInfo.usage = buffer->_config.usage;
         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        bufferInfo.pNext = buffer->_config.pNextExtension;
 
         if (buffer->_config.useDeviceAddress) {
             bufferInfo.usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
@@ -85,6 +86,18 @@ namespace Syn::Vk {
         config.memoryUsage = VMA_MEMORY_USAGE_AUTO;
         config.allocationFlags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
         config.useDeviceAddress = false;
+
+        return std::make_unique<Buffer>(config);
+    }
+
+    std::unique_ptr<Buffer> BufferFactory::CreateVideoBitstream(VkDeviceSize size, const void* pNextExtension) {
+        BufferConfig config;
+        config.size = size;
+        config.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_VIDEO_DECODE_SRC_BIT_KHR;
+        config.memoryUsage = VMA_MEMORY_USAGE_AUTO;
+        config.allocationFlags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+        config.useDeviceAddress = false;
+        config.pNextExtension = pNextExtension;
 
         return std::make_unique<Buffer>(config);
     }

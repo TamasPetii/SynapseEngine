@@ -14,6 +14,7 @@ namespace Syn::Vk {
         VmaMemoryUsage memoryUsage = VMA_MEMORY_USAGE_AUTO;
         VmaAllocationCreateFlags allocationFlags = 0;
         bool useDeviceAddress = true;
+        const void* pNextExtension = nullptr;
     };
 
     class SYN_API Buffer {

@@ -9,6 +9,7 @@ namespace Syn::Vk {
         static std::unique_ptr<Buffer> CreateGpu(VkDeviceSize size,VkBufferUsageFlags usage);
         static std::unique_ptr<Buffer> CreatePersistent(VkDeviceSize size,VkBufferUsageFlags usage);
         static std::unique_ptr<Buffer> CreateStaging(VkDeviceSize size);
+        static std::unique_ptr<Buffer> CreateVideoBitstream(VkDeviceSize size, const void* pNextExtension);
         static std::unique_ptr<Buffer> Create(const BufferConfig& config);
     };
 }

@@ -58,31 +58,37 @@ namespace Syn
             return result;
         }
 
-        size_t byteSize = data.bitstreamData.size();
-        result.bitstreamBuffer = Vk::BufferFactory::CreateStaging(byteSize);
-        result.bitstreamBuffer->Write(data.bitstreamData.data(), byteSize, 0);
+        auto context = ServiceLocator::Get<Vk::Context>();
+        auto deviceObj = context->GetDevice();
+        auto device = deviceObj->Handle();
+        VkPhysicalDevice physicalDevice = context->GetPhysicalDevice()->Handle();
+
+        VkVideoDecodeH264ProfileInfoKHR h264ProfileInfo{ VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_PROFILE_INFO_KHR };
+        h264ProfileInfo.stdProfileIdc = STD_VIDEO_H264_PROFILE_IDC_MAIN;
+        h264ProfileInfo.pictureLayout = VK_VIDEO_DECODE_H264_PICTURE_LAYOUT_PROGRESSIVE_KHR;
+
+        VkVideoProfileInfoKHR videoProfileInfo{ VK_STRUCTURE_TYPE_VIDEO_PROFILE_INFO_KHR };
+        videoProfileInfo.videoCodecOperation = VK_VIDEO_CODEC_OPERATION_DECODE_H264_BIT_KHR;
+        videoProfileInfo.chromaSubsampling = VK_VIDEO_CHROMA_SUBSAMPLING_420_BIT_KHR;
+        videoProfileInfo.lumaBitDepth = VK_VIDEO_COMPONENT_BIT_DEPTH_8_BIT_KHR;
+        videoProfileInfo.chromaBitDepth = VK_VIDEO_COMPONENT_BIT_DEPTH_8_BIT_KHR;
+        videoProfileInfo.pNext = &h264ProfileInfo;
+
+        VkVideoProfileListInfoKHR videoProfileList{ VK_STRUCTURE_TYPE_VIDEO_PROFILE_LIST_INFO_KHR };
+        videoProfileList.profileCount = 1;
+        videoProfileList.pProfiles = &videoProfileInfo;
+
+        size_t rawSize = data.bitstreamData.size();
+        size_t alignment = 256;
+        size_t byteSize = (rawSize + alignment - 1) & ~(alignment - 1);
+
+        std::vector<uint8_t> alignedData = data.bitstreamData;
+        alignedData.resize(byteSize, 0);
+
+        result.bitstreamBuffer = Vk::BufferFactory::CreateVideoBitstream(byteSize, &videoProfileList);
+        result.bitstreamBuffer->Write(alignedData.data(), byteSize, 0);
 
         if (!_textures[0]) {
-            auto context = ServiceLocator::Get<Vk::Context>();
-            auto deviceObj = context->GetDevice();
-            auto device = deviceObj->Handle();
-            VkPhysicalDevice physicalDevice = context->GetPhysicalDevice()->Handle();
-
-            VkVideoDecodeH264ProfileInfoKHR h264ProfileInfo{ VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_PROFILE_INFO_KHR };
-            h264ProfileInfo.stdProfileIdc = STD_VIDEO_H264_PROFILE_IDC_MAIN;
-            h264ProfileInfo.pictureLayout = VK_VIDEO_DECODE_H264_PICTURE_LAYOUT_PROGRESSIVE_KHR;
-
-            VkVideoProfileInfoKHR videoProfileInfo{ VK_STRUCTURE_TYPE_VIDEO_PROFILE_INFO_KHR };
-            videoProfileInfo.videoCodecOperation = VK_VIDEO_CODEC_OPERATION_DECODE_H264_BIT_KHR;
-            videoProfileInfo.chromaSubsampling = VK_VIDEO_CHROMA_SUBSAMPLING_420_BIT_KHR;
-            videoProfileInfo.lumaBitDepth = VK_VIDEO_COMPONENT_BIT_DEPTH_8_BIT_KHR;
-            videoProfileInfo.chromaBitDepth = VK_VIDEO_COMPONENT_BIT_DEPTH_8_BIT_KHR;
-            videoProfileInfo.pNext = &h264ProfileInfo;
-
-            VkVideoProfileListInfoKHR videoProfileList{ VK_STRUCTURE_TYPE_VIDEO_PROFILE_LIST_INFO_KHR };
-            videoProfileList.profileCount = 1;
-            videoProfileList.pProfiles = &videoProfileInfo;
-
             VkSamplerYcbcrConversionCreateInfo ycbcrInfo{ VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_CREATE_INFO };
             ycbcrInfo.format = data.format;
             ycbcrInfo.ycbcrModel = VK_SAMPLER_YCBCR_MODEL_CONVERSION_YCBCR_709;
@@ -111,14 +117,23 @@ namespace Syn
                 tex = std::make_shared<Vk::Image>(imgConfig);
             }
 
+            VkVideoDecodeH264CapabilitiesKHR h264Capabilities{ VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_CAPABILITIES_KHR };
+            VkVideoDecodeCapabilitiesKHR decodeCapabilities{ VK_STRUCTURE_TYPE_VIDEO_DECODE_CAPABILITIES_KHR };
+            decodeCapabilities.pNext = &h264Capabilities;
+            VkVideoCapabilitiesKHR videoCapabilities{ VK_STRUCTURE_TYPE_VIDEO_CAPABILITIES_KHR };
+            videoCapabilities.pNext = &decodeCapabilities;
+
+            vkGetPhysicalDeviceVideoCapabilitiesKHR(physicalDevice, &videoProfileInfo, &videoCapabilities);
+
             VkVideoSessionCreateInfoKHR sessionInfo{ VK_STRUCTURE_TYPE_VIDEO_SESSION_CREATE_INFO_KHR };
             sessionInfo.pVideoProfile = &videoProfileInfo;
             sessionInfo.queueFamilyIndex = deviceObj->GetVideoDecodeQueue()->GetFamilyIndex();
             sessionInfo.maxCodedExtent = { _width, _height };
-            sessionInfo.maxDpbSlots = 16;
-            sessionInfo.maxActiveReferencePictures = 16;
+            sessionInfo.maxDpbSlots = 0;
+            sessionInfo.maxActiveReferencePictures = 0;
             sessionInfo.pictureFormat = data.format;
             sessionInfo.referencePictureFormat = data.format;
+            sessionInfo.pStdHeaderVersion = &videoCapabilities.stdHeaderVersion;
 
             if (vkCreateVideoSessionKHR(device, &sessionInfo, nullptr, &_videoSession) == VK_SUCCESS) {
 
@@ -160,6 +175,10 @@ namespace Syn
                 StdVideoH264PictureParameterSet pps{};
 
                 if (_parser && _parser->Parse(_extradata, sps, pps)) {
+
+                    _spsId = sps.seq_parameter_set_id;
+                    _ppsId = pps.pic_parameter_set_id;
+
                     VkVideoDecodeH264SessionParametersAddInfoKHR h264AddInfo{ VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_SESSION_PARAMETERS_ADD_INFO_KHR };
                     h264AddInfo.stdSPSCount = 1;
                     h264AddInfo.pStdSPSs = &sps;
@@ -203,13 +222,38 @@ namespace Syn
 
             vkCmdBeginVideoCodingKHR(cmd, &beginInfo);
 
+            if (_frameIndex == 1) {
+                VkVideoCodingControlInfoKHR controlInfo{ VK_STRUCTURE_TYPE_VIDEO_CODING_CONTROL_INFO_KHR };
+                controlInfo.flags = VK_VIDEO_CODING_CONTROL_RESET_BIT_KHR;
+                vkCmdControlVideoCodingKHR(cmd, &controlInfo);
+            }
+
+            StdVideoDecodeH264PictureInfo syndPpsInfo{};
+            syndPpsInfo.pic_parameter_set_id = _ppsId;
+            syndPpsInfo.seq_parameter_set_id = _spsId;
+            syndPpsInfo.flags.IdrPicFlag = 1;
+            syndPpsInfo.flags.is_intra = 1;
+            syndPpsInfo.flags.is_reference = 0;
+            syndPpsInfo.frame_num = static_cast<uint16_t>(_frameIndex & 0xFFFF);
+            syndPpsInfo.PicOrderCnt[0] = static_cast<int32_t>(_frameIndex * 2);
+            syndPpsInfo.PicOrderCnt[1] = 0;
+
+            uint32_t sliceOffset = 0;
+
+            VkVideoDecodeH264PictureInfoKHR h264PicInfo{ VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_PICTURE_INFO_KHR };
+            h264PicInfo.pStdPictureInfo = &syndPpsInfo;
+            h264PicInfo.sliceCount = 1;
+            h264PicInfo.pSliceOffsets = &sliceOffset;
+
             VkVideoDecodeInfoKHR decodeInfo{ VK_STRUCTURE_TYPE_VIDEO_DECODE_INFO_KHR };
+            decodeInfo.pNext = &h264PicInfo;
             decodeInfo.srcBuffer = result.bitstreamBuffer->Handle();
             decodeInfo.srcBufferOffset = 0;
             decodeInfo.srcBufferRange = byteSize;
 
             VkVideoPictureResourceInfoKHR dstPictureResource{ VK_STRUCTURE_TYPE_VIDEO_PICTURE_RESOURCE_INFO_KHR };
             dstPictureResource.imageViewBinding = currentTexture->GetView();
+            dstPictureResource.codedExtent = { _width, _height };
             decodeInfo.dstPictureResource = dstPictureResource;
 
             vkCmdDecodeVideoKHR(cmd, &decodeInfo);
