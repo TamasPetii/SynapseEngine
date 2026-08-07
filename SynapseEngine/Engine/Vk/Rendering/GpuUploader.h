@@ -14,6 +14,7 @@ namespace Syn::Vk
         std::function<void(VkCommandBuffer)> uploadCallback;
         std::function<void()> onFinished;
         bool needsGraphics = false;
+        bool needsVideo = false;
     };
 
     class SYN_API GpuUploader {
@@ -21,6 +22,7 @@ namespace Syn::Vk
         GpuUploader();
         ~GpuUploader() = default;
 
+        void Submit(GpuUploadRequest request);
         void Enqueue(GpuUploadRequest request);
         void UploadSync(GpuUploadRequest request);
         void ProcessUploads();
@@ -36,11 +38,15 @@ namespace Syn::Vk
         std::vector<ActiveBatch> _activeBatches;
         std::vector<GpuUploadRequest> _transferRequests;
         std::vector<GpuUploadRequest> _graphicsRequests;
+        std::vector<GpuUploadRequest> _videoRequests;
 
         Vk::ThreadSafeQueue* _transferQueue = nullptr;
         Vk::ThreadSafeQueue* _graphicsQueue = nullptr;
+        Vk::ThreadSafeQueue* _videoQueue = nullptr;
+
         std::unique_ptr<Vk::CommandPool> _transferPool;
         std::unique_ptr<Vk::CommandPool> _graphicsPool;
+        std::unique_ptr<Vk::CommandPool> _videoPool;
 
         std::mutex _mutex;
     };

@@ -1,4 +1,5 @@
 #include "AudioApiImpl.h"
+#include "Engine/Audio/Engine/IAudioEngine.h"
 #include <filesystem>
 
 namespace Syn {
@@ -39,5 +40,57 @@ namespace Syn {
         }
 
         return nullptr;
+    }
+
+    void AudioApiImpl::Play() {
+        if (_selectedAudioId == INVALID_AUDIO_ID) return;
+        auto data = GetAudioCpuData(_selectedAudioId);
+        if (!data) return;
+
+        if (auto audioEngine = ServiceLocator::Get<IAudioEngine>()) {
+            audioEngine->PlayPreview(data);
+        }
+    }
+
+    void AudioApiImpl::Pause() {
+        if (auto audioEngine = ServiceLocator::Get<IAudioEngine>()) {
+            audioEngine->PausePreview();
+        }
+    }
+
+    void AudioApiImpl::Stop() {
+        if (auto audioEngine = ServiceLocator::Get<IAudioEngine>()) {
+            audioEngine->StopPreview();
+        }
+    }
+
+    void AudioApiImpl::SetPlaybackTime(float timeInSeconds) {
+        if (auto audioEngine = ServiceLocator::Get<IAudioEngine>()) {
+            audioEngine->SetPreviewTime(timeInSeconds);
+        }
+    }
+
+    bool AudioApiImpl::IsPlaying() const {
+        if (auto audioEngine = ServiceLocator::Get<IAudioEngine>()) {
+            return audioEngine->IsPreviewPlaying();
+        }
+        return false;
+    }
+
+    float AudioApiImpl::GetPlaybackTime() const {
+        if (auto audioEngine = ServiceLocator::Get<IAudioEngine>()) {
+            return audioEngine->GetPreviewTime();
+        }
+        return 0.0f;
+    }
+
+    float AudioApiImpl::GetDuration() const {
+        if (_selectedAudioId == INVALID_AUDIO_ID) return 0.0f;
+        auto data = GetAudioCpuData(_selectedAudioId);
+
+        if (data && data->sampleRate > 0) {
+            return static_cast<float>(data->totalFrames) / static_cast<float>(data->sampleRate);
+        }
+        return 0.0f;
     }
 }

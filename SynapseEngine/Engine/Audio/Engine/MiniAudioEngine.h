@@ -19,6 +19,13 @@ namespace Syn
         void UpdateSound(EntityID entity, const AudioSourceComponent& component, const CpuAudioData& audioData, const glm::vec3& position) override;
         void StopSound(EntityID entity) override;
         void StopAllSounds() override;
+
+        void PlayPreview(const CpuAudioData* audioData) override;
+        void PausePreview() override;
+        void StopPreview() override;
+        void SetPreviewTime(float time) override;
+        bool IsPreviewPlaying() const override;
+        float GetPreviewTime() const override;
     private:
         struct ActiveSound {
             ma_audio_buffer buffer;
@@ -31,5 +38,8 @@ namespace Syn
 
         std::unordered_map<EntityID, ActiveSound> _activeSounds;
         std::mutex _mutex;
+
+        ActiveSound _previewSound;
+        const CpuAudioData* _currentPreviewData = nullptr;
     };
 }

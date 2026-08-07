@@ -21,5 +21,12 @@ namespace Syn
         virtual void UpdateSound(EntityID entity, const AudioSourceComponent& component, const CpuAudioData& audioData, const glm::vec3& position) = 0;
         virtual void StopSound(EntityID entity) = 0;
         virtual void StopAllSounds() = 0;
+
+        virtual void PlayPreview(const CpuAudioData* audioData) = 0;
+        virtual void PausePreview() = 0;
+        virtual void StopPreview() = 0;
+        virtual void SetPreviewTime(float timeInSeconds) = 0;
+        virtual bool IsPreviewPlaying() const = 0;
+        virtual float GetPreviewTime() const = 0;
     };
 }

@@ -133,6 +133,13 @@ namespace Syn::Vk {
             inds.transfer = inds.graphics;
         }
 
+        for (uint32_t i = 0; i < queueFamilyCount; i++) {
+            if (queueFamilies[i].queueFlags & VK_QUEUE_VIDEO_DECODE_BIT_KHR) {
+                inds.videoDecode = i;
+                break;
+            }
+        }
+
         return inds;
     }
 

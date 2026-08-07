@@ -8,6 +8,9 @@
 #include "View/AudioHierarchy/AudioHierarchyView.h"
 #include "EditorCore/ViewModels/AudioWorkspace/AudioHierarchy/AudioHierarchyViewModel.h"
 
+#include "View/AudioViewport/AudioViewportView.h"
+#include "EditorCore/ViewModels/AudioWorkspace/AudioViewport/AudioViewportViewModel.h"
+
 namespace Syn {
 
     AudioWorkspace::AudioWorkspace(EditorContext* context, IconManager* iconManager, const std::string& assetPath)
@@ -33,6 +36,14 @@ namespace Syn {
             AudioHierarchyViewModel{
                 _context->GetApi<IAudioApi>(),
                 _context->GetApi<IPreviewApi>()
+            }
+        );
+
+        using AudioViewportWin = EditorWindow<AudioViewportView, AudioViewportViewModel>;
+        AddWindow<AudioViewportWin>(
+            AudioViewportView{},
+            AudioViewportViewModel{
+                _context->GetApi<IAudioApi>()
             }
         );
     }

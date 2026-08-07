@@ -36,6 +36,8 @@ namespace Syn {
     class IRenderStatCollector;
     class FrameStatisticsManager;
     class PreviewManager;
+    class VideoBuilder;
+    class VideoManager;
 
     using PhysicsFactory = std::function<std::unique_ptr<IPhysicsEngine>()>;
 
@@ -92,6 +94,8 @@ namespace Syn
         static IRenderStatCollector* _renderStatCollector;
         static FrameStatisticsManager* _frameStatisticsManager;
         static PreviewManager* _previewManager;
+        static VideoBuilder* _videoBuilder;
+        static VideoManager* _videoManager;
     };
 
     template <> SYN_API void ServiceLocator::Provide<Vk::Context>(Vk::Context*);
@@ -120,6 +124,8 @@ namespace Syn
     template <> SYN_API void ServiceLocator::Provide<FrameStatisticsManager>(FrameStatisticsManager*);
     template <> SYN_API void ServiceLocator::Provide<PreviewManager>(PreviewManager*);
     template <> SYN_API void ServiceLocator::Provide<PhysicsFactory>(PhysicsFactory);
+    template <> SYN_API void ServiceLocator::Provide<VideoBuilder>(VideoBuilder*);
+    template <> SYN_API void ServiceLocator::Provide<VideoManager>(VideoManager*);
 
     template <> SYN_API Vk::Context* ServiceLocator::Get<Vk::Context>();
     template <> SYN_API Vk::GpuUploader* ServiceLocator::Get<Vk::GpuUploader>();
@@ -147,4 +153,6 @@ namespace Syn
     template <> SYN_API FrameStatisticsManager* ServiceLocator::Get<FrameStatisticsManager>();
     template <> SYN_API PreviewManager* ServiceLocator::Get<PreviewManager>();
     template <> SYN_API PhysicsFactory& ServiceLocator::Get<PhysicsFactory>();
+    template <> SYN_API VideoBuilder* ServiceLocator::Get<VideoBuilder>();
+    template <> SYN_API VideoManager* ServiceLocator::Get<VideoManager>();
 }

@@ -60,6 +60,16 @@
 #include "Engine/Audio/Converter/DefaultCpuAudioExtractor.h"
 #include "Engine/Audio/Processor/AudioWaveformProcessor.h"
 
+#include "Engine/Video/Loader/VideoLoaderRegistry.h"
+#include "Engine/Video/Loader/FFmpeg/FFmpegVideoLoader.h"
+#include "Engine/Video/Processor/VideoProcessorPipeline.h"
+#include "Engine/Video/Processor/AnnexBVideoProcessor.h"
+#include "Engine/Video/Converter/DefaultVideoCooker.h"
+#include "Engine/Video/Converter/DefaultGpuVideoConverter.h"
+#include "Engine/Video/Uploader/VulkanGpuVideoUploader.h"
+#include "Engine/Video/Converter/FFmpegCpuVideoConverter.h"
+#include "Engine/Video/Uploader/CpuPixelVideoUploader.h"
+
 #include "Engine/Mesh/MeshSourceNames.h"
 
 namespace Syn {
@@ -72,6 +82,7 @@ namespace Syn {
 		InitModelManager();
 		InitAnimationManager();
 		InitAudioManager();
+		InitVideoManager(true);
     }
 
 	void ResourceManager::InitPreviewManager() {
@@ -300,6 +311,51 @@ namespace Syn {
 		);
 
 		ServiceLocator::Provide<AudioManager>(_audioManager.get());
+	}
+
+	void ResourceManager::InitVideoManager(bool useGpuDecoding)
+	{
+		auto loaderRegistry = std::make_unique<VideoLoaderRegistry>();
+		loaderRegistry->Register(std::make_shared<FFmpegVideoLoader>(), 1);
+
+		auto pipeline = std::make_unique<VideoProcessorPipeline>();
+
+		VideoConverterFactory converterFactory;
+		VideoUploaderFactory uploaderFactory;
+
+		if (useGpuDecoding) {
+			pipeline->AddProcessor(std::make_unique<AnnexBVideoProcessor>());
+
+			converterFactory = [](const VideoInfo& info) {
+				return std::make_unique<DefaultGpuVideoConverter>();
+				};
+			uploaderFactory = [](const VideoInfo& info) {
+				return std::make_unique<VulkanGpuVideoUploader>(info.width, info.height);
+				};
+		}
+		else {
+			converterFactory = [](const VideoInfo& info) {
+				return std::make_unique<FFmpegCpuVideoConverter>(AV_CODEC_ID_H264, info.width, info.height);
+				};
+			uploaderFactory = [](const VideoInfo& info) {
+				return std::make_unique<CpuPixelVideoUploader>(info.width, info.height);
+				};
+		}
+
+		_videoBuilder = std::make_shared<VideoBuilder>(
+			std::move(loaderRegistry),
+			std::move(pipeline),
+			std::move(converterFactory),
+			std::move(uploaderFactory),
+			std::make_unique<DefaultVideoCooker>()
+		);
+		ServiceLocator::Provide<VideoBuilder>(_videoBuilder.get());
+
+		_videoManager = std::make_unique<VideoManager>(
+			_framesInFlight,
+			_videoBuilder
+		);
+		ServiceLocator::Provide<VideoManager>(_videoManager.get());
 	}
 
     ResourceManager::~ResourceManager() {

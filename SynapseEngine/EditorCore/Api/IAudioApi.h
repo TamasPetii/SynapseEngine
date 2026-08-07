@@ -26,5 +26,14 @@ namespace Syn
         virtual uint32_t GetSelected() const = 0;
 
         virtual const CpuAudioData* GetAudioCpuData(uint32_t audioId) const = 0;
+
+        virtual void Play() = 0;
+        virtual void Pause() = 0;
+        virtual void Stop() = 0;
+        virtual void SetPlaybackTime(float timeInSeconds) = 0;
+
+        virtual bool IsPlaying() const = 0;
+        virtual float GetPlaybackTime() const = 0;
+        virtual float GetDuration() const = 0;
     };
 }

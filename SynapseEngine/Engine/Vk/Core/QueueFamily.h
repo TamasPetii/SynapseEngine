@@ -7,13 +7,15 @@ namespace Syn::Vk {
         std::optional<uint32_t> compute;
         std::optional<uint32_t> transfer;
         std::optional<uint32_t> present;
+        std::optional<uint32_t> videoDecode;
 
         bool IsComplete() const {
             return 
                 graphics.has_value() && 
                 compute.has_value() && 
                 transfer.has_value() && 
-                present.has_value();
+                present.has_value() && 
+                videoDecode.has_value();
         }
     };
 }

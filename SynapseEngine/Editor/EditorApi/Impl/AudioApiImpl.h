@@ -16,6 +16,14 @@ namespace Syn {
 
         const CpuAudioData* GetAudioCpuData(uint32_t audioId) const override;
 
+        void Play() override;
+        void Pause() override;
+        void Stop() override;
+        void SetPlaybackTime(float timeInSeconds) override;
+
+        bool IsPlaying() const override;
+        float GetPlaybackTime() const override;
+        float GetDuration() const override;
     private:
         AudioManager* _audioManager;
         uint32_t _selectedAudioId = INVALID_AUDIO_ID;

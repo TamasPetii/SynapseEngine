@@ -8,7 +8,8 @@ namespace Syn::Vk {
         std::set<uint32_t> uniqueQueueFamilies = {
             indices.graphics.value(),
             indices.compute.value(),
-            indices.transfer.value()
+            indices.transfer.value(),
+            indices.videoDecode.value()
         };
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
@@ -157,6 +158,10 @@ namespace Syn::Vk {
 
         if (indices.transfer.has_value()) {
             _transferQueue = getQueue(indices.transfer.value());
+        }
+
+        if (indices.videoDecode.has_value()) {
+            _videoDecodeQueue = getQueue(indices.videoDecode.value());
         }
 
         InitVMA(instance, physicalDevice);

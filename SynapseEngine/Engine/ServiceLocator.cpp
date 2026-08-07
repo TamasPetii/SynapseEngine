@@ -28,6 +28,8 @@ namespace Syn
     IRenderStatCollector* ServiceLocator::_renderStatCollector = nullptr;
     FrameStatisticsManager* ServiceLocator::_frameStatisticsManager = nullptr;
     PreviewManager* ServiceLocator::_previewManager = nullptr;
+    VideoBuilder* ServiceLocator::_videoBuilder = nullptr;
+    VideoManager* ServiceLocator::_videoManager = nullptr;
 
     template <> void ServiceLocator::Provide<Vk::Context>(Vk::Context* s) { _vkContext = s; }
     template <> void ServiceLocator::Provide<Vk::GpuUploader>(Vk::GpuUploader* s) { _gpuUploader = s; }
@@ -55,6 +57,8 @@ namespace Syn
     template <> void ServiceLocator::Provide<PreviewManager>(PreviewManager* s) { _previewManager = s; }
     template <> void ServiceLocator::Provide<PhysicsFactory>(PhysicsFactory f) { _physicsFactory = std::move(f); }
     template <> void ServiceLocator::Provide<ShaderBuilder>(ShaderBuilder* s) { _shaderBuilder = s; }
+    template <> void ServiceLocator::Provide<VideoBuilder>(VideoBuilder* s) { _videoBuilder = s; }
+    template <> void ServiceLocator::Provide<VideoManager>(VideoManager* s) { _videoManager = s; }
 
     template <> Vk::Context* ServiceLocator::Get<Vk::Context>() { return _vkContext; }
     template <> Vk::GpuUploader* ServiceLocator::Get<Vk::GpuUploader>() { return _gpuUploader; }
@@ -82,4 +86,6 @@ namespace Syn
     template <> PreviewManager* ServiceLocator::Get<PreviewManager>() { return _previewManager; }
     template <> PhysicsFactory& ServiceLocator::Get<PhysicsFactory>() { return _physicsFactory; }
     template <> ShaderBuilder* ServiceLocator::Get<ShaderBuilder>() { return _shaderBuilder; }
+    template <> VideoBuilder* ServiceLocator::Get<VideoBuilder>() { return _videoBuilder; }
+    template <> VideoManager* ServiceLocator::Get<VideoManager>() { return _videoManager; }
 }

@@ -1,17 +1,22 @@
 #pragma once
 #include "Engine/SynApi.h"
-#include "Engine/Shader/ShaderManager.h"
-#include "Engine/Shader/Builder/ShaderBuilder.h"
-#include "Engine/Mesh/ModelManager.h"
-#include "Engine/Image/ImageManager.h"
-#include "Engine/Material/MaterialManager.h"
-#include "Engine/Animation/Builder/AnimationBuilder.h"
-#include "Engine/Animation/AnimationManager.h"
 #include "PreviewManager.h"
 #include <memory>
+#include "Engine/Shader/ShaderManager.h"
+#include "Engine/Shader/Builder/ShaderBuilder.h"
+
+#include "Engine/Image/ImageManager.h"
+#include "Engine/Mesh/ModelManager.h"
+#include "Engine/Material/MaterialManager.h"
+
+#include "Engine/Animation/AnimationManager.h"
+#include "Engine/Animation/Builder/AnimationBuilder.h"
 
 #include "Engine/Audio/Builder/AudioBuilder.h"
 #include "Engine/Audio/AudioManager.h"
+
+#include "Engine/Video/Builder/VideoBuilder.h"
+#include "Engine/Video/VideoManager.h"
 
 namespace Syn {
 
@@ -30,6 +35,7 @@ namespace Syn {
         void InitAnimationManager();
         void InitPreviewManager();
         void InitAudioManager();
+        void InitVideoManager(bool useGpuDecoding = true);
     private:
         std::shared_ptr<ShaderBuilder> _shaderBuilder;
         std::unique_ptr<ShaderManager> _shaderManager;
@@ -49,6 +55,9 @@ namespace Syn {
 
         std::shared_ptr<AudioBuilder> _audioBuilder;
         std::unique_ptr<AudioManager> _audioManager;
+
+        std::shared_ptr<VideoBuilder> _videoBuilder;
+        std::unique_ptr<VideoManager> _videoManager;
 
 		uint32_t _framesInFlight;
     };

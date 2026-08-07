@@ -149,4 +149,77 @@ namespace Syn
         }
         _activeSounds.clear();
     }
+
+    void MiniAudioEngine::PlayPreview(const CpuAudioData* audioData) {
+        if (!_isInitialized || !audioData || audioData->samples.empty()) return;
+        std::lock_guard lock(_mutex);
+
+        if (_previewSound.isInitialized) {
+            if (_currentPreviewData == audioData) {
+                ma_sound_start(&_previewSound.sound);
+                return;
+            }
+            else {
+                ma_sound_stop(&_previewSound.sound);
+                ma_sound_uninit(&_previewSound.sound);
+                ma_audio_buffer_uninit(&_previewSound.buffer);
+                _previewSound.isInitialized = false;
+            }
+        }
+
+        _currentPreviewData = audioData;
+
+        ma_audio_buffer_config bufferConfig = ma_audio_buffer_config_init(ma_format_f32, audioData->channels, audioData->totalFrames, audioData->samples.data(), nullptr);
+        bufferConfig.sampleRate = audioData->sampleRate;
+
+        if (ma_audio_buffer_init(&bufferConfig, &_previewSound.buffer) != MA_SUCCESS) return;
+
+        ma_sound_config soundConfig = ma_sound_config_init();
+        soundConfig.pDataSource = &_previewSound.buffer;
+        soundConfig.flags |= MA_SOUND_FLAG_NO_SPATIALIZATION;
+
+        if (ma_sound_init_ex(&_engine, &soundConfig, &_previewSound.sound) != MA_SUCCESS) {
+            ma_audio_buffer_uninit(&_previewSound.buffer);
+            return;
+        }
+
+        _previewSound.isInitialized = true;
+        ma_sound_start(&_previewSound.sound);
+    }
+
+    void MiniAudioEngine::PausePreview() {
+        std::lock_guard lock(_mutex);
+        if (_previewSound.isInitialized) {
+            ma_sound_stop(&_previewSound.sound);
+        }
+    }
+
+    void MiniAudioEngine::StopPreview() {
+        std::lock_guard lock(_mutex);
+        if (_previewSound.isInitialized) {
+            ma_sound_stop(&_previewSound.sound);
+            ma_sound_seek_to_pcm_frame(&_previewSound.sound, 0);
+        }
+    }
+
+    void MiniAudioEngine::SetPreviewTime(float time) {
+        std::lock_guard lock(_mutex);
+        if (_previewSound.isInitialized && _currentPreviewData) {
+            ma_uint64 frame = static_cast<ma_uint64>(time * _currentPreviewData->sampleRate);
+            ma_sound_seek_to_pcm_frame(&_previewSound.sound, frame);
+        }
+    }
+
+    bool MiniAudioEngine::IsPreviewPlaying() const {
+        if (!_previewSound.isInitialized) return false;
+        return ma_sound_is_playing(&_previewSound.sound) == MA_TRUE;
+    }
+
+    float MiniAudioEngine::GetPreviewTime() const {
+        if (!_previewSound.isInitialized || !_currentPreviewData) return 0.0f;
+
+        ma_uint64 cursor = 0;
+        ma_sound_get_cursor_in_pcm_frames(&_previewSound.sound, &cursor);
+        return static_cast<float>(cursor) / static_cast<float>(_currentPreviewData->sampleRate);
+    }
 }
