@@ -69,6 +69,7 @@
 #include "Engine/Video/Uploader/VulkanGpuVideoUploader.h"
 #include "Engine/Video/Converter/FFmpegCpuVideoConverter.h"
 #include "Engine/Video/Uploader/CpuPixelVideoUploader.h"
+#include "Engine/Video/Parser/H264ExtradataParser.h"
 
 #include "Engine/Mesh/MeshSourceNames.h"
 
@@ -324,20 +325,24 @@ namespace Syn {
 		VideoConverterFactory converterFactory;
 		VideoUploaderFactory uploaderFactory;
 
+		uint32_t bufferCount = _framesInFlight + 2;
+
+		auto h264Parser = std::make_shared<H264ExtradataParser>();
+
 		if (useGpuDecoding) {
 			converterFactory = [](const VideoInfo& info) {
 				return std::make_unique<DefaultGpuVideoConverter>();
 				};
-			uploaderFactory = [](const VideoInfo& info) {
-				return std::make_unique<VulkanGpuVideoUploader>(info.width, info.height);
+			uploaderFactory = [h264Parser, bufferCount](const VideoInfo& info) {
+				return std::make_unique<VulkanGpuVideoUploader>(info.width, info.height, bufferCount, info.extradata, h264Parser);
 				};
 		}
 		else {
 			converterFactory = [](const VideoInfo& info) {
 				return std::make_unique<FFmpegCpuVideoConverter>(AV_CODEC_ID_H264, info.width, info.height, info.extradata);
 				};
-			uploaderFactory = [](const VideoInfo& info) {
-				return std::make_unique<CpuPixelVideoUploader>(info.width, info.height);
+			uploaderFactory = [bufferCount](const VideoInfo& info) {
+				return std::make_unique<CpuPixelVideoUploader>(info.width, info.height, bufferCount);
 				};
 		}
 
@@ -346,8 +351,10 @@ namespace Syn {
 			std::move(pipeline),
 			std::move(converterFactory),
 			std::move(uploaderFactory),
-			std::make_unique<DefaultVideoCooker>()
+			std::make_unique<DefaultVideoCooker>(),
+			h264Parser
 		);
+
 		ServiceLocator::Provide<VideoBuilder>(_videoBuilder.get());
 
 		_videoManager = std::make_unique<VideoManager>(

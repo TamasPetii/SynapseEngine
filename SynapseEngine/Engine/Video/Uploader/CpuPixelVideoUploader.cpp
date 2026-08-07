@@ -4,8 +4,11 @@
 
 namespace Syn
 {
-    CpuPixelVideoUploader::CpuPixelVideoUploader(uint32_t width, uint32_t height)
-        : _width(width), _height(height) {}
+    CpuPixelVideoUploader::CpuPixelVideoUploader(uint32_t width, uint32_t height, uint32_t bufferCount)
+        : _width(width), _height(height)
+    {
+        _textures.resize(bufferCount);
+    }
 
     VideoUploadResult CpuPixelVideoUploader::Upload(const GpuVideoPacket& data, VkCommandBuffer cmd)
     {
@@ -16,7 +19,7 @@ namespace Syn
             return result;
         }
 
-        if (!_texture) {
+        if (!_textures[0]) {
             Vk::ImageConfig imgConfig{};
             imgConfig.width = _width;
             imgConfig.height = _height;
@@ -25,14 +28,20 @@ namespace Syn
             imgConfig.mipLevels = 1;
             imgConfig.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
-            _texture = std::make_shared<Vk::Image>(imgConfig);
+            for (auto& tex : _textures) {
+                tex = std::make_shared<Vk::Image>(imgConfig);
+            }
         }
+
+        uint32_t currentIndex = _frameIndex % _textures.size();
+        _frameIndex++;
+        auto currentTexture = _textures[currentIndex];
 
         size_t byteSize = data.bitstreamData.size();
         result.bitstreamBuffer = Vk::BufferFactory::CreateStaging(byteSize);
         result.bitstreamBuffer->Write(data.bitstreamData.data(), byteSize, 0);
 
-        _texture->TransitionLayout(
+        currentTexture->TransitionLayout(
             cmd,
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             VK_PIPELINE_STAGE_2_TRANSFER_BIT,
@@ -42,7 +51,7 @@ namespace Syn
 
         Vk::BufferToImageCopyInfo copyInfo{};
         copyInfo.srcBuffer = result.bitstreamBuffer->Handle();
-        copyInfo.dstImage = _texture->Handle();
+        copyInfo.dstImage = currentTexture->Handle();
         copyInfo.width = _width;
         copyInfo.height = _height;
         copyInfo.depth = 1;
@@ -55,7 +64,7 @@ namespace Syn
 
         Vk::BufferUtils::CopyBufferToImage(cmd, copyInfo);
 
-        _texture->TransitionLayout(
+        currentTexture->TransitionLayout(
             cmd,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
             VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT,
@@ -63,13 +72,13 @@ namespace Syn
             false
         );
 
-        _texture->OverrideInternalState(
+        currentTexture->OverrideInternalState(
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
             VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
             VK_ACCESS_2_SHADER_READ_BIT
         );
 
-        result.texture = _texture;
+        result.texture = currentTexture;
         result.isFrameReady = true;
         return result;
     }

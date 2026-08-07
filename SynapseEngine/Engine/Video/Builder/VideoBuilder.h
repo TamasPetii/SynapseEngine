@@ -7,6 +7,7 @@
 #include "Engine/Video/Uploader/IGpuVideoUploader.h"
 #include "Engine/Video/Source/IVideoSource.h"
 #include "Engine/Video/Data/Video.h"
+#include "Engine/Video/Parser/IH264ExtradataParser.h"
 
 #include <memory>
 #include <string>
@@ -25,7 +26,8 @@ namespace Syn
             std::unique_ptr<IVideoProcessorPipeline> pipeline,
             VideoConverterFactory converterFactory,
             VideoUploaderFactory uploaderFactory,
-            std::unique_ptr<IVideoCooker> cooker
+            std::unique_ptr<IVideoCooker> cooker,
+            std::shared_ptr<IH264ExtradataParser> _h264Parser
         );
 
         VideoBuilder(const VideoBuilder&) = delete;
@@ -47,5 +49,6 @@ namespace Syn
         VideoConverterFactory _converterFactory;
         VideoUploaderFactory _uploaderFactory;
         std::unique_ptr<IVideoCooker> _cooker;
+		std::shared_ptr<IH264ExtradataParser> _h264Parser;
     };
 }

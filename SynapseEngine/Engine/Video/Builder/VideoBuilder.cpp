@@ -9,12 +9,14 @@ namespace Syn
         std::unique_ptr<IVideoProcessorPipeline> pipeline,
         VideoConverterFactory converterFactory,
         VideoUploaderFactory uploaderFactory,
-        std::unique_ptr<IVideoCooker> cooker) :
+        std::unique_ptr<IVideoCooker> cooker,
+        std::shared_ptr<IH264ExtradataParser> h264Parser) :
         _registry(std::move(registry)),
         _pipeline(std::move(pipeline)),
         _converterFactory(std::move(converterFactory)),
         _uploaderFactory(std::move(uploaderFactory)),
-        _cooker(std::move(cooker))
+        _cooker(std::move(cooker)),
+        _h264Parser(std::move(h264Parser))
     {}
 
     std::unique_ptr<IGpuVideoConverter> VideoBuilder::CreateConverter(const VideoInfo& info) const {
