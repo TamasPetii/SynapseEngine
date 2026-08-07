@@ -16,7 +16,7 @@ namespace Syn
             return result;
         }
 
-        if (!result.texture) {
+        if (!_texture) {
             Vk::ImageConfig imgConfig{};
             imgConfig.width = _width;
             imgConfig.height = _height;
@@ -25,14 +25,14 @@ namespace Syn
             imgConfig.mipLevels = 1;
             imgConfig.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 
-            result.texture = std::make_shared<Vk::Image>(imgConfig);
+            _texture = std::make_shared<Vk::Image>(imgConfig);
         }
 
         size_t byteSize = data.bitstreamData.size();
         result.bitstreamBuffer = Vk::BufferFactory::CreateStaging(byteSize);
         result.bitstreamBuffer->Write(data.bitstreamData.data(), byteSize, 0);
 
-        result.texture->TransitionLayout(
+        _texture->TransitionLayout(
             cmd,
             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             VK_PIPELINE_STAGE_2_TRANSFER_BIT,
@@ -55,7 +55,7 @@ namespace Syn
 
         Vk::BufferUtils::CopyBufferToImage(cmd, copyInfo);
 
-        result.texture->TransitionLayout(
+        _texture->TransitionLayout(
             cmd,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
             VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT,
@@ -63,12 +63,13 @@ namespace Syn
             false
         );
 
-        result.texture->OverrideInternalState(
+        _texture->OverrideInternalState(
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
             VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
             VK_ACCESS_2_SHADER_READ_BIT
         );
 
+        result.texture = _texture;
         result.isFrameReady = true;
         return result;
     }

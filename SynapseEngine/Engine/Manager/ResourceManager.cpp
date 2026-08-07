@@ -319,13 +319,12 @@ namespace Syn {
 		loaderRegistry->Register(std::make_shared<FFmpegVideoLoader>(), 1);
 
 		auto pipeline = std::make_unique<VideoProcessorPipeline>();
+		pipeline->AddProcessor(std::make_unique<AnnexBVideoProcessor>());
 
 		VideoConverterFactory converterFactory;
 		VideoUploaderFactory uploaderFactory;
 
 		if (useGpuDecoding) {
-			pipeline->AddProcessor(std::make_unique<AnnexBVideoProcessor>());
-
 			converterFactory = [](const VideoInfo& info) {
 				return std::make_unique<DefaultGpuVideoConverter>();
 				};
@@ -335,7 +334,7 @@ namespace Syn {
 		}
 		else {
 			converterFactory = [](const VideoInfo& info) {
-				return std::make_unique<FFmpegCpuVideoConverter>(AV_CODEC_ID_H264, info.width, info.height);
+				return std::make_unique<FFmpegCpuVideoConverter>(AV_CODEC_ID_H264, info.width, info.height, info.extradata);
 				};
 			uploaderFactory = [](const VideoInfo& info) {
 				return std::make_unique<CpuPixelVideoUploader>(info.width, info.height);

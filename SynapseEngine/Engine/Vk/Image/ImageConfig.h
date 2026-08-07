@@ -32,6 +32,9 @@ namespace Syn::Vk {
         VmaAllocationCreateFlags allocationFlags = 0;
         VkImageCreateFlags flags = 0;
 
+        void* videoProfileList = nullptr;
+        VkSamplerYcbcrConversion ycbcrConversion = VK_NULL_HANDLE;
+
         std::unordered_map<std::string, ImageViewConfig> imageViewConfigs;
         void AddView(const std::string& name, const ImageViewConfig& config) {
             imageViewConfigs[name] = config;

@@ -31,6 +31,13 @@ namespace Syn
             if (stream->avg_frame_rate.den > 0) {
                 _info.frameRate = av_q2d(stream->avg_frame_rate);
             }
+
+            if (stream->codecpar->extradata && stream->codecpar->extradata_size > 0) {
+                _info.extradata.assign(
+                    stream->codecpar->extradata,
+                    stream->codecpar->extradata + stream->codecpar->extradata_size
+                );
+            }
         }
     }
 

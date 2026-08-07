@@ -1,6 +1,7 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include <cstdint>
+#include <vector>
 #include <vulkan/vulkan.h>
 
 namespace Syn
@@ -11,5 +12,6 @@ namespace Syn
         double frameRate = 0.0;
         int64_t duration = 0;
         VkFormat format = VK_FORMAT_UNDEFINED;
+        std::vector<uint8_t> extradata;
     };
 }

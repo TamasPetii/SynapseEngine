@@ -34,6 +34,7 @@ namespace Syn {
     class PreviewManager;
 	class IAudioEngine;
     class AudioManager;
+    class VideoManager;
 }
 
 namespace Syn
@@ -73,6 +74,7 @@ namespace Syn
         ModelManager* GetModelManager();
         AnimationManager* GetAnimationManager();
         PreviewManager* GetPreviewManager();
+		VideoManager* GetVideoManager();
         std::shared_ptr<Syn::MemorySink> GetMemorySink() const { return _memorySink; }
     private:
         void Init(const EngineInitParams& params);

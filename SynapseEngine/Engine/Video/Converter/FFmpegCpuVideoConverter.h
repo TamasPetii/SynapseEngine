@@ -13,7 +13,7 @@ namespace Syn
     class SYN_API FFmpegCpuVideoConverter : public IGpuVideoConverter
     {
     public:
-        FFmpegCpuVideoConverter(AVCodecID codecId, int width, int height);
+        FFmpegCpuVideoConverter(AVCodecID codecId, int width, int height, const std::vector<uint8_t>& extradata);
         ~FFmpegCpuVideoConverter() override;
 
         GpuVideoPacket Convert(const CookedVideoPacket& cookedPacket) override;

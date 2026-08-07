@@ -24,12 +24,7 @@ namespace Syn::Vk
         VkImageView GetView(const std::string& name = "") const;
 		VkImageLayout GetLayout() const { return _currentLayout; }
         void TransitionLayout(VkCommandBuffer cmd, VkImageLayout newLayout, VkPipelineStageFlags2 dstStage, VkAccessFlags2 dstAccess, bool discardContent = false);
-    
-        void OverrideInternalState(VkImageLayout layout, VkPipelineStageFlags2 stage, VkAccessFlags2 access) {
-            _currentLayout = layout;
-            _currentStage = stage;
-            _currentAccess = access;
-        }
+        void OverrideInternalState(VkImageLayout layout, VkPipelineStageFlags2 stage, VkAccessFlags2 access);
     private:
         ImageConfig _config;
 

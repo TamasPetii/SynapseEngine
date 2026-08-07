@@ -30,6 +30,7 @@
 #include "Engine/Logger/SynLog.h"
 #include "Engine/Utils/PathUtils.h"
 #include "Engine/Audio/AudioManager.h"
+#include "Engine/Video/VideoManager.h"
 
 #include <random>
 #include <fstream>
@@ -189,6 +190,44 @@ namespace Syn
             registry.GetPool<TagComponent>()->SetCategory(bgAudio, StorageCategory::Static);
 
             hm->AttachChild(rootAudios, bgAudio);
+        }
+
+        {
+            auto videoManager = ServiceLocator::Get<VideoManager>();
+            std::string videoPath = PathUtils::GetAbsolutePathString("Assets/Engine/Video/nature.mp4");
+            uint32_t videoId = videoManager->LoadVideoAsync(videoPath);
+
+            EntityID tvEntity = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(tvEntity);
+            registry.GetComponent<TagComponent>(tvEntity).name = "Cinema_Screen";
+            registry.GetComponent<TagComponent>(tvEntity).tag = "Model";
+            registry.AddComponent<TransformComponent>(tvEntity);
+            registry.AddComponent<ModelComponent>(tvEntity);
+            registry.AddComponent<MaterialOverrideComponent>(tvEntity);
+            registry.AddComponent<PipelineOverrideComponent>(tvEntity);
+
+            auto& tvTransform = registry.GetComponent<TransformComponent>(tvEntity);
+            tvTransform.translation = glm::vec3(15.0f, 25.0f, 0.0f);
+            tvTransform.rotation = glm::vec3(-90.0f, 90.0f, 0.0f);
+            tvTransform.scale = glm::vec3(32.0f, 1.0f, 18.0f);
+            registry.GetComponent<ModelComponent>(tvEntity).modelIndex = modelManager->GetResourceIndex(MeshSourceNames::Quad);
+
+            Material tvMaterial{};
+            tvMaterial.color = glm::vec4(1.0f);
+            tvMaterial.emissiveColor = glm::vec3(1.0f);
+            tvMaterial.emissiveIntensity = 1.0f;
+            tvMaterial.videoTexture = videoId;
+
+            uint32_t tvMatId = materialManager->LoadMaterialDirect("VideoScreenMat", tvMaterial);
+            registry.GetComponent<MaterialOverrideComponent>(tvEntity).materials.push_back(tvMatId);
+
+            registry.GetPool<TransformComponent>()->SetCategory(tvEntity, StorageCategory::Static);
+            registry.GetPool<ModelComponent>()->SetCategory(tvEntity, StorageCategory::Static);
+            registry.GetPool<MaterialOverrideComponent>()->SetCategory(tvEntity, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(tvEntity, StorageCategory::Static);
+            registry.GetPool<TagComponent>()->SetCategory(tvEntity, StorageCategory::Static);
+
+            hm->AttachChild(rootEnvironment, tvEntity);
         }
 
         // Cameras (Main & Debug)

@@ -57,6 +57,7 @@
 #include "Engine/Scene/Loader/ManifestSceneLoader.h"
 
 #include "Engine/Vk/Descriptor/DescriptorUtils.h"
+#include "Engine/Video/VideoManager.h"
 
 #include <print>
 #include <filesystem>
@@ -88,6 +89,7 @@ namespace Syn
 		ServiceLocator::Get<MaterialManager>()->Update();
 		ServiceLocator::Get<ImageManager>()->Update();
 		ServiceLocator::Get<AudioManager>()->Update();
+		ServiceLocator::Get<VideoManager>()->Update();
 
 		//Notifications
 		ServiceLocator::Get<MaterialManager>()->ProcessPendingNotifications();
@@ -439,5 +441,10 @@ namespace Syn
 	PreviewManager* Engine::GetPreviewManager()
 	{
 		return ServiceLocator::Get<PreviewManager>();
+	}
+
+	VideoManager* Engine::GetVideoManager()
+	{
+		return ServiceLocator::Get<VideoManager>();
 	}
 }

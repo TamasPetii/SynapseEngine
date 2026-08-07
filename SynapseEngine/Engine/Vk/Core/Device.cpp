@@ -88,6 +88,7 @@ namespace Syn::Vk {
 
         VkPhysicalDeviceVulkan11Features features11{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES };
         features11.shaderDrawParameters = VK_TRUE;
+        features11.samplerYcbcrConversion = VK_TRUE;
 
         VkPhysicalDeviceFeatures2 deviceFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2 };
         deviceFeatures.features.samplerAnisotropy = VK_TRUE;

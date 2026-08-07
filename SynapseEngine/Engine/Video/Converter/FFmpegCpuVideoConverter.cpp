@@ -3,7 +3,7 @@
 
 namespace Syn
 {
-    FFmpegCpuVideoConverter::FFmpegCpuVideoConverter(AVCodecID codecId, int width, int height)
+    FFmpegCpuVideoConverter::FFmpegCpuVideoConverter(AVCodecID codecId, int width, int height, const std::vector<uint8_t>& extradata)
         : _width(width), _height(height)
     {
         const AVCodec* codec = avcodec_find_decoder(codecId);
@@ -11,6 +11,12 @@ namespace Syn
 
         _codecContext->width = width;
         _codecContext->height = height;
+
+        if (!extradata.empty()) {
+            _codecContext->extradata_size = static_cast<int>(extradata.size());
+            _codecContext->extradata = static_cast<uint8_t*>(av_mallocz(extradata.size() + AV_INPUT_BUFFER_PADDING_SIZE));
+            std::memcpy(_codecContext->extradata, extradata.data(), extradata.size());
+        }
 
         avcodec_open2(_codecContext, codec, nullptr);
 

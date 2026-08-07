@@ -8,7 +8,7 @@ namespace Syn
     {
     public:
         VulkanGpuVideoUploader(uint32_t width, uint32_t height);
-        ~VulkanGpuVideoUploader() override = default;
+        ~VulkanGpuVideoUploader() override;
 
         VideoUploadResult Upload(const GpuVideoPacket& data, VkCommandBuffer cmd) override;
     private:
@@ -16,5 +16,7 @@ namespace Syn
         uint32_t _height;
         VkVideoSessionKHR _videoSession = VK_NULL_HANDLE;
         VkVideoSessionParametersKHR _sessionParams = VK_NULL_HANDLE;
+        VkSamplerYcbcrConversion _ycbcrConversion = VK_NULL_HANDLE;
+        std::shared_ptr<Vk::Image> _texture;
     };
 }

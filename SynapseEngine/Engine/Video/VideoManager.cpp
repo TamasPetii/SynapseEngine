@@ -146,9 +146,14 @@ namespace Syn
                             }
 
                             streamState->isUploading = false;
-                            this->MarkDirty(streamId);
+
+                            if (this->GetEntryState(streamId) != ResourceState::Ready) {
+                                this->SetResourceState(streamId, ResourceState::Ready);
+                                this->MarkDirty(streamId);
+                            }
                         },
-                        .needsGraphics = false
+                        .needsGraphics = false,
+                        .needsVideo = true
                     };
 
                     ServiceLocator::Get<Vk::GpuUploader>()->Submit(std::move(request));

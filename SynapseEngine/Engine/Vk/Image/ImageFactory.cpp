@@ -30,6 +30,10 @@ namespace Syn::Vk {
         imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageInfo.flags = image->_config.flags;
 
+        if (image->_config.videoProfileList) {
+            imageInfo.pNext = image->_config.videoProfileList;
+        }
+
         VmaAllocationCreateInfo allocCreateInfo{};
         allocCreateInfo.usage = image->_config.memoryUsage;
         allocCreateInfo.flags = image->_config.allocationFlags;
@@ -65,6 +69,12 @@ namespace Syn::Vk {
             viewInfo.subresourceRange.baseArrayLayer = config.baseArrayLayer;
             viewInfo.subresourceRange.layerCount = config.layerCount == VK_REMAINING_ARRAY_LAYERS ? image->_config.arrayLayers : config.layerCount;
             viewInfo.components = config.swizzle;
+
+            VkSamplerYcbcrConversionInfo ycbcrInfo{ VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_INFO };
+            if (image->_config.ycbcrConversion != VK_NULL_HANDLE) {
+                ycbcrInfo.conversion = image->_config.ycbcrConversion;
+                viewInfo.pNext = &ycbcrInfo;
+            }
 
             VkImageView viewHandle;
             SYN_VK_ASSERT_MSG(vkCreateImageView(device->Handle(), &viewInfo, nullptr, &viewHandle), ("Failed to create Image View: " + name).c_str());

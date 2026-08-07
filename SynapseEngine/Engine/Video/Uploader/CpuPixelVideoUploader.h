@@ -12,6 +12,7 @@ namespace Syn
 
         VideoUploadResult Upload(const GpuVideoPacket& data, VkCommandBuffer cmd) override;
     private:
+        std::shared_ptr<Vk::Image> _texture;
         uint32_t _width;
         uint32_t _height;
     };

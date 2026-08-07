@@ -78,4 +78,10 @@ namespace Syn::Vk {
         _currentStage = dstStage;
         _currentAccess = dstAccess;
     }
+
+    void Image::OverrideInternalState(VkImageLayout layout, VkPipelineStageFlags2 stage, VkAccessFlags2 access) {
+        _currentLayout = layout;
+        _currentStage = stage;
+        _currentAccess = access;
+    }
 }
