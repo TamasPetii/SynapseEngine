@@ -321,7 +321,6 @@ namespace Syn {
 		loaderRegistry->Register(std::make_shared<FFmpegVideoLoader>(), 1);
 
 		auto pipeline = std::make_unique<VideoProcessorPipeline>();
-		pipeline->AddProcessor(std::make_unique<AnnexBVideoProcessor>());
 
 		VideoConverterFactory converterFactory;
 		VideoUploaderFactory uploaderFactory;
