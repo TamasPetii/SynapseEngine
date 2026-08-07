@@ -126,7 +126,7 @@ local vcpkg_packages = {
     "vcpkg::box3d",
     "vcpkg::miniaudio",
     "vcpkg::shader-slang",
-        "vcpkg::ffmpeg"
+    "vcpkg::ffmpeg"
 }
 
 for _, pkg in ipairs(vcpkg_packages) do

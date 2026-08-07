@@ -12,6 +12,7 @@
 #include "Engine/Animation/AnimationManager.h"
 #include "Engine/Material/MaterialManager.h"
 #include "Engine/Image/ImageManager.h"
+#include "Engine/Video/VideoManager.h"
 
 namespace Syn
 {
@@ -26,12 +27,14 @@ namespace Syn
         std::vector<uint32_t> localToGlobalAnims;
         std::vector<uint32_t> localToGlobalMats;
         std::vector<uint32_t> localToGlobalTex;
+        std::vector<uint32_t> localToGlobalVideo;
 
         LoadAndMapModels(snapshot.modelManifest, localToGlobalModels);
         LoadAndMapAnimations(snapshot.animationManifest, localToGlobalModels, localToGlobalAnims);
         LoadAndMapTextures(snapshot.textureManifest, localToGlobalTex);
-        RemapAndLoadMaterials(snapshot.materialManifest, localToGlobalTex, localToGlobalMats);
+        LoadAndMapVideos(snapshot.videoManifest, localToGlobalVideo);
 
+        RemapAndLoadMaterials(snapshot.materialManifest, localToGlobalTex, localToGlobalVideo, localToGlobalMats);
         RemapModelComponents(scene, localToGlobalModels);
         RemapAnimationComponents(scene, localToGlobalAnims);
         RemapMaterialComponents(scene, localToGlobalMats);
@@ -58,6 +61,18 @@ namespace Syn
         }
 
         return true;
+    }
+
+    void ManifestSceneLoader::LoadAndMapVideos(const std::vector<VideoManifestEntry>& videoManifest, std::vector<uint32_t>& outLocalToGlobalVideo)
+    {
+        auto videoManager = ServiceLocator::Get<VideoManager>();
+        outLocalToGlobalVideo.reserve(videoManifest.size());
+
+        for (const auto& entry : videoManifest)
+        {
+            uint32_t globalId = videoManager->LoadVideoAsync(entry.path);
+            outLocalToGlobalVideo.push_back(globalId);
+        }
     }
 
     void ManifestSceneLoader::LoadAndMapModels(const std::vector<std::string>& modelManifest, std::vector<uint32_t>& outLocalToGlobalModels)
@@ -104,7 +119,7 @@ namespace Syn
         }
     }
 
-    void ManifestSceneLoader::RemapAndLoadMaterials(std::vector<MaterialManifestEntry>& matManifest, const std::vector<uint32_t>& localToGlobalTex, std::vector<uint32_t>& outLocalToGlobalMats)
+    void ManifestSceneLoader::RemapAndLoadMaterials(std::vector<MaterialManifestEntry>& matManifest, const std::vector<uint32_t>& localToGlobalTex, const std::vector<uint32_t>& localToGlobalVideo, std::vector<uint32_t>& outLocalToGlobalMats)
     {
         auto matManager = ServiceLocator::Get<MaterialManager>();
         outLocalToGlobalMats.reserve(matManifest.size());
@@ -121,6 +136,18 @@ namespace Syn
             }
             };
 
+        auto applyVideoRemap = [&](uint32_t& localVidIndex) {
+            if (localVidIndex != UINT32_MAX) {
+                if (localVidIndex < localToGlobalVideo.size()) {
+                    localVidIndex = localToGlobalVideo[localVidIndex];
+                }
+                else {
+                    Error("ManifestSceneLoader: Material has corrupt local video index: {}", localVidIndex);
+                    localVidIndex = UINT32_MAX;
+                }
+            }
+            };
+
         for (auto& entry : matManifest)
         {
             applyRemap(entry.material.albedoTexture);
@@ -130,6 +157,15 @@ namespace Syn
             applyRemap(entry.material.metallicRoughnessTexture);
             applyRemap(entry.material.emissiveTexture);
             applyRemap(entry.material.ambientOcclusionTexture);
+            
+            applyRemap(entry.material.opacityTexture);
+            applyRemap(entry.material.clearcoatTexture);
+            applyRemap(entry.material.clearcoatRoughnessTexture);
+            applyRemap(entry.material.clearcoatNormalTexture);
+            applyRemap(entry.material.specularTexture);
+            applyRemap(entry.material.specularColorTexture);
+
+            applyVideoRemap(entry.material.videoTexture);
 
             uint32_t globalId = matManager->LoadMaterialDirect(entry.name, entry.material);
             outLocalToGlobalMats.push_back(globalId);

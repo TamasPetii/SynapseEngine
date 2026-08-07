@@ -46,6 +46,7 @@ namespace Syn
             ar.Property("clearcoatNormalTexture", mat.clearcoatNormalTexture);
             ar.Property("specularTexture", mat.specularTexture);
             ar.Property("specularColorTexture", mat.specularColorTexture);
+            ar.Property("videoTexture", mat.videoTexture);
 
             ar.Property("albedoSampler", mat.albedoSampler);
             ar.Property("normalSampler", mat.normalSampler);
@@ -61,6 +62,7 @@ namespace Syn
             ar.Property("clearcoatNormalSampler", mat.clearcoatNormalSampler);
             ar.Property("specularSampler", mat.specularSampler);
             ar.Property("specularColorSampler", mat.specularColorSampler);
+            ar.Property("videoSampler", mat.videoSampler);
         }
     };
 }

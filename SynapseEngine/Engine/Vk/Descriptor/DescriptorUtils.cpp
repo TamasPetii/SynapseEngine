@@ -1,6 +1,7 @@
 #include "DescriptorUtils.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
+#include "DescriptorBuffer.h"
 
 namespace Syn::Vk 
 {
@@ -36,5 +37,30 @@ namespace Syn::Vk
         }
 
         return targetLayout;
+    }
+
+    void DescriptorUtils::BindMultipleBuffer(VkCommandBuffer cmd, VkPipelineLayout pipelineLayout, VkPipelineBindPoint bindPoint, std::span<const std::pair<uint32_t, DescriptorBuffer*>> sets)
+    {
+        if (sets.empty()) return;
+
+        std::vector<VkDescriptorBufferBindingInfoEXT> bindingInfos;
+        bindingInfos.reserve(sets.size());
+
+        for (const auto& [setIndex, buffer] : sets) {
+            VkDescriptorBufferBindingInfoEXT info{ VK_STRUCTURE_TYPE_DESCRIPTOR_BUFFER_BINDING_INFO_EXT };
+            info.address = buffer->GetDeviceAddress();
+            info.usage = VK_BUFFER_USAGE_RESOURCE_DESCRIPTOR_BUFFER_BIT_EXT | VK_BUFFER_USAGE_SAMPLER_DESCRIPTOR_BUFFER_BIT_EXT;
+            bindingInfos.push_back(info);
+        }
+
+        vkCmdBindDescriptorBuffersEXT(cmd, static_cast<uint32_t>(bindingInfos.size()), bindingInfos.data());
+
+        for (uint32_t i = 0; i < sets.size(); ++i) {
+            uint32_t setIndex = sets[i].first;
+            uint32_t bufferIndex = i;
+            VkDeviceSize offset = 0;
+
+            vkCmdSetDescriptorBufferOffsetsEXT(cmd, bindPoint, pipelineLayout, setIndex, 1, &bufferIndex, &offset);
+        }
     }
 }

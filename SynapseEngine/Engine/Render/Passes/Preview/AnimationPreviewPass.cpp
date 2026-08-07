@@ -13,6 +13,9 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Engine/Video/VideoManager.h"
+#include "Engine/Vk/Descriptor/DescriptorUtils.h"
+
 namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/AnimationPreviewPC.glsl"
@@ -20,11 +23,17 @@ namespace Syn {
     void AnimationPreviewPass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
         auto imageManager = ServiceLocator::Get<ImageManager>();
+        auto videoManager = ServiceLocator::Get<VideoManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = true;
-        config.layoutOverride = [imageManager](uint32_t setIndex) {
-            if (setIndex == 0) return imageManager->GetBindlessLayout();
+        config.layoutOverride = [imageManager, videoManager](uint32_t setIndex) {
+            if (setIndex == 0) {
+                return imageManager->GetBindlessLayout();
+            }
+            if (setIndex == 1) {
+                return videoManager->GetBindlessLayout();
+            }
             return VkDescriptorSetLayout{};
             };
 
@@ -102,8 +111,18 @@ namespace Syn {
         if (_dirtyAnimations.empty()) return;
 
         auto imageManager = ServiceLocator::Get<ImageManager>();
-        auto bindlessBuffer = imageManager->GetBindlessBuffer();
-        bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
+        auto videoManager = ServiceLocator::Get<VideoManager>();
+        std::vector<std::pair<uint32_t, Vk::DescriptorBuffer*>> buffersToBind;
+
+        if (auto imgBuffer = imageManager->GetBindlessBuffer()) {
+            buffersToBind.push_back({ 0, imgBuffer });
+        }
+
+        if (auto vidBuffer = videoManager->GetBindlessBuffer()) {
+            buffersToBind.push_back({ 1, vidBuffer });
+        }
+
+        Vk::DescriptorUtils::BindMultipleBuffer(context.cmd, _shaderProgram->GetLayout(), VK_PIPELINE_BIND_POINT_GRAPHICS, buffersToBind);
     }
 
     void AnimationPreviewPass::Draw(const RenderContext& context) {

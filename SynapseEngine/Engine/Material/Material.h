@@ -2,6 +2,7 @@
 #include "Engine/SynApi.h"
 #include <string>
 #include <vector>
+#include <cstdint>
 #include <glm/glm.hpp>
 
 namespace Syn
@@ -65,6 +66,9 @@ namespace Syn
 
         uint32_t specularColorTexture = UINT32_MAX;
         uint32_t specularColorSampler = UINT32_MAX;
+
+        uint32_t videoTexture = UINT32_MAX;
+        uint32_t videoSampler = UINT32_MAX;
     };
 
     struct SYN_API GpuMaterial {
@@ -97,8 +101,8 @@ namespace Syn
         uint32_t clearcoatNormalTexture;
         uint32_t specularTexture;
         uint32_t specularColorTexture;
+        uint32_t videoTexture;
         uint32_t padding1;
-        uint32_t padding2;
     };
 }
 

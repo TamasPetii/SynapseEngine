@@ -22,6 +22,15 @@ vec4 EvaluateAlbedoAlpha(uint64_t textureMetadataBufferAddr, const Material mat,
         finalColor *= SampleTexture2D(texID, sampID, uv);
     }
 
+    if (HAS_VIDEO_TEX(mat)) {
+        uint texID = UNPACK_TEXTURE_ID(mat.videoTexture);
+        uint sampID = UNPACK_SAMPLER_ID(mat.videoTexture);
+        if (sampID == INVALID_SAMPLER_INDEX) {
+            sampID = SAMPLER_LINEAR_CLAMP_EDGE;
+        }
+        finalColor *= SampleVideoTexture2D(texID, sampID, uv);
+    }
+
     if (HAS_OPACITY_TEX(mat)) { 
         uint texID = UNPACK_TEXTURE_ID(mat.opacityTexture);
         uint sampID = ResolveSampler(textureMetadataBufferAddr, mat.opacityTexture, texID);

@@ -79,6 +79,26 @@ namespace Syn
         }
     };
 
+    struct SYN_API VideoManifestEntry {
+        std::string name;
+        std::string path;
+    };
+
+    template <>
+    struct Schema<VideoManifestEntry> {
+        static constexpr bool exists = true;
+
+        template <typename Archive, typename U>
+        static void Invoke(Archive& ar, const char* name, U& val)
+        {
+            ScopedArchiveObject obj(ar, name);
+            auto& entry = const_cast<std::remove_const_t<U>&>(val);
+
+            ar.Property("name", entry.name);
+            ar.Property("path", entry.path);
+        }
+    };
+
     template <typename... Components>
     struct SceneSnapshot
     {
@@ -87,6 +107,7 @@ namespace Syn
         std::vector<AnimationManifestEntry> animationManifest;
         std::vector<MaterialManifestEntry> materialManifest;
         std::vector<TextureManifestEntry> textureManifest;
+        std::vector<VideoManifestEntry> videoManifest;
     };
 
     template <typename... Components>
@@ -116,6 +137,7 @@ namespace Syn
             ar.Property("AnimationManifest", snapshot.animationManifest);
             ar.Property("MaterialManifest", snapshot.materialManifest); 
             ar.Property("TextureManifest", snapshot.textureManifest);
+            ar.Property("VideoManifest", snapshot.videoManifest);
 
             RegistrySnapshot<Components...> regSnap{ registry };
             ar.Property("Registry", regSnap);

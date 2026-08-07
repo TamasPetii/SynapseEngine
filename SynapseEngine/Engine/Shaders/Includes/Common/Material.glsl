@@ -30,8 +30,8 @@ struct Material {
     uint clearcoatNormalTexture;
     uint specularTexture;
     uint specularColorTexture;
+    uint videoTexture;
     uint padding1;
-    uint padding2;
 };
 
 layout(buffer_reference, std430) readonly restrict buffer MaterialBuffer { Material data[]; };
@@ -65,5 +65,6 @@ layout(buffer_reference, std430) readonly restrict buffer MaterialLookupBuffer {
 #define HAS_CLEARCOAT_NORMAL_TEX(mat)   HAS_VALID_TEXTURE((mat).clearcoatNormalTexture)
 #define HAS_SPECULAR_TEX(mat)           HAS_VALID_TEXTURE((mat).specularTexture)
 #define HAS_SPECULAR_COLOR_TEX(mat)     HAS_VALID_TEXTURE((mat).specularColorTexture)
+#define HAS_VIDEO_TEX(mat)              HAS_VALID_TEXTURE((mat).videoTexture)
 
 #endif

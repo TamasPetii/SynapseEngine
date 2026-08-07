@@ -14,6 +14,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <cassert>
 #include "Engine/Vk/Rendering/PushConstant.h"
+#include "Engine/Video/VideoManager.h"
+#include "Engine/Vk/Descriptor/DescriptorUtils.h"
 
 namespace Syn {
 
@@ -35,14 +37,21 @@ namespace Syn {
     void TraditionalTransparentAlphaTestedDepthPrepass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
         auto imageManager = ServiceLocator::Get<ImageManager>();
+        auto videoManager = ServiceLocator::Get<VideoManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = true;
         config.defines = { ShaderDefines::EnableAlphaTest };
-        config.layoutOverride = [imageManager](uint32_t setIndex) {
-            if (setIndex == 0) return imageManager->GetBindlessLayout();
+        config.layoutOverride = [imageManager, videoManager](uint32_t setIndex) {
+            if (setIndex == 0) {
+                return imageManager->GetBindlessLayout();
+            }
+            if (setIndex == 1) {
+                return videoManager->GetBindlessLayout();
+            }
             return VkDescriptorSetLayout{};
             };
+
 
         _shaderProgramId = shaderManager->LoadProgramAsync("TraditionalTransparentAlphaTestedDepthPrepassProgram", {
             ShaderNames::TraditionalPreDepthVert,
@@ -128,7 +137,6 @@ namespace Syn {
 
         uint32_t fIdx = context.frameIndex;
 
-
         Vk::PushConstant<TraditionalMeshletPassPC> pc;
         pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
         pc->baseDescriptorOffset = drawData->Models.traditionalCmdOffsets[_renderType];
@@ -136,10 +144,21 @@ namespace Syn {
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
-    void TraditionalTransparentAlphaTestedDepthPrepass::BindDescriptors(const RenderContext& context) {
+    void TraditionalTransparentAlphaTestedDepthPrepass::BindDescriptors(const RenderContext& context) 
+    {
         auto imageManager = ServiceLocator::Get<ImageManager>();
-        auto bindlessBuffer = imageManager->GetBindlessBuffer();
-        bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
+        auto videoManager = ServiceLocator::Get<VideoManager>();
+        std::vector<std::pair<uint32_t, Vk::DescriptorBuffer*>> buffersToBind;
+
+        if (auto imgBuffer = imageManager->GetBindlessBuffer()) {
+            buffersToBind.push_back({ 0, imgBuffer });
+        }
+
+        if (auto vidBuffer = videoManager->GetBindlessBuffer()) {
+            buffersToBind.push_back({ 1, vidBuffer });
+        }
+
+        Vk::DescriptorUtils::BindMultipleBuffer(context.cmd, _shaderProgram->GetLayout(), VK_PIPELINE_BIND_POINT_GRAPHICS, buffersToBind);
     }
 
     void TraditionalTransparentAlphaTestedDepthPrepass::Draw(const RenderContext& context) {

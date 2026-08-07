@@ -5,6 +5,7 @@
 
 layout(set = 0, binding = 0) uniform sampler globalSamplers[];
 layout(set = 0, binding = 1) uniform texture2D bindlessTextures[];
+layout(set = 1, binding = 0) uniform texture2D bindlessVideoTextures[];
 
 layout(buffer_reference, std430, buffer_reference_align = 4) readonly restrict buffer TextureMetadataBuffer {
     uint data[];
@@ -34,6 +35,13 @@ void UnpackTextureMetadata(uint meta, out uint samplerID, out bool invertTangent
 vec4 SampleTexture2D(uint textureID, uint samplerID, vec2 uv) { 
     return texture(
         sampler2D(bindlessTextures[nonuniformEXT(textureID)], globalSamplers[nonuniformEXT(samplerID)]), 
+        uv
+    );
+}
+
+vec4 SampleVideoTexture2D(uint textureID, uint samplerID, vec2 uv) { 
+    return texture(
+        sampler2D(bindlessVideoTextures[nonuniformEXT(textureID)], globalSamplers[nonuniformEXT(samplerID)]), 
         uv
     );
 }

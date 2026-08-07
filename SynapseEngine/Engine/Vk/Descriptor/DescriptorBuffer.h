@@ -28,6 +28,7 @@ namespace Syn::Vk {
         void WriteBuffer(uint32_t binding, uint32_t arrayElement, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range, VkDescriptorType type);
         void Bind(VkCommandBuffer cmd, VkPipelineLayout pipelineLayout, uint32_t setIndex = 0, VkPipelineBindPoint bindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS);
         StaleDescriptorBuffers RecordSync(VkCommandBuffer cmd);
+        VkDeviceAddress GetDeviceAddress() const { return _gpu->GetDeviceAddress(); }
     private:
         void WriteDescriptor(uint32_t binding, uint32_t arrayElement, size_t descriptorSize, const VkDescriptorGetInfoEXT& getInfo);
     private:

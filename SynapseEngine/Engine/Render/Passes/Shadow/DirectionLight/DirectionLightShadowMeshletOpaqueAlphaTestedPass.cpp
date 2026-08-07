@@ -13,6 +13,8 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Component/Light/Direction/DirectionLightShadowComponent.h"
+#include "Engine/Video/VideoManager.h"
+#include "Engine/Vk/Descriptor/DescriptorUtils.h"
 
 namespace Syn {
 
@@ -40,15 +42,19 @@ namespace Syn {
     void DirectionLightShadowMeshletOpaqueAlphaTestedPass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
         auto imageManager = ServiceLocator::Get<ImageManager>();
+        auto videoManager = ServiceLocator::Get<VideoManager>();
 
         Vk::ShaderProgramConfig config;
-        config.layoutOverride = [imageManager](uint32_t setIndex) {
+        config.defines = { ShaderDefines::EnableAlphaTest };
+        config.layoutOverride = [imageManager, videoManager](uint32_t setIndex) {
             if (setIndex == 0) {
                 return imageManager->GetBindlessLayout();
             }
+            if (setIndex == 1) {
+                return videoManager->GetBindlessLayout();
+            }
             return VkDescriptorSetLayout{};
             };
-        config.defines = { ShaderDefines::EnableAlphaTest };
 
         _shaderProgramId = shaderManager->LoadProgramAsync("DirectionLightShadowMeshletOpaqueAlphaTestedProgram", {
             ShaderNames::DirectionLightShadowMeshletTask,
@@ -65,7 +71,6 @@ namespace Syn {
                 .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
                 .polygonMode = VK_POLYGON_MODE_FILL,
                 .lineWidth = 1.0f
-                /* .depthBiasEnable = VK_TRUE,*/ // Érdemes bekapcsolni az árnyékokhoz!
             },
             .depth = {
                 .testEnable = VK_TRUE,
@@ -133,15 +138,24 @@ namespace Syn {
 
         //pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
 
-        auto bindlessBuffer = imageManager->GetBindlessBuffer();
-        bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
+        auto videoManager = ServiceLocator::Get<VideoManager>();
+        std::vector<std::pair<uint32_t, Vk::DescriptorBuffer*>> buffersToBind;
+
+        if (auto imgBuffer = imageManager->GetBindlessBuffer()) {
+            buffersToBind.push_back({ 0, imgBuffer });
+        }
+
+        if (auto vidBuffer = videoManager->GetBindlessBuffer()) {
+            buffersToBind.push_back({ 1, vidBuffer });
+        }
+
+        Vk::DescriptorUtils::BindMultipleBuffer(context.cmd, _shaderProgram->GetLayout(), VK_PIPELINE_BIND_POINT_GRAPHICS, buffersToBind);
     }
 
     void DirectionLightShadowMeshletOpaqueAlphaTestedPass::Draw(const RenderContext& context)
     {
         auto scene = context.scene;
         auto drawData = scene->GetSceneDrawData();
-
 
         auto indirectBuffer = drawData->DirectionLightShadow.indirectBuffer.GetHandle(context.frameIndex);
         auto countBuffer = drawData->Models.drawCountBuffer.GetHandle(context.frameIndex);

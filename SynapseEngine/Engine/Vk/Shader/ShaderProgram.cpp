@@ -85,6 +85,14 @@ namespace Syn::Vk {
             maxSetIndex = mergedBindings.rbegin()->first;
         }
 
+        if (_config.layoutOverride) {
+            for (uint32_t probeSet = maxSetIndex + 1; probeSet < 4; ++probeSet) {
+                if (_config.layoutOverride(probeSet) != VK_NULL_HANDLE) {
+                    maxSetIndex = probeSet;
+                }
+            }
+        }
+
         _bindLayouts.resize(maxSetIndex + 1, VK_NULL_HANDLE);
 
         for (uint32_t set = 0; set <= maxSetIndex; ++set) 

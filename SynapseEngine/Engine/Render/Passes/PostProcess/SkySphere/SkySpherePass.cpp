@@ -9,6 +9,8 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
+#include "Engine/Video/VideoManager.h"
+#include "Engine/Vk/Descriptor/DescriptorUtils.h"
 
 namespace Syn {
 
@@ -26,11 +28,17 @@ namespace Syn {
     void SkySpherePass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
         auto imageManager = ServiceLocator::Get<ImageManager>();
+        auto videoManager = ServiceLocator::Get<VideoManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = true;
-        config.layoutOverride = [imageManager](uint32_t setIndex) {
-            if (setIndex == 0) return imageManager->GetBindlessLayout();
+        config.layoutOverride = [imageManager, videoManager](uint32_t setIndex) {
+            if (setIndex == 0) {
+                return imageManager->GetBindlessLayout();
+            }
+            if (setIndex == 1) {
+                return videoManager->GetBindlessLayout();
+            }
             return VkDescriptorSetLayout{};
             };
 
@@ -131,9 +139,18 @@ namespace Syn {
     void SkySpherePass::BindDescriptors(const RenderContext& context)
     {
         auto imageManager = ServiceLocator::Get<ImageManager>();
-        auto bindlessBuffer = imageManager->GetBindlessBuffer();
+        auto videoManager = ServiceLocator::Get<VideoManager>();
+        std::vector<std::pair<uint32_t, Vk::DescriptorBuffer*>> buffersToBind;
 
-        bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
+        if (auto imgBuffer = imageManager->GetBindlessBuffer()) {
+            buffersToBind.push_back({ 0, imgBuffer });
+        }
+
+        if (auto vidBuffer = videoManager->GetBindlessBuffer()) {
+            buffersToBind.push_back({ 1, vidBuffer });
+        }
+
+        Vk::DescriptorUtils::BindMultipleBuffer(context.cmd, _shaderProgram->GetLayout(), VK_PIPELINE_BIND_POINT_GRAPHICS, buffersToBind);
     }
 
     void SkySpherePass::Draw(const RenderContext& context)

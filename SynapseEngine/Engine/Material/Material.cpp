@@ -30,8 +30,8 @@ namespace Syn {
         , clearcoatNormalTexture(UINT32_MAX)
         , specularTexture(UINT32_MAX)
         , specularColorTexture(UINT32_MAX)
+        , videoTexture(UINT32_MAX)
         , padding1(0)
-        , padding2(0)
     {}
 
     SYN_INLINE uint32_t PackTextureAndSampler(uint32_t textureIdx, uint32_t samplerIdx) {
@@ -74,8 +74,8 @@ namespace Syn {
         , clearcoatNormalTexture(PackTextureAndSampler(material.clearcoatNormalTexture, material.clearcoatNormalSampler))
         , specularTexture(PackTextureAndSampler(material.specularTexture, material.specularSampler))
         , specularColorTexture(PackTextureAndSampler(material.specularColorTexture, material.specularColorSampler))
+        , videoTexture(PackTextureAndSampler(material.videoTexture, material.videoSampler))
         , padding1(0)
-        , padding2(0)
     {
         uint32_t flags = 0;
 
