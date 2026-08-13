@@ -70,7 +70,7 @@
 #include "Engine/Mesh/Processor/CpuModelProcessor/MemoryCleanupProcessor.h"
 
 #include "Engine/Audio/Loader/DefaultAudioLoaderRegistry.h"
-#include "Engine/Audio/Loader/MiniaudioLoader.h"
+#include "Engine/Audio/Loader/MiniAudioLoader.h"
 #include "Engine/Audio/Processor/DefaultAudioProcessorPipeline.h"
 #include "Engine/Audio/Converter/DefaultAudioCooker.h"
 #include "Engine/Audio/Converter/DefaultCpuAudioExtractor.h"

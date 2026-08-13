@@ -16,6 +16,8 @@
 
 #include "FFmpegCpuVideoConverter.h"
 #include "Engine/Logger/SynLog.h"
+#include <memory>
+#include <cstring>
 
 namespace Syn
 {
@@ -31,7 +33,7 @@ namespace Syn
         if (!extradata.empty()) {
             _codecContext->extradata_size = static_cast<int>(extradata.size());
             _codecContext->extradata = static_cast<uint8_t*>(av_mallocz(extradata.size() + AV_INPUT_BUFFER_PADDING_SIZE));
-            std::memcpy(_codecContext->extradata, extradata.data(), extradata.size());
+            memcpy(_codecContext->extradata, extradata.data(), extradata.size());
         }
 
         avcodec_open2(_codecContext, codec, nullptr);

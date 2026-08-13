@@ -17,16 +17,33 @@ set_objectdir("Intermediates/$(os)-$(arch)/$(mode)/$(name)")
 if is_plat("windows") then
     add_cxflags("/bigobj", "/GR-", "/arch:AVX2")
 elseif is_plat("linux") then
-    add_cxflags(
+    add_cxxflags(
+        "-include cstdint", 
         "-fno-rtti", 
         "-std=c++23", 
+        {force = true}
+    )
+    
+    add_cxflags(
         "-mavx2", 
         "-mbmi", 
         "-mpopcnt", 
         "-mlzcnt", 
         "-mf16c", 
         "-mfma", 
-        "-mfpmath=sse", 
+        "-mfpmath=sse",
+        {force = true}
+    )
+
+    local vcpkg_linux = os.projectdir() .. "/../External/vcpkg/installed/x64-linux/lib"
+    local vcpkg_dynamic = os.projectdir() .. "/../External/vcpkg/installed/x64-linux-dynamic/lib"
+
+    add_linkdirs(vcpkg_linux, vcpkg_dynamic)
+    add_rpathdirs(vcpkg_linux, vcpkg_dynamic)
+    
+    add_ldflags(
+        "-Wl,-rpath-link=" .. vcpkg_linux,
+        "-Wl,-rpath-link=" .. vcpkg_dynamic,
         {force = true}
     )
 end
@@ -98,6 +115,16 @@ local imgui_cfg = {
 
 add_requires(imgui_name, {configs = imgui_cfg})
 
+local ffmpeg_name = "vcpkg::ffmpeg"
+
+local ffmpeg_cfg = {
+    shared = is_plat("linux"),
+    debug = is_mode("debug"),
+    runtimes = (is_plat("windows") and (is_mode("debug") and "MDd" or "MD")) or nil
+}
+
+add_requires(ffmpeg_name, {configs = ffmpeg_cfg})
+
 local vcpkg_packages = {
     "vcpkg::glm",
     "vcpkg::glfw3",
@@ -125,8 +152,7 @@ local vcpkg_packages = {
     "vcpkg::tinygltf",
     "vcpkg::box3d",
     "vcpkg::miniaudio",
-    "vcpkg::shader-slang",
-    "vcpkg::ffmpeg"
+    "vcpkg::shader-slang"
 }
 
 for _, pkg in ipairs(vcpkg_packages) do
@@ -140,7 +166,7 @@ for _, pkg in ipairs(vcpkg_packages) do
     add_requires(pkg, {configs = cfg})
 end
 
-add_packages(imgui_name, table.unpack(vcpkg_packages))
+add_packages(imgui_name, ffmpeg_name, table.unpack(vcpkg_packages))
 
 target("Engine")
     set_kind("shared")

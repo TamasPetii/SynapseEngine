@@ -15,7 +15,7 @@
 // along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
 
 #include "AudioBuilder.h"
-#include "Engine/Audio/Source/FIle/FileAudioSource.h"
+#include "Engine/Audio/Source/File/FileAudioSource.h"
 
 namespace Syn
 {
