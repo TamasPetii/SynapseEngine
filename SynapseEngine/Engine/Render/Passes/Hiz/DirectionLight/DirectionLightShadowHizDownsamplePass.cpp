@@ -1,6 +1,6 @@
 #include "DirectionLightShadowHizDownsamplePass.h"
 #include "Engine/ServiceLocator.h"
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/ShaderManager.h"
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "Engine/Vk/Image/ImageUtils.h"
@@ -24,8 +24,8 @@ namespace Syn {
     }
 
     void DirectionLightShadowHizDownsamplePass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
-        _shaderProgram = shaderManager->CreateProgram("DirectionLightShadowHizDownsampleProgram", {
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
+        _shaderProgramId = shaderManager->LoadProgramAsync("DirectionLightShadowHizDownsampleProgram", {
             ShaderNames::HizDownsample
             });
     }
@@ -44,7 +44,7 @@ namespace Syn {
     }
 
     void DirectionLightShadowHizDownsamplePass::Dispatch(const RenderContext& context) {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge);
 
         auto drawData = context.scene->GetSceneDrawData();

@@ -1,8 +1,25 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "RenderPipeline.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
 #include "Engine/Profiler/IGpuProfiler.h"
 #include "Engine/Statistics/IRenderStatCollector.h"
+#include "Engine/Shader/ShaderManager.h"
 
 namespace Syn
 {
@@ -20,8 +37,16 @@ namespace Syn
 
     void RenderPipeline::Execute(const RenderContext& context)
     {
-        auto profiler = ServiceLocator::GetGpuProfiler();
-		auto statCollector = ServiceLocator::GetRenderStatCollector();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
+        if (shaderManager->IsCompiling())
+        {
+            auto image = ServiceLocator::Get<Vk::Context>()->GetSwapChain()->GetImage(context.swapchainImageIndex);
+            image->TransitionLayout(context.cmd, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT, VK_ACCESS_2_NONE, false);
+            return;
+        }
+
+        auto profiler = ServiceLocator::Get<IGpuProfiler>();
+		auto statCollector = ServiceLocator::Get<IRenderStatCollector>();
 
         if (context.scene)
         {
@@ -48,7 +73,7 @@ namespace Syn
             }
         }
 
-        auto image = ServiceLocator::GetVkContext()->GetSwapChain()->GetImage(context.swapchainImageIndex);
+        auto image = ServiceLocator::Get<Vk::Context>()->GetSwapChain()->GetImage(context.swapchainImageIndex);
 		image->TransitionLayout(context.cmd, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT, VK_ACCESS_2_NONE, false);
     }
 }

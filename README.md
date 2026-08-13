@@ -14,11 +14,17 @@ The system integrates a segmented data-oriented ECS with a hierarchical GPU cull
 ![Synapse Engine Model Workspace](Docs/Images/ModelWorkspace.png)
 *Model Workspace*
 
+![Synapse Engine Animation Workspace](Docs/Images/AnimationWorkspace.png)
+*Animation Workspace featuring an animation timeline.*
+
 ![Synapse Engine Material Workspace](Docs/Images/MaterialWorkspace.png)
 *Material Workspace*
 
 ![Synapse Engine Texture Workspace](Docs/Images/TextureWorkspace.png)
 *Texture Workspace*
+
+![Synapse Engine Audio Workspace](Docs/Images/AudioWorkspace.png)
+*Audio Workspace for 3D audio playback.*
 
 ## Core Concepts
 
@@ -238,6 +244,21 @@ Generate a `CMakeLists.txt` for traditional CMake workflows:
 xmake project -k cmake -m "debug,release,dist,performance" .
 ```
 
+#### CLion
+
+SynapseEngine integrates perfectly with CLion using the official Xmake plugin.
+
+1. **Install the Plugin:** Open CLion, navigate to Settings > Plugins, search for **Xmake**, and install it from the marketplace.
+2. **Xmake Tool Window:** After opening the project, you will find the Xmake tool window situated in the bottom-left corner of the IDE. You can use this panel to manage the project, select your build targets, switch build modes, and compile the engine directly.
+
+![CLion Xmake Tool Window](Docs/Images/ClionXmakePlugin.png)
+*The Xmake tool window located at the bottom left for building the project.*
+
+3. **Run & Debug Configurations:** While the plugin seamlessly handles the build process, the launch and debug options must be configured manually. Go to the **Run/Debug Configurations** menu, create a new configuration, and manually set the executable path pointing to the binary compiled by xmake.
+
+![CLion Run/Debug Configuration](Docs/Images/ClionRunConfig.png)
+*Manual setup for Run and Debug configurations in CLion.*
+
 ---
 
 ### Linux Setup (Ubuntu)
@@ -254,13 +275,30 @@ sudo apt-get update
 sudo apt-get install -y \
     gcc-14 \
     g++-14 \
+    build-essential \
+    pkg-config \
+    autoconf \
+    autoconf-archive \
+    automake \
+    libtool \
+    m4 \
+    zip \
+    unzip \
+    curl \
+    nasm \
+    yasm \
     libx11-dev \
     libxcursor-dev \
     libxrandr-dev \
     libxinerama-dev \
     libxi-dev \
+    libxext-dev \
+    libxrender-dev \
+    libxtst-dev \
+    libxcb1-dev \
+    libx11-xcb-dev \
     libgl1-mesa-dev \
-    libxxxf86vm-dev \
+    libxxf86vm-dev \
     libwayland-dev \
     libxkbcommon-dev
 ```
@@ -305,6 +343,8 @@ cd ../..
 Configure the project using the GCC 14 toolchain and build it.
 
 ```bash
+cd SynapseEngine
+
 xmake f -p linux -a x64 -m release --cc=gcc-14 --cxx=g++-14 -y
 
 xmake

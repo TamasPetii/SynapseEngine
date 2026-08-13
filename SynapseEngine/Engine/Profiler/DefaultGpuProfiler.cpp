@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "DefaultGpuProfiler.h"
 
 namespace Syn {
@@ -12,14 +28,14 @@ namespace Syn {
         _queryCounters.resize(framesInFlight, 0);
 
         for (uint32_t i = 0; i < framesInFlight; ++i) {
-            _pools[i] = std::make_unique<Vk::TimestampQueryPool>(256);
+            _pools[i] = std::make_unique<Vk::TimestampQueryPool>(MAX_QUERIES_PER_FRAME);
         }
     }
 
     void DefaultGpuProfiler::BeginFrame(VkCommandBuffer cmd, uint32_t frameIndex) {
         _queryCounters[frameIndex] = 0;
         _activeMeasurements[frameIndex].clear();
-        _pools[frameIndex]->Reset(cmd, 0, 256);
+        _pools[frameIndex]->Reset(cmd, 0, MAX_QUERIES_PER_FRAME);
     }
 
     uint32_t DefaultGpuProfiler::StartPass(VkCommandBuffer cmd, uint32_t frameIndex, const std::string& groupName, const std::string& name) {

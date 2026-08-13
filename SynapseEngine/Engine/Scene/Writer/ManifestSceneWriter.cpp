@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "ManifestSceneWriter.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/ServiceLocator.h"
@@ -10,6 +26,7 @@
 #include "Engine/Component/Rendering/AnimationComponent.h"
 #include "Engine/Component/Core/TransformComponent.h"
 #include "Engine/Serialization/Schema/Scene/SceneSnapshotTypes.h"
+#include "Engine/Video/VideoManager.h"
 
 namespace Syn
 {
@@ -27,9 +44,12 @@ namespace Syn
 		std::vector<TextureManifestEntry> textureManifest;
 		std::vector<uint32_t> outLocalToGlobalTex;
 
+        std::vector<VideoManifestEntry> videoManifest;
+        std::vector<uint32_t> outLocalToGlobalVideo;
+
 		ProcessMaterials(scene, matManifest, localToGlobalMats);
 		ProcessTextures(matManifest, textureManifest, outLocalToGlobalTex);
-
+        ProcessVideos(matManifest, videoManifest, outLocalToGlobalVideo);
         ProcessModels(scene, modelManifest, localToGlobalModels);
         ProcessAnimations(scene, animManifest, localToGlobalAnims);
 
@@ -38,8 +58,9 @@ namespace Syn
         snapshot.animationManifest = std::move(animManifest);
         snapshot.materialManifest = std::move(matManifest);
 		snapshot.textureManifest = std::move(textureManifest);
+        snapshot.videoManifest = std::move(videoManifest);
 
-        auto serializer = ServiceLocator::GetSerializer();
+        auto serializer = ServiceLocator::Get<Serializer>();
         bool success = false;
         if (serializer)
             success = serializer->SaveToFile(path, snapshot);
@@ -54,7 +75,7 @@ namespace Syn
         auto modelPool = scene.GetRegistry()->GetPool<ModelComponent>();
         if (!modelPool) return;
 
-        auto modelManager = ServiceLocator::GetModelManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
         uint32_t maxModelId = static_cast<uint32_t>(modelManager->GetResourceCount());
 
         std::vector<uint8_t> usedModels(maxModelId, 0);
@@ -97,7 +118,7 @@ namespace Syn
         auto modelPool = scene.GetRegistry()->GetPool<ModelComponent>();
         if (!animPool || !modelPool) return;
 
-        auto animManager = ServiceLocator::GetAnimationManager();
+        auto animManager = ServiceLocator::Get<AnimationManager>();
         uint32_t maxAnimId = animManager->GetResourceCount();
 
         std::vector<uint8_t> usedAnims(maxAnimId, 0);
@@ -149,8 +170,8 @@ namespace Syn
         auto modelPool = scene.GetRegistry()->GetPool<ModelComponent>();
         auto matPool = scene.GetRegistry()->GetPool<MaterialOverrideComponent>();
 
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto matManager = ServiceLocator::GetMaterialManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
+        auto matManager = ServiceLocator::Get<MaterialManager>();
 
         uint32_t maxMatId = matManager->GetResourceCount();
         std::vector<uint8_t> usedMats(maxMatId, 0);
@@ -238,7 +259,7 @@ namespace Syn
 
     void ManifestSceneWriter::ProcessTextures(std::vector<MaterialManifestEntry>& inOutMatManifest, std::vector<TextureManifestEntry>& outTexManifest, std::vector<uint32_t>& outLocalToGlobalTex)
     {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         uint32_t maxTexId = imageManager->GetResourceCount();
 
         std::vector<uint8_t> usedTex(maxTexId, 0);
@@ -256,6 +277,13 @@ namespace Syn
             markUsed(matEntry.material.metallicRoughnessTexture);
             markUsed(matEntry.material.emissiveTexture);
             markUsed(matEntry.material.ambientOcclusionTexture);
+            markUsed(matEntry.material.opacityTexture);
+            markUsed(matEntry.material.clearcoatTexture);
+            markUsed(matEntry.material.clearcoatRoughnessTexture);
+            markUsed(matEntry.material.clearcoatNormalTexture);
+            markUsed(matEntry.material.specularTexture);
+            markUsed(matEntry.material.specularColorTexture);
+            markUsed(matEntry.material.videoTexture);
         }
 
         std::vector<std::string> allTexPaths = imageManager->GetResourcePaths();
@@ -294,6 +322,13 @@ namespace Syn
             remapTex(matEntry.material.metallicRoughnessTexture);
             remapTex(matEntry.material.emissiveTexture);
             remapTex(matEntry.material.ambientOcclusionTexture);
+            remapTex(matEntry.material.opacityTexture);
+            remapTex(matEntry.material.clearcoatTexture);
+            remapTex(matEntry.material.clearcoatRoughnessTexture);
+            remapTex(matEntry.material.clearcoatNormalTexture);
+            remapTex(matEntry.material.specularTexture);
+            remapTex(matEntry.material.specularColorTexture);
+            remapTex(matEntry.material.videoTexture);
         }
     }
 
@@ -340,6 +375,53 @@ namespace Syn
                     }
                 }
             }
+        }
+    }
+
+    void ManifestSceneWriter::ProcessVideos(std::vector<MaterialManifestEntry>& inOutMatManifest, std::vector<VideoManifestEntry>& outVideoManifest, std::vector<uint32_t>& outLocalToGlobalVideo)
+    {
+        auto videoManager = ServiceLocator::Get<VideoManager>();
+        uint32_t maxVidId = videoManager->GetResourceCount();
+
+        std::vector<uint8_t> usedVid(maxVidId, 0);
+
+        auto markUsed = [&](uint32_t vidIndex) {
+            if (vidIndex != UINT32_MAX && vidIndex < maxVidId)
+                usedVid[vidIndex] = 1;
+            };
+
+        for (const auto& matEntry : inOutMatManifest) {
+            markUsed(matEntry.material.videoTexture);
+        }
+
+        std::vector<std::string> allVidPaths = videoManager->GetResourcePaths();
+        for (uint32_t globalIndex = 0; globalIndex < maxVidId; ++globalIndex)
+        {
+            if (usedVid[globalIndex] == 1)
+            {
+                VideoManifestEntry entry{};
+                entry.name = (globalIndex < allVidPaths.size() && !allVidPaths[globalIndex].empty())
+                    ? allVidPaths[globalIndex]
+                    : "Video_" + std::to_string(globalIndex);
+
+                entry.path = entry.name;
+
+                outVideoManifest.push_back(entry);
+                outLocalToGlobalVideo.push_back(globalIndex);
+            }
+        }
+
+        std::vector<uint32_t> globalToLocal(maxVidId, UINT32_MAX);
+        for (uint32_t i = 0; i < outLocalToGlobalVideo.size(); ++i) {
+            globalToLocal[outLocalToGlobalVideo[i]] = i;
+        }
+
+        auto remapVid = [&](uint32_t& vidIndex) {
+            if (vidIndex != UINT32_MAX && vidIndex < maxVidId) vidIndex = globalToLocal[vidIndex];
+            };
+
+        for (auto& matEntry : inOutMatManifest) {
+            remapVid(matEntry.material.videoTexture);
         }
     }
 }

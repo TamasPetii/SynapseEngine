@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #version 460
 #extension GL_GOOGLE_include_directive : require
 #extension GL_KHR_shader_subgroup_basic : require
@@ -18,6 +34,7 @@
 #include "../../../Includes/Utils/Occlusion.glsl"
 #include "../../../Includes/Common/StaticChunk.glsl"
 #include "../../../Includes/Common/Animation.glsl"
+#include "../../../Includes/Utils/CullingUtils.glsl"
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
@@ -124,31 +141,27 @@ void main() {
         entityData = SET_BIT_TO(entityData, 31, visibility == INTERSECTION_INSIDE);
 
         // 9. Fast-path: Process simple/small models directly to Radix Sort
-        const uint MAX_MESH_COUNT = 16u;
-        const uint MAX_VERTEX_COUNT = 25000u;
         uint safeMeshCount = mAlloc.meshAllocationCount / 4;
         uint maxInstances = ctx.modelCount * ctx.spotLightShadowMultiplier;
 
-        if (safeMeshCount <= MAX_MESH_COUNT && addrs.vertexCount < MAX_VERTEX_COUNT) 
+        if (IsModelSimpleEnoughForFastPath(safeMeshCount, addrs.vertexCount)) 
         {
-            uint rawLod = (mainCamScreenSize > 512.0) ? 0 : (mainCamScreenSize > 256.0) ? 1 : (mainCamScreenSize > 128.0) ? 2 : 3;
+            uint rawLod = CalculateLodFromScreenSize(mainCamScreenSize);
             uint lod = min(rawLod + ctx.spotLightShadowLodBias, 3u);
 
             for(uint m = 0; m < safeMeshCount; ++m) {
                 uint matIdx = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, modelComp.materialOffset + m);
                 Material mat = GET_MATERIAL(ctx.materialBufferAddr, matIdx);
 
-                uint matType = 0;
-                if (IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat))       matType = 3;
-                else if (IS_TRANSPARENT(mat) && !IS_DOUBLE_SIDED(mat)) matType = 2;
-                else if (!IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat)) matType = 1;
-
-                if (matType > 1) continue;
+                uint matType = GetMaterialRenderType(mat);
+                if (matType > 3) continue;
 
                 MeshAllocationInfo meshAlloc = GET_MESH_ALLOC(ctx.globalMeshAllocationBufferAddr, mAlloc.meshAllocationOffset + (m * 4) + lod);
-                if (meshAlloc.activeTypes[matType] == 1) {
-                    uint indirectIdx = meshAlloc.indirectIndices[matType];
-                    uint isMeshlet = (meshAlloc.isMeshletPipeline == PIPELINE_MESHLET) ? 1u : 0u;
+                uint pipeIdx = GET_PIPELINE_INDEX(ctx.pipelineLookupBufferAddr, modelComp.pipelineOffset + m);
+
+                if (meshAlloc.activeTypes[pipeIdx][matType] == 1) {
+                    uint indirectIdx = meshAlloc.indirectIndices[pipeIdx][matType];
+                    uint isMeshlet = (pipeIdx == PIPELINE_MESHLET) ? 1u : 0u;
 
                     uint drawCallKey = (isMeshlet << 31) | (indirectIdx & 0x7FFFFFFF);
                     uvec2 gpuPayload = uvec2(entityData, lightIdx);

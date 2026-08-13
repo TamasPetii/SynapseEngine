@@ -1,6 +1,22 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "GeometryWorkGraphCullingPass.h"
 #include "Engine/ServiceLocator.h"
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/ShaderManager.h"
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Scene/Scene.h"
@@ -23,7 +39,7 @@ namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/ModelMeshCullingPC.glsl"
 
     GeometryWorkGraphCullingPass::~GeometryWorkGraphCullingPass() {
-        auto device = ServiceLocator::GetVkContext()->GetDevice()->Handle();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice()->Handle();
 
         if (_graphPipeline != VK_NULL_HANDLE) {
             vkDestroyPipeline(device, _graphPipeline, nullptr);
@@ -39,13 +55,14 @@ namespace Syn {
     }
 
     void GeometryWorkGraphCullingPass::Initialize() {
-        auto device = ServiceLocator::GetVkContext()->GetDevice()->Handle();
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        /*
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice()->Handle();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("GeometryWorkGraphCullingProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("GeometryWorkGraphCullingProgram", {
                     ShaderNames::GeometryWorkGraphModelCullingComp,
                     ShaderNames::GeometryWorkGraphStaticChunkCullingComp,
                     ShaderNames::GeometryWorkGraphStaticModelCullingComp,
@@ -117,6 +134,8 @@ namespace Syn {
         vkGetExecutionGraphPipelineNodeIndexAMDX(device, _graphPipeline, &nodeInfos[0], &_dynamicModelRootIndex);
         vkGetExecutionGraphPipelineNodeIndexAMDX(device, _graphPipeline, &nodeInfos[1], &_staticChunkRootIndex);
         vkGetExecutionGraphPipelineNodeIndexAMDX(device, _graphPipeline, &nodeInfos[3], &_mortonChunkRootIndex);
+
+        */
     }
 
     void GeometryWorkGraphCullingPass::Execute(const RenderContext& context) {
@@ -161,7 +180,7 @@ namespace Syn {
     }
 
     void GeometryWorkGraphCullingPass::BindDescriptors(const RenderContext& context) {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, prevFrameIndex);

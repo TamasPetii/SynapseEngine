@@ -1,6 +1,22 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "DirectionLightShadowMeshCullingPass.h"
 #include "Engine/ServiceLocator.h"
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/ShaderManager.h"
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Scene/Scene.h"
@@ -31,8 +47,8 @@ namespace Syn {
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        auto shaderManager = ServiceLocator::GetShaderManager();
-        _shaderProgram = shaderManager->CreateProgram("DirectionLightShadowMeshCullingProgram", {
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
+        _shaderProgramId = shaderManager->LoadProgramAsync("DirectionLightShadowMeshCullingProgram", {
             ShaderNames::DirectionLightShadowMeshCullingComp
             }, config);
     }
@@ -59,7 +75,7 @@ namespace Syn {
     }
 
     void DirectionLightShadowMeshCullingPass::BindDescriptors(const RenderContext& context) {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
         auto depthPyramid = context.scene->GetSceneDrawData()->DirectionLightShadow.shadowDepthPyramid[prevFrameIndex].get();

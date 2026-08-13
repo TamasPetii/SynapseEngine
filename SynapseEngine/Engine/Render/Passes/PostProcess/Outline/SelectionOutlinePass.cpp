@@ -1,6 +1,22 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "SelectionOutlinePass.h"
 #include "Engine/ServiceLocator.h"
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/ShaderManager.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
@@ -19,11 +35,12 @@ namespace Syn
 
     void SelectionOutlinePass::Initialize()
     {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = ServiceLocator::GetShaderManager()->CreateProgram("SelectionOutlineProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("SelectionOutlineProgram", {
             ShaderNames::FullscreenVert,
             ShaderNames::SelectionOutlineFrag
             }, config);
@@ -117,7 +134,7 @@ namespace Syn
 
     void SelectionOutlinePass::BindDescriptors(const RenderContext& context)
     {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
  
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         auto entityTexture = rtGroup->GetImage(RenderTargetNames::EntityIndex);

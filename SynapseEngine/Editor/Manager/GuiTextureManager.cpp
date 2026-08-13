@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "GuiTextureManager.h"
 #include <imgui_impl_vulkan.h>
 #include "Engine/ServiceLocator.h"
@@ -27,7 +43,7 @@ namespace Syn {
         _currentFrameIndex = currentFrameIndex;
 
         if (_deletionQueues.empty()) {
-            uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
+            uint32_t framesInFlight = ServiceLocator::Get<FrameContext>()->framesInFlight;
             _deletionQueues.resize(framesInFlight);
         }
     }
@@ -42,7 +58,7 @@ namespace Syn {
 
     void GuiTextureManager::FlushQueue(uint32_t frameIndex) {
         if (_deletionQueues.empty()) {
-            auto ctx = ServiceLocator::GetFrameContext();
+            auto ctx = ServiceLocator::Get<FrameContext>();
             uint32_t framesInFlight = ctx ? ctx->framesInFlight : 3;
             _deletionQueues.resize(framesInFlight);
         }

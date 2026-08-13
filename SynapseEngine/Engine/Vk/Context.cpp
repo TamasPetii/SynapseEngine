@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #define VOLK_IMPLEMENTATION
 #include "Context.h"
 
@@ -22,7 +38,12 @@ namespace Syn::Vk {
             VK_EXT_SAMPLER_FILTER_MINMAX_EXTENSION_NAME,
             VK_EXT_MUTABLE_DESCRIPTOR_TYPE_EXTENSION_NAME,
             VK_KHR_VULKAN_MEMORY_MODEL_EXTENSION_NAME,
-            VK_EXT_SUBGROUP_SIZE_CONTROL_EXTENSION_NAME
+            VK_EXT_SUBGROUP_SIZE_CONTROL_EXTENSION_NAME,
+            VK_EXT_DESCRIPTOR_HEAP_EXTENSION_NAME,
+            VK_EXT_DEVICE_GENERATED_COMMANDS_EXTENSION_NAME,
+            VK_KHR_VIDEO_QUEUE_EXTENSION_NAME,
+            VK_KHR_VIDEO_DECODE_QUEUE_EXTENSION_NAME,
+            VK_KHR_VIDEO_DECODE_H264_EXTENSION_NAME
             /*, VK_AMDX_SHADER_ENQUEUE_EXTENSION_NAME */
         };
     }

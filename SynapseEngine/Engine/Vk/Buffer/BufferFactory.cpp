@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "BufferFactory.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
@@ -6,7 +22,7 @@
 namespace Syn::Vk {
 
     void BufferFactory::Allocate(Buffer* buffer) {
-        auto context = ServiceLocator::GetVkContext();
+        auto context = ServiceLocator::Get<Vk::Context>();
         auto device = context->GetDevice();
         VmaAllocator allocator = device->GetAllocator();
 
@@ -14,6 +30,7 @@ namespace Syn::Vk {
         bufferInfo.size = buffer->_config.size;
         bufferInfo.usage = buffer->_config.usage;
         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        bufferInfo.pNext = buffer->_config.pNextExtension;
 
         if (buffer->_config.useDeviceAddress) {
             bufferInfo.usage |= VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT;
@@ -85,6 +102,18 @@ namespace Syn::Vk {
         config.memoryUsage = VMA_MEMORY_USAGE_AUTO;
         config.allocationFlags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
         config.useDeviceAddress = false;
+
+        return std::make_unique<Buffer>(config);
+    }
+
+    std::unique_ptr<Buffer> BufferFactory::CreateVideoBitstream(VkDeviceSize size, const void* pNextExtension) {
+        BufferConfig config;
+        config.size = size;
+        config.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_VIDEO_DECODE_SRC_BIT_KHR;
+        config.memoryUsage = VMA_MEMORY_USAGE_AUTO;
+        config.allocationFlags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
+        config.useDeviceAddress = false;
+        config.pNextExtension = pNextExtension;
 
         return std::make_unique<Buffer>(config);
     }

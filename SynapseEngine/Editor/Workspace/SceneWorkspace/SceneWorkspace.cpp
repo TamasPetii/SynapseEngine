@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "SceneWorkspace.h"
 #include "Editor/Manager/EditorIcons.h"
 
@@ -21,6 +37,9 @@
 
 #include "View/Logger/LoggerView.h"
 #include "EditorCore/ViewModels/SceneWorkspace/Logger/LoggerViewModel.h"
+
+#include "View/Statistics/StatisticsView.h"
+#include "EditorCore/ViewModels/SceneWorkspace/Statistics/StatisticsViewModel.h"
 
 #include "Engine/Scene/SceneNames.h"
 
@@ -62,8 +81,11 @@ namespace Syn {
                 _context->GetApi<IMeshColliderApi>(),
                 _context->GetApi<IRigidBodyApi>(),
                 _context->GetApi<IModelComponentApi>(),
-                _context->GetApi<IAnimationApi>(),
-                _context->GetApi<IMaterialOverrideApi>()
+                _context->GetApi<IAnimationCompApi>(),
+                _context->GetApi<IMaterialOverrideApi>(),
+                _context->GetApi<IPipelineOverrideApi>(),
+				_context->GetApi<IAudioSourceApi>(),
+                _context->GetApi<IAudioListenerApi>()
             }
         );
 
@@ -99,6 +121,12 @@ namespace Syn {
         AddWindow<BenchmarkWin>(
             BenchmarkView{},
             BenchmarkViewModel{}
+        );
+
+        using StatisticsWin = EditorWindow<StatisticsView, StatisticsViewModel>;
+        AddWindow<StatisticsWin>(
+            StatisticsView{},
+            StatisticsViewModel{}
         );
 
         using LoggerWin = EditorWindow<LoggerView, LoggerViewModel>;

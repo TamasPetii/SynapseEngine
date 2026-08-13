@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #ifndef SYN_INCLUDES_COMMON_MESH_GLSL
 #define SYN_INCLUDES_COMMON_MESH_GLSL
 
@@ -105,7 +121,9 @@ layout(buffer_reference, std430) readonly restrict buffer VertexIndicesBuffer   
 layout(buffer_reference, std430) readonly restrict buffer TriangleIndicesBuffer  { uint8_t data[]; };
 layout(buffer_reference, std430) readonly restrict buffer DebugMeshletInstanceBuffer    { DebugMeshletInstance data[]; };
 layout(buffer_reference, std430) readonly restrict buffer MaterialIndices        { uint data[]; };
+layout(buffer_reference, std430) readonly restrict buffer PipelineIndices { uint data[]; };
 
+#define GET_PIPELINE_INDEX(addr, idx)         PipelineIndices(addr).data[idx]
 #define GET_VERTEX_POS(addr, idx)             PositionBuffer(addr).data[idx]
 #define GET_VERTEX_ATTR(addr, idx)            AttributeBuffer(addr).data[idx]
 #define GET_INDEX(addr, idx)                  IndexBuffer(addr).data[idx]

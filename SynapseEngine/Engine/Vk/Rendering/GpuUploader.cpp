@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "GpuUploader.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
@@ -6,24 +22,37 @@
 namespace Syn::Vk {
 
     GpuUploader::GpuUploader() {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
         _transferQueue = device->GetTransferQueue();
         _graphicsQueue = device->GetGraphicsQueue();
+        _videoQueue = device->GetVideoDecodeQueue();
 
         if (!_transferQueue) _transferQueue = _graphicsQueue;
 
         _transferPool = std::make_unique<Vk::CommandPool>(_transferQueue, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT);
         _graphicsPool = std::make_unique<Vk::CommandPool>(_graphicsQueue, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT);
+
+        if (_videoQueue) {
+            _videoPool = std::make_unique<Vk::CommandPool>(_videoQueue, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT);
+        }
     }
 
     void GpuUploader::Enqueue(GpuUploadRequest request) {
         std::lock_guard lock(_mutex);
-        if (request.needsGraphics) {
+
+        if (request.needsVideo && _videoQueue) {
+            _videoRequests.push_back(std::move(request));
+        }
+        else if (request.needsGraphics) {
             _graphicsRequests.push_back(std::move(request));
         }
         else {
             _transferRequests.push_back(std::move(request));
         }
+    }
+
+    void GpuUploader::Submit(GpuUploadRequest request) {
+        Enqueue(std::move(request));
     }
 
     void GpuUploader::ProcessUploads() {
@@ -47,6 +76,10 @@ namespace Syn::Vk {
 
         if (!_graphicsRequests.empty()) {
             ProcessQueue(_graphicsRequests, _graphicsQueue, _graphicsPool.get());
+        }
+
+        if (!_videoRequests.empty() && _videoQueue) {
+            ProcessQueue(_videoRequests, _videoQueue, _videoPool.get());
         }
     }
 
@@ -78,9 +111,19 @@ namespace Syn::Vk {
     void GpuUploader::UploadSync(GpuUploadRequest request) {
         std::lock_guard lock(_mutex);
 
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
-        Vk::ThreadSafeQueue* queue = request.needsGraphics ? _graphicsQueue : _transferQueue;
-        Vk::CommandPool* pool = request.needsGraphics ? _graphicsPool.get() : _transferPool.get();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
+
+        Vk::ThreadSafeQueue* queue = _transferQueue;
+        Vk::CommandPool* pool = _transferPool.get();
+
+        if (request.needsVideo && _videoQueue) {
+            queue = _videoQueue;
+            pool = _videoPool.get();
+        }
+        else if (request.needsGraphics) {
+            queue = _graphicsQueue;
+            pool = _graphicsPool.get();
+        }
 
         auto cmd = pool->AllocateBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
         auto fence = std::make_shared<Vk::Fence>(false);

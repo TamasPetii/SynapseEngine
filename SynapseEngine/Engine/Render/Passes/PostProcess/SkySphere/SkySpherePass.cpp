@@ -1,7 +1,23 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "SkySpherePass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/ShaderManager.h"
 #include "Engine/Vk/Image/ImageFactory.h"
 #include "Engine/Scene/BufferNames.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
@@ -9,6 +25,8 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
+#include "Engine/Video/VideoManager.h"
+#include "Engine/Vk/Descriptor/DescriptorUtils.h"
 
 namespace Syn {
 
@@ -24,17 +42,23 @@ namespace Syn {
     }
 
     void SkySpherePass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
+        auto videoManager = ServiceLocator::Get<VideoManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = true;
-        config.layoutOverride = [imageManager](uint32_t setIndex) {
-            if (setIndex == 0) return imageManager->GetBindlessLayout();
+        config.layoutOverride = [imageManager, videoManager](uint32_t setIndex) {
+            if (setIndex == 0) {
+                return imageManager->GetBindlessLayout();
+            }
+            if (setIndex == 1) {
+                return videoManager->GetBindlessLayout();
+            }
             return VkDescriptorSetLayout{};
             };
 
-        _shaderProgram = shaderManager->CreateProgram("SkySphereProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("SkySphereProgram", {
             ShaderNames::SkySphereVert,
             ShaderNames::SkySphereFrag
             }, config);
@@ -104,7 +128,7 @@ namespace Syn {
 
     void SkySpherePass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         uint32_t fIdx = context.frameIndex;
 
         const auto& envSettings = scene->GetSettings()->environment;
@@ -130,10 +154,19 @@ namespace Syn {
 
     void SkySpherePass::BindDescriptors(const RenderContext& context)
     {
-        auto imageManager = ServiceLocator::GetImageManager();
-        auto bindlessBuffer = imageManager->GetBindlessBuffer();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
+        auto videoManager = ServiceLocator::Get<VideoManager>();
+        std::vector<std::pair<uint32_t, Vk::DescriptorBuffer*>> buffersToBind;
 
-        bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
+        if (auto imgBuffer = imageManager->GetBindlessBuffer()) {
+            buffersToBind.push_back({ 0, imgBuffer });
+        }
+
+        if (auto vidBuffer = videoManager->GetBindlessBuffer()) {
+            buffersToBind.push_back({ 1, vidBuffer });
+        }
+
+        Vk::DescriptorUtils::BindMultipleBuffer(context.cmd, _shaderProgram->GetLayout(), VK_PIPELINE_BIND_POINT_GRAPHICS, buffersToBind);
     }
 
     void SkySpherePass::Draw(const RenderContext& context)

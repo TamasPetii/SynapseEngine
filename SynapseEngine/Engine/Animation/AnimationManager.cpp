@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "AnimationManager.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
@@ -13,11 +29,15 @@ namespace Syn {
         uint32_t framesInFlight,
         std::shared_ptr<AnimationBuilder> builder,
         std::unique_ptr<IGpuAnimationUploader> uploader,
-        std::unique_ptr<ICpuAnimationExtractor> cpuExtractor)
+        std::unique_ptr<ICpuAnimationExtractor> cpuExtractor, 
+        PreviewAllocateCallback previewAllocateCallback,
+        PreviewMarkDirtyCallback previewMarkDirtyCallback)
         : AddressResourceManager<Animation, GpuAnimationAddresses>(framesInFlight, 1024, 256, 512),
         _builder(builder), 
         _uploader(std::move(uploader)), 
-        _cpuExtractor(std::move(cpuExtractor))
+        _cpuExtractor(std::move(cpuExtractor)),
+        _previewAllocateCallback(std::move(previewAllocateCallback)),
+        _previewMarkDirtyCallback(std::move(previewMarkDirtyCallback))
     {
     }
 
@@ -25,7 +45,7 @@ namespace Syn {
         std::string uniqueName = filePath + "_" + std::to_string(baseModelId);
 
         return InternalLoadAsync(uniqueName, [this, filePath, baseModelId]() {
-            auto modelManager = ServiceLocator::GetModelManager();
+            auto modelManager = ServiceLocator::Get<ModelManager>();
 
             modelManager->WaitForResource(baseModelId);
 
@@ -39,7 +59,13 @@ namespace Syn {
             if (!baseModel) 
                 return std::shared_ptr<Animation>(nullptr);
 
-            return _builder->BuildFromFile(filePath, baseModel->cpuData);
+            auto anim = _builder->BuildFromFile(filePath, baseModel->cpuData);
+
+            if (anim) {
+                anim->cpuData.baseModelId = baseModelId;
+            }
+
+            return anim;
             });
     }
 
@@ -47,13 +73,19 @@ namespace Syn {
         std::string uniqueName = filePath + "_" + std::to_string(baseModelId);
 
         return InternalLoadSync(uniqueName, [this, filePath, baseModelId]() {
-            auto modelManager = ServiceLocator::GetModelManager();
+            auto modelManager = ServiceLocator::Get<ModelManager>();
             auto baseModel = modelManager->GetResource(baseModelId);
 
             if (!baseModel) 
                 return std::shared_ptr<Animation>(nullptr);
 
-            return _builder->BuildFromFile(filePath, baseModel->cpuData);
+            auto anim = _builder->BuildFromFile(filePath, baseModel->cpuData);
+
+            if (anim) {
+                anim->cpuData.baseModelId = baseModelId;
+            }
+
+            return anim;
             });
     }
 
@@ -96,6 +128,9 @@ namespace Syn {
 
         _cpuExtractor->Extract(gpuData, cpuData);
 
+        uint32_t index = _pathToId.at(entry.path);
+        if (_previewAllocateCallback) _previewAllocateCallback(index);
+
         entry.resource->transientGpuData.reset();
         entry.resource->transientCpuData.reset();
     }
@@ -117,6 +152,8 @@ namespace Syn {
             addresses.isReady = 1;
 
             WriteAddress(index, addresses);
+
+            if (_previewMarkDirtyCallback) _previewMarkDirtyCallback(index);
             });
     }
 }

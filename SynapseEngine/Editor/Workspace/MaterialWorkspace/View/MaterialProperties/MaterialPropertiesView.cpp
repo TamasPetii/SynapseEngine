@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "MaterialPropertiesView.h"
 #include "Editor/Manager/EditorIcons.h"
 #include "Editor/Widgets/CardWidget.h"
@@ -45,8 +61,18 @@ namespace Syn {
 
                     Syn::UI::PropertySeparator();
 
+                    if (Syn::UI::PropertyDragFloat("Clearcoat", editedMat.clearcoatFactor, 0.01f, 0.0f, 1.0f, "%.2f")) isModified = true;
+                    if (Syn::UI::PropertyDragFloat("CC Roughness", editedMat.clearcoatRoughness, 0.01f, 0.0f, 1.0f, "%.2f")) isModified = true;
+
+                    if (Syn::UI::PropertyDragFloat("IOR", editedMat.ior, 0.01f, 1.0f, 3.0f, "%.2f")) isModified = true;
+                    if (Syn::UI::PropertyDragFloat("Specular Factor", editedMat.specularFactor, 0.01f, 0.0f, 1.0f, "%.2f")) isModified = true;
+                    if (Syn::UI::PropertyColor3("Specular Color", editedMat.specularColor)) isModified = true;
+
+                    Syn::UI::PropertySeparator();
+
                     if (Syn::UI::PropertyCheckbox("Double Sided", editedMat.doubleSided)) isModified = true;
                     if (Syn::UI::PropertyCheckbox("Transparent", editedMat.isTransparent)) isModified = true;
+                    if (Syn::UI::PropertyCheckbox("Alpha Tested", editedMat.isAlphaTested)) isModified = true;
 
                     Syn::UI::EndPropertyGrid();
                 }
@@ -83,9 +109,33 @@ namespace Syn {
                         editedMat.emissiveTexture, state.emissiveName, state.availableTextures,
                         editedMat.emissiveSampler, state.emissiveSamplerName, state.availableSamplers, isModified);
 
-                    DrawTextureSlot("AO",
+                    DrawTextureSlot("AmbientOcclusion",
                         editedMat.ambientOcclusionTexture, state.aoName, state.availableTextures,
                         editedMat.ambientOcclusionSampler, state.aoSamplerName, state.availableSamplers, isModified);
+
+                    DrawTextureSlot("Opacity",
+                        editedMat.opacityTexture, state.opacityName, state.availableTextures,
+                        editedMat.opacitySampler, state.opacitySamplerName, state.availableSamplers, isModified);
+
+                    DrawTextureSlot("Clearcoat",
+                        editedMat.clearcoatTexture, state.clearcoatName, state.availableTextures,
+                        editedMat.clearcoatSampler, state.clearcoatSamplerName, state.availableSamplers, isModified);
+
+                    DrawTextureSlot("CC Roughness",
+                        editedMat.clearcoatRoughnessTexture, state.clearcoatRoughnessName, state.availableTextures,
+                        editedMat.clearcoatRoughnessSampler, state.clearcoatRoughnessSamplerName, state.availableSamplers, isModified);
+
+                    DrawTextureSlot("CC Normal",
+                        editedMat.clearcoatNormalTexture, state.clearcoatNormalName, state.availableTextures,
+                        editedMat.clearcoatNormalSampler, state.clearcoatNormalSamplerName, state.availableSamplers, isModified);
+
+                    DrawTextureSlot("Specular",
+                        editedMat.specularTexture, state.specularName, state.availableTextures,
+                        editedMat.specularSampler, state.specularSamplerName, state.availableSamplers, isModified);
+
+                    DrawTextureSlot("Specular Color",
+                        editedMat.specularColorTexture, state.specularColorName, state.availableTextures,
+                        editedMat.specularColorSampler, state.specularColorSamplerName, state.availableSamplers, isModified);
 
                     Syn::UI::EndPropertyGrid();
                 }

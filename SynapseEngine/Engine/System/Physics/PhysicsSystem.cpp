@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "PhysicsSystem.h"
 #include "Engine/Component/Core/TransformComponent.h"
 #include "Engine/Component/Physics/RigidBodyComponent.h"
@@ -6,11 +22,15 @@
 
 #include "Engine/System/Core/TransformSystem.h"
 #include "Engine/System/Physics/RigidBodySystem.h"
+#include "Engine/System/Physics/PhysicsDebugSystem.h"
 
 namespace Syn
 {
     std::vector<TypeID> PhysicsSystem::GetReadDependencies() const {
-        return { TypeInfo<RigidBodySystem>::ID };
+        return { 
+            TypeInfo<PhysicsDebugSystem>::ID,
+            TypeInfo<RigidBodySystem>::ID
+        };
     }
 
     std::vector<TypeID> PhysicsSystem::GetWriteDependencies() const {
@@ -44,7 +64,11 @@ namespace Syn
             });
 
         tf::Task simulateTask = this->EmplaceTask(subflow, "SimulatePhysics", [physicsEngine, deltaTime]() {
-            physicsEngine->Update(deltaTime);
+
+            const float maxDeltaTime = 1.0f / 15.0f;
+            float safeDeltaTime = std::min(deltaTime, maxDeltaTime);
+
+            physicsEngine->Update(safeDeltaTime);
             });
 
         std::optional<tf::Task> postUpdateTask = this->ForEach(entities, subflow, "SyncDynamicsToECS",

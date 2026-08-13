@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #version 460
 #extension GL_GOOGLE_include_directive : require
 #extension GL_EXT_buffer_reference2 : require
@@ -66,6 +82,13 @@ void main()
     vec3 normal    = normalize(normalRoughness.xyz);
     float roughness = clamp(normalRoughness.a, 0.04, 1.0);
 
+    float defaultIor = 1.5;
+    float defaultSpecularFactor = 1.0;
+    vec3 defaultSpecularColor = vec3(1.0);
+    float defaultClearcoatFactor = 0.0;
+    float defaultClearcoatRoughness = 0.0;
+    vec3 defaultClearcoatNormal = normal;
+
     // 3. Final Attenuation and Physically Based Rendering (PBR)
     vec3 viewDir = normalize(camera.eye.xyz - position); 
     vec3 lightDir = normalize(light.position.xyz - position);
@@ -80,7 +103,23 @@ void main()
         spotLightShadowAtlas
     );
 
-    vec3 radiance = SimulateSpotLight(ctx.spotLightDataBufferAddr, inLightDenseIndex, position, albedo, normal, viewDir, roughness, metallic);
+    vec3 radiance = SimulateSpotLight(
+        ctx.spotLightDataBufferAddr, 
+        inLightDenseIndex, 
+        position,
+        albedo, 
+        normal, 
+        viewDir, 
+        roughness, 
+        metallic,
+        defaultIor, 
+        defaultSpecularFactor, 
+        defaultSpecularColor,
+        defaultClearcoatFactor, 
+        defaultClearcoatRoughness, 
+        defaultClearcoatNormal
+    );
+
     radiance *= shadowFactor;
 
     if (ctx.enableSsao == 1 && ctx.enableSsaoLight == 1) {

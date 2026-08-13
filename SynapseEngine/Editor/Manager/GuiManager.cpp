@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "GuiManager.h"
 #include <vulkan/vulkan.h>
 #include <imgui.h>
@@ -98,7 +114,7 @@ namespace Syn {
 
     void GuiManager::BeginFrame() {
         
-        if (auto frameCtx = ServiceLocator::GetFrameContext())
+        if (auto frameCtx = ServiceLocator::Get<FrameContext>())
             _textureManager->SetCurrentFrame(frameCtx->currentFrameIndex);
 
         ImGui_ImplVulkan_NewFrame();
@@ -124,9 +140,17 @@ namespace Syn {
             const char* wsModel = SYN_WS_MODEL;
             const char* wsMaterial = SYN_WS_MATERIAL;
             const char* wsTexture = SYN_WS_TEXTURE;
+            const char* wsAnimation = SYN_WS_ANIMATION;
+            const char* wsAudio = SYN_WS_AUDIO;
 
             ImVec2 btnPadding = ImGui::GetStyle().FramePadding;
-            float totalWidth = ImGui::CalcTextSize(wsScene).x + ImGui::CalcTextSize(wsModel).x + ImGui::CalcTextSize(wsMaterial).x + ImGui::CalcTextSize(wsTexture).x + (btnPadding.x * 2.0f * 4.0f);
+            float totalWidth = ImGui::CalcTextSize(wsScene).x 
+                             + ImGui::CalcTextSize(wsAnimation).x 
+                             + ImGui::CalcTextSize(wsModel).x 
+                             + ImGui::CalcTextSize(wsMaterial).x 
+                             + ImGui::CalcTextSize(wsTexture).x +
+                             + ImGui::CalcTextSize(wsAudio).x +
+                             + (btnPadding.x * 2.0f * 6.0f);
 
             ImGui::SetCursorPosX(ImGui::GetWindowWidth() - totalWidth - 10.0f);
 
@@ -161,9 +185,11 @@ namespace Syn {
                 };
 
             WorkspaceTab(wsScene, EditorWorkspace::Scene);
+            WorkspaceTab(wsAnimation, EditorWorkspace::Animation);
             WorkspaceTab(wsModel, EditorWorkspace::Model);
             WorkspaceTab(wsMaterial, EditorWorkspace::Material);
             WorkspaceTab(wsTexture, EditorWorkspace::Texture);
+            WorkspaceTab(wsAudio, EditorWorkspace::Audio);
 
             ImGui::PopStyleColor();
             ImGui::PopStyleVar(2);
@@ -192,6 +218,8 @@ namespace Syn {
             case EditorWorkspace::Texture:  hostWindowName = "HostWindow_Texture";  subDockspaceId = ImGui::GetID("DockSpace_Texture"); break;
             case EditorWorkspace::Material: hostWindowName = "HostWindow_Material"; subDockspaceId = ImGui::GetID("DockSpace_Material"); break;
             case EditorWorkspace::Model:    hostWindowName = "HostWindow_Model";    subDockspaceId = ImGui::GetID("DockSpace_Model"); break;
+            case EditorWorkspace::Animation:hostWindowName = "HostWindow_Animation"; subDockspaceId = ImGui::GetID("DockSpace_Animation"); break;
+            case EditorWorkspace::Audio:    hostWindowName = "HostWindow_Audio";    subDockspaceId = ImGui::GetID("DockSpace_Audio"); break;
             default:                        hostWindowName = "HostWindow_Default";  subDockspaceId = ImGui::GetID("DockSpace_Default"); break;
         }
 

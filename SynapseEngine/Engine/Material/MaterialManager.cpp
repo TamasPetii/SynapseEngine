@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "MaterialManager.h"
 #include "Engine/Vk/Buffer/BufferFactory.h"
 #include "Engine/Logger/SynLog.h"
@@ -22,35 +38,58 @@ namespace Syn {
         LoadDefaultMaterialSync();
     }
 
-    uint32_t MaterialManager::LoadMaterial(const std::string& name, const MaterialInfo& info) {
+    std::shared_ptr<Material> MaterialManager::CreateMaterialFromInfo(const MaterialInfo& info)
+    {
+        auto getTexId = [this](const TexturePayload& payload) -> uint32_t {
+            if (payload.path.empty() && !payload.IsEmbedded())
+                return UINT32_MAX;
+
+            return _textureLoadCallback(payload);
+            };
+
+        Material mat;
+        mat.color = info.color;
+        mat.emissiveColor = info.emissiveFactor;
+        mat.emissiveIntensity = info.emissiveIntensity;
+        mat.uvScale = info.uvScale;
+        mat.metalness = info.metallicFactor;
+        mat.roughness = info.roughnessFactor;
+        mat.aoStrength = info.aoStrength;
+        mat.doubleSided = info.doubleSided;
+        mat.isTransparent = info.isTransparent;
+        mat.isAlphaTested = info.isAlphaTested;
+        mat.clearcoatFactor = info.clearcoatFactor;
+        mat.clearcoatRoughness = info.clearcoatRoughnessFactor;
+        mat.ior = info.ior;
+        mat.specularFactor = info.specularFactor;
+        mat.specularColor = info.specularColorFactor;
+
+        mat.albedoTexture = getTexId(info.albedo);
+        mat.normalTexture = getTexId(info.normal);
+        mat.metalnessTexture = getTexId(info.metalness);
+        mat.roughnessTexture = getTexId(info.roughness);
+        mat.metallicRoughnessTexture = getTexId(info.metallicRoughness);
+        mat.emissiveTexture = getTexId(info.emissive);
+        mat.ambientOcclusionTexture = getTexId(info.ambientOcclusion);
+        mat.opacityTexture = getTexId(info.opacity);
+        mat.clearcoatTexture = getTexId(info.clearcoat);
+        mat.clearcoatRoughnessTexture = getTexId(info.clearcoatRoughness);
+        mat.clearcoatNormalTexture = getTexId(info.clearcoatNormal);
+        mat.specularTexture = getTexId(info.specular);
+        mat.specularColorTexture = getTexId(info.specularColor);
+
+        return std::make_shared<Material>(mat);
+    }
+
+    uint32_t MaterialManager::LoadMaterialSync(const std::string& name, const MaterialInfo& info) {
         return InternalLoadSync(name, [this, info]() {
-            auto getTexId = [this](const TexturePayload& payload) -> uint32_t {
-                if (payload.path.empty() && !payload.IsEmbedded()) 
-                    return UINT32_MAX;
+            return CreateMaterialFromInfo(info);
+            });
+    }
 
-                return _textureLoadCallback(payload);
-                };
-
-            Material mat;
-            mat.color = info.color;
-            mat.emissiveColor = info.emissiveFactor;
-            mat.emissiveIntensity = info.emissiveIntensity;
-            mat.uvScale = info.uvScale;
-            mat.metalness = info.metallicFactor;
-            mat.roughness = info.roughnessFactor;
-            mat.aoStrength = info.aoStrength;
-            mat.doubleSided = info.doubleSided;
-            mat.isTransparent = info.isTransparent;
-
-            mat.albedoTexture = getTexId(info.albedo);
-            mat.normalTexture = getTexId(info.normal);
-            mat.metalnessTexture = getTexId(info.metalness);
-            mat.roughnessTexture = getTexId(info.roughness);
-            mat.metallicRoughnessTexture = getTexId(info.metallicRoughness);
-            mat.emissiveTexture = getTexId(info.emissive);
-            mat.ambientOcclusionTexture = getTexId(info.ambientOcclusion);
-
-            return std::make_shared<Material>(mat);
+    uint32_t MaterialManager::LoadMaterialAsync(const std::string& name, const MaterialInfo& info) {
+        return InternalLoadAsync(name, [this, info]() {
+            return CreateMaterialFromInfo(info);
             });
     }
 
@@ -74,7 +113,7 @@ namespace Syn {
     void MaterialManager::LoadDefaultMaterialSync()
     {
         MaterialInfo defaultInfo{};
-        LoadMaterial(MaterialNames::EngineDefault, defaultInfo);
+        LoadMaterialSync(MaterialNames::EngineDefault, defaultInfo);
     }
 
     void MaterialManager::FinalizeResource(EntryType& entry) {

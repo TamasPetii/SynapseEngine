@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "TestSceneSource.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Scene/Insiders/SceneInsider.h"
@@ -8,9 +24,10 @@
 #include "Engine/Component/Rendering/ModelComponent.h"
 #include "Engine/Mesh/Factory/MeshFactory.h"
 #include "Engine/Mesh/ModelManager.h"
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/ShaderManager.h"
 #include "Engine/Mesh/MeshSourceNames.h"
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
+#include "Engine/Component/Rendering/PipelineOverrideComponent.h"
 #include "Engine/Material/MaterialManager.h"
 #include "Engine/Animation/AnimationManager.h"
 #include "Engine/Component/Rendering/AnimationComponent.h"
@@ -23,9 +40,13 @@
 #include "Engine/Component/Physics/ConvexColliderComponent.h"
 #include "Engine/Component/Physics/MeshColliderComponent.h"
 #include "Engine/Component/Physics/RigidBodyComponent.h"
+#include "Engine/Component/Audio/AudioSourceComponent.h"
+#include "Engine/Component/Audio/AudioListenerComponent.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Logger/SynLog.h"
 #include "Engine/Utils/PathUtils.h"
+#include "Engine/Audio/AudioManager.h"
+#include "Engine/Video/VideoManager.h"
 
 #include <random>
 #include <fstream>
@@ -43,9 +64,10 @@ namespace Syn
         EntityID& debugCam = SceneInsider::GetDebugCameraEntity(scene, SceneInsider::GetKey());
         HierarchyManager* hm = scene.GetHierarchyManager();
 
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto animationManager = ServiceLocator::GetAnimationManager();
-        auto materialManager = ServiceLocator::GetMaterialManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
+        auto animationManager = ServiceLocator::Get<AnimationManager>();
+        auto materialManager = ServiceLocator::Get<MaterialManager>();
+        auto audioManager = ServiceLocator::Get<AudioManager>();
 
         json config;
         std::string path = PathUtils::GetAbsolutePathString("Engine/Scene/Source/Procedural/test_config.json");
@@ -66,7 +88,7 @@ namespace Syn
             Syn::Warning("scene_config.json not found, using default settings.");
         }
 
-        const std::string modelPath = "Assets/Engine/Models/";
+        const std::string modelPath = "../External/glTF-Sample-Assets/Models/";
         const std::string envPath = "Assets/Engine/Environment/";
 
         bool spawnSponza = config.value("/environment/spawn_sponza"_json_pointer, true);
@@ -85,6 +107,7 @@ namespace Syn
         int physCapsuleCount = config.value("/entities/physics_capsules"_json_pointer, 0);
 
         int dirLightCount = config.value("/lights/directional_count"_json_pointer, 1);
+        int dirLightShadowCount = config.value("/lights/directional_shadow_count"_json_pointer, 1);
         int pointLightCount = config.value("/lights/point_count"_json_pointer, 50);
         int pointShadowCount = config.value("/lights/point_shadow_count"_json_pointer, 5);
         int spotLightCount = config.value("/lights/spot_count"_json_pointer, 50);
@@ -104,7 +127,7 @@ namespace Syn
             modelManager->GetResourceIndex(MeshSourceNames::Torus)
         };
 
-        auto skyTextureId = ServiceLocator::GetImageManager()->LoadImageSync(PathUtils::GetAbsolutePathString(envPath + "MainScene.hdr"));
+        auto skyTextureId = ServiceLocator::Get<ImageManager>()->LoadImageSync(PathUtils::GetAbsolutePathString(envPath + "MainScene.hdr"));
         scene.GetSettings()->environment.skyTextureId = skyTextureId;
 
         EntityID rootCameras = scene.CreateEntity();
@@ -155,6 +178,74 @@ namespace Syn
         registry.GetPool<TransformComponent>()->SetCategory(rootLights, StorageCategory::Static);
         registry.GetPool<TagComponent>()->SetCategory(rootLights, StorageCategory::Static);
 
+        EntityID rootAudios = scene.CreateEntity();
+        registry.AddComponent<TagComponent>(rootAudios);
+        registry.GetComponent<TagComponent>(rootAudios).name = "Audios";
+        registry.GetComponent<TagComponent>(rootAudios).tag = "Root";
+        registry.AddComponent<TransformComponent>(rootAudios);
+        registry.GetPool<TransformComponent>()->SetCategory(rootAudios, StorageCategory::Static);
+        registry.GetPool<TagComponent>()->SetCategory(rootAudios, StorageCategory::Static);
+
+        { // Audios (2D Background Music)
+            EntityID bgAudio = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(bgAudio);
+            registry.GetComponent<TagComponent>(bgAudio).name = "Background_Music";
+            registry.GetComponent<TagComponent>(bgAudio).tag = "Audio";
+            registry.AddComponent<TransformComponent>(bgAudio);
+            registry.AddComponent<AudioSourceComponent>(bgAudio);
+
+            auto& bgSource = registry.GetComponent<AudioSourceComponent>(bgAudio);
+            bgSource.soundIndex = audioManager->LoadAudioSync(PathUtils::GetAbsolutePathString("Assets/Engine/Audio/creepy.mp3"));
+            bgSource.isSpatialized = false;
+            bgSource.loop = true;
+            bgSource.play = true;
+            bgSource.volume = 0.1f;
+
+            registry.GetPool<TransformComponent>()->SetCategory(bgAudio, StorageCategory::Static);
+            registry.GetPool<AudioSourceComponent>()->SetCategory(bgAudio, StorageCategory::Static);
+            registry.GetPool<TagComponent>()->SetCategory(bgAudio, StorageCategory::Static);
+
+            hm->AttachChild(rootAudios, bgAudio);
+        }
+
+        {
+            auto videoManager = ServiceLocator::Get<VideoManager>();
+            std::string videoPath = PathUtils::GetAbsolutePathString("Assets/Engine/Video/nature.mp4");
+            uint32_t videoId = videoManager->LoadVideoAsync(videoPath);
+
+            EntityID tvEntity = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(tvEntity);
+            registry.GetComponent<TagComponent>(tvEntity).name = "Cinema_Screen";
+            registry.GetComponent<TagComponent>(tvEntity).tag = "Model";
+            registry.AddComponent<TransformComponent>(tvEntity);
+            registry.AddComponent<ModelComponent>(tvEntity);
+            registry.AddComponent<MaterialOverrideComponent>(tvEntity);
+            registry.AddComponent<PipelineOverrideComponent>(tvEntity);
+
+            auto& tvTransform = registry.GetComponent<TransformComponent>(tvEntity);
+            tvTransform.translation = glm::vec3(15.0f, 25.0f, 0.0f);
+            tvTransform.rotation = glm::vec3(-90.0f, 90.0f, 0.0f);
+            tvTransform.scale = glm::vec3(32.0f, 1.0f, 18.0f);
+            registry.GetComponent<ModelComponent>(tvEntity).modelIndex = modelManager->GetResourceIndex(MeshSourceNames::Quad);
+
+            Material tvMaterial{};
+            tvMaterial.color = glm::vec4(1.0f);
+            tvMaterial.emissiveColor = glm::vec3(1.0f);
+            tvMaterial.emissiveIntensity = 0.0f;
+            tvMaterial.videoTexture = videoId;
+
+            uint32_t tvMatId = materialManager->LoadMaterialDirect("VideoScreenMat", tvMaterial);
+            registry.GetComponent<MaterialOverrideComponent>(tvEntity).materials.push_back(tvMatId);
+
+            registry.GetPool<TransformComponent>()->SetCategory(tvEntity, StorageCategory::Static);
+            registry.GetPool<ModelComponent>()->SetCategory(tvEntity, StorageCategory::Static);
+            registry.GetPool<MaterialOverrideComponent>()->SetCategory(tvEntity, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(tvEntity, StorageCategory::Static);
+            registry.GetPool<TagComponent>()->SetCategory(tvEntity, StorageCategory::Static);
+
+            hm->AttachChild(rootEnvironment, tvEntity);
+        }
+
         // Cameras (Main & Debug)
         {
             sceneCam = scene.CreateEntity();
@@ -163,9 +254,11 @@ namespace Syn
             registry.GetComponent<TagComponent>(sceneCam).tag = "Camera";
             registry.AddComponent<CameraComponent>(sceneCam);
             registry.AddComponent<TransformComponent>(sceneCam);
+			registry.AddComponent<AudioListenerComponent>(sceneCam);
             registry.GetPool<CameraComponent>()->SetCategory(sceneCam, StorageCategory::Stream);
             registry.GetPool<TransformComponent>()->SetCategory(sceneCam, StorageCategory::Stream);
             registry.GetPool<TagComponent>()->SetCategory(sceneCam, StorageCategory::Static);
+            registry.GetPool<AudioListenerComponent>()->SetCategory(sceneCam, StorageCategory::Stream);
             hm->AttachChild(rootCameras, sceneCam);
 
             debugCam = scene.CreateEntity();
@@ -182,35 +275,52 @@ namespace Syn
 
         if (spawnMonkey)
         {
-            uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Monkey/Untitled.obj"));
+            //uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Suzanne/glTF/Suzanne.gltf"));
+            //uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString("C:/Users/User/Desktop/Models/Dragon/dragon.obj"));
+        
+            uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "DamagedHelmet/glTF/DamagedHelmet.gltf"));
 
             EntityID monkeyId = scene.CreateEntity();
             registry.AddComponent<TagComponent>(monkeyId);
             registry.AddComponent<MaterialOverrideComponent>(monkeyId);
+            registry.AddComponent<PipelineOverrideComponent>(monkeyId);
             registry.GetComponent<TagComponent>(monkeyId).name = "Suzanne_Monkey";
             registry.GetComponent<TagComponent>(monkeyId).tag = "Model";
             registry.AddComponent<TransformComponent>(monkeyId);
             registry.AddComponent<ModelComponent>(monkeyId);
+            registry.AddComponent<AudioSourceComponent>(monkeyId);
 
             registry.GetComponent<TransformComponent>(monkeyId).translation = glm::vec3(0.0f, 0.0f, 0.0f);
             registry.GetComponent<TransformComponent>(monkeyId).scale = glm::vec3(5.0f, 5.0f, 5.0f);
             registry.GetComponent<ModelComponent>(monkeyId).modelIndex = monkeyModelIndex;
 
+            auto& monkeyAudio = registry.GetComponent<AudioSourceComponent>(monkeyId);
+            monkeyAudio.soundIndex = audioManager->LoadAudioSync(PathUtils::GetAbsolutePathString("Assets/Engine/Audio/alien.wav"));
+            monkeyAudio.isSpatialized = true;
+            monkeyAudio.loop = true;
+            monkeyAudio.play = true;
+            monkeyAudio.volume = 1.0f;
+            monkeyAudio.minDistance = 2.0f;
+            monkeyAudio.maxDistance = 50.0f;
+
             registry.GetPool<TransformComponent>()->SetCategory(monkeyId, StorageCategory::Static);
             registry.GetPool<ModelComponent>()->SetCategory(monkeyId, StorageCategory::Static);
             registry.GetPool<MaterialOverrideComponent>()->SetCategory(monkeyId, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(monkeyId, StorageCategory::Static);
             registry.GetPool<TagComponent>()->SetCategory(monkeyId, StorageCategory::Static);
+            registry.GetPool<AudioSourceComponent>()->SetCategory(monkeyId, StorageCategory::Static);
 
             hm->AttachChild(rootEnvironment, monkeyId);
         }
 
         if (spawnSponza)
         {
-            uint32_t sponzaId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Sponza/sponza.obj"));
+            uint32_t sponzaId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Sponza/glTF/Sponza.gltf"));
 
             EntityID sponzaEntity = scene.CreateEntity();
             registry.AddComponent<TagComponent>(sponzaEntity);
             registry.AddComponent<MaterialOverrideComponent>(sponzaEntity);
+            registry.AddComponent<PipelineOverrideComponent>(sponzaEntity);
             registry.GetComponent<TagComponent>(sponzaEntity).name = "Classic_Sponza";
             registry.GetComponent<TagComponent>(sponzaEntity).tag = "Model";
             registry.AddComponent<TransformComponent>(sponzaEntity);
@@ -219,7 +329,7 @@ namespace Syn
             registry.AddComponent<RigidBodyComponent>(sponzaEntity);
 
             registry.GetComponent<TransformComponent>(sponzaEntity).translation = glm::vec3(0.0f, 0.0f, 0.0f);
-            registry.GetComponent<TransformComponent>(sponzaEntity).scale = glm::vec3(0.2f, 0.2f, 0.2f);
+            registry.GetComponent<TransformComponent>(sponzaEntity).scale = glm::vec3(25.0f, 25.0f, 25.0f);
             registry.GetComponent<ModelComponent>(sponzaEntity).modelIndex = sponzaId;
             registry.GetComponent<RigidBodyComponent>(sponzaEntity).motionType = PhysicsMotionType::Static;
 
@@ -228,6 +338,7 @@ namespace Syn
             registry.GetPool<RigidBodyComponent>()->SetCategory(sponzaEntity, StorageCategory::Stream);
             registry.GetPool<MeshColliderComponent>()->SetCategory(sponzaEntity, StorageCategory::Stream);
             registry.GetPool<MaterialOverrideComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
             registry.GetPool<TagComponent>()->SetCategory(sponzaEntity, StorageCategory::Static);
 
             hm->AttachChild(rootEnvironment, sponzaEntity);
@@ -244,6 +355,7 @@ namespace Syn
             registry.AddComponent<RigidBodyComponent>(floorEntity);
             registry.AddComponent<BoxColliderComponent>(floorEntity);
             registry.AddComponent<MaterialOverrideComponent>(floorEntity);
+            registry.AddComponent<PipelineOverrideComponent>(floorEntity);
 
             auto& floorTransform = registry.GetComponent<TransformComponent>(floorEntity);
             floorTransform.translation = glm::vec3(0.0f, -1.0f, 0.0f);
@@ -260,11 +372,12 @@ namespace Syn
             registry.GetPool<RigidBodyComponent>()->SetCategory(floorEntity, StorageCategory::Static);
             registry.GetPool<BoxColliderComponent>()->SetCategory(floorEntity, StorageCategory::Static);
             registry.GetPool<MaterialOverrideComponent>()->SetCategory(floorEntity, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(floorEntity, StorageCategory::Static);
             registry.GetPool<TagComponent>()->SetCategory(floorEntity, StorageCategory::Static);
 
             MaterialInfo floorMatInfo{};
             floorMatInfo.color = glm::vec4(0.2f, 0.2f, 0.2f, 1.0f);
-            uint32_t floorMatId = materialManager->LoadMaterial("FloorMat", floorMatInfo);
+            uint32_t floorMatId = materialManager->LoadMaterialSync("FloorMat", floorMatInfo);
             registry.GetComponent<MaterialOverrideComponent>(floorEntity).materials.push_back(floorMatId);
 
             hm->AttachChild(rootEnvironment, floorEntity);
@@ -272,14 +385,11 @@ namespace Syn
 
         if (charCount > 0)
         {
-            uint32_t mutantId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Monster/Mutant/Mutant.dae"));
+            //uint32_t mutantId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "CesiumMan/glTF/CesiumMan.gltf"));
+            //uint32_t animationId = animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "CesiumMan/glTF/CesiumMan.gltf"), mutantId);
 
-            std::vector<uint32_t> animationIds;
-            animationIds.push_back(animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "Monster/Breakdance 1990/Breakdance 1990.dae"), mutantId));
-            animationIds.push_back(animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "Monster/Breakdance Ending 1/Breakdance Ending 1.dae"), mutantId));
-            animationIds.push_back(animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "Monster/Dancing/Dancing.dae"), mutantId));
-            animationIds.push_back(animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "Monster/Hip Hop Dancing/Hip Hop Dancing.dae"), mutantId));
-            animationIds.push_back(animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "Monster/Hip Hop Dancing_2/Hip Hop Dancing.dae"), mutantId));
+            uint32_t mutantId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "BrainStem/glTF/BrainStem.gltf"));
+            uint32_t animationId = animationManager->LoadAnimationAsync(PathUtils::GetAbsolutePathString(modelPath + "BrainStem/glTF/BrainStem.gltf"), mutantId);
 
             // Animated Characters
             for (int i = 0; i < charCount; i++)
@@ -292,16 +402,18 @@ namespace Syn
                 registry.AddComponent<ModelComponent>(characterEntity);
                 registry.AddComponent<AnimationComponent>(characterEntity);
                 registry.AddComponent<MaterialOverrideComponent>(characterEntity);
+                registry.AddComponent<PipelineOverrideComponent>(characterEntity);
 
                 registry.GetComponent<TransformComponent>(characterEntity).translation = glm::vec3((rand() % 400) - 200.0f, 0.0f, (rand() % 400) - 200.0f);
                 registry.GetComponent<TransformComponent>(characterEntity).scale = glm::vec3(5.f);
                 registry.GetComponent<ModelComponent>(characterEntity).modelIndex = mutantId;
 
                 auto& animComp = registry.GetComponent<AnimationComponent>(characterEntity);
-                animComp.animationIndex = animationIds[rand() % animationIds.size()];
+                animComp.animationIndex = animationId;
                 animComp.speed = 0.5f + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX)) * 1.5f;
 
                 registry.GetPool<MaterialOverrideComponent>()->SetCategory(characterEntity, StorageCategory::Static);
+                registry.GetPool<PipelineOverrideComponent>()->SetCategory(characterEntity, StorageCategory::Static);
                 registry.GetPool<TagComponent>()->SetCategory(characterEntity, StorageCategory::Static);
                 registry.GetPool<TransformComponent>()->SetCategory(characterEntity, StorageCategory::Static);
                 registry.GetPool<ModelComponent>()->SetCategory(characterEntity, StorageCategory::Static);
@@ -328,7 +440,7 @@ namespace Syn
                 matInfo.roughnessFactor = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                 matInfo.aoStrength = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
 
-                sharedMaterialIds.push_back(materialManager->LoadMaterial("SharedMat_" + std::to_string(j), matInfo));
+                sharedMaterialIds.push_back(materialManager->LoadMaterialSync("SharedMat_" + std::to_string(j), matInfo));
             }
         }
 
@@ -343,7 +455,7 @@ namespace Syn
                 matInfo.emissiveFactor = glm::vec3(r, g, b);
                 matInfo.metallicFactor = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
                 matInfo.roughnessFactor = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
-                overrideComp.materials.push_back(materialManager->LoadMaterial("UniqueMat_" + std::to_string(index), matInfo));
+                overrideComp.materials.push_back(materialManager->LoadMaterialSync("UniqueMat_" + std::to_string(index), matInfo));
             }
             else if (!sharedMaterialIds.empty()) {
                 overrideComp.materials.push_back(sharedMaterialIds[rand() % sharedMaterialIds.size()]);
@@ -358,14 +470,17 @@ namespace Syn
             registry.AddComponent<TransformComponent>(e);
             registry.AddComponent<ModelComponent>(e);
             registry.AddComponent<MaterialOverrideComponent>(e);
+            registry.AddComponent<PipelineOverrideComponent>(e);
 
             auto& transform = registry.GetComponent<TransformComponent>(e);
             transform.translation = glm::vec3((rand() % 800) - 400.0f, (rand() % 800) + 5, (rand() % 800) - 400.0f);
             transform.rotation = glm::vec3(rand() % 360, rand() % 360, rand() % 360);
 
             registry.GetComponent<ModelComponent>(e).modelIndex = geoIds[rand() % geoIds.size()];
+            registry.GetComponent<PipelineOverrideComponent>(e).pipelines = {static_cast<uint32_t>(rand() % 2)};
 
             registry.GetPool<MaterialOverrideComponent>()->SetCategory(e, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TagComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
@@ -388,12 +503,14 @@ namespace Syn
             registry.AddComponent<RigidBodyComponent>(e);
             registry.AddComponent<BoxColliderComponent>(e);
             registry.AddComponent<MaterialOverrideComponent>(e);
+            registry.AddComponent<PipelineOverrideComponent>(e);
 
-            registry.GetComponent<TransformComponent>(e).translation = glm::vec3((rand() % 400) - 200.0f, (rand() % 400) + 5, (rand() % 400) - 200.0f);
+            registry.GetComponent<TransformComponent>(e).translation = glm::vec3((rand() % 100) - 50, (rand() % 200) + 5, (rand() % 100) - 50);
             registry.GetComponent<ModelComponent>(e).modelIndex = cubeMeshId;
             registry.GetComponent<RigidBodyComponent>(e).motionType = PhysicsMotionType::Dynamic;
 
             registry.GetPool<MaterialOverrideComponent>()->SetCategory(e, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TagComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
             registry.GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
@@ -414,12 +531,14 @@ namespace Syn
             registry.AddComponent<RigidBodyComponent>(e);
             registry.AddComponent<SphereColliderComponent>(e);
             registry.AddComponent<MaterialOverrideComponent>(e);
+            registry.AddComponent<PipelineOverrideComponent>(e);
 
-            registry.GetComponent<TransformComponent>(e).translation = glm::vec3((rand() % 400) - 200.0f, (rand() % 400) + 5, (rand() % 400) - 200.0f);
+            registry.GetComponent<TransformComponent>(e).translation = glm::vec3((rand() % 100) - 50, (rand() % 200) + 5, (rand() % 100) - 50);
             registry.GetComponent<ModelComponent>(e).modelIndex = sphereMeshId;
             registry.GetComponent<RigidBodyComponent>(e).motionType = PhysicsMotionType::Dynamic;
 
             registry.GetPool<MaterialOverrideComponent>()->SetCategory(e, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TagComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
             registry.GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
@@ -440,14 +559,16 @@ namespace Syn
             registry.AddComponent<RigidBodyComponent>(e);
             registry.AddComponent<CapsuleColliderComponent>(e);
             registry.AddComponent<MaterialOverrideComponent>(e);
+            registry.AddComponent<PipelineOverrideComponent>(e);
 
-            registry.GetComponent<TransformComponent>(e).translation = glm::vec3((rand() % 400) - 200.0f, (rand() % 400) + 5, (rand() % 400) - 200.0f);
+            registry.GetComponent<TransformComponent>(e).translation = glm::vec3((rand() % 100) - 50, (rand() % 200) + 5, (rand() % 100) - 50);
             registry.GetComponent<TransformComponent>(e).rotation = glm::vec3(rand() % 360, rand() % 360, rand() % 360);
 
             registry.GetComponent<ModelComponent>(e).modelIndex = capsuleMeshId;
             registry.GetComponent<RigidBodyComponent>(e).motionType = PhysicsMotionType::Dynamic;
 
             registry.GetPool<MaterialOverrideComponent>()->SetCategory(e, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TagComponent>()->SetCategory(e, StorageCategory::Static);
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
             registry.GetPool<ModelComponent>()->SetCategory(e, StorageCategory::Static);
@@ -471,7 +592,7 @@ namespace Syn
             auto& light = registry.GetComponent<DirectionLightComponent>(e);
             light.color = glm::vec3(1.0f, 0.95f, 0.85f) * 0.55f;
             light.strength = 5.0f;
-            light.useShadow = true;
+            light.useShadow = dirLightShadowCount != 0;
 
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
             registry.GetPool<DirectionLightComponent>()->SetCategory(e, StorageCategory::Stream);

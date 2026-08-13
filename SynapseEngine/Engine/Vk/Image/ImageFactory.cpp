@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "ImageFactory.h"
 #include "ImageUtils.h"
 #include "Engine/ServiceLocator.h"
@@ -7,7 +23,7 @@
 namespace Syn::Vk {
 
     void ImageFactory::Allocate(Image* image) {
-        auto context = ServiceLocator::GetVkContext();
+        auto context = ServiceLocator::Get<Vk::Context>();
         auto device = context->GetDevice();
         VmaAllocator allocator = device->GetAllocator();
 
@@ -30,6 +46,10 @@ namespace Syn::Vk {
         imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         imageInfo.flags = image->_config.flags;
 
+        if (image->_config.videoProfileList) {
+            imageInfo.pNext = image->_config.videoProfileList;
+        }
+
         VmaAllocationCreateInfo allocCreateInfo{};
         allocCreateInfo.usage = image->_config.memoryUsage;
         allocCreateInfo.flags = image->_config.allocationFlags;
@@ -42,7 +62,7 @@ namespace Syn::Vk {
     }
 
     void ImageFactory::CreateViews(Image* image) {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         if (!image->_config.imageViewConfigs.contains(ImageViewNames::Default)) {
             ImageViewConfig defaultConfig;
@@ -65,6 +85,12 @@ namespace Syn::Vk {
             viewInfo.subresourceRange.baseArrayLayer = config.baseArrayLayer;
             viewInfo.subresourceRange.layerCount = config.layerCount == VK_REMAINING_ARRAY_LAYERS ? image->_config.arrayLayers : config.layerCount;
             viewInfo.components = config.swizzle;
+
+            VkSamplerYcbcrConversionInfo ycbcrInfo{ VK_STRUCTURE_TYPE_SAMPLER_YCBCR_CONVERSION_INFO };
+            if (image->_config.ycbcrConversion != VK_NULL_HANDLE) {
+                ycbcrInfo.conversion = image->_config.ycbcrConversion;
+                viewInfo.pNext = &ycbcrInfo;
+            }
 
             VkImageView viewHandle;
             SYN_VK_ASSERT_MSG(vkCreateImageView(device->Handle(), &viewInfo, nullptr, &viewHandle), ("Failed to create Image View: " + name).c_str());

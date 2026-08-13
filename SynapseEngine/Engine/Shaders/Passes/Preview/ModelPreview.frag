@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #version 460
 #extension GL_GOOGLE_include_directive : require
 #extension GL_EXT_nonuniform_qualifier : require
@@ -30,17 +46,28 @@ void main() {
     Material mat = GET_MATERIAL(ctx.materialBufferAddr, inMaterialId);
 
     vec4 albedoAlpha = EvaluateAlbedoAlpha(ctx.textureMetadataBufferAddr, mat, inUV);
-    if (albedoAlpha.a < ctx.alphaLimitDiscard) {
+    if (IS_ALPHA_TESTED(mat) && albedoAlpha.a < ctx.alphaLimitDiscard) {
         discard;
     }
 
-    vec3 finalNormal = EvaluateNormal(ctx.textureMetadataBufferAddr, mat, inUV, inNormal, inTangent);
+    bool frontFacing = IS_DOUBLE_SIDED(mat) ? gl_FrontFacing : true;
+    vec3 finalNormal = EvaluateNormal(ctx.textureMetadataBufferAddr, mat, inUV, inNormal, inTangent, frontFacing);
     vec2 metalRough = EvaluateMetallicRoughness(ctx.textureMetadataBufferAddr, mat, inUV);
     vec3 emissive = EvaluateEmissive(ctx.textureMetadataBufferAddr, mat, inUV);
     float ao = EvaluateAO(ctx.textureMetadataBufferAddr, mat, inUV);
 
     float finalMetalness = clamp(metalRough.x, 0.0, 1.0);
     float finalRoughness = clamp(metalRough.y, 0.04, 1.0);
+
+    float clearcoatFactor, clearcoatRoughness;
+    vec3 clearcoatNormal;
+    EvaluateClearcoat(ctx.textureMetadataBufferAddr, mat, inUV, inNormal, inTangent, frontFacing, clearcoatFactor, clearcoatRoughness, clearcoatNormal);
+
+    float specularFactor;
+    vec3 specularColor;
+    EvaluateSpecular(ctx.textureMetadataBufferAddr, mat, inUV, specularFactor, specularColor);
+    
+    float ior = mat.ior;
 
     vec3 viewDir = vec3(0.0, 0.0, 1.0); 
     vec3 totalRadiance = vec3(0.0);
@@ -51,7 +78,8 @@ void main() {
     float keyLightStrength = 2.5;
     totalRadiance += ShadePhysicallyBased(
         albedoAlpha.rgb, finalNormal, viewDir, keyLightDir, 
-        finalRoughness, finalMetalness, keyLightColor, 1.0, keyLightStrength
+        finalRoughness, finalMetalness, ior, specularFactor, specularColor, clearcoatFactor, clearcoatRoughness, clearcoatNormal,
+        keyLightColor, 1.0, keyLightStrength
     );
 
     // Fill Light
@@ -60,7 +88,8 @@ void main() {
     float fillLightStrength = 1.0;
     totalRadiance += ShadePhysicallyBased(
         albedoAlpha.rgb, finalNormal, viewDir, fillLightDir, 
-        finalRoughness, finalMetalness, fillLightColor, 1.0, fillLightStrength
+        finalRoughness, finalMetalness, ior, specularFactor, specularColor, clearcoatFactor, clearcoatRoughness, clearcoatNormal,
+        fillLightColor, 1.0, fillLightStrength
     );
 
     // Ambient és Bloom

@@ -1,5 +1,22 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "ModelSystem.h"
 #include "MaterialSystem.h"
+#include "PipelineSystem.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/FrameContext.h"
 #include "Engine/Component/Core/TagComponent.h"
@@ -10,7 +27,8 @@ namespace Syn
 
     std::vector<TypeID> ModelSystem::GetReadDependencies() const {
         return { 
-            TypeInfo<MaterialSystem>::ID
+            TypeInfo<MaterialSystem>::ID,
+            TypeInfo<PipelineSystem>::ID
         };
     }
 
@@ -29,7 +47,7 @@ namespace Syn
         this->EmplaceTask(subflow, SystemPhaseNames::Update, [this, scene, currentVersion]() {
             if (_lastModelManagerVersion != currentVersion) {
                 _lastModelManagerVersion = currentVersion;
-                this->SetFramesToUpload(ServiceLocator::GetFrameContext()->framesInFlight);
+                this->SetFramesToUpload(ServiceLocator::Get<FrameContext>()->framesInFlight);
             }
             });
 

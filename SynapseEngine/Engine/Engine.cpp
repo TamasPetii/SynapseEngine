@@ -1,15 +1,27 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "Engine.h"
 #include "Logger/SynLog.h"
 #include "ServiceLocator.h"
 #include "Vk/Context.h"
-#include "Vk/Shader/Shader.h"
-#include "Vk/Shader/ShaderProgram.h"
-#include "Vk/Buffer/SynVkBuffer.h"
-#include "Vk/Rendering/GpuUploader.h"
 
 #include "Engine/Scene/SceneNames.h"
 #include "Engine/Manager/ResourceManager.h"
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/ShaderManager.h"
 #include "Engine/Mesh/Builder/StaticMeshBuilder.h"
 #include "Engine/Mesh/Converter/DefaultGpuModelConverter.h"
 #include "Engine/Mesh/Converter/DefaultModelCooker.h"
@@ -19,6 +31,9 @@
 #include "Engine/Mesh/Processor/MeshProcessor/MeshProcessors.h"
 #include "Engine/Mesh/Source/MeshSources.h"
 #include "Engine/Mesh/Factory/MeshFactory.h"
+
+#include "Engine/Audio/Engine/MiniAudioEngine.h"
+#include "Engine/Audio/AudioManager.h"
 
 #include "Engine/Render/RenderManager.h"
 #include "Engine/Render/RenderPipeline.h"
@@ -30,9 +45,12 @@
 #include "Engine/Scene/Source/Procedural/MaterialPreviewSceneSource.h"
 #include "Engine/Scene/Source/Procedural/ModelPreviewSceneSource.h"
 #include "Engine/Scene/Source/File/FileSceneSource.h"
+#include "Engine/Scene/Source/Procedural/AnimationPreviewSceneSource.h"
+#include "Engine/Scene/Source/Procedural/EmptySceneSource.h"
 
 #include "Engine/Render/RendererFactory.h"
-#include "Engine/Physics/JoltPhysicsEngine.h"
+#include "Engine/Physics/Jolt/JoltPhysicsEngine.h"
+#include "Engine/Physics/Box3D/Box3DPhysicsEngine.h"
 
 #include "Engine/Profiler/DefaultGpuProfiler.h"
 #include "Engine/Profiler/DefaultCpuProfiler.h"
@@ -55,6 +73,7 @@
 #include "Engine/Scene/Loader/ManifestSceneLoader.h"
 
 #include "Engine/Vk/Descriptor/DescriptorUtils.h"
+#include "Engine/Video/VideoManager.h"
 
 #include <print>
 #include <filesystem>
@@ -77,23 +96,26 @@ namespace Syn
 		_frameContext.deltaTime = deltaTime;
 		uint32_t currentFrame = _frameContext.currentFrameIndex;
 
-		ServiceLocator::GetCpuProfiler()->BeginFrame(currentFrame);
+		ServiceLocator::Get<ICpuProfiler>()->BeginFrame(currentFrame);
 
 		//Updates
-		ServiceLocator::GetAnimationManager()->Update();
-		ServiceLocator::GetModelManager()->Update();
-		ServiceLocator::GetMaterialManager()->Update();
-		ServiceLocator::GetImageManager()->Update();
+		ServiceLocator::Get<ShaderManager>()->Update();
+		ServiceLocator::Get<AnimationManager>()->Update();
+		ServiceLocator::Get<ModelManager>()->Update();
+		ServiceLocator::Get<MaterialManager>()->Update();
+		ServiceLocator::Get<ImageManager>()->Update();
+		ServiceLocator::Get<AudioManager>()->Update();
+		ServiceLocator::Get<VideoManager>()->Update();
 
 		//Notifications
-		ServiceLocator::GetMaterialManager()->ProcessPendingNotifications();
-		ServiceLocator::GetModelManager()->ProcessPendingNotifications();
+		ServiceLocator::Get<MaterialManager>()->ProcessPendingNotifications();
+		ServiceLocator::Get<ModelManager>()->ProcessPendingNotifications();
 
-		ServiceLocator::GetGpuUploader()->ProcessUploads();
+		ServiceLocator::Get<Vk::GpuUploader>()->ProcessUploads();
 
 		_sceneManager->Update(_frameContext.deltaTime, currentFrame);
 	
-		ServiceLocator::GetInputManager()->UpdatePrevious();
+		ServiceLocator::Get<InputManager>()->UpdatePrevious();
 	}
 
 	void Engine::Render()
@@ -105,9 +127,6 @@ namespace Syn
 
 		_renderManager->WaitForFrame(currentFrame);
 
-		ServiceLocator::GetGpuProfiler()->ResolveFrame(currentFrame);
-		ServiceLocator::GetFrameStatisticsManager()->ResolveFrame(currentFrame, ServiceLocator::GetRenderStatCollector());
-
 		if (_onGuiFlushCallback)
 			_onGuiFlushCallback(currentFrame);
 
@@ -117,8 +136,8 @@ namespace Syn
 
 		_sceneManager->Finish();
 
-		ServiceLocator::GetCpuProfiler()->ResolveFrame(currentFrame);
-		ServiceLocator::GetPreviewManager()->ClearAllDirtyResources();
+		ServiceLocator::Get<ICpuProfiler>()->ResolveFrame(currentFrame);
+		ServiceLocator::Get<PreviewManager>()->FlushCompletedResources();
 
 		AdvanceFrameIndex();
 	}
@@ -128,7 +147,7 @@ namespace Syn
 		_onGuiFlushCallback = params.onGuiFlushCallback;
 
 		_inputManager = std::make_unique<InputManager>();
-		ServiceLocator::ProvideInputManager(_inputManager.get());
+		ServiceLocator::Provide<InputManager>(_inputManager.get());
 
 		InitFrameContext(1);
 		InitLogger();
@@ -136,6 +155,7 @@ namespace Syn
 		InitTaskExecutor();
 		InitSerializer();
 		InitResourceManager();
+		InitAudioEngine();
 		InitRenderManager(params);
 		InitSceneManager();
 		InitPhysicsEngine();
@@ -163,23 +183,23 @@ namespace Syn
 		};
 
 		_vkContext = std::make_unique<Vk::Context>(vkContextParams);
-		ServiceLocator::ProvideVkContext(_vkContext.get());
+		ServiceLocator::Provide<Vk::Context>(_vkContext.get());
 		_vkContext->InitSwapChain(vkContextParams);
 
 		_gpuUploader = std::make_unique<Vk::GpuUploader>();
-		ServiceLocator::ProvideGpuUploader(_gpuUploader.get());
+		ServiceLocator::Provide<Vk::GpuUploader>(_gpuUploader.get());
 	}
 
 	void Engine::InitResourceManager()
 	{
 		_resourceManager = std::make_unique<ResourceManager>(_frameContext.framesInFlight);
-		ServiceLocator::ProvideResourceManager(_resourceManager.get());
+		ServiceLocator::Provide<ResourceManager>(_resourceManager.get());
 	}
 
 	void Engine::InitFrameContext(uint32_t framesInFlight) {
 		_frameContext.framesInFlight = framesInFlight;
 		_frameContext.currentFrameIndex = 0;
-		ServiceLocator::ProvideFrameContext(&_frameContext);
+		ServiceLocator::Provide<FrameContext>(&_frameContext);
 	}
 
 	void Engine::AdvanceFrameIndex() {
@@ -199,11 +219,11 @@ namespace Syn
 
 			std::string logReport = "";
 
-			if (auto cpuProfiler = ServiceLocator::GetCpuProfiler()) {
+			if (auto cpuProfiler = ServiceLocator::Get<ICpuProfiler>()) {
 				logReport += cpuProfiler->GenerateReport(prevFrame, "CPU") + "\n";
 			}
 
-			if (auto gpuProfiler = ServiceLocator::GetGpuProfiler()) {
+			if (auto gpuProfiler = ServiceLocator::Get<IGpuProfiler>()) {
 				logReport += gpuProfiler->GenerateReport(prevFrame, "GPU") + "\n";
 			}
 			std::println("{}\n", logReport);
@@ -218,22 +238,42 @@ namespace Syn
 	{
 		float timestampPeriod = _vkContext->GetPhysicalDevice()->GetProperties().limits.timestampPeriod;
 		_gpuProfiler = std::make_unique<DefaultGpuProfiler>(_frameContext.framesInFlight, timestampPeriod);
-		ServiceLocator::ProvideGpuProfiler(_gpuProfiler.get());
+		ServiceLocator::Provide<IGpuProfiler>(_gpuProfiler.get());
 
 		_cpuProfiler = std::make_unique<DefaultCpuProfiler>(_frameContext.framesInFlight);
-		ServiceLocator::ProvideCpuProfiler(_cpuProfiler.get());
+		ServiceLocator::Provide<ICpuProfiler>(_cpuProfiler.get());
 
 		_renderStatCollector = std::make_unique<DefaultRenderStatCollector>(_frameContext.framesInFlight);
-		ServiceLocator::ProvideRenderStatCollector(_renderStatCollector.get());
+		ServiceLocator::Provide<IRenderStatCollector>(_renderStatCollector.get());
 
 		_frameStatisticsManager = std::make_unique<FrameStatisticsManager>(_frameContext.framesInFlight);
-		ServiceLocator::ProvideFrameStatisticsManager(_frameStatisticsManager.get());
+		ServiceLocator::Provide<FrameStatisticsManager>(_frameStatisticsManager.get());
 	}
 
 	void Engine::InitRenderManager(const EngineInitParams& params)
 	{
 		_renderManager = std::move(RendererFactory::CreateSceneRenderer(_frameContext.framesInFlight));
 		_renderManager->SetGuiRenderCallback(params.onRenderGuiCallback);
+
+		_renderManager->SetPreRenderCallback([](VkCommandBuffer cmd, uint32_t frameIndex, Scene* scene) {
+			auto gpuProfiler = ServiceLocator::Get<IGpuProfiler>();
+			auto renderStatCollector = ServiceLocator::Get<IRenderStatCollector>();
+			auto frameStatManager = ServiceLocator::Get<FrameStatisticsManager>();
+
+			gpuProfiler->ResolveFrame(frameIndex);
+			renderStatCollector->ResolveFrame(frameIndex);
+			frameStatManager->ResolveFrame(cmd, scene, frameIndex, renderStatCollector->GetStats(frameIndex));
+			gpuProfiler->BeginFrame(cmd, frameIndex);
+			renderStatCollector->BeginFrame(cmd, frameIndex);
+			});
+	}
+
+	void Engine::InitAudioEngine()
+	{
+		_audioEngine = std::make_unique<MiniAudioEngine>();
+		_audioEngine->Init();
+
+		ServiceLocator::Provide<IAudioEngine>(_audioEngine.get());
 	}
 
 	void Engine::Shutdown() 
@@ -247,11 +287,17 @@ namespace Syn
 		_cpuProfiler.reset();
 		_renderStatCollector.reset();
 		_frameStatisticsManager.reset();
+
+		if (_audioEngine) {
+			_audioEngine->Shutdown();
+			_audioEngine.reset();
+			ServiceLocator::Provide<IAudioEngine>(nullptr);
+		}
+
 		_resourceManager.reset();
 		_gpuUploader.reset();
 		_taskExecutor.reset();
 		_serializer.reset();
-		ServiceLocator::Shutdown();
 		Vk::DescriptorUtils::Cleanup();
 		_vkContext.reset(); //This has to be the last one!
 	}
@@ -277,7 +323,7 @@ namespace Syn
 
 		_taskExecutor = std::make_unique<tf::Executor>(workerThreads);
 
-		ServiceLocator::ProvideTaskExecutor(_taskExecutor.get());
+		ServiceLocator::Provide<tf::Executor>(_taskExecutor.get());
 	}
 
 	void Engine::OnChar(unsigned int codepoint)
@@ -331,7 +377,7 @@ namespace Syn
 		auto loader = std::make_unique<ManifestSceneLoader>();
 
 		_sceneManager = std::make_unique<Syn::SceneManager>(std::move(writer), std::move(loader));
-		ServiceLocator::ProvideSceneManager(_sceneManager.get());
+		ServiceLocator::Provide<SceneManager>(_sceneManager.get());
 
 		_sceneManager->RegisterScene(SceneNames::Main, [frames]() {
 			return std::make_unique<Scene>(frames, std::make_unique<TestSceneSource>());
@@ -345,13 +391,22 @@ namespace Syn
 			return std::make_unique<Scene>(frames, std::make_unique<ModelPreviewSceneSource>());
 			});
 
+		_sceneManager->RegisterScene(SceneNames::AnimationPreview, [frames]() {
+			return std::make_unique<Scene>(frames, std::make_unique<AnimationPreviewSceneSource>());
+			});
+
+		_sceneManager->RegisterScene(SceneNames::Empty, [frames]() {
+			return std::make_unique<Scene>(frames, std::make_unique<EmptySceneSource>());
+			});
+
 		_sceneManager->LoadScene(SceneNames::Main);
 	}
 
 	void Engine::InitPhysicsEngine()
 	{
-		ServiceLocator::ProvidePhysicsFactory([]() {
+		ServiceLocator::Provide<PhysicsFactory>([]() {
 			auto physicsEngine = std::make_unique<JoltPhysicsEngine>();
+			//auto physicsEngine = std::make_unique<Box3DPhysicsEngine>();
 			physicsEngine->Init();
 
 			return physicsEngine;
@@ -376,27 +431,36 @@ namespace Syn
 
 		_serializer = std::make_unique<Serializer>(std::move(service));
 
-		ServiceLocator::ProvideSerializer(_serializer.get());
+		ServiceLocator::Provide<Serializer>(_serializer.get());
+	}
+
+	AudioManager* Engine::GetAudioManager() {
+		return ServiceLocator::Get<AudioManager>();
 	}
 
 	MaterialManager* Engine::GetMaterialManager() {
-		return ServiceLocator::GetMaterialManager();
+		return ServiceLocator::Get<MaterialManager>();
 	}
 
 	ImageManager* Engine::GetImageManager() {
-		return ServiceLocator::GetImageManager();
+		return ServiceLocator::Get<ImageManager>();
 	}
 
 	ModelManager* Engine::GetModelManager() {
-		return ServiceLocator::GetModelManager();
+		return ServiceLocator::Get<ModelManager>();
 	}
 
 	AnimationManager* Engine::GetAnimationManager() {
-		return ServiceLocator::GetAnimationManager();
+		return ServiceLocator::Get<AnimationManager>();
 	}
 
 	PreviewManager* Engine::GetPreviewManager()
 	{
-		return ServiceLocator::GetPreviewManager();
+		return ServiceLocator::Get<PreviewManager>();
+	}
+
+	VideoManager* Engine::GetVideoManager()
+	{
+		return ServiceLocator::Get<VideoManager>();
 	}
 }

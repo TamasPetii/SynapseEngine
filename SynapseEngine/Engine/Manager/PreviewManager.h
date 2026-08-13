@@ -1,6 +1,23 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #pragma once
 #include "Engine/SynApi.h"
-#include "Engine/Vk/Image/Image.h"
+#include "Engine/Utils/StaleImage.h"
+#include "Engine/Utils/StaleBuffer.h"
 #include <queue>
 #include <unordered_map>
 #include <unordered_set>
@@ -15,7 +32,9 @@ namespace Syn {
     enum class PreviewResourceType : uint32_t {
         Material = 0,
         Model = 1,
-        Image = 2
+        Image = 2,
+        Animation = 3,
+        Audio = 4
     };
 
     class SYN_API PreviewManager {
@@ -31,9 +50,9 @@ namespace Syn {
 
         void MarkAllActiveDirty();
         void MarkDirty(PreviewResourceType type, uint32_t resourceId);
+        void MarkCompleted(PreviewResourceType type, uint32_t resourceId);
+        void FlushCompletedResources();
         std::vector<uint32_t> GetDirtyResources(PreviewResourceType type);
-        void ClearDirtyResources(PreviewResourceType type);
-        void ClearAllDirtyResources();
 
         void GetViewportAndScissor(PreviewResourceType type, uint32_t resourceId, VkViewport& outViewport, VkRect2D& outScissor) const;
         void GetNormalizedUVs(PreviewResourceType type, uint32_t resourceId, glm::vec2& outUv0, glm::vec2& outUv1) const;
@@ -42,6 +61,7 @@ namespace Syn {
         Vk::Image* GetAtlasDepthImage() const { return _atlasDepthImage.get(); }
         Vk::Image* GetScratchColorImage() const { return _scratchColorImage.get(); }
         Vk::Image* GetScratchBloomImage() const { return _scratchBloomImage.get(); }
+        void AddStaleBuffer(std::unique_ptr<Vk::Buffer> buffer);
 
         uint32_t GetResolution() const { return _resolution; }
         std::vector<uint32_t> GetActiveResources(PreviewResourceType type) const;
@@ -61,8 +81,12 @@ namespace Syn {
         std::unique_ptr<Vk::Image> _scratchColorImage;
         std::unique_ptr<Vk::Image> _scratchBloomImage;
 
+        std::vector<StaleImage> _staleImages;
+        std::vector<StaleBuffer> _staleBuffers;
+
         std::queue<uint32_t> _freeTiles;
         std::unordered_map<uint64_t, uint32_t> _resourceToTile;
         std::unordered_map<PreviewResourceType, std::unordered_set<uint32_t>> _dirtyResources;
+        std::unordered_map<PreviewResourceType, std::vector<uint32_t>> _completedResources;
     };
 }

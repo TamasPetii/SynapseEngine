@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #version 460
 #extension GL_GOOGLE_include_directive : require
 #extension GL_EXT_buffer_reference2 : require
@@ -93,41 +109,6 @@ void main() {
         worldPos = center + (v.position * extents);
         
         lightColor = chunkFullyInside ? vec3(0.1, 1.0, 0.1) : vec3(1.0, 0.5, 0.0);
-    }
-    else if (pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_BOX_COLLIDER) {
-        BoxColliderComponent collider = GET_BOX_COLLIDER(ctx.boxColliderDataBufferAddr, gl_InstanceIndex);
-
-        uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, collider.entityIndex);
-        TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
-
-        vec3 localPos = (v.position * collider.halfExtents) + collider.localOffset;
-        worldPos = (transform.transform * vec4(localPos, 1.0)).xyz;
-
-        lightColor = vec3(0.0, 1.0, 0.0);
-    }
-    else if (pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_SPHERE_COLLIDER) {
-        SphereColliderComponent collider = GET_SPHERE_COLLIDER(ctx.sphereColliderDataBufferAddr, gl_InstanceIndex);
-
-        uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, collider.entityIndex);
-        TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
-
-        vec3 localPos = (v.position * collider.radius) + collider.localOffset;
-        worldPos = (transform.transform * vec4(localPos, 1.0)).xyz;
-        
-        lightColor = vec3(0.0, 1.0, 1.0);
-    }
-    else if (pc.shapeDrawType == WIREFRAME_DEBUG_SHAPE_TYPE_CAPSULE_COLLIDER) {
-        CapsuleColliderComponent collider = GET_CAPSULE_COLLIDER(ctx.capsuleColliderDataBufferAddr, gl_InstanceIndex);
-
-        uint transformDenseIndex = GET_SPARSE_INDEX(ctx.transformSparseMapBufferAddr, collider.entityIndex);
-        TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, transformDenseIndex);
-
-        vec3 unitPos = v.position * 2.0;
-        vec3 scale = vec3(collider.radius, collider.halfHeight, collider.radius);
-        vec3 localPos = (unitPos * scale) + collider.localOffset;
-        worldPos = (transform.transform * vec4(localPos, 1.0)).xyz;
-
-        lightColor = vec3(1.0, 0.5, 0.0);
     }
 
     uint cameraDenseIndex = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.activeCameraEntity);

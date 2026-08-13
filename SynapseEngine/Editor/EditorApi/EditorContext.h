@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #pragma once
 #include <memory>
 #include <unordered_map>
@@ -6,6 +22,7 @@
 #include "Editor/Manager/GuiTextureManager.h"
 
 #include "EditorCore/Api/IApi.h" 
+#include "EditorCore/Api/IAnimationApi.h" 
 #include "EditorCore/Api/ISelectionApi.h"
 #include "EditorCore/Api/ITagApi.h"
 #include "EditorCore/Api/ITransformApi.h"
@@ -29,9 +46,14 @@
 #include "EditorCore/Api/IMeshColliderApi.h"
 #include "EditorCore/Api/IRigidBodyApi.h"
 #include "EditorCore/Api/IModelComponentApi.h"
-#include "EditorCore/Api/IAnimationApi.h"
+#include "EditorCore/Api/IAnimationCompApi.h"
 #include "EditorCore/Api/IMaterialOverrideApi.h"
 #include "EditorCore/Api/IPreviewApi.h"
+#include "EditorCore/Api/IPipelineOverrideApi.h"
+#include "EditorCore/Api/IAudioSourceApi.h"
+#include "EditorCore/Api/IAudioListenerApi.h"
+#include "EditorCore/Api/IAudioApi.h"
+#include "Engine/Registry/Type/TypeInfo.h"
 
 namespace Syn {
     class EditorContext {
@@ -39,8 +61,11 @@ namespace Syn {
         EditorContext(Engine* engine, GuiTextureManager* textureManager);
 
         template <typename T>
-        T* GetApi() const {
-            auto it = _apis.find(std::type_index(typeid(T)));
+        T* GetApi() const 
+        {
+            const TypeID id = TypeInfo<T>::ID;
+
+            auto it = _apis.find(id);
 
             if (it != _apis.end()) {
                 return static_cast<T*>(it->second.get());
@@ -52,9 +77,10 @@ namespace Syn {
     private:
         template <typename Interface, typename Implementation, typename... Args>
         void RegisterApi(Args&&... args) {
-            _apis[std::type_index(typeid(Interface))] = std::make_unique<Implementation>(std::forward<Args>(args)...);
+            const TypeID id = TypeInfo<Interface>::ID;
+            _apis[id] = std::make_unique<Implementation>(std::forward<Args>(args)...);
         }
 
-        std::unordered_map<std::type_index, std::unique_ptr<IApi>> _apis;
+        std::unordered_map<TypeID, std::unique_ptr<IApi>> _apis;
     };
 }

@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #pragma once
 #include <IconsFontAwesome5.h>
 
@@ -11,6 +27,7 @@ constexpr const char* ASSET_PATH = "Assets";
 #define SYN_ICON_FILE           ICON_FA_FILE
 #define SYN_ICON_IMAGE          ICON_FA_IMAGE
 #define SYN_ICON_CODE           ICON_FA_CODE
+#define SYN_ICON_CLOCK          ICON_FA_CLOCK
 
 // Content browser icons
 #define SYN_ICON_ARROW_UP       ICON_FA_ARROW_UP
@@ -37,8 +54,10 @@ constexpr const char* ASSET_PATH = "Assets";
 #define SYN_ICON_MICROCHIP      ICON_FA_MICROCHIP
 #define SYN_ICON_DESKTOP        ICON_FA_DESKTOP
 #define SYN_ICON_TACHOMETER     ICON_FA_TACHOMETER_ALT
+#define SYN_ICON_CUT            ICON_FA_CUT
 
 // Generic / Editor
+#define SYN_ICON_AUDIO          ICON_FA_VOLUME_UP
 #define SYN_ICON_GAMEPAD        ICON_FA_GAMEPAD
 #define SYN_ICON_ARROWS_ALT     ICON_FA_ARROWS_ALT
 #define SYN_ICON_LAYER_GROUP    ICON_FA_LAYER_GROUP
@@ -66,12 +85,15 @@ constexpr const char* ASSET_PATH = "Assets";
 #define SYN_ICON_DRAW_POLYGON   ICON_FA_DRAW_POLYGON
 #define SYN_ICON_SYNC           ICON_FA_SYNC
 #define SYN_ICON_PROJECT_DIAGRAM ICON_FA_PROJECT_DIAGRAM
+#define SYN_ICON_FILM           ICON_FA_FILM
 #define SYN_ICON_BRUSH			ICON_FA_BRUSH
 // Workspace Labels
 #define SYN_WS_SCENE            SYN_ICON_GLOBE " Scene"
 #define SYN_WS_MODEL            SYN_ICON_DRAW_POLYGON " Model"
 #define SYN_WS_MATERIAL         SYN_ICON_MAGIC " Material"
 #define SYN_WS_TEXTURE          SYN_ICON_IMAGE " Texture"
+#define SYN_WS_ANIMATION        SYN_ICON_RUNNING " Animation"
+#define SYN_WS_AUDIO            SYN_ICON_AUDIO " Audio"
 
 #define SYN_ICON_MODEL               ICON_FA_SHAPES
 #define SYN_ICON_ANIMATION           ICON_FA_RUNNING

@@ -1,8 +1,25 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "GlobalFrameSetupPass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Manager/ComponentBufferManager.h"
 #include "Engine/Material/MaterialManager.h"
+#include "Engine/Video/VideoManager.h"
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Animation/AnimationManager.h"
 #include "Engine/Image/ImageManager.h"
@@ -34,10 +51,10 @@ namespace Syn {
 
         drawData->ForwardPlus.CheckResize(settings->lighting.tileSize, width, height, fIdx);
 
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto materialManager = ServiceLocator::GetMaterialManager();
-        auto animationManager = ServiceLocator::GetAnimationManager();
-		auto imageManager = ServiceLocator::GetImageManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
+        auto materialManager = ServiceLocator::Get<MaterialManager>();
+        auto animationManager = ServiceLocator::Get<AnimationManager>();
+		auto imageManager = ServiceLocator::Get<ImageManager>();
 
         FrameGlobalContext ctx = {};
 
@@ -87,6 +104,7 @@ namespace Syn {
         
         ctx.materialLookupBufferAddr = drawData->Models.materialIndexBuffer.GetAddress(fIdx);
         ctx.materialBufferAddr = materialManager->GetAddressBufferDeviceAddress();
+        ctx.pipelineLookupBufferAddr = drawData->Models.pipelineIndexBuffer.GetAddress(fIdx);
 
         //Direction Light Buffers
         ctx.directionLightIndirectCommandBufferAddr = drawData->DirectionLights.indirectBuffer.GetAddress(fIdx);
@@ -257,6 +275,7 @@ namespace Syn {
         ctx.directionLightCount = static_cast<uint32_t>(directionLightPool->Size());
         ctx.pointLightCount = static_cast<uint32_t>(pointLightPool->Size());
         ctx.spotLightCount = static_cast<uint32_t>(spotLightPool->Size());
+        ctx.activeDirectionLightCount = drawData->DirectionLights.cmdTemplate.instanceCount;
 
         ctx.enableGeometryBvhCulling = !(settings->culling.geometrySpatialAcceleration == SpatialAccelerationType::None) ? 1 : 0;
         ctx.enableDirectionLightBvhCulling = !(settings->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::None) ? 1 : 0;
@@ -281,10 +300,11 @@ namespace Syn {
 
         //Todo: Kiszervezni lambdába innen!
 		drawData->CoherentToGpuBufferSync(context.cmd, fIdx);
-        ServiceLocator::GetAnimationManager()->RecordSync(context.cmd);
-        ServiceLocator::GetModelManager()->RecordSync(context.cmd);
-        ServiceLocator::GetMaterialManager()->RecordSync(context.cmd);
-        ServiceLocator::GetImageManager()->RecordSync(context.cmd);
+        ServiceLocator::Get<AnimationManager>()->RecordSync(context.cmd);
+        ServiceLocator::Get<ModelManager>()->RecordSync(context.cmd);
+        ServiceLocator::Get<MaterialManager>()->RecordSync(context.cmd);
+        ServiceLocator::Get<ImageManager>()->RecordSync(context.cmd);
+        ServiceLocator::Get<VideoManager>()->RecordSync(context.cmd);
 
         Vk::GlobalBarrierInfo globalBarrier{};
 

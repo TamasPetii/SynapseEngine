@@ -1,6 +1,22 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "MaterialPreviewPass.h"
 #include "Engine/ServiceLocator.h"
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/ShaderManager.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Mesh/ModelManager.h"
@@ -11,23 +27,31 @@
 #include "Engine/Mesh/MeshSourceNames.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include "Engine/Video/VideoManager.h"
+#include "Engine/Vk/Descriptor/DescriptorUtils.h"
 
 namespace Syn {
 
     #include "Engine/Shaders/Includes/PushConstants/MaterialPreviewPC.glsl"
 
     void MaterialPreviewPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
+        auto videoManager = ServiceLocator::Get<VideoManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = true;
-        config.layoutOverride = [imageManager](uint32_t setIndex) {
-            if (setIndex == 0) return imageManager->GetBindlessLayout();
+        config.layoutOverride = [imageManager, videoManager](uint32_t setIndex) {
+            if (setIndex == 0) {
+                return imageManager->GetBindlessLayout();
+            }
+            if (setIndex == 1) {
+                return videoManager->GetBindlessLayout();
+            }
             return VkDescriptorSetLayout{};
             };
 
-        _shaderProgram = shaderManager->CreateProgram("MaterialPreviewProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("MaterialPreviewProgram", {
             ShaderNames::MaterialPreviewVert,
             ShaderNames::MaterialPreviewFrag
             }, config);
@@ -65,8 +89,8 @@ namespace Syn {
         _dirtyMaterials.clear();
         _renderInfo.reset();
 
-        auto pm = ServiceLocator::GetPreviewManager();
-        auto modelManager = ServiceLocator::GetModelManager();
+        auto pm = ServiceLocator::Get<PreviewManager>();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
 
         _dirtyMaterials = pm->GetDirtyResources(PreviewResourceType::Material);
         if (_dirtyMaterials.empty()) return;
@@ -92,16 +116,26 @@ namespace Syn {
     void MaterialPreviewPass::BindDescriptors(const RenderContext& context) {
         if (_dirtyMaterials.empty()) return;
 
-        auto imageManager = ServiceLocator::GetImageManager();
-        auto bindlessBuffer = imageManager->GetBindlessBuffer();
-        bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
+        auto imageManager = ServiceLocator::Get<ImageManager>();
+        auto videoManager = ServiceLocator::Get<VideoManager>();
+        std::vector<std::pair<uint32_t, Vk::DescriptorBuffer*>> buffersToBind;
+
+        if (auto imgBuffer = imageManager->GetBindlessBuffer()) {
+            buffersToBind.push_back({ 0, imgBuffer });
+        }
+
+        if (auto vidBuffer = videoManager->GetBindlessBuffer()) {
+            buffersToBind.push_back({ 1, vidBuffer });
+        }
+
+        Vk::DescriptorUtils::BindMultipleBuffer(context.cmd, _shaderProgram->GetLayout(), VK_PIPELINE_BIND_POINT_GRAPHICS, buffersToBind);
     }
 
     void MaterialPreviewPass::Draw(const RenderContext& context) {
         if (_dirtyMaterials.empty() || !_renderInfo.has_value()) return;
 
-        auto pm = ServiceLocator::GetPreviewManager();
-        auto modelManager = ServiceLocator::GetModelManager();
+        auto pm = ServiceLocator::Get<PreviewManager>();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
 
         Vk::PushConstant<MaterialPreviewPC> pc;
         pc->frameGlobalContextBufferAddr = context.scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex);

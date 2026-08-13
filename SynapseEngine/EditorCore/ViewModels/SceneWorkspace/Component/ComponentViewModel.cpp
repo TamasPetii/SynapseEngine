@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "ComponentViewModel.h"
 
 namespace Syn 
@@ -18,8 +34,11 @@ namespace Syn
         IMeshColliderApi* meshColliderApi,
         IRigidBodyApi* rigidBodyApi,
 		IModelComponentApi* modelComponentApi,
-		IAnimationApi* animationApi,
-        IMaterialOverrideApi* materialOverrideApi
+        IAnimationCompApi* animationApi,
+        IMaterialOverrideApi* materialOverrideApi,
+        IPipelineOverrideApi* pipelineOverrideApi,
+        IAudioSourceApi* audioSourceApi,
+        IAudioListenerApi* audioListenerApi
     )
         : 
         _selectionApi(selectionApi),
@@ -37,7 +56,10 @@ namespace Syn
         _rigidBodyViewModel(selectionApi, rigidBodyApi),
 		_modelComponentViewModel(selectionApi, modelComponentApi),
 		_animationViewModel(selectionApi, animationApi),
-        _materialOverrideViewModel(selectionApi, materialOverrideApi)
+        _materialOverrideViewModel(selectionApi, materialOverrideApi),
+        _pipelineOverrideViewModel(selectionApi, pipelineOverrideApi),
+		_audioSourceViewModel(selectionApi, audioSourceApi),
+        _audioListenerViewModel(selectionApi, audioListenerApi)
     {}
 
     const ComponentState& ComponentViewModel::GetState() const {
@@ -68,6 +90,9 @@ namespace Syn
 			_modelComponentViewModel.SyncWithEngine();
 			_animationViewModel.SyncWithEngine();
             _materialOverrideViewModel.SyncWithEngine();
+            _pipelineOverrideViewModel.SyncWithEngine();
+            _audioSourceViewModel.SyncWithEngine();
+            _audioListenerViewModel.SyncWithEngine();
         }
     }
 
@@ -119,6 +144,15 @@ namespace Syn
             }
             else if constexpr (std::is_same_v<T, MaterialOverrideIntent>) {
                 _materialOverrideViewModel.Dispatch(arg);
+            }
+            else if constexpr (std::is_same_v<T, PipelineOverrideIntent>) {
+                _pipelineOverrideViewModel.Dispatch(arg);
+            }
+			else if constexpr (std::is_same_v<T, AudioSourceIntent>) {
+				_audioSourceViewModel.Dispatch(arg);
+			}
+            else if constexpr (std::is_same_v<T, AudioListenerIntent>) {
+                _audioListenerViewModel.Dispatch(arg);
             }
         }, intent);
     }

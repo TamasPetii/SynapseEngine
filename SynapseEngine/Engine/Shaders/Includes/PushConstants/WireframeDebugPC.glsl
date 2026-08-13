@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #ifndef SYN_INCLUDES_PUSH_CONSTANTS_WIREFRAME_LIGHT_PC_GLSL
 #define SYN_INCLUDES_PUSH_CONSTANTS_WIREFRAME_LIGHT_PC_GLSL
 
@@ -10,9 +26,6 @@
 #define WIREFRAME_DEBUG_SHAPE_TYPE_SPOT_LIGHT_CONE      4
 #define WIREFRAME_DEBUG_SHAPE_TYPE_STATIC_CHUNK         5
 #define WIREFRAME_DEBUG_SHAPE_TYPE_MORTON_CHUNK         6
-#define WIREFRAME_DEBUG_SHAPE_TYPE_BOX_COLLIDER         7
-#define WIREFRAME_DEBUG_SHAPE_TYPE_SPHERE_COLLIDER      8
-#define WIREFRAME_DEBUG_SHAPE_TYPE_CAPSULE_COLLIDER     9
 
 struct WireframeDebugPC {
     uint64_t frameGlobalContextBufferAddr;

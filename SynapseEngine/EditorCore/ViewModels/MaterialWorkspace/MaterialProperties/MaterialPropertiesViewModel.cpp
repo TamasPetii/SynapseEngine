@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "MaterialPropertiesViewModel.h"
 
 namespace Syn {
@@ -70,6 +86,24 @@ namespace Syn {
 
             _state.aoName = getTexName(matData.ambientOcclusionTexture);
             _state.aoSamplerName = getSamplerName(matData.ambientOcclusionSampler);
+
+            _state.opacityName = getTexName(matData.opacityTexture);
+            _state.opacitySamplerName = getSamplerName(matData.opacitySampler);
+
+            _state.clearcoatName = getTexName(matData.clearcoatTexture);
+            _state.clearcoatSamplerName = getSamplerName(matData.clearcoatSampler);
+
+            _state.clearcoatRoughnessName = getTexName(matData.clearcoatRoughnessTexture);
+            _state.clearcoatRoughnessSamplerName = getSamplerName(matData.clearcoatRoughnessSampler);
+
+            _state.clearcoatNormalName = getTexName(matData.clearcoatNormalTexture);
+            _state.clearcoatNormalSamplerName = getSamplerName(matData.clearcoatNormalSampler);
+
+            _state.specularName = getTexName(matData.specularTexture);
+            _state.specularSamplerName = getSamplerName(matData.specularSampler);
+
+            _state.specularColorName = getTexName(matData.specularColorTexture);
+            _state.specularColorSamplerName = getSamplerName(matData.specularColorSampler);
         }
         else {
             _state.hasSelection = false;

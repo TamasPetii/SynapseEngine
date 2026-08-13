@@ -1,7 +1,23 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "MeshletTransparentForwardPass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/ShaderManager.h"
 #include "Engine/Vk/Image/ImageFactory.h"
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Scene/BufferNames.h"
@@ -20,6 +36,8 @@
 #include <cassert>
 
 #include "Engine/Vk/Rendering/PushConstant.h"
+#include "Engine/Video/VideoManager.h"
+#include "Engine/Vk/Descriptor/DescriptorUtils.h"
 
 namespace Syn {
 
@@ -28,7 +46,23 @@ namespace Syn {
     MeshletTransparentForwardPass::MeshletTransparentForwardPass(MaterialRenderType renderType)
         : _renderType(renderType)
     {
-        _passName = (_renderType == MaterialRenderType::Transparent1Sided) ? "Meshlet_Transparent_Forward_1Sided" : "Meshlet_Transparent_Forward_2Sided";
+        switch (_renderType) {
+        case MaterialRenderType::Transparent1Sided:
+            _passName = "MeshletTransparentForward1Sided";
+            break;
+        case MaterialRenderType::Transparent2Sided:
+            _passName = "MeshletTransparentForward2Sided";
+            break;
+        case MaterialRenderType::AlphaTestedTransparent1Sided:
+            _passName = "MeshletAlphaTestedTransparentForward1Sided";
+            break;
+        case MaterialRenderType::AlphaTestedTransparent2Sided:
+            _passName = "MeshletAlphaTestedTransparentForward2Sided";
+            break;
+        default:
+            assert(false && "Invalid RenderType for Transparent Pass!");
+            break;
+        }
     }
 
     bool MeshletTransparentForwardPass::ShouldExecute(const RenderContext& context) const
@@ -38,25 +72,29 @@ namespace Syn {
     }
 
     void MeshletTransparentForwardPass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
+        auto videoManager = ServiceLocator::Get<VideoManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = true;
-        config.layoutOverride = [imageManager](uint32_t setIndex) {
+        config.layoutOverride = [imageManager, videoManager](uint32_t setIndex) {
             if (setIndex == 0) {
                 return imageManager->GetBindlessLayout();
+            }
+            if (setIndex == 1) {
+                return videoManager->GetBindlessLayout();
             }
             return VkDescriptorSetLayout{};
             };
 
-        _shaderProgram = shaderManager->CreateProgram("MeshletTransparentForwardProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("MeshletTransparentForwardProgram", {
             ShaderNames::MeshletTask,
             ShaderNames::MeshletMesh,
             ShaderNames::TransparentForwardFrag
             }, config);
 
-        VkCullModeFlags cullMode = (_renderType == MaterialRenderType::Transparent2Sided) ? VK_CULL_MODE_NONE : VK_CULL_MODE_BACK_BIT;
+        VkCullModeFlags cullMode = (_renderType == MaterialRenderType::Transparent2Sided || _renderType == MaterialRenderType::AlphaTestedTransparent2Sided) ? VK_CULL_MODE_NONE : VK_CULL_MODE_BACK_BIT;
 
         _graphicsState = {
             .raster = {
@@ -103,27 +141,64 @@ namespace Syn {
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
         _graphicsState.renderArea = extent;
 
-        std::vector<std::string> targets = {
-            RenderTargetNames::TransparentAccum,
-            RenderTargetNames::TransparentReveal
-        };
-
-        for (const auto& name : targets)
-        {
-            _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
-                    .imageView = group->GetImage(name)->GetView(Vk::ImageViewNames::Default),
-                    .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                    .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-                    .storeOp = VK_ATTACHMENT_STORE_OP_STORE
-                }));
+        uint32_t msaaSamples = context.scene->GetSettings()->lighting.msaaSamples;
+        if (context.scene->GetSettings()->lighting.pipelineType == PipelineType::Deferred) {
+            msaaSamples = 1;
         }
+        _graphicsState.raster.samples = static_cast<VkSampleCountFlagBits>(msaaSamples);
 
-        _depthAttachment = Vk::RenderUtils::CreateAttachment({
-            .imageView = group->GetImage(RenderTargetNames::OpaqueDepth)->GetView(Vk::ImageViewNames::Default),
-            .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-            .storeOp = VK_ATTACHMENT_STORE_OP_STORE
-            });
+        if (msaaSamples > 1) {
+            _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
+                .imageView = group->GetImage(RenderTargetNames::TransparentAccumMSAA)->GetView(Vk::ImageViewNames::Default),
+                .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+                .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+                .resolveImageView = group->GetImage(RenderTargetNames::TransparentAccum)->GetView(Vk::ImageViewNames::Default),
+                .resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT
+                }));
+
+            _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
+                .imageView = group->GetImage(RenderTargetNames::TransparentRevealMSAA)->GetView(Vk::ImageViewNames::Default),
+                .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+                .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+                .resolveImageView = group->GetImage(RenderTargetNames::TransparentReveal)->GetView(Vk::ImageViewNames::Default),
+                .resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT
+                }));
+
+            _depthAttachment = Vk::RenderUtils::CreateAttachment({
+                .imageView = group->GetImage(RenderTargetNames::OpaqueDepthMSAA)->GetView(Vk::ImageViewNames::Default),
+                .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+                .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+                .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
+                .resolveMode = VK_RESOLVE_MODE_NONE
+                });
+
+        }
+        else {
+            _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
+                .imageView = group->GetImage(RenderTargetNames::TransparentAccum)->GetView(Vk::ImageViewNames::Default),
+                .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+                .storeOp = VK_ATTACHMENT_STORE_OP_STORE
+                }));
+
+            _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
+                .imageView = group->GetImage(RenderTargetNames::TransparentReveal)->GetView(Vk::ImageViewNames::Default),
+                .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+                .storeOp = VK_ATTACHMENT_STORE_OP_STORE
+                }));
+
+            _depthAttachment = Vk::RenderUtils::CreateAttachment({
+                .imageView = group->GetImage(RenderTargetNames::OpaqueDepth)->GetView(Vk::ImageViewNames::Default),
+                .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+                .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+                .storeOp = VK_ATTACHMENT_STORE_OP_STORE
+                });
+        }
 
         _renderInfo = Vk::RenderingInfoConfig{
             .renderArea = extent,
@@ -135,13 +210,13 @@ namespace Syn {
 
     void MeshletTransparentForwardPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto materialManager = ServiceLocator::GetMaterialManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
+        auto materialManager = ServiceLocator::Get<MaterialManager>();
 
         auto drawData = scene->GetSceneDrawData();
         auto componentBufferManager = scene->GetComponentBufferManager();
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
-        auto animationManager = ServiceLocator::GetAnimationManager();
+        auto animationManager = ServiceLocator::Get<AnimationManager>();
 
         uint32_t fIdx = context.frameIndex;
         
@@ -156,7 +231,7 @@ namespace Syn {
 
     void MeshletTransparentForwardPass::BindDescriptors(const RenderContext& context)
     {
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto drawData = context.scene->GetSceneDrawData();
 
         //Using prevous frame's depth pyramid!
@@ -204,8 +279,18 @@ namespace Syn {
 
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
 
-        auto bindlessBuffer = imageManager->GetBindlessBuffer();
-        bindlessBuffer->Bind(context.cmd, _shaderProgram->GetLayout(), 0, VK_PIPELINE_BIND_POINT_GRAPHICS);
+        auto videoManager = ServiceLocator::Get<VideoManager>();
+        std::vector<std::pair<uint32_t, Vk::DescriptorBuffer*>> buffersToBind;
+
+        if (auto imgBuffer = imageManager->GetBindlessBuffer()) {
+            buffersToBind.push_back({ 0, imgBuffer });
+        }
+
+        if (auto vidBuffer = videoManager->GetBindlessBuffer()) {
+            buffersToBind.push_back({ 1, vidBuffer });
+        }
+
+        Vk::DescriptorUtils::BindMultipleBuffer(context.cmd, _shaderProgram->GetLayout(), VK_PIPELINE_BIND_POINT_GRAPHICS, buffersToBind);
     }
 
     void MeshletTransparentForwardPass::Draw(const RenderContext& context)
@@ -223,7 +308,7 @@ namespace Syn {
         if (maxCommandCount > 0) {
             VkDeviceSize traditionalBytes = drawData->Models.activeTraditionalCount * sizeof(VkDrawIndirectCommand);
             VkDeviceSize indirectOffset = traditionalBytes + (commandOffsetIdx * sizeof(VkDrawMeshTasksIndirectCommandEXT));
-            VkDeviceSize countOffset = (MaterialRenderType::Count + _renderType) * sizeof(uint32_t);
+            VkDeviceSize countOffset = (MaterialRenderType::MaterialRenderTypeCount + _renderType) * sizeof(uint32_t);
 
             vkCmdDrawMeshTasksIndirectCountEXT(
                 context.cmd,

@@ -1,6 +1,25 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "PreviewManager.h"
 #include "Engine/Logger/SynLog.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
+#include "Engine/ServiceLocator.h"
+#include "Engine/FrameContext.h"
+#include "Engine/Vk/Buffer/BufferFactory.h"
 
 namespace Syn {
 
@@ -44,6 +63,15 @@ namespace Syn {
         _resolution = newResolution;
         _tilesPerRow = _resolution / _tileSize;
         uint32_t newTotalTiles = _tilesPerRow * _tilesPerRow;
+
+
+        uint32_t framesInFlight = ServiceLocator::Get<FrameContext>()->framesInFlight;
+
+        if (_atlasImage)
+            _staleImages.push_back({ std::move(_atlasImage), framesInFlight });
+
+        if (_atlasDepthImage)
+            _staleImages.push_back({ std::move(_atlasDepthImage), framesInFlight });
 
         Vk::ImageConfig config{};
         config.width = _resolution;
@@ -125,15 +153,39 @@ namespace Syn {
         return std::vector<uint32_t>(dirtySet.begin(), dirtySet.end());
     }
 
-    void PreviewManager::ClearDirtyResources(PreviewResourceType type) {
+    void PreviewManager::MarkCompleted(PreviewResourceType type, uint32_t resourceId) {
         std::lock_guard<std::mutex> lock(_mutex);
-        _dirtyResources[type].clear();
+        _completedResources[type].push_back(resourceId);
     }
 
-    void PreviewManager::ClearAllDirtyResources() {
+    void PreviewManager::FlushCompletedResources() {
         std::lock_guard<std::mutex> lock(_mutex);
-        for (auto& [type, set] : _dirtyResources) {
-            set.clear();
+
+        for (auto& [type, resources] : _completedResources) {
+            for (uint32_t id : resources) {
+                _dirtyResources[type].erase(id);
+            }
+            resources.clear();
+        }
+
+        for (auto it = _staleImages.begin(); it != _staleImages.end();) {
+            if (it->framesToLive > 0) {
+                it->framesToLive--;
+                ++it;
+            }
+            else {
+                it = _staleImages.erase(it);
+            }
+        }
+
+        for (auto it = _staleBuffers.begin(); it != _staleBuffers.end();) {
+            if (it->framesToLive > 0) {
+                it->framesToLive--;
+                ++it;
+            }
+            else {
+                it = _staleBuffers.erase(it);
+            }
         }
 
         if (_warmupFramesRemaining > 0) {
@@ -208,5 +260,11 @@ namespace Syn {
             PreviewResourceType type = static_cast<PreviewResourceType>(id >> 32);
             _dirtyResources[type].insert(static_cast<uint32_t>(id & 0xFFFFFFFF));
         }
+    }
+
+    void PreviewManager::AddStaleBuffer(std::unique_ptr<Vk::Buffer> buffer) {
+        std::lock_guard<std::mutex> lock(_mutex);
+        uint32_t framesInFlight = ServiceLocator::Get<FrameContext>()->framesInFlight;
+        _staleBuffers.push_back({ std::move(buffer), framesInFlight });
     }
 }

@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "PointLightShadowAtlasRadixSortPass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Scene/Scene.h"
@@ -19,7 +35,7 @@ namespace Syn {
     }
 
     void PointLightShadowAtlasRadixSortPass::Initialize() {
-        auto vulkanContext = ServiceLocator::GetVkContext();
+        auto vulkanContext = ServiceLocator::Get<Vk::Context>();
 
         VrdxSorterCreateInfo sorterInfo = {};
         sorterInfo.physicalDevice = vulkanContext->GetPhysicalDevice()->Handle();
@@ -46,7 +62,7 @@ namespace Syn {
         auto& tempBuffer = drawData->PointLightShadow.atlasRadixSortTempBuffer;
 
         VrdxSorterStorageRequirements reqs;
-        vrdxGetSorterKeyValueStorageRequirements(_radixSorter, maxSortCount, &reqs);
+        vrdxGetSorterStorageRequirements(_radixSorter, maxSortCount, VRDX_SORT_MODE_KEY_VALUE, &reqs);
         tempBuffer.UpdateCapacity(fIdx, reqs.size);
 
         VkBuffer keysHandle = compManager->GetComponentBuffer(BufferNames::PointLightShadowAtlasSortKeyBuffer, fIdx).buffer->Handle();
@@ -77,21 +93,20 @@ namespace Syn {
         valuesPreBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         Vk::BufferUtils::InsertBarrier(context.cmd, valuesPreBarrier);
 
-        vrdxCmdSortKeyValueIndirect(
-            context.cmd,
-            _radixSorter,
-            maxSortCount,
-            countBuffer,
-            0,
-            keysHandle,
-            0,
-            valuesHandle,
-            0,
-            tempBuffer.GetHandle(fIdx),
-            0,
-            VK_NULL_HANDLE,
-            0
-        );
+        VrdxSortInfo sortInfo{};
+        sortInfo.elementCount = maxSortCount;
+        sortInfo.elementCountBuffer = countBuffer;
+        sortInfo.elementCountOffset = 0;
+        sortInfo.keysBuffer = keysHandle;
+        sortInfo.keysOffset = 0;
+        sortInfo.valuesBuffer = valuesHandle;
+        sortInfo.valuesOffset = 0;
+        sortInfo.storageBuffer = tempBuffer.GetHandle(fIdx);
+        sortInfo.storageOffset = 0;
+        sortInfo.queryPool = VK_NULL_HANDLE;
+        sortInfo.query = 0;
+
+        vrdxCmdSort(context.cmd, _radixSorter, &sortInfo);
 
         Vk::BufferBarrierInfo keysBarrier{};
         keysBarrier.buffer = keysHandle;

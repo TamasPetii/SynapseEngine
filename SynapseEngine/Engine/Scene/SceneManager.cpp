@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "SceneManager.h"
 #include "Engine/Logger/SynLog.h"
 #include "Engine/Scene/Writer/ManifestSceneWriter.h"
@@ -47,7 +63,7 @@ namespace Syn
         Info("SceneManager: Loading scene from file path: {}", path.string());
 
         auto source = std::make_unique<FileSceneSource>(path, _loader.get());
-        uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
+        uint32_t framesInFlight = ServiceLocator::Get<FrameContext>()->framesInFlight;
 
         _pendingScene = std::make_unique<Scene>(framesInFlight, std::move(source));
         _isSceneChangePending = true;
@@ -76,7 +92,7 @@ namespace Syn
         {
             if (_activeScene)
             {
-                ServiceLocator::GetVkContext()->GetDevice()->WaitIdle();
+                ServiceLocator::Get<Vk::Context>()->GetDevice()->WaitIdle();
             }
 
             if (_pendingScene)

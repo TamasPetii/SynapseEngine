@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "BenchmarkViewModel.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/FrameContext.h"
@@ -13,7 +29,7 @@ namespace Syn {
     }
 
     void BenchmarkViewModel::SyncWithEngine() {
-        auto frameCtx = ServiceLocator::GetFrameContext();
+        auto frameCtx = ServiceLocator::Get<FrameContext>();
         if (!frameCtx) return;
 
         float fps = frameCtx->deltaTime > 0.0f ? (1.0f / frameCtx->deltaTime) : 0.0f;
@@ -27,13 +43,13 @@ namespace Syn {
 
         uint32_t prevFrame = (frameCtx->currentFrameIndex + frameCtx->framesInFlight - 1) % frameCtx->framesInFlight;
 
-        if (auto cpuProfiler = ServiceLocator::GetCpuProfiler()) {
+        if (auto cpuProfiler = ServiceLocator::Get<ICpuProfiler>()) {
             auto rawTimings = cpuProfiler->GetTimings(prevFrame);
             _state.totalCpuTimeMs = CalculateGlobalTotal(rawTimings);
             _state.cpuTimings = ProcessTimings(rawTimings, true);
         }
 
-        if (auto gpuProfiler = ServiceLocator::GetGpuProfiler()) {
+        if (auto gpuProfiler = ServiceLocator::Get<IGpuProfiler>()) {
             auto rawTimings = gpuProfiler->GetTimings(prevFrame);
             _state.totalGpuTimeMs = CalculateGlobalTotal(rawTimings);
             _state.gpuTimings = ProcessTimings(rawTimings, false);
@@ -97,7 +113,7 @@ namespace Syn {
                 if (!matchesSearch) continue;
 
                 if (!_state.filters.showUpdate && phaseName.find(SystemPhaseNames::Update) != std::string::npos) continue;
-                if (!_state.filters.showUploadGPU && phaseName.find(SystemPhaseNames::UploadGPU) != std::string::npos) continue; // Catches GPU and Sparse Map
+                if (!_state.filters.showUploadGPU && phaseName.find(SystemPhaseNames::UploadGPU) != std::string::npos) continue;
                 if (!_state.filters.showFinish && phaseName.find(SystemPhaseNames::Finish) != std::string::npos) continue;
 
                 std::string key = rawGroup.name + "_" + phaseName + "_" + entryName;

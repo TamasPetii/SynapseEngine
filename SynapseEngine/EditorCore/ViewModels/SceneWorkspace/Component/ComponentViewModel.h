@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #pragma once
 #include "EditorCore/ViewModels/IViewModel.h"
 #include "ComponentState.h"
@@ -20,6 +36,9 @@
 #include "Rendering/Model/ModelComponentViewModel.h"
 #include "Rendering/Animation/AnimationViewModel.h"
 #include "Rendering/MaterialOverride/MaterialOverrideViewModel.h"
+#include "Rendering/PipelineOverride/PipelineOverrideViewModel.h"
+#include "Audio/AudioSource/AudioSourceViewModel.h"
+#include "Audio/AudioListener/AudioListenerViewModel.h"
 
 #include "EditorCore/Api/ISelectionApi.h"
 #include "EditorCore/Api/ITagApi.h"
@@ -34,8 +53,11 @@
 #include "EditorCore/Api/IMeshColliderApi.h"
 #include "EditorCore/Api/IRigidBodyApi.h"
 #include "EditorCore/Api/IModelComponentApi.h"
-#include "EditorCore/Api/IAnimationApi.h"
+#include "EditorCore/Api/IAnimationCompApi.h"
 #include "EditorCore/Api/IMaterialOverrideApi.h"
+#include "EditorCore/Api/IPipelineOverrideApi.h"
+#include "EditorCore/Api/IAudioSourceApi.h"
+#include "EditorCore/Api/IAudioListenerApi.h"
 
 namespace Syn {
     class ComponentViewModel : public IViewModel<ComponentState, ComponentIntent> {
@@ -56,8 +78,11 @@ namespace Syn {
             IMeshColliderApi* meshColliderApi,
             IRigidBodyApi* rigidBodyApi,
             IModelComponentApi* modelComponentApi,
-            IAnimationApi* animationApi,
-            IMaterialOverrideApi* materialOverrideApi
+            IAnimationCompApi* animationApi,
+            IMaterialOverrideApi* materialOverrideApi,
+            IPipelineOverrideApi* pipelineOverrideApi,
+			IAudioSourceApi* audioSourceApi,
+            IAudioListenerApi* audioListenerApi
             );
 
         ~ComponentViewModel() override = default;
@@ -81,6 +106,9 @@ namespace Syn {
 		ModelComponentViewModel& GetModelComponentViewModel() { return _modelComponentViewModel; }
 		AnimationViewModel& GetAnimationViewModel() { return _animationViewModel; }
         MaterialOverrideViewModel& GetMaterialOverrideViewModel() { return _materialOverrideViewModel; }
+        PipelineOverrideViewModel& GetPipelineOverrideViewModel() { return _pipelineOverrideViewModel; }
+		AudioSourceViewModel& GetAudioSourceViewModel() { return _audioSourceViewModel; }
+        AudioListenerViewModel& GetAudioListenerViewModel() { return _audioListenerViewModel; }
     private:
 		ISelectionApi* _selectionApi = nullptr;
         ComponentState _state;
@@ -102,5 +130,8 @@ namespace Syn {
 		ModelComponentViewModel _modelComponentViewModel;
 		AnimationViewModel _animationViewModel;
         MaterialOverrideViewModel _materialOverrideViewModel;
+        PipelineOverrideViewModel _pipelineOverrideViewModel;
+		AudioSourceViewModel _audioSourceViewModel;
+        AudioListenerViewModel _audioListenerViewModel;
     };
 }

@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "StaticSpatialSahSystem.h"
 #include "Engine/Component/Core/TransformComponent.h"
 #include "Engine/Component/Rendering/ModelComponent.h"
@@ -72,7 +88,7 @@ namespace Syn
         chunkGroup->visibleChunkIds.resize(staticEntities.size());
 
         chunkGroup->chunkCounter.store(0, std::memory_order_relaxed);
-        uint32_t framesInFlight = ServiceLocator::GetFrameContext()->framesInFlight;
+        uint32_t framesInFlight = ServiceLocator::Get<FrameContext>()->framesInFlight;
         this->SetFramesToUpload(framesInFlight);
         
         auto gatherTaskOpt = this->ForEachIndex(size_t(0), staticEntities.size(), size_t(1), subflow, "GatherSpatialItems",

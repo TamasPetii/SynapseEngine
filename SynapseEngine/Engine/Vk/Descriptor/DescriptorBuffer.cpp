@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "DescriptorBuffer.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
@@ -10,7 +26,7 @@ namespace Syn::Vk {
     DescriptorBuffer::DescriptorBuffer(VkDescriptorSetLayout layout)
         : _layout(layout)
     {
-        auto context = ServiceLocator::GetVkContext();
+        auto context = ServiceLocator::Get<Vk::Context>();
         auto device = context->GetDevice();
         auto physicalDevice = context->GetPhysicalDevice();
 
@@ -53,7 +69,7 @@ namespace Syn::Vk {
 
     void DescriptorBuffer::FillSampledImages(uint32_t binding, uint32_t count, VkImageView view, VkImageLayout layout)
     {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         VkDescriptorImageInfo imageInfo{ VK_NULL_HANDLE, view, layout };
 
@@ -81,7 +97,7 @@ namespace Syn::Vk {
     {
         std::lock_guard<std::mutex> lock(_bufferMutex);
 
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         VkDeviceSize bindingOffset;
         vkGetDescriptorSetLayoutBindingOffsetEXT(device->Handle(), _layout, binding, &bindingOffset);
@@ -127,7 +143,7 @@ namespace Syn::Vk {
 
     void DescriptorBuffer::WriteBuffer(uint32_t binding, uint32_t arrayElement, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range, VkDescriptorType type)
     {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
         VkBufferDeviceAddressInfo bdaInfo{ VK_STRUCTURE_TYPE_BUFFER_DEVICE_ADDRESS_INFO };
         bdaInfo.buffer = buffer;

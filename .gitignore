@@ -317,3 +317,13 @@ orleans.codegen.cs
 **/*.Server/ModelManifest.xml
 _Pvt_Extensions
 FakesAssemblies/
+
+# ==========================================
+# CLion / JetBrains IDEs
+# ==========================================
+.idea/
+cmake-build-*/
+*.iws
+*.iml
+*.ipr
+out/

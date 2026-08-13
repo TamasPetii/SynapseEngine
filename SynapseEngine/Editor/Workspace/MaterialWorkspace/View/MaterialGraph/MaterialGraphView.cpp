@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "MaterialGraphView.h"
 #include "Editor/Manager/EditorIcons.h" 
 #include <imgui.h>
@@ -178,6 +194,12 @@ namespace Syn {
         case GraphPinType::MetallicRoughness: return "MetallicRoughness";
         case GraphPinType::Emissive: return "Emissive";
         case GraphPinType::AmbientOcclusion: return "Ambient Occlusion";
+        case GraphPinType::Clearcoat: return "Clearcoat";
+        case GraphPinType::ClearcoatRoughness: return "CC Roughness";
+        case GraphPinType::ClearcoatNormal: return "CC Normal";
+        case GraphPinType::Specular: return "Specular";
+        case GraphPinType::SpecularColor: return "Specular Color";
+
         default: return "Unknown";
         }
     }

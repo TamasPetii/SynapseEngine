@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "HierarchyView.h"
 #include "Editor/Manager/EditorIcons.h"
 #include "Editor/Widgets/CardWidget.h"
@@ -34,32 +50,27 @@ namespace Syn {
 
                 ImGui::BeginChild("HierarchyTableContainer", ImVec2(0, tableHeight), ImGuiChildFlags_Borders, ImGuiWindowFlags_NoScrollbar);
 
-                if (ImGui::BeginTable("HierarchyTable", 2, ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable)) {
+                if (ImGui::BeginTable("HierarchyTable", 1, ImGuiTableFlags_ScrollY | ImGuiTableFlags_Resizable)) {
 
                     ImGui::TableSetupScrollFreeze(0, 1);
                     ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_WidthStretch);
-                    ImGui::TableSetupColumn("Vis", ImGuiTableColumnFlags_WidthFixed, 32.0f);
 
                     ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
-                    for (int column = 0; column < 2; column++) {
-                        ImGui::TableSetColumnIndex(column);
-                        const char* columnName = ImGui::TableGetColumnName(column);
+                    ImGui::TableSetColumnIndex(0);
 
-                        ImGui::PushID(column);
+                    ImGui::PushID(0);
+                    float cellWidth = ImGui::GetColumnWidth();
+                    const char* columnName = "Name";
+                    float textWidth = ImGui::CalcTextSize(columnName).x;
+                    ImVec2 startPos = ImGui::GetCursorPos();
 
-                        float cellWidth = ImGui::GetColumnWidth();
-                        float textWidth = ImGui::CalcTextSize(columnName).x;
-                        ImVec2 startPos = ImGui::GetCursorPos();
+                    ImGui::TableHeader("");
 
-                        ImGui::TableHeader("");
-
-                        ImGui::SetCursorPos(ImVec2(startPos.x + (cellWidth - textWidth) * 0.5f, startPos.y + 3.0f));
-                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
-                        ImGui::Text("%s", columnName);
-                        ImGui::PopStyleColor();
-
-                        ImGui::PopID();
-                    }
+                    ImGui::SetCursorPos(ImVec2(startPos.x + (cellWidth - textWidth) * 0.5f, startPos.y + 3.0f));
+                    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 1.0f, 1.0f));
+                    ImGui::Text("%s", columnName);
+                    ImGui::PopStyleColor();
+                    ImGui::PopID();
 
                     ImGuiListClipper clipper;
                     clipper.Begin(static_cast<int>(state.flatNodes.size()));
@@ -158,10 +169,9 @@ namespace Syn {
     void HierarchyView::RenderEntityRow(HierarchyViewModel& vm, const HierarchyNode& node) {
         ImGui::PushID(node.id);
         ImGui::TableNextRow();
-
         ImGui::TableNextColumn();
 
-        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding;
+        ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanFullWidth | ImGuiTreeNodeFlags_FramePadding | ImGuiTreeNodeFlags_AllowOverlap;
 
         if (!node.hasChildren) flags |= ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
         if (vm.GetState().selectedEntity == node.id) flags |= ImGuiTreeNodeFlags_Selected;
@@ -191,27 +201,32 @@ namespace Syn {
             ImGui::EndPopup();
         }
 
-        if (node.hasChildren && isOpened) {
-            ImGui::TreePop();
-        }
-
-        ImGui::TableNextColumn();
-
         const char* eyeIcon = node.isVisible ? SYN_ICON_EYE : SYN_ICON_EYE_SLASH;
         ImVec4 eyeColor = node.isVisible ? ImGui::GetStyleColorVec4(ImGuiCol_Text) : ImVec4(0.5f, 0.5f, 0.5f, 1.0f);
 
         ImGui::PushStyleColor(ImGuiCol_Text, eyeColor);
         ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 1.0f, 0.1f));
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 1.0f, 1.0f, 0.2f));
 
         float iconWidth = ImGui::CalcTextSize(eyeIcon).x;
-        float columnWidth = ImGui::GetColumnWidth();
-        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + (columnWidth - iconWidth) * 0.5f - 4.0f);
+        ImGui::SameLine();
 
+        float availX = ImGui::GetContentRegionAvail().x;
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + availX - iconWidth - 12.0f);
+
+        ImGui::PushID("VisibilityToggle");
         if (ImGui::Button(eyeIcon)) {
             vm.Dispatch(HierarchyToggleVisibilityIntent{ node.id, !node.isVisible });
         }
+        ImGui::PopID();
 
-        ImGui::PopStyleColor(2);
+        ImGui::PopStyleColor(4);
+
+        if (node.hasChildren && isOpened) {
+            ImGui::TreePop();
+        }
+
         ImGui::PopID();
     }
 

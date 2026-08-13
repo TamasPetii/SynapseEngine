@@ -1,0 +1,83 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
+#include "AnimationWorkspace.h"
+#include "Editor/Manager/EditorIcons.h"
+
+#include "Editor/Workspace/Common/ContentBrowser/ContentBrowserView.h"
+#include "EditorCore/ViewModels/Common/ContentBrowser/ContentBrowserViewModel.h"
+
+#include "View/AnimationHierarchy/AnimationHierarchyView.h"
+#include "EditorCore/ViewModels/AnimationWorkspace/AnimationHierarchy/AnimationHierarchyViewModel.h"
+
+#include "View/AnimationViewport/AnimationViewportView.h"
+#include "EditorCore/ViewModels/AnimationWorkspace/AnimationViewport/AnimationViewportViewModel.h"
+
+#include "View/AnimationSequencer/AnimationSequencerView.h"
+#include "EditorCore/ViewModels/AnimationWorkspace/AnimationSequencer/AnimationSequencerViewModel.h"
+
+#include "Engine/Scene/SceneNames.h"
+
+namespace Syn {
+
+    AnimationWorkspace::AnimationWorkspace(EditorContext* context, IconManager* iconManager, const std::string& assetPath)
+        : _context(context), _iconManager(iconManager), _assetPath(assetPath) {}
+
+    void AnimationWorkspace::OnActivate() {
+        if (_context && _context->GetApi<ISceneApi>()) {
+            _context->GetApi<ISceneApi>()->ActivateScene(SceneNames::AnimationPreview);
+        }
+    }
+
+    void AnimationWorkspace::Initialize() {
+
+        using ContentBrowserWin = EditorWindow<ContentBrowserView, ContentBrowserViewModel>;
+        AddWindow<ContentBrowserWin>(
+            ContentBrowserView{ _iconManager, SYN_ICON_FOLDER_OPEN " Content Browser###Content_Animation" },
+            ContentBrowserViewModel{ _context->GetApi<IFileSystemApi>(), _assetPath }
+        );
+
+        using AnimationHierarchyWin = EditorWindow<AnimationHierarchyView, AnimationHierarchyViewModel>;
+        AddWindow<AnimationHierarchyWin>(
+            AnimationHierarchyView{},
+            AnimationHierarchyViewModel{ 
+                _context->GetApi<IAnimationApi>(),
+                _context->GetApi<IModelApi>(),
+                _context->GetApi<IPreviewApi>()
+            }
+        );
+
+        using AnimationViewportWin = EditorWindow<AnimationViewportView, AnimationViewportViewModel>;
+        AddWindow<AnimationViewportWin>(
+            AnimationViewportView{},
+            AnimationViewportViewModel{
+                _context->GetApi<IRenderApi>(),
+                _context->GetApi<ISelectionApi>(),
+                _context->GetApi<ITransformApi>(),
+                _context->GetApi<ISettingsApi>(),
+                _context->GetApi<IAnimationApi>()
+            }
+        );
+
+        using AnimationSequencerWin = EditorWindow<AnimationSequencerView, AnimationSequencerViewModel>;
+        AddWindow<AnimationSequencerWin>(
+            AnimationSequencerView{},
+            AnimationSequencerViewModel{
+                _context->GetApi<IAnimationApi>()
+            }
+        );
+    }
+}

@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #pragma once
 #include "Engine/SynApi.h"
 #include "Engine/Vk/Command/CommandPool.h"
@@ -14,6 +30,7 @@ namespace Syn::Vk
         std::function<void(VkCommandBuffer)> uploadCallback;
         std::function<void()> onFinished;
         bool needsGraphics = false;
+        bool needsVideo = false;
     };
 
     class SYN_API GpuUploader {
@@ -21,6 +38,7 @@ namespace Syn::Vk
         GpuUploader();
         ~GpuUploader() = default;
 
+        void Submit(GpuUploadRequest request);
         void Enqueue(GpuUploadRequest request);
         void UploadSync(GpuUploadRequest request);
         void ProcessUploads();
@@ -36,11 +54,15 @@ namespace Syn::Vk
         std::vector<ActiveBatch> _activeBatches;
         std::vector<GpuUploadRequest> _transferRequests;
         std::vector<GpuUploadRequest> _graphicsRequests;
+        std::vector<GpuUploadRequest> _videoRequests;
 
         Vk::ThreadSafeQueue* _transferQueue = nullptr;
         Vk::ThreadSafeQueue* _graphicsQueue = nullptr;
+        Vk::ThreadSafeQueue* _videoQueue = nullptr;
+
         std::unique_ptr<Vk::CommandPool> _transferPool;
         std::unique_ptr<Vk::CommandPool> _graphicsPool;
+        std::unique_ptr<Vk::CommandPool> _videoPool;
 
         std::mutex _mutex;
     };

@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #ifndef SYN_INCLUDES_UTILS_MATERIAL_MATH_GLSL
 #define SYN_INCLUDES_UTILS_MATERIAL_MATH_GLSL
 
@@ -21,12 +37,34 @@ vec4 EvaluateAlbedoAlpha(uint64_t textureMetadataBufferAddr, const Material mat,
         uint sampID = ResolveSampler(textureMetadataBufferAddr, mat.albedoTexture, texID);
         finalColor *= SampleTexture2D(texID, sampID, uv);
     }
+
+    if (HAS_VIDEO_TEX(mat)) {
+        uint texID = UNPACK_TEXTURE_ID(mat.videoTexture);
+        uint sampID = UNPACK_SAMPLER_ID(mat.videoTexture);
+        if (sampID == INVALID_SAMPLER_INDEX) {
+            sampID = SAMPLER_LINEAR_CLAMP_EDGE;
+        }
+        finalColor *= SampleVideoTexture2D(texID, sampID, uv);
+    }
+
+    if (HAS_OPACITY_TEX(mat)) { 
+        uint texID = UNPACK_TEXTURE_ID(mat.opacityTexture);
+        uint sampID = ResolveSampler(textureMetadataBufferAddr, mat.opacityTexture, texID);
+        
+        float opacityMask = SampleTexture2D(texID, sampID, uv).r;
+        finalColor.a = opacityMask;
+    }
+
     return finalColor;
 }
 
-vec3 EvaluateNormal(uint64_t textureMetadataBufferAddr, Material mat, vec2 uv, vec3 vertexNormal, vec4 vertexTangent) {
+vec3 EvaluateNormal(uint64_t textureMetadataBufferAddr, Material mat, vec2 uv, vec3 vertexNormal, vec4 vertexTangent, bool isFrontFacing) {
     vec3 normal = normalize(vertexNormal);
     
+    if (!isFrontFacing) {
+        normal = -normal;
+    }
+
     if (!HAS_NORMAL_TEX(mat)) {
         return normal;
     }
@@ -104,6 +142,77 @@ float EvaluateAO(uint64_t textureMetadataBufferAddr, Material mat, vec2 uv) {
         ao *= SampleTexture2D(texID, sampID, uv).r;
     }
     return ao;
+}
+
+void EvaluateClearcoat(
+    uint64_t textureMetadataBufferAddr, 
+    Material mat, 
+    vec2 uv, 
+    vec3 vertexNormal, 
+    vec4 vertexTangent, 
+    bool isFrontFacing,
+    out float outFactor, 
+    out float outRoughness, 
+    out vec3 outNormal
+) {
+    outFactor = mat.clearcoatFactor;
+    outRoughness = mat.clearcoatRoughness;
+    
+    if (HAS_CLEARCOAT_TEX(mat)) {
+        uint texID = UNPACK_TEXTURE_ID(mat.clearcoatTexture);
+        uint sampID = ResolveSampler(textureMetadataBufferAddr, mat.clearcoatTexture, texID);
+        outFactor *= SampleTexture2D(texID, sampID, uv).r;
+    }
+
+    if (HAS_CLEARCOAT_ROUGHNESS_TEX(mat)) {
+        uint texID = UNPACK_TEXTURE_ID(mat.clearcoatRoughnessTexture);
+        uint sampID = ResolveSampler(textureMetadataBufferAddr, mat.clearcoatRoughnessTexture, texID);
+        outRoughness *= SampleTexture2D(texID, sampID, uv).g;
+    }
+
+    vec3 geomNormal = normalize(vertexNormal);
+    if (!isFrontFacing) geomNormal = -geomNormal;
+
+    if (HAS_CLEARCOAT_NORMAL_TEX(mat)) {
+        uint texID = UNPACK_TEXTURE_ID(mat.clearcoatNormalTexture);
+        uint sampID = ResolveSampler(textureMetadataBufferAddr, mat.clearcoatNormalTexture, texID);
+        
+        vec3 tangent = normalize(vertexTangent.xyz);
+        tangent = normalize(tangent - geomNormal * dot(geomNormal, tangent));
+        vec3 bitangent = cross(geomNormal, tangent) * vertexTangent.w;
+        mat3 TBN = mat3(tangent, bitangent, geomNormal);
+
+        vec3 tangentSpaceNormal;
+        tangentSpaceNormal.xy = SampleTexture2D(texID, sampID, uv).xy * 2.0 - 1.0;
+        tangentSpaceNormal.z = sqrt(max(1.0 - dot(tangentSpaceNormal.xy, tangentSpaceNormal.xy), 0.0));
+        
+        outNormal = normalize(TBN * tangentSpaceNormal);
+    } else {
+        outNormal = geomNormal;
+    }
+}
+
+void EvaluateSpecular(
+    uint64_t textureMetadataBufferAddr, 
+    Material mat, 
+    vec2 uv, 
+    out float outSpecularFactor, 
+    out vec3 outSpecularColor
+) {
+    outSpecularFactor = mat.specularFactor;
+    outSpecularColor = mat.specularColor;
+
+    if (HAS_SPECULAR_TEX(mat)) {
+        uint texID = UNPACK_TEXTURE_ID(mat.specularTexture);
+        uint sampID = ResolveSampler(textureMetadataBufferAddr, mat.specularTexture, texID);
+        outSpecularFactor *= SampleTexture2D(texID, sampID, uv).a; 
+    }
+
+    if (HAS_SPECULAR_COLOR_TEX(mat)) {
+        uint texID = UNPACK_TEXTURE_ID(mat.specularColorTexture);
+        uint sampID = ResolveSampler(textureMetadataBufferAddr, mat.specularColorTexture, texID);
+        outSpecularColor *= SampleTexture2D(texID, sampID, uv).rgb;
+    }
 }
 
 #endif

@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #ifndef SYN_INCLUDES_UTILS_OCCLUSION_GLSL
 #define SYN_INCLUDES_UTILS_OCCLUSION_GLSL
 
@@ -67,7 +83,8 @@ float CalculateSphereScreenSizeOrtho(vec3 worldCenter, float radius, mat4 viewPr
     return INFINITE_SCREEN_SIZE;
 }
 
-bool IsSphereOccludedPerspective(vec3 worldCenter, float radius, mat4 view, mat4 proj, float zNear, float zFar, sampler2D depthPyramid, vec2 screenRes, bool enableDepthOcclusion, out float outScreenSizePixels) {
+bool IsSphereOccludedPerspective(vec3 worldCenter, float radius, mat4 view, mat4 proj, float zNear,
+float zFar, sampler2D depthPyramid, vec2 screenRes, bool enableDepthOcclusion, out float outScreenSizePixels) {
     vec3 viewCenter = (view * vec4(worldCenter, 1.0)).xyz;
     vec4 uv;
     outScreenSizePixels = INFINITE_SCREEN_SIZE;

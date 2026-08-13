@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "Synapse.h"
 #include "Engine/SynMacro.h"
 #include "Engine/Vk/Context.h"
@@ -8,6 +24,8 @@
 #include "Editor/Workspace/ModelWorkspace/ModelWorkspace.h"
 #include "Editor/Workspace/MaterialWorkspace/MaterialWorkspace.h"
 #include "Editor/Workspace/TextureWorkspace/TextureWorkspace.h"
+#include "Editor/Workspace/AnimationWorkspace/AnimationWorkspace.h"
+#include "Editor/Workspace/AudioWorkspace/AudioWorkspace.h"
 
 #include "Editor/Workspace/Common/MainMenu/MainMenuView.h"
 #include "EditorCore/ViewModels/Common/MainMenu/MainMenuViewModel.h"
@@ -130,6 +148,14 @@ void Synapse::OnInit() {
     ));
 
     _guiManager->AddWorkspace(Syn::EditorWorkspace::Texture, std::make_unique<Syn::TextureWorkspace>(
+        _editorContext.get(), _iconManager.get(), absoluteAssetsPath
+    ));
+
+    _guiManager->AddWorkspace(Syn::EditorWorkspace::Animation, std::make_unique<Syn::AnimationWorkspace>(
+        _editorContext.get(), _iconManager.get(), absoluteAssetsPath
+    ));
+
+    _guiManager->AddWorkspace(Syn::EditorWorkspace::Audio, std::make_unique<Syn::AudioWorkspace>(
         _editorContext.get(), _iconManager.get(), absoluteAssetsPath
     ));
 

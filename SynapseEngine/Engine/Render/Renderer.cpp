@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "Renderer.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
@@ -13,7 +29,7 @@ namespace Syn {
     Renderer::Renderer(uint32_t framesInFlight)
         : _framesInFlight(framesInFlight)
     {
-        auto vkContext = ServiceLocator::GetVkContext();
+        auto vkContext = ServiceLocator::Get<Vk::Context>();
         auto device = vkContext->GetDevice();
 
         _graphicsQueue = device->GetGraphicsQueue();
@@ -38,12 +54,12 @@ namespace Syn {
     }
 
     Renderer::~Renderer() {
-        auto device = ServiceLocator::GetVkContext()->GetDevice();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
         device->WaitIdle();
     }
 
     void Renderer::WaitForFrame(uint32_t frameIndex) {
-        auto device = ServiceLocator::GetVkContext()->GetDevice()->Handle();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice()->Handle();
 
         VkFence fences[] = { _inFlightFences[frameIndex]->Handle(), _presentFences[frameIndex]->Handle() };
         VkResult result = vkWaitForFences(device, 2, fences, VK_TRUE, UINT64_MAX);
@@ -55,8 +71,8 @@ namespace Syn {
     }
 
     Vk::CommandBuffer* Renderer::BeginFrame(uint32_t frameIndex) {
-        auto device = ServiceLocator::GetVkContext()->GetDevice()->Handle();
-        auto swapChain = ServiceLocator::GetVkContext()->GetSwapChain();
+        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice()->Handle();
+        auto swapChain = ServiceLocator::Get<Vk::Context>()->GetSwapChain();
 
         VkFence fences[] = { _inFlightFences[frameIndex]->Handle(), _presentFences[frameIndex]->Handle() };
         vkResetFences(device, 2, fences);
@@ -101,7 +117,7 @@ namespace Syn {
 
         _graphicsQueue->Submit(&submitInfo, _inFlightFences[frameIndex]->Handle());
 
-        auto swapChain = ServiceLocator::GetVkContext()->GetSwapChain();
+        auto swapChain = ServiceLocator::Get<Vk::Context>()->GetSwapChain();
         swapChain->Present(_imageIndex, _renderFinishedSemaphores[frameIndex]->Handle(), _presentFences[frameIndex]->Handle());
     }
 }

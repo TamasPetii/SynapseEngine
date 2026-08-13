@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "AnimationColliderProcessor.h"
 #include "Engine/ServiceLocator.h"
 #include <limits>
@@ -25,7 +41,7 @@ namespace Syn
                 });
         }
 
-        ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
+        ServiceLocator::Get<tf::Executor>()->run(taskflow).wait();
 
 		ComputeGlobalAnimationCollider(inOutAnimation);
     }
@@ -74,7 +90,7 @@ namespace Syn
 
         tf::GuidedPartitioner partitioner(1);
 
-        subflow.for_each_index(size_t(0), model.globalMeshCount, size_t(1),
+        subflow.for_each_index(size_t(0), static_cast<size_t>(model.globalMeshCount), size_t(1),
             [&](size_t m) {
                 //Todo: Change to new cpu model!
                 const auto& meshDesc = model.meshDescriptors[m * 4];

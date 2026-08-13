@@ -1,6 +1,22 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "ClusterPointLightSinglePass.h"
 #include "Engine/ServiceLocator.h"
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/ShaderManager.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
@@ -9,11 +25,11 @@ namespace Syn {
     #include "Engine/Shaders/Includes/PushConstants/ClusterLightWritePC.glsl"
 
     void ClusterPointLightSinglePass::Initialize() {
-        auto shaderManager = ServiceLocator::GetShaderManager();
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = false;
 
-        _shaderProgram = shaderManager->CreateProgram("ClusterPointLightSingleProgram", {
+        _shaderProgramId = shaderManager->LoadProgramAsync("ClusterPointLightSingleProgram", {
             ShaderNames::ClusterPointLightSingle
             }, config);
     }

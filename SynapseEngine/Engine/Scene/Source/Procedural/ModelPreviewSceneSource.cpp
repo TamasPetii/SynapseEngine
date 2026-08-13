@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "ModelPreviewSceneSource.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Scene/Insiders/SceneInsider.h"
@@ -28,8 +44,8 @@ namespace Syn
         EntityID& sceneCam = SceneInsider::GetSceneCameraEntity(scene, SceneInsider::GetKey());
         HierarchyManager* hm = scene.GetHierarchyManager();
 
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto materialManager = ServiceLocator::GetMaterialManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
+        auto materialManager = ServiceLocator::Get<MaterialManager>();
 
         Syn::Info("Populating Model Preview Scene...");
 
@@ -129,9 +145,13 @@ namespace Syn
 
         hm->AttachChild(rootEnvironment, previewModel);
 
-        auto skyTextureId = ServiceLocator::GetImageManager()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/Engine/Environment/ModelPreview.hdr"));
+        auto skyTextureId = ServiceLocator::Get<ImageManager>()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/Engine/Environment/ModelPreview.hdr"));
         scene.GetSettings()->environment.skyTextureId = skyTextureId;
         scene.GetSettings()->debug.enableInfiniteGrid = true;
+        scene.GetSettings()->debug.enableBillboardCameras = false;
+        scene.GetSettings()->debug.enableBillboardPointLights = false;
+        scene.GetSettings()->debug.enableBillboardSpotLights = false;
+        scene.GetSettings()->debug.enableBillboardDirectionalLights = false;
 
         return true;
     }

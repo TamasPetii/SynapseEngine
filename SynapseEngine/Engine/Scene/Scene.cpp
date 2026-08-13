@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "Scene.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Mesh/MeshDrawDescriptor.h"
@@ -15,6 +31,7 @@
 #include "Engine/Component/Light/Point/PointLightComponent.h"
 #include "Engine/Component/Light/Spot/SpotLightComponent.h"
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
+#include "Engine/Component/Rendering/PipelineOverrideComponent.h"
 
 #include "Engine/System/Core/TransformSystem.h"
 #include "Engine/System/Core/TransformSetupSystem.h"
@@ -29,7 +46,10 @@
 #include "Engine/System/Rendering/ModelFrustumCullingSystem.h"
 #include "Engine/System/Rendering/AnimationSystem.h"
 #include "Engine/System/Rendering/MaterialOverrideSystem.h"
+#include "Engine/System/Rendering/PipelineSystem.h"
+#include "Engine/System/Rendering/PipelineOverrideSystem.h"
 #include "Engine/System/Physics/PhysicsSystem.h"
+#include "Engine/System/Audio/AudioSystem.h"
 
 #include "Engine/System/Light/Point/PointLightSystem.h"
 #include "Engine/System/Light/Point/PointLightShadowSystem.h"
@@ -58,6 +78,7 @@
 #include "Engine/System/Physics/ConvexColliderSystem.h"
 #include "Engine/System/Physics/MeshColliderSystem.h"
 #include "Engine/System/Physics/RigidBodySystem.h"
+#include "Engine/System/Physics/PhysicsDebugSystem.h"
 #include "Engine/System/Core/StaticSpatialSahSystem.h"
 #include "Engine/System/Core/TransformModelLinkSystem.h"
 #include "Engine/Profiler/ICpuProfiler.h"
@@ -74,6 +95,11 @@ namespace Syn
 
     void Scene::DestroyEntity(EntityID entity) {
         if (!_registry->IsValid(entity)) return;
+        
+        for (auto& system : _systems) {
+            system->OnEntityDestroyed(this, entity);
+        }
+
         _hierarchyManager->OnEntityDestroyed(entity);
         _registry->DestroyEntity(entity);
     }
@@ -89,6 +115,7 @@ namespace Syn
         _registry->EnsurePool<AnimationComponent>();
         _registry->EnsurePool<ModelComponent>();
         _registry->EnsurePool<MaterialOverrideComponent>();
+        _registry->EnsurePool<PipelineOverrideComponent>();
         _registry->EnsurePool<DirectionLightComponent>();
         _registry->EnsurePool<DirectionLightShadowComponent>();
         _registry->EnsurePool<PointLightComponent>();
@@ -103,7 +130,7 @@ namespace Syn
 		_registry->EnsurePool<RigidBodyComponent>();
 		_registry->EnsurePool<HierarchyComponent>();
 
-        _physicsEngine = ServiceLocator::GetPhysicsFactory()();
+        _physicsEngine = ServiceLocator::Get<PhysicsFactory>()();
 
         _hierarchyManager = std::make_unique<HierarchyManager>(_registry.get());
 
@@ -126,6 +153,10 @@ namespace Syn
 
     Scene::~Scene()
     {
+        for (auto& system : _systems) {
+            system->OnClean(this);
+        }
+
 		_physicsEngine->Shutdown();
         _physicsEngine.reset();
         _registry.reset();
@@ -147,12 +178,14 @@ namespace Syn
 
         RegisterSystem<StaticSpatialSahSystem>();
         RegisterSystem<MaterialSystem>();
+        RegisterSystem<PipelineSystem>();
         RegisterSystem<CameraSystem>();
         RegisterSystem<RenderSystem>();
         RegisterSystem<ModelSystem>();
         RegisterSystem<ModelFrustumCullingSystem>();
         RegisterSystem<AnimationSystem>();
         RegisterSystem<MaterialOverrideSystem>();
+        RegisterSystem<PipelineOverrideSystem>();
 
         RegisterSystem<PointLightSystem>();
         RegisterSystem<PointLightShadowSystem>();
@@ -176,6 +209,7 @@ namespace Syn
         RegisterSystem<DirectionLightShadowAtlasSystem>();
 
         RegisterSystem<PhysicsSystem>();
+        RegisterSystem<PhysicsDebugSystem>();
 		RegisterSystem<BoxColliderSystem>();
 		RegisterSystem<SphereColliderSystem>();
 		RegisterSystem<CapsuleColliderSystem>();
@@ -185,8 +219,7 @@ namespace Syn
 
 		RegisterSystem<HierarchySystem>();
         RegisterSystem<SelectionOutlineSystem>();
-
-
+        RegisterSystem<AudioSystem>();
     }
 
     void Scene::InitializeComponentBuffers()
@@ -447,7 +480,7 @@ namespace Syn
 
                 std::string groupName = sys->GetGroup();
 
-                CpuProfileScope profile(ServiceLocator::GetCpuProfiler(), _currentFrameIndex, groupName, profilerName);
+                CpuProfileScope profile(ServiceLocator::Get<ICpuProfiler>(), _currentFrameIndex, groupName, profilerName);
 
                 switch (phase)
                 {
@@ -500,9 +533,10 @@ namespace Syn
         _currentFrameIndex = frameIndex;
         _currentDeltaTime = deltaTime;
 
-        auto modelSnapshot = ServiceLocator::GetModelManager()->GetSnapshotAndVersion();
-        auto animSnapshot = ServiceLocator::GetAnimationManager()->GetSnapshotAndVersion();
-        auto materialSnapshot = ServiceLocator::GetMaterialManager()->GetSnapshotAndVersion();
+        auto modelSnapshot = ServiceLocator::Get<ModelManager>()->GetSnapshotAndVersion();
+        auto animSnapshot = ServiceLocator::Get<AnimationManager>()->GetSnapshotAndVersion();
+        auto materialSnapshot = ServiceLocator::Get<MaterialManager>()->GetSnapshotAndVersion();
+		auto audioSnapshot = ServiceLocator::Get<AudioManager>()->GetSnapshotAndVersion();
 
         _systemContext.deltaTime = deltaTime;
         _systemContext.frameIndex = frameIndex;
@@ -510,10 +544,12 @@ namespace Syn
         _systemContext.modelManagerVersion = modelSnapshot.version;
         _systemContext.materialManagerVersion = materialSnapshot.version;
         _systemContext.animationManagerVersion = animSnapshot.version;
+        _systemContext.audioManagerVersion = audioSnapshot.version;
 
         _systemContext.modelSnapshots = modelSnapshot.snapshots;
         _systemContext.materialSnapshots = materialSnapshot.snapshots;
         _systemContext.animationSnapshots = animSnapshot.snapshots;
+        _systemContext.soundSnapshots = audioSnapshot.snapshots;
 
         _systemContext.materialRenderTypes.clear();
         _systemContext.materialRenderTypes.resize(materialSnapshot.snapshots.size());
@@ -524,16 +560,25 @@ namespace Syn
                     return MaterialRenderType::Opaque1Sided;
 
                 bool isTrans = snapshot.resource->isTransparent;
+                bool isAlpha = snapshot.resource->isAlphaTested;
                 bool isDouble = snapshot.resource->doubleSided;
 
-                if (isTrans && isDouble)  return MaterialRenderType::Transparent2Sided;
-                if (isTrans)             return MaterialRenderType::Transparent1Sided;
-                if (isDouble)            return MaterialRenderType::Opaque2Sided;
-                return MaterialRenderType::Opaque1Sided;
+                if (isTrans) {
+                    if (isAlpha) 
+                        return isDouble ? MaterialRenderType::AlphaTestedTransparent2Sided : MaterialRenderType::AlphaTestedTransparent1Sided;
+                    else
+                        return isDouble ? MaterialRenderType::Transparent2Sided : MaterialRenderType::Transparent1Sided;
+                }
+                else {
+                    if (isAlpha) 
+                        return isDouble ? MaterialRenderType::AlphaTestedOpaque2Sided : MaterialRenderType::AlphaTestedOpaque1Sided;
+                    else
+                        return isDouble ? MaterialRenderType::Opaque2Sided : MaterialRenderType::Opaque1Sided;
+                }
             });
 
-        auto screenWidth = ServiceLocator::GetFrameContext()->screenWidth;
-        auto screenHeight = ServiceLocator::GetFrameContext()->screenHeight;
+        auto screenWidth = ServiceLocator::Get<FrameContext>()->screenWidth;
+        auto screenHeight = ServiceLocator::Get<FrameContext>()->screenHeight;
 
         if (_sceneCameraEntity != NULL_ENTITY && _registry->HasComponent<CameraComponent>(_sceneCameraEntity))
         {
@@ -547,7 +592,7 @@ namespace Syn
             _registry->GetComponent<CameraComponent>(_debugCameraEntity).height = (float)screenHeight;
         }
 
-        ServiceLocator::GetTaskExecutor()->run(_updateTaskflow).wait();
+        ServiceLocator::Get<tf::Executor>()->run(_updateTaskflow).wait();
     }
 
     void Scene::UpdateGPU(uint32_t frameIndex)
@@ -555,11 +600,11 @@ namespace Syn
         _currentFrameIndex = frameIndex;
         _componentBufferManager->Update(frameIndex);
 
-        ServiceLocator::GetTaskExecutor()->run(_gpuTaskflow).wait();
+        ServiceLocator::Get<tf::Executor>()->run(_gpuTaskflow).wait();
     }
 
     void Scene::Finish()
     {
-        ServiceLocator::GetTaskExecutor()->run(_finishTaskflow).wait();
+        ServiceLocator::Get<tf::Executor>()->run(_finishTaskflow).wait();
     }
 }

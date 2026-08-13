@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #define VMA_IMPLEMENTATION
 #include "Device.h"
 
@@ -8,7 +24,8 @@ namespace Syn::Vk {
         std::set<uint32_t> uniqueQueueFamilies = {
             indices.graphics.value(),
             indices.compute.value(),
-            indices.transfer.value()
+            indices.transfer.value(),
+            indices.videoDecode.value()
         };
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
@@ -29,6 +46,9 @@ namespace Syn::Vk {
 
         VkPhysicalDeviceShaderObjectFeaturesEXT shaderObjectFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_OBJECT_FEATURES_EXT };
         shaderObjectFeatures.shaderObject = VK_TRUE;
+
+        VkPhysicalDeviceDescriptorHeapFeaturesEXT heapFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_HEAP_FEATURES_EXT };
+        heapFeatures.descriptorHeap = VK_TRUE;
 
         VkPhysicalDeviceDescriptorBufferFeaturesEXT descriptorBufferFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_BUFFER_FEATURES_EXT };
         descriptorBufferFeatures.descriptorBuffer = VK_TRUE;
@@ -84,6 +104,7 @@ namespace Syn::Vk {
 
         VkPhysicalDeviceVulkan11Features features11{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES };
         features11.shaderDrawParameters = VK_TRUE;
+        features11.samplerYcbcrConversion = VK_TRUE;
 
         VkPhysicalDeviceFeatures2 deviceFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2 };
         deviceFeatures.features.samplerAnisotropy = VK_TRUE;
@@ -94,19 +115,25 @@ namespace Syn::Vk {
         deviceFeatures.features.pipelineStatisticsQuery = VK_TRUE;
         deviceFeatures.features.shaderInt64 = VK_TRUE;
 		deviceFeatures.features.shaderClipDistance = VK_TRUE;
-        
+		deviceFeatures.features.shaderStorageImageMultisample = VK_TRUE;
+       
+        VkPhysicalDeviceDeviceGeneratedCommandsFeaturesEXT dgcFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_GENERATED_COMMANDS_FEATURES_EXT };
+        dgcFeatures.deviceGeneratedCommands = VK_TRUE;
+
         deviceFeatures.pNext = &features11;
         features11.pNext = &features12;
         features12.pNext = &features13;
         features13.pNext = &meshFeatures;
         meshFeatures.pNext = &shaderObjectFeatures;
         shaderObjectFeatures.pNext = &descriptorBufferFeatures;
-        descriptorBufferFeatures.pNext = &mutableFeatures;
+        descriptorBufferFeatures.pNext = &heapFeatures;
+        heapFeatures.pNext = &mutableFeatures;
         mutableFeatures.pNext = &dynamicState1;
         dynamicState1.pNext = &dynamicState2;
         dynamicState2.pNext = &dynamicState3;
         dynamicState3.pNext = &maintenance1Features;
-        maintenance1Features.pNext = nullptr;
+        maintenance1Features.pNext = &dgcFeatures;
+        dgcFeatures.pNext = nullptr;
 
         /*
         maintenance1Features.pNext = &enqueueFeatures;
@@ -148,6 +175,10 @@ namespace Syn::Vk {
 
         if (indices.transfer.has_value()) {
             _transferQueue = getQueue(indices.transfer.value());
+        }
+
+        if (indices.videoDecode.has_value()) {
+            _videoDecodeQueue = getQueue(indices.videoDecode.value());
         }
 
         InitVMA(instance, physicalDevice);

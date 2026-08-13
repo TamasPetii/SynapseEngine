@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #version 460
 #extension GL_EXT_mesh_shader : require
 #extension GL_GOOGLE_include_directive : require
@@ -9,9 +25,13 @@
 #include "../../../Includes/Common/Transform.glsl"
 #include "../../../Includes/Common/Animation.glsl"
 #include "../../../Includes/Common/DirectionLight.glsl"
+#include "../../../Includes/Common/Material.glsl"
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 layout(triangles, max_vertices = 64, max_primitives = 64) out;
+
+layout(location = 0) out vec2 outUV[];
+layout(location = 1) out flat uint outMaterialId[]; 
 
 #include "../../../Includes/Payload/ShadowTaskPayload.glsl"
 taskPayloadSharedEXT ShadowTaskPayload payload;
@@ -57,6 +77,8 @@ void main() {
         uint globalVtxIdx = GET_MESHLET_VERTEX_INDEX(addrs.meshletVertexIndices, meshlet.vertexIndicesOffset + i);
         GpuVertexPosition v = GET_VERTEX_POS(addrs.vertexPositions, globalVtxIdx);
 
+
+
         uint nodeIndex = UNPACK_UINT16_X(v.packedIndex);
         GpuNodeTransform staticNode = GET_NODE_TRANSFORM(addrs.nodeTransforms, nodeIndex);
         mat4 finalMat = staticNode.globalTransform;
@@ -101,6 +123,18 @@ void main() {
 
         // Map into specific shadow atlas region
         gl_MeshVerticesEXT[i].gl_Position = clipPos;
+
+        #ifdef ENABLE_ALPHA_TEST
+        GpuVertexAttributes attr = GET_VERTEX_ATTR(addrs.vertexAttributes, globalVtxIdx);
+        uint meshIndex = UNPACK_UINT16_Y(v.packedIndex);
+        uint materialOffset = GET_MODEL_COMP(ctx.modelBufferAddr, payload.modelDenseIndex).materialOffset;
+        uint materialId = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, materialOffset + meshIndex);
+        outMaterialId[i] = materialId;
+        outUV[i] = vec2(attr.uv_x, 1.0 - attr.uv_y);
+        #else
+        outMaterialId[i] = 0;
+        outUV[i] = vec2(0.0);
+        #endif
    }
 
     // 6. Process primitive indices

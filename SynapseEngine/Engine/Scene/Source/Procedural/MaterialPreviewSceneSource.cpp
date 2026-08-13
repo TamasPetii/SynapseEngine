@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "MaterialPreviewSceneSource.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Scene/Insiders/SceneInsider.h"
@@ -29,8 +45,8 @@ namespace Syn
         EntityID& sceneCam = SceneInsider::GetSceneCameraEntity(scene, SceneInsider::GetKey());
         HierarchyManager* hm = scene.GetHierarchyManager();
 
-        auto modelManager = ServiceLocator::GetModelManager();
-        auto materialManager = ServiceLocator::GetMaterialManager();
+        auto modelManager = ServiceLocator::Get<ModelManager>();
+        auto materialManager = ServiceLocator::Get<MaterialManager>();
 
         Syn::Info("Populating Material Preview Scene...");
 
@@ -116,7 +132,7 @@ namespace Syn
         MaterialInfo floorMatInfo{};
         floorMatInfo.color = glm::vec4(0.15f, 0.15f, 0.15f, 1.0f);
         floorMatInfo.roughnessFactor = 0.9f;
-        uint32_t floorMatId = materialManager->LoadMaterial("Preview_FloorMat", floorMatInfo);
+        uint32_t floorMatId = materialManager->LoadMaterialSync("Preview_FloorMat", floorMatInfo);
 
         // Geometries
 
@@ -164,10 +180,14 @@ namespace Syn
             };
 
         // 2. Center object: Suzanne
-        auto skyTextureId = ServiceLocator::GetImageManager()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/Engine/Environment/MaterialPreview.hdr"));
+        auto skyTextureId = ServiceLocator::Get<ImageManager>()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/Engine/Environment/MaterialPreview.hdr"));
         scene.GetSettings()->environment.skyTextureId = skyTextureId;
+        scene.GetSettings()->debug.enableBillboardCameras = false;
+        scene.GetSettings()->debug.enableBillboardPointLights = false;
+        scene.GetSettings()->debug.enableBillboardSpotLights = false;
+        scene.GetSettings()->debug.enableBillboardDirectionalLights = false;
 
-        uint32_t monkeyId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString("Assets/Engine/Models/Monkey/Untitled.obj"));
+        uint32_t monkeyId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString("../External/glTF-Sample-Assets/Models/Suzanne/glTF/Suzanne.gltf"));
         CreatePreviewObject("Center_Monkey", monkeyId, glm::vec3(0.0f, 0.5f, 0.0f), glm::vec3(1.5f));
 
         uint32_t sphereId = modelManager->GetResourceIndex(MeshSourceNames::Sphere);

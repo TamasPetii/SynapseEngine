@@ -1,6 +1,22 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "SsaoBlurPass.h"
 #include "Engine/ServiceLocator.h"
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/ShaderManager.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
@@ -21,7 +37,9 @@ namespace Syn {
     }
 
     void SsaoBlurPass::Initialize() {
-        _shaderProgram = ServiceLocator::GetShaderManager()->CreateProgram("SsaoBlurProgram", {
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
+
+        _shaderProgramId = shaderManager->LoadProgramAsync("SsaoBlurProgram", {
             ShaderNames::SsaoBlurComp
             });
     }
@@ -58,7 +76,7 @@ namespace Syn {
 
     void SsaoBlurPass::BindDescriptors(const RenderContext& context) {
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
 
         auto depthPyramid = rtGroup->GetImage(RenderTargetNames::DepthPyramid);
         auto ssaoAo = rtGroup->GetImage(RenderTargetNames::SsaoAo);
@@ -85,7 +103,7 @@ namespace Syn {
 
     void SsaoBlurPass::Dispatch(const RenderContext& context) {
         auto rtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
-        auto imageManager = ServiceLocator::GetImageManager();
+        auto imageManager = ServiceLocator::Get<ImageManager>();
         auto ssaoAo = rtGroup->GetImage(RenderTargetNames::SsaoAo);
 
         uint32_t width = rtGroup->GetWidth();

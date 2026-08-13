@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #ifndef SYN_INCLUDES_COMMON_CULLING_GLSL
 #define SYN_INCLUDES_COMMON_CULLING_GLSL
 
@@ -7,6 +23,9 @@
 
 #define PIPELINE_TRADITIONAL 0u
 #define PIPELINE_MESHLET     1u
+#define PIPELINE_COUNT 2u
+
+#define MATERIAL_RENDER_COUNT 8u
 
 struct VisibleModelData { 
     uint entityId; 
@@ -22,17 +41,15 @@ struct ModelAllocationInfo {
 
 struct MeshAllocationInfo { 
     uint descriptorIndex; 
-    uint isMeshletPipeline; 
-    uint padding[2]; 
-    uint indirectIndices[4];
-    uint instanceOffsets[4];
-    uint activeTypes[4];
+    uint padding[3]; 
+    uint indirectIndices[PIPELINE_COUNT][MATERIAL_RENDER_COUNT];
+    uint instanceOffsets[PIPELINE_COUNT][MATERIAL_RENDER_COUNT];
+    uint activeTypes[PIPELINE_COUNT][MATERIAL_RENDER_COUNT];
 };
 
 layout(buffer_reference, std430) readonly restrict buffer ModelAllocBuffer   { ModelAllocationInfo data[]; };
 layout(buffer_reference, std430) readonly restrict buffer MeshAllocBuffer    { MeshAllocationInfo data[]; };
 layout(buffer_reference, std430) restrict buffer VisibleModelList            { VisibleModelData data[]; };
-
 
 #define GET_MODEL_ALLOC(addr, idx)      ModelAllocBuffer(addr).data[idx]
 #define GET_MESH_ALLOC(addr, idx)       MeshAllocBuffer(addr).data[idx]

@@ -1,30 +1,88 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #pragma once
 #include "Engine/SynApi.h"
 #include "Engine/Statistics/IRenderStatCollector.h"
+#include "Engine/Utils/RenderBuffer.h"
 #include <vector>
+#include <string>
 
-namespace Syn {
+namespace Syn
+{
+    class Scene;
 
-    struct SYN_API CpuRenderStats {
+    struct SYN_API RawCpuRenderStats {
         uint32_t totalModels = 0;
-        uint32_t totalDrawDescriptors = 0;
-        uint32_t traditionalDrawDescriptors = 0;
-        uint32_t meshletDrawDescriptors = 0;
+        uint32_t activeTraditionalCount = 0;
+        uint32_t activeMeshletCount = 0;
         uint32_t totalAllocatedInstances = 0;
-        uint32_t totalMaxMeshlets = 0;
+        uint32_t totalMaxMeshletInstances = 0;
+        uint64_t maxPossibleVertices = 0;
+        uint64_t maxPossibleIndices = 0;
+        uint64_t maxPossibleTriangles = 0;
+
+        uint32_t totalDirLights = 0;
+        uint32_t totalSpotLights = 0;
+        uint32_t totalPointLights = 0;
+
+        uint32_t visibleDirLights = 0;
+        uint32_t visibleSpotLights = 0;
+        uint32_t visiblePointLights = 0;
+
+        uint32_t shadowDirLights = 0;
+        uint32_t shadowSpotLights = 0;
+        uint32_t shadowPointLights = 0;
+
+        uint32_t appendedDirInstances = 0;
+        uint32_t appendedSpotInstances = 0;
+        uint32_t appendedPointInstances = 0;
+
+        uint64_t maxDirVertices = 0;
+        uint64_t maxSpotVertices = 0;
+        uint64_t maxPointVertices = 0;
+
+        uint64_t maxDirTriangles = 0;
+        uint64_t maxSpotTriangles = 0;
+        uint64_t maxPointTriangles = 0;
+    };
+
+    struct SYN_API GpuCullingReadback {
+        uint32_t spotVisibleLights;
+        uint32_t spotVisibleShadowLights;
+        uint32_t pointVisibleLights;
+        uint32_t pointVisibleShadowLights;
+        uint32_t spotVisibleShadowInstances;
+        uint32_t pointVisibleShadowInstances;
     };
 
     class SYN_API FrameStatisticsManager {
     public:
         FrameStatisticsManager(uint32_t framesInFlight);
 
-        void UpdateCpuStats(const CpuRenderStats& newStats);
-        void ResolveFrame(uint32_t frameIndex, IRenderStatCollector* gpuCollector);
+        void ResolveFrame(VkCommandBuffer cmd, Scene* scene, uint32_t frameIndex, const std::vector<RenderPassStats>& gpuStats);
 
-        const CpuRenderStats& GetCpuStats() const;
+        const RawCpuRenderStats& GetCpuStats(uint32_t frameIndex) const;
         const std::vector<RenderPassStats>& GetGpuStats(uint32_t frameIndex) const;
+    protected:
+        void RecordReadback(VkCommandBuffer cmd, uint32_t frameIndex, Scene* scene);
     private:
-        CpuRenderStats _cpuStats;
+        RenderBuffer _readbackBuffer;
+
+        std::vector<RawCpuRenderStats> _cpuStatsPerFrame;
         std::vector<std::vector<RenderPassStats>> _gpuStatsPerFrame;
     };
 }

@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #version 460
 #extension GL_GOOGLE_include_directive : require
 
@@ -13,6 +29,7 @@
 #include "../../../Includes/Common/SpotLight.glsl"
 #include "../../../Includes/Utils/CullingMath.glsl"
 #include "../../../Includes/Utils/Occlusion.glsl"
+#include "../../../Includes/Utils/CullingUtils.glsl"
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
@@ -92,12 +109,8 @@ void main() {
         uint matIdx = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, modelComp.materialOffset + m);
         Material mat = GET_MATERIAL(ctx.materialBufferAddr, matIdx);
 
-        uint matType = 0;
-        if (IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat))       matType = 3;
-        else if (IS_TRANSPARENT(mat) && !IS_DOUBLE_SIDED(mat)) matType = 2;
-        else if (!IS_TRANSPARENT(mat) && IS_DOUBLE_SIDED(mat)) matType = 1;
-
-        if (matType > 1) continue;
+        uint matType = GetMaterialRenderType(mat);
+        if (matType > 3) continue;
 
         GpuMeshCollider localMeshCollider = GET_MESH_COLLIDER(addrs.meshColliders, m);
 
@@ -119,15 +132,17 @@ void main() {
         float mainCamScreenSize = CalculateSphereScreenSizePerspective(worldCollider.center, worldCollider.radius, camera.view, camera.proj, cameraNear, screenRes);
         if (mainCamScreenSize < 1.0) continue;
 
-        uint rawLod = (mainCamScreenSize > 512.0) ? 0 : (mainCamScreenSize > 256.0) ? 1 : (mainCamScreenSize > 128.0) ? 2 : 3;
+        uint rawLod = CalculateLodFromScreenSize(mainCamScreenSize);
         uint lod = min(rawLod + ctx.spotLightShadowLodBias, 3u);
 
         // 11. Emit to Radix Sort Buffers
         MeshAllocationInfo meshAlloc = GET_MESH_ALLOC(ctx.globalMeshAllocationBufferAddr, mAlloc.meshAllocationOffset + (m * 4) + lod);
-        if (meshAlloc.activeTypes[matType] == 1) {
+        uint pipeIdx = GET_PIPELINE_INDEX(ctx.pipelineLookupBufferAddr, modelComp.pipelineOffset + m);
+
+        if (meshAlloc.activeTypes[pipeIdx][matType] == 1) {
             
-            uint indirectIdx = meshAlloc.indirectIndices[matType];
-            uint isMeshlet = (meshAlloc.isMeshletPipeline == PIPELINE_MESHLET) ? 1u : 0u;
+            uint indirectIdx = meshAlloc.indirectIndices[pipeIdx][matType];
+            uint isMeshlet = (pipeIdx == PIPELINE_MESHLET) ? 1u : 0u;
 
             uint drawCallKey = (isMeshlet << 31) | (indirectIdx & 0x7FFFFFFF);
             

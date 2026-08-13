@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "RendererFactory.h"
 #include "Engine/Vk/Image/ImageConfig.h"
 
@@ -17,7 +33,9 @@
 #include "Engine/Render/Passes/Preview/PreviewPreTransitionPass.h"
 #include "Engine/Render/Passes/Preview/PreviewPostTransitionPass.h"
 #include "Engine/Render/Passes/Preview/ModelPreviewPass.h"
+#include "Engine/Render/Passes/Preview/AnimationPreviewPass.h"
 #include "Engine/Render/Passes/Preview/MaterialPreviewPass.h"
+#include "Engine/Render/Passes/Preview/AudioPreviewPass.h"
 #include "Engine/Render/Passes/Preview/MaterialPreviewBloomPass.h"
 
 #include "Engine/Render/Passes/Culling/Geometry/GeometryModelCullingPass.h"
@@ -97,7 +115,9 @@
 
 #include "Engine/Render/Passes/Shading/Deferred/GBuffer/OpaqueDeferredTransitionPass.h"
 #include "Engine/Render/Passes/Shading/Deferred/GBuffer/MeshletOpaqueDeferredPass.h"
+#include "Engine/Render/Passes/Shading/Deferred/GBuffer/MeshletOpaqueAlphaTestedDeferredPass.h"
 #include "Engine/Render/Passes/Shading/Deferred/GBuffer/TraditionalOpaqueDeferredPass.h"
+#include "Engine/Render/Passes/Shading/Deferred/GBuffer/TraditionalOpaqueAlphaTestedDeferredPass.h"
 
 #include "Engine/Render/Passes/Shading/Deferred/Lighting/DeferredLightTransitionPass.h"
 #include "Engine/Render/Passes/Shading/Deferred/Lighting/DeferredEmissiveAoPass.h"
@@ -118,14 +138,20 @@
 
 #include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/OpaqueDepthTransitionPrepass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/MeshletOpaqueDepthPrepass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/MeshletOpaqueAlphaTestedDepthPrepass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/TraditionalOpaqueDepthPrepass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/TraditionalOpaqueAlphaTestedDepthPrepass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/TransparentDepthTransitionPrepass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/MeshletTransparentDepthPrepass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/MeshletTransparentAlphaTestedDepthPrepass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/TraditionalTransparentDepthPrepass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/TraditionalTransparentAlphaTestedDepthPrepass.h"
 
 #include "Engine/Render/Passes/Shading/ForwardPlus/Lighting/OpaqueForwardTransitionPass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/Lighting/MeshletOpaqueForwardPass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Lighting/MeshletOpaqueAlphaTestedForwardPass.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/Lighting/TraditionalOpaqueForwardPass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Lighting/TraditionalOpaqueAlphaTestedForwardPass.h"
 
 #include "Engine/Render/Passes/Shading/Wboit/TransparentForwardTransitionPass.h"
 #include "Engine/Render/Passes/Shading/Wboit/MeshletTransparentForwardPass.h"
@@ -144,24 +170,28 @@
 #include "Engine/Render/Passes/Wireframe/Light/SpotLightPyramidWireframePass.h"
 #include "Engine/Render/Passes/Wireframe/Chunk/StaticChunkAabbWireframePass.h"
 #include "Engine/Render/Passes/Wireframe/Chunk/MortonChunkAabbWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/Collider/BoxColliderWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/Collider/SphereColliderWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/Collider/CapsuleColliderWireframePass.h"
+#include "Engine/Render/Passes/Wireframe/Physics/WireframePhysicsPass.h"
 #include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletAabbPass.h"
 #include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletSpherePass.h"
 #include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletConePass.h"
 
 #include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowInitPass.h"
 #include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowTraditionalOpaquePass.h"
+#include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowTraditionalOpaqueAlphaTestedPass.h"
 #include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowMeshletOpaquePass.h"
+#include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowMeshletOpaqueAlphaTestedPass.h"
 
 #include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowInitPass.h"
 #include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowTraditionalOpaquePass.h"
+#include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowTraditionalOpaqueAlphaTestedPass.h"
 #include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowMeshletOpaquePass.h"
+#include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowMeshletOpaqueAlphaTestedPass.h"
 
 #include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowInitPass.h"
 #include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowTraditionalOpaquePass.h"
+#include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowTraditionalOpaqueAlphaTestedPass.h"
 #include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowMeshletOpaquePass.h"
+#include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowMeshletOpaqueAlphaTestedPass.h"
 
 #include "Engine/Render/Passes/PostProcess/Ssao/SsaoInitPass.h"
 #include "Engine/Render/Passes/PostProcess/Ssao/SsaoPass.h"
@@ -251,6 +281,10 @@ namespace Syn
         pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
         pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
+        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
+        pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
 
         //SpotLight Shadow Passes
         pipeline->AddPass(std::make_unique<SpotLightShadowInitPass>());
@@ -258,6 +292,10 @@ namespace Syn
         pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
         pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
+        pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
+        pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
         
         //Point Light Shadow Passes
         pipeline->AddPass(std::make_unique<PointLightShadowInitPass>());
@@ -265,6 +303,10 @@ namespace Syn
         pipeline->AddPass(std::make_unique<PointLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
         pipeline->AddPass(std::make_unique<PointLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<PointLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
+        pipeline->AddPass(std::make_unique<PointLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<PointLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
+        pipeline->AddPass(std::make_unique<PointLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<PointLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
 
 		//Forward+ Depth Opaque Prepasses
 		pipeline->AddPass(std::make_unique<OpaqueDepthTransitionPrepass>());
@@ -272,13 +314,21 @@ namespace Syn
 		pipeline->AddPass(std::make_unique<MeshletOpaqueDepthPrepass>(MaterialRenderType::Opaque2Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueDepthPrepass>(MaterialRenderType::Opaque1Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueDepthPrepass>(MaterialRenderType::Opaque2Sided));
-        
+        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedOpaque2Sided));
+        pipeline->AddPass(std::make_unique<TraditionalOpaqueAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<TraditionalOpaqueAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedOpaque2Sided));
+
         //Deferred Depth Opaque Prepasses
 		pipeline->AddPass(std::make_unique<OpaqueDeferredTransitionPass>());
 		pipeline->AddPass(std::make_unique<MeshletOpaqueDeferredPass>(MaterialRenderType::Opaque1Sided));
         pipeline->AddPass(std::make_unique<MeshletOpaqueDeferredPass>(MaterialRenderType::Opaque2Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueDeferredPass>(MaterialRenderType::Opaque1Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueDeferredPass>(MaterialRenderType::Opaque2Sided));
+        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedDeferredPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedDeferredPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
+        pipeline->AddPass(std::make_unique<TraditionalOpaqueAlphaTestedDeferredPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<TraditionalOpaqueAlphaTestedDeferredPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
 
         //Copy Opaque Depth to Transparent Depth Buffer
 		pipeline->AddPass(std::make_unique<DepthCopyPass>());
@@ -289,6 +339,10 @@ namespace Syn
         pipeline->AddPass(std::make_unique<MeshletTransparentDepthPrepass>(MaterialRenderType::Transparent2Sided));
         pipeline->AddPass(std::make_unique<TraditionalTransparentDepthPrepass>(MaterialRenderType::Transparent1Sided));
         pipeline->AddPass(std::make_unique<TraditionalTransparentDepthPrepass>(MaterialRenderType::Transparent2Sided));
+        pipeline->AddPass(std::make_unique<MeshletTransparentAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedTransparent1Sided));
+        pipeline->AddPass(std::make_unique<MeshletTransparentAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedTransparent2Sided));
+        pipeline->AddPass(std::make_unique<TraditionalTransparentAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedTransparent1Sided));
+        pipeline->AddPass(std::make_unique<TraditionalTransparentAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedTransparent2Sided));
 
 		//Build Hi-Z depth pyramid (Opaque|Transparent)
         pipeline->AddPass(std::make_unique<GeometryHizLinearPreparePass>());
@@ -335,6 +389,10 @@ namespace Syn
 		pipeline->AddPass(std::make_unique<MeshletOpaqueForwardPass>(MaterialRenderType::Opaque2Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueForwardPass>(MaterialRenderType::Opaque1Sided));
 		pipeline->AddPass(std::make_unique<TraditionalOpaqueForwardPass>(MaterialRenderType::Opaque2Sided));
+        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedForwardPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedForwardPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
+        pipeline->AddPass(std::make_unique<TraditionalOpaqueAlphaTestedForwardPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
+        pipeline->AddPass(std::make_unique<TraditionalOpaqueAlphaTestedForwardPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
 
         // SkySphere
         pipeline->AddPass(std::make_unique<SkySpherePass>());
@@ -357,9 +415,7 @@ namespace Syn
         pipeline->AddPass(std::make_unique<SpotLightPyramidWireframePass>());
         pipeline->AddPass(std::make_unique<StaticChunkAabbWireframePass>());
         pipeline->AddPass(std::make_unique<MortonChunkAabbWireframePass>());
-        pipeline->AddPass(std::make_unique<BoxColliderWireframePass>());
-        pipeline->AddPass(std::make_unique<SphereColliderWireframePass>());
-        pipeline->AddPass(std::make_unique<CapsuleColliderWireframePass>());
+        pipeline->AddPass(std::make_unique<WireframePhysicsPass>());
 
         //Billboard Passes
         pipeline->AddPass(std::make_unique<BillboardTransitionPass>());
@@ -374,6 +430,10 @@ namespace Syn
 		pipeline->AddPass(std::make_unique<MeshletTransparentForwardPass>(MaterialRenderType::Transparent2Sided));
 		pipeline->AddPass(std::make_unique<TraditionalTransparentForwardPass>(MaterialRenderType::Transparent1Sided));
 		pipeline->AddPass(std::make_unique<TraditionalTransparentForwardPass>(MaterialRenderType::Transparent2Sided));
+        pipeline->AddPass(std::make_unique<MeshletTransparentForwardPass>(MaterialRenderType::AlphaTestedTransparent1Sided));
+        pipeline->AddPass(std::make_unique<MeshletTransparentForwardPass>(MaterialRenderType::AlphaTestedTransparent2Sided));
+        pipeline->AddPass(std::make_unique<TraditionalTransparentForwardPass>(MaterialRenderType::AlphaTestedTransparent1Sided));
+        pipeline->AddPass(std::make_unique<TraditionalTransparentForwardPass>(MaterialRenderType::AlphaTestedTransparent2Sided));
 
 		//Transparent Composite Passes (WBOIT)
         pipeline->AddPass(std::make_unique<TransparentCompositeTransitionPass>());
@@ -395,6 +455,8 @@ namespace Syn
         pipeline->AddPass(std::make_unique<PreviewPreTransitionPass>());
         pipeline->AddPass(std::make_unique<MaterialPreviewPass>());
         pipeline->AddPass(std::make_unique<ModelPreviewPass>());
+        pipeline->AddPass(std::make_unique<AudioPreviewPass>());
+        pipeline->AddPass(std::make_unique<AnimationPreviewPass>());
         pipeline->AddPass(std::make_unique<MaterialPreviewBloomPass>());
         pipeline->AddPass(std::make_unique<PreviewPostTransitionPass>());
 
@@ -410,6 +472,9 @@ namespace Syn
         uint32_t initWidth = 4;
         uint32_t initHeight = 4;
 
+        uint32_t msaaSamples = 4;
+        VkSampleCountFlagBits sampleCount = static_cast<VkSampleCountFlagBits>(msaaSamples);
+
         Vk::ImageConfig mainImageSpec{};
         mainImageSpec.width = initWidth;
         mainImageSpec.height = initHeight;
@@ -418,6 +483,10 @@ namespace Syn
         mainImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT;
         mainImageSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::Main, mainImageSpec);
+
+        Vk::ImageConfig mainMsaaSpec = mainImageSpec;
+        mainMsaaSpec.samples = sampleCount;
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::MainMSAA, mainMsaaSpec);
 
         Vk::ImageConfig colorImageSpec{};
         colorImageSpec.width = initWidth;
@@ -493,6 +562,10 @@ namespace Syn
         transparentAccumSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::TransparentAccum, transparentAccumSpec);
 
+        Vk::ImageConfig transparentAccumMsaaSpec = transparentAccumSpec;
+        transparentAccumMsaaSpec.samples = sampleCount;
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::TransparentAccumMSAA, transparentAccumMsaaSpec);
+
         Vk::ImageConfig transparentRevealSpec{};
         transparentRevealSpec.width = initWidth;
         transparentRevealSpec.height = initHeight;
@@ -502,6 +575,10 @@ namespace Syn
         transparentRevealSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::TransparentReveal, transparentRevealSpec);
 
+        Vk::ImageConfig transparentRevealMsaaSpec = transparentRevealSpec;
+        transparentRevealMsaaSpec.samples = sampleCount;
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::TransparentRevealMSAA, transparentRevealMsaaSpec);
+
         Vk::ImageConfig entityImageSpec{};
         entityImageSpec.width = initWidth;
         entityImageSpec.height = initHeight;
@@ -510,6 +587,10 @@ namespace Syn
         entityImageSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         entityImageSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
         rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::EntityIndex, entityImageSpec);
+
+        Vk::ImageConfig entityImageMsaaSpec = entityImageSpec;
+        entityImageMsaaSpec.samples = sampleCount;
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::EntityIndexMSAA, entityImageMsaaSpec);
 
         Vk::ImageConfig depthPyramidImageSpec{};
         depthPyramidImageSpec.width = initWidth;
@@ -563,6 +644,10 @@ namespace Syn
         opaqueDepthSpec.usage = VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
         opaqueDepthSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
         rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::OpaqueDepth, opaqueDepthSpec);
+
+        Vk::ImageConfig opaqueDepthMsaaSpec = opaqueDepthSpec;
+        opaqueDepthMsaaSpec.samples = sampleCount;
+        rtManager->AddAttachment(RenderTargetGroupNames::Main, RenderTargetNames::OpaqueDepthMSAA, opaqueDepthMsaaSpec);
 
         Vk::ImageConfig transparentDepthSpec{};
         transparentDepthSpec.width = initWidth;

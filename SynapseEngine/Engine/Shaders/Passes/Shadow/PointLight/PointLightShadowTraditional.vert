@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #version 460
 #extension GL_GOOGLE_include_directive : require
 #extension GL_ARB_shader_draw_parameters : require
@@ -13,6 +29,9 @@
 #include "../../../Includes/Common/Animation.glsl"
 #include "../../../Includes/Common/Material.glsl"
 #include "../../../Includes/Common/PointLight.glsl"
+
+layout(location = 0) out vec2 outUV;
+layout(location = 1) out flat uint outMaterialId;
 
 #include "../../../Includes/PushConstants/PointLightShadowTraditionalMeshletPassPC.glsl"
 
@@ -55,6 +74,7 @@ void main() {
 
     // 6. Evaluate Static Hierarchy (Default pose)
     uint nodeIndex = UNPACK_UINT16_X(v.packedIndex);
+    uint meshIndex = UNPACK_UINT16_Y(v.packedIndex);
     GpuNodeTransform staticNodeTransform = GET_NODE_TRANSFORM(addrs.nodeTransforms, nodeIndex);
     mat4 finalModelMat = staticNodeTransform.globalTransform;
 
@@ -115,4 +135,18 @@ void main() {
     // Atlas Positioning
     clipPos.xy = clipPos.xy * scale + offset * clipPos.w;
     gl_Position = clipPos;
+
+    #ifdef ENABLE_ALPHA_TEST
+
+    uint flatMaterialIndex = comp.materialOffset + meshIndex;
+    uint resolvedMaterialId = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, flatMaterialIndex);
+    outMaterialId = resolvedMaterialId;
+
+    GpuVertexAttributes attr = GET_VERTEX_ATTR(addrs.vertexAttributes, realVertexIndex);
+    outUV = vec2(attr.uv_x, 1.0 - attr.uv_y);
+
+    #else
+    outMaterialId = 0;
+    outUV = vec2(0.0);
+    #endif
 }

@@ -1,11 +1,25 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "RenderManager.h"
 
 #include "Engine/Vk/Command/CommandBuffer.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
 #include "Engine/FrameContext.h"
-#include "Engine/Profiler/IGpuProfiler.h"
-#include "Engine/Statistics/IRenderStatCollector.h"
 
 namespace Syn {
 
@@ -41,7 +55,7 @@ namespace Syn {
 
         if (_frameNeedsResize[frameIndex]) 
         {
-            ServiceLocator::GetVkContext()->GetDevice()->WaitIdle();
+            ServiceLocator::Get<Vk::Context>()->GetDevice()->WaitIdle();
             _renderTargetManager->Resize(frameIndex, _newWidth, _newHeight);
             _frameNeedsResize[frameIndex] = false;
         }
@@ -51,8 +65,9 @@ namespace Syn {
         if (!cmd) 
             return;
 
-        ServiceLocator::GetGpuProfiler()->BeginFrame(cmd->Handle(), frameIndex);
-        ServiceLocator::GetRenderStatCollector()->BeginFrame(cmd->Handle(), frameIndex);
+        if (_preRenderCallback) {
+            _preRenderCallback(cmd->Handle(), frameIndex, scene);
+        }
 
         if (_preRenderCallback) {
             _preRenderCallback(cmd->Handle(), frameIndex, scene);
@@ -82,7 +97,7 @@ namespace Syn {
             _frameNeedsResize[i] = true;
         }
 
-        ServiceLocator::GetFrameContext()->screenWidth = width;
-		ServiceLocator::GetFrameContext()->screenHeight = height;
+        ServiceLocator::Get<FrameContext>()->screenWidth = width;
+		ServiceLocator::Get<FrameContext>()->screenHeight = height;
     }
 }

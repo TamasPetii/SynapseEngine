@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "MortonRadixSortPass.h"
 #include "Engine/Scene/Scene.h"
 #include "Engine/Component/Core/TransformComponent.h"
@@ -21,7 +37,7 @@ namespace Syn {
     }
 
     void MortonRadixSortPass::Initialize() {
-        auto vulkanContext = ServiceLocator::GetVkContext();
+        auto vulkanContext = ServiceLocator::Get<Vk::Context>();
         VkPhysicalDevice physicalDevice = vulkanContext->GetPhysicalDevice()->Handle();
         VkDevice device = vulkanContext->GetDevice()->Handle();
 
@@ -75,7 +91,7 @@ namespace Syn {
         uint32_t fIdx = context.frameIndex;
 
         VrdxSorterStorageRequirements reqs;
-        vrdxGetSorterKeyValueStorageRequirements(_radixSorter, _staticCount, &reqs);
+        vrdxGetSorterStorageRequirements(_radixSorter, _staticCount, VRDX_SORT_MODE_KEY_VALUE, &reqs);
         tempBuffer.UpdateCapacity(context.frameIndex, reqs.size);
 
         VkBuffer keysHandle = compManager->GetComponentBuffer(BufferNames::MortonKeysData, fIdx).buffer->Handle();
@@ -98,19 +114,20 @@ namespace Syn {
         valuesPreBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         Vk::BufferUtils::InsertBarrier(context.cmd, valuesPreBarrier);
 
-        vrdxCmdSortKeyValue(
-            context.cmd,
-            _radixSorter,
-            _staticCount,
-            keysHandle,
-            0,
-            valuesHandle,
-            0,
-            tempHandle,
-            0,
-            VK_NULL_HANDLE,
-            0
-        );
+        VrdxSortInfo sortInfo{};
+        sortInfo.elementCount = _staticCount;
+        sortInfo.elementCountBuffer = VK_NULL_HANDLE;
+        sortInfo.elementCountOffset = 0;
+        sortInfo.keysBuffer = keysHandle;
+        sortInfo.keysOffset = 0;
+        sortInfo.valuesBuffer = valuesHandle;
+        sortInfo.valuesOffset = 0;
+        sortInfo.storageBuffer = tempHandle;
+        sortInfo.storageOffset = 0;
+        sortInfo.queryPool = VK_NULL_HANDLE;
+        sortInfo.query = 0;
+
+        vrdxCmdSort(context.cmd, _radixSorter, &sortInfo);
 
         Vk::BufferBarrierInfo keysBarrier{};
         keysBarrier.buffer = keysHandle;

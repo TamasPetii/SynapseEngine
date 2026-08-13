@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "ImageUtils.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
@@ -152,7 +168,7 @@ namespace Syn::Vk {
     }
 
     void ImageUtils::GenerateMipMaps(VkCommandBuffer cmd, VkImage image, VkFormat format, uint32_t width, uint32_t height, uint32_t mipLevels) {
-        auto physicalDevice = ServiceLocator::GetVkContext()->GetPhysicalDevice();
+        auto physicalDevice = ServiceLocator::Get<Vk::Context>()->GetPhysicalDevice();
         VkFormatProperties formatProperties;
         vkGetPhysicalDeviceFormatProperties(physicalDevice->Handle(), format, &formatProperties);
 

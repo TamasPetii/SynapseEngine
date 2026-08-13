@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "DefaultCpuModelExtractor.h"
 #include "Engine/Render/ComputeGroupSize.h"
 #include <utility>
@@ -10,6 +26,7 @@ namespace Syn
         outCpuData.globalIndexCount = gpuData.globalIndexCount;
         outCpuData.globalMeshCount = gpuData.globalMeshCount;
         outCpuData.globalAverageLodIndexCount = gpuData.globalAverageLodIndexCount;
+        outCpuData.globalLod0IndexCount = gpuData.globalLod0IndexCount;
 
         size_t totalLodCount = gpuData.indexedData.meshDescriptors.size();
 
@@ -42,7 +59,7 @@ namespace Syn
             blueprint.meshletCmd.groupCountY = groupCountY;
             blueprint.meshletCmd.groupCountZ = 1;
 
-            blueprint.isMeshletPipeline = true ? MeshDrawBlueprint::PIPELINE_MESHLET : MeshDrawBlueprint::PIPELINE_TRADITIONAL;
+            blueprint.pipelineRenderType = PipelineRenderType::Meshlet;
 
             outCpuData.baseDrawCommands.push_back(blueprint);
         }
@@ -54,5 +71,11 @@ namespace Syn
 
         outCpuData.indices = gpuData.indexedData.indices;
         outCpuData.meshNodeDescriptors = gpuData.meshNodeDescriptors;
+
+        outCpuData.nodeTransforms.reserve(gpuData.nodeTransforms.size());
+        for (const auto& node : gpuData.nodeTransforms)
+        {
+            outCpuData.nodeTransforms.push_back(node.transform);
+        }
     }
 }

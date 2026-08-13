@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #ifndef SYN_INCLUDES_COMMON_BINDLESS_TEXTURES_GLSL
 #define SYN_INCLUDES_COMMON_BINDLESS_TEXTURES_GLSL
 
@@ -5,6 +21,7 @@
 
 layout(set = 0, binding = 0) uniform sampler globalSamplers[];
 layout(set = 0, binding = 1) uniform texture2D bindlessTextures[];
+layout(set = 1, binding = 0) uniform texture2D bindlessVideoTextures[];
 
 layout(buffer_reference, std430, buffer_reference_align = 4) readonly restrict buffer TextureMetadataBuffer {
     uint data[];
@@ -34,6 +51,13 @@ void UnpackTextureMetadata(uint meta, out uint samplerID, out bool invertTangent
 vec4 SampleTexture2D(uint textureID, uint samplerID, vec2 uv) { 
     return texture(
         sampler2D(bindlessTextures[nonuniformEXT(textureID)], globalSamplers[nonuniformEXT(samplerID)]), 
+        uv
+    );
+}
+
+vec4 SampleVideoTexture2D(uint textureID, uint samplerID, vec2 uv) { 
+    return texture(
+        sampler2D(bindlessVideoTextures[nonuniformEXT(textureID)], globalSamplers[nonuniformEXT(samplerID)]), 
         uv
     );
 }

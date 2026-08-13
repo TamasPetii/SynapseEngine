@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #version 460
 #extension GL_GOOGLE_include_directive : require
 #extension GL_ARB_shader_draw_parameters : require
@@ -12,6 +28,9 @@
 #include "../../../Includes/Common/Animation.glsl"
 #include "../../../Includes/Common/Material.glsl"
 #include "../../../Includes/Common/DirectionLight.glsl"
+
+layout(location = 0) out vec2 outUV;
+layout(location = 1) out flat uint outMaterialId;
 
 #include "../../../Includes/PushConstants/DirectionLightShadowTraditionalMeshletPassPC.glsl"
 
@@ -122,4 +141,16 @@ void main() {
 
     // Atlas Positioning
     gl_Position = clipPos;
+
+    // 8. Resolve Material Index for the current sub-mesh
+    #ifdef ENABLE_ALPHA_TEST
+    uint flatMaterialIndex = comp.materialOffset + meshIndex;
+    uint resolvedMaterialId = GET_MATERIAL_INDEX(ctx.materialLookupBufferAddr, flatMaterialIndex);
+    GpuVertexAttributes attr = GET_VERTEX_ATTR(addrs.vertexAttributes, realVertexIndex);
+    outMaterialId = resolvedMaterialId;
+    outUV = vec2(attr.uv_x, 1.0 - attr.uv_y);
+    #else
+    outMaterialId = 0;
+    outUV = vec2(0.0);
+    #endif
 }

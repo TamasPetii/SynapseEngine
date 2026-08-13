@@ -1,6 +1,22 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "MaterialPreviewBloomPass.h"
 #include "Engine/ServiceLocator.h"
-#include "Engine/Manager/ShaderManager.h"
+#include "Engine/Shader/ShaderManager.h"
 #include "Engine/Manager/PreviewManager.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Scene/Scene.h"
@@ -23,15 +39,37 @@ namespace Syn {
     }
 
     void MaterialPreviewBloomPass::Initialize() {
-        auto sm = ServiceLocator::GetShaderManager();
-        _prefilterProgram = sm->CreateProgram("PrevBloomPrefilter", { ShaderNames::BloomPrefilter });
-        _downsampleProgram = sm->CreateProgram("PrevBloomDown", { ShaderNames::BloomDownsample });
-        _upsampleProgram = sm->CreateProgram("PrevBloomUp", { ShaderNames::BloomUpsample });
-        _compositeProgram = sm->CreateProgram("PrevBloomComp", { ShaderNames::BloomComposite });
+        auto sm = ServiceLocator::Get<ShaderManager>();
+        _prefilterProgramId = sm->LoadProgramAsync("PrevBloomPrefilter", { ShaderNames::BloomPrefilter });
+        _downsampleProgramId = sm->LoadProgramAsync("PrevBloomDown", { ShaderNames::BloomDownsample });
+        _upsampleProgramId = sm->LoadProgramAsync("PrevBloomUp", { ShaderNames::BloomUpsample });
+        _compositeProgramId = sm->LoadProgramAsync("PrevBloomComp", { ShaderNames::BloomComposite });
     }
 
     void MaterialPreviewBloomPass::Execute(const RenderContext& context) {
-        auto pm = ServiceLocator::GetPreviewManager();
+
+        auto sm = ServiceLocator::Get<ShaderManager>();
+
+        if (!_prefilterProgram && _prefilterProgramId != UINT32_MAX) {
+            _prefilterProgram = sm->GetResource(_prefilterProgramId).get();
+        }
+
+        if (!_downsampleProgram && _downsampleProgramId != UINT32_MAX) {
+            _downsampleProgram = sm->GetResource(_downsampleProgramId).get();
+        }
+
+        if (!_upsampleProgram && _upsampleProgramId != UINT32_MAX) {
+            _upsampleProgram = sm->GetResource(_upsampleProgramId).get();
+        }
+
+        if (!_compositeProgram && _compositeProgramId != UINT32_MAX) {
+            _compositeProgram = sm->GetResource(_compositeProgramId).get();
+        }
+
+        if (!_prefilterProgram || !_downsampleProgram || !_upsampleProgram || !_compositeProgram)
+            return;
+
+        auto pm = ServiceLocator::Get<PreviewManager>();
 
         std::vector<uint32_t> dirtyMaterials = pm->GetDirtyResources(PreviewResourceType::Material);
         if (dirtyMaterials.empty()) return;
@@ -209,15 +247,15 @@ namespace Syn {
             scratchBackToGen.baseArrayLayer = 0;
             scratchBackToGen.layerCount = 1;
             Vk::ImageUtils::InsertBarrier(context.cmd, scratchBackToGen);
-        }
 
-        pm->ClearDirtyResources(PreviewResourceType::Material);
+            pm->MarkCompleted(PreviewResourceType::Material, matId);
+        }
     }
 
     void MaterialPreviewBloomPass::DispatchPrefilter(const RenderContext& context, Vk::Image* colorImage, Vk::Image* bloomImage) {
         _prefilterProgram->Bind(context.cmd);
 
-        auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::LinearClampEdge);
+        auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::LinearClampEdge);
 
         Vk::PushDescriptorWriter writer;
         writer.AddCombinedImageSampler(0, colorImage->GetView(Vk::ImageViewNames::Default), sampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -238,7 +276,7 @@ namespace Syn {
     void MaterialPreviewBloomPass::DispatchDownsample(const RenderContext& context, Vk::Image* bloomImage) {
         _downsampleProgram->Bind(context.cmd);
 
-        auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::LinearClampEdge);
+        auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::LinearClampEdge);
         Vk::PushDescriptorWriter pushWriter;
         glm::vec2 currentInSize = glm::vec2(bloomImage->GetExtent().width, bloomImage->GetExtent().height);
 
@@ -296,7 +334,7 @@ namespace Syn {
     void MaterialPreviewBloomPass::DispatchUpsample(const RenderContext& context, Vk::Image* bloomImage) {
         _upsampleProgram->Bind(context.cmd);
 
-        auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::LinearClampEdge);
+        auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::LinearClampEdge);
         Vk::PushDescriptorWriter pushWriter;
         glm::vec2 baseSize = glm::vec2(bloomImage->GetExtent().width, bloomImage->GetExtent().height);
 
@@ -340,7 +378,7 @@ namespace Syn {
     void MaterialPreviewBloomPass::DispatchComposite(const RenderContext& context, Vk::Image* colorImage, Vk::Image* bloomImage) {
         _compositeProgram->Bind(context.cmd);
         
-        auto sampler = ServiceLocator::GetImageManager()->GetSampler(SamplerNames::LinearClampEdge);
+        auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::LinearClampEdge);
         Vk::PushDescriptorWriter writer;
         writer.AddCombinedImageSampler(0, bloomImage->GetView(std::string(Vk::ImageViewNames::Default) + std::string(Vk::ImageViewNames::Mip) + "0"), sampler->Handle(), VK_IMAGE_LAYOUT_GENERAL);
         writer.AddStorageImage(1, colorImage->GetView(Vk::ImageViewNames::Default), VK_IMAGE_LAYOUT_GENERAL);

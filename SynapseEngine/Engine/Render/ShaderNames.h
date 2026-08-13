@@ -1,8 +1,29 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #pragma once
 #include "Engine/SynApi.h"
 
 namespace Syn
 {
+    struct ShaderDefines
+    {
+        static constexpr const char* EnableAlphaTest = "ENABLE_ALPHA_TEST";
+    };
+
     struct SYN_API ShaderNames
     {
         static constexpr const char* FullscreenVert = "Engine/Shaders/Passes/Common/Fullscreen.vert";
@@ -64,6 +85,7 @@ namespace Syn
         static constexpr const char* TransparentCompositeFrag = "Engine/Shaders/Passes/Shading/Wboit/TransparentComposite.frag";
         static constexpr const char* TransparentForwardFrag = "Engine/Shaders/Passes/Shading/Wboit/TransparentForward.frag";
 
+        static constexpr const char* WireframePhysicsVert = "Engine/Shaders/Passes/Wireframe/WireframePhysics.vert";
         static constexpr const char* WireframeSetup = "Engine/Shaders/Passes/Wireframe/WireframeSetup.comp";
         static constexpr const char* WireframeMeshVert = "Engine/Shaders/Passes/Wireframe/WireframeMesh.vert";
         static constexpr const char* WireframeMeshletMesh = "Engine/Shaders/Passes/Wireframe/WireframeMeshlet.mesh";
@@ -152,5 +174,8 @@ namespace Syn
 
         static constexpr const char* ModelPreviewVert = "Engine/Shaders/Passes/Preview/ModelPreview.vert";
         static constexpr const char* ModelPreviewFrag = "Engine/Shaders/Passes/Preview/ModelPreview.frag";
+
+        static constexpr const char* AnimationPreviewVert = "Engine/Shaders/Passes/Preview/AnimationPreview.vert";
+        static constexpr const char* AnimationPreviewFrag = "Engine/Shaders/Passes/Preview/AnimationPreview.frag";
 }; 
 }

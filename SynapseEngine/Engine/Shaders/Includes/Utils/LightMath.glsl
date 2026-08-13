@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #ifndef SYN_INCLUDES_UTILS_LIGHT_MATH_GLSL
 #define SYN_INCLUDES_UTILS_LIGHT_MATH_GLSL
 
@@ -14,17 +30,28 @@ vec3 SimulateBloom(vec3 emissiveColor, float emissiveIntensity, float globalEmis
     return emissiveColor * emissiveIntensity * globalEmissiveIntensity;
 }
 
-vec3 SimulateDirectionalLight(const uint64_t directionLightDataBufferAddr, uint lightIndex, vec3 albedo, vec3 normal, vec3 viewDir, float roughness, float metallic) {
+vec3 SimulateDirectionalLight(
+    const uint64_t directionLightDataBufferAddr, uint lightIndex, 
+    vec3 albedo, vec3 normal, vec3 viewDir, float roughness, float metallic,
+    float ior, float specularFactor, vec3 specularColor,
+    float clearcoatFactor, float clearcoatRoughness, vec3 clearcoatNormal
+) {
     DirectionLightComponent light = GET_DIRECTION_LIGHT(directionLightDataBufferAddr, lightIndex);
     vec3 lightDir = normalize(-light.direction);
         
     return ShadePhysicallyBased(
         albedo, normal, viewDir, lightDir, roughness, metallic, 
+        ior, specularFactor, specularColor, clearcoatFactor, clearcoatRoughness, clearcoatNormal,
         light.color, 1.0, light.strength
     );
 }
 
-vec3 SimulatePointLight(const uint64_t pointLightDataBufferAddr, uint lightIndex, vec3 worldPos, vec3 albedo, vec3 normal, vec3 viewDir, float roughness, float metallic) {
+vec3 SimulatePointLight(
+    const uint64_t pointLightDataBufferAddr, uint lightIndex, vec3 worldPos, 
+    vec3 albedo, vec3 normal, vec3 viewDir, float roughness, float metallic,
+    float ior, float specularFactor, vec3 specularColor,
+    float clearcoatFactor, float clearcoatRoughness, vec3 clearcoatNormal
+) {
     PointLightComponent light = GET_POINT_LIGHT(pointLightDataBufferAddr, lightIndex);
     
     float distToLight = distance(worldPos, light.position);
@@ -37,11 +64,17 @@ vec3 SimulatePointLight(const uint64_t pointLightDataBufferAddr, uint lightIndex
 
     return ShadePhysicallyBased(
         albedo, normal, viewDir, lightDir, roughness, metallic, 
+        ior, specularFactor, specularColor, clearcoatFactor, clearcoatRoughness, clearcoatNormal,
         light.color, attenuation, light.strength
     );
 }
 
-vec3 SimulateSpotLight(const uint64_t spotLightDataBufferAddr, uint lightIndex, vec3 worldPos, vec3 albedo, vec3 normal, vec3 viewDir, float roughness, float metallic) {
+vec3 SimulateSpotLight(
+    const uint64_t spotLightDataBufferAddr, uint lightIndex, vec3 worldPos, 
+    vec3 albedo, vec3 normal, vec3 viewDir, float roughness, float metallic,
+    float ior, float specularFactor, vec3 specularColor,
+    float clearcoatFactor, float clearcoatRoughness, vec3 clearcoatNormal
+) {
     SpotLightComponent light = GET_SPOT_LIGHT(spotLightDataBufferAddr, lightIndex);
     
     float distToLight = distance(worldPos, light.position);
@@ -65,6 +98,7 @@ vec3 SimulateSpotLight(const uint64_t spotLightDataBufferAddr, uint lightIndex, 
 
     return ShadePhysicallyBased(
         albedo, normal, viewDir, lightDir, roughness, metallic, 
+        ior, specularFactor, specularColor, clearcoatFactor, clearcoatRoughness, clearcoatNormal,
         light.color, attenuation, light.strength
     );
 }

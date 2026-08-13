@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #pragma once
 #include "../VkCommon.h"
 
@@ -46,6 +62,10 @@ namespace Syn::Vk {
         std::optional<VkClearValue> clearValue = std::nullopt;
         VkAttachmentLoadOp loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         VkAttachmentStoreOp storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+
+        VkImageView resolveImageView = VK_NULL_HANDLE;
+        VkImageLayout resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+        VkResolveModeFlagBits resolveMode = VK_RESOLVE_MODE_NONE;
     };
 
     struct RenderingInfoConfig {

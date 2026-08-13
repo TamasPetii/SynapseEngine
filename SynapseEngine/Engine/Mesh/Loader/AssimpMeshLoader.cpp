@@ -1,6 +1,23 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "AssimpMeshLoader.h"
 #include "Engine/Utils/AssimpUtils.h"
 #include "Engine/Mesh/Utils/MeshUtils.h"
+#include "Engine/Image/SamplerNames.h"
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
@@ -128,7 +145,7 @@ namespace Syn
         ProcessMeshVertices(scene, outModel, taskflow);
         ProcessMeshIndices(scene, outModel, taskflow);
 
-        ServiceLocator::GetTaskExecutor()->run(taskflow).wait();
+        ServiceLocator::Get<tf::Executor>()->run(taskflow).wait();
     }
 
     void AssimpMeshLoader::ProcessMaterials(const aiScene* scene, RawModel& outModel, tf::Taskflow& taskflow)
@@ -138,14 +155,32 @@ namespace Syn
                 aiMaterial* matAI = scene->mMaterials[matIndex];
                 MaterialInfo& matInfo = outModel.materials[matIndex];
 
-                matInfo.name = matAI->GetName().C_Str();
+                std::string matName = matAI->GetName().C_Str();
+                if (matName.empty()) matName = "Material";
+                matInfo.name = matName + "_" + std::to_string(matIndex);
+
+                //matInfo.name = modelName + "_" + matName + "_" + std::to_string(matIndex);
 
                 auto extractTexture = [&](aiTextureType type, TexturePayload& outPayload) -> bool {
                     if (matAI->GetTextureCount(type) > 0) {
 
                         aiString path;
-                        matAI->GetTexture(type, 0, &path);
+                        aiTextureMapMode mapMode[3];
+
+                        matAI->GetTexture(type, 0, &path, nullptr, nullptr, nullptr, nullptr, mapMode);
                         outPayload.path = path.C_Str();
+
+                        auto mapModeToStr = [](aiTextureMapMode mode) {
+                            switch (mode) {
+                            case aiTextureMapMode_Clamp: return SamplerWrapModeNames::ClampEdge;
+                            case aiTextureMapMode_Mirror: return SamplerWrapModeNames::Repeat;
+                            default: return SamplerWrapModeNames::Repeat;
+                            }
+                            };
+
+                        outPayload.wrapModeU = mapModeToStr(mapMode[0]);
+                        outPayload.wrapModeV = mapModeToStr(mapMode[1]);
+                        outPayload.wrapModeW = mapModeToStr(mapMode[2]);
 
                         const aiTexture* embeddedTexture = scene->GetEmbeddedTexture(path.C_Str());
 
@@ -199,6 +234,39 @@ namespace Syn
                     extractTexture(aiTextureType_AMBIENT, matInfo.ambientOcclusion);
                 }
 
+                if (extractTexture(aiTextureType_OPACITY, matInfo.opacity)) {
+                    matInfo.isAlphaTested = true;
+                }
+
+                ai_real specularFactor;
+                if (AI_SUCCESS == matAI->Get(AI_MATKEY_SPECULAR_FACTOR, specularFactor)) {
+                    matInfo.specularFactor = static_cast<float>(specularFactor);
+                }
+
+                aiColor3D specularColor;
+                if (AI_SUCCESS == matAI->Get(AI_MATKEY_COLOR_SPECULAR, specularColor)) {
+                    matInfo.specularColorFactor = glm::vec3(specularColor.r, specularColor.g, specularColor.b);
+                }
+
+                if (!extractTexture(aiTextureType_SPECULAR, matInfo.specular)) {
+                    extractTexture(aiTextureType_REFLECTION, matInfo.specular);
+                }
+
+                ai_real clearcoatFactor, clearcoatRoughnessFactor, iorVal;
+                if (AI_SUCCESS == matAI->Get(AI_MATKEY_CLEARCOAT_FACTOR, clearcoatFactor)) {
+                    matInfo.clearcoatFactor = static_cast<float>(clearcoatFactor);
+                }
+
+                if (AI_SUCCESS == matAI->Get(AI_MATKEY_CLEARCOAT_ROUGHNESS_FACTOR, clearcoatRoughnessFactor)) {
+                    matInfo.clearcoatRoughnessFactor = static_cast<float>(clearcoatRoughnessFactor);
+                }
+
+                if (AI_SUCCESS == matAI->Get(AI_MATKEY_REFRACTI, iorVal)) {
+                    matInfo.ior = static_cast<float>(iorVal);
+                }
+
+                extractTexture(aiTextureType_CLEARCOAT, matInfo.clearcoat);
+
                 aiColor4D color;
 
                 if (AI_SUCCESS == matAI->Get(AI_MATKEY_BASE_COLOR, color)) {
@@ -229,7 +297,7 @@ namespace Syn
 
                 ai_real opacity = 1.0f;
                 if (AI_SUCCESS == matAI->Get(AI_MATKEY_OPACITY, opacity)) {
-                    if (false && opacity < 0.98f) {
+                    if (opacity > 0.0f && opacity < 0.99f) {
                         matInfo.isTransparent = true;
                     }
                 }

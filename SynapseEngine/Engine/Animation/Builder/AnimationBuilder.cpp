@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "AnimationBuilder.h"
 #include "Engine/Animation/Source/File/FileAnimationSource.h"
 #include "Engine/Serialization/Schema/Animation/GpuBatchedAnimationSchema.h"
@@ -47,7 +63,7 @@ namespace Syn
         animation->transientCpuData = std::make_unique<CookedAnimation>();
         animation->transientGpuData = std::make_unique<GpuBatchedAnimation>();
 
-        auto serializer = ServiceLocator::GetSerializer();
+        auto serializer = ServiceLocator::Get<Serializer>();
 
         bool useCache = false;
         if (std::filesystem::exists(cachePath) && std::filesystem::exists(srcPath)) {

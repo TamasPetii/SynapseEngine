@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "MaterialApiImpl.h"
 #include "EditorCore/ViewModels/MaterialWorkspace/MaterialGraph/MaterialGraphState.h"
 #include "Engine/Scene/Insiders/SceneInsider.h"
@@ -24,15 +40,15 @@ namespace Syn {
         return result;
     }
 
-    uint32_t MaterialApiImpl::GetSelectedMaterial() const { 
+    uint32_t MaterialApiImpl::GetSelectedMaterial() const {
         return _selectedMaterial;
     }
 
-    void MaterialApiImpl::SetSelectedMaterial(uint32_t id) { 
+    void MaterialApiImpl::SetSelectedMaterial(uint32_t id) {
         _selectedMaterial = id;
     }
 
-    uint64_t MaterialApiImpl::GetVersion() const { 
+    uint64_t MaterialApiImpl::GetVersion() const {
         return _materialManager ? _materialManager->GetVersion() : 0;
     }
 
@@ -58,6 +74,11 @@ namespace Syn {
         case GraphPinType::MetallicRoughness: return mat->metallicRoughnessTexture;
         case GraphPinType::Emissive: return mat->emissiveTexture;
         case GraphPinType::AmbientOcclusion: return mat->ambientOcclusionTexture;
+        case GraphPinType::Clearcoat: return mat->clearcoatTexture;
+        case GraphPinType::ClearcoatRoughness: return mat->clearcoatRoughnessTexture;
+        case GraphPinType::ClearcoatNormal: return mat->clearcoatNormalTexture;
+        case GraphPinType::Specular: return mat->specularTexture;
+        case GraphPinType::SpecularColor: return mat->specularColorTexture;
         default: return INVALID_MATERIAL_ID;
         }
     }
@@ -76,6 +97,11 @@ namespace Syn {
         case GraphPinType::MetallicRoughness: mat->metallicRoughnessTexture = textureId; break;
         case GraphPinType::Emissive: mat->emissiveTexture = textureId; break;
         case GraphPinType::AmbientOcclusion: mat->ambientOcclusionTexture = textureId; break;
+        case GraphPinType::Clearcoat: mat->clearcoatTexture = textureId; break;
+        case GraphPinType::ClearcoatRoughness: mat->clearcoatRoughnessTexture = textureId; break;
+        case GraphPinType::ClearcoatNormal: mat->clearcoatNormalTexture = textureId; break;
+        case GraphPinType::Specular: mat->specularTexture = textureId; break;
+        case GraphPinType::SpecularColor: mat->specularColorTexture = textureId; break;
         default: break;
         }
     }

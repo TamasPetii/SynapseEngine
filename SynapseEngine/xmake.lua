@@ -5,7 +5,7 @@ set_config("vcpkg", os.projectdir() .. "/../External/vcpkg")
 
 set_allowedmodes("debug", "release", "dist", "performance")
 add_rules("mode.debug", "mode.release")
-add_rules("plugin.compile_commands.autoupdate", {outputdir = ".vscode"})
+-- add_rules("plugin.compile_commands.autoupdate", {outputdir = ".vscode"})
 
 set_languages("c17", "cxx23")
 set_warnings("allextra")
@@ -17,16 +17,33 @@ set_objectdir("Intermediates/$(os)-$(arch)/$(mode)/$(name)")
 if is_plat("windows") then
     add_cxflags("/bigobj", "/GR-", "/arch:AVX2")
 elseif is_plat("linux") then
-    add_cxflags(
+    add_cxxflags(
+        "-include cstdint", 
         "-fno-rtti", 
         "-std=c++23", 
+        {force = true}
+    )
+    
+    add_cxflags(
         "-mavx2", 
         "-mbmi", 
         "-mpopcnt", 
         "-mlzcnt", 
         "-mf16c", 
         "-mfma", 
-        "-mfpmath=sse", 
+        "-mfpmath=sse",
+        {force = true}
+    )
+
+    local vcpkg_linux = os.projectdir() .. "/../External/vcpkg/installed/x64-linux/lib"
+    local vcpkg_dynamic = os.projectdir() .. "/../External/vcpkg/installed/x64-linux-dynamic/lib"
+
+    add_linkdirs(vcpkg_linux, vcpkg_dynamic)
+    add_rpathdirs(vcpkg_linux, vcpkg_dynamic)
+    
+    add_ldflags(
+        "-Wl,-rpath-link=" .. vcpkg_linux,
+        "-Wl,-rpath-link=" .. vcpkg_dynamic,
         {force = true}
     )
 end
@@ -36,7 +53,9 @@ add_includedirs(
     "../External/vulkan_radix_sort/include",
     "../External/ImGuiFileDialog",
     "../External/imgui-node-editor",
-    "../External/IconFontCppHeaders"
+    "../External/IconFontCppHeaders",
+    "../External/ImGuizmo/src",
+    "../External/im-neo-sequencer"
 )
 
 add_defines('SYN_PROJECT_ROOT="' .. os.projectdir():gsub('\\', '/') .. '"')
@@ -50,6 +69,7 @@ add_defines(
     "NOMINMAX",
     "WIN32_LEAN_AND_MEAN",
     "_CRT_SECURE_NO_WARNINGS",
+    "JPH_DEBUG_RENDERER",
     "JPH_OBJECT_STREAM",
     "JPH_USE_AVX2",
     "JPH_USE_AVX",
@@ -95,6 +115,16 @@ local imgui_cfg = {
 
 add_requires(imgui_name, {configs = imgui_cfg})
 
+local ffmpeg_name = "vcpkg::ffmpeg"
+
+local ffmpeg_cfg = {
+    shared = is_plat("linux"),
+    debug = is_mode("debug"),
+    runtimes = (is_plat("windows") and (is_mode("debug") and "MDd" or "MD")) or nil
+}
+
+add_requires(ffmpeg_name, {configs = ffmpeg_cfg})
+
 local vcpkg_packages = {
     "vcpkg::glm",
     "vcpkg::glfw3",
@@ -114,12 +144,15 @@ local vcpkg_packages = {
     "vcpkg::spirv-reflect",
     "vcpkg::spirv-headers",
     "vcpkg::taskflow",
-    "vcpkg::imguizmo",
-    "vcpkg::joltphysics",
+    "vcpkg::joltphysics[debugrenderer]",
     "vcpkg::tinyxml2",
     "vcpkg::yaml-cpp",
     "vcpkg::tomlplusplus",
-    "vcpkg::nanosvg"
+    "vcpkg::nanosvg",
+    "vcpkg::tinygltf",
+    "vcpkg::box3d",
+    "vcpkg::miniaudio",
+    "vcpkg::shader-slang"
 }
 
 for _, pkg in ipairs(vcpkg_packages) do
@@ -133,7 +166,7 @@ for _, pkg in ipairs(vcpkg_packages) do
     add_requires(pkg, {configs = cfg})
 end
 
-add_packages(imgui_name, table.unpack(vcpkg_packages))
+add_packages(imgui_name, ffmpeg_name, table.unpack(vcpkg_packages))
 
 target("Engine")
     set_kind("shared")
@@ -167,7 +200,13 @@ target("Editor")
         add_syslinks("pthread", "dl", "m")
     end
 
-    add_files("Editor/**.cpp", "../External/ImGuiFileDialog/*.cpp", "../External/imgui-node-editor/*.cpp")
+    add_files(
+        "Editor/**.cpp", 
+        "../External/ImGuiFileDialog/*.cpp", 
+        "../External/imgui-node-editor/*.cpp",
+        "../External/ImGuizmo/src/*.cpp",
+        "../External/im-neo-sequencer/*.cpp"
+    )
     add_headerfiles("Editor/**.h", "Editor/**.hpp")
     add_deps("Engine", "EditorCore")
     set_rundir("$(projectdir)")
