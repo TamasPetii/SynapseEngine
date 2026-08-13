@@ -275,11 +275,26 @@ sudo apt-get update
 sudo apt-get install -y \
     gcc-14 \
     g++-14 \
+    build-essential \
+    pkg-config \
+    autoconf \
+    autoconf-archive \
+    automake \
+    libtool \
+    m4 \
+    zip \
+    unzip \
+    curl \
     libx11-dev \
     libxcursor-dev \
     libxrandr-dev \
     libxinerama-dev \
     libxi-dev \
+    libxext-dev \
+    libxrender-dev \
+    libxtst-dev \
+    libxcb1-dev \
+    libx11-xcb-dev \
     libgl1-mesa-dev \
     libxxxf86vm-dev \
     libwayland-dev \
@@ -319,8 +334,6 @@ cd External/vcpkg
 ./bootstrap-vcpkg.sh
 
 cd ../..
-
-cd SynapseEngine/
 ```
 
 #### 6. Configure & Build
