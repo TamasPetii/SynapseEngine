@@ -46,7 +46,7 @@ namespace Syn {
         auto& tempBuffer = drawData->PointLightShadow.atlasRadixSortTempBuffer;
 
         VrdxSorterStorageRequirements reqs;
-        vrdxGetSorterKeyValueStorageRequirements(_radixSorter, maxSortCount, &reqs);
+        vrdxGetSorterStorageRequirements(_radixSorter, maxSortCount, VRDX_SORT_MODE_KEY_VALUE, &reqs);
         tempBuffer.UpdateCapacity(fIdx, reqs.size);
 
         VkBuffer keysHandle = compManager->GetComponentBuffer(BufferNames::PointLightShadowAtlasSortKeyBuffer, fIdx).buffer->Handle();
@@ -77,21 +77,20 @@ namespace Syn {
         valuesPreBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
         Vk::BufferUtils::InsertBarrier(context.cmd, valuesPreBarrier);
 
-        vrdxCmdSortKeyValueIndirect(
-            context.cmd,
-            _radixSorter,
-            maxSortCount,
-            countBuffer,
-            0,
-            keysHandle,
-            0,
-            valuesHandle,
-            0,
-            tempBuffer.GetHandle(fIdx),
-            0,
-            VK_NULL_HANDLE,
-            0
-        );
+        VrdxSortInfo sortInfo{};
+        sortInfo.elementCount = maxSortCount;
+        sortInfo.elementCountBuffer = countBuffer;
+        sortInfo.elementCountOffset = 0;
+        sortInfo.keysBuffer = keysHandle;
+        sortInfo.keysOffset = 0;
+        sortInfo.valuesBuffer = valuesHandle;
+        sortInfo.valuesOffset = 0;
+        sortInfo.storageBuffer = tempBuffer.GetHandle(fIdx);
+        sortInfo.storageOffset = 0;
+        sortInfo.queryPool = VK_NULL_HANDLE;
+        sortInfo.query = 0;
+
+        vrdxCmdSort(context.cmd, _radixSorter, &sortInfo);
 
         Vk::BufferBarrierInfo keysBarrier{};
         keysBarrier.buffer = keysHandle;

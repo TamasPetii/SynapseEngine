@@ -67,7 +67,8 @@ float CalculateSphereScreenSizeOrtho(vec3 worldCenter, float radius, mat4 viewPr
     return INFINITE_SCREEN_SIZE;
 }
 
-bool IsSphereOccludedPerspective(vec3 worldCenter, float radius, mat4 view, mat4 proj, float zNear, float zFar, sampler2D depthPyramid, vec2 screenRes, bool enableDepthOcclusion, out float outScreenSizePixels) {
+bool IsSphereOccludedPerspective(vec3 worldCenter, float radius, mat4 view, mat4 proj, float zNear,
+float zFar, sampler2D depthPyramid, vec2 screenRes, bool enableDepthOcclusion, out float outScreenSizePixels) {
     vec3 viewCenter = (view * vec4(worldCenter, 1.0)).xyz;
     vec4 uv;
     outScreenSizePixels = INFINITE_SCREEN_SIZE;
