@@ -285,6 +285,8 @@ sudo apt-get install -y \
     zip \
     unzip \
     curl \
+    nasm \
+    yasm \
     libx11-dev \
     libxcursor-dev \
     libxrandr-dev \
@@ -296,7 +298,7 @@ sudo apt-get install -y \
     libxcb1-dev \
     libx11-xcb-dev \
     libgl1-mesa-dev \
-    libxxxf86vm-dev \
+    libxxf86vm-dev \
     libwayland-dev \
     libxkbcommon-dev
 ```
