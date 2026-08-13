@@ -319,6 +319,8 @@ cd External/vcpkg
 ./bootstrap-vcpkg.sh
 
 cd ../..
+
+cd SynapseEngine/
 ```
 
 #### 6. Configure & Build
