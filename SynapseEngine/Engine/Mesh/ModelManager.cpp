@@ -147,9 +147,9 @@ namespace Syn {
         std::shared_ptr<StaticMesh> res = entry.resource;
 
         Vk::GpuUploadRequest request{
-            .uploadCallback = [this, entryId, res](VkCommandBuffer cmd) 
+            .uploadCallback = [this, entryId, res](VkCommandBuffer cmd,  Vk::GpuUploader* gpuUploader)
             {
-                auto uploadResult = _uploader->Upload(*(res->transientGpuData), cmd);
+                auto uploadResult = _uploader->Upload(*(res->transientGpuData), cmd, gpuUploader);
 
                 std::lock_guard lock(_mutex);
                 auto& safeEntry = _entries[entryId];

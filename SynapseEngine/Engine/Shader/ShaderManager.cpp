@@ -95,7 +95,7 @@ namespace Syn
         auto program = entry.resource;
 
         Vk::GpuUploadRequest request{
-            .uploadCallback = [program](VkCommandBuffer cmd) {
+            .uploadCallback = [program](VkCommandBuffer cmd, Vk::GpuUploader* gpuUploader) {
                 program->CreatePipelineLayoutAndShaders();
             },
             .onFinished = [this, entryId]() {

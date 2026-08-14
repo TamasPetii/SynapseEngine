@@ -149,7 +149,7 @@ namespace Syn {
         auto readbackBuffer = Vk::BufferFactory::Create(readbackConfig);
 
         Vk::GpuUploadRequest request{
-            .uploadCallback = [&](VkCommandBuffer cmd) {
+            .uploadCallback = [&](VkCommandBuffer cmd, Vk::GpuUploader* gpuUploader) {
                 entityImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_READ_BIT);
                 Vk::ImageToBufferCopyInfo copyInfo{};
                 copyInfo.srcImage = entityImage->Handle();

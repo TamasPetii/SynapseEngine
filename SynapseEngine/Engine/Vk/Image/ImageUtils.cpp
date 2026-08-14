@@ -67,8 +67,8 @@ namespace Syn::Vk {
         barrier.dstAccessMask = info.dstAccess;
         barrier.oldLayout = info.oldLayout;
         barrier.newLayout = info.newLayout;
-        barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-        barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        barrier.srcQueueFamilyIndex = info.srcQueueFamilyIndex;
+        barrier.dstQueueFamilyIndex = info.dstQueueFamilyIndex;
         barrier.image = info.image;
         barrier.subresourceRange.aspectMask = info.aspectMask;
         barrier.subresourceRange.baseMipLevel = info.baseMipLevel;
@@ -79,6 +79,39 @@ namespace Syn::Vk {
         VkDependencyInfo depInfo{ VK_STRUCTURE_TYPE_DEPENDENCY_INFO };
         depInfo.imageMemoryBarrierCount = 1;
         depInfo.pImageMemoryBarriers = &barrier;
+
+        vkCmdPipelineBarrier2(cmd, &depInfo);
+    }
+
+    void ImageUtils::InsertBatchedBarriers(VkCommandBuffer cmd, std::span<const ImageBarrierInfo> barriers) {
+        if (barriers.empty()) return;
+
+        std::vector<VkImageMemoryBarrier2> vkBarriers;
+        vkBarriers.reserve(barriers.size());
+
+        for (const auto& info : barriers) {
+            VkImageMemoryBarrier2 barrier{ VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2 };
+            barrier.srcStageMask = info.srcStage;
+            barrier.srcAccessMask = info.srcAccess;
+            barrier.dstStageMask = info.dstStage;
+            barrier.dstAccessMask = info.dstAccess;
+            barrier.oldLayout = info.oldLayout;
+            barrier.newLayout = info.newLayout;
+            barrier.srcQueueFamilyIndex = info.srcQueueFamilyIndex;
+            barrier.dstQueueFamilyIndex = info.dstQueueFamilyIndex;
+            barrier.image = info.image;
+            barrier.subresourceRange.aspectMask = info.aspectMask;
+            barrier.subresourceRange.baseMipLevel = info.baseMipLevel;
+            barrier.subresourceRange.levelCount = info.levelCount;
+            barrier.subresourceRange.baseArrayLayer = info.baseArrayLayer;
+            barrier.subresourceRange.layerCount = info.layerCount;
+
+            vkBarriers.push_back(barrier);
+        }
+
+        VkDependencyInfo depInfo{ VK_STRUCTURE_TYPE_DEPENDENCY_INFO };
+        depInfo.imageMemoryBarrierCount = static_cast<uint32_t>(vkBarriers.size());
+        depInfo.pImageMemoryBarriers = vkBarriers.data();
 
         vkCmdPipelineBarrier2(cmd, &depInfo);
     }

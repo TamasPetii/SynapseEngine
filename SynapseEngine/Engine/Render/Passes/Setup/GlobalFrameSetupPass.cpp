@@ -33,6 +33,7 @@
 #include "Engine/Component/Light/Spot/SpotLightComponent.h"
 #include "Engine/Component/Rendering/ModelComponent.h"
 #include "Engine/Component/Core/TransformComponent.h"
+#include "Engine/Vk/Rendering/GpuUploader.h"
 
 namespace Syn {
 
@@ -305,6 +306,8 @@ namespace Syn {
         ServiceLocator::Get<MaterialManager>()->RecordSync(context.cmd);
         ServiceLocator::Get<ImageManager>()->RecordSync(context.cmd);
         ServiceLocator::Get<VideoManager>()->RecordSync(context.cmd);
+
+    	ServiceLocator::Get<Vk::GpuUploader>()->RecordAcquireBarriers(context.cmd);
 
         Vk::GlobalBarrierInfo globalBarrier{};
 

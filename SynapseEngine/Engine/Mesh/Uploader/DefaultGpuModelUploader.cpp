@@ -18,7 +18,7 @@
 
 namespace Syn
 {
-    ModelUploadResult DefaultGpuModelUploader::Upload(const GpuBatchedModel& data, VkCommandBuffer cmd)
+    ModelUploadResult DefaultGpuModelUploader::Upload(const GpuBatchedModel& data, VkCommandBuffer cmd, Vk::GpuUploader* uploader)
     {
         ModelUploadResult result;
 
@@ -61,14 +61,10 @@ namespace Syn
                 copyInfo.dstOffset = 0;
                 Vk::BufferUtils::CopyBuffer(cmd, copyInfo);
 
-                Vk::BufferBarrierInfo barrier{};
-                barrier.buffer = outBuffer->Handle();
-                barrier.size = byteSize;
-                barrier.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
-                barrier.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
-                barrier.dstStage = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
-                barrier.dstAccess = VK_ACCESS_2_MEMORY_READ_BIT;
-                Vk::BufferUtils::InsertBarrier(cmd, barrier);
+                uploader->RegisterBufferTransfer({
+                    .buffer = outBuffer->Handle(),
+                    .size = byteSize
+                });
 
                 currentStagingOffset += getAlignedSize(byteSize);
             };

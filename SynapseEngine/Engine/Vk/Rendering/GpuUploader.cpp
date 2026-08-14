@@ -61,7 +61,14 @@ namespace Syn::Vk {
         auto it = _activeBatches.begin();
 
         while (it != _activeBatches.end()) {
-            if (it->fence->IsSignaled()) {
+            if (it->fence->IsSignaled())
+            {
+                if (!it->acquireBuffers.empty() || !it->acquireImages.empty()) {
+                    std::lock_guard transferLock(_transferMutex);
+                    _readyAcquireBuffers.insert(_readyAcquireBuffers.end(), it->acquireBuffers.begin(), it->acquireBuffers.end());
+                    _readyAcquireImages.insert(_readyAcquireImages.end(), it->acquireImages.begin(), it->acquireImages.end());
+                }
+
                 for (auto& cb : it->callbacks) if (cb) cb();
                 it = _activeBatches.erase(it);
             }
@@ -90,9 +97,12 @@ namespace Syn::Vk {
 
         cmd->Begin(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
         for (auto& req : requests) {
-            req.uploadCallback(cmd->Handle());
+            req.uploadCallback(cmd->Handle(), this);
             callbacks.push_back(std::move(req.onFinished));
         }
+
+        auto pendingAcquires = InsertReleaseBarriers(cmd->Handle(), queue);
+
         cmd->End();
 
         VkCommandBufferSubmitInfo cmdSubmitInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO };
@@ -104,7 +114,14 @@ namespace Syn::Vk {
 
         queue->Submit(&submitInfo, fence->Handle());
 
-        _activeBatches.push_back({ fence, std::move(cmd), std::move(callbacks) });
+        _activeBatches.push_back({
+            fence,
+            std::move(cmd),
+            std::move(callbacks),
+            std::move(pendingAcquires.buffers),
+            std::move(pendingAcquires.images)
+        });
+
         requests.clear();
     }
 
@@ -129,7 +146,8 @@ namespace Syn::Vk {
         auto fence = std::make_shared<Vk::Fence>(false);
 
         cmd->Begin(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-        request.uploadCallback(cmd->Handle());
+        request.uploadCallback(cmd->Handle(), this);
+        auto pendingAcquires = InsertReleaseBarriers(cmd->Handle(), queue);
         cmd->End();
 
         VkCommandBufferSubmitInfo cmdSubmitInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO };
@@ -144,8 +162,114 @@ namespace Syn::Vk {
         VkFence vkFence = fence->Handle();
         vkWaitForFences(device->Handle(), 1, &vkFence, VK_TRUE, UINT64_MAX);
 
+        if (!pendingAcquires.buffers.empty() || !pendingAcquires.images.empty()) {
+            std::lock_guard transferLock(_transferMutex);
+            _readyAcquireBuffers.insert(_readyAcquireBuffers.end(), pendingAcquires.buffers.begin(), pendingAcquires.buffers.end());
+            _readyAcquireImages.insert(_readyAcquireImages.end(), pendingAcquires.images.begin(), pendingAcquires.images.end());
+        }
+
         if (request.onFinished) {
             request.onFinished();
+        }
+    }
+
+    void GpuUploader::RegisterBufferTransfer(const BufferTransferData& data) {
+        std::lock_guard lock(_transferMutex);
+        _currentBatchBuffers.push_back(data);
+    }
+
+    void GpuUploader::RegisterImageTransfer(const ImageTransferData& data) {
+        std::lock_guard lock(_transferMutex);
+        _currentBatchImages.push_back(data);
+    }
+
+    PendingAcquires GpuUploader::InsertReleaseBarriers(VkCommandBuffer cmd, Vk::ThreadSafeQueue* queue) {
+        uint32_t srcQueueFamily = queue->GetFamilyIndex();
+        uint32_t graphicsQueueFamily = _graphicsQueue->GetFamilyIndex();
+        bool needsOwnershipTransfer = (srcQueueFamily != graphicsQueueFamily);
+
+        std::vector<Vk::BufferBarrierInfo> releaseBuffers;
+        std::vector<Vk::ImageBarrierInfo> releaseImages;
+        PendingAcquires pending;
+
+        {
+            std::lock_guard transferLock(_transferMutex);
+
+            releaseBuffers.reserve(_currentBatchBuffers.size());
+            for (const auto& buf : _currentBatchBuffers) {
+                Vk::BufferBarrierInfo b{};
+                b.buffer = buf.buffer;
+                b.size = buf.size;
+                b.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+                b.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+                b.dstStage = needsOwnershipTransfer ? 0 : VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+                b.dstAccess = needsOwnershipTransfer ? 0 : VK_ACCESS_2_MEMORY_READ_BIT;
+                b.srcQueueFamilyIndex = needsOwnershipTransfer ? srcQueueFamily : VK_QUEUE_FAMILY_IGNORED;
+                b.dstQueueFamilyIndex = needsOwnershipTransfer ? graphicsQueueFamily : VK_QUEUE_FAMILY_IGNORED;
+                releaseBuffers.push_back(b);
+
+                if (needsOwnershipTransfer) {
+                    b.srcStage = 0;
+                    b.srcAccess = 0;
+                    b.dstStage = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+                    b.dstAccess = VK_ACCESS_2_MEMORY_READ_BIT;
+                    pending.buffers.push_back(b);
+                }
+            }
+
+            releaseImages.reserve(_currentBatchImages.size());
+            for (const auto& img : _currentBatchImages) {
+                Vk::ImageBarrierInfo b{};
+                b.image = img.image;
+                b.aspectMask = img.aspectMask;
+                b.levelCount = img.mipLevels;
+                b.oldLayout = img.oldLayout;
+                b.newLayout = img.newLayout;
+                b.srcStage = VK_PIPELINE_STAGE_2_TRANSFER_BIT;
+                b.srcAccess = VK_ACCESS_2_TRANSFER_WRITE_BIT;
+                b.dstStage = needsOwnershipTransfer ? 0 : VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+                b.dstAccess = needsOwnershipTransfer ? 0 : VK_ACCESS_2_MEMORY_READ_BIT;
+                b.srcQueueFamilyIndex = needsOwnershipTransfer ? srcQueueFamily : VK_QUEUE_FAMILY_IGNORED;
+                b.dstQueueFamilyIndex = needsOwnershipTransfer ? graphicsQueueFamily : VK_QUEUE_FAMILY_IGNORED;
+                releaseImages.push_back(b);
+
+                if (needsOwnershipTransfer) {
+                    b.srcStage = 0;
+                    b.srcAccess = 0;
+                    b.dstStage = VK_PIPELINE_STAGE_2_ALL_COMMANDS_BIT;
+                    b.dstAccess = VK_ACCESS_2_MEMORY_READ_BIT;
+                    pending.images.push_back(b);
+                }
+            }
+
+            _currentBatchBuffers.clear();
+            _currentBatchImages.clear();
+        }
+
+        if (!releaseBuffers.empty()) Vk::BufferUtils::InsertBatchedBarriers(cmd, releaseBuffers);
+        if (!releaseImages.empty()) Vk::ImageUtils::InsertBatchedBarriers(cmd, releaseImages);
+
+        return pending;
+    }
+
+    void GpuUploader::RecordAcquireBarriers(VkCommandBuffer cmd) {
+        std::vector<Vk::BufferBarrierInfo> buffersToAcquire;
+        std::vector<Vk::ImageBarrierInfo> imagesToAcquire;
+
+        {
+            std::lock_guard lock(_transferMutex);
+            if (_readyAcquireBuffers.empty() && _readyAcquireImages.empty()) return;
+
+            buffersToAcquire = std::move(_readyAcquireBuffers);
+            imagesToAcquire = std::move(_readyAcquireImages);
+        }
+
+        if (!buffersToAcquire.empty()) {
+            Vk::BufferUtils::InsertBatchedBarriers(cmd, buffersToAcquire);
+        }
+
+        if (!imagesToAcquire.empty()) {
+            Vk::ImageUtils::InsertBatchedBarriers(cmd, imagesToAcquire);
         }
     }
 }

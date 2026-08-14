@@ -19,6 +19,9 @@
 #include "Engine/Vk/Command/CommandPool.h"
 #include "Engine/Vk/Command/CommandBuffer.h"
 #include "Engine/Vk/Synchronization/Fence.h"
+#include "Engine/Vk/Buffer/BufferUtils.h"
+#include "Engine/Vk/Image/ImageUtils.h"
+#include <vulkan/vulkan.h>
 #include <vector>
 #include <functional>
 #include <mutex>
@@ -26,11 +29,31 @@
 
 namespace Syn::Vk
 {
+    class GpuUploader;
+
     struct SYN_API GpuUploadRequest {
-        std::function<void(VkCommandBuffer)> uploadCallback;
+        std::function<void(VkCommandBuffer, GpuUploader*)> uploadCallback;
         std::function<void()> onFinished;
         bool needsGraphics = false;
         bool needsVideo = false;
+    };
+
+    struct PendingAcquires {
+        std::vector<Vk::BufferBarrierInfo> buffers;
+        std::vector<Vk::ImageBarrierInfo> images;
+    };
+
+    struct SYN_API BufferTransferData {
+        VkBuffer buffer;
+        VkDeviceSize size;
+    };
+
+    struct SYN_API ImageTransferData {
+        VkImage image;
+        VkImageAspectFlags aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+        uint32_t mipLevels = 1;
+        VkImageLayout oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+        VkImageLayout newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
     };
 
     class SYN_API GpuUploader {
@@ -42,14 +65,21 @@ namespace Syn::Vk
         void Enqueue(GpuUploadRequest request);
         void UploadSync(GpuUploadRequest request);
         void ProcessUploads();
+
+        void RegisterBufferTransfer(const BufferTransferData& data);
+        void RegisterImageTransfer(const ImageTransferData& data);
+        void RecordAcquireBarriers(VkCommandBuffer cmd);
     private:
         struct ActiveBatch {
             std::shared_ptr<Vk::Fence> fence;
             std::unique_ptr<Vk::CommandBuffer> cmd;
             std::vector<std::function<void()>> callbacks;
+            std::vector<Vk::BufferBarrierInfo> acquireBuffers;
+            std::vector<Vk::ImageBarrierInfo> acquireImages;
         };
 
         void ProcessQueue(std::vector<GpuUploadRequest>& requests, Vk::ThreadSafeQueue* queue, Vk::CommandPool* pool);
+        PendingAcquires InsertReleaseBarriers(VkCommandBuffer cmd, Vk::ThreadSafeQueue* queue);
 
         std::vector<ActiveBatch> _activeBatches;
         std::vector<GpuUploadRequest> _transferRequests;
@@ -65,5 +95,12 @@ namespace Syn::Vk
         std::unique_ptr<Vk::CommandPool> _videoPool;
 
         std::mutex _mutex;
+
+        std::mutex _transferMutex;
+        std::vector<BufferTransferData> _currentBatchBuffers;
+        std::vector<ImageTransferData> _currentBatchImages;
+
+        std::vector<Vk::BufferBarrierInfo> _readyAcquireBuffers;
+        std::vector<Vk::ImageBarrierInfo> _readyAcquireImages;
     };
 }

@@ -86,6 +86,7 @@ namespace Syn::Vk {
         static void CopyBuffer(VkCommandBuffer cmd, const BufferCopyInfo& info);
         static void CopyBufferToImage(VkCommandBuffer cmd, const BufferToImageCopyInfo& info);
         static void InsertBarrier(VkCommandBuffer cmd, const BufferBarrierInfo& info);
+        static void InsertBatchedBarriers(VkCommandBuffer cmd, std::span<const BufferBarrierInfo> barriers);
         static void InsertGlobalBarrier(VkCommandBuffer cmd, const GlobalBarrierInfo& info);
         static void FillBuffer(VkCommandBuffer cmd, const BufferFillInfo& info);
         static void UpdateBuffer(VkCommandBuffer cmd, const BufferUpdateInfo& info);

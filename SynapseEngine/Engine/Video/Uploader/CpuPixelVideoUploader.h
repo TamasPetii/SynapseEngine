@@ -28,7 +28,7 @@ namespace Syn
         CpuPixelVideoUploader(uint32_t width, uint32_t height, uint32_t bufferCount);
         ~CpuPixelVideoUploader() override = default;
 
-        VideoUploadResult Upload(const GpuVideoPacket& data, VkCommandBuffer cmd) override;
+        VideoUploadResult Upload(const GpuVideoPacket& data, VkCommandBuffer cmd, Vk::GpuUploader* uploader) override;
     private:
         std::vector<std::shared_ptr<Vk::Image>> _textures;
         uint32_t _frameIndex = 0;

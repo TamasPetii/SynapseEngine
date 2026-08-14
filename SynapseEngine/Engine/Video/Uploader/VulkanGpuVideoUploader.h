@@ -35,7 +35,7 @@ namespace Syn
         );
         ~VulkanGpuVideoUploader() override;
 
-        VideoUploadResult Upload(const GpuVideoPacket& data, VkCommandBuffer cmd) override;
+        VideoUploadResult Upload(const GpuVideoPacket& data, VkCommandBuffer cmd, Vk::GpuUploader* uploader) override;
     private:
         uint32_t _width;
         uint32_t _height;

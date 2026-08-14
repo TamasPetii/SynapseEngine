@@ -65,7 +65,7 @@ namespace Syn
         _sessionMemories.clear();
     }
 
-    VideoUploadResult VulkanGpuVideoUploader::Upload(const GpuVideoPacket& data, VkCommandBuffer cmd)
+    VideoUploadResult VulkanGpuVideoUploader::Upload(const GpuVideoPacket& data, VkCommandBuffer cmd, Vk::GpuUploader* uploader)
     {
         VideoUploadResult result;
         result.isFrameReady = false;
@@ -278,13 +278,12 @@ namespace Syn
             vkCmdEndVideoCodingKHR(cmd, &endInfo);
         }
 
-        currentTexture->TransitionLayout(
-            cmd,
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT,
-            VK_ACCESS_2_NONE,
-            false
-        );
+       uploader->RegisterImageTransfer({
+            .image = currentTexture->Handle(),
+            .mipLevels = 1,
+            .oldLayout = VK_IMAGE_LAYOUT_VIDEO_DECODE_DST_KHR,
+            .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        });
 
         currentTexture->OverrideInternalState(
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,

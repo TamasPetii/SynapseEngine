@@ -20,6 +20,7 @@
 #include "Engine/Animation/Data/Gpu/GpuBatchedAnimation.h"
 #include "Engine/Vk/Buffer/BufferFactory.h"
 #include "Engine/Vk/Buffer/BufferUtils.h"
+#include "Engine/Vk/Rendering/GpuUploader.h"
 #include <memory>
 
 namespace Syn
@@ -34,6 +35,6 @@ namespace Syn
     {
     public:
         virtual ~IGpuAnimationUploader() = default;
-        virtual AnimationUploadResult Upload(const GpuBatchedAnimation& data, VkCommandBuffer cmd) = 0;
+        virtual AnimationUploadResult Upload(const GpuBatchedAnimation& data, VkCommandBuffer cmd, Vk::GpuUploader* uploader) = 0;
     };
 }

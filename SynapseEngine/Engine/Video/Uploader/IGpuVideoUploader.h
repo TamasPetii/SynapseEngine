@@ -19,6 +19,7 @@
 #include "Engine/Video/Data/Gpu/GpuVideoPacket.h"
 #include "VideoUploadResult.h"
 #include <vulkan/vulkan.h>
+#include "Engine/Vk/Rendering/GpuUploader.h"
 
 namespace Syn
 {
@@ -26,7 +27,7 @@ namespace Syn
     {
     public:
         virtual ~IGpuVideoUploader() = default;
-        virtual VideoUploadResult Upload(const GpuVideoPacket& data, VkCommandBuffer cmd) = 0;
+        virtual VideoUploadResult Upload(const GpuVideoPacket& data, VkCommandBuffer cmd, Vk::GpuUploader* uploader) = 0;
     protected:
         static constexpr uint32_t BUFFER_COUNT = 3;
     };

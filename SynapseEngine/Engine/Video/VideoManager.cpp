@@ -148,8 +148,8 @@ namespace Syn
                     auto streamState = stream;
 
                     Vk::GpuUploadRequest request{
-                        .uploadCallback = [uploader, videoData, streamState](VkCommandBuffer cmd) {
-                            auto result = uploader->Upload(*(videoData->transientGpuData), cmd);
+                        .uploadCallback = [uploader, videoData, streamState](VkCommandBuffer cmd, Vk::GpuUploader* gpuUploader) {
+                            auto result = uploader->Upload(*(videoData->transientGpuData), cmd, gpuUploader);
                             videoData->image = result.texture;
 
                             std::lock_guard<std::mutex> lock(streamState->stagingMutex);

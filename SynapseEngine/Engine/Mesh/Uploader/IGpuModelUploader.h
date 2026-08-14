@@ -20,6 +20,7 @@
 #include "Engine/Mesh/Data/Gpu/GpuBatchedModel.h"
 #include "Engine/Vk/Buffer/BufferFactory.h"
 #include "Engine/Vk/Buffer/BufferUtils.h"
+#include "Engine/Vk/Rendering/GpuUploader.h"
 #include <memory>
 
 namespace Syn
@@ -34,6 +35,6 @@ namespace Syn
     {
     public:
         virtual ~IGpuModelUploader() = default;
-        virtual ModelUploadResult Upload(const GpuBatchedModel& data, VkCommandBuffer cmd) = 0;
+        virtual ModelUploadResult Upload(const GpuBatchedModel& data, VkCommandBuffer cmd, Vk::GpuUploader* uploader) = 0;
     };
 }
