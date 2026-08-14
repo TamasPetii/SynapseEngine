@@ -38,6 +38,7 @@ namespace Syn
     protected:
         virtual void OnEntryCreated(uint32_t index) override;
         void WriteAddress(uint32_t index, const TAddressStruct& addresses);
+        void WriteAddresses(std::span<const std::pair<uint32_t, TAddressStruct>> updates);
     protected:
         uint32_t _framesInFlight;
         std::mutex _staleMutex;
@@ -110,6 +111,32 @@ namespace Syn
 
         size_t offset = index * sizeof(TAddressStruct);
         _addressBuffer.Write(0, &addresses, sizeof(TAddressStruct), offset);
+    }
+
+    template <typename TResource, typename TAddressStruct>
+    void AddressResourceManager<TResource, TAddressStruct>::WriteAddresses(std::span<const std::pair<uint32_t, TAddressStruct>> updates) {
+        std::lock_guard<std::mutex> writeLock(_writeMutex);
+        if (updates.empty()) return;
+
+        uint32_t maxIndex = 0;
+        for (const auto& u : updates) {
+            if (u.first > maxIndex) 
+                maxIndex = u.first;
+        }
+
+        uint32_t requiredCapacity = maxIndex + 1;
+        auto staleBuffers = _addressBuffer.UpdateCapacity(0, requiredCapacity);
+
+        if (staleBuffers.HasAny()) {
+            std::lock_guard<std::mutex> lock(_staleMutex);
+            if (staleBuffers.mapped) _staleBuffers.push_back({ staleBuffers.mapped, _framesInFlight });
+            if (staleBuffers.gpu)    _staleBuffers.push_back({ staleBuffers.gpu, _framesInFlight });
+        }
+
+        for (const auto& u : updates) {
+            size_t offset = u.first * sizeof(TAddressStruct);
+            _addressBuffer.Write(0, &u.second, sizeof(TAddressStruct), offset);
+        }
     }
 
     template <typename TResource, typename TAddressStruct>

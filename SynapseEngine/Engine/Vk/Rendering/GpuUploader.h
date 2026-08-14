@@ -85,14 +85,17 @@ namespace Syn::Vk
         std::vector<GpuUploadRequest> _transferRequests;
         std::vector<GpuUploadRequest> _graphicsRequests;
         std::vector<GpuUploadRequest> _videoRequests;
+        std::vector<GpuUploadRequest> _computeRequests;
 
         Vk::ThreadSafeQueue* _transferQueue = nullptr;
         Vk::ThreadSafeQueue* _graphicsQueue = nullptr;
         Vk::ThreadSafeQueue* _videoQueue = nullptr;
+        Vk::ThreadSafeQueue* _computeQueue = nullptr;
 
         std::unique_ptr<Vk::CommandPool> _transferPool;
         std::unique_ptr<Vk::CommandPool> _graphicsPool;
         std::unique_ptr<Vk::CommandPool> _videoPool;
+        std::unique_ptr<Vk::CommandPool> _computePool;
 
         std::mutex _mutex;
 

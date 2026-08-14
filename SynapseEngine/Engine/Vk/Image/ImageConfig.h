@@ -20,6 +20,8 @@
 namespace Syn::Vk {
     struct SYN_API ImageViewConfig {
         VkImageViewType viewType = VK_IMAGE_VIEW_TYPE_2D;
+        VkFormat format = VK_FORMAT_UNDEFINED;
+        VkImageAspectFlags aspectMask = 0;
         uint32_t baseMipLevel = 0;
         uint32_t mipLevelCount = VK_REMAINING_MIP_LEVELS;
         uint32_t baseArrayLayer = 0;

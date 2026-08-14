@@ -21,6 +21,8 @@
 #include "Engine/Logger/SynLog.h"
 #include "Engine/Vk/Descriptor/DescriptorLayoutBuilder.h"
 #include "Engine/Vk/Rendering/GpuUploader.h"
+#include "Engine/Image/ImageManager.h"
+#include "Engine/Image/SamplerNames.h"
 
 namespace Syn
 {
@@ -106,19 +108,58 @@ namespace Syn
     }
 
     void VideoManager::FlushDirtyResources() {
+        std::vector<std::pair<uint32_t, uint32_t>> addressUpdates;
+
+        auto imageManager = ServiceLocator::Get<ImageManager>();
+        uint32_t samplerIndex = imageManager ? imageManager->GetSamplerIndex(SamplerNames::LinearClampEdge) : 0;
+        uint32_t textureData = (samplerIndex & 0x7FFFFFFF);
+
         this->ProcessDirtyReadyEntries(
-            [this](uint32_t index, const EntryType& entry) {
+            [this, &addressUpdates, textureData](uint32_t index, const EntryType& entry) {
                 if (!entry.resource->video || !entry.resource->video->image) return;
+
+                auto targetImage = entry.resource->video->convertedImage ?
+                    entry.resource->video->convertedImage :
+                    entry.resource->video->image;
+
+                if (!targetImage) return;
 
                 _bindlessBuffer->WriteSampledImage(
                     BINDING_VIDEO_TEXTURES,
                     index,
-                    entry.resource->video->image->GetView()
+                    targetImage->GetView()
                 );
 
-                this->WriteAddress(index, index);
+                addressUpdates.push_back({ index, textureData });
             }
         );
+
+        if (!addressUpdates.empty()) {
+            this->WriteAddresses(addressUpdates);
+        }
+    }
+
+    void VideoManager::UpdateVideoBindlessBatch(std::span<const std::pair<uint32_t, VkImageView>> updates) {
+        if (updates.empty()) return;
+
+        auto imageManager = ServiceLocator::Get<ImageManager>();
+        uint32_t samplerIndex = imageManager ? imageManager->GetSamplerIndex(SamplerNames::LinearClampEdge) : 0;
+        uint32_t textureData = (samplerIndex & 0x7FFFFFFF);
+
+        std::vector<std::pair<uint32_t, uint32_t>> addressUpdates;
+        addressUpdates.reserve(updates.size());
+
+        for (const auto& u : updates) {
+            _bindlessBuffer->WriteSampledImage(
+                BINDING_VIDEO_TEXTURES,
+                u.first,
+                u.second
+            );
+
+            addressUpdates.push_back({ u.first, textureData });
+        }
+
+        this->WriteAddresses(addressUpdates);
     }
 
     void VideoManager::StreamingThreadLoop() 

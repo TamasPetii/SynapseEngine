@@ -59,6 +59,7 @@ namespace Syn {
         void RecordSync(VkCommandBuffer cmd);
         uint32_t LoadVideoAsync(const std::string& filePath);
 
+        void UpdateVideoBindlessBatch(std::span<const std::pair<uint32_t, VkImageView>> updates);
         Vk::DescriptorBuffer* GetBindlessBuffer() const { return _bindlessBuffer.get(); }
         VkDescriptorSetLayout GetBindlessLayout() const { return _bindlessLayout; }
     protected:

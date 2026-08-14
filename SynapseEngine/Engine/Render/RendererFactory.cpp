@@ -199,6 +199,7 @@
 #include "Engine/Render/Passes/PostProcess/InfiniteGrid/InfiniteGridPass.h"
 
 #include "Engine/Render/Passes/Shading/Visibility/DebugVisibilityPass.h"
+#include "Engine/Render/Passes/Video/VideoConversionPass.h"
 
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "RenderNames.h"
@@ -213,6 +214,7 @@ namespace Syn
 
 		//Setup Passes
 		pipeline->AddPass(std::make_unique<GlobalFrameSetupPass>());
+        pipeline->AddPass(std::make_unique<VideoConversionPass>());
 		pipeline->AddPass(std::make_unique<OpaqueInitPass>());
 		pipeline->AddPass(std::make_unique<TransparentInitPass>());
 		pipeline->AddPass(std::make_unique<HizInitPass>());

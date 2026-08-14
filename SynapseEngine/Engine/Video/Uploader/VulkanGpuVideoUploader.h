@@ -21,6 +21,10 @@
 #include <vector>
 #include <memory>
 
+#include <vk_video/vulkan_video_codecs_common.h>
+#include <vk_video/vulkan_video_codec_h264std.h>
+#include <vk_video/vulkan_video_codec_h264std_decode.h>
+
 namespace Syn
 {
     class SYN_API VulkanGpuVideoUploader : public IGpuVideoUploader
@@ -37,20 +41,39 @@ namespace Syn
 
         VideoUploadResult Upload(const GpuVideoPacket& data, VkCommandBuffer cmd, Vk::GpuUploader* uploader) override;
     private:
+
+        void ParseSliceHeader(const std::vector<uint8_t>& bitstream, bool& outIsIdr, bool& outIsIntra, bool& outIsReference);
+    private:
+        struct DpbSlot {
+            StdVideoDecodeH264ReferenceInfo stdInfo{};
+            VkVideoDecodeH264DpbSlotInfoKHR h264Info{ VK_STRUCTURE_TYPE_VIDEO_DECODE_H264_DPB_SLOT_INFO_KHR };
+            VkVideoReferenceSlotInfoKHR slotInfo{ VK_STRUCTURE_TYPE_VIDEO_REFERENCE_SLOT_INFO_KHR };
+            bool isActive = false;
+        };
+
         uint32_t _width;
         uint32_t _height;
         std::vector<uint8_t> _extradata;
         std::shared_ptr<IH264ExtradataParser> _parser;
 
+        uint32_t _h264FrameNum = 0;
         uint8_t _spsId = 0;
         uint8_t _ppsId = 0;
 
+        std::vector<VkDeviceMemory> _sessionMemories;
         VkVideoSessionKHR _videoSession = VK_NULL_HANDLE;
         VkVideoSessionParametersKHR _sessionParams = VK_NULL_HANDLE;
         VkSamplerYcbcrConversion _ycbcrConversion = VK_NULL_HANDLE;
-        std::vector<VkDeviceMemory> _sessionMemories;
 
-        std::vector<std::shared_ptr<Vk::Image>> _textures;
         uint32_t _frameIndex = 0;
+        std::vector<std::shared_ptr<Vk::Image>> _textures;
+
+        uint32_t _maxDpbSlots = 16;
+        int32_t _currentDpbSlot = 0;
+        int32_t _picOrderCnt = 0;
+
+        std::vector<DpbSlot> _dpbSlots;
+        std::vector<std::shared_ptr<Vk::Image>> _dpbTextures;
+        std::vector<VkVideoPictureResourceInfoKHR> _dpbResources;
     };
 }

@@ -24,8 +24,13 @@ namespace Syn
     {
         if (cookedPacket.data.size() < 4) return;
 
+        if (cookedPacket.data[0] == 0x00 && cookedPacket.data[1] == 0x00 &&
+            (cookedPacket.data[2] == 0x01 || (cookedPacket.data[2] == 0x00 && cookedPacket.data[3] == 0x01))) {
+            return;
+        }
+
         std::vector<uint8_t> annexbData;
-        annexbData.reserve(cookedPacket.data.size() + 16);
+        annexbData.reserve(cookedPacket.data.size() + 32);
 
         size_t offset = 0;
         size_t size = cookedPacket.data.size();
@@ -42,19 +47,14 @@ namespace Syn
                 break;
             }
 
-            uint8_t naluHeader = cookedPacket.data[offset];
-            uint8_t naluType = naluHeader & 0x1F;
+            annexbData.push_back(0x00);
+            annexbData.push_back(0x00);
+            annexbData.push_back(0x00);
+            annexbData.push_back(0x01);
 
-            if ((naluType >= 1 && naluType <= 5) || naluType == 9) {
-                annexbData.push_back(0x00);
-                annexbData.push_back(0x00);
-                annexbData.push_back(0x00);
-                annexbData.push_back(0x01);
-
-                annexbData.insert(annexbData.end(),
-                    cookedPacket.data.begin() + offset,
-                    cookedPacket.data.begin() + offset + naluLen);
-            }
+            annexbData.insert(annexbData.end(),
+                cookedPacket.data.begin() + offset,
+                cookedPacket.data.begin() + offset + naluLen);
 
             offset += naluLen;
         }

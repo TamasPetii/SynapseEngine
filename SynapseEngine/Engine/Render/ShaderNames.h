@@ -177,5 +177,7 @@ namespace Syn
 
         static constexpr const char* AnimationPreviewVert = "Engine/Shaders/Passes/Preview/AnimationPreview.vert";
         static constexpr const char* AnimationPreviewFrag = "Engine/Shaders/Passes/Preview/AnimationPreview.frag";
+
+    	static constexpr const char* YuvToRgbComp = "Engine/Shaders/Passes/Video/YuvToRgb.comp";
 }; 
 }
