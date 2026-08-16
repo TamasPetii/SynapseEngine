@@ -30,7 +30,7 @@ namespace Syn
                 uint32_t val = 0;
                 for (int i = 0; i < n; ++i) {
                     if (bitPos / 8 >= size) return val;
-                    int bytePos = bitPos / 8;
+                    int bytePos = static_cast<int>(bitPos / 8);
                     int bitOffset = 7 - (bitPos % 8);
                     val = (val << 1) | ((data[bytePos] >> bitOffset) & 1);
                     bitPos++;
@@ -63,6 +63,18 @@ namespace Syn
                 clean.push_back(nalu[i]);
             }
             return clean;
+        }
+
+        void SkipScalingList(H264BitReader& br, int sizeOfScalingList) {
+            int lastScale = 8;
+            int nextScale = 8;
+            for (int j = 0; j < sizeOfScalingList; j++) {
+                if (nextScale != 0) {
+                    int delta_scale = br.ReadSE();
+                    nextScale = (lastScale + delta_scale + 256) % 256;
+                }
+                lastScale = (nextScale == 0) ? lastScale : nextScale;
+            }
         }
     }
 
@@ -110,13 +122,22 @@ namespace Syn
             outSps.level_idc = (StdVideoH264LevelIdc)br.ReadBits(8);
             outSps.seq_parameter_set_id = static_cast<uint8_t>(br.ReadUE());
 
+            outSps.chroma_format_idc = STD_VIDEO_H264_CHROMA_FORMAT_IDC_420;
+
             if (outSps.profile_idc == 100 || outSps.profile_idc == 110 || outSps.profile_idc == 122 || outSps.profile_idc == 244 || outSps.profile_idc == 44 || outSps.profile_idc == 83 || outSps.profile_idc == 86 || outSps.profile_idc == 118 || outSps.profile_idc == 128) {
                 uint32_t chroma = br.ReadUE();
+                outSps.chroma_format_idc = static_cast<StdVideoH264ChromaFormatIdc>(chroma);
                 if (chroma == 3) br.ReadBits(1);
                 br.ReadUE();
                 br.ReadUE();
                 br.ReadBits(1);
-                if (br.ReadBits(1)) {}
+                if (br.ReadBits(1)) {
+                    for (int i = 0; i < ((chroma != 3) ? 8 : 12); i++) {
+                        if (br.ReadBits(1)) {
+                            SkipScalingList(br, (i < 6) ? 16 : 64);
+                        }
+                    }
+                }
             }
 
             outSps.log2_max_frame_num_minus4 = static_cast<uint8_t>(br.ReadUE());
@@ -178,6 +199,22 @@ namespace Syn
             outPps.flags.deblocking_filter_control_present_flag = br.ReadBits(1);
             outPps.flags.constrained_intra_pred_flag = br.ReadBits(1);
             outPps.flags.redundant_pic_cnt_present_flag = br.ReadBits(1);
+
+            if (br.bitPos + 1 < cleanPps.size() * 8) {
+                outPps.flags.transform_8x8_mode_flag = br.ReadBits(1);
+                if (br.ReadBits(1)) {
+                    int limit = 6 + ((outSps.chroma_format_idc != 3) ? 2 : 6) * outPps.flags.transform_8x8_mode_flag;
+                    for (int i = 0; i < limit; i++) {
+                        if (br.ReadBits(1)) {
+                            SkipScalingList(br, (i < 6) ? 16 : 64);
+                        }
+                    }
+                }
+                outPps.second_chroma_qp_index_offset = static_cast<int8_t>(br.ReadSE());
+            }
+            else {
+                outPps.second_chroma_qp_index_offset = outPps.chroma_qp_index_offset;
+            }
         }
         return true;
     }

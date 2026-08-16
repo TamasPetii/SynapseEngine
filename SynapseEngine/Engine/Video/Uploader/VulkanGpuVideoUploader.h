@@ -60,6 +60,9 @@ namespace Syn
         uint8_t _spsId = 0;
         uint8_t _ppsId = 0;
 
+        int32_t _pocMsb = 0;
+        uint32_t _prevPocLsb = 0;
+
         std::vector<VkDeviceMemory> _sessionMemories;
         VkVideoSessionKHR _videoSession = VK_NULL_HANDLE;
         VkVideoSessionParametersKHR _sessionParams = VK_NULL_HANDLE;
