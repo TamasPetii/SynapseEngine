@@ -210,7 +210,7 @@ namespace Syn
 
         {
             auto videoManager = ServiceLocator::Get<VideoManager>();
-            std::string videoPath = PathUtils::GetAbsolutePathString("Assets/Engine/Video/nature.mp4");
+            std::string videoPath = PathUtils::GetAbsolutePathString("Assets/Engine/Video/budapest.mp4");
             uint32_t videoId = videoManager->LoadVideoAsync(videoPath);
 
             EntityID tvEntity = scene.CreateEntity();

@@ -295,6 +295,7 @@ namespace Syn
             vkGetPhysicalDeviceVideoCapabilitiesKHR(physicalDevice, &videoProfileInfo, &videoCapabilities);
 
             _maxDpbSlots = std::min(videoCapabilities.maxDpbSlots, 16u);
+            _textures.resize(_maxDpbSlots + 8);
 
             Vk::ImageConfig imgConfig{};
             imgConfig.width = _width;
@@ -638,8 +639,19 @@ namespace Syn
             VK_ACCESS_2_TRANSFER_WRITE_BIT
         );
 
-        result.texture = currentTexture;
-        result.isFrameReady = true;
+        _reorderQueue[data.pts] = currentTexture;
+
+        if (_reorderQueue.size() >= 4) {
+            auto it = _reorderQueue.begin();
+            result.texture = it->second;
+            _reorderQueue.erase(it);
+            result.isFrameReady = true;
+        }
+        else {
+            result.texture = nullptr;
+            result.isFrameReady = false;
+        }
+
         return result;
     }
 }

@@ -100,7 +100,7 @@ namespace Syn {
 		InitModelManager();
 		InitAnimationManager();
 		InitAudioManager();
-		InitVideoManager(true);
+		InitVideoManager(false);
     }
 
 	void ResourceManager::InitPreviewManager() {

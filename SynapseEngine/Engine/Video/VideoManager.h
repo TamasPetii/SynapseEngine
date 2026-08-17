@@ -30,6 +30,7 @@
 #include <atomic>
 #include <mutex>
 #include <vector>
+#include <chrono>
 
 namespace Syn {
 
@@ -45,6 +46,8 @@ namespace Syn {
 
         bool isPlaying = true;
         bool isLooping = true;
+        bool hasStarted = false;
+        std::chrono::steady_clock::time_point lastDecodeTime;
     };
 
     class SYN_API VideoManager : public AddressResourceManager<VideoStreamState, uint32_t> {

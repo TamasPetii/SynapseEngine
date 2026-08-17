@@ -20,6 +20,7 @@
 #include "Engine/Video/Parser/IH264ExtradataParser.h"
 #include <vector>
 #include <memory>
+#include <map>
 
 #include <vk_video/vulkan_video_codecs_common.h>
 #include <vk_video/vulkan_video_codec_h264std.h>
@@ -78,5 +79,6 @@ namespace Syn
         std::vector<DpbSlot> _dpbSlots;
         std::vector<std::shared_ptr<Vk::Image>> _dpbTextures;
         std::vector<VkVideoPictureResourceInfoKHR> _dpbResources;
+        std::map<int64_t, std::shared_ptr<Vk::Image>> _reorderQueue;
     };
 }
