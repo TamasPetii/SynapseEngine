@@ -200,6 +200,7 @@
 
 #include "Engine/Render/Passes/Shading/Visibility/DebugVisibilityPass.h"
 #include "Engine/Render/Passes/Video/VideoConversionPass.h"
+#include "Engine/Render/Passes/Present/SwapchainPresentPass.h"
 
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "RenderNames.h"
@@ -465,6 +466,7 @@ namespace Syn
 		//Gui and Present Passes
 		pipeline->AddPass(std::make_unique<PresentationTransitionPass>());
         pipeline->AddPass(std::make_unique<GuiPass>());
+		pipeline->AddPass(std::make_unique<SwapchainPresentPass>());
         pipeline->InitializeAll();
 
         renderManager->RegisterPipeline(RenderPipelineNames::ScenePipeline, std::move(pipeline));

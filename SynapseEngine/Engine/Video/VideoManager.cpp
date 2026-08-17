@@ -19,20 +19,18 @@
 #include "Engine/Vk/Context.h"
 #include "Engine/Vk/Core/Device.h"
 #include "Engine/Logger/SynLog.h"
-#include "Engine/Vk/Descriptor/DescriptorLayoutBuilder.h"
 #include "Engine/Vk/Rendering/GpuUploader.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Image/SamplerNames.h"
 
 namespace Syn
 {
-    VideoManager::VideoManager(uint32_t framesInFlight, std::shared_ptr<VideoBuilder> builder)
+    VideoManager::VideoManager(uint32_t framesInFlight, std::shared_ptr<VideoBuilder> builder, VideoManagerCallbacks callbacks)
         : AddressResourceManager<VideoStreamState, uint32_t>(framesInFlight, 64, 16, 32),
-        _framesInFlight(framesInFlight),
+        _callbacks(std::move(callbacks)),
         _builder(builder),
         _isRunning(true)
     {
-        InitializeBindlessSetup();
         _streamingThread = std::thread(&VideoManager::StreamingThreadLoop, this);
     }
 
@@ -40,43 +38,6 @@ namespace Syn
         _isRunning = false;
         if (_streamingThread.joinable()) {
             _streamingThread.join();
-        }
-
-        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice()->Handle();
-        if (_bindlessLayout != VK_NULL_HANDLE) {
-            vkDestroyDescriptorSetLayout(device, _bindlessLayout, nullptr);
-            _bindlessLayout = VK_NULL_HANDLE;
-        }
-    }
-
-    void VideoManager::InitializeBindlessSetup()
-    {
-        Vk::DescriptorLayoutBuilder layoutBuilder;
-        layoutBuilder.AddBindlessBinding(BINDING_VIDEO_TEXTURES, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_ALL, MAX_VIDEOS);
-
-        _bindlessLayout = layoutBuilder.Build(Vk::DescriptorLayoutType::DescriptorBuffer);
-        _bindlessBuffer = std::make_unique<Vk::DescriptorBuffer>(_bindlessLayout);
-    }
-
-    void VideoManager::Update() {
-        BaseResourceManager<VideoStreamState>::Update();
-
-        std::lock_guard<std::mutex> lock(_staleMutex);
-        for (auto it = _staleGpuBuffers.begin(); it != _staleGpuBuffers.end();) {
-            if (it->framesToLive > 0) { it->framesToLive--; ++it; }
-            else { it = _staleGpuBuffers.erase(it); }
-        }
-        for (auto it = _staleMappedBuffers.begin(); it != _staleMappedBuffers.end();) {
-            if (it->framesToLive > 0) { it->framesToLive--; ++it; }
-            else { it = _staleMappedBuffers.erase(it); }
-        }
-    }
-
-    void VideoManager::RecordSync(VkCommandBuffer cmd) {
-        if (auto staleBuffers = _bindlessBuffer->RecordSync(cmd); staleBuffers.mapped || staleBuffers.gpu) {
-            std::lock_guard<std::mutex> lock(_staleMutex);
-            _staleMappedBuffers.push_back({ staleBuffers.mapped, _framesInFlight });
-            _staleGpuBuffers.push_back({ staleBuffers.gpu, _framesInFlight });
         }
     }
 
@@ -103,9 +64,7 @@ namespace Syn
         this->MarkDirty(entryId);
     }
 
-    void VideoManager::FinalizeResource(EntryType& entry) {
-    
-    }
+    void VideoManager::FinalizeResource(EntryType& entry) {}
 
     void VideoManager::FlushDirtyResources() {
         std::vector<std::pair<uint32_t, uint32_t>> addressUpdates;
@@ -124,11 +83,9 @@ namespace Syn
 
                 if (!targetImage) return;
 
-                _bindlessBuffer->WriteSampledImage(
-                    BINDING_VIDEO_TEXTURES,
-                    index,
-                    targetImage->GetView()
-                );
+                if (_callbacks.updateVideoTexture) {
+                    _callbacks.updateVideoTexture(index, targetImage->GetView());
+                }
 
                 addressUpdates.push_back({ index, textureData });
             }
@@ -150,12 +107,9 @@ namespace Syn
         addressUpdates.reserve(updates.size());
 
         for (const auto& u : updates) {
-            _bindlessBuffer->WriteSampledImage(
-                BINDING_VIDEO_TEXTURES,
-                u.first,
-                u.second
-            );
-
+            if (_callbacks.updateVideoTexture) {
+                _callbacks.updateVideoTexture(u.first, u.second);
+            }
             addressUpdates.push_back({ u.first, textureData });
         }
 
@@ -233,8 +187,7 @@ namespace Syn
                             this->SetResourceState(streamId, ResourceState::Ready);
                             this->MarkDirty(streamId);
                         },
-                        .needsGraphics = false,
-                        .needsVideo = true
+                        .queueType = Vk::GpuQueueType::Video
                     };
 
                     ServiceLocator::Get<Vk::GpuUploader>()->Submit(std::move(request));

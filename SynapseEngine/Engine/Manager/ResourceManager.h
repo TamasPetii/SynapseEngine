@@ -20,22 +20,19 @@
 #include <memory>
 #include "Engine/Shader/ShaderManager.h"
 #include "Engine/Shader/Builder/ShaderBuilder.h"
-
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Material/MaterialManager.h"
-
 #include "Engine/Animation/AnimationManager.h"
 #include "Engine/Animation/Builder/AnimationBuilder.h"
-
 #include "Engine/Audio/Builder/AudioBuilder.h"
 #include "Engine/Audio/AudioManager.h"
-
 #include "Engine/Video/Builder/VideoBuilder.h"
 #include "Engine/Video/VideoManager.h"
+#include "Engine/Environment/EnvironmentManager.h"
+#include "Engine/Manager/DescriptorManager.h"
 
 namespace Syn {
-
     class SYN_API ResourceManager {
     public:
         ResourceManager(uint32_t framesInFlight);
@@ -43,7 +40,9 @@ namespace Syn {
 
         ResourceManager(const ResourceManager&) = delete;
         ResourceManager& operator=(const ResourceManager&) = delete;
+
     private:
+        void InitDescriptorManager();
         void InitShaderManager();
         void InitModelManager();
         void InitImageManager();
@@ -52,14 +51,18 @@ namespace Syn {
         void InitPreviewManager();
         void InitAudioManager();
         void InitVideoManager(bool useGpuDecoding = true);
+        void InitEnvironmentManager();
+
     private:
+        std::unique_ptr<DescriptorManager> _descriptorManager;
+
         std::shared_ptr<ShaderBuilder> _shaderBuilder;
         std::unique_ptr<ShaderManager> _shaderManager;
 
         std::unique_ptr<MaterialManager> _materialManager;
 
-		std::shared_ptr<StaticMeshBuilder> _staticMeshBuilder;
-		std::unique_ptr<ModelManager> _modelManager;
+        std::shared_ptr<StaticMeshBuilder> _staticMeshBuilder;
+        std::unique_ptr<ModelManager> _modelManager;
 
         std::shared_ptr<ImageBuilder> _imageBuilder;
         std::unique_ptr<ImageManager> _imageManager;
@@ -75,6 +78,8 @@ namespace Syn {
         std::shared_ptr<VideoBuilder> _videoBuilder;
         std::unique_ptr<VideoManager> _videoManager;
 
-		uint32_t _framesInFlight;
+        std::unique_ptr<EnvironmentManager> _environmentManager;
+
+        uint32_t _framesInFlight;
     };
 }

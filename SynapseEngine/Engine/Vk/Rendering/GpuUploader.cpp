@@ -26,6 +26,7 @@ namespace Syn::Vk {
         _transferQueue = device->GetTransferQueue();
         _graphicsQueue = device->GetGraphicsQueue();
         _videoQueue = device->GetVideoDecodeQueue();
+        _computeQueue = device->GetComputeQueue();
 
         if (!_transferQueue) _transferQueue = _graphicsQueue;
 
@@ -35,15 +36,22 @@ namespace Syn::Vk {
         if (_videoQueue) {
             _videoPool = std::make_unique<Vk::CommandPool>(_videoQueue, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT);
         }
+
+        if (_computeQueue) {
+            _computePool = std::make_unique<Vk::CommandPool>(_computeQueue, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT);
+        }
     }
 
     void GpuUploader::Enqueue(GpuUploadRequest request) {
         std::lock_guard lock(_mutex);
 
-        if (request.needsVideo && _videoQueue) {
+        if (request.queueType == GpuQueueType::Video && _videoQueue) {
             _videoRequests.push_back(std::move(request));
         }
-        else if (request.needsGraphics) {
+        else if (request.queueType == GpuQueueType::Compute && _computeQueue) {
+            _computeRequests.push_back(std::move(request));
+        }
+        else if (request.queueType == GpuQueueType::Graphics && _graphicsQueue) {
             _graphicsRequests.push_back(std::move(request));
         }
         else {
@@ -81,8 +89,12 @@ namespace Syn::Vk {
             ProcessQueue(_transferRequests, _transferQueue, _transferPool.get());
         }
 
-        if (!_graphicsRequests.empty()) {
+        if (!_graphicsRequests.empty() && _graphicsQueue) {
             ProcessQueue(_graphicsRequests, _graphicsQueue, _graphicsPool.get());
+        }
+
+        if (!_computeRequests.empty() && _computeQueue) {
+            ProcessQueue(_computeRequests, _computeQueue, _computePool.get());
         }
 
         if (!_videoRequests.empty() && _videoQueue) {
@@ -120,7 +132,7 @@ namespace Syn::Vk {
             std::move(callbacks),
             std::move(pendingAcquires.buffers),
             std::move(pendingAcquires.images)
-        });
+            });
 
         requests.clear();
     }
@@ -133,11 +145,15 @@ namespace Syn::Vk {
         Vk::ThreadSafeQueue* queue = _transferQueue;
         Vk::CommandPool* pool = _transferPool.get();
 
-        if (request.needsVideo && _videoQueue) {
+        if (request.queueType == GpuQueueType::Video && _videoQueue) {
             queue = _videoQueue;
             pool = _videoPool.get();
         }
-        else if (request.needsGraphics) {
+        else if (request.queueType == GpuQueueType::Compute && _computeQueue) {
+            queue = _computeQueue;
+            pool = _computePool.get();
+        }
+        else if (request.queueType == GpuQueueType::Graphics && _graphicsQueue) {
             queue = _graphicsQueue;
             pool = _graphicsPool.get();
         }

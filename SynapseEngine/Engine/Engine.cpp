@@ -47,6 +47,7 @@
 #include "Engine/Scene/Source/File/FileSceneSource.h"
 #include "Engine/Scene/Source/Procedural/AnimationPreviewSceneSource.h"
 #include "Engine/Scene/Source/Procedural/EmptySceneSource.h"
+#include "Engine/Environment/EnvironmentManager.h"
 
 #include "Engine/Render/RendererFactory.h"
 #include "Engine/Physics/Jolt/JoltPhysicsEngine.h"
@@ -74,6 +75,7 @@
 
 #include "Engine/Vk/Descriptor/DescriptorUtils.h"
 #include "Engine/Video/VideoManager.h"
+#include "Engine/Manager/DescriptorManager.h"
 
 #include <print>
 #include <filesystem>
@@ -99,6 +101,7 @@ namespace Syn
 		ServiceLocator::Get<ICpuProfiler>()->BeginFrame(currentFrame);
 
 		//Updates
+		ServiceLocator::Get<DescriptorManager>()->Update();
 		ServiceLocator::Get<ShaderManager>()->Update();
 		ServiceLocator::Get<AnimationManager>()->Update();
 		ServiceLocator::Get<ModelManager>()->Update();
@@ -106,6 +109,7 @@ namespace Syn
 		ServiceLocator::Get<ImageManager>()->Update();
 		ServiceLocator::Get<AudioManager>()->Update();
 		ServiceLocator::Get<VideoManager>()->Update();
+		ServiceLocator::Get<EnvironmentManager>()->Update();
 
 		//Notifications
 		ServiceLocator::Get<MaterialManager>()->ProcessPendingNotifications();
@@ -462,5 +466,9 @@ namespace Syn
 	VideoManager* Engine::GetVideoManager()
 	{
 		return ServiceLocator::Get<VideoManager>();
+	}
+
+	EnvironmentManager* Engine::GetEnvironmentManager() {
+		return ServiceLocator::Get<EnvironmentManager>();
 	}
 }

@@ -34,6 +34,8 @@
 #include "Engine/Component/Rendering/ModelComponent.h"
 #include "Engine/Component/Core/TransformComponent.h"
 #include "Engine/Vk/Rendering/GpuUploader.h"
+#include "Engine/Environment/EnvironmentManager.h"
+#include "Engine/Manager/DescriptorManager.h"
 
 namespace Syn {
 
@@ -56,10 +58,12 @@ namespace Syn {
         auto materialManager = ServiceLocator::Get<MaterialManager>();
         auto animationManager = ServiceLocator::Get<AnimationManager>();
 		auto imageManager = ServiceLocator::Get<ImageManager>();
+        auto environmentManager = ServiceLocator::Get<EnvironmentManager>();
 
         FrameGlobalContext ctx = {};
 
 		ctx.textureMetadataBufferAddr = imageManager->GetAddressBufferDeviceAddress();
+        ctx.environmentBufferAddr = environmentManager->GetAddressBufferDeviceAddress();
 
         ctx.globalDrawCountBufferAddr = drawData->Models.drawCountBuffer.GetAddress(fIdx);
         ctx.globalInstanceIndexBufferAddr = drawData->Models.instanceBuffer.GetAddress(fIdx);
@@ -306,6 +310,8 @@ namespace Syn {
         ServiceLocator::Get<MaterialManager>()->RecordSync(context.cmd);
         ServiceLocator::Get<ImageManager>()->RecordSync(context.cmd);
         ServiceLocator::Get<VideoManager>()->RecordSync(context.cmd);
+        ServiceLocator::Get<EnvironmentManager>()->RecordSync(context.cmd);
+        ServiceLocator::Get<DescriptorManager>()->RecordSync(context.cmd);
 
     	ServiceLocator::Get<Vk::GpuUploader>()->RecordAcquireBarriers(context.cmd);
 

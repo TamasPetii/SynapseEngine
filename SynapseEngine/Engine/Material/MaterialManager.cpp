@@ -21,17 +21,11 @@
 
 namespace Syn {
 
-    MaterialManager::MaterialManager(uint32_t framesInFlight, 
-        TextureLoadCallback textureLoadCallback, 
-        PreviewAllocateCallback previewAllocateCallback,
-        PreviewMarkDirtyCallback previewMarkDirtyCallback,
-        MaterialReadyOrChangedCallback materialReadyOrChangedCallback
+    MaterialManager::MaterialManager(uint32_t framesInFlight,
+        MaterialManagerCallbacks callbacks
     )
         : AddressResourceManager<Material, GpuMaterial>(framesInFlight, 1024, 1024, 2048)
-        , _textureLoadCallback(std::move(textureLoadCallback))
-        , _previewAllocateCallback(std::move(previewAllocateCallback))
-        , _previewMarkDirtyCallback(std::move(previewMarkDirtyCallback))
-        , _materialReadyOrChangedCallback(std::move(materialReadyOrChangedCallback))
+        , _callbacks(std::move(callbacks))
     {
         Material emptyMat;
         WriteAddress(0, GpuMaterial(emptyMat));
@@ -44,7 +38,7 @@ namespace Syn {
             if (payload.path.empty() && !payload.IsEmbedded())
                 return UINT32_MAX;
 
-            return _textureLoadCallback(payload);
+            return _callbacks.textureLoad(payload);
             };
 
         Material mat;
@@ -118,22 +112,22 @@ namespace Syn {
 
     void MaterialManager::FinalizeResource(EntryType& entry) {
         uint32_t index = _pathToId.at(entry.path);
-        if (_previewAllocateCallback) _previewAllocateCallback(index);
-        if (_previewMarkDirtyCallback) _previewMarkDirtyCallback(index);
-        if (_materialReadyOrChangedCallback) _materialReadyOrChangedCallback(index);
+        if (_callbacks.previewAllocate) _callbacks.previewAllocate(index);
+        if (_callbacks.previewMarkDirty) _callbacks.previewMarkDirty(index);
+        if (_callbacks.materialReadyOrChanged) _callbacks.materialReadyOrChanged(index);
     }
 
-    void MaterialManager::FlushDirtyResources() 
+    void MaterialManager::FlushDirtyResources()
     {
         ProcessDirtyReadyEntries(
             [this](uint32_t index, const EntryType& entry) {
                 WriteAddress(index, GpuMaterial(*entry.resource));
 
-                if (_previewMarkDirtyCallback)
-                    _previewMarkDirtyCallback(index);
+                if (_callbacks.previewMarkDirty)
+                    _callbacks.previewMarkDirty(index);
 
-                if (_materialReadyOrChangedCallback)
-                    _materialReadyOrChangedCallback(index);
+                if (_callbacks.materialReadyOrChanged)
+                    _callbacks.materialReadyOrChanged(index);
             }
         );
     }
@@ -177,13 +171,13 @@ namespace Syn {
         if (imagesToProcess.empty()) return;
 
         for (uint32_t imgId : imagesToProcess) {
-            for (uint32_t matId : GetMaterialsUsingTexture(imgId)) 
+            for (uint32_t matId : GetMaterialsUsingTexture(imgId))
             {
-                if (_previewMarkDirtyCallback) 
-                    _previewMarkDirtyCallback(matId);
+                if (_callbacks.previewMarkDirty)
+                    _callbacks.previewMarkDirty(matId);
 
-                if (_materialReadyOrChangedCallback)
-                    _materialReadyOrChangedCallback(matId);
+                if (_callbacks.materialReadyOrChanged)
+                    _callbacks.materialReadyOrChanged(matId);
             }
         }
     }

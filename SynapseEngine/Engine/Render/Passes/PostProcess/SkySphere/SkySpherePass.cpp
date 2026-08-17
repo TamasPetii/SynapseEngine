@@ -45,18 +45,17 @@ namespace Syn {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
         auto imageManager = ServiceLocator::Get<ImageManager>();
         auto videoManager = ServiceLocator::Get<VideoManager>();
+        auto descriptorManager = ServiceLocator::Get<DescriptorManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = true;
-        config.layoutOverride = [imageManager, videoManager](uint32_t setIndex) {
+        config.layoutOverride = [descriptorManager](uint32_t setIndex) {
             if (setIndex == 0) {
-                return imageManager->GetBindlessLayout();
-            }
-            if (setIndex == 1) {
-                return videoManager->GetBindlessLayout();
+                return descriptorManager->GetBindlessLayout();
             }
             return VkDescriptorSetLayout{};
             };
+
 
         _shaderProgramId = shaderManager->LoadProgramAsync("SkySphereProgram", {
             ShaderNames::SkySphereVert,
@@ -158,12 +157,9 @@ namespace Syn {
         auto videoManager = ServiceLocator::Get<VideoManager>();
         std::vector<std::pair<uint32_t, Vk::DescriptorBuffer*>> buffersToBind;
 
-        if (auto imgBuffer = imageManager->GetBindlessBuffer()) {
-            buffersToBind.push_back({ 0, imgBuffer });
-        }
-
-        if (auto vidBuffer = videoManager->GetBindlessBuffer()) {
-            buffersToBind.push_back({ 1, vidBuffer });
+        auto descriptorManager = ServiceLocator::Get<DescriptorManager>();
+        if (auto descBuffer = descriptorManager->GetBindlessBuffer()) {
+            buffersToBind.push_back({ 0, descBuffer });
         }
 
         Vk::DescriptorUtils::BindMultipleBuffer(context.cmd, _shaderProgram->GetLayout(), VK_PIPELINE_BIND_POINT_GRAPHICS, buffersToBind);

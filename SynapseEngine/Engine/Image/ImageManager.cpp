@@ -21,89 +21,29 @@
 #include "Engine/Vk/Rendering/GpuUploader.h"
 #include "Engine/Logger/SynLog.h"
 #include "SamplerNames.h"
-#include "Engine/Vk/Descriptor/DescriptorWriter.h"
 #include "ImageNames.h"
 #include "Engine/Image/Source/Procedural/DefaultImageSource.h"
-#include "Engine/Vk/Descriptor/DescriptorLayoutBuilder.h";
 
-namespace Syn 
+namespace Syn
 {
     ImageManager::ImageManager(
         uint32_t framesInFlight,
         std::shared_ptr<ImageBuilder> builder,
         std::unique_ptr<IGpuImageUploader> uploader,
         std::unique_ptr<ICpuImageExtractor> cpuExtractor,
-        ImageReadyOrChangedCallback imageReadyCallback)
-		: AddressResourceManager<Texture, uint32_t>(framesInFlight, 1024, 256, 512),
-		_framesInFlight(framesInFlight),
-        _builder(builder), 
-        _uploader(std::move(uploader)), 
-        _cpuExtractor(std::move(cpuExtractor)),
-        _imageReadyOrChangedCallback(std::move(imageReadyCallback))
+        ImageManagerCallbacks callbacks)
+        : AddressResourceManager<Texture, uint32_t>(framesInFlight, 1024, 256, 512),
+        _callbacks(std::move(callbacks)),
+        _builder(builder),
+        _uploader(std::move(uploader)),
+        _cpuExtractor(std::move(cpuExtractor))
     {
-        InitializeBindlessSetup();
-    }
-
-    ImageManager::~ImageManager() {
-        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice()->Handle();
-
-        if (_bindlessLayout != VK_NULL_HANDLE) {
-            vkDestroyDescriptorSetLayout(device, _bindlessLayout, nullptr);
-            _bindlessLayout = VK_NULL_HANDLE;
-        }
-    }
-
-    void ImageManager::InitializeBindlessSetup()
-    {
-        Vk::DescriptorLayoutBuilder layoutBuilder;
-        layoutBuilder.AddBindlessBinding(BINDING_SAMPLERS, VK_DESCRIPTOR_TYPE_SAMPLER, VK_SHADER_STAGE_ALL, MAX_SAMPLERS);
-        layoutBuilder.AddBindlessBinding(BINDING_TEXTURES, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_ALL, MAX_IMAGES);
-        
-        _bindlessLayout = layoutBuilder.Build(Vk::DescriptorLayoutType::DescriptorBuffer);
-        _bindlessBuffer = std::make_unique<Vk::DescriptorBuffer>(_bindlessLayout);
-
         CreateSamplers();
         LoadDefaultImageSync();
     }
 
-    void ImageManager::Update() {
-        BaseResourceManager<Texture>::Update();
-
-        std::lock_guard<std::mutex> lock(_staleMutex);
-
-        for (auto it = _staleGpuBuffers.begin(); it != _staleGpuBuffers.end();) {
-            if (it->framesToLive > 0) {
-                it->framesToLive--;
-                ++it;
-            }
-            else {
-                it = _staleGpuBuffers.erase(it);
-            }
-        }
-
-        for (auto it = _staleMappedBuffers.begin(); it != _staleMappedBuffers.end();) {
-            if (it->framesToLive > 0) {
-                it->framesToLive--;
-                ++it;
-            }
-            else {
-                it = _staleMappedBuffers.erase(it);
-            }
-        }
-    }
-
-    void ImageManager::RecordSync(VkCommandBuffer cmd) {
-        if (auto staleBuffers = _bindlessBuffer->RecordSync(cmd); staleBuffers.mapped || staleBuffers.gpu) {
-            std::lock_guard<std::mutex> lock(_staleMutex);
-
-            _staleMappedBuffers.push_back({ staleBuffers.mapped, _framesInFlight });
-            _staleGpuBuffers.push_back({ staleBuffers.gpu, _framesInFlight });
-        }
-    }
-
     void ImageManager::CreateSamplers() {
         {
-            // Linear Repeat
             Vk::SamplerConfig config{};
             config.magFilter = VK_FILTER_LINEAR;
             config.minFilter = VK_FILTER_LINEAR;
@@ -117,7 +57,6 @@ namespace Syn
         }
 
         {
-            // Linear Clamp To Edge
             Vk::SamplerConfig config{};
             config.magFilter = VK_FILTER_LINEAR;
             config.minFilter = VK_FILTER_LINEAR;
@@ -131,7 +70,6 @@ namespace Syn
         }
 
         {
-            // Nearest Repeat
             Vk::SamplerConfig config{};
             config.magFilter = VK_FILTER_NEAREST;
             config.minFilter = VK_FILTER_NEAREST;
@@ -145,7 +83,6 @@ namespace Syn
         }
 
         {
-            // Nearest Clamp To Edge
             Vk::SamplerConfig config{};
             config.magFilter = VK_FILTER_NEAREST;
             config.minFilter = VK_FILTER_NEAREST;
@@ -159,7 +96,6 @@ namespace Syn
         }
 
         {
-            // LinearAniso
             Vk::SamplerConfig config{};
             config.magFilter = VK_FILTER_LINEAR;
             config.minFilter = VK_FILTER_LINEAR;
@@ -173,7 +109,6 @@ namespace Syn
         }
 
         {
-            // NearestAniso
             Vk::SamplerConfig config{};
             config.magFilter = VK_FILTER_NEAREST;
             config.minFilter = VK_FILTER_NEAREST;
@@ -187,7 +122,6 @@ namespace Syn
         }
 
         {
-            // MaxReduction (HZB)
             Vk::SamplerConfig config{};
             config.magFilter = VK_FILTER_LINEAR;
             config.minFilter = VK_FILTER_LINEAR;
@@ -204,7 +138,6 @@ namespace Syn
         }
 
         {
-            // BloomSampler
             Vk::SamplerConfig config{};
             config.magFilter = VK_FILTER_LINEAR;
             config.minFilter = VK_FILTER_LINEAR;
@@ -218,7 +151,6 @@ namespace Syn
         }
 
         {
-            // ShadowSampler (PCF)
             Vk::SamplerConfig config{};
             config.magFilter = VK_FILTER_LINEAR;
             config.minFilter = VK_FILTER_LINEAR;
@@ -251,7 +183,9 @@ namespace Syn
         uint32_t index = static_cast<uint32_t>(_samplers.size());
         auto sampler = std::make_unique<Vk::Sampler>(config);
 
-        _bindlessBuffer->WriteSampler(BINDING_SAMPLERS, index, sampler->Handle());
+        if (_callbacks.registerSampler) {
+            _callbacks.registerSampler(index, sampler->Handle());
+        }
 
         _samplers.push_back(std::move(sampler));
         _samplerNameToIndex[name] = index;
@@ -277,8 +211,8 @@ namespace Syn
 
         auto resource = GetResource(defaultId);
 
-        if (resource && resource->image) {
-            _bindlessBuffer->FillSampledImages(BINDING_TEXTURES, MAX_IMAGES, resource->image->GetView());
+        if (resource && resource->image && _callbacks.fillDefaultTexture) {
+            _callbacks.fillDefaultTexture(resource->image->GetView());
         }
     }
 
@@ -320,32 +254,27 @@ namespace Syn
 
         Vk::GpuUploadRequest request{
             .uploadCallback = [this, entryId, res](VkCommandBuffer cmd, Vk::GpuUploader* gpuUploader) {
-
                 auto uploadResult = _uploader->Upload(*(res->transientGpuData), cmd, gpuUploader);
                 res->image = uploadResult.texture;
-
                 std::lock_guard lock(_mutex);
                 _entries[entryId].stagingBuffer = std::move(uploadResult.stagingBuffer);
             },
             .onFinished = [this, entryId]() {
                 std::lock_guard lock(_mutex);
                 auto& entry = _entries[entryId];
-
                 FinalizeResource(entry);
                 entry.stagingBuffer.reset();
-
                 SetResourceState(entryId, ResourceState::Ready);
                 MarkDirty(entryId);
-
                 Info("Image '{}' is ready", entry.path);
             },
-            .needsGraphics = needsGraphics
+            .queueType = needsGraphics ? Vk::GpuQueueType::Graphics : Vk::GpuQueueType::Transfer
         };
 
         SubmitGpuRequest(entry, std::move(request));
     }
 
-    void ImageManager::FinalizeResource(EntryType& entry) 
+    void ImageManager::FinalizeResource(EntryType& entry)
     {
         _cpuExtractor->Extract(*(entry.resource->transientGpuData), entry.resource->cpuData);
 
@@ -354,7 +283,6 @@ namespace Syn
     }
 
     void ImageManager::FlushDirtyResources() {
-        //Just to handle bistro test, this will be deleted!!
         auto isNormalMap = [](const std::string& path) {
             std::string lowerPath = path;
             std::transform(lowerPath.begin(), lowerPath.end(), lowerPath.begin(), ::tolower);
@@ -365,11 +293,9 @@ namespace Syn
             [this, &isNormalMap](uint32_t index, const EntryType& entry) {
                 if (!entry.resource->image) return;
 
-                _bindlessBuffer->WriteSampledImage(
-                    BINDING_TEXTURES,
-                    index,
-                    entry.resource->image->GetView()
-                );
+                if (_callbacks.updateTexture) {
+                    _callbacks.updateTexture(index, entry.resource->image->GetView());
+                }
 
                 uint32_t samplerIndex = GetSamplerIndex("LinearAniso");
                 bool invertTangent = isNormalMap(entry.path);
@@ -381,8 +307,8 @@ namespace Syn
 
                 WriteAddress(index, textureData);
 
-                if (_imageReadyOrChangedCallback) {
-                    _imageReadyOrChangedCallback(index);
+                if (_callbacks.notifyMaterialManager) {
+                    _callbacks.notifyMaterialManager(index);
                 }
             }
         );

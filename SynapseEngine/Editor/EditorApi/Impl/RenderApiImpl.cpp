@@ -165,7 +165,7 @@ namespace Syn {
                 Vk::ImageUtils::CopyImageToBuffer(cmd, copyInfo);
                 entityImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT);
             },
-            .needsGraphics = true
+			.queueType = Vk::GpuQueueType::Graphics
         };
 
         ServiceLocator::Get<Vk::GpuUploader>()->UploadSync(std::move(request));

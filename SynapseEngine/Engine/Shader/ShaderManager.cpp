@@ -102,7 +102,7 @@ namespace Syn
                 SetResourceState(entryId, ResourceState::Ready);
                 MarkDirty(entryId);
             },
-            .needsGraphics = false
+			.queueType = Vk::GpuQueueType::Graphics
         };
 
         SubmitGpuRequest(entry, std::move(request));

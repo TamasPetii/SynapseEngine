@@ -35,7 +35,7 @@ namespace Syn {
         options.SetGenerateDebugInfo();
         options.SetOptimizationLevel(shaderc_optimization_level_zero);
 #else
-        options.SetOptimizationLevel(/*shaderc_optimization_level_performance*/ shaderc_optimization_level_zero);
+        options.SetOptimizationLevel(shaderc_optimization_level_performance);
 #endif
 
         shaderc_shader_kind kind = MapStageToKind(shader.stage);

@@ -22,6 +22,7 @@
 
 struct FrameGlobalContext {
     uint64_t textureMetadataBufferAddr;
+    uint64_t environmentBufferAddr;
 
     uint64_t globalDrawCountBufferAddr; 
     uint64_t globalInstanceIndexBufferAddr; 

@@ -31,11 +31,17 @@ namespace Syn::Vk
 {
     class GpuUploader;
 
+    enum class GpuQueueType {
+        Transfer,
+        Graphics,
+        Compute,
+        Video
+    };
+
     struct SYN_API GpuUploadRequest {
         std::function<void(VkCommandBuffer, GpuUploader*)> uploadCallback;
         std::function<void()> onFinished;
-        bool needsGraphics = false;
-        bool needsVideo = false;
+        GpuQueueType queueType = GpuQueueType::Transfer;
     };
 
     struct PendingAcquires {

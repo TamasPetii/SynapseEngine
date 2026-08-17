@@ -24,22 +24,18 @@
 #include "Engine/Logger/SynLog.h"
 
 namespace Syn {
-
     AnimationManager::AnimationManager(
         uint32_t framesInFlight,
         std::shared_ptr<AnimationBuilder> builder,
         std::unique_ptr<IGpuAnimationUploader> uploader,
-        std::unique_ptr<ICpuAnimationExtractor> cpuExtractor, 
-        PreviewAllocateCallback previewAllocateCallback,
-        PreviewMarkDirtyCallback previewMarkDirtyCallback)
+        std::unique_ptr<ICpuAnimationExtractor> cpuExtractor,
+        AnimationManagerCallbacks callbacks)
         : AddressResourceManager<Animation, GpuAnimationAddresses>(framesInFlight, 1024, 256, 512),
-        _builder(builder), 
-        _uploader(std::move(uploader)), 
+        _builder(builder),
+        _uploader(std::move(uploader)),
         _cpuExtractor(std::move(cpuExtractor)),
-        _previewAllocateCallback(std::move(previewAllocateCallback)),
-        _previewMarkDirtyCallback(std::move(previewMarkDirtyCallback))
-    {
-    }
+        _callbacks(std::move(callbacks))
+    {}
 
     uint32_t AnimationManager::LoadAnimationAsync(const std::string& filePath, uint32_t baseModelId) {
         std::string uniqueName = filePath + "_" + std::to_string(baseModelId);
@@ -56,7 +52,7 @@ namespace Syn {
 
             auto baseModel = modelManager->GetResource(baseModelId);
 
-            if (!baseModel) 
+            if (!baseModel)
                 return std::shared_ptr<Animation>(nullptr);
 
             auto anim = _builder->BuildFromFile(filePath, baseModel->cpuData);
@@ -76,7 +72,7 @@ namespace Syn {
             auto modelManager = ServiceLocator::Get<ModelManager>();
             auto baseModel = modelManager->GetResource(baseModelId);
 
-            if (!baseModel) 
+            if (!baseModel)
                 return std::shared_ptr<Animation>(nullptr);
 
             auto anim = _builder->BuildFromFile(filePath, baseModel->cpuData);
@@ -89,7 +85,7 @@ namespace Syn {
             });
     }
 
-    void AnimationManager::StartGpuUpload(EntryType& entry) 
+    void AnimationManager::StartGpuUpload(EntryType& entry)
     {
         uint32_t entryId = _pathToId.at(entry.path);
         std::shared_ptr<Animation> res = entry.resource;
@@ -115,7 +111,7 @@ namespace Syn {
 
                 Info("Animation loaded, extracted, and RAM freed: {}", safeEntry.path);
             },
-            .needsGraphics = false
+            .queueType = Vk::GpuQueueType::Transfer
         };
 
         SubmitGpuRequest(entry, std::move(request));
@@ -129,7 +125,7 @@ namespace Syn {
         _cpuExtractor->Extract(gpuData, cpuData);
 
         uint32_t index = _pathToId.at(entry.path);
-        if (_previewAllocateCallback) _previewAllocateCallback(index);
+        if (_callbacks.previewAllocate) _callbacks.previewAllocate(index);
 
         entry.resource->transientGpuData.reset();
         entry.resource->transientCpuData.reset();
@@ -153,7 +149,7 @@ namespace Syn {
 
             WriteAddress(index, addresses);
 
-            if (_previewMarkDirtyCallback) _previewMarkDirtyCallback(index);
+            if (_callbacks.previewMarkDirty) _callbacks.previewMarkDirty(index);
             });
     }
 }
