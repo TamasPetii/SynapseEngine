@@ -79,6 +79,8 @@ namespace Syn
         std::vector<DpbSlot> _dpbSlots;
         std::vector<std::shared_ptr<Vk::Image>> _dpbTextures;
         std::vector<VkVideoPictureResourceInfoKHR> _dpbResources;
+
+        int64_t _lastDts = -1;
         std::map<int64_t, std::shared_ptr<Vk::Image>> _reorderQueue;
     };
 }

@@ -443,6 +443,13 @@ namespace Syn
             bool isIntra = sliceInfo.isValid ? sliceInfo.isIntra : false;
             bool isRef = sliceInfo.isValid ? sliceInfo.isReference : false;
 
+            if (_lastDts != -1 && data.dts < _lastDts) {
+                _reorderQueue.clear();
+                isIdr = true;
+            }
+
+            _lastDts = data.dts;
+
             if (isIdr || _frameIndex == 1) {
                 isIdr = true;
                 for (auto& slot : _dpbSlots) slot.isActive = false;
