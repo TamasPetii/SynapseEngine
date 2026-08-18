@@ -85,6 +85,7 @@
 #include "Engine/System/Core/TransformModelLinkSystem.h"
 #include "Engine/Profiler/ICpuProfiler.h"
 #include "Engine/FrameContext.h"
+#include "Engine/Audio/Engine/IAudioEngine.h"
 
 namespace Syn
 {
@@ -97,11 +98,6 @@ namespace Syn
 
     void Scene::DestroyEntity(EntityID entity) {
         if (!_registry->IsValid(entity)) return;
-        
-        for (auto& system : _systems) {
-            system->OnEntityDestroyed(this, entity);
-        }
-
         _hierarchyManager->OnEntityDestroyed(entity);
         _registry->DestroyEntity(entity);
     }
@@ -222,6 +218,13 @@ namespace Syn
 		RegisterSystem<HierarchySystem>();
         RegisterSystem<SelectionOutlineSystem>();
         RegisterSystem<AudioSystem>();
+
+        _registry->RegisterOnDestroy<AudioSourceComponent>([](EntityID entity, AudioSourceComponent& source) {
+            auto audioEngine = ServiceLocator::Get<IAudioEngine>();
+            if (audioEngine) {
+                audioEngine->StopSound(entity);
+            }
+            });
     }
 
     void Scene::InitializeComponentBuffers()

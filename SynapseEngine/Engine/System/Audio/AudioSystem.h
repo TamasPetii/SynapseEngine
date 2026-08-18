@@ -31,7 +31,6 @@ namespace Syn
         void OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) override;
         void OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow) override;
 
-        void OnEntityDestroyed(Scene* scene, EntityID entity) override;
         void OnClean(Scene* scene) override;
     };
 }
