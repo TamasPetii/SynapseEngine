@@ -28,7 +28,8 @@
 #include "Engine/Render/Passes/PostProcess/Bloom/BloomDownsamplePass.h"
 #include "Engine/Render/Passes/PostProcess/Bloom/BloomCompositePass.h"
 #include "Engine/Render/Passes/PostProcess/Outline/SelectionOutlinePass.h"
-#include "Engine/Render/Passes/PostProcess/SkySphere/SkySpherePass.h"
+#include "Engine/Render/Passes/PostProcess/Sky/SkySpherePass.h"
+#include "Engine/Render/Passes/PostProcess/Sky/SkyboxPass.h"
 
 #include "Engine/Render/Passes/Preview/PreviewPreTransitionPass.h"
 #include "Engine/Render/Passes/Preview/PreviewPostTransitionPass.h"
@@ -399,6 +400,7 @@ namespace Syn
 
         // SkySphere
         pipeline->AddPass(std::make_unique<SkySpherePass>());
+        pipeline->AddPass(std::make_unique<SkyBoxPass>());
 
         //Grid
         pipeline->AddPass(std::make_unique<InfiniteGridPass>());

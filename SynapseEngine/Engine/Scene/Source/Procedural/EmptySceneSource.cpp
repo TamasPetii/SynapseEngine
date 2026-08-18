@@ -21,6 +21,7 @@
 #include "Engine/Component/Core/CameraComponent.h"
 #include "Engine/Component/Core/TagComponent.h"
 #include "Engine/Logger/SynLog.h"
+#include "Engine/Environment/EnvironmentManager.h"
 
 namespace Syn
 {
@@ -62,7 +63,7 @@ namespace Syn
         scene.GetSettings()->debug.enableBillboardPointLights = false;
         scene.GetSettings()->debug.enableBillboardSpotLights = false;
         scene.GetSettings()->debug.enableBillboardDirectionalLights = false;
-        scene.GetSettings()->environment.skyTextureId = 0xFFFFFFFF;
+        scene.GetSettings()->environment.activeEnvironmentId = UINT32_MAX;
 
         return true;
     }

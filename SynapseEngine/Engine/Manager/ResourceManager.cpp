@@ -408,6 +408,24 @@ namespace Syn {
         EnvironmentManagerCallbacks callbacks{
             .updateCubeTexture = [this](uint32_t index, VkImageView view) {
                 _descriptorManager->WriteCubeTexture(index, view);
+            },
+            .getSamplerIndex = [this](const std::string& name) {
+                return _imageManager->GetSamplerIndex(name);
+            },
+            .loadProceduralImage = [this](const std::string& name, std::function<std::unique_ptr<IImageSource>()> factory) {
+                return _imageManager->LoadImageFromSourceAsync(name, factory);
+            },
+            .loadImageSync = [this](const std::string& path) {
+                return _imageManager->LoadImageSync(path);
+            },
+            .loadImageAsync = [this](const std::string& path) {
+                return _imageManager->LoadImageAsync(path);
+            },
+            .waitForImage = [this](uint32_t id) {
+                _imageManager->WaitForResource(id);
+            },
+            .getImageResource = [this](uint32_t id) {
+                return _imageManager->GetResource(id);
             }
         };
 

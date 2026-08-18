@@ -21,9 +21,43 @@
 #include "../Common/DirectionLight.glsl"
 #include "../Common/PointLight.glsl"
 #include "../Common/SpotLight.glsl"
+#include "../Common/Environment.glsl"
 
 vec3 SimulateAmbientLight(vec3 albedo, float ambientIntensity, float globalAmbientIntensity) {
     return albedo * ambientIntensity * globalAmbientIntensity;
+}
+
+vec3 SimulateEnvironmentLight(
+    uint64_t envBufferAddr, uint envIndex, uint brdfLutIndex,
+    vec3 albedo, vec3 normal, vec3 viewDir, float roughness, float metalness,
+    float ior, float specularFactor, vec3 specularColor,
+    float ao, float globalAmbientStrength
+) 
+{
+    if (envIndex == 0xFFFFFFFF) {
+        return SimulateAmbientLight(albedo, ao, globalAmbientStrength);
+    }
+
+    EnvironmentData env = GET_ENVIRONMENT(envBufferAddr, envIndex);
+    uint samplerIndex = GET_ENV_CUBE_SAMPLER(env);
+
+    vec3 R = reflect(-viewDir, normal);
+    float NdotV = max(dot(normal, viewDir), 0.0);
+
+    vec3 irradiance = SampleEnvironmentIrradianceCube(envIndex, samplerIndex, normal).rgb;
+    
+    const float MAX_REFLECTION_LOD = 4.0;
+    vec3 prefiltered = SampleEnvironmentPrefilteredCube(envIndex, samplerIndex, R, roughness * MAX_REFLECTION_LOD).rgb;
+    
+    vec2 brdf = SampleTexture2D(brdfLutIndex, samplerIndex, vec2(NdotV, roughness)).rg;
+
+    vec3 iblRadiance = SimulateIBL(
+        albedo, normal, viewDir, roughness, metalness,
+        ior, specularFactor, specularColor,
+        irradiance, prefiltered, brdf
+    );
+
+    return iblRadiance * ao * env.skyTint * env.ambientIntensity * globalAmbientStrength;
 }
 
 vec3 SimulateBloom(vec3 emissiveColor, float emissiveIntensity, float globalEmissiveIntensity) {

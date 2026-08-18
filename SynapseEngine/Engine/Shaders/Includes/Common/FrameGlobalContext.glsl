@@ -249,6 +249,9 @@ struct FrameGlobalContext {
     uint pointLightShadowMinBlockSize;
     uint pointLightShadowGridSize;
     uint pointLightShadowHizMipLevels;
+
+    uint brdfLutTextureIndex;
+    uint activeEnvironmentIndex;
 };
 
 #ifndef __cplusplus

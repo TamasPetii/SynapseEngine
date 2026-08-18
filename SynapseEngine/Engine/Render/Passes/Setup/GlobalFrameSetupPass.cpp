@@ -301,6 +301,9 @@ namespace Syn {
         float tanHalfFov = std::tan(glm::radians(cameraPool->Get(ctx.mainCameraEntity).fov) * 0.5f);
         ctx.sliceScaleFactor = 1.0f / std::log2(1.0f + (2.0f * tanHalfFov / static_cast<float>(ctx.tileCountY)));
 
+        ctx.brdfLutTextureIndex = environmentManager->GetBrdfLutId();
+        ctx.activeEnvironmentIndex = settings->environment.activeEnvironmentId;;
+
         drawData->frameContextBuffer.Write(fIdx , &ctx, sizeof(FrameGlobalContext), 0);
 
         //Todo: Kiszervezni lambdába innen!

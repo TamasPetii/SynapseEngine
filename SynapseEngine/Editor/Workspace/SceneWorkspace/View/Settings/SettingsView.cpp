@@ -234,6 +234,7 @@ namespace Syn {
             }
             Syn::UI::EndCard();
 
+            /*
             constexpr const char* CardEnvironmentTitle = "Environment Settings";
             if (Syn::UI::BeginCard(CardEnvironmentTitle, SYN_ICON_SUN, getCardState(CardEnvironmentTitle))) {
                 if (Syn::UI::BeginPropertyGrid("EnvironmentGrid")) {
@@ -308,6 +309,7 @@ namespace Syn {
                 }
             }
             Syn::UI::EndCard();
+            */
 
             constexpr const char* CardDebugTitle = "Debug & Visualization";
             if (Syn::UI::BeginCard(CardDebugTitle, SYN_ICON_BUG, getCardState(CardDebugTitle))) {

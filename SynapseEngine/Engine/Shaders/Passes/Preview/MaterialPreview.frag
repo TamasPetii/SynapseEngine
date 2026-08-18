@@ -117,7 +117,12 @@ void main() {
     );
 
     // Ambient & Bloom
-    totalRadiance += SimulateAmbientLight(albedoAlpha.rgb, ao, ctx.ambientStrength);
+    totalRadiance += SimulateEnvironmentLight(
+        ctx.environmentBufferAddr, ctx.activeEnvironmentIndex, ctx.brdfLutTextureIndex,
+        albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness,
+        ior, specularFactor, specularColor, ao, ctx.ambientStrength
+    );
+
     totalRadiance += SimulateBloom(emissive, 1.0, ctx.emissiveStrength);
 
     vec3 finalColor = mix(bgColor, totalRadiance, IS_TRANSPARENT(mat) ? albedoAlpha.a : 1.0);

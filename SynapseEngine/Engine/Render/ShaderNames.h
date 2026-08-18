@@ -37,8 +37,9 @@ namespace Syn
         static constexpr const char* BloomDownsample = "Engine/Shaders/Passes/PostProcess/Bloom/BloomDownsample.comp";
         static constexpr const char* BloomComposite = "Engine/Shaders/Passes/PostProcess/Bloom/BloomComposite.comp";
 
-        static constexpr const char* SkySphereVert = "Engine/Shaders/Passes/PostProcess/SkySphere/SkySphere.vert";
-        static constexpr const char* SkySphereFrag = "Engine/Shaders/Passes/PostProcess/SkySphere/SkySphere.frag";
+        static constexpr const char* SkyVert = "Engine/Shaders/Passes/PostProcess/Sky/Sky.vert";
+        static constexpr const char* SkySphereFrag = "Engine/Shaders/Passes/PostProcess/Sky/SkySphere.frag";
+        static constexpr const char* SkyBoxFrag = "Engine/Shaders/Passes/PostProcess/Sky/SkyBox.frag";
 
         static constexpr const char* SelectionOutlineFrag = "Engine/Shaders/Passes/PostProcess/Outline/SelectionOutline.frag";
 
@@ -58,6 +59,8 @@ namespace Syn
         static constexpr const char* TraditionalVert = "Engine/Shaders/Passes/Shading/Common/Traditional.vert";
 
         static constexpr const char* OpaqueDeferredFrag = "Engine/Shaders/Passes/Shading/Deferred/GBuffer/OpaqueDeferred.frag";
+        
+        static constexpr const char* DeferredEmissiveAoVert = "Engine/Shaders/Passes/Shading/Deferred/Lighting/DeferredEmissiveAo.vert";
         static constexpr const char* DeferredEmissiveAoFrag = "Engine/Shaders/Passes/Shading/Deferred/Lighting/DeferredEmissiveAo.frag";
         static constexpr const char* DeferredPointLightVert = "Engine/Shaders/Passes/Shading/Deferred/Lighting/DeferredPointLight.vert";
         static constexpr const char* DeferredPointLightFrag = "Engine/Shaders/Passes/Shading/Deferred/Lighting/DeferredPointLight.frag";

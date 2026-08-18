@@ -1,19 +1,3 @@
-// Copyright (C) 2026 Tamás Péter
-// This file is part of SynapseEngine.
-//
-// SynapseEngine is free software: you can redistribute it and/or modify
-// it under the terms of the GNU Affero General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// SynapseEngine is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU Affero General Public License for more details.
-//
-// You should have received a copy of the GNU Affero General Public License
-// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
-
 #include "SkySpherePass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
@@ -25,7 +9,7 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
-#include "Engine/Video/VideoManager.h"
+#include "Engine/Manager/DescriptorManager.h"
 #include "Engine/Vk/Descriptor/DescriptorUtils.h"
 
 namespace Syn {
@@ -36,15 +20,13 @@ namespace Syn {
 
     bool SkySpherePass::ShouldExecute(const RenderContext& context) const
     {
-        auto skyTextureId = context.scene->GetSettings()->environment.skyTextureId;
-        bool enabled = context.scene->GetSettings()->environment.enableSky;
-        return enabled && skyTextureId != UINT32_MAX && !context.scene->GetSettings()->debug.enableDebugVisibility;
+        const auto& envSettings = context.scene->GetSettings()->environment;
+        bool is2DMode = (envSettings.skyMode == SkyMode::EquirectangularTexture || envSettings.skyMode == SkyMode::OctahedralTexture);
+        return envSettings.enableSky && is2DMode && envSettings.activeEnvironmentId != UINT32_MAX && !context.scene->GetSettings()->debug.enableDebugVisibility;
     }
 
     void SkySpherePass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
-        auto imageManager = ServiceLocator::Get<ImageManager>();
-        auto videoManager = ServiceLocator::Get<VideoManager>();
         auto descriptorManager = ServiceLocator::Get<DescriptorManager>();
 
         Vk::ShaderProgramConfig config;
@@ -56,9 +38,8 @@ namespace Syn {
             return VkDescriptorSetLayout{};
             };
 
-
         _shaderProgramId = shaderManager->LoadProgramAsync("SkySphereProgram", {
-            ShaderNames::SkySphereVert,
+            ShaderNames::SkyVert,
             ShaderNames::SkySphereFrag
             }, config);
 
@@ -96,25 +77,19 @@ namespace Syn {
         VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
         _graphicsState.renderArea = extent;
 
-        std::vector<std::string> targets = {
-            RenderTargetNames::Main,
-        };
-
-        for (const auto& name : targets)
-        {
-            _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
-                    .imageView = group->GetImage(name)->GetView(Vk::ImageViewNames::Default),
-                    .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-                    .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-                    .storeOp = VK_ATTACHMENT_STORE_OP_STORE
-                }));
-        }
+        _colorAttachments.clear();
+        _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
+            .imageView = group->GetImage(RenderTargetNames::Main)->GetView(Vk::ImageViewNames::Default),
+            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+            .storeOp = VK_ATTACHMENT_STORE_OP_STORE
+            }));
 
         _depthAttachment = Vk::RenderUtils::CreateAttachment({
-                .imageView = group->GetImage(RenderTargetNames::OpaqueDepth)->GetView(Vk::ImageViewNames::Default),
-                .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
-                .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
-                .storeOp = VK_ATTACHMENT_STORE_OP_STORE
+            .imageView = group->GetImage(RenderTargetNames::OpaqueDepth)->GetView(Vk::ImageViewNames::Default),
+            .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+            .storeOp = VK_ATTACHMENT_STORE_OP_STORE
             });
 
         _renderInfo = Vk::RenderingInfoConfig{
@@ -132,32 +107,19 @@ namespace Syn {
 
         const auto& envSettings = scene->GetSettings()->environment;
 
-        glm::vec3 rotRads = glm::radians(envSettings.skyRotation);
-        glm::mat4 rotMat = glm::mat4(1.0f);
-        rotMat = glm::rotate(rotMat, rotRads.y, glm::vec3(0.0f, 1.0f, 0.0f));
-        rotMat = glm::rotate(rotMat, rotRads.x, glm::vec3(1.0f, 0.0f, 0.0f));
-        rotMat = glm::rotate(rotMat, rotRads.z, glm::vec3(0.0f, 0.0f, 1.0f));
-
         Vk::PushConstant<SkySpherePC> pc;
         pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
-        pc->skyTextureIndex = envSettings.skyTextureId;
-        pc->samplerIndex = imageManager->GetSamplerIndex(SamplerNames::SkyboxSampler);
-        pc->mappingType = envSettings.skyMode == SkyMode::EquirectangularTexture ? 0 : 1;
-        pc->skyIntensity = envSettings.skyIntensity;
-        pc->skyRotationMatrix = rotMat;
-        pc->skyTint = envSettings.skyTint;
-        pc->skyExposureEV = envSettings.skyExposureEV;
+        pc->environmentIndex = envSettings.activeEnvironmentId;
+        pc->mappingType = (envSettings.skyMode == SkyMode::EquirectangularTexture) ? 0 : 1;
 
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void SkySpherePass::BindDescriptors(const RenderContext& context)
     {
-        auto imageManager = ServiceLocator::Get<ImageManager>();
-        auto videoManager = ServiceLocator::Get<VideoManager>();
+        auto descriptorManager = ServiceLocator::Get<DescriptorManager>();
         std::vector<std::pair<uint32_t, Vk::DescriptorBuffer*>> buffersToBind;
 
-        auto descriptorManager = ServiceLocator::Get<DescriptorManager>();
         if (auto descBuffer = descriptorManager->GetBindlessBuffer()) {
             buffersToBind.push_back({ 0, descBuffer });
         }

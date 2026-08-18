@@ -47,6 +47,7 @@
 #include "Engine/Utils/PathUtils.h"
 #include "Engine/Audio/AudioManager.h"
 #include "Engine/Video/VideoManager.h"
+#include "Engine/Environment/EnvironmentManager.h"
 
 #include <random>
 #include <fstream>
@@ -127,8 +128,8 @@ namespace Syn
             modelManager->GetResourceIndex(MeshSourceNames::Torus)
         };
 
-        auto skyTextureId = ServiceLocator::Get<ImageManager>()->LoadImageSync(PathUtils::GetAbsolutePathString(envPath + "MainScene.hdr"));
-        scene.GetSettings()->environment.skyTextureId = skyTextureId;
+        auto envId = ServiceLocator::Get<EnvironmentManager>()->LoadEnvironmentSync(PathUtils::GetAbsolutePathString(envPath + "MainScene.hdr"));
+        scene.GetSettings()->environment.activeEnvironmentId = envId;
 
         EntityID rootCameras = scene.CreateEntity();
         registry.AddComponent<TagComponent>(rootCameras);

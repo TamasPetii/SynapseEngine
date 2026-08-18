@@ -50,30 +50,46 @@ namespace Syn::Vk {
     }
 
     void ShaderProgram::Bind(VkCommandBuffer cmd) const {
-        static const std::vector<VkShaderStageFlagBits> allStages = {
-            VK_SHADER_STAGE_VERTEX_BIT,
-            VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
-            VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
-            VK_SHADER_STAGE_GEOMETRY_BIT,
-            VK_SHADER_STAGE_FRAGMENT_BIT,
-            VK_SHADER_STAGE_TASK_BIT_EXT,
-            VK_SHADER_STAGE_MESH_BIT_EXT,
-            VK_SHADER_STAGE_COMPUTE_BIT
-        };
+        bool isCompute = false;
+        for (auto stage : _stages) {
+            if (stage == VK_SHADER_STAGE_COMPUTE_BIT) {
+                isCompute = true;
+                break;
+            }
+        }
 
-        std::vector<VkShaderEXT> handlesToBind(allStages.size(), VK_NULL_HANDLE);
+        std::vector<VkShaderStageFlagBits> stagesToBind;
+        if (isCompute) {
+            stagesToBind = { 
+                VK_SHADER_STAGE_COMPUTE_BIT
+            };
+        }
+        else {
+            stagesToBind = {
+                VK_SHADER_STAGE_VERTEX_BIT,
+                VK_SHADER_STAGE_TESSELLATION_CONTROL_BIT,
+                VK_SHADER_STAGE_TESSELLATION_EVALUATION_BIT,
+                VK_SHADER_STAGE_GEOMETRY_BIT,
+                VK_SHADER_STAGE_FRAGMENT_BIT,
+                VK_SHADER_STAGE_TASK_BIT_EXT,
+                VK_SHADER_STAGE_MESH_BIT_EXT
+            };
+        }
+
+        std::vector<VkShaderEXT> handlesToBind(stagesToBind.size(), VK_NULL_HANDLE);
+
         for (size_t i = 0; i < _shaderObjects.size(); ++i) {
             VkShaderStageFlagBits currentStage = _stages[i];
 
-            for (size_t j = 0; j < allStages.size(); ++j) {
-                if (allStages[j] == currentStage) {
+            for (size_t j = 0; j < stagesToBind.size(); ++j) {
+                if (stagesToBind[j] == currentStage) {
                     handlesToBind[j] = _shaderObjects[i];
                     break;
                 }
             }
         }
 
-        vkCmdBindShadersEXT(cmd, static_cast<uint32_t>(allStages.size()), allStages.data(), handlesToBind.data());
+        vkCmdBindShadersEXT(cmd, static_cast<uint32_t>(stagesToBind.size()), stagesToBind.data(), handlesToBind.data());
     }
 
     void ShaderProgram::CreatePipelineLayoutAndShaders() {

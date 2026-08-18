@@ -175,7 +175,20 @@ namespace Syn
             config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
             config.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
             config.anisotropyEnable = true;
-            RegisterSampler(SamplerNames::SkyboxSampler, config);
+            RegisterSampler(SamplerNames::SkySphereSampler, config);
+        }
+
+        {
+            Vk::SamplerConfig config{};
+            config.magFilter = VK_FILTER_LINEAR;
+            config.minFilter = VK_FILTER_LINEAR;
+            config.addressModeU = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+            config.addressModeV = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+            config.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
+            config.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+            config.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+            config.anisotropyEnable = true;
+            RegisterSampler(SamplerNames::SkyBoxSampler, config);
         }
     }
 

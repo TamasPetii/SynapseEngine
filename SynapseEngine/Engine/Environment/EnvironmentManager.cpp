@@ -2,6 +2,8 @@
 #include "Engine/ServiceLocator.h"
 #include "Engine/Vk/Context.h"
 #include "Engine/Vk/Core/Device.h"
+#include <glm/gtc/matrix_transform.hpp>
+#include "Engine/Image/Source/Procedural/BrdfLutImageSource.h"
 
 namespace Syn {
     EnvironmentManager::EnvironmentManager(
@@ -13,13 +15,50 @@ namespace Syn {
         _callbacks(std::move(callbacks)),
         _imageBuilder(std::move(imageBuilder)),
         _uploader(std::move(uploader))
-    {}
+    {
+        if (_callbacks.loadProceduralImage) {
+            _brdfLutId = _callbacks.loadProceduralImage("BrdfLut", []() {
+                return std::make_unique<BrdfLutImageSource>(512, 1024);
+                });
+        }
+    }
+
+    std::shared_ptr<Environment> EnvironmentManager::CreateEnvironmentResource(uint32_t skyTexId) {
+        if (_callbacks.waitForImage && skyTexId != UINT32_MAX) {
+            _callbacks.waitForImage(skyTexId);
+        }
+
+        auto env = std::make_shared<Environment>();
+        env->skyTextureId = skyTexId;
+
+        if (_callbacks.getImageResource && skyTexId != UINT32_MAX) {
+            env->transientSourceImage = _callbacks.getImageResource(skyTexId);
+        }
+
+        return env;
+    }
 
     uint32_t EnvironmentManager::LoadEnvironmentAsync(const std::string& filePath) {
-        return this->InternalLoadAsync(filePath, [this, filePath]() {
-            auto env = std::make_shared<Environment>();
-            env->transientSourceImage = _imageBuilder->BuildFromFile(filePath);
-            return env;
+        uint32_t skyTexId = UINT32_MAX;
+
+        if (_callbacks.loadImageAsync) {
+            skyTexId = _callbacks.loadImageAsync(filePath);
+        }
+
+        return this->InternalLoadAsync(filePath, [this, skyTexId]() {
+            return CreateEnvironmentResource(skyTexId);
+            });
+    }
+
+    uint32_t EnvironmentManager::LoadEnvironmentSync(const std::string& filePath) {
+        uint32_t skyTexId = UINT32_MAX;
+
+        if (_callbacks.loadImageSync) {
+            skyTexId = _callbacks.loadImageSync(filePath);
+        }
+
+        return this->InternalLoadSync(filePath, [this, skyTexId]() {
+            return CreateEnvironmentResource(skyTexId);
             });
     }
 
@@ -76,16 +115,29 @@ namespace Syn {
                     _callbacks.updateCubeTexture(prefilteredIdx, entry.resource->prefilteredMap->image->GetView());
                 }
 
-                EnvironmentData data{};
-                data.intensity = entry.resource->intensity;
-                data.skyTint[0] = entry.resource->skyTint.x;
-                data.skyTint[1] = entry.resource->skyTint.y;
-                data.skyTint[2] = entry.resource->skyTint.z;
+                glm::vec3 rotRads = glm::radians(entry.resource->skyRotation);
+                glm::mat4 rotMat = glm::mat4(1.0f);
+                rotMat = glm::rotate(rotMat, rotRads.y, glm::vec3(0.0f, 1.0f, 0.0f));
+                rotMat = glm::rotate(rotMat, rotRads.x, glm::vec3(1.0f, 0.0f, 0.0f));
+                rotMat = glm::rotate(rotMat, rotRads.z, glm::vec3(0.0f, 0.0f, 1.0f));
 
-                data.baseCubemapIndex = baseCubeIdx;
-                data.irradianceCubeIndex = irradianceIdx;
-                data.prefilteredCubeIndex = prefilteredIdx;
-                data.brdfLutTexIndex = UINT32_MAX;
+                EnvironmentData data{};
+                data.skyRotationMatrix = rotMat;
+                data.skyTint = entry.resource->skyTint;
+                data.skyExposureEV = entry.resource->skyExposureEV;
+                data.intensity = entry.resource->intensity;
+                data.ambientIntensity = entry.resource->ambientIntensity;
+                data.skyTextureIndex = entry.resource->skyTextureId;
+
+                uint32_t cubeSampler = 0;
+                uint32_t sphereSampler = 0;
+
+                if (_callbacks.getSamplerIndex) {
+                    cubeSampler = _callbacks.getSamplerIndex(entry.resource->cubemapSamplerName);
+                    sphereSampler = _callbacks.getSamplerIndex(entry.resource->skySphereSamplerName);
+                }
+
+                data.packedSamplers = (sphereSampler << 16) | (cubeSampler & 0xFFFF);
 
                 addressUpdates.push_back({ index, data });
             }

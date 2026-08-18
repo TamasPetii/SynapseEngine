@@ -27,6 +27,10 @@ float FresnelSchlickScalar(float cosTheta, float F0) {
     return F0 + (1.0 - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
 }
 
+vec3 FresnelSchlickRoughness(float cosTheta, vec3 F0, float roughness) {
+    return F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(clamp(1.0 - cosTheta, 0.0, 1.0), 5.0);
+}
+
 float DistributionGGX(vec3 N, vec3 H, float roughness) {
     float a = roughness * roughness;
     float a2 = a * a;
@@ -118,6 +122,31 @@ vec3 ShadePhysicallyBased(
 
     vec3 radiance = lightColor * attenuation * strength;
     return finalColor * radiance * NdotL;
+}
+
+vec3 SimulateIBL(
+    vec3 albedo, vec3 N, vec3 V, float roughness, float metalness,
+    float ior, float specularFactor, vec3 specularColor,
+    vec3 irradiance, vec3 prefilteredColor, vec2 brdfLut
+) {
+    float NdotV = max(dot(N, V), 0.0001);
+
+    float clampedIor = max(ior, 1.0);
+    float iorRatio = (clampedIor - 1.0) / (clampedIor + 1.0);
+    float f0Dielectric = iorRatio * iorRatio;
+    vec3 f0DielectricModified = min(f0Dielectric * specularColor * specularFactor, vec3(1.0));
+    vec3 F0 = mix(f0DielectricModified, albedo, metalness);
+
+    vec3 F = FresnelSchlickRoughness(NdotV, F0, roughness);
+
+    vec3 kS = F;
+    vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metalness;
+
+    vec3 diffuse = irradiance * albedo;
+    vec3 specular = prefilteredColor * (F * brdfLut.x + brdfLut.y);
+
+    return (kD * diffuse + specular);
 }
 
 #endif

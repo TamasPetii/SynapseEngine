@@ -198,8 +198,12 @@ void main()
 
     if(ctx.enableForwardPlusEmissiveAo == 1)
     {
-        //Ambient
-        totalRadiance += SimulateAmbientLight(albedoAlpha.rgb, finalAo, ctx.ambientStrength);
+        //IBL/Ambient
+        totalRadiance += SimulateEnvironmentLight(
+            ctx.environmentBufferAddr, ctx.activeEnvironmentIndex, ctx.brdfLutTextureIndex,
+            albedoAlpha.rgb, finalNormal, viewDir, finalRoughness, finalMetalness,
+            ior, specularFactor, specularColor, finalAo, ctx.ambientStrength
+        );
 
         //Bloom Radiance
         totalRadiance += SimulateBloom(finalEmissive, 1.0, ctx.emissiveStrength);
