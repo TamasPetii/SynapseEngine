@@ -25,6 +25,7 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
+#include "Engine/Vk/Descriptor/DescriptorUtils.h"
 
 namespace Syn {
 
@@ -39,9 +40,16 @@ namespace Syn {
 
     void DeferredEmissiveAoPass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
+        auto descriptorManager = ServiceLocator::Get<DescriptorManager>();
 
         Vk::ShaderProgramConfig config;
-        config.useDescriptorBuffers = false;
+        config.useDescriptorBuffers = true;
+        config.layoutOverride = [descriptorManager](uint32_t setIndex) {
+            if (setIndex == 0) {
+                return descriptorManager->GetBindlessLayout();
+            }
+            return VkDescriptorSetLayout{};
+            };
 
         _shaderProgramId = shaderManager->LoadProgramAsync("DeferredEmissiveAoProgram", {
             ShaderNames::DeferredEmissiveAoVert,
@@ -160,6 +168,15 @@ namespace Syn {
         );
 
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
+    
+        std::vector<std::pair<uint32_t, Vk::DescriptorBuffer*>> buffersToBind;
+
+        auto descriptorManager = ServiceLocator::Get<DescriptorManager>();
+        if (auto descBuffer = descriptorManager->GetBindlessBuffer()) {
+            buffersToBind.push_back({ 0, descBuffer });
+        }
+
+        Vk::DescriptorUtils::BindMultipleBuffer(context.cmd, _shaderProgram->GetLayout(), VK_PIPELINE_BIND_POINT_GRAPHICS, buffersToBind);
     }
 
     void DeferredEmissiveAoPass::Draw(const RenderContext& context) {
