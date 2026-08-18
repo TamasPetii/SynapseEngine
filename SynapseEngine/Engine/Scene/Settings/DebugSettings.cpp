@@ -40,6 +40,8 @@ namespace Syn
         , enableBillboardPointLights(true)
         , enableBillboardSpotLights(true)
         , enableBillboardDirectionalLights(true)
+        , enableBillboardAudioSources(true)
+		, enableBillboardAudioListeners(true)
         , enableSelectedOutline(true)
         , enableSelectedHierarchyOutline(true)
         , outlinePrimaryColor(glm::vec4(1.0f, 0.60f, 0.0f, 1.0f))

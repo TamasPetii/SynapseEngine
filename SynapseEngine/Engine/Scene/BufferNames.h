@@ -102,5 +102,8 @@ namespace Syn
 
         static constexpr const char* TagSparseMap = "TagSparseMap";
         static constexpr const char* TagData = "TagData";
+
+        static constexpr const char* AudioSourceVisibleData = "AudioSourceVisibleData";
+        static constexpr const char* AudioListenerVisibleData = "AudioListenerVisibleData";
     };
 }

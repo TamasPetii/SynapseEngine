@@ -32,6 +32,8 @@
 #include "Engine/Component/Light/Spot/SpotLightComponent.h"
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
 #include "Engine/Component/Rendering/PipelineOverrideComponent.h"
+#include "Engine/Component/Audio/AudioSourceComponent.h"
+#include "Engine/Component/Audio/AudioListenerComponent.h"
 
 #include "Engine/System/Core/TransformSystem.h"
 #include "Engine/System/Core/TransformSetupSystem.h"
@@ -337,6 +339,9 @@ namespace Syn
 
         RegisterComponentSparseMapBuffer<MeshColliderComponent>(BufferNames::MeshColliderSparseMap);
         RegisterComponentBuffer<MeshColliderComponent, MeshColliderComponentGPU>(BufferNames::MeshColliderData);
+
+        RegisterComponentBuffer<AudioSourceComponent, uint32_t>(BufferNames::AudioSourceVisibleData);
+        RegisterComponentBuffer<AudioListenerComponent, uint32_t>(BufferNames::AudioListenerVisibleData);
 
         RegisterGenericBuffer<VisibleModelData>(BufferNames::DirectionLightShadowModelVisibleData,
             [this]() -> uint32_t {

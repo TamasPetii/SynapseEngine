@@ -136,4 +136,34 @@ namespace Syn
 
         audioEngine->StopAllSounds();
     }
+
+    void AudioSystem::OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow)
+    {
+        auto registry = scene->GetRegistry();
+        auto componentBufferManager = scene->GetComponentBufferManager();
+
+        auto sourcePool = registry->GetPool<AudioSourceComponent>();
+        if (sourcePool) {
+            auto visibleBuffer = componentBufferManager->GetComponentBuffer(BufferNames::AudioSourceVisibleData, frameIndex);
+            if (visibleBuffer.buffer) {
+                auto handler = static_cast<uint32_t*>(visibleBuffer.buffer->Map());
+                for (auto entity : sourcePool->GetStorage().GetDenseEntities()) {
+                    auto idx = sourcePool->GetMapping().Get(entity);
+                    handler[idx] = entity;
+                }
+            }
+        }
+
+        auto listenerPool = registry->GetPool<AudioListenerComponent>();
+        if (listenerPool) {
+            auto visibleBuffer = componentBufferManager->GetComponentBuffer(BufferNames::AudioListenerVisibleData, frameIndex);
+            if (visibleBuffer.buffer) {
+                auto handler = static_cast<uint32_t*>(visibleBuffer.buffer->Map());
+                for (auto entity : listenerPool->GetStorage().GetDenseEntities()) {
+                    auto idx = listenerPool->GetMapping().Get(entity);
+                    handler[idx] = entity;
+                }
+            }
+        }
+    }
 }

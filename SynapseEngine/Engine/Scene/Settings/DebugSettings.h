@@ -67,6 +67,8 @@ namespace Syn
         bool enableBillboardPointLights;
         bool enableBillboardSpotLights;
         bool enableBillboardDirectionalLights;
+        bool enableBillboardAudioSources;
+		bool enableBillboardAudioListeners;
 
         // Editor Selection Outlines
         bool enableSelectedOutline;

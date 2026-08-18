@@ -22,6 +22,8 @@
 #include "Engine/Render/Passes/Billboard/DirectionLightBillboardPass.h"
 #include "Engine/Render/Passes/Billboard/PointLightBillboardPass.h"
 #include "Engine/Render/Passes/Billboard/SpotLightBillboardPass.h"
+#include "Engine/Render/Passes/Billboard/AudioListenerBillboardPass.h"
+#include "Engine/Render/Passes/Billboard/AudioSourceBillboardPass.h"
 
 #include "Engine/Render/Passes/PostProcess/Bloom/BloomPrefilterPass.h"
 #include "Engine/Render/Passes/PostProcess/Bloom/BloomUpsamplePass.h"
@@ -428,7 +430,9 @@ namespace Syn
         pipeline->AddPass(std::make_unique<DirectionLightBillboardPass>());
         pipeline->AddPass(std::make_unique<PointLightBillboardPass>());
         pipeline->AddPass(std::make_unique<SpotLightBillboardPass>());
-
+        pipeline->AddPass(std::make_unique<AudioSourceBillboardPass>());
+        pipeline->AddPass(std::make_unique<AudioListenerBillboardPass>());
+        
 		//Forward+ Transparent Lighting Passes (WBOIT)
 		pipeline->AddPass(std::make_unique<TransparentForwardTransitionPass>());
         pipeline->AddPass(std::make_unique<MeshletTransparentForwardPass>(MaterialRenderType::Transparent1Sided));
