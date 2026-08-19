@@ -19,9 +19,10 @@
 
 namespace Syn
 {
-    struct ShaderDefines
+    struct SYN_API ShaderDefines
     {
         static constexpr const char* EnableAlphaTest = "ENABLE_ALPHA_TEST";
+        static constexpr const char* EnableWorkGraph = "ENABLE_WORK_GRAPH";
     };
 
     struct SYN_API ShaderNames
@@ -110,13 +111,6 @@ namespace Syn
         static constexpr const char* GeometryStaticModelCullingComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryStaticModelCulling.comp";
         static constexpr const char* GeometryMortonChunkCullingComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryMortonChunkCulling.comp";
         static constexpr const char* GeometryMortonModelCullingComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryMortonModelCulling.comp";
-
-        static constexpr const char* GeometryWorkGraphModelCullingComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphModelCulling.comp";
-        static constexpr const char* GeometryWorkGraphStaticChunkCullingComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphStaticChunkCulling.comp";
-        static constexpr const char* GeometryWorkGraphStaticModelCullingComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphStaticModelCulling.comp";
-        static constexpr const char* GeometryWorkGraphMortonChunkCullingComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphMortonChunkCulling.comp";
-        static constexpr const char* GeometryWorkGraphMortonModelCullingComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphMortonModelCulling.comp";
-        static constexpr const char* GeometryWorkGraphMeshCullingComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphMeshCulling.comp";
 
         static constexpr const char* DirectionLightShadowFrag = "Engine/Shaders/Passes/Shadow/DirectionLight/DirectionLightShadow.frag";
         static constexpr const char* DirectionLightShadowTransparentFrag = "Engine/Shaders/Passes/Shadow/DirectionLight/DirectionLightShadowTransparent.frag";

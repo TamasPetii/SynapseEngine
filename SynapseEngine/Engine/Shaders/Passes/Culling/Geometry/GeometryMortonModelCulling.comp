@@ -20,6 +20,10 @@
 #extension GL_KHR_shader_subgroup_arithmetic : require
 #extension GL_KHR_shader_subgroup_ballot : require
 
+#ifdef ENABLE_WORK_GRAPH
+#extension GL_AMDX_shader_enqueue : require
+#endif
+
 #include "../../../Includes/Core.glsl"
 #include "../../../Includes/Common/FrameGlobalContext.glsl"
 #include "../../../Includes/Common/Camera.glsl"
@@ -35,6 +39,10 @@
 #include "../../../Includes/Common/Animation.glsl"
 #include "../../../Includes/Utils/CullingUtils.glsl"
 
+#ifdef ENABLE_WORK_GRAPH
+#include "../../../Includes/Payload/WorkGraphCullingPayload.glsl"
+#endif
+
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
 #include "../../../Includes/PushConstants/ModelMeshCullingPC.glsl"
@@ -46,14 +54,24 @@ layout(push_constant) uniform PushConstants {
 // Depth pyramid (HZB) for main camera occlusion culling
 layout(set = 2, binding = 0) uniform sampler2D depthPyramid;
 
+#ifdef ENABLE_WORK_GRAPH
+layout(coalescing_node_amdx) in;
+layout(location = 0) in ChunkCullingPayload payloadIn;
+layout(coalescing_node_amdx) out node_type GeometryWorkGraphMeshCullingNode;
+layout(location = 1) out MeshCullingPayload payloadOut;
+#endif
+
 void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
-    // 1 WorkGroup processes 1 Visible Morton Chunk
-    uint visibilitySlot = gl_WorkGroupID.x; 
+    #ifdef ENABLE_WORK_GRAPH
+        uint rawChunkId = payloadIn.rawChunkPayload;
+    #else
+        // 1. WorkGroup processes 1 Visible Morton Chunk & Unpack chunk state
+        uint visibilitySlot = gl_WorkGroupID.x; 
+        uint rawChunkId = GET_VISIBLE_CHUNK(ctx.mortonChunkVisibleIndexBufferAddr, visibilitySlot);
+    #endif
 
-    // 1. Unpack chunk state
-    uint rawChunkId = GET_VISIBLE_CHUNK(ctx.mortonChunkVisibleIndexBufferAddr, visibilitySlot);
     bool chunkFullyInside = (rawChunkId >> 31) != 0;
     uint pureChunkId = rawChunkId & 0x7FFFFFFF;
 
@@ -161,28 +179,37 @@ void main() {
             continue;
         }
 
-        // 8. Slow-path: Defer large/complex models to the Mesh Culling pass
-        uint needsWrite = 1;
-        uint subgroupWriteCount = subgroupAdd(needsWrite);
-        uint localOffset = subgroupExclusiveAdd(needsWrite);
-        uint baseOffset = 0;
+        #ifdef ENABLE_WORK_GRAPH
+            // 8. WORK GRAPH ENQUEUE (Directly spawn a Mesh Culling Node)
+            allocateNodeRecordAMDX(GeometryWorkGraphMeshCullingNode, 1);
+            payloadOut.entityId = SET_BIT_TO(entityId, 31, visibility == INTERSECTION_INSIDE);
+            payloadOut.modelIndex = modelComp.modelIndex;
+            submitNodeRecordAMDX(GeometryWorkGraphMeshCullingNode);
+        #else
+            // 8. Slow-path: Defer large/complex models to the Mesh Culling pass
+            uint needsWrite = 1;
+            uint subgroupWriteCount = subgroupAdd(needsWrite);
+            uint localOffset = subgroupExclusiveAdd(needsWrite);
+            uint baseOffset = 0;
         
-        if (subgroupElect()) {
-            baseOffset = atomicAdd(GET_DISPATCH_CMD(ctx.modelCountBufferAddr).groupCountX, subgroupWriteCount);
-        }
+            if (subgroupElect()) {
+                baseOffset = atomicAdd(GET_DISPATCH_CMD(ctx.modelCountBufferAddr).groupCountX, subgroupWriteCount);
+            }
 
-        baseOffset = subgroupBroadcastFirst(baseOffset);
+            baseOffset = subgroupBroadcastFirst(baseOffset);
 
-        if(needsWrite == 1)
-        {
-            uint finalIndex = baseOffset + localOffset;
-            VisibleModelData outData;
+            if(needsWrite == 1)
+            {
+                uint finalIndex = baseOffset + localOffset;
+                VisibleModelData outData;
 
-            // Encode full visibility flag into entity ID
-            outData.entityId = SET_BIT_TO(entityId, 31, visibility == INTERSECTION_INSIDE);
-            outData.modelIndex = modelComp.modelIndex;
+                // Encode full visibility flag into entity ID
+                outData.entityId = SET_BIT_TO(entityId, 31, visibility == INTERSECTION_INSIDE);
+                outData.modelIndex = modelComp.modelIndex;
 
-            GET_VISIBLE_MODEL(ctx.modelVisibleIndexBufferAddr, finalIndex) = outData;
-        }
+                GET_VISIBLE_MODEL(ctx.modelVisibleIndexBufferAddr, finalIndex) = outData;
+            }
+        #endif
+
     }
 }

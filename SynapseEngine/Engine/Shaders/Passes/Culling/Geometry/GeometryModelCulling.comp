@@ -20,6 +20,10 @@
 #extension GL_KHR_shader_subgroup_arithmetic : require
 #extension GL_KHR_shader_subgroup_ballot : require
 
+#ifdef ENABLE_WORK_GRAPH
+#extension GL_AMDX_shader_enqueue : require
+#endif
+
 #include "../../../Includes/Core.glsl"
 #include "../../../Includes/Common/FrameGlobalContext.glsl"
 #include "../../../Includes/Common/Camera.glsl"
@@ -34,6 +38,10 @@
 #include "../../../Includes/Utils/Occlusion.glsl"
 #include "../../../Includes/Utils/CullingUtils.glsl"
 
+#ifdef ENABLE_WORK_GRAPH
+#include "../../../Includes/Payload/WorkGraphCullingPayload.glsl"
+#endif
+
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
 #include "../../../Includes/PushConstants/ModelMeshCullingPC.glsl"
@@ -44,6 +52,11 @@ layout(push_constant) uniform PushConstants {
 
 // Depth pyramid (HZB) for main camera occlusion culling
 layout(set = 2, binding = 0) uniform sampler2D depthPyramid;
+
+#ifdef ENABLE_WORK_GRAPH
+layout(coalescing_node_amdx) out node_type GeometryWorkGraphMeshCullingNode;
+layout(location = 0) out MeshCullingPayload payloadOut;
+#endif
 
 void main() 
 {
@@ -152,28 +165,35 @@ void main()
         }
         return;
     }
+    #ifdef ENABLE_WORK_GRAPH
+        // 8. Slow-path: WORK GRAPH ENQUEUE (Directly spawn a Mesh Culling Node)
+        allocateNodeRecordAMDX(GeometryWorkGraphMeshCullingNode, 1);
+        payloadOut.entityId = SET_BIT_TO(entityId, 31, visibility == INTERSECTION_INSIDE);
+        payloadOut.modelIndex = modelComp.modelIndex;
+        submitNodeRecordAMDX(GeometryWorkGraphMeshCullingNode);
+    #else
+        // 8. Slow-path: Defer large/complex models to the Mesh Culling pass
+        uint needsWrite = 1;
+        uint subgroupWriteCount = subgroupAdd(needsWrite);
+        uint localOffset = subgroupExclusiveAdd(needsWrite);
+        uint baseOffset = 0;
 
-    // 8. Slow-path: Defer large/complex models to the Mesh Culling pass
-    uint needsWrite = 1;
-    uint subgroupWriteCount = subgroupAdd(needsWrite);
-    uint localOffset = subgroupExclusiveAdd(needsWrite);
-    uint baseOffset = 0;
+        // Elect one thread per subgroup to perform the atomic memory allocation
+        if (subgroupElect()) {
+            baseOffset = atomicAdd(GET_DISPATCH_CMD(ctx.modelCountBufferAddr).groupCountX, subgroupWriteCount);
+        }
 
-    // Elect one thread per subgroup to perform the atomic memory allocation
-    if (subgroupElect()) {
-        baseOffset = atomicAdd(GET_DISPATCH_CMD(ctx.modelCountBufferAddr).groupCountX, subgroupWriteCount);
-    }
+        baseOffset = subgroupBroadcastFirst(baseOffset);
 
-    baseOffset = subgroupBroadcastFirst(baseOffset);
+        if (needsWrite == 1) {
+            uint finalIndex = baseOffset + localOffset;
+            VisibleModelData outData;
 
-    if (needsWrite == 1) {
-        uint finalIndex = baseOffset + localOffset;
-        VisibleModelData outData;
+            // Encode full visibility flag into entity ID
+            outData.entityId = SET_BIT_TO(entityId, 31, visibility == INTERSECTION_INSIDE);
+            outData.modelIndex = modelComp.modelIndex;
 
-        // Encode full visibility flag into entity ID
-        outData.entityId = SET_BIT_TO(entityId, 31, visibility == INTERSECTION_INSIDE);
-        outData.modelIndex = modelComp.modelIndex;
-
-        GET_VISIBLE_MODEL(ctx.modelVisibleIndexBufferAddr, finalIndex) = outData;
-    }
+            GET_VISIBLE_MODEL(ctx.modelVisibleIndexBufferAddr, finalIndex) = outData;
+        }
+    #endif
 }
