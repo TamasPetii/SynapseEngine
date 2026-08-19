@@ -223,7 +223,6 @@ namespace Syn
                     matIdx = data.materialOverrides[m];
 
                 MaterialRenderType matType = (matIdx < matTypeSnapshot.size()) ? matTypeSnapshot[matIdx] : MaterialRenderType::Opaque1Sided;
-                if (matType != MaterialRenderType::Opaque1Sided && matType != MaterialRenderType::Opaque2Sided) continue;
 
                 uint32_t pipeIdx = static_cast<uint32_t>(data.modelResource->cpuData.baseDrawCommands[m * 4].pipelineRenderType);
                 if (!data.pipelineOverrides.empty() && m < data.pipelineOverrides.size() && data.pipelineOverrides[m] != UINT32_MAX) {

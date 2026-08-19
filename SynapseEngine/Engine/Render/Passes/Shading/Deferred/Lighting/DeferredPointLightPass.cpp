@@ -126,10 +126,12 @@ namespace Syn {
         auto imageManager = ServiceLocator::Get<ImageManager>();
         auto sampler = imageManager->GetSampler(SamplerNames::NearestClampEdge)->Handle();
 		auto ssaoSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge)->Handle();
+        auto linearSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge)->Handle();
 
         uint fIdx = context.frameIndex;
         auto drawData = context.scene->GetSceneDrawData();
         auto pointShadowAtlas = drawData->PointLightShadow.shadowAtlas[fIdx].get();
+        auto pointColorAtlas = drawData->PointLightShadow.shadowColorAtlas[fIdx].get();
         auto shadowSampler = imageManager->GetSampler(SamplerNames::ShadowSampler);
 
         Vk::PushDescriptorWriter pushWriter;
@@ -166,6 +168,13 @@ namespace Syn {
             4,
             pointShadowAtlas->GetView(Vk::ImageViewNames::Default),
             shadowSampler->Handle(),
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            5,
+            pointColorAtlas->GetView(Vk::ImageViewNames::Default),
+            linearSampler,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 

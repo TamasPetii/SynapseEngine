@@ -72,6 +72,33 @@ namespace Syn {
                 );
                 _viewportTextures[cacheKey] = handle;
             }
+            else if (targetName == RenderTargetNames::DirectionLightShadowColorAtlas) {
+                auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
+                auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::NearestClampEdge);
+                TextureHandle handle = _textureManager->RegisterTexture(
+                    drawData->DirectionLightShadow.shadowColorAtlas[currentFrame]->GetView(viewName),
+                    sampler->Handle()
+                );
+                _viewportTextures[cacheKey] = handle;
+            }
+            else if (targetName == RenderTargetNames::SpotLightShadowColorAtlas) {
+                auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
+                auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::NearestClampEdge);
+                TextureHandle handle = _textureManager->RegisterTexture(
+                    drawData->SpotLightShadow.shadowColorAtlas[currentFrame]->GetView(viewName),
+                    sampler->Handle()
+                );
+                _viewportTextures[cacheKey] = handle;
+            }
+            else if (targetName == RenderTargetNames::PointLightShadowColorAtlas) {
+                auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
+                auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::NearestClampEdge);
+                TextureHandle handle = _textureManager->RegisterTexture(
+                    drawData->PointLightShadow.shadowColorAtlas[currentFrame]->GetView(viewName),
+                    sampler->Handle()
+                );
+                _viewportTextures[cacheKey] = handle;
+            }
             else {
                 auto rtManager = renderManager->GetRenderTargetManager();
                 auto group = rtManager->GetGroup(groupName, currentFrame);

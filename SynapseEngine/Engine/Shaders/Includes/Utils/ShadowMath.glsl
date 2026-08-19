@@ -21,7 +21,7 @@
 #include "../Common/PointLight.glsl"
 #include "../Common/SpotLight.glsl"
 
-float CalculateDirectionalLightShadow(
+vec3 CalculateDirectionalLightShadow(
     const uint64_t dirLightShadowDataBufferAddr,
     const uint64_t dirLightShadowSparseMapBufferAddr,
     uint lightEntityIndex,
@@ -30,14 +30,15 @@ float CalculateDirectionalLightShadow(
     vec3 lightDir,
     float viewDepth,
     sampler2DShadow shadowAtlas,
+    sampler2D shadowColorAtlas,
     out uint outCascadeIndex
 ) {
     outCascadeIndex = 0;
 
-    if (dirLightShadowSparseMapBufferAddr == 0) return 1.0;
+    if (dirLightShadowSparseMapBufferAddr == 0) return vec3(1.0);
     
     uint shadowDenseIndex = GET_SPARSE_INDEX(dirLightShadowSparseMapBufferAddr, lightEntityIndex);
-    if (shadowDenseIndex == INVALID_INDEX) return 1.0;
+    if (shadowDenseIndex == INVALID_INDEX) return vec3(1.0);
 
     DirectionLightShadowComponent shadowComp = GET_DIRECTION_LIGHT_SHADOW(dirLightShadowDataBufferAddr, shadowDenseIndex);
 
@@ -54,7 +55,7 @@ float CalculateDirectionalLightShadow(
     vec3 ndc = clipPos.xyz / (clipPos.w == 0.0 ? 1.0 : clipPos.w);
     
     if (ndc.z < 0.0 || ndc.z > 1.0 || ndc.x < -1.0 || ndc.x > 1.0 || ndc.y < -1.0 || ndc.y > 1.0) {
-        return 1.0; 
+        return vec3(1.0); 
     }
 
     float NoL = clamp(dot(normal, lightDir), 0.0, 1.0);
@@ -78,41 +79,57 @@ float CalculateDirectionalLightShadow(
     uv = clamp(uv, minUV, maxUV);
 
     // 3x3 PCF filtering
-    float shadow = 0.0;
+    float opaqueShadow = 0.0;
+    vec3 transparentShadow = vec3(0.0);
+
     for (int x = -1; x <= 1; ++x) {
         for (int y = -1; y <= 1; ++y) {
             vec2 offset = vec2(x, y) * texelSize;
             vec2 sampleUV = clamp(uv + offset, minUV, maxUV);
-            shadow += texture(shadowAtlas, vec3(sampleUV, currentDepth));
+            
+            // Opaque Shadow (Hardware PCF)
+            opaqueShadow += texture(shadowAtlas, vec3(sampleUV, currentDepth));
+
+            // Transparent Shadow (Color Filter & Alpha Depth)
+            vec4 transData = textureLod(shadowColorAtlas, sampleUV, 0.0);
+            
+            if (currentDepth > transData.a) {
+                // Pixel is in shadow, apply the colored filter
+                transparentShadow += transData.rgb; 
+            } else {
+                // Pixel is in front or is the transparent surface itself, let light pass through
+                transparentShadow += vec3(1.0);     
+            }
         }
     }
     
-    return shadow / 9.0;
+    return vec3(opaqueShadow / 9.0) * (transparentShadow / 9.0);
 }
 
-float CalculateSpotLightShadow(
+vec3 CalculateSpotLightShadow(
     const uint64_t spotLightShadowDataBufferAddr,
     const uint64_t spotLightShadowSparseMapBufferAddr,
     uint lightEntityIndex,
     vec3 worldPos,
     vec3 normal,
     vec3 lightDir,
-    sampler2DShadow shadowAtlas
+    sampler2DShadow shadowAtlas,
+    sampler2D shadowColorAtlas
 ) {
-    if (spotLightShadowSparseMapBufferAddr == 0) return 1.0;
+    if (spotLightShadowSparseMapBufferAddr == 0) return vec3(1.0);
 
     uint shadowDenseIndex = GET_SPARSE_INDEX(spotLightShadowSparseMapBufferAddr, lightEntityIndex);
-    if (shadowDenseIndex == INVALID_INDEX) return 1.0;
+    if (shadowDenseIndex == INVALID_INDEX) return vec3(1.0);
 
     SpotLightShadowComponent shadowComp = GET_SPOT_LIGHT_SHADOW(spotLightShadowDataBufferAddr, shadowDenseIndex);
 
     // 1. Project to clip space
     vec4 clipPos = shadowComp.viewProj * vec4(worldPos, 1.0);
-    if (clipPos.w <= 0.0) return 1.0;
+    if (clipPos.w <= 0.0) return vec3(1.0);
 
     vec3 ndc = clipPos.xyz / clipPos.w;
     if (ndc.z < 0.0 || ndc.z > 1.0 || ndc.x < -1.0 || ndc.x > 1.0 || ndc.y < -1.0 || ndc.y > 1.0) {
-        return 1.0;
+        return vec3(1.0);
     }
 
     float near = shadowComp.planes.x;
@@ -142,31 +159,44 @@ float CalculateSpotLightShadow(
     uv = clamp(uv, minUV, maxUV);
 
     // 4. 3x3 PCF filter
-    float shadow = 0.0;
+    float opaqueShadow = 0.0;
+    vec3 transparentShadow = vec3(0.0);
+
     for (int x = -1; x <= 1; ++x) {
         for (int y = -1; y <= 1; ++y) {
             vec2 offset = vec2(x, y) * texelSize;
             vec2 sampleUV = clamp(uv + offset, minUV, maxUV);
-            shadow += texture(shadowAtlas, vec3(sampleUV, currentDepth));
+            
+            // Opaque Shadow
+            opaqueShadow += texture(shadowAtlas, vec3(sampleUV, currentDepth));
+
+            // Transparent Shadow
+            vec4 transData = textureLod(shadowColorAtlas, sampleUV, 0.0);
+            if (currentDepth > transData.a) {
+                transparentShadow += transData.rgb;
+            } else {
+                transparentShadow += vec3(1.0);
+            }
         }
     }
     
-    return shadow / 9.0;
+    return vec3(opaqueShadow / 9.0) * (transparentShadow / 9.0);
 }
 
-float CalculatePointLightShadow(
+vec3 CalculatePointLightShadow(
     const uint64_t pointLightShadowDataBufferAddr,
     const uint64_t pointLightShadowSparseMapBufferAddr,
     uint lightEntityIndex,
     vec3 worldPos,
     vec3 normal,
     vec3 lightPos,
-    sampler2DShadow shadowAtlas
+    sampler2DShadow shadowAtlas,
+    sampler2D shadowColorAtlas
 ) {
-    if (pointLightShadowSparseMapBufferAddr == 0) return 1.0;
+    if (pointLightShadowSparseMapBufferAddr == 0) return vec3(1.0);
 
     uint shadowDenseIndex = GET_SPARSE_INDEX(pointLightShadowSparseMapBufferAddr, lightEntityIndex);
-    if (shadowDenseIndex == INVALID_INDEX) return 1.0;
+    if (shadowDenseIndex == INVALID_INDEX) return vec3(1.0);
 
     PointLightShadowComponent shadowComp = GET_POINT_LIGHT_SHADOW(pointLightShadowDataBufferAddr, shadowDenseIndex);
 
@@ -185,11 +215,11 @@ float CalculatePointLightShadow(
 
     // 2. Project to get NDC xy
     vec4 clipPos = shadowComp.viewProjs[faceIndex] * vec4(worldPos, 1.0);
-    if (clipPos.w <= 0.0) return 1.0;
+    if (clipPos.w <= 0.0) return vec3(1.0);
 
     vec3 ndc = clipPos.xyz / clipPos.w;
     if (ndc.z < 0.0 || ndc.z > 1.0 || ndc.x < -1.0 || ndc.x > 1.0 || ndc.y < -1.0 || ndc.y > 1.0) {
-        return 1.0;
+        return vec3(1.0);
     }
 
     // 3. Linear Slope-Scaled Bias Calculation
@@ -210,7 +240,6 @@ float CalculatePointLightShadow(
     float biasedDist = max(linearDist - linearBias, near + 0.001);
 
     // Convert biased linear distance back to non-linear Vulkan depth [0, 1]
-    // Formula: z_ndc = (f / (f - n)) - (f * n) / ((f - n) * z_linear)
     float currentDepth = (far / (far - near)) - (far * near) / ((far - near) * biasedDist);
 
     // 4. NDC to Atlas UV mapping
@@ -225,16 +254,28 @@ float CalculatePointLightShadow(
     uv = clamp(uv, minUV, maxUV);
 
     // 5. 3x3 PCF filter
-    float shadow = 0.0;
+    float opaqueShadow = 0.0;
+    vec3 transparentShadow = vec3(0.0);
+
     for (int x = -1; x <= 1; ++x) {
         for (int y = -1; y <= 1; ++y) {
             vec2 offset = vec2(x, y) * texelSize;
             vec2 sampleUV = clamp(uv + offset, minUV, maxUV);
-            shadow += texture(shadowAtlas, vec3(sampleUV, currentDepth));
+            
+            // Opaque Shadow
+            opaqueShadow += texture(shadowAtlas, vec3(sampleUV, currentDepth));
+
+            // Transparent Shadow
+            vec4 transData = textureLod(shadowColorAtlas, sampleUV, 0.0);
+            if (currentDepth > transData.a) {
+                transparentShadow += transData.rgb;
+            } else {
+                transparentShadow += vec3(1.0);
+            }
         }
     }
     
-    return shadow / 9.0;
+    return vec3(opaqueShadow / 9.0) * (transparentShadow / 9.0);
 }
 
 #endif

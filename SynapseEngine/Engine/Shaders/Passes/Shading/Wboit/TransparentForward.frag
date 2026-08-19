@@ -42,6 +42,9 @@ layout(location = 1) out float outReveal;
 layout(set = 2, binding = 2) uniform sampler2DShadow dirLightShadowAtlas;
 layout(set = 2, binding = 3) uniform sampler2DShadow pointLightShadowAtlas;
 layout(set = 2, binding = 4) uniform sampler2DShadow spotLightShadowAtlas;
+layout(set = 2, binding = 5) uniform sampler2D dirLightShadowColorAtlas;
+layout(set = 2, binding = 6) uniform sampler2D pointLightShadowColorAtlas;
+layout(set = 2, binding = 7) uniform sampler2D spotLightShadowColorAtlas;
 
 #include "../../../Includes/PushConstants/TraditionalMeshletPassPC.glsl"
 
@@ -122,7 +125,8 @@ void main()
         vec3 lightDir = normalize(-dirLightDirection);
 
         uint debugCascadeIndex = 0;
-        float shadowFactor = CalculateDirectionalLightShadow(
+
+        vec3 shadowFactor = CalculateDirectionalLightShadow(
             ctx.directionLightShadowDataBufferAddr,
             ctx.directionLightShadowSparseMapBufferAddr,
             entityId,
@@ -131,6 +135,7 @@ void main()
             lightDir,
             viewDepth,
             dirLightShadowAtlas,
+            dirLightShadowColorAtlas,
             debugCascadeIndex
         );
 
@@ -150,14 +155,15 @@ void main()
         
         vec3 pointLightPosition = GET_POINT_LIGHT(ctx.pointLightDataBufferAddr, lightDenseIndex).position.xyz;
 
-        float shadowFactor = CalculatePointLightShadow(
+        vec3 shadowFactor = CalculatePointLightShadow(
             ctx.pointLightShadowDataBufferAddr,
             ctx.pointLightShadowSparseMapBufferAddr,
             lightEntityIndex,
             worldPos,
             finalNormal,
             pointLightPosition,
-            pointLightShadowAtlas
+            pointLightShadowAtlas,
+            pointLightShadowColorAtlas
         );
 
         vec3 lightContribution = SimulatePointLight(
@@ -177,14 +183,15 @@ void main()
         vec3 spotLightPosition = GET_SPOT_LIGHT(ctx.spotLightDataBufferAddr, lightDenseIndex).position.xyz;
         vec3 lightDir = normalize(spotLightPosition - worldPos);
 
-        float shadowFactor = CalculateSpotLightShadow(
+        vec3 shadowFactor = CalculateSpotLightShadow(
             ctx.spotLightShadowDataBufferAddr,
             ctx.spotLightShadowSparseMapBufferAddr,
             lightEntityIndex,
             worldPos,
             finalNormal,
             lightDir,
-            spotLightShadowAtlas
+            spotLightShadowAtlas,
+            spotLightShadowColorAtlas
         );
 
         vec3 lightContribution = SimulateSpotLight(

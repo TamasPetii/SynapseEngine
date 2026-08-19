@@ -156,7 +156,6 @@ void main() {
                 Material mat = GET_MATERIAL(ctx.materialBufferAddr, matIdx);
 
                 uint matType = GetMaterialRenderType(mat);
-                if (matType > 3) continue;
 
                 MeshAllocationInfo meshAlloc = GET_MESH_ALLOC(ctx.globalMeshAllocationBufferAddr, mAlloc.meshAllocationOffset + (m * 4) + lod);
                 uint pipeIdx = GET_PIPELINE_INDEX(ctx.pipelineLookupBufferAddr, modelComp.pipelineOffset + m);

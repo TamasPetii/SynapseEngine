@@ -163,10 +163,6 @@ void main()
 
             uint matType = GetMaterialRenderType(mat);
 
-            // Shadows are only cast by Opaque materials
-            if (matType > 3) 
-                continue;
-
             MeshAllocationInfo meshAlloc = GET_MESH_ALLOC(ctx.globalMeshAllocationBufferAddr, mAlloc.meshAllocationOffset + (m * 4) + lod);
             uint pipeIdx = GET_PIPELINE_INDEX(ctx.pipelineLookupBufferAddr, modelComp.pipelineOffset + m);
 

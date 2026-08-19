@@ -119,6 +119,7 @@ namespace Syn
         static constexpr const char* GeometryWorkGraphMeshCullingComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphMeshCulling.comp";
 
         static constexpr const char* DirectionLightShadowFrag = "Engine/Shaders/Passes/Shadow/DirectionLight/DirectionLightShadow.frag";
+        static constexpr const char* DirectionLightShadowTransparentFrag = "Engine/Shaders/Passes/Shadow/DirectionLight/DirectionLightShadowTransparent.frag";
         static constexpr const char* DirectionLightShadowTraditionalVert = "Engine/Shaders/Passes/Shadow/DirectionLight/DirectionLightShadowTraditional.vert";
         static constexpr const char* DirectionLightShadowMeshletTask = "Engine/Shaders/Passes/Shadow/DirectionLight/DirectionLightShadowMeshlet.task";
         static constexpr const char* DirectionLightShadowMeshletMesh = "Engine/Shaders/Passes/Shadow/DirectionLight/DirectionLightShadowMeshlet.mesh";
@@ -140,6 +141,7 @@ namespace Syn
 
         static constexpr const char* SpotLightCulling = "Engine/Shaders/Passes/Culling/SpotLight/SpotLightCulling.comp";
         static constexpr const char* SpotLightShadowFrag = "Engine/Shaders/Passes/Shadow/SpotLight/SpotLightShadow.frag";
+        static constexpr const char* SpotLightShadowTransparentFrag = "Engine/Shaders/Passes/Shadow/SpotLight/SpotLightShadowTransparent.frag";
         static constexpr const char* SpotLightShadowTraditionalVert = "Engine/Shaders/Passes/Shadow/SpotLight/SpotLightShadowTraditional.vert";
         static constexpr const char* SpotLightShadowMeshletTask = "Engine/Shaders/Passes/Shadow/SpotLight/SpotLightShadowMeshlet.task";
         static constexpr const char* SpotLightShadowMeshletMesh = "Engine/Shaders/Passes/Shadow/SpotLight/SpotLightShadowMeshlet.mesh";
@@ -157,6 +159,7 @@ namespace Syn
 
         static constexpr const char* PointLightCulling = "Engine/Shaders/Passes/Culling/PointLight/PointLightCulling.comp";
         static constexpr const char* PointLightShadowFrag = "Engine/Shaders/Passes/Shadow/PointLight/PointLightShadow.frag";
+        static constexpr const char* PointLightShadowTransparentFrag = "Engine/Shaders/Passes/Shadow/PointLight/PointLightShadowTransparent.frag";
         static constexpr const char* PointLightShadowTraditionalVert = "Engine/Shaders/Passes/Shadow/PointLight/PointLightShadowTraditional.vert";
         static constexpr const char* PointLightShadowMeshletTask = "Engine/Shaders/Passes/Shadow/PointLight/PointLightShadowMeshlet.task";
         static constexpr const char* PointLightShadowMeshletMesh = "Engine/Shaders/Passes/Shadow/PointLight/PointLightShadowMeshlet.mesh";

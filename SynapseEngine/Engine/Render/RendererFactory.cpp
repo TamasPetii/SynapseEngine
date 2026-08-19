@@ -183,18 +183,27 @@
 #include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowTraditionalOpaqueAlphaTestedPass.h"
 #include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowMeshletOpaquePass.h"
 #include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowMeshletOpaqueAlphaTestedPass.h"
+#include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowTraditionalTransparentPass.h"
+#include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowMeshletTransparentPass.h"
+#include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowTransparentTransitionPass.h"
 
 #include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowInitPass.h"
 #include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowTraditionalOpaquePass.h"
 #include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowTraditionalOpaqueAlphaTestedPass.h"
 #include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowMeshletOpaquePass.h"
 #include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowMeshletOpaqueAlphaTestedPass.h"
+#include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowTraditionalTransparentPass.h"
+#include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowMeshletTransparentPass.h"
+#include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowTransparentTransitionPass.h"
 
 #include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowInitPass.h"
 #include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowTraditionalOpaquePass.h"
 #include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowTraditionalOpaqueAlphaTestedPass.h"
 #include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowMeshletOpaquePass.h"
 #include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowMeshletOpaqueAlphaTestedPass.h"
+#include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowTraditionalTransparentPass.h"
+#include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowMeshletTransparentPass.h"
+#include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowTransparentTransitionPass.h"
 
 #include "Engine/Render/Passes/PostProcess/Ssao/SsaoInitPass.h"
 #include "Engine/Render/Passes/PostProcess/Ssao/SsaoPass.h"
@@ -291,6 +300,15 @@ namespace Syn
         pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
         pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
         pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
+        pipeline->AddPass(std::make_unique<DirectionLightShadowTransparentTransitionPass>());
+        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalTransparentPass>(MaterialRenderType::Transparent1Sided));
+        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalTransparentPass>(MaterialRenderType::Transparent2Sided));
+        pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletTransparentPass>(MaterialRenderType::Transparent1Sided));
+        pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletTransparentPass>(MaterialRenderType::Transparent2Sided));
+        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalTransparentPass>(MaterialRenderType::AlphaTestedTransparent1Sided));
+        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalTransparentPass>(MaterialRenderType::AlphaTestedTransparent2Sided));
+        pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletTransparentPass>(MaterialRenderType::AlphaTestedTransparent1Sided));
+        pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletTransparentPass>(MaterialRenderType::AlphaTestedTransparent2Sided));
 
         //SpotLight Shadow Passes
         pipeline->AddPass(std::make_unique<SpotLightShadowInitPass>());
@@ -302,7 +320,16 @@ namespace Syn
         pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
         pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
         pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
-        
+        pipeline->AddPass(std::make_unique<SpotLightShadowTransparentTransitionPass>());
+        pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalTransparentPass>(MaterialRenderType::Transparent1Sided));
+        pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalTransparentPass>(MaterialRenderType::Transparent2Sided));
+        pipeline->AddPass(std::make_unique<SpotLightShadowMeshletTransparentPass>(MaterialRenderType::Transparent1Sided));
+        pipeline->AddPass(std::make_unique<SpotLightShadowMeshletTransparentPass>(MaterialRenderType::Transparent2Sided));
+        pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalTransparentPass>(MaterialRenderType::AlphaTestedTransparent1Sided));
+        pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalTransparentPass>(MaterialRenderType::AlphaTestedTransparent2Sided));
+        pipeline->AddPass(std::make_unique<SpotLightShadowMeshletTransparentPass>(MaterialRenderType::AlphaTestedTransparent1Sided));
+        pipeline->AddPass(std::make_unique<SpotLightShadowMeshletTransparentPass>(MaterialRenderType::AlphaTestedTransparent2Sided));
+
         //Point Light Shadow Passes
         pipeline->AddPass(std::make_unique<PointLightShadowInitPass>());
         pipeline->AddPass(std::make_unique<PointLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque1Sided));
@@ -313,6 +340,15 @@ namespace Syn
         pipeline->AddPass(std::make_unique<PointLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
         pipeline->AddPass(std::make_unique<PointLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
         pipeline->AddPass(std::make_unique<PointLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
+        pipeline->AddPass(std::make_unique<PointLightShadowTransparentTransitionPass>());
+        pipeline->AddPass(std::make_unique<PointLightShadowTraditionalTransparentPass>(MaterialRenderType::Transparent1Sided));
+        pipeline->AddPass(std::make_unique<PointLightShadowTraditionalTransparentPass>(MaterialRenderType::Transparent2Sided));
+        pipeline->AddPass(std::make_unique<PointLightShadowMeshletTransparentPass>(MaterialRenderType::Transparent1Sided));
+        pipeline->AddPass(std::make_unique<PointLightShadowMeshletTransparentPass>(MaterialRenderType::Transparent2Sided));
+        pipeline->AddPass(std::make_unique<PointLightShadowTraditionalTransparentPass>(MaterialRenderType::AlphaTestedTransparent1Sided));
+        pipeline->AddPass(std::make_unique<PointLightShadowTraditionalTransparentPass>(MaterialRenderType::AlphaTestedTransparent2Sided));
+        pipeline->AddPass(std::make_unique<PointLightShadowMeshletTransparentPass>(MaterialRenderType::AlphaTestedTransparent1Sided));
+        pipeline->AddPass(std::make_unique<PointLightShadowMeshletTransparentPass>(MaterialRenderType::AlphaTestedTransparent2Sided));
 
 		//Forward+ Depth Opaque Prepasses
 		pipeline->AddPass(std::make_unique<OpaqueDepthTransitionPrepass>());

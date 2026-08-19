@@ -39,6 +39,7 @@ layout(set = 2, binding = 1) uniform sampler2D normalRoughnessTexture;
 layout(set = 2, binding = 2) uniform sampler2D depthTexture;
 layout(set = 2, binding = 3) uniform sampler2D ssaoTexture;
 layout(set = 2, binding = 4) uniform sampler2DShadow pointLightShadowAtlas;
+layout(set = 2, binding = 5) uniform sampler2D pointLightShadowColorAtlas;
 
 #include "../../../../Includes/PushConstants/DeferredPointLightPC.glsl"
 
@@ -85,14 +86,15 @@ void main()
     // 5. Physically Based Rendering (PBR) Light Calculation
     vec3 viewDir = normalize(camera.eye.xyz - position);
 
-    float shadowFactor = CalculatePointLightShadow(
+    vec3 shadowFactor = CalculatePointLightShadow(
         ctx.pointLightShadowDataBufferAddr,
         ctx.pointLightShadowSparseMapBufferAddr,
         inEntityLightIndex,
         position,
         normal,
         light.position.xyz,
-        pointLightShadowAtlas
+        pointLightShadowAtlas,
+        pointLightShadowColorAtlas
     );
 
     vec3 radiance = SimulatePointLight(
