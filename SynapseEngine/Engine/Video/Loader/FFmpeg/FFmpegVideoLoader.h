@@ -29,6 +29,7 @@ namespace Syn
 
         std::unique_ptr<IVideoState> OpenFile(const std::filesystem::path& path) override;
         std::unique_ptr<IVideoState> OpenMemory(const std::vector<uint8_t>& data) override;
+        std::unique_ptr<IVideoState> OpenNetwork(const std::string& url) override;
         std::vector<std::string> GetSupportedExtensions() const override;
     };
 }

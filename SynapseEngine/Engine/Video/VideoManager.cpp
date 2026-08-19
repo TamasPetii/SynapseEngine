@@ -58,6 +58,23 @@ namespace Syn
             });
     }
 
+    uint32_t VideoManager::LoadVideoFromNetworkAsync(const std::string& url) {
+        return this->InternalLoadAsync(url, [this, url]() {
+            auto state = std::make_shared<VideoStreamState>();
+            state->source = _builder->CreateSourceFromNetwork(url);
+            state->video = std::make_shared<Video>();
+
+            if (state->source) {
+                VideoInfo info = state->source->GetInfo();
+                state->video->info = info;
+                state->converter = _builder->CreateConverter(info);
+                state->uploader = _builder->CreateUploader(info);
+            }
+
+            return state;
+            });
+    }
+
     void VideoManager::StartGpuUpload(EntryType& entry) {
         uint32_t entryId = this->_pathToId.at(entry.path);
         this->SetResourceState(entryId, ResourceState::Ready);

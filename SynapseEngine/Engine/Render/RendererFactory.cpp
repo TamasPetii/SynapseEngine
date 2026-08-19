@@ -31,7 +31,7 @@
 #include "Engine/Render/Passes/PostProcess/Bloom/BloomCompositePass.h"
 #include "Engine/Render/Passes/PostProcess/Outline/SelectionOutlinePass.h"
 #include "Engine/Render/Passes/PostProcess/Sky/SkySpherePass.h"
-#include "Engine/Render/Passes/PostProcess/Sky/SkyboxPass.h"
+#include "Engine/Render/Passes/PostProcess/Sky/SkyBoxPass.h"
 
 #include "Engine/Render/Passes/Preview/PreviewPreTransitionPass.h"
 #include "Engine/Render/Passes/Preview/PreviewPostTransitionPass.h"

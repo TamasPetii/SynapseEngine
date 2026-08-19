@@ -53,6 +53,7 @@ namespace Syn
         void RegisterProcessor(std::unique_ptr<IVideoProcessor> processor);
 
         std::unique_ptr<IVideoSource> CreateSourceFromFile(const std::string& filePath);
+        std::unique_ptr<IVideoSource> CreateSourceFromNetwork(const std::string& url);
 
         std::unique_ptr<IGpuVideoConverter> CreateConverter(const VideoInfo& info) const;
         std::unique_ptr<IGpuVideoUploader> CreateUploader(const VideoInfo& info) const;

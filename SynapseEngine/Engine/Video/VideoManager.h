@@ -57,6 +57,8 @@ namespace Syn {
         ~VideoManager() override;
 
         uint32_t LoadVideoAsync(const std::string& filePath);
+        uint32_t LoadVideoFromNetworkAsync(const std::string& url);
+
         void UpdateVideoBindlessBatch(std::span<const std::pair<uint32_t, VkImageView>> updates);
 
     protected:

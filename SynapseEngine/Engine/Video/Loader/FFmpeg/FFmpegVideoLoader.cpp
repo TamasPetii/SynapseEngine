@@ -32,6 +32,15 @@ namespace Syn
         return nullptr;
     }
 
+    std::unique_ptr<IVideoState> FFmpegVideoLoader::OpenNetwork(const std::string& url)
+    {
+        auto state = std::make_unique<FFmpegVideoState>(url);
+        if (state->GetInfo().width == 0) {
+            return nullptr;
+        }
+        return state;
+    }
+
     std::vector<std::string> FFmpegVideoLoader::GetSupportedExtensions() const
     {
         return { ".mp4", ".mkv", ".avi", ".mov", ".webm" };
