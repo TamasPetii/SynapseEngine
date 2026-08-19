@@ -183,7 +183,21 @@ target("Engine")
         "Engine/**.task",
         "Engine/**.json"
     )
+
     add_defines("SYN_BUILD_DLL", "VK_NO_PROTOTYPES")
+
+    if is_plat("windows") then
+        add_syslinks(
+            "ws2_32",
+            "secur32",
+            "bcrypt",
+            "crypt32",
+            "ncrypt",
+            "mfuuid",
+            "strmiids",
+            "ole32"
+        )
+    end
 
 target("EditorCore")
     set_kind("static")
