@@ -168,6 +168,24 @@ end
 
 add_packages(imgui_name, ffmpeg_name, table.unpack(vcpkg_packages))
 
+if is_plat("windows") then
+    add_syslinks(
+        "ws2_32",
+        "secur32",
+        "bcrypt",
+        "crypt32",
+        "ncrypt",
+        "mfuuid",
+        "strmiids",
+        "ole32",
+        "user32",
+        "gdi32",
+        "shell32"
+    )
+elseif is_plat("linux") then
+    add_syslinks("pthread", "dl", "m")
+end
+
 target("Engine")
     set_kind("shared")
     add_files("Engine/**.cpp")
@@ -186,19 +204,6 @@ target("Engine")
 
     add_defines("SYN_BUILD_DLL", "VK_NO_PROTOTYPES")
 
-    if is_plat("windows") then
-        add_syslinks(
-            "ws2_32",
-            "secur32",
-            "bcrypt",
-            "crypt32",
-            "ncrypt",
-            "mfuuid",
-            "strmiids",
-            "ole32"
-        )
-    end
-
 target("EditorCore")
     set_kind("static")
     add_files("EditorCore/**.cpp")
@@ -207,12 +212,6 @@ target("EditorCore")
 
 target("Editor")
     set_kind("binary")
-
-    if is_plat("windows") then
-        add_syslinks("gdi32", "user32", "shell32")
-    elseif is_plat("linux") then
-        add_syslinks("pthread", "dl", "m")
-    end
 
     add_files(
         "Editor/**.cpp", 
