@@ -94,10 +94,12 @@ namespace Syn
         colorAtlasSpec.AddView(Vk::ImageViewNames::Default, Vk::ImageViewConfig{
             .viewType = VK_IMAGE_VIEW_TYPE_2D
             });
+
         colorAtlasSpec.AddView(RenderTargetViewNames::DirectionLightShadowTransparentColor, Vk::ImageViewConfig{
             .viewType = VK_IMAGE_VIEW_TYPE_2D,
             .swizzle = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_ONE }
             });
+
         colorAtlasSpec.AddView(RenderTargetViewNames::DirectionLightShadowTransparentDepth, Vk::ImageViewConfig{
             .viewType = VK_IMAGE_VIEW_TYPE_2D,
             .swizzle = { VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_ONE }

@@ -116,6 +116,7 @@ namespace Syn::Vk {
         deviceFeatures.features.shaderInt64 = VK_TRUE;
 		deviceFeatures.features.shaderClipDistance = VK_TRUE;
 		deviceFeatures.features.shaderStorageImageMultisample = VK_TRUE;
+		deviceFeatures.features.independentBlend = VK_TRUE;
        
         VkPhysicalDeviceDeviceGeneratedCommandsFeaturesEXT dgcFeatures{ VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DEVICE_GENERATED_COMMANDS_FEATURES_EXT };
         dgcFeatures.deviceGeneratedCommands = VK_TRUE;
