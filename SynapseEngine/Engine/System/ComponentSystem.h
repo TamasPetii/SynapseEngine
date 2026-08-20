@@ -162,8 +162,11 @@ namespace Syn
         auto resetTask = this->EmplaceTask(subflow, SystemPhaseNames::FinishResetState, [pool]() {
             pool->ResetAllStateBits();
 
-            for (EntityID entity : pool->GetStorage().GetDirtyStatics()) {
+            for (EntityID entity : pool->GetStorage().GetDirtyStatics()) 
+            {
+                if (pool->Has(entity)) {
                     pool->template ResetBit<DIRTY_STATIC_BIT>(entity);
+                }
             }
 
             pool->ResetStaticDirtyCounter();
@@ -264,7 +267,11 @@ namespace Syn
     template <typename TPool, typename Func>
     SYN_INLINE std::optional<tf::Task> ComponentSystem<TComponent>::ForEachStaticDirty(TPool* pool, tf::Subflow& subflow, const std::string& phaseName, Func&& func)
     {
-        return this->ForEach(pool->GetStorage().GetDirtyStatics(), subflow, phaseName + " " + SystemPhaseNames::StaticDirty, std::forward<Func>(func));
+        return this->ForEach(pool->GetStorage().GetDirtyStatics(), subflow, phaseName + " " + SystemPhaseNames::StaticDirty, [pool, func](EntityID entity) {
+            if (pool->Has(entity)) {
+                func(entity);
+            }
+        });
     }
 
     template <typename TComponent>
