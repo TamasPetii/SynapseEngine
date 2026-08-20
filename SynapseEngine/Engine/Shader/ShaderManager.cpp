@@ -33,6 +33,18 @@ namespace Syn
         : _builder(std::move(builder))
     {}
 
+    std::shared_ptr<Shader> ShaderManager::GetShader(const std::string& filepath, std::span<const std::string> defines) {
+        std::string key = GenerateShaderKey(filepath, defines);
+        std::lock_guard lock(_shaderCacheMutex);
+
+        auto it = _cpuShaders.find(key);
+        if (it != _cpuShaders.end()) {
+            return it->second;
+        }
+
+        return nullptr;
+    }
+
     std::shared_ptr<Shader> ShaderManager::LoadShaderCPU(const std::string& filepath, VkShaderStageFlagBits stage, std::span<const std::string> defines) {
         std::string key = GenerateShaderKey(filepath, defines);
 
@@ -95,14 +107,14 @@ namespace Syn
         auto program = entry.resource;
 
         Vk::GpuUploadRequest request{
-            .uploadCallback = [program](VkCommandBuffer cmd) {
+            .uploadCallback = [program](VkCommandBuffer cmd, Vk::GpuUploader* gpuUploader) {
                 program->CreatePipelineLayoutAndShaders();
             },
             .onFinished = [this, entryId]() {
                 SetResourceState(entryId, ResourceState::Ready);
                 MarkDirty(entryId);
             },
-            .needsGraphics = false
+			.queueType = Vk::GpuQueueType::Graphics
         };
 
         SubmitGpuRequest(entry, std::move(request));

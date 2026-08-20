@@ -53,12 +53,15 @@ namespace Syn
 
 		static constexpr const char* DirectionLightShadowAtlas = "DirectionLightShadowAtlas";
         static constexpr const char* DirectionLightShadowDepthPyramid = "DirectionLightShadowDepthPyramid";
-        
+        static constexpr const char* DirectionLightShadowColorAtlas = "DirectionLightShadowColorAtlas";
+
         static constexpr const char* SpotLightShadowAtlas = "SpotLightShadowAtlas";
         static constexpr const char* SpotLightShadowDepthPyramid = "SpotLightShadowDepthPyramid";
+        static constexpr const char* SpotLightShadowColorAtlas = "SpotLightShadowColorAtlas";
 
         static constexpr const char* PointLightShadowAtlas = "PointLightShadowAtlas";
         static constexpr const char* PointLightShadowDepthPyramid = "PointLightShadowDepthPyramid";
+        static constexpr const char* PointLightShadowColorAtlas = "PointLightShadowColorAtlas";
 
         static constexpr const char* PreviewAtlas = "PreviewAtlas";
     };
@@ -77,11 +80,17 @@ namespace Syn
 
         static constexpr const char* DirectionLightShadowDepthPyramidMin = "DirectionLightShadowDepthPyramidMin";
         static constexpr const char* DirectionLightShadowDepthPyramidMax = "DirectionLightShadowDepthPyramidMax";
+        static constexpr const char* DirectionLightShadowTransparentDepth = "DirectionLightShadowTransparentDepth";
+        static constexpr const char* DirectionLightShadowTransparentColor = "DirectionLightShadowTransparentColor";
 
         static constexpr const char* SpotLightShadowDepthPyramidMin = "SpotLightShadowDepthPyramidMin";
         static constexpr const char* SpotLightShadowDepthPyramidMax = "SpotLightShadowDepthPyramidMax";
+        static constexpr const char* SpotLightShadowTransparentDepth = "SpotLightShadowTransparentDepth";
+        static constexpr const char* SpotLightShadowTransparentColor = "SpotLightShadowTransparentColor";
 
         static constexpr const char* PointLightShadowDepthPyramidMin = "PointLightShadowDepthPyramidMin";
         static constexpr const char* PointLightShadowDepthPyramidMax = "PointLightShadowDepthPyramidMax";
+        static constexpr const char* PointLightShadowTransparentDepth = "PointLightShadowTransparentDepth";
+        static constexpr const char* PointLightShadowTransparentColor = "PointLightShadowTransparentColor";
     };
 }

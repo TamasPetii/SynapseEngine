@@ -20,29 +20,27 @@
 #include "Engine/Mesh/Builder/StaticMeshBuilder.h"
 #include "Engine/Mesh/Uploader/IGpuModelUploader.h"
 #include "Engine/Mesh/Converter/ICpuModelExtractor.h"
-
 #include "Engine/Vk/Core/ThreadSafeQueue.h"
 #include "Engine/Vk/Command/CommandPool.h"
 #include "Engine/Utils/WindowedBuffer.h"
-
 #include <unordered_set>
 
 namespace Syn {
-
-    using MaterialLoadCallback = std::function<uint32_t(const std::string& name, const MaterialInfo& info)>;
     using MeshSourceFactory = std::function<std::unique_ptr<IMeshSource>()>;
     using StaticMeshFactory = std::function<std::shared_ptr<StaticMesh>()>;
-    using PreviewAllocateCallback = std::function<void(uint32_t resourceId)>;
-    using PreviewMarkDirtyCallback = std::function<void(uint32_t resourceId)>;
+
+    struct ModelManagerCallbacks {
+        std::function<uint32_t(const std::string&, const MaterialInfo&)> materialLoad;
+        std::function<void(uint32_t)> previewAllocate;
+        std::function<void(uint32_t)> previewMarkDirty;
+    };
 
     class SYN_API ModelManager : public AddressResourceManager<StaticMesh, GpuModelAddresses> {
     public:
-        ModelManager(uint32_t framesInFlight, 
+        ModelManager(uint32_t framesInFlight,
             std::shared_ptr<StaticMeshBuilder> builder,
             std::unique_ptr<IGpuModelUploader> uploader,
-            MaterialLoadCallback materialLoadCallback = nullptr,
-            PreviewAllocateCallback previewAllocateCallback = nullptr,
-            PreviewMarkDirtyCallback previewMarkDirtyCallback = nullptr
+            ModelManagerCallbacks callbacks
         );
 
         ~ModelManager() = default;
@@ -59,15 +57,13 @@ namespace Syn {
         void NotifyMaterialReady(uint32_t materialId);
         void ProcessPendingNotifications() override;
     protected:
-		void FlushDirtyResources() override;
+        void FlushDirtyResources() override;
         void StartGpuUpload(EntryType& entry) override;
         void FinalizeResource(EntryType& entry) override;
     private:
-        MaterialLoadCallback _materialLoadCallback;
-        PreviewAllocateCallback _previewAllocateCallback;
-        PreviewMarkDirtyCallback _previewMarkDirtyCallback;
         std::shared_ptr<StaticMeshBuilder> _builder;
         std::unique_ptr<IGpuModelUploader> _uploader;
+        ModelManagerCallbacks _callbacks;
 
         std::mutex _pendingMaterialMutex;
         std::unordered_set<uint32_t> _pendingMaterials;

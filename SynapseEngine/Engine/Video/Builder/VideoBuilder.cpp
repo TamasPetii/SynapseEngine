@@ -16,6 +16,7 @@
 
 #include "VideoBuilder.h"
 #include "Engine/Video/Source/File/FileVideoSource.h"
+#include "Engine/Video/Source/Network/NetworkVideoSource.h" 
 #include <filesystem>
 
 namespace Syn
@@ -62,6 +63,29 @@ namespace Syn
             return nullptr;
 
         return std::make_unique<FileVideoSource>(filePath, loader);
+    }
+
+    std::unique_ptr<IVideoSource> VideoBuilder::CreateSourceFromNetwork(const std::string& url)
+    {
+        std::string cleanUrl = url;
+        size_t queryPos = cleanUrl.find('?');
+        if (queryPos != std::string::npos) {
+            cleanUrl = cleanUrl.substr(0, queryPos);
+        }
+
+        std::string ext = std::filesystem::path(cleanUrl).extension().string();
+
+        if (ext.empty()) {
+            ext = ".mp4";
+        }
+
+        IVideoLoader* loader = _registry->GetLoaderForExtension(ext);
+
+        if (!loader) {
+            return nullptr;
+        }
+
+        return std::make_unique<NetworkVideoSource>(url, loader);
     }
 
     bool VideoBuilder::ProcessNextPacket(IVideoSource& source, Video& outVideo, IGpuVideoConverter& converter)

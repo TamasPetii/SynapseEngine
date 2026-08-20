@@ -1,0 +1,148 @@
+#include "AudioListenerBillboardPass.h"
+#include "Engine/ServiceLocator.h"
+#include "Engine/Shader/ShaderManager.h"
+#include "Engine/Manager/ComponentBufferManager.h"
+#include "Engine/Scene/Scene.h"
+#include "Engine/Scene/BufferNames.h"
+#include "Engine/Render/RenderNames.h"
+#include "Engine/Vk/Image/ImageViewNames.h"
+#include "Engine/Image/ImageManager.h"
+#include "Engine/Image/SamplerNames.h"
+#include "Engine/Vk/Descriptor/PushDescriptorWriter.h"
+#include "Engine/Component/Audio/AudioListenerComponent.h"
+#include "Engine/Vk/Rendering/PushConstant.h"
+#include "Engine/Utils/PathUtils.h"
+
+namespace Syn {
+
+#include "Engine/Shaders/Includes/PushConstants/BillboardPC.glsl"
+
+    bool AudioListenerBillboardPass::ShouldExecute(const RenderContext& context) const {
+        auto pool = context.scene->GetRegistry()->GetPool<AudioListenerComponent>();
+
+        if (!pool || pool->Size() == 0)
+            return false;
+
+        return context.scene->GetSettings()->debug.enableBillboardAudioListeners;
+    }
+
+    void AudioListenerBillboardPass::Initialize()
+    {
+        auto shaderManager = ServiceLocator::Get<ShaderManager>();
+
+        Vk::ShaderProgramConfig config;
+        config.useDescriptorBuffers = false;
+
+        _shaderProgramId = shaderManager->LoadProgramAsync(
+            "AudioListenerBillboardProgram",
+            {
+                ShaderNames::BillboardVert,
+                ShaderNames::BillboardFrag
+            },
+            config
+        );
+
+        _graphicsState = {
+            .raster = {
+                .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+                .cullMode = VK_CULL_MODE_NONE,
+                .polygonMode = VK_POLYGON_MODE_FILL
+            },
+            .depth = {
+                .testEnable = VK_TRUE,
+                .writeEnable = VK_TRUE,
+                .compareOp = VK_COMPARE_OP_LESS
+            },
+            .blendStates = {
+                {
+                    .enable = VK_TRUE,
+                    .srcColorFactor = VK_BLEND_FACTOR_SRC_ALPHA,
+                    .dstColorFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
+                    .colorBlendOp = VK_BLEND_OP_ADD,
+                    .srcAlphaFactor = VK_BLEND_FACTOR_ONE,
+                    .dstAlphaFactor = VK_BLEND_FACTOR_ZERO,
+                    .alphaBlendOp = VK_BLEND_OP_ADD
+                },
+                {
+                    .enable = VK_FALSE
+                }
+            },
+            .colorAttachmentCount = 2
+        };
+
+        _iconTexture = ServiceLocator::Get<ImageManager>()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/Engine/Icons/AudioListenerIcon.png"));
+    }
+
+    void AudioListenerBillboardPass::PrepareFrame(const RenderContext& context) {
+        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
+        VkExtent2D extent = { group->GetWidth(), group->GetHeight() };
+
+        _graphicsState.renderArea = extent;
+
+        _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
+            .imageView = group->GetImage(RenderTargetNames::Main)->GetView(Vk::ImageViewNames::Default),
+            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+            .storeOp = VK_ATTACHMENT_STORE_OP_STORE
+            }));
+
+        _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
+            .imageView = group->GetImage(RenderTargetNames::EntityIndex)->GetView(Vk::ImageViewNames::Default),
+            .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+            .storeOp = VK_ATTACHMENT_STORE_OP_STORE
+            }));
+
+        _depthAttachment = Vk::RenderUtils::CreateAttachment({
+            .imageView = group->GetImage(RenderTargetNames::TransparentDepth)->GetView(Vk::ImageViewNames::Default),
+            .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
+            .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
+            .storeOp = VK_ATTACHMENT_STORE_OP_STORE
+            });
+
+        _renderInfo = Vk::RenderingInfoConfig{
+            .renderArea = extent,
+            .colorAttachments = _colorAttachments,
+            .depthAttachment = &_depthAttachment.value(),
+            .layerCount = 1
+        };
+    }
+
+    void AudioListenerBillboardPass::BindDescriptors(const RenderContext& context) {
+        auto imageManager = ServiceLocator::Get<ImageManager>();
+        auto texture = imageManager->GetResource(_iconTexture);
+        auto sampler = imageManager->GetSampler(SamplerNames::LinearClampEdge)->Handle();
+
+        Vk::PushDescriptorWriter pushWriter;
+        pushWriter.AddCombinedImageSampler(
+            0,
+            texture->image->GetView(Vk::ImageViewNames::Default),
+            sampler,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
+    }
+
+    void AudioListenerBillboardPass::PushConstants(const RenderContext& context) {
+        auto scene = context.scene;
+        auto compManager = scene->GetComponentBufferManager();
+        uint32_t fIdx = context.frameIndex;
+
+        Vk::PushConstant<BillboardPC> pc;
+        pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(fIdx);
+        pc->visibleEntitiesAddr = compManager->GetBufferAddr(BufferNames::AudioListenerVisibleData, fIdx);
+        pc->baseScale = 1.0f;
+        pc.Push(context.cmd, _shaderProgram->GetLayout());
+    }
+
+    void AudioListenerBillboardPass::Draw(const RenderContext& context) {
+        auto registry = context.scene->GetRegistry();
+        auto pool = registry->GetPool<AudioListenerComponent>();
+
+        if (!pool || pool->Size() == 0) return;
+
+        uint32_t listenerCount = static_cast<uint32_t>(pool->Size());
+        vkCmdDraw(context.cmd, 6, listenerCount, 0, 0);
+    }
+}

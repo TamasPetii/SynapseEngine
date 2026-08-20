@@ -20,24 +20,23 @@
 #include "Engine/Animation/Builder/AnimationBuilder.h"
 #include "Engine/Animation/Uploader/IGpuAnimationUploader.h"
 #include "Engine/Animation/Converter/ICpuAnimationExtractor.h"
-
 #include "Engine/Vk/Core/ThreadSafeQueue.h"
 #include "Engine/Vk/Command/CommandPool.h"
 #include "Engine/Utils/WindowedBuffer.h"
 
 namespace Syn {
-
-    using PreviewAllocateCallback = std::function<void(uint32_t resourceId)>;
-    using PreviewMarkDirtyCallback = std::function<void(uint32_t resourceId)>;
+    struct AnimationManagerCallbacks {
+        std::function<void(uint32_t)> previewAllocate;
+        std::function<void(uint32_t)> previewMarkDirty;
+    };
 
     class SYN_API AnimationManager : public AddressResourceManager<Animation, GpuAnimationAddresses> {
     public:
-        AnimationManager(uint32_t framesInFlight, 
-            std::shared_ptr<AnimationBuilder> builder, 
+        AnimationManager(uint32_t framesInFlight,
+            std::shared_ptr<AnimationBuilder> builder,
             std::unique_ptr<IGpuAnimationUploader> uploader,
             std::unique_ptr<ICpuAnimationExtractor> cpuExtractor,
-            PreviewAllocateCallback previewAllocateCallback = nullptr,
-            PreviewMarkDirtyCallback previewMarkDirtyCallback = nullptr);
+            AnimationManagerCallbacks callbacks);
         ~AnimationManager() = default;
 
         uint32_t LoadAnimationAsync(const std::string& filePath, uint32_t baseModelId);
@@ -50,8 +49,6 @@ namespace Syn {
         std::shared_ptr<AnimationBuilder> _builder;
         std::unique_ptr<IGpuAnimationUploader> _uploader;
         std::unique_ptr<ICpuAnimationExtractor> _cpuExtractor;
-
-        PreviewAllocateCallback _previewAllocateCallback;
-        PreviewMarkDirtyCallback _previewMarkDirtyCallback;
+        AnimationManagerCallbacks _callbacks;
     };
 }

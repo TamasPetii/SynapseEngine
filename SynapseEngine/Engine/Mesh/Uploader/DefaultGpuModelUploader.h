@@ -27,6 +27,6 @@ namespace Syn
         DefaultGpuModelUploader() = default;
         ~DefaultGpuModelUploader() override = default;
 
-        ModelUploadResult Upload(const GpuBatchedModel& data, VkCommandBuffer cmd) override;
+        ModelUploadResult Upload(const GpuBatchedModel& data, VkCommandBuffer cmd, Vk::GpuUploader* uploader) override;
     };
 }

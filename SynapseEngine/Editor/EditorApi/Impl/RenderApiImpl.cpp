@@ -72,6 +72,33 @@ namespace Syn {
                 );
                 _viewportTextures[cacheKey] = handle;
             }
+            else if (targetName == RenderTargetNames::DirectionLightShadowColorAtlas) {
+                auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
+                auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::NearestClampEdge);
+                TextureHandle handle = _textureManager->RegisterTexture(
+                    drawData->DirectionLightShadow.shadowColorAtlas[currentFrame]->GetView(viewName),
+                    sampler->Handle()
+                );
+                _viewportTextures[cacheKey] = handle;
+            }
+            else if (targetName == RenderTargetNames::SpotLightShadowColorAtlas) {
+                auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
+                auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::NearestClampEdge);
+                TextureHandle handle = _textureManager->RegisterTexture(
+                    drawData->SpotLightShadow.shadowColorAtlas[currentFrame]->GetView(viewName),
+                    sampler->Handle()
+                );
+                _viewportTextures[cacheKey] = handle;
+            }
+            else if (targetName == RenderTargetNames::PointLightShadowColorAtlas) {
+                auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
+                auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::NearestClampEdge);
+                TextureHandle handle = _textureManager->RegisterTexture(
+                    drawData->PointLightShadow.shadowColorAtlas[currentFrame]->GetView(viewName),
+                    sampler->Handle()
+                );
+                _viewportTextures[cacheKey] = handle;
+            }
             else {
                 auto rtManager = renderManager->GetRenderTargetManager();
                 auto group = rtManager->GetGroup(groupName, currentFrame);
@@ -149,7 +176,7 @@ namespace Syn {
         auto readbackBuffer = Vk::BufferFactory::Create(readbackConfig);
 
         Vk::GpuUploadRequest request{
-            .uploadCallback = [&](VkCommandBuffer cmd) {
+            .uploadCallback = [&](VkCommandBuffer cmd, Vk::GpuUploader* gpuUploader) {
                 entityImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, VK_PIPELINE_STAGE_2_TRANSFER_BIT, VK_ACCESS_2_TRANSFER_READ_BIT);
                 Vk::ImageToBufferCopyInfo copyInfo{};
                 copyInfo.srcImage = entityImage->Handle();
@@ -165,7 +192,7 @@ namespace Syn {
                 Vk::ImageUtils::CopyImageToBuffer(cmd, copyInfo);
                 entityImage->TransitionLayout(cmd, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT, VK_ACCESS_2_SHADER_READ_BIT);
             },
-            .needsGraphics = true
+			.queueType = Vk::GpuQueueType::Graphics
         };
 
         ServiceLocator::Get<Vk::GpuUploader>()->UploadSync(std::move(request));

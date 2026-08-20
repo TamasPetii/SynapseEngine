@@ -78,8 +78,8 @@ namespace Syn::Vk {
             VkImageViewCreateInfo viewInfo{ VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO };
             viewInfo.image = image->_handle;
             viewInfo.viewType = config.viewType;
-            viewInfo.format = image->_config.format;
-            viewInfo.subresourceRange.aspectMask = image->_config.aspectMask;
+            viewInfo.format = (config.format != VK_FORMAT_UNDEFINED) ? config.format : image->_config.format;
+            viewInfo.subresourceRange.aspectMask = (config.aspectMask != 0) ? config.aspectMask : image->_config.aspectMask;
             viewInfo.subresourceRange.baseMipLevel = config.baseMipLevel;
             viewInfo.subresourceRange.levelCount = config.mipLevelCount == VK_REMAINING_MIP_LEVELS ? (image->_config.mipLevels - config.baseMipLevel) : config.mipLevelCount;
             viewInfo.subresourceRange.baseArrayLayer = config.baseArrayLayer;

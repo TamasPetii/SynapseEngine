@@ -232,8 +232,6 @@ namespace Syn
 
                 MaterialRenderType matType = (matIdx < matTypeSnapshot.size()) ? matTypeSnapshot[matIdx] : MaterialRenderType::Opaque1Sided;
 
-                if (matType != MaterialRenderType::Opaque1Sided && matType != MaterialRenderType::Opaque2Sided) continue;
-
                 uint32_t pipeIdx = static_cast<uint32_t>(data.modelResource->cpuData.baseDrawCommands[m * 4].pipelineRenderType);
                 if (!data.pipelineOverrides.empty() && m < data.pipelineOverrides.size() && data.pipelineOverrides[m] != UINT32_MAX) {
                     pipeIdx = data.pipelineOverrides[m];
@@ -458,17 +456,19 @@ namespace Syn
             for (uint32_t i = 0; i < appendedCount; ++i)
             {
                 const auto& item = _sortBuffer[i];
+				auto& mainGroup = drawData->Models;
+
                 uint32_t isMeshlet = (item.drawCallKey >> 31) & 1;
                 uint32_t indirectIdx = item.drawCallKey & 0x7FFFFFFF;
 
                 shadowGroup.instances[i] = item.gpuPayload;
+                uint32_t descIdx = isMeshlet ? (indirectIdx + mainGroup.activeTraditionalCount) : indirectIdx;
 
-                if (indirectIdx != currentIndirectIdx) {
-                    logPreviousBatch();
-
+                if (indirectIdx != currentIndirectIdx || isMeshlet != currentIsMeshlet) {
                     currentIndirectIdx = indirectIdx;
                     currentIsMeshlet = isMeshlet;
-                    shadowGroup.shadowDescriptors[indirectIdx].instanceOffset = i;
+
+                    shadowGroup.shadowDescriptors[descIdx].instanceOffset = i;
                 }
 
                 if (isMeshlet) {

@@ -23,7 +23,7 @@
 
 namespace Syn
 {
-    ImageUploadResult DefaultGpuImageUploader::Upload(const GpuImage& data, VkCommandBuffer cmd)
+    ImageUploadResult DefaultGpuImageUploader::Upload(const GpuImage& data, VkCommandBuffer cmd, Vk::GpuUploader* uploader)
     {
         ImageUploadResult result;
 
@@ -122,13 +122,11 @@ namespace Syn
             result.requiresGraphicsQueue = true;
         }
         else {
-            result.texture->TransitionLayout(
-                cmd,
-                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT,
-                VK_ACCESS_2_NONE,                                      
-                false
-            );
+            uploader->RegisterImageTransfer({
+                .image = result.texture->Handle(),
+                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                .mipLevels = targetMipLevels
+            });
 
             result.texture->OverrideInternalState(
                 VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,

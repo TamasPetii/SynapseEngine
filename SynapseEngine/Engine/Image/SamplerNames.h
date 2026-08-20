@@ -30,7 +30,8 @@ namespace Syn
         static constexpr const char* MaxReduction = "MaxReduction";
         static constexpr const char* BloomSampler = "BloomSampler";
         static constexpr const char* ShadowSampler = "ShadowSampler";
-        static constexpr const char* SkyboxSampler = "SkyboxSampler";
+        static constexpr const char* SkySphereSampler = "SkySphereSampler";
+        static constexpr const char* SkyBoxSampler = "SkyBoxSampler";
     };
 
     struct SYN_API SamplerWrapModeNames

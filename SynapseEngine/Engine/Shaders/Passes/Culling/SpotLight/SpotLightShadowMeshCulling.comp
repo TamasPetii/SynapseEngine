@@ -110,7 +110,6 @@ void main() {
         Material mat = GET_MATERIAL(ctx.materialBufferAddr, matIdx);
 
         uint matType = GetMaterialRenderType(mat);
-        if (matType > 3) continue;
 
         GpuMeshCollider localMeshCollider = GET_MESH_COLLIDER(addrs.meshColliders, m);
 

@@ -19,18 +19,18 @@
 #include "Engine/Vk/Context.h"
 #include "Engine/Vk/Core/Device.h"
 #include "Engine/Logger/SynLog.h"
-#include "Engine/Vk/Descriptor/DescriptorLayoutBuilder.h"
 #include "Engine/Vk/Rendering/GpuUploader.h"
+#include "Engine/Image/ImageManager.h"
+#include "Engine/Image/SamplerNames.h"
 
 namespace Syn
 {
-    VideoManager::VideoManager(uint32_t framesInFlight, std::shared_ptr<VideoBuilder> builder)
+    VideoManager::VideoManager(uint32_t framesInFlight, std::shared_ptr<VideoBuilder> builder, VideoManagerCallbacks callbacks)
         : AddressResourceManager<VideoStreamState, uint32_t>(framesInFlight, 64, 16, 32),
-        _framesInFlight(framesInFlight),
+        _callbacks(std::move(callbacks)),
         _builder(builder),
         _isRunning(true)
     {
-        InitializeBindlessSetup();
         _streamingThread = std::thread(&VideoManager::StreamingThreadLoop, this);
     }
 
@@ -38,43 +38,6 @@ namespace Syn
         _isRunning = false;
         if (_streamingThread.joinable()) {
             _streamingThread.join();
-        }
-
-        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice()->Handle();
-        if (_bindlessLayout != VK_NULL_HANDLE) {
-            vkDestroyDescriptorSetLayout(device, _bindlessLayout, nullptr);
-            _bindlessLayout = VK_NULL_HANDLE;
-        }
-    }
-
-    void VideoManager::InitializeBindlessSetup()
-    {
-        Vk::DescriptorLayoutBuilder layoutBuilder;
-        layoutBuilder.AddBindlessBinding(BINDING_VIDEO_TEXTURES, VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, VK_SHADER_STAGE_ALL, MAX_VIDEOS);
-
-        _bindlessLayout = layoutBuilder.Build(Vk::DescriptorLayoutType::DescriptorBuffer);
-        _bindlessBuffer = std::make_unique<Vk::DescriptorBuffer>(_bindlessLayout);
-    }
-
-    void VideoManager::Update() {
-        BaseResourceManager<VideoStreamState>::Update();
-
-        std::lock_guard<std::mutex> lock(_staleMutex);
-        for (auto it = _staleGpuBuffers.begin(); it != _staleGpuBuffers.end();) {
-            if (it->framesToLive > 0) { it->framesToLive--; ++it; }
-            else { it = _staleGpuBuffers.erase(it); }
-        }
-        for (auto it = _staleMappedBuffers.begin(); it != _staleMappedBuffers.end();) {
-            if (it->framesToLive > 0) { it->framesToLive--; ++it; }
-            else { it = _staleMappedBuffers.erase(it); }
-        }
-    }
-
-    void VideoManager::RecordSync(VkCommandBuffer cmd) {
-        if (auto staleBuffers = _bindlessBuffer->RecordSync(cmd); staleBuffers.mapped || staleBuffers.gpu) {
-            std::lock_guard<std::mutex> lock(_staleMutex);
-            _staleMappedBuffers.push_back({ staleBuffers.mapped, _framesInFlight });
-            _staleGpuBuffers.push_back({ staleBuffers.gpu, _framesInFlight });
         }
     }
 
@@ -95,33 +58,82 @@ namespace Syn
             });
     }
 
+    uint32_t VideoManager::LoadVideoFromNetworkAsync(const std::string& url) {
+        return this->InternalLoadAsync(url, [this, url]() {
+            auto state = std::make_shared<VideoStreamState>();
+            state->source = _builder->CreateSourceFromNetwork(url);
+            state->video = std::make_shared<Video>();
+
+            if (state->source) {
+                VideoInfo info = state->source->GetInfo();
+                state->video->info = info;
+                state->converter = _builder->CreateConverter(info);
+                state->uploader = _builder->CreateUploader(info);
+            }
+
+            return state;
+            });
+    }
+
     void VideoManager::StartGpuUpload(EntryType& entry) {
         uint32_t entryId = this->_pathToId.at(entry.path);
         this->SetResourceState(entryId, ResourceState::Ready);
         this->MarkDirty(entryId);
     }
 
-    void VideoManager::FinalizeResource(EntryType& entry) {
-    
-    }
+    void VideoManager::FinalizeResource(EntryType& entry) {}
 
     void VideoManager::FlushDirtyResources() {
+        std::vector<std::pair<uint32_t, uint32_t>> addressUpdates;
+
+        auto imageManager = ServiceLocator::Get<ImageManager>();
+        uint32_t samplerIndex = imageManager ? imageManager->GetSamplerIndex(SamplerNames::LinearClampEdge) : 0;
+        uint32_t textureData = (samplerIndex & 0x7FFFFFFF);
+
         this->ProcessDirtyReadyEntries(
-            [this](uint32_t index, const EntryType& entry) {
+            [this, &addressUpdates, textureData](uint32_t index, const EntryType& entry) {
                 if (!entry.resource->video || !entry.resource->video->image) return;
 
-                _bindlessBuffer->WriteSampledImage(
-                    BINDING_VIDEO_TEXTURES,
-                    index,
-                    entry.resource->video->image->GetView()
-                );
+                auto targetImage = entry.resource->video->convertedImage ?
+                    entry.resource->video->convertedImage :
+                    entry.resource->video->image;
 
-                this->WriteAddress(index, index);
+                if (!targetImage) return;
+
+                if (_callbacks.updateVideoTexture) {
+                    _callbacks.updateVideoTexture(index, targetImage->GetView());
+                }
+
+                addressUpdates.push_back({ index, textureData });
             }
         );
+
+        if (!addressUpdates.empty()) {
+            this->WriteAddresses(addressUpdates);
+        }
     }
 
-    void VideoManager::StreamingThreadLoop() 
+    void VideoManager::UpdateVideoBindlessBatch(std::span<const std::pair<uint32_t, VkImageView>> updates) {
+        if (updates.empty()) return;
+
+        auto imageManager = ServiceLocator::Get<ImageManager>();
+        uint32_t samplerIndex = imageManager ? imageManager->GetSamplerIndex(SamplerNames::LinearClampEdge) : 0;
+        uint32_t textureData = (samplerIndex & 0x7FFFFFFF);
+
+        std::vector<std::pair<uint32_t, uint32_t>> addressUpdates;
+        addressUpdates.reserve(updates.size());
+
+        for (const auto& u : updates) {
+            if (_callbacks.updateVideoTexture) {
+                _callbacks.updateVideoTexture(u.first, u.second);
+            }
+            addressUpdates.push_back({ u.first, textureData });
+        }
+
+        this->WriteAddresses(addressUpdates);
+    }
+
+    void VideoManager::StreamingThreadLoop()
     {
         while (_isRunning) {
             std::vector<std::pair<uint32_t, std::shared_ptr<VideoStreamState>>> activeStreams;
@@ -138,6 +150,29 @@ namespace Syn
             for (auto& [streamId, stream] : activeStreams) {
                 if (!stream->source || !stream->video || stream->isUploading) continue;
 
+                if (stream->video->info.frameRate > 0.0) {
+                    auto now = std::chrono::steady_clock::now();
+
+                    if (!stream->hasStarted) {
+                        stream->lastDecodeTime = now;
+                        stream->hasStarted = true;
+                    }
+
+                    double elapsed = std::chrono::duration<double>(now - stream->lastDecodeTime).count();
+                    double frameDuration = 1.0 / stream->video->info.frameRate;
+
+                    if (elapsed < frameDuration) {
+                        continue;
+                    }
+
+                    if (elapsed > frameDuration * 2.0) {
+                        stream->lastDecodeTime = now;
+                    }
+                    else {
+                        stream->lastDecodeTime += std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(frameDuration));
+                    }
+                }
+
                 bool success = _builder->ProcessNextPacket(*(stream->source), *(stream->video), *(stream->converter));
 
                 if (success) {
@@ -148,9 +183,12 @@ namespace Syn
                     auto streamState = stream;
 
                     Vk::GpuUploadRequest request{
-                        .uploadCallback = [uploader, videoData, streamState](VkCommandBuffer cmd) {
-                            auto result = uploader->Upload(*(videoData->transientGpuData), cmd);
-                            videoData->image = result.texture;
+                        .uploadCallback = [uploader, videoData, streamState](VkCommandBuffer cmd, Vk::GpuUploader* gpuUploader) {
+                            auto result = uploader->Upload(*(videoData->transientGpuData), cmd, gpuUploader);
+
+                            if (result.texture != nullptr) {
+                                videoData->image = result.texture;
+                            }
 
                             std::lock_guard<std::mutex> lock(streamState->stagingMutex);
                             streamState->activeStagingBuffer = std::move(result.bitstreamBuffer);
@@ -166,8 +204,7 @@ namespace Syn
                             this->SetResourceState(streamId, ResourceState::Ready);
                             this->MarkDirty(streamId);
                         },
-                        .needsGraphics = false,
-                        .needsVideo = true
+                        .queueType = Vk::GpuQueueType::Video
                     };
 
                     ServiceLocator::Get<Vk::GpuUploader>()->Submit(std::move(request));
@@ -175,10 +212,11 @@ namespace Syn
                 }
                 else if (stream->isLooping) {
                     stream->source->Reset();
+                    stream->hasStarted = false;
                 }
             }
 
-            std::this_thread::sleep_for(std::chrono::milliseconds(8));
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
     }
 }

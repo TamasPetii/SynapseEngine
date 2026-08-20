@@ -38,19 +38,18 @@ namespace Syn
     void RenderPipeline::Execute(const RenderContext& context)
     {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
-        if (shaderManager->IsCompiling())
-        {
-            auto image = ServiceLocator::Get<Vk::Context>()->GetSwapChain()->GetImage(context.swapchainImageIndex);
-            image->TransitionLayout(context.cmd, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT, VK_ACCESS_2_NONE, false);
-            return;
-        }
+        bool isCompiling = shaderManager->IsCompiling();
 
         auto profiler = ServiceLocator::Get<IGpuProfiler>();
-		auto statCollector = ServiceLocator::Get<IRenderStatCollector>();
+        auto statCollector = ServiceLocator::Get<IRenderStatCollector>();
 
         if (context.scene)
         {
             for (auto& pass : _passes) {
+                if (isCompiling && pass->GetName() != "SwapchainPresentPass") {
+                    continue;
+                }
+
                 if (pass->ShouldExecute(context))
                 {
                     uint32_t measureIdx = profiler->StartPass(context.cmd, context.frameIndex, pass->GetGroup(), pass->GetName());
@@ -72,8 +71,5 @@ namespace Syn
                 }
             }
         }
-
-        auto image = ServiceLocator::Get<Vk::Context>()->GetSwapChain()->GetImage(context.swapchainImageIndex);
-		image->TransitionLayout(context.cmd, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR, VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT, VK_ACCESS_2_NONE, false);
     }
 }

@@ -25,6 +25,7 @@
 #include "Engine/Render/RenderNames.h"
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
+#include "Engine/Vk/Descriptor/DescriptorUtils.h"
 
 namespace Syn {
 
@@ -39,12 +40,19 @@ namespace Syn {
 
     void DeferredEmissiveAoPass::Initialize() {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
+        auto descriptorManager = ServiceLocator::Get<DescriptorManager>();
 
         Vk::ShaderProgramConfig config;
-        config.useDescriptorBuffers = false;
+        config.useDescriptorBuffers = true;
+        config.layoutOverride = [descriptorManager](uint32_t setIndex) {
+            if (setIndex == 0) {
+                return descriptorManager->GetBindlessLayout();
+            }
+            return VkDescriptorSetLayout{};
+            };
 
         _shaderProgramId = shaderManager->LoadProgramAsync("DeferredEmissiveAoProgram", {
-            ShaderNames::FullscreenVert,
+            ShaderNames::DeferredEmissiveAoVert,
             ShaderNames::DeferredEmissiveAoFrag
             }, config);
 
@@ -112,11 +120,15 @@ namespace Syn {
     void DeferredEmissiveAoPass::BindDescriptors(const RenderContext& context) {
         auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
         auto imageManager = ServiceLocator::Get<ImageManager>();
+
         auto nearestSampler = imageManager->GetSampler(SamplerNames::NearestClampEdge)->Handle();
-		auto ssaoSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge)->Handle();
+        auto ssaoSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge)->Handle();
 
         auto colorImg = group->GetImage(RenderTargetNames::ColorMetallic);
         auto emissiveAoImg = group->GetImage(RenderTargetNames::EmissiveAo);
+
+        auto normalRoughnessImg = group->GetImage(RenderTargetNames::NormalRoughness);
+        auto depthImg = group->GetImage(RenderTargetNames::OpaqueDepth);
 
         Vk::PushDescriptorWriter pushWriter;
 
@@ -138,9 +150,33 @@ namespace Syn {
             2,
             group->GetImage(RenderTargetNames::SsaoAo)->GetView(Vk::ImageViewNames::Default),
             ssaoSampler,
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            3,
+            normalRoughnessImg->GetView(Vk::ImageViewNames::Default),
+            nearestSampler,
+            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
+        );
+
+        pushWriter.AddCombinedImageSampler(
+            4,
+            depthImg->GetView(Vk::ImageViewNames::Default),
+            nearestSampler,
+            VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL
+        );
 
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
+    
+        std::vector<std::pair<uint32_t, Vk::DescriptorBuffer*>> buffersToBind;
+
+        auto descriptorManager = ServiceLocator::Get<DescriptorManager>();
+        if (auto descBuffer = descriptorManager->GetBindlessBuffer()) {
+            buffersToBind.push_back({ 0, descBuffer });
+        }
+
+        Vk::DescriptorUtils::BindMultipleBuffer(context.cmd, _shaderProgram->GetLayout(), VK_PIPELINE_BIND_POINT_GRAPHICS, buffersToBind);
     }
 
     void DeferredEmissiveAoPass::Draw(const RenderContext& context) {

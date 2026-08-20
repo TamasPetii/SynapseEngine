@@ -22,14 +22,12 @@
 #include "Engine/Video/Converter/IGpuVideoConverter.h"
 #include "Engine/Video/Source/IVideoSource.h"
 #include "Engine/Video/Data/Video.h"
-
-#include "Engine/Vk/Core/ThreadSafeQueue.h"
-#include "Engine/Vk/Descriptor/DescriptorBuffer.h"
-
 #include <thread>
 #include <atomic>
 #include <mutex>
 #include <vector>
+#include <chrono>
+#include <functional>
 
 namespace Syn {
 
@@ -45,40 +43,35 @@ namespace Syn {
 
         bool isPlaying = true;
         bool isLooping = true;
+        bool hasStarted = false;
+        std::chrono::steady_clock::time_point lastDecodeTime;
+    };
+
+    struct VideoManagerCallbacks {
+        std::function<void(uint32_t, VkImageView)> updateVideoTexture;
     };
 
     class SYN_API VideoManager : public AddressResourceManager<VideoStreamState, uint32_t> {
     public:
-        static constexpr uint32_t MAX_VIDEOS = 64;
-        static constexpr uint32_t BINDING_VIDEO_TEXTURES = 0;
+        VideoManager(uint32_t framesInFlight, std::shared_ptr<VideoBuilder> builder, VideoManagerCallbacks callbacks);
+        ~VideoManager() override;
 
-        VideoManager(uint32_t framesInFlight, std::shared_ptr<VideoBuilder> builder);
-        ~VideoManager();
-
-        void Update() override;
-        void RecordSync(VkCommandBuffer cmd);
         uint32_t LoadVideoAsync(const std::string& filePath);
+        uint32_t LoadVideoFromNetworkAsync(const std::string& url);
 
-        Vk::DescriptorBuffer* GetBindlessBuffer() const { return _bindlessBuffer.get(); }
-        VkDescriptorSetLayout GetBindlessLayout() const { return _bindlessLayout; }
+        void UpdateVideoBindlessBatch(std::span<const std::pair<uint32_t, VkImageView>> updates);
+
     protected:
         void FlushDirtyResources() override;
         void StartGpuUpload(EntryType& entry) override;
         void FinalizeResource(EntryType& entry) override;
 
     private:
-        void InitializeBindlessSetup();
         void StreamingThreadLoop();
+
     private:
+        VideoManagerCallbacks _callbacks;
         std::shared_ptr<VideoBuilder> _builder;
-
-        uint32_t _framesInFlight;
-        std::mutex _staleMutex;
-        std::vector<StaleBuffer> _staleGpuBuffers;
-        std::vector<StaleBuffer> _staleMappedBuffers;
-
-        VkDescriptorSetLayout _bindlessLayout = VK_NULL_HANDLE;
-        std::unique_ptr<Vk::DescriptorBuffer> _bindlessBuffer;
 
         std::thread _streamingThread;
         std::atomic<bool> _isRunning;

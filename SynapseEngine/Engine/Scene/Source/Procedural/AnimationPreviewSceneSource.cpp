@@ -30,6 +30,7 @@
 #include "Engine/Component/Light/Point/PointLightComponent.h"
 #include "Engine/Component/Light/Direction/DirectionLightComponent.h"
 #include "Engine/Image/ImageManager.h"
+#include "Engine/Environment/EnvironmentManager.h"
 #include "Engine/Mesh/MeshSourceNames.h"
 #include "Engine/Logger/SynLog.h"
 #include "Engine/Utils/PathUtils.h"
@@ -151,8 +152,8 @@ namespace Syn
 
         hm->AttachChild(rootEnvironment, previewAnimation);
 
-        auto skyTextureId = ServiceLocator::Get<ImageManager>()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/Engine/Environment/ModelPreview.hdr"));
-        scene.GetSettings()->environment.skyTextureId = skyTextureId;
+        auto envId = ServiceLocator::Get<EnvironmentManager>()->LoadEnvironmentSync(PathUtils::GetAbsolutePathString("Assets/Engine/Environment/ModelPreview.hdr"));
+        scene.GetSettings()->environment.activeEnvironmentId = envId;
         scene.GetSettings()->debug.enableInfiniteGrid = true;
         scene.GetSettings()->debug.enableBillboardCameras = false;
         scene.GetSettings()->debug.enableBillboardPointLights = false;

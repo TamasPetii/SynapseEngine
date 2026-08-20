@@ -39,6 +39,7 @@ namespace Syn {
 
         uint32_t LoadProgramAsync(const std::string& programName, const std::vector<std::string>& shaderFiles, const Vk::ShaderProgramConfig& config = {});
         uint32_t LoadProgramSync(const std::string& programName, const std::vector<std::string>& shaderFiles, const Vk::ShaderProgramConfig& config = {});
+        std::shared_ptr<Shader> GetShader(const std::string& filepath, std::span<const std::string> defines = {});
 
         void Clear();
         bool IsCompiling() const;

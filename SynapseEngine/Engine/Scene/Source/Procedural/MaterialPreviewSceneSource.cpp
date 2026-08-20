@@ -32,6 +32,7 @@
 #include "Engine/Mesh/MeshSourceNames.h"
 #include "Engine/Logger/SynLog.h"
 #include "Engine/Utils/PathUtils.h"
+#include "Engine/Environment/EnvironmentManager.h"
 
 #include <glm/gtc/constants.hpp>
 #include <vector>
@@ -179,9 +180,8 @@ namespace Syn
             hm->AttachChild(rootEnvironment, e);
             };
 
-        // 2. Center object: Suzanne
-        auto skyTextureId = ServiceLocator::Get<ImageManager>()->LoadImageSync(PathUtils::GetAbsolutePathString("Assets/Engine/Environment/MaterialPreview.hdr"));
-        scene.GetSettings()->environment.skyTextureId = skyTextureId;
+        auto envId = ServiceLocator::Get<EnvironmentManager>()->LoadEnvironmentSync(PathUtils::GetAbsolutePathString("Assets/Engine/Environment/MaterialPreview.hdr"));
+        scene.GetSettings()->environment.activeEnvironmentId = envId;
         scene.GetSettings()->debug.enableBillboardCameras = false;
         scene.GetSettings()->debug.enableBillboardPointLights = false;
         scene.GetSettings()->debug.enableBillboardSpotLights = false;

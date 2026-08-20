@@ -40,7 +40,6 @@ namespace Syn
         virtual void OnUpdate(Scene* scene, uint32_t frameIndex, float deltaTime, tf::Subflow& subflow) {}
         virtual void OnUploadToGpu(Scene* scene, uint32_t frameIndex, tf::Subflow& subflow) {}
         virtual void OnFinish(Scene* scene, tf::Subflow& subflow) {}
-        virtual void OnEntityDestroyed(Scene* scene, EntityID entity) {}
         virtual void OnClean(Scene* scene) {}
 
         virtual std::vector<TypeID> GetReadDependencies() const { return {}; }

@@ -26,6 +26,6 @@ namespace Syn
         DefaultGpuImageUploader() = default;
         ~DefaultGpuImageUploader() override = default;
 
-        ImageUploadResult Upload(const GpuImage& data, VkCommandBuffer cmd) override;
+        ImageUploadResult Upload(const GpuImage& data, VkCommandBuffer cmd, Vk::GpuUploader* uploader) override;
     };
 }

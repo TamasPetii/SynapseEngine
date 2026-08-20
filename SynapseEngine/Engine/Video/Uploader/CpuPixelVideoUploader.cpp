@@ -26,7 +26,7 @@ namespace Syn
         _textures.resize(bufferCount);
     }
 
-    VideoUploadResult CpuPixelVideoUploader::Upload(const GpuVideoPacket& data, VkCommandBuffer cmd)
+    VideoUploadResult CpuPixelVideoUploader::Upload(const GpuVideoPacket& data, VkCommandBuffer cmd, Vk::GpuUploader* uploader)
     {
         VideoUploadResult result;
         result.isFrameReady = false;
@@ -80,13 +80,10 @@ namespace Syn
 
         Vk::BufferUtils::CopyBufferToImage(cmd, copyInfo);
 
-        currentTexture->TransitionLayout(
-            cmd,
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            VK_PIPELINE_STAGE_2_BOTTOM_OF_PIPE_BIT,
-            VK_ACCESS_2_NONE,
-            false
-        );
+        uploader->RegisterImageTransfer({
+            .image = currentTexture->Handle(),
+            .mipLevels = 1
+        });
 
         currentTexture->OverrideInternalState(
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,

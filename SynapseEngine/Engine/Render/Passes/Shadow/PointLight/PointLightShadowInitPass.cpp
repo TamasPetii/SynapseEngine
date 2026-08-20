@@ -35,6 +35,25 @@ namespace Syn {
         VkExtent2D extent = { POINT_SHADOW_ATLAS_SIZE, POINT_SHADOW_ATLAS_SIZE };
         _graphicsState.renderArea = extent;
 
+        if (auto colorImg = drawData->PointLightShadow.shadowColorAtlas[fIdx].get())
+        {
+            _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
+                .imageView = colorImg->GetView(Vk::ImageViewNames::Default),
+                .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .clearValue = VkClearValue{.color = {{1.0f, 1.0f, 1.0f, 1.0f}}},
+                .loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR,
+                .storeOp = VK_ATTACHMENT_STORE_OP_STORE
+                }));
+
+            _imageTransitions.push_back({
+                .image = colorImg,
+                .newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+                .dstStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+                .dstAccess = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+                .discardContent = true
+                });
+        }
+
         if (auto depthImg = drawData->PointLightShadow.shadowAtlas[fIdx].get())
         {
             _depthAttachment = Vk::RenderUtils::CreateAttachment({

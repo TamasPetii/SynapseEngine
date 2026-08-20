@@ -27,6 +27,7 @@ namespace Syn
     struct SYN_API Video {
         VideoInfo info;
         std::shared_ptr<Vk::Image> image;
+        std::shared_ptr<Vk::Image> convertedImage;
 
         std::unique_ptr<CookedVideoPacket> transientCpuData;
         std::unique_ptr<GpuVideoPacket> transientGpuData;

@@ -196,10 +196,12 @@ namespace Syn {
 
         HandleDragAndDrop(vm, node.id);
 
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(8.0f, 8.0f));
         if (ImGui::BeginPopupContextItem()) {
             RenderContextMenu(vm, node.id);
             ImGui::EndPopup();
         }
+        ImGui::PopStyleVar();
 
         const char* eyeIcon = node.isVisible ? SYN_ICON_EYE : SYN_ICON_EYE_SLASH;
         ImVec4 eyeColor = node.isVisible ? ImGui::GetStyleColorVec4(ImGuiCol_Text) : ImVec4(0.5f, 0.5f, 0.5f, 1.0f);

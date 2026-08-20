@@ -46,6 +46,8 @@ namespace Syn
     PreviewManager* ServiceLocator::_previewManager = nullptr;
     VideoBuilder* ServiceLocator::_videoBuilder = nullptr;
     VideoManager* ServiceLocator::_videoManager = nullptr;
+    EnvironmentManager* ServiceLocator::_environmentManager = nullptr;
+    DescriptorManager* ServiceLocator::_descriptorManager = nullptr;
 
     template <> void ServiceLocator::Provide<Vk::Context>(Vk::Context* s) { _vkContext = s; }
     template <> void ServiceLocator::Provide<Vk::GpuUploader>(Vk::GpuUploader* s) { _gpuUploader = s; }
@@ -75,6 +77,8 @@ namespace Syn
     template <> void ServiceLocator::Provide<ShaderBuilder>(ShaderBuilder* s) { _shaderBuilder = s; }
     template <> void ServiceLocator::Provide<VideoBuilder>(VideoBuilder* s) { _videoBuilder = s; }
     template <> void ServiceLocator::Provide<VideoManager>(VideoManager* s) { _videoManager = s; }
+    template <> void ServiceLocator::Provide<EnvironmentManager>(EnvironmentManager* s) { _environmentManager = s; }
+    template <> void ServiceLocator::Provide<DescriptorManager>(DescriptorManager* s) { _descriptorManager = s; }
 
     template <> Vk::Context* ServiceLocator::Get<Vk::Context>() { return _vkContext; }
     template <> Vk::GpuUploader* ServiceLocator::Get<Vk::GpuUploader>() { return _gpuUploader; }
@@ -104,4 +108,6 @@ namespace Syn
     template <> ShaderBuilder* ServiceLocator::Get<ShaderBuilder>() { return _shaderBuilder; }
     template <> VideoBuilder* ServiceLocator::Get<VideoBuilder>() { return _videoBuilder; }
     template <> VideoManager* ServiceLocator::Get<VideoManager>() { return _videoManager; }
+    template <> EnvironmentManager* ServiceLocator::Get<EnvironmentManager>() { return _environmentManager; }
+    template <> DescriptorManager* ServiceLocator::Get<DescriptorManager>() { return _descriptorManager; }
 }

@@ -27,22 +27,16 @@
 #include "Engine/Render/ComputeGroupSize.h"
 
 namespace Syn {
-
     ModelManager::ModelManager(uint32_t framesInFlight,
         std::shared_ptr<StaticMeshBuilder> builder,
         std::unique_ptr<IGpuModelUploader> uploader,
-        MaterialLoadCallback materialLoadCallback,
-        PreviewAllocateCallback previewAllocateCallback,
-        PreviewMarkDirtyCallback previewMarkDirtyCallback
+        ModelManagerCallbacks callbacks
     )
         : AddressResourceManager<StaticMesh, GpuModelAddresses>(framesInFlight, 1024, 256, 512),
-        _builder(builder), 
-        _uploader(std::move(uploader)), 
-        _materialLoadCallback(std::move(materialLoadCallback)),
-        _previewAllocateCallback(std::move(previewAllocateCallback)),
-        _previewMarkDirtyCallback(std::move(previewMarkDirtyCallback))
-    {
-    }
+        _builder(builder),
+        _uploader(std::move(uploader)),
+        _callbacks(std::move(callbacks))
+    {}
 
     uint32_t ModelManager::LoadModelAsync(const std::string& filePath) {
         return InternalLoadAsync(filePath, [this, filePath]() {
@@ -87,7 +81,7 @@ namespace Syn {
     }
 
     void ModelManager::StartGpuUpload(EntryType& entry) {
-        if (_materialLoadCallback && entry.resource && entry.resource->transientGpuData) 
+        if (_callbacks.materialLoad && entry.resource && entry.resource->transientGpuData)
         {
             std::filesystem::path modelDir = std::filesystem::path(entry.path).parent_path();
             auto& transientGpu = *(entry.resource->transientGpuData);
@@ -119,7 +113,7 @@ namespace Syn {
                 std::mt19937 rng(std::random_device{}());
                 std::uniform_real_distribution<float> dist(0.0f, 1.0f);
 
-                uint32_t matId = _materialLoadCallback(uniqueMatName, matInfo);
+                uint32_t matId = _callbacks.materialLoad(uniqueMatName, matInfo);
 
                 loadedMaterialIds.push_back(matId);
             }
@@ -147,9 +141,9 @@ namespace Syn {
         std::shared_ptr<StaticMesh> res = entry.resource;
 
         Vk::GpuUploadRequest request{
-            .uploadCallback = [this, entryId, res](VkCommandBuffer cmd) 
+            .uploadCallback = [this, entryId, res](VkCommandBuffer cmd,  Vk::GpuUploader* gpuUploader)
             {
-                auto uploadResult = _uploader->Upload(*(res->transientGpuData), cmd);
+                auto uploadResult = _uploader->Upload(*(res->transientGpuData), cmd, gpuUploader);
 
                 std::lock_guard lock(_mutex);
                 auto& safeEntry = _entries[entryId];
@@ -168,7 +162,7 @@ namespace Syn {
 
                 Info("Model loaded, hardware buffers ready and transient RAM freed: {}", safeEntry.path);
             },
-            .needsGraphics = false
+            .queueType = Vk::GpuQueueType::Transfer
         };
 
         SubmitGpuRequest(entry, std::move(request));
@@ -177,12 +171,12 @@ namespace Syn {
     void ModelManager::FinalizeResource(EntryType& entry)
     {
         uint32_t index = _pathToId.at(entry.path);
-        if (_previewAllocateCallback) _previewAllocateCallback(index);
+        if (_callbacks.previewAllocate) _callbacks.previewAllocate(index);
         entry.resource->transientGpuData.reset();
         entry.resource->transientCpuData.reset();
     }
 
-    void ModelManager::FlushDirtyResources() 
+    void ModelManager::FlushDirtyResources()
     {
         ProcessDirtyReadyEntries([this](uint32_t index, const EntryType& entry) {
 
@@ -213,7 +207,7 @@ namespace Syn {
 
             WriteAddress(index, addresses);
 
-            if (_previewMarkDirtyCallback) _previewMarkDirtyCallback(index);
+            if (_callbacks.previewMarkDirty) _callbacks.previewMarkDirty(index);
             });
     }
 
@@ -256,8 +250,8 @@ namespace Syn {
 
         for (uint32_t materialId : materialsToProcess) {
             for (uint32_t modelId : GetModelsUsingMaterials(materialId)) {
-                if (_previewMarkDirtyCallback) 
-                        _previewMarkDirtyCallback(modelId);
+                if (_callbacks.previewMarkDirty)
+                    _callbacks.previewMarkDirty(modelId);
             }
         }
     }

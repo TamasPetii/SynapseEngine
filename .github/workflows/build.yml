@@ -46,9 +46,11 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y \
-          gcc-14 g++-14 \
-          libx11-dev libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev \
-          libgl1-mesa-dev libxxf86vm-dev libwayland-dev libxkbcommon-dev
+          gcc-14 g++-14 build-essential pkg-config autoconf autoconf-archive \
+          automake libtool m4 zip unzip curl nasm yasm libx11-dev \
+          libxcursor-dev libxrandr-dev libxinerama-dev libxi-dev libxext-dev \
+          libxrender-dev libxtst-dev libxcb1-dev libx11-xcb-dev libgl1-mesa-dev \
+          libxxf86vm-dev libwayland-dev libxkbcommon-dev
 
     - name: Install Xmake
       shell: bash

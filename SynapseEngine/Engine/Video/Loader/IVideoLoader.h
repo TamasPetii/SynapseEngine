@@ -30,6 +30,7 @@ namespace Syn
         virtual ~IVideoLoader() = default;
         virtual std::unique_ptr<IVideoState> OpenFile(const std::filesystem::path& path) = 0;
         virtual std::unique_ptr<IVideoState> OpenMemory(const std::vector<uint8_t>& data) = 0;
+        virtual std::unique_ptr<IVideoState> OpenNetwork(const std::string& url) = 0;
         virtual std::vector<std::string> GetSupportedExtensions() const = 0;
     };
 }

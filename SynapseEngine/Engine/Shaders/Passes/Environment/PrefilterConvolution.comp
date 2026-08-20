@@ -1,0 +1,46 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+
+#include "../../Includes/Core.glsl"
+#include "../../Includes/Utils/EnvironmentMath.glsl"
+
+layout(local_size_x = 16, local_size_y = 16, local_size_z = 1) in;
+
+layout(set = 2, binding = 0) uniform samplerCube environmentMap;
+layout(set = 2, binding = 1, rgba16f) uniform writeonly imageCube prefilterMap;
+
+layout(push_constant) uniform PushConstants {
+    float roughness;
+} pc;
+
+void main() {
+    ivec3 cubeCoord = ivec3(gl_GlobalInvocationID);
+    ivec2 size = imageSize(prefilterMap);
+    
+    if(cubeCoord.x >= size.x || cubeCoord.y >= size.y) return;
+    
+    vec2 uv = vec2(cubeCoord.xy) / vec2(size.xy);
+    vec3 N = GetCubeDir(uv, cubeCoord.z);
+    vec3 R = N;
+    vec3 V = R;
+    
+    uint SAMPLE_COUNT = 1024u;
+    vec3 prefilteredColor = vec3(0.0);
+    float totalWeight = 0.0;
+    
+    for(uint i = 0u; i < SAMPLE_COUNT; ++i) {
+        vec2 Xi = Hammersley(i, SAMPLE_COUNT);
+        vec3 H = ImportanceSampleGGX(Xi, N, pc.roughness);
+        vec3 L = normalize(2.0 * dot(V, H) * H - V);
+        
+        float NdotL = max(dot(N, L), 0.0);
+
+        if(NdotL > 0.0) {
+            prefilteredColor += texture(environmentMap, L).rgb * NdotL;
+            totalWeight += NdotL;
+        }
+    }
+    
+    prefilteredColor = prefilteredColor / totalWeight;
+    imageStore(prefilterMap, cubeCoord, vec4(prefilteredColor, 1.0));
+}

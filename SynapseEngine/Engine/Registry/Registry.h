@@ -31,6 +31,14 @@ namespace Syn
 {
 	class RegistryInsider;
 
+	template<typename T>
+	using ComponentDestroyCallback = std::function<void(EntityID, T&)>;
+
+	struct IDestroyCallbackWrapper {
+		virtual ~IDestroyCallbackWrapper() = default;
+		virtual void Invoke(EntityID entity, IPool* pool) = 0;
+	};
+
 	class SYN_API Registry
 	{
 	public:
@@ -105,6 +113,9 @@ namespace Syn
 
 		template<typename T>
 		WrapperType<T>* EnsurePool();
+
+		template<typename T>
+		void RegisterOnDestroy(ComponentDestroyCallback<T> callback);
 	private:
 		template<typename T>
 		IPool* GetIPool();
@@ -117,13 +128,36 @@ namespace Syn
 		std::vector<EntityID> _freeEntities;
 		SparseSet _activeEntities;
 		DataPool<IPool*> _pools;
+		std::unordered_map<TypeID, std::vector<std::unique_ptr<IDestroyCallbackWrapper>>> _destroyCallbacks;
 	private:
 		friend class RegistryInsider;
+	};
+
+	template<typename T>
+	struct DestroyCallbackWrapper : public IDestroyCallbackWrapper
+	{
+		DestroyCallbackWrapper(ComponentDestroyCallback<T> cb) : callback(std::move(cb)) {}
+
+		void Invoke(EntityID entity, IPool* pool) override {
+			auto* typedPool = static_cast<Registry::WrapperType<T>*>(pool);
+			if (typedPool->_pool.Has(entity)) {
+				callback(entity, typedPool->_pool.Get(entity));
+			}
+		}
+	private:
+		ComponentDestroyCallback<T> callback;
 	};
 }
 
 namespace Syn
 {
+	template<typename T>
+	SYN_INLINE void Registry::RegisterOnDestroy(ComponentDestroyCallback<T> callback)
+	{
+		const TypeID id = TypeInfo<T>::ID;
+		_destroyCallbacks[id].push_back(std::make_unique<DestroyCallbackWrapper<T>>(std::move(callback)));
+	}
+
 	template<typename T>
 	SYN_INLINE Registry::WrapperType<T>* Registry::EnsurePool()
 	{

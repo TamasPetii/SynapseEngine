@@ -19,9 +19,10 @@
 
 namespace Syn
 {
-    struct ShaderDefines
+    struct SYN_API ShaderDefines
     {
         static constexpr const char* EnableAlphaTest = "ENABLE_ALPHA_TEST";
+        static constexpr const char* EnableWorkGraph = "ENABLE_WORK_GRAPH";
     };
 
     struct SYN_API ShaderNames
@@ -37,8 +38,9 @@ namespace Syn
         static constexpr const char* BloomDownsample = "Engine/Shaders/Passes/PostProcess/Bloom/BloomDownsample.comp";
         static constexpr const char* BloomComposite = "Engine/Shaders/Passes/PostProcess/Bloom/BloomComposite.comp";
 
-        static constexpr const char* SkySphereVert = "Engine/Shaders/Passes/PostProcess/SkySphere/SkySphere.vert";
-        static constexpr const char* SkySphereFrag = "Engine/Shaders/Passes/PostProcess/SkySphere/SkySphere.frag";
+        static constexpr const char* SkyVert = "Engine/Shaders/Passes/PostProcess/Sky/Sky.vert";
+        static constexpr const char* SkySphereFrag = "Engine/Shaders/Passes/PostProcess/Sky/SkySphere.frag";
+        static constexpr const char* SkyBoxFrag = "Engine/Shaders/Passes/PostProcess/Sky/SkyBox.frag";
 
         static constexpr const char* SelectionOutlineFrag = "Engine/Shaders/Passes/PostProcess/Outline/SelectionOutline.frag";
 
@@ -58,6 +60,8 @@ namespace Syn
         static constexpr const char* TraditionalVert = "Engine/Shaders/Passes/Shading/Common/Traditional.vert";
 
         static constexpr const char* OpaqueDeferredFrag = "Engine/Shaders/Passes/Shading/Deferred/GBuffer/OpaqueDeferred.frag";
+        
+        static constexpr const char* DeferredEmissiveAoVert = "Engine/Shaders/Passes/Shading/Deferred/Lighting/DeferredEmissiveAo.vert";
         static constexpr const char* DeferredEmissiveAoFrag = "Engine/Shaders/Passes/Shading/Deferred/Lighting/DeferredEmissiveAo.frag";
         static constexpr const char* DeferredPointLightVert = "Engine/Shaders/Passes/Shading/Deferred/Lighting/DeferredPointLight.vert";
         static constexpr const char* DeferredPointLightFrag = "Engine/Shaders/Passes/Shading/Deferred/Lighting/DeferredPointLight.frag";
@@ -97,7 +101,7 @@ namespace Syn
         static constexpr const char* DpHvoBlurComp = "Engine/Shaders/Passes/PostProcess/Ssao/DpHvoBlur.comp";
         static constexpr const char* SsaoComp = "Engine/Shaders/Passes/PostProcess/Ssao/Ssao.comp";
         static constexpr const char* SsaoBlurComp = "Engine/Shaders/Passes/PostProcess/Ssao/SsaoBlur.comp";
-   
+
         static constexpr const char* InfiniteGridFrag = "Engine/Shaders/Passes/PostProcess/InfiniteGrid/InfiniteGrid.frag";
 
         static constexpr const char* GeometryCullingCommandResetComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryCullingCommandReset.comp";
@@ -107,15 +111,9 @@ namespace Syn
         static constexpr const char* GeometryStaticModelCullingComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryStaticModelCulling.comp";
         static constexpr const char* GeometryMortonChunkCullingComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryMortonChunkCulling.comp";
         static constexpr const char* GeometryMortonModelCullingComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryMortonModelCulling.comp";
-    
-        static constexpr const char* GeometryWorkGraphModelCullingComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphModelCulling.comp";
-        static constexpr const char* GeometryWorkGraphStaticChunkCullingComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphStaticChunkCulling.comp";
-		static constexpr const char* GeometryWorkGraphStaticModelCullingComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphStaticModelCulling.comp";
-		static constexpr const char* GeometryWorkGraphMortonChunkCullingComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphMortonChunkCulling.comp";
-		static constexpr const char* GeometryWorkGraphMortonModelCullingComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphMortonModelCulling.comp";
-		static constexpr const char* GeometryWorkGraphMeshCullingComp = "Engine/Shaders/Passes/Culling/Geometry/GeometryWorkGraphMeshCulling.comp";
-    
+
         static constexpr const char* DirectionLightShadowFrag = "Engine/Shaders/Passes/Shadow/DirectionLight/DirectionLightShadow.frag";
+        static constexpr const char* DirectionLightShadowTransparentFrag = "Engine/Shaders/Passes/Shadow/DirectionLight/DirectionLightShadowTransparent.frag";
         static constexpr const char* DirectionLightShadowTraditionalVert = "Engine/Shaders/Passes/Shadow/DirectionLight/DirectionLightShadowTraditional.vert";
         static constexpr const char* DirectionLightShadowMeshletTask = "Engine/Shaders/Passes/Shadow/DirectionLight/DirectionLightShadowMeshlet.task";
         static constexpr const char* DirectionLightShadowMeshletMesh = "Engine/Shaders/Passes/Shadow/DirectionLight/DirectionLightShadowMeshlet.mesh";
@@ -134,9 +132,10 @@ namespace Syn
         static constexpr const char* DirectionLightShadowWorkGraphMortonChunkCullingComp = "Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphMortonChunkCulling.comp";
         static constexpr const char* DirectionLightShadowWorkGraphMortonModelCullingComp = "Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphMortonModelCulling.comp";
         static constexpr const char* DirectionLightShadowWorkGraphMeshCullingComp = "Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphMeshCulling.comp";
-        
+
         static constexpr const char* SpotLightCulling = "Engine/Shaders/Passes/Culling/SpotLight/SpotLightCulling.comp";
         static constexpr const char* SpotLightShadowFrag = "Engine/Shaders/Passes/Shadow/SpotLight/SpotLightShadow.frag";
+        static constexpr const char* SpotLightShadowTransparentFrag = "Engine/Shaders/Passes/Shadow/SpotLight/SpotLightShadowTransparent.frag";
         static constexpr const char* SpotLightShadowTraditionalVert = "Engine/Shaders/Passes/Shadow/SpotLight/SpotLightShadowTraditional.vert";
         static constexpr const char* SpotLightShadowMeshletTask = "Engine/Shaders/Passes/Shadow/SpotLight/SpotLightShadowMeshlet.task";
         static constexpr const char* SpotLightShadowMeshletMesh = "Engine/Shaders/Passes/Shadow/SpotLight/SpotLightShadowMeshlet.mesh";
@@ -151,9 +150,10 @@ namespace Syn
         static constexpr const char* SpotLightShadowMortonModelCullingComp = "Engine/Shaders/Passes/Culling/SpotLight/SpotLightShadowMortonModelCulling.comp";
         static constexpr const char* SpotLightShadowStaticChunkCullingComp = "Engine/Shaders/Passes/Culling/SpotLight/SpotLightShadowStaticChunkCulling.comp";
         static constexpr const char* SpotLightShadowStaticModelCullingComp = "Engine/Shaders/Passes/Culling/SpotLight/SpotLightShadowStaticModelCulling.comp";
-        
+
         static constexpr const char* PointLightCulling = "Engine/Shaders/Passes/Culling/PointLight/PointLightCulling.comp";
         static constexpr const char* PointLightShadowFrag = "Engine/Shaders/Passes/Shadow/PointLight/PointLightShadow.frag";
+        static constexpr const char* PointLightShadowTransparentFrag = "Engine/Shaders/Passes/Shadow/PointLight/PointLightShadowTransparent.frag";
         static constexpr const char* PointLightShadowTraditionalVert = "Engine/Shaders/Passes/Shadow/PointLight/PointLightShadowTraditional.vert";
         static constexpr const char* PointLightShadowMeshletTask = "Engine/Shaders/Passes/Shadow/PointLight/PointLightShadowMeshlet.task";
         static constexpr const char* PointLightShadowMeshletMesh = "Engine/Shaders/Passes/Shadow/PointLight/PointLightShadowMeshlet.mesh";
@@ -177,5 +177,11 @@ namespace Syn
 
         static constexpr const char* AnimationPreviewVert = "Engine/Shaders/Passes/Preview/AnimationPreview.vert";
         static constexpr const char* AnimationPreviewFrag = "Engine/Shaders/Passes/Preview/AnimationPreview.frag";
-}; 
+
+        static constexpr const char* YuvToRgbComp = "Engine/Shaders/Passes/Video/YuvToRgb.comp";
+
+        static constexpr const char* EquirectangularToCube = "Engine/Shaders/Passes/Environment/EquirectangularToCube.comp";
+        static constexpr const char* IrradianceConvolution = "Engine/Shaders/Passes/Environment/IrradianceConvolution.comp";
+        static constexpr const char* PrefilterConvolution = "Engine/Shaders/Passes/Environment/PrefilterConvolution.comp";
+    }; 
 }

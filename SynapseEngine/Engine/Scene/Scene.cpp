@@ -32,6 +32,8 @@
 #include "Engine/Component/Light/Spot/SpotLightComponent.h"
 #include "Engine/Component/Rendering/MaterialOverrideComponent.h"
 #include "Engine/Component/Rendering/PipelineOverrideComponent.h"
+#include "Engine/Component/Audio/AudioSourceComponent.h"
+#include "Engine/Component/Audio/AudioListenerComponent.h"
 
 #include "Engine/System/Core/TransformSystem.h"
 #include "Engine/System/Core/TransformSetupSystem.h"
@@ -83,6 +85,7 @@
 #include "Engine/System/Core/TransformModelLinkSystem.h"
 #include "Engine/Profiler/ICpuProfiler.h"
 #include "Engine/FrameContext.h"
+#include "Engine/Audio/Engine/IAudioEngine.h"
 
 namespace Syn
 {
@@ -95,11 +98,6 @@ namespace Syn
 
     void Scene::DestroyEntity(EntityID entity) {
         if (!_registry->IsValid(entity)) return;
-        
-        for (auto& system : _systems) {
-            system->OnEntityDestroyed(this, entity);
-        }
-
         _hierarchyManager->OnEntityDestroyed(entity);
         _registry->DestroyEntity(entity);
     }
@@ -220,6 +218,13 @@ namespace Syn
 		RegisterSystem<HierarchySystem>();
         RegisterSystem<SelectionOutlineSystem>();
         RegisterSystem<AudioSystem>();
+
+        _registry->RegisterOnDestroy<AudioSourceComponent>([](EntityID entity, AudioSourceComponent& source) {
+            auto audioEngine = ServiceLocator::Get<IAudioEngine>();
+            if (audioEngine) {
+                audioEngine->StopSound(entity);
+            }
+            });
     }
 
     void Scene::InitializeComponentBuffers()
@@ -337,6 +342,9 @@ namespace Syn
 
         RegisterComponentSparseMapBuffer<MeshColliderComponent>(BufferNames::MeshColliderSparseMap);
         RegisterComponentBuffer<MeshColliderComponent, MeshColliderComponentGPU>(BufferNames::MeshColliderData);
+
+        RegisterComponentBuffer<AudioSourceComponent, uint32_t>(BufferNames::AudioSourceVisibleData);
+        RegisterComponentBuffer<AudioListenerComponent, uint32_t>(BufferNames::AudioListenerVisibleData);
 
         RegisterGenericBuffer<VisibleModelData>(BufferNames::DirectionLightShadowModelVisibleData,
             [this]() -> uint32_t {

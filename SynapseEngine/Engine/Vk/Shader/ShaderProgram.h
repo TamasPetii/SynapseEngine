@@ -29,7 +29,7 @@ namespace Syn::Vk {
 
     struct ShaderProgramConfig {
         DescriptorLayoutOverride layoutOverride = nullptr;
-        bool useDescriptorBuffers = false;
+        bool useDescriptorBuffers = true;
         std::vector<std::string> defines;
     };
 

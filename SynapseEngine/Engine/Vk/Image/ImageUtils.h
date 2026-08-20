@@ -35,6 +35,9 @@ namespace Syn::Vk {
         uint32_t levelCount = VK_REMAINING_MIP_LEVELS;
         uint32_t baseArrayLayer = 0;
         uint32_t layerCount = VK_REMAINING_ARRAY_LAYERS;
+
+        uint32_t srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+        uint32_t dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
     };
 
 	using LayoutTransitionInfo = ImageBarrierInfo;
@@ -87,6 +90,7 @@ namespace Syn::Vk {
     public:
         static void InferSrcState(VkImageLayout layout, VkPipelineStageFlags2& outStage, VkAccessFlags2& outAccess);
         static void InsertBarrier(VkCommandBuffer cmd, const ImageBarrierInfo& info);
+        static void InsertBatchedBarriers(VkCommandBuffer cmd, std::span<const ImageBarrierInfo> barriers);
         static void TransitionLayout(VkCommandBuffer cmd, const LayoutTransitionInfo& info);
         static void BlitImage(VkCommandBuffer cmd, const ImageCopyInfo& info);
         static void CopyImage(VkCommandBuffer cmd, const ImageCopyInfo& info);

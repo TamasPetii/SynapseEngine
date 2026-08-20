@@ -19,6 +19,7 @@
 #include "Engine/Vk/Image/Image.h"
 #include "Engine/Vk/Buffer/Buffer.h"
 #include "Engine/Image/Data/Texture.h"
+#include "Engine/Vk/Rendering/GpuUploader.h"
 
 namespace Syn
 {
@@ -32,6 +33,6 @@ namespace Syn
     {
     public:
         virtual ~IGpuImageUploader() = default;
-        virtual ImageUploadResult Upload(const GpuImage& data, VkCommandBuffer cmd) = 0;
+        virtual ImageUploadResult Upload(const GpuImage& data, VkCommandBuffer cmd, Vk::GpuUploader* uploader) = 0;
     };
 }

@@ -25,9 +25,14 @@ namespace Syn {
     void ShadowAtlasTransitionPass::PrepareFrame(const RenderContext& context) {
         auto drawData = context.scene->GetSceneDrawData();
         auto fIdx = context.frameIndex;
+
         auto dirShadowAtlas = drawData->DirectionLightShadow.shadowAtlas[fIdx].get();
         auto pointShadowAtlas = drawData->PointLightShadow.shadowAtlas[fIdx].get();
         auto spotShadowAtlas = drawData->SpotLightShadow.shadowAtlas[fIdx].get();
+
+        auto dirColorAtlas = drawData->DirectionLightShadow.shadowColorAtlas[fIdx].get();
+        auto pointColorAtlas = drawData->PointLightShadow.shadowColorAtlas[fIdx].get();
+        auto spotColorAtlas = drawData->SpotLightShadow.shadowColorAtlas[fIdx].get();
 
         _imageTransitions.push_back({
             .image = dirShadowAtlas,
@@ -35,7 +40,7 @@ namespace Syn {
             .dstStage = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
             .dstAccess = VK_ACCESS_2_SHADER_READ_BIT,
             .discardContent = false
-        });
+            });
 
         _imageTransitions.push_back({
             .image = pointShadowAtlas,
@@ -47,6 +52,30 @@ namespace Syn {
 
         _imageTransitions.push_back({
             .image = spotShadowAtlas,
+            .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            .dstStage = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
+            .dstAccess = VK_ACCESS_2_SHADER_READ_BIT,
+            .discardContent = false
+            });
+
+        _imageTransitions.push_back({
+            .image = dirColorAtlas,
+            .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            .dstStage = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
+            .dstAccess = VK_ACCESS_2_SHADER_READ_BIT,
+            .discardContent = false
+            });
+
+        _imageTransitions.push_back({
+            .image = pointColorAtlas,
+            .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+            .dstStage = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
+            .dstAccess = VK_ACCESS_2_SHADER_READ_BIT,
+            .discardContent = false
+            });
+
+        _imageTransitions.push_back({
+            .image = spotColorAtlas,
             .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
             .dstStage = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
             .dstAccess = VK_ACCESS_2_SHADER_READ_BIT,

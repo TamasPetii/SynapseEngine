@@ -17,6 +17,7 @@
 #pragma once
 #include "Engine/SynApi.h"
 #include "Engine/Render/Passes/ComputePass.h"
+#include "Engine/Vk/Buffer/Buffer.h"
 
 namespace Syn {
     class SYN_API GeometryWorkGraphCullingPass : public ComputePass {
@@ -34,12 +35,12 @@ namespace Syn {
         void BindDescriptors(const RenderContext& context) override;
         void Dispatch(const RenderContext& context) override;
     private:
-        // Variables to track the sizes of our 3 Root Node dispatches
+        void CreateGraphPipeline();
+
         uint32_t _dynamicModelCount = 0;
         uint32_t _staticChunkCount = 0;
         uint32_t _mortonChunkCount = 0;
 
-        // Node indices mapped after pipeline creation (Depends on your specific Vulkan AMDX wrapper)
         uint32_t _dynamicModelRootIndex = 0;
         uint32_t _staticChunkRootIndex = 0;
         uint32_t _mortonChunkRootIndex = 0;

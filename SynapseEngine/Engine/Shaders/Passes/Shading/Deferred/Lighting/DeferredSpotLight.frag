@@ -39,6 +39,7 @@ layout(set = 2, binding = 1) uniform sampler2D normalRoughnessTexture;
 layout(set = 2, binding = 2) uniform sampler2D depthTexture;
 layout(set = 2, binding = 3) uniform sampler2D ssaoTexture;
 layout(set = 2, binding = 4) uniform sampler2DShadow spotLightShadowAtlas;
+layout(set = 2, binding = 5) uniform sampler2D spotLightShadowColorAtlas;
 
 #include "../../../../Includes/PushConstants/DeferredSpotLightPC.glsl"
 
@@ -93,14 +94,15 @@ void main()
     vec3 viewDir = normalize(camera.eye.xyz - position); 
     vec3 lightDir = normalize(light.position.xyz - position);
 
-    float shadowFactor = CalculateSpotLightShadow(
+    vec3 shadowFactor = CalculateSpotLightShadow(
         ctx.spotLightShadowDataBufferAddr,
         ctx.spotLightShadowSparseMapBufferAddr,
         inEntityLightIndex,
         position,
         normal,
         lightDir,
-        spotLightShadowAtlas
+        spotLightShadowAtlas,
+        spotLightShadowColorAtlas
     );
 
     vec3 radiance = SimulateSpotLight(

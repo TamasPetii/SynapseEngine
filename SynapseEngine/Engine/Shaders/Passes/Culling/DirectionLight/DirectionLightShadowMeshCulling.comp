@@ -113,10 +113,6 @@ void main() {
 
         uint matType = GetMaterialRenderType(mat);
 
-        // Shadows are only cast by Opaque materials
-        if (matType > 3) 
-            continue;
-
         // Resolve local mesh collider (Handle animation frame data if skinned)
         GpuMeshCollider localMeshCollider = GET_MESH_COLLIDER(addrs.meshColliders, m);
 

@@ -18,6 +18,7 @@
 #include "Engine/SynApi.h"
 #include "Engine/Vk/Rendering/RenderUtils.h"
 #include "Engine/Vk/Shader/ShaderProgram.h"
+#include "Engine/Manager/DescriptorManager.h"
 #include <string>
 #include <vector>
 #include <memory>

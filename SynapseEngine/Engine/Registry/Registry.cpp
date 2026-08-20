@@ -60,6 +60,15 @@ namespace Syn
 		std::for_each(_pools.GetDenseEntities().begin(), _pools.GetDenseEntities().end(), 
 			[&](EntityID poolEntity) {
 				IPool* pool = _pools.Get(poolEntity);
+
+				if (auto it = _destroyCallbacks.find(poolEntity); it != _destroyCallbacks.end())
+				{
+					for (auto& wrapper : it->second)
+					{
+						wrapper->Invoke(entity, pool);
+					}
+				}
+
 				pool->RemoveIfHas(entity);
 			});
 

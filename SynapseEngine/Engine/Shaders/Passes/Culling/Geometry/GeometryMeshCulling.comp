@@ -17,6 +17,10 @@
 #version 460
 #extension GL_GOOGLE_include_directive : require
 
+#ifdef ENABLE_WORK_GRAPH
+    #extension GL_AMDX_shader_enqueue : require
+#endif
+
 #include "../../../Includes/Core.glsl"
 #include "../../../Includes/Common/FrameGlobalContext.glsl"
 #include "../../../Includes/Common/Camera.glsl"
@@ -30,6 +34,10 @@
 #include "../../../Includes/Utils/Occlusion.glsl"
 #include "../../../Includes/Utils/CullingUtils.glsl"
 
+#ifdef ENABLE_WORK_GRAPH
+    #include "../../../Includes/Payload/WorkGraphCullingPayload.glsl"
+#endif
+
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
 #include "../../../Includes/PushConstants/ModelMeshCullingPC.glsl"
@@ -41,21 +49,29 @@ layout(push_constant) uniform PushConstants {
 // Depth pyramid (HZB) for main camera occlusion culling
 layout(set = 2, binding = 0) uniform sampler2D depthPyramid;
 
+#ifdef ENABLE_WORK_GRAPH
+    layout(coalescing_node_amdx) in;
+    layout(location = 0) in MeshCullingPayload payloadIn;
+#endif
+
 void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
     // Thread mapping: 1 WorkGroup = 1 Deferred Model, Local Threads = Meshes
-    uint jobIndex = gl_WorkGroupID.x;
     uint localThreadId = gl_LocalInvocationID.x;
 
-    // 1. Boundary check against the deferred model count
-    if (jobIndex >= GET_DISPATCH_CMD(ctx.modelCountBufferAddr).groupCountX) return;
-
-    // 2. Fetch Job Metadata from VisibleModelList
-    VisibleModelData modelData = GET_VISIBLE_MODEL(ctx.modelVisibleIndexBufferAddr, jobIndex);
+    #ifdef ENABLE_WORK_GRAPH
+        uint rawEntityId = payloadIn.entityId;
+        uint modelIndex = payloadIn.modelIndex;
+    #else
+        uint jobIndex = gl_WorkGroupID.x;
+        if (jobIndex >= GET_DISPATCH_CMD(ctx.modelCountBufferAddr).groupCountX) return;
+        VisibleModelData modelData = GET_VISIBLE_MODEL(ctx.modelVisibleIndexBufferAddr, jobIndex);
+        uint rawEntityId = modelData.entityId;
+        uint modelIndex = modelData.modelIndex;
+    #endif
 
     // Unpack payload: [Bit 31: Inside Frustum] [Bits 0-30: EntityID]
-    uint rawEntityId = modelData.entityId;
     bool parentFullyInside = (rawEntityId >> 31) != 0; 
     uint pureEntityId = rawEntityId & 0x7FFFFFFF;
 

@@ -23,5 +23,8 @@ namespace Syn::Vk
     {
         static constexpr const char* Default = "_default";
         static constexpr const char* Mip = "_mip";
+
+        static constexpr const char* Luma = "Luma";
+		static  constexpr const char* Chroma = "Chroma";
     };
 }

@@ -27,6 +27,6 @@ namespace Syn
         DefaultGpuAnimationUploader() = default;
         ~DefaultGpuAnimationUploader() override = default;
 
-        AnimationUploadResult Upload(const GpuBatchedAnimation& data, VkCommandBuffer cmd) override;
+        AnimationUploadResult Upload(const GpuBatchedAnimation& data, VkCommandBuffer cmd, Vk::GpuUploader* uploader) override;
     };
 }

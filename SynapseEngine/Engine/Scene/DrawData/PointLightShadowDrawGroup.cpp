@@ -114,9 +114,32 @@ namespace Syn
             .perMipViews = true
             });
 
+        Vk::ImageConfig colorAtlasSpec{};
+        colorAtlasSpec.width = POINT_SHADOW_ATLAS_SIZE;
+        colorAtlasSpec.height = POINT_SHADOW_ATLAS_SIZE;
+        colorAtlasSpec.type = VK_IMAGE_TYPE_2D;
+        colorAtlasSpec.format = VK_FORMAT_R16G16B16A16_SFLOAT;
+        colorAtlasSpec.usage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        colorAtlasSpec.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+
+        colorAtlasSpec.AddView(Vk::ImageViewNames::Default, Vk::ImageViewConfig{
+            .viewType = VK_IMAGE_VIEW_TYPE_2D
+            });
+
+        colorAtlasSpec.AddView(RenderTargetViewNames::PointLightShadowTransparentColor, Vk::ImageViewConfig{
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .swizzle = { VK_COMPONENT_SWIZZLE_R, VK_COMPONENT_SWIZZLE_G, VK_COMPONENT_SWIZZLE_B, VK_COMPONENT_SWIZZLE_ONE }
+            });
+
+        colorAtlasSpec.AddView(RenderTargetViewNames::PointLightShadowTransparentDepth, Vk::ImageViewConfig{
+            .viewType = VK_IMAGE_VIEW_TYPE_2D,
+            .swizzle = { VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_A, VK_COMPONENT_SWIZZLE_ONE }
+            });
+
         for (int i = 0; i < frameCount; ++i) {
             shadowAtlas.push_back(std::make_unique<Vk::Image>(atlasSpec));
             shadowDepthPyramid.push_back(std::make_unique<Vk::Image>(hizSpec));
+            shadowColorAtlas.push_back(std::make_unique<Vk::Image>(colorAtlasSpec));
         }
     }
 

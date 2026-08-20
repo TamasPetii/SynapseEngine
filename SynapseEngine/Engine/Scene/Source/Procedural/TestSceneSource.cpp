@@ -47,6 +47,7 @@
 #include "Engine/Utils/PathUtils.h"
 #include "Engine/Audio/AudioManager.h"
 #include "Engine/Video/VideoManager.h"
+#include "Engine/Environment/EnvironmentManager.h"
 
 #include <random>
 #include <fstream>
@@ -127,8 +128,8 @@ namespace Syn
             modelManager->GetResourceIndex(MeshSourceNames::Torus)
         };
 
-        auto skyTextureId = ServiceLocator::Get<ImageManager>()->LoadImageSync(PathUtils::GetAbsolutePathString(envPath + "MainScene.hdr"));
-        scene.GetSettings()->environment.skyTextureId = skyTextureId;
+        auto envId = ServiceLocator::Get<EnvironmentManager>()->LoadEnvironmentSync(PathUtils::GetAbsolutePathString(envPath + "MainScene.hdr"));
+        scene.GetSettings()->environment.activeEnvironmentId = envId;
 
         EntityID rootCameras = scene.CreateEntity();
         registry.AddComponent<TagComponent>(rootCameras);
@@ -210,40 +211,80 @@ namespace Syn
 
         {
             auto videoManager = ServiceLocator::Get<VideoManager>();
-            std::string videoPath = PathUtils::GetAbsolutePathString("Assets/Engine/Video/nature.mp4");
-            uint32_t videoId = videoManager->LoadVideoAsync(videoPath);
 
-            EntityID tvEntity = scene.CreateEntity();
-            registry.AddComponent<TagComponent>(tvEntity);
-            registry.GetComponent<TagComponent>(tvEntity).name = "Cinema_Screen";
-            registry.GetComponent<TagComponent>(tvEntity).tag = "Model";
-            registry.AddComponent<TransformComponent>(tvEntity);
-            registry.AddComponent<ModelComponent>(tvEntity);
-            registry.AddComponent<MaterialOverrideComponent>(tvEntity);
-            registry.AddComponent<PipelineOverrideComponent>(tvEntity);
+            std::string localVideoPath = PathUtils::GetAbsolutePathString("Assets/Engine/Video/budapest.mp4");
+            uint32_t localVideoId = videoManager->LoadVideoAsync(localVideoPath);
 
-            auto& tvTransform = registry.GetComponent<TransformComponent>(tvEntity);
-            tvTransform.translation = glm::vec3(15.0f, 25.0f, 0.0f);
-            tvTransform.rotation = glm::vec3(-90.0f, 90.0f, 0.0f);
-            tvTransform.scale = glm::vec3(32.0f, 1.0f, 18.0f);
-            registry.GetComponent<ModelComponent>(tvEntity).modelIndex = modelManager->GetResourceIndex(MeshSourceNames::Quad);
+            EntityID tvEntity1 = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(tvEntity1);
+            registry.GetComponent<TagComponent>(tvEntity1).name = "Cinema_Screen_Local";
+            registry.GetComponent<TagComponent>(tvEntity1).tag = "Model";
+            registry.AddComponent<TransformComponent>(tvEntity1);
+            registry.AddComponent<ModelComponent>(tvEntity1);
+            registry.AddComponent<MaterialOverrideComponent>(tvEntity1);
+            registry.AddComponent<PipelineOverrideComponent>(tvEntity1);
 
-            Material tvMaterial{};
-            tvMaterial.color = glm::vec4(1.0f);
-            tvMaterial.emissiveColor = glm::vec3(1.0f);
-            tvMaterial.emissiveIntensity = 0.0f;
-            tvMaterial.videoTexture = videoId;
+            auto& tvTransform1 = registry.GetComponent<TransformComponent>(tvEntity1);
+            tvTransform1.translation = glm::vec3(15.0f, 25.0f, -18.0f);
+            tvTransform1.rotation = glm::vec3(-90.0f, 105.0f, 0.0f);
+            tvTransform1.scale = glm::vec3(32.0f, 1.0f, 18.0f);
+            registry.GetComponent<ModelComponent>(tvEntity1).modelIndex = modelManager->GetResourceIndex(MeshSourceNames::Quad);
 
-            uint32_t tvMatId = materialManager->LoadMaterialDirect("VideoScreenMat", tvMaterial);
-            registry.GetComponent<MaterialOverrideComponent>(tvEntity).materials.push_back(tvMatId);
+            Material tvMaterial1{};
+            tvMaterial1.color = glm::vec4(1.0f);
+            tvMaterial1.emissiveColor = glm::vec3(1.0f);
+            tvMaterial1.emissiveIntensity = 0.0f;
+            tvMaterial1.videoTexture = localVideoId;
 
-            registry.GetPool<TransformComponent>()->SetCategory(tvEntity, StorageCategory::Static);
-            registry.GetPool<ModelComponent>()->SetCategory(tvEntity, StorageCategory::Static);
-            registry.GetPool<MaterialOverrideComponent>()->SetCategory(tvEntity, StorageCategory::Static);
-            registry.GetPool<PipelineOverrideComponent>()->SetCategory(tvEntity, StorageCategory::Static);
-            registry.GetPool<TagComponent>()->SetCategory(tvEntity, StorageCategory::Static);
+            uint32_t tvMatId1 = materialManager->LoadMaterialDirect("VideoScreenMat_Local", tvMaterial1);
+            registry.GetComponent<MaterialOverrideComponent>(tvEntity1).materials.push_back(tvMatId1);
 
-            hm->AttachChild(rootEnvironment, tvEntity);
+            registry.GetPool<TransformComponent>()->SetCategory(tvEntity1, StorageCategory::Static);
+            registry.GetPool<ModelComponent>()->SetCategory(tvEntity1, StorageCategory::Static);
+            registry.GetPool<MaterialOverrideComponent>()->SetCategory(tvEntity1, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(tvEntity1, StorageCategory::Static);
+            registry.GetPool<TagComponent>()->SetCategory(tvEntity1, StorageCategory::Static);
+
+            hm->AttachChild(rootEnvironment, tvEntity1);
+        }
+
+        {
+            auto videoManager = ServiceLocator::Get<VideoManager>();
+
+            std::string networkVideoUrl = "https://github.com/TamasPetii/SynapseEngine/releases/download/v1.0.0/network_test_video.mp4";
+            uint32_t networkVideoId = videoManager->LoadVideoFromNetworkAsync(networkVideoUrl);
+
+            EntityID tvEntity2 = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(tvEntity2);
+            registry.GetComponent<TagComponent>(tvEntity2).name = "Cinema_Screen_Network";
+            registry.GetComponent<TagComponent>(tvEntity2).tag = "Model";
+            registry.AddComponent<TransformComponent>(tvEntity2);
+            registry.AddComponent<ModelComponent>(tvEntity2);
+            registry.AddComponent<MaterialOverrideComponent>(tvEntity2);
+            registry.AddComponent<PipelineOverrideComponent>(tvEntity2);
+
+            auto& tvTransform2 = registry.GetComponent<TransformComponent>(tvEntity2);
+            tvTransform2.translation = glm::vec3(15.0f, 25.0f, 18.0f);
+            tvTransform2.rotation = glm::vec3(-90.0f, 75.0f, 0.0f);
+            tvTransform2.scale = glm::vec3(32.0f, 1.0f, 18.0f);
+            registry.GetComponent<ModelComponent>(tvEntity2).modelIndex = modelManager->GetResourceIndex(MeshSourceNames::Quad);
+
+            Material tvMaterial2{};
+            tvMaterial2.color = glm::vec4(1.0f);
+            tvMaterial2.emissiveColor = glm::vec3(1.0f);
+            tvMaterial2.emissiveIntensity = 0.0f;
+            tvMaterial2.videoTexture = networkVideoId;
+
+            uint32_t tvMatId2 = materialManager->LoadMaterialDirect("VideoScreenMat_Network", tvMaterial2);
+            registry.GetComponent<MaterialOverrideComponent>(tvEntity2).materials.push_back(tvMatId2);
+
+            registry.GetPool<TransformComponent>()->SetCategory(tvEntity2, StorageCategory::Static);
+            registry.GetPool<ModelComponent>()->SetCategory(tvEntity2, StorageCategory::Static);
+            registry.GetPool<MaterialOverrideComponent>()->SetCategory(tvEntity2, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(tvEntity2, StorageCategory::Static);
+            registry.GetPool<TagComponent>()->SetCategory(tvEntity2, StorageCategory::Static);
+
+            hm->AttachChild(rootEnvironment, tvEntity2);
         }
 
         // Cameras (Main & Debug)

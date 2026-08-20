@@ -63,18 +63,17 @@ namespace Syn {
         auto shaderManager = ServiceLocator::Get<ShaderManager>();
         auto imageManager = ServiceLocator::Get<ImageManager>();
         auto videoManager = ServiceLocator::Get<VideoManager>();
+        auto descriptorManager = ServiceLocator::Get<DescriptorManager>();
 
         Vk::ShaderProgramConfig config;
         config.useDescriptorBuffers = true;
-        config.layoutOverride = [imageManager, videoManager](uint32_t setIndex) {
+        config.layoutOverride = [descriptorManager](uint32_t setIndex) {
             if (setIndex == 0) {
-                return imageManager->GetBindlessLayout();
-            }
-            if (setIndex == 1) {
-                return videoManager->GetBindlessLayout();
+                return descriptorManager->GetBindlessLayout();
             }
             return VkDescriptorSetLayout{};
             };
+
 
         _shaderProgramId = shaderManager->LoadProgramAsync("MeshletOpaqueAlphaTestedForwardProgram", {
             ShaderNames::MeshletTask,
@@ -165,7 +164,6 @@ namespace Syn {
         auto imageManager = ServiceLocator::Get<ImageManager>();
         auto drawData = context.scene->GetSceneDrawData();
 
-        //Using prevous frame's depth pyramid!
         uint fIdx = context.frameIndex;
         uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
         auto prevRtGroup = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, prevFrameIndex);
@@ -182,54 +180,30 @@ namespace Syn {
         auto spotShadowAtlas = drawData->SpotLightShadow.shadowAtlas[fIdx].get();
         auto shadowSampler = imageManager->GetSampler(SamplerNames::ShadowSampler);
 
+        auto dirColorAtlas = drawData->DirectionLightShadow.shadowColorAtlas[fIdx].get();
+        auto pointColorAtlas = drawData->PointLightShadow.shadowColorAtlas[fIdx].get();
+        auto spotColorAtlas = drawData->SpotLightShadow.shadowColorAtlas[fIdx].get();
+        auto linearSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge);
+
         Vk::PushDescriptorWriter pushWriter;
 
-        pushWriter.AddCombinedImageSampler(
-            0,
-            depthPyramid->GetView(Vk::ImageViewNames::Default),
-            maxSampler->Handle(),
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-        );
+        pushWriter.AddCombinedImageSampler(0, depthPyramid->GetView(Vk::ImageViewNames::Default), maxSampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        pushWriter.AddCombinedImageSampler(1, ssaoTexture->GetView(Vk::ImageViewNames::Default), ssaoSampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-        pushWriter.AddCombinedImageSampler(
-            1,
-            ssaoTexture->GetView(Vk::ImageViewNames::Default),
-            ssaoSampler->Handle(),
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-        );
+        pushWriter.AddCombinedImageSampler(2, dirShadowAtlas->GetView(Vk::ImageViewNames::Default), shadowSampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        pushWriter.AddCombinedImageSampler(3, pointShadowAtlas->GetView(Vk::ImageViewNames::Default), shadowSampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        pushWriter.AddCombinedImageSampler(4, spotShadowAtlas->GetView(Vk::ImageViewNames::Default), shadowSampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-        pushWriter.AddCombinedImageSampler(
-            2,
-            dirShadowAtlas->GetView(Vk::ImageViewNames::Default),
-            shadowSampler->Handle(),
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-        );
-
-        pushWriter.AddCombinedImageSampler(
-            3,
-            pointShadowAtlas->GetView(Vk::ImageViewNames::Default),
-            shadowSampler->Handle(),
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-        );
-
-        pushWriter.AddCombinedImageSampler(
-            4,
-            spotShadowAtlas->GetView(Vk::ImageViewNames::Default),
-            shadowSampler->Handle(),
-            VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
-        );
+        pushWriter.AddCombinedImageSampler(5, dirColorAtlas->GetView(Vk::ImageViewNames::Default), linearSampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        pushWriter.AddCombinedImageSampler(6, pointColorAtlas->GetView(Vk::ImageViewNames::Default), linearSampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        pushWriter.AddCombinedImageSampler(7, spotColorAtlas->GetView(Vk::ImageViewNames::Default), linearSampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
 
-        auto videoManager = ServiceLocator::Get<VideoManager>();
+        auto descriptorManager = ServiceLocator::Get<DescriptorManager>();
         std::vector<std::pair<uint32_t, Vk::DescriptorBuffer*>> buffersToBind;
-
-        if (auto imgBuffer = imageManager->GetBindlessBuffer()) {
-            buffersToBind.push_back({ 0, imgBuffer });
-        }
-
-        if (auto vidBuffer = videoManager->GetBindlessBuffer()) {
-            buffersToBind.push_back({ 1, vidBuffer });
+        if (auto descBuffer = descriptorManager->GetBindlessBuffer()) {
+            buffersToBind.push_back({ 0, descBuffer });
         }
 
         Vk::DescriptorUtils::BindMultipleBuffer(context.cmd, _shaderProgram->GetLayout(), VK_PIPELINE_BIND_POINT_GRAPHICS, buffersToBind);

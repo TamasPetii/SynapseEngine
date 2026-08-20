@@ -21,7 +21,8 @@
 
 layout(set = 0, binding = 0) uniform sampler globalSamplers[];
 layout(set = 0, binding = 1) uniform texture2D bindlessTextures[];
-layout(set = 1, binding = 0) uniform texture2D bindlessVideoTextures[];
+layout(set = 0, binding = 2) uniform texture2D bindlessVideoTextures[];
+layout(set = 0, binding = 3) uniform textureCube bindlessCubeTextures[];
 
 layout(buffer_reference, std430, buffer_reference_align = 4) readonly restrict buffer TextureMetadataBuffer {
     uint data[];
@@ -59,6 +60,21 @@ vec4 SampleVideoTexture2D(uint textureID, uint samplerID, vec2 uv) {
     return texture(
         sampler2D(bindlessVideoTextures[nonuniformEXT(textureID)], globalSamplers[nonuniformEXT(samplerID)]), 
         uv
+    );
+}
+
+vec4 SampleTextureCube(uint textureID, uint samplerID, vec3 dir) { 
+    return texture(
+        samplerCube(bindlessCubeTextures[nonuniformEXT(textureID)], globalSamplers[nonuniformEXT(samplerID)]), 
+        dir
+    );
+}
+
+vec4 SampleTextureCubeLod(uint textureID, uint samplerID, vec3 dir, float lod) { 
+    return textureLod(
+        samplerCube(bindlessCubeTextures[nonuniformEXT(textureID)], globalSamplers[nonuniformEXT(samplerID)]), 
+        dir,
+        lod
     );
 }
 

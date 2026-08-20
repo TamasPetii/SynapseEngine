@@ -20,6 +20,10 @@
 #extension GL_KHR_shader_subgroup_arithmetic : require
 #extension GL_KHR_shader_subgroup_ballot : require
 
+#ifdef ENABLE_WORK_GRAPH
+#extension GL_AMDX_shader_enqueue : require
+#endif
+
 #include "../../../Includes/Core.glsl"
 #include "../../../Includes/Common/FrameGlobalContext.glsl"
 #include "../../../Includes/Common/Camera.glsl"
@@ -28,6 +32,10 @@
 #include "../../../Includes/Utils/Occlusion.glsl"
 #include "../../../Includes/Common/StaticChunk.glsl"
 #include "../../../Includes/Common/IndirectCommand.glsl"
+
+#ifdef ENABLE_WORK_GRAPH
+#include "../../../Includes/Payload/WorkGraphCullingPayload.glsl"
+#endif
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
 
@@ -39,6 +47,11 @@ layout(push_constant) uniform PushConstants {
 
 // Depth pyramid (HZB) for main camera occlusion culling
 layout(set = 2, binding = 0) uniform sampler2D depthPyramid;
+
+#ifdef ENABLE_WORK_GRAPH
+layout(coalescing_node_amdx) out node_type GeometryWorkGraphMortonModelCullingNode;
+layout(location = 0) out ChunkCullingPayload payloadOut;
+#endif
 
 void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
@@ -74,25 +87,32 @@ void main() {
         return;
     }
 
-    // 5. Subgroup-optimized writes to the visible Morton chunk list
-    uint needsWrite = 1;
-    uint subgroupWriteCount = subgroupAdd(needsWrite);
-    uint localOffset = subgroupExclusiveAdd(needsWrite); 
-    uint baseOffset = 0;
+    #ifdef ENABLE_WORK_GRAPH
+        // 5. WORK GRAPH ENQUEUE (Directly spawn a Model Culling Node)
+        allocateNodeRecordAMDX(GeometryWorkGraphMortonModelCullingNode, 1);
+        payloadOut.rawChunkPayload = SET_BIT_TO(chunkId, 31, visibility == INTERSECTION_INSIDE);
+        submitNodeRecordAMDX(GeometryWorkGraphMortonModelCullingNode);
+    #else
+        // 5. Subgroup-optimized writes to the visible Morton chunk list
+        uint needsWrite = 1;
+        uint subgroupWriteCount = subgroupAdd(needsWrite);
+        uint localOffset = subgroupExclusiveAdd(needsWrite); 
+        uint baseOffset = 0;
 
-    if (subgroupElect() && subgroupWriteCount > 0) {
-        // Increment the indirect dispatch command groupCountX
-        baseOffset = atomicAdd(GET_VK_DISPATCH_CMD(ctx.mortonChunkVisibleIndirectDispatchBufferAddr).groupCountX, subgroupWriteCount);
-    }
+        if (subgroupElect() && subgroupWriteCount > 0) {
+            // Increment the indirect dispatch command groupCountX
+            baseOffset = atomicAdd(GET_VK_DISPATCH_CMD(ctx.mortonChunkVisibleIndirectDispatchBufferAddr).groupCountX, subgroupWriteCount);
+        }
 
-    baseOffset = subgroupBroadcastFirst(baseOffset);
+        baseOffset = subgroupBroadcastFirst(baseOffset);
 
-    // 6. Encode Payload and write to visible list
-    if (needsWrite == 1) {
-        uint finalIndex = baseOffset + localOffset;
+        // 6. Encode Payload and write to visible list
+        if (needsWrite == 1) {
+            uint finalIndex = baseOffset + localOffset;
 
-        // Encode chunk ID with visibility flag
-        uint payload = SET_BIT_TO(chunkId, 31, visibility == INTERSECTION_INSIDE);        
-        GET_VISIBLE_CHUNK(ctx.mortonChunkVisibleIndexBufferAddr, finalIndex) = payload;
-    }
+            // Encode chunk ID with visibility flag
+            uint payload = SET_BIT_TO(chunkId, 31, visibility == INTERSECTION_INSIDE);        
+            GET_VISIBLE_CHUNK(ctx.mortonChunkVisibleIndexBufferAddr, finalIndex) = payload;
+        }
+    #endif   
 }

@@ -338,6 +338,9 @@ namespace Syn {
                     ImGui::Unindent();
                 }
 
+                RadioButton("DirLight Trans Color", RenderTargetGroupNames::Main, RenderTargetNames::DirectionLightShadowColorAtlas, RenderTargetViewNames::DirectionLightShadowTransparentColor);
+                RadioButton("DirLight Trans Depth", RenderTargetGroupNames::Main, RenderTargetNames::DirectionLightShadowColorAtlas, RenderTargetViewNames::DirectionLightShadowTransparentDepth);
+
                 static int spotShadowHzbMaxMip = 0;
                 spotShadowHzbMaxMip = std::clamp(spotShadowHzbMaxMip, 0, int(SPOT_SHADOW_HIZ_MIP_LEVELS - 1));
                 std::string spotShadowMaxBaseView = RenderTargetViewNames::SpotLightShadowDepthPyramidMax;
@@ -370,6 +373,8 @@ namespace Syn {
                     ImGui::Unindent();
                 }
 
+                RadioButton("SpotLight Trans Color", RenderTargetGroupNames::Main, RenderTargetNames::SpotLightShadowColorAtlas, RenderTargetViewNames::SpotLightShadowTransparentColor);
+                RadioButton("SpotLight Trans Depth", RenderTargetGroupNames::Main, RenderTargetNames::SpotLightShadowColorAtlas, RenderTargetViewNames::SpotLightShadowTransparentDepth);
                 static int pointShadowHzbMaxMip = 0;
                 pointShadowHzbMaxMip = std::clamp(pointShadowHzbMaxMip, 0, int(POINT_SHADOW_HIZ_MIP_LEVELS - 1));
                 std::string pointShadowMaxBaseView = RenderTargetViewNames::PointLightShadowDepthPyramidMax;
@@ -399,6 +404,9 @@ namespace Syn {
                     }
                     ImGui::Unindent();
                 }
+
+                RadioButton("PointLight Trans Color", RenderTargetGroupNames::Main, RenderTargetNames::PointLightShadowColorAtlas, RenderTargetViewNames::PointLightShadowTransparentColor);
+                RadioButton("PointLight Trans Depth", RenderTargetGroupNames::Main, RenderTargetNames::PointLightShadowColorAtlas, RenderTargetViewNames::PointLightShadowTransparentDepth);
 
                 RadioButton("PreviewAtlas", RenderTargetGroupNames::Main, RenderTargetNames::PreviewAtlas, Vk::ImageViewNames::Default);
             }

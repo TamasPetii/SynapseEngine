@@ -74,6 +74,34 @@ namespace Syn::Vk {
         vkCmdPipelineBarrier2(cmd, &depInfo);
     }
 
+    void BufferUtils::InsertBatchedBarriers(VkCommandBuffer cmd, std::span<const BufferBarrierInfo> barriers) {
+        if (barriers.empty()) return;
+
+        std::vector<VkBufferMemoryBarrier2> vkBarriers;
+        vkBarriers.reserve(barriers.size());
+
+        for (const auto& info : barriers) {
+            VkBufferMemoryBarrier2 barrier{ VK_STRUCTURE_TYPE_BUFFER_MEMORY_BARRIER_2 };
+            barrier.srcStageMask = info.srcStage;
+            barrier.srcAccessMask = info.srcAccess;
+            barrier.dstStageMask = info.dstStage;
+            barrier.dstAccessMask = info.dstAccess;
+            barrier.srcQueueFamilyIndex = info.srcQueueFamilyIndex;
+            barrier.dstQueueFamilyIndex = info.dstQueueFamilyIndex;
+            barrier.buffer = info.buffer;
+            barrier.offset = info.offset;
+            barrier.size = info.size;
+
+            vkBarriers.push_back(barrier);
+        }
+
+        VkDependencyInfo depInfo{ VK_STRUCTURE_TYPE_DEPENDENCY_INFO };
+        depInfo.bufferMemoryBarrierCount = static_cast<uint32_t>(vkBarriers.size());
+        depInfo.pBufferMemoryBarriers = vkBarriers.data();
+
+        vkCmdPipelineBarrier2(cmd, &depInfo);
+    }
+
     void BufferUtils::InsertGlobalBarrier(VkCommandBuffer cmd, const GlobalBarrierInfo& info) {
         VkMemoryBarrier2 barrier{ VK_STRUCTURE_TYPE_MEMORY_BARRIER_2 };
         barrier.srcStageMask = info.srcStage;

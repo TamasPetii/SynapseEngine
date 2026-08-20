@@ -40,6 +40,7 @@ layout(set = 2, binding = 1) uniform sampler2D normalRoughnessTexture;
 layout(set = 2, binding = 2) uniform sampler2D depthTexture;
 layout(set = 2, binding = 3) uniform sampler2D ssaoTexture;
 layout(set = 2, binding = 4) uniform sampler2DShadow dirLightShadowAtlas;
+layout(set = 2, binding = 5) uniform sampler2D dirLightShadowColorAtlas;
 
 #include "../../../../Includes/PushConstants/DeferredDirectionLightPC.glsl"
 
@@ -83,7 +84,8 @@ void main()
     vec3 viewDir = normalize(camera.eye.xyz - position);  
 
     uint debugCascadeIndex = 0;
-    float shadowFactor = CalculateDirectionalLightShadow(
+
+    vec3 shadowFactor = CalculateDirectionalLightShadow(
         ctx.directionLightShadowDataBufferAddr,
         ctx.directionLightShadowSparseMapBufferAddr,
         inEntityLightIndex,
@@ -92,6 +94,7 @@ void main()
         lightDir,
         viewDepth,
         dirLightShadowAtlas,
+        dirLightShadowColorAtlas,
         debugCascadeIndex
     );
     
