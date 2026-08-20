@@ -456,17 +456,19 @@ namespace Syn
             for (uint32_t i = 0; i < appendedCount; ++i)
             {
                 const auto& item = _sortBuffer[i];
+				auto& mainGroup = drawData->Models;
+
                 uint32_t isMeshlet = (item.drawCallKey >> 31) & 1;
                 uint32_t indirectIdx = item.drawCallKey & 0x7FFFFFFF;
 
                 shadowGroup.instances[i] = item.gpuPayload;
+                uint32_t descIdx = isMeshlet ? (indirectIdx + mainGroup.activeTraditionalCount) : indirectIdx;
 
-                if (indirectIdx != currentIndirectIdx) {
-                    logPreviousBatch();
-
+                if (indirectIdx != currentIndirectIdx || isMeshlet != currentIsMeshlet) {
                     currentIndirectIdx = indirectIdx;
                     currentIsMeshlet = isMeshlet;
-                    shadowGroup.shadowDescriptors[indirectIdx].instanceOffset = i;
+
+                    shadowGroup.shadowDescriptors[descIdx].instanceOffset = i;
                 }
 
                 if (isMeshlet) {

@@ -438,6 +438,7 @@ namespace Syn
         tf::Task finalizeTask = subflow.emplace([this, drawData]() {
             uint32_t appendedCount = drawData->PointLightShadow.appendedInstanceCount.load(std::memory_order_relaxed);
             auto& shadowGroup = drawData->PointLightShadow;
+			auto& mainGroup = drawData->Models;
 
             uint32_t currentIndirectIdx = 0xFFFFFFFF;
             uint32_t currentIsMeshlet = 0;
@@ -450,10 +451,13 @@ namespace Syn
 
                 shadowGroup.instances[i] = item.gpuPayload;
 
-                if (indirectIdx != currentIndirectIdx) {
+                uint32_t descIdx = isMeshlet ? (indirectIdx + mainGroup.activeTraditionalCount) : indirectIdx;
+
+                if (indirectIdx != currentIndirectIdx || isMeshlet != currentIsMeshlet) {
                     currentIndirectIdx = indirectIdx;
                     currentIsMeshlet = isMeshlet;
-                    shadowGroup.shadowDescriptors[indirectIdx].instanceOffset = i;
+
+                    shadowGroup.shadowDescriptors[descIdx].instanceOffset = i;
                 }
 
                 if (isMeshlet) {
