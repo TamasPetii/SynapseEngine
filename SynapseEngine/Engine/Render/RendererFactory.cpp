@@ -290,6 +290,7 @@ namespace Syn
         pipeline->AddPass(std::make_unique<PointLightShadowFinalizeSetupPass>());
         pipeline->AddPass(std::make_unique<PointLightShadowFinalizePass>());
 
+
         //DirectionLight Shadow Passes
         pipeline->AddPass(std::make_unique<DirectionLightShadowInitPass>());
         pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque1Sided));

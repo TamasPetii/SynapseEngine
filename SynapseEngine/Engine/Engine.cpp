@@ -100,6 +100,9 @@ namespace Syn
 
 		ServiceLocator::Get<ICpuProfiler>()->BeginFrame(currentFrame);
 
+		//Gpu Uploader Update
+		ServiceLocator::Get<Vk::GpuUploader>()->ProcessUploads();
+
 		//Updates
 		ServiceLocator::Get<DescriptorManager>()->Update();
 		ServiceLocator::Get<ShaderManager>()->Update();
@@ -114,8 +117,6 @@ namespace Syn
 		//Notifications
 		ServiceLocator::Get<MaterialManager>()->ProcessPendingNotifications();
 		ServiceLocator::Get<ModelManager>()->ProcessPendingNotifications();
-
-		ServiceLocator::Get<Vk::GpuUploader>()->ProcessUploads();
 
 		_sceneManager->Update(_frameContext.deltaTime, currentFrame);
 	
