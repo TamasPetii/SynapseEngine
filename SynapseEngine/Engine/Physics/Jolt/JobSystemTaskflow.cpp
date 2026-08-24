@@ -34,7 +34,6 @@ namespace Syn
 
     JobSystemTaskflow::~JobSystemTaskflow()
     {
-        mExecutor.wait_for_all();
     }
 
     int  JobSystemTaskflow::GetMaxConcurrency() const

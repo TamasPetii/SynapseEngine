@@ -93,6 +93,7 @@ namespace Syn
             if (_activeScene)
             {
                 ServiceLocator::Get<Vk::Context>()->GetDevice()->WaitIdle();
+                _activeScene.reset();
             }
 
             if (_pendingScene)
