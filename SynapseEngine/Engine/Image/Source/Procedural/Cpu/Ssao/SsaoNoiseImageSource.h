@@ -15,17 +15,14 @@
 // along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
 
 #pragma once
-#include "Engine/SynApi.h"
-#include "ProceduralImageSource.h"
+#include "Engine/Image/Source/Procedural/ProceduralImageSource.h"
 
 namespace Syn
 {
-    class SYN_API DefaultImageSource : public ProceduralImageSource
+    class SYN_API SsaoNoiseImageSource : public ProceduralImageSource
     {
     public:
-        DefaultImageSource();
-        ~DefaultImageSource() override = default;
-
+        SsaoNoiseImageSource();
         std::optional<RawImage> Produce() override;
     };
 }

@@ -18,8 +18,10 @@
 #include "Engine/SynApi.h"
 #include <vector>
 #include <cstdint>
+#include <functional>
 #include <vulkan/vulkan.h>
 #include "Engine/Image/Data/Common/MipLevelInfo.h"
+#include "Engine/Vk/Image/Image.h"
 
 namespace Syn
 {
@@ -33,8 +35,11 @@ namespace Syn
 
         bool isCompressed = false;
         bool autoGenerateMipmaps = false;
+        bool isGpuGenerated = false;
+        bool autoCache = false;
 
         std::vector<uint8_t> pixels;
         std::vector<MipLevelInfo> mipData;
+        std::function<void(VkCommandBuffer, class Vk::Image&)> gpuGeneratorCallback;
     };
 }

@@ -39,78 +39,34 @@ namespace Syn
         imgConfig.depth = data.depth;
         imgConfig.format = data.format;
         imgConfig.mipLevels = targetMipLevels;
-        imgConfig.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+        imgConfig.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
-        if (data.autoGenerateMipmaps) {
-            imgConfig.usage |= VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+        if (data.isGpuGenerated) {
+            imgConfig.usage |= VK_IMAGE_USAGE_STORAGE_BIT;
         }
 
         result.texture = std::make_shared<Vk::Image>(imgConfig);
 
-        //Staging Buffer
-        size_t byteSize = data.pixels.size();
-        result.stagingBuffer = Vk::BufferFactory::CreateStaging(byteSize);
-        result.stagingBuffer->Write(data.pixels.data(), byteSize, 0);
-
-        result.texture->TransitionLayout(
-            cmd,
-            VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-            VK_PIPELINE_STAGE_2_TRANSFER_BIT,
-            VK_ACCESS_2_TRANSFER_WRITE_BIT,
-            true
-        );
-
-        if (!data.mipData.empty()) {
-            for (uint32_t level = 0; level < data.mipLevels; ++level) {
-                const auto& mip = data.mipData[level];
-
-                Vk::BufferToImageCopyInfo copyInfo{};
-                copyInfo.srcBuffer = result.stagingBuffer->Handle();
-                copyInfo.dstImage = result.texture->Handle();
-
-                copyInfo.width = mip.width;
-                copyInfo.height = mip.height;
-                copyInfo.depth = data.depth;
-
-                copyInfo.bufferOffset = mip.offset;
-
-                copyInfo.mipLevel = level;
-                copyInfo.baseArrayLayer = 0;
-                copyInfo.layerCount = 1;
-                copyInfo.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                copyInfo.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-
-                Vk::BufferUtils::CopyBufferToImage(cmd, copyInfo);
-            }
-        }
-        else {
-            Vk::BufferToImageCopyInfo copyInfo{};
-            copyInfo.srcBuffer = result.stagingBuffer->Handle();
-            copyInfo.dstImage = result.texture->Handle();
-
-            copyInfo.width = data.width;
-            copyInfo.height = data.height;
-            copyInfo.depth = data.depth;
-
-            copyInfo.bufferOffset = 0;
-
-            copyInfo.mipLevel = 0;
-            copyInfo.baseArrayLayer = 0;
-            copyInfo.layerCount = 1;
-            copyInfo.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            copyInfo.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
-
-            Vk::BufferUtils::CopyBufferToImage(cmd, copyInfo);
-        }
-
-        if (data.autoGenerateMipmaps && targetMipLevels > 1) {
-            Vk::ImageUtils::GenerateMipMaps(
+        if (data.isGpuGenerated)
+        {
+            result.texture->TransitionLayout(
                 cmd,
-                result.texture->Handle(),
-                data.format,
-                data.width,
-                data.height,
-                targetMipLevels
+                VK_IMAGE_LAYOUT_GENERAL,
+                VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
+                VK_ACCESS_2_SHADER_WRITE_BIT,
+                true
+            );
+
+            if (data.gpuGeneratorCallback) {
+                data.gpuGeneratorCallback(cmd, *result.texture);
+            }
+
+            result.texture->TransitionLayout(
+                cmd,
+                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT | VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT,
+                VK_ACCESS_2_SHADER_READ_BIT,
+                false
             );
 
             result.texture->OverrideInternalState(
@@ -121,20 +77,97 @@ namespace Syn
 
             result.requiresGraphicsQueue = true;
         }
-        else {
-            uploader->RegisterImageTransfer({
-                .image = result.texture->Handle(),
-                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                .mipLevels = targetMipLevels
-            });
+        else
+        {
+            //Staging Buffer
+            size_t byteSize = data.pixels.size();
+            result.stagingBuffer = Vk::BufferFactory::CreateStaging(byteSize);
+            result.stagingBuffer->Write(data.pixels.data(), byteSize, 0);
 
-            result.texture->OverrideInternalState(
-                VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
-                VK_ACCESS_2_SHADER_READ_BIT
+            result.texture->TransitionLayout(
+                cmd,
+                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                VK_PIPELINE_STAGE_2_TRANSFER_BIT,
+                VK_ACCESS_2_TRANSFER_WRITE_BIT,
+                true
             );
 
-            result.requiresGraphicsQueue = false;
+            if (!data.mipData.empty()) {
+                for (uint32_t level = 0; level < data.mipLevels; ++level) {
+                    const auto& mip = data.mipData[level];
+
+                    Vk::BufferToImageCopyInfo copyInfo{};
+                    copyInfo.srcBuffer = result.stagingBuffer->Handle();
+                    copyInfo.dstImage = result.texture->Handle();
+
+                    copyInfo.width = mip.width;
+                    copyInfo.height = mip.height;
+                    copyInfo.depth = data.depth;
+
+                    copyInfo.bufferOffset = mip.offset;
+
+                    copyInfo.mipLevel = level;
+                    copyInfo.baseArrayLayer = 0;
+                    copyInfo.layerCount = 1;
+                    copyInfo.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                    copyInfo.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+
+                    Vk::BufferUtils::CopyBufferToImage(cmd, copyInfo);
+                }
+            }
+            else {
+                Vk::BufferToImageCopyInfo copyInfo{};
+                copyInfo.srcBuffer = result.stagingBuffer->Handle();
+                copyInfo.dstImage = result.texture->Handle();
+
+                copyInfo.width = data.width;
+                copyInfo.height = data.height;
+                copyInfo.depth = data.depth;
+
+                copyInfo.bufferOffset = 0;
+
+                copyInfo.mipLevel = 0;
+                copyInfo.baseArrayLayer = 0;
+                copyInfo.layerCount = 1;
+                copyInfo.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                copyInfo.dstImageLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+
+                Vk::BufferUtils::CopyBufferToImage(cmd, copyInfo);
+            }
+
+            if (data.autoGenerateMipmaps && targetMipLevels > 1) {
+                Vk::ImageUtils::GenerateMipMaps(
+                    cmd,
+                    result.texture->Handle(),
+                    data.format,
+                    data.width,
+                    data.height,
+                    targetMipLevels
+                );
+
+                result.texture->OverrideInternalState(
+                    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                    VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
+                    VK_ACCESS_2_SHADER_READ_BIT
+                );
+
+                result.requiresGraphicsQueue = true;
+            }
+            else {
+                uploader->RegisterImageTransfer({
+                    .image = result.texture->Handle(),
+                    .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                    .mipLevels = targetMipLevels
+                    });
+
+                result.texture->OverrideInternalState(
+                    VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+                    VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
+                    VK_ACCESS_2_SHADER_READ_BIT
+                );
+
+                result.requiresGraphicsQueue = false;
+            }
         }
 
         return result;

@@ -97,6 +97,9 @@ namespace Syn::Vk {
         static void CopyImageToBuffer(VkCommandBuffer cmd, const ImageToBufferCopyInfo& info);
         static void GenerateMipMaps(VkCommandBuffer cmd, VkImage image, VkFormat format, uint32_t width, uint32_t height, uint32_t mipLevels);
         static void ClearColorImage(VkCommandBuffer cmd, const ImageClearColorInfo& info);
+        static bool IsFloatFormat(VkFormat format);
+        static size_t GetBytesPerPixel(VkFormat format);
+        static uint32_t GetChannelCount(VkFormat format);
         static uint32_t CalculateMipLevels(uint32_t width, uint32_t height);
     };
 }

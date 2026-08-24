@@ -183,5 +183,6 @@ namespace Syn
         static constexpr const char* EquirectangularToCube = "Engine/Shaders/Passes/Environment/EquirectangularToCube.comp";
         static constexpr const char* IrradianceConvolution = "Engine/Shaders/Passes/Environment/IrradianceConvolution.comp";
         static constexpr const char* PrefilterConvolution = "Engine/Shaders/Passes/Environment/PrefilterConvolution.comp";
+        static constexpr const char* BrdfLut = "Engine/Shaders/Passes/Environment/BrdfLut.comp";
     }; 
 }

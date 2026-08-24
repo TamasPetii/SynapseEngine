@@ -19,6 +19,7 @@ namespace Syn
         image.mipLevels = 1;
         image.format = VK_FORMAT_R32G32_SFLOAT;
         image.isCompressed = false;
+        image.autoCache = false;
 
         size_t imageSizeInBytes = _resolution * _resolution * 2 * sizeof(float);
         image.pixels.resize(imageSizeInBytes);

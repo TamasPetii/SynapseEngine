@@ -34,6 +34,10 @@ namespace Syn
 		gpuData.autoGenerateMipmaps = cookedImage.autoGenerateMipmaps;
 		gpuData.isCompressed = cookedImage.isCompressed;
 
+        gpuData.isGpuGenerated = cookedImage.isGpuGenerated;
+        gpuData.gpuGeneratorCallback = cookedImage.gpuGeneratorCallback;
+		gpuData.autoCache = cookedImage.autoCache;
+
         return gpuData;
     }
 }

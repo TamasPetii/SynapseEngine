@@ -19,6 +19,7 @@
 #include "Engine/Logger/SynLog.h"
 #include <filesystem>
 #include "Engine/Utils/PathUtils.h"
+#include "Engine/EnginePaths.h"
 
 namespace Syn 
 {
@@ -45,18 +46,15 @@ namespace Syn
         _processorPipeline->AddProcessor(std::move(processor));
     }
 
-    std::shared_ptr<Shader> ShaderBuilder::BuildFromFile(const std::string& filePath, VkShaderStageFlagBits stage, const std::vector<std::string>& defines) {
-        namespace fs = std::filesystem;
-
-        fs::path sourcePath(filePath);
+    std::shared_ptr<Shader> ShaderBuilder::BuildFromFile(const std::string& filePath, VkShaderStageFlagBits stage, const std::vector<std::string>& defines) 
+    {
+        std::filesystem::path sourcePath(filePath);
         sourcePath = Syn::PathUtils::GetAbsolutePath(sourcePath);
 
-        const char* appDataPath = std::getenv("APPDATA");
-        fs::path baseDir = appDataPath ? appDataPath : ".";
-        fs::path cacheDir = baseDir / "Synapse" / "Shaders";
+        auto cacheDir = EnginePaths::GetShadersCacheDir();
 
-        if (!fs::exists(cacheDir)) {
-            fs::create_directories(cacheDir);
+        if (!std::filesystem::exists(cacheDir)) {
+            std::filesystem::create_directories(cacheDir);
         }
 
         std::string cacheFilename = filePath;
@@ -78,18 +76,18 @@ namespace Syn
         cacheFilename += "_unknown";
 #endif
 
-        fs::path cachePath = cacheDir / (cacheFilename + ".spv");
+        std::filesystem::path cachePath = cacheDir / (cacheFilename + ".spv");
         bool needsCompile = true;
 
-        if (fs::exists(cachePath) && fs::exists(sourcePath)) {
-            auto cacheTime = fs::last_write_time(cachePath);
+        if (std::filesystem::exists(cachePath) && std::filesystem::exists(sourcePath)) {
+            auto cacheTime = std::filesystem::last_write_time(cachePath);
             needsCompile = false;
 
             std::unordered_set<std::string> dependencies = _dependencyResolver->ResolveDependencies(sourcePath);
 
             for (const auto& dep : dependencies) {
-                if (fs::exists(dep)) {
-                    auto depTime = fs::last_write_time(dep);
+                if (std::filesystem::exists(dep)) {
+                    auto depTime = std::filesystem::last_write_time(dep);
                     if (depTime > cacheTime) {
                         needsCompile = true;
                         break;

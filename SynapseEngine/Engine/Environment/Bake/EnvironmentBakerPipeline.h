@@ -14,7 +14,6 @@ namespace Syn {
         void AddBaker(std::unique_ptr<IEnvironmentBaker> baker);
         void InitializeAll();
         void Execute(const EnvironmentBakeContext& context);
-
     private:
         std::vector<std::unique_ptr<IEnvironmentBaker>> _bakers;
     };

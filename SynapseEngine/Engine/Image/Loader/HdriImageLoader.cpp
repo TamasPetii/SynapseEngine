@@ -51,7 +51,10 @@ namespace Syn
 
     std::optional<RawImage> HdriImageLoader::ProcessData(float* data, int width, int height, int originalChannels) {
 
-        int desiredChannels = 4;
+        int desiredChannels = originalChannels;
+        if (originalChannels == 3) {
+            desiredChannels = 4;
+        }
 
         RawImage rawImage{};
         rawImage.width = static_cast<uint32_t>(width);
@@ -59,7 +62,16 @@ namespace Syn
         rawImage.depth = 1;
         rawImage.mipLevels = 1;
         rawImage.isCompressed = false;
-        rawImage.format = VK_FORMAT_R32G32B32A32_SFLOAT;
+
+        if (desiredChannels == 1) {
+            rawImage.format = VK_FORMAT_R32_SFLOAT;
+        }
+        else if (desiredChannels == 2) {
+            rawImage.format = VK_FORMAT_R32G32_SFLOAT;
+        }
+        else {
+            rawImage.format = VK_FORMAT_R32G32B32A32_SFLOAT;
+        }
 
         size_t numPixels = static_cast<size_t>(width * height);
         size_t imageSizeInBytes = numPixels * desiredChannels * sizeof(float);

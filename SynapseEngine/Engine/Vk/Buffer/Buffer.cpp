@@ -86,4 +86,24 @@ namespace Syn::Vk {
 
         Unmap();
     }
+
+    void Buffer::Invalidate(VkDeviceSize offset, VkDeviceSize size) {
+        if (_isCoherent)
+            return;
+
+        vmaInvalidateAllocation(_allocator, _allocation, offset, size);
+    }
+
+    void Buffer::Read(void* data, size_t size, size_t offset) {
+        if (!_isCoherent) {
+            Invalidate(offset, size);
+        }
+
+        void* ptr = Map();
+        if (ptr) {
+            memcpy(data, static_cast<uint8_t*>(ptr) + offset, size);
+        }
+
+        Unmap();
+    }
 }

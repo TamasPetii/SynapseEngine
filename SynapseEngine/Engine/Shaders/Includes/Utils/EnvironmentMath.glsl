@@ -60,8 +60,10 @@ vec2 Hammersley(uint i, uint N) {
 vec3 ImportanceSampleGGX(vec2 Xi, vec3 N, float roughness) {
     float a = roughness * roughness;
     float phi = 2.0 * PI * Xi.x;
-    float cosTheta = sqrt((1.0 - Xi.y) / (1.0 + (a*a - 1.0) * Xi.y));
-    float sinTheta = sqrt(1.0 - cosTheta*cosTheta);
+
+    float denom = max(1.0 + (a*a - 1.0) * Xi.y, 0.00001);
+    float cosTheta = sqrt(clamp((1.0 - Xi.y) / denom, 0.0, 1.0));
+    float sinTheta = sqrt(clamp(1.0 - cosTheta*cosTheta, 0.0, 1.0));
     
     vec3 H = vec3(cos(phi) * sinTheta, sin(phi) * sinTheta, cosTheta);
     

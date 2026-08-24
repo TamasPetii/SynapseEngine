@@ -19,7 +19,7 @@
 #include "Engine/Mesh/ModelManager.h"
 #include "Engine/Mesh/MeshSourceNames.h"
 #include "Engine/Image/ImageManager.h"
-#include "Engine/Image/Source/Procedural/SsaoNoiseImageSource.h"
+#include "Engine/Image/Source/Procedural/Cpu/Ssao/SsaoNoiseImageSource.h"
 
 namespace Syn
 {

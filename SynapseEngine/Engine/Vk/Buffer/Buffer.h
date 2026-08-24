@@ -56,6 +56,9 @@ namespace Syn::Vk {
 
         void Flush(VkDeviceSize offset = 0, VkDeviceSize size = VK_WHOLE_SIZE);
         void Write(const void* data, size_t size, size_t offset = 0);
+
+        void Invalidate(VkDeviceSize offset = 0, VkDeviceSize size = VK_WHOLE_SIZE);
+        void Read(void* data, size_t size, size_t offset = 0);
     private:
         BufferConfig _config;
 

@@ -18,13 +18,12 @@
 #include "Engine/Logger/LogUtils.h"
 #include <filesystem>
 #include <format>
+#include "Engine/EnginePaths.h"
 
 namespace Syn
 {
     FileSink::FileSink() {
-        const char* appDataPath = std::getenv("APPDATA");
-        std::filesystem::path baseDir = appDataPath ? appDataPath : ".";
-        std::filesystem::path logDir = baseDir / "Synapse" / "Logs";
+        std::filesystem::path logDir = EnginePaths::GetLogsDir();
 
         if (!std::filesystem::exists(logDir)) {
             std::filesystem::create_directories(logDir);

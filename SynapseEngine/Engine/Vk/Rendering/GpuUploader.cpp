@@ -64,41 +64,51 @@ namespace Syn::Vk {
     }
 
     void GpuUploader::ProcessUploads() {
-        std::lock_guard lock(_mutex);
+        std::vector<std::function<void()>> callbacksToRun;
 
-        auto it = _activeBatches.begin();
+        {
+            std::lock_guard lock(_mutex);
 
-        while (it != _activeBatches.end()) {
-            if (it->fence->IsSignaled())
-            {
-                if (!it->acquireBuffers.empty() || !it->acquireImages.empty()) {
-                    std::lock_guard transferLock(_transferMutex);
-                    _readyAcquireBuffers.insert(_readyAcquireBuffers.end(), it->acquireBuffers.begin(), it->acquireBuffers.end());
-                    _readyAcquireImages.insert(_readyAcquireImages.end(), it->acquireImages.begin(), it->acquireImages.end());
+            auto it = _activeBatches.begin();
+
+            while (it != _activeBatches.end()) {
+                if (it->fence->IsSignaled())
+                {
+                    if (!it->acquireBuffers.empty() || !it->acquireImages.empty()) {
+                        std::lock_guard transferLock(_transferMutex);
+                        _readyAcquireBuffers.insert(_readyAcquireBuffers.end(), it->acquireBuffers.begin(), it->acquireBuffers.end());
+                        _readyAcquireImages.insert(_readyAcquireImages.end(), it->acquireImages.begin(), it->acquireImages.end());
+                    }
+
+                    for (auto& cb : it->callbacks) {
+                        if (cb) callbacksToRun.push_back(std::move(cb));
+                    }
+                    it = _activeBatches.erase(it);
                 }
-
-                for (auto& cb : it->callbacks) if (cb) cb();
-                it = _activeBatches.erase(it);
+                else {
+                    ++it;
+                }
             }
-            else {
-                ++it;
+
+            if (!_transferRequests.empty()) {
+                ProcessQueue(_transferRequests, _transferQueue, _transferPool.get());
+            }
+
+            if (!_graphicsRequests.empty() && _graphicsQueue) {
+                ProcessQueue(_graphicsRequests, _graphicsQueue, _graphicsPool.get());
+            }
+
+            if (!_computeRequests.empty() && _computeQueue) {
+                ProcessQueue(_computeRequests, _computeQueue, _computePool.get());
+            }
+
+            if (!_videoRequests.empty() && _videoQueue) {
+                ProcessQueue(_videoRequests, _videoQueue, _videoPool.get());
             }
         }
 
-        if (!_transferRequests.empty()) {
-            ProcessQueue(_transferRequests, _transferQueue, _transferPool.get());
-        }
-
-        if (!_graphicsRequests.empty() && _graphicsQueue) {
-            ProcessQueue(_graphicsRequests, _graphicsQueue, _graphicsPool.get());
-        }
-
-        if (!_computeRequests.empty() && _computeQueue) {
-            ProcessQueue(_computeRequests, _computeQueue, _computePool.get());
-        }
-
-        if (!_videoRequests.empty() && _videoQueue) {
-            ProcessQueue(_videoRequests, _videoQueue, _videoPool.get());
+        for (auto& cb : callbacksToRun) {
+            cb();
         }
     }
 
@@ -138,54 +148,58 @@ namespace Syn::Vk {
     }
 
     void GpuUploader::UploadSync(GpuUploadRequest request) {
-        std::lock_guard lock(_mutex);
+        std::function<void()> callbackToRun = std::move(request.onFinished);
 
-        auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
+        {
+            std::lock_guard lock(_mutex);
 
-        Vk::ThreadSafeQueue* queue = _transferQueue;
-        Vk::CommandPool* pool = _transferPool.get();
+            auto device = ServiceLocator::Get<Vk::Context>()->GetDevice();
 
-        if (request.queueType == GpuQueueType::Video && _videoQueue) {
-            queue = _videoQueue;
-            pool = _videoPool.get();
+            Vk::ThreadSafeQueue* queue = _transferQueue;
+            Vk::CommandPool* pool = _transferPool.get();
+
+            if (request.queueType == GpuQueueType::Video && _videoQueue) {
+                queue = _videoQueue;
+                pool = _videoPool.get();
+            }
+            else if (request.queueType == GpuQueueType::Compute && _computeQueue) {
+                queue = _computeQueue;
+                pool = _computePool.get();
+            }
+            else if (request.queueType == GpuQueueType::Graphics && _graphicsQueue) {
+                queue = _graphicsQueue;
+                pool = _graphicsPool.get();
+            }
+
+            auto cmd = pool->AllocateBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+            auto fence = std::make_shared<Vk::Fence>(false);
+
+            cmd->Begin(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+            request.uploadCallback(cmd->Handle(), this);
+            auto pendingAcquires = InsertReleaseBarriers(cmd->Handle(), queue);
+            cmd->End();
+
+            VkCommandBufferSubmitInfo cmdSubmitInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO };
+            cmdSubmitInfo.commandBuffer = cmd->Handle();
+
+            VkSubmitInfo2 submitInfo{ VK_STRUCTURE_TYPE_SUBMIT_INFO_2 };
+            submitInfo.commandBufferInfoCount = 1;
+            submitInfo.pCommandBufferInfos = &cmdSubmitInfo;
+
+            queue->Submit(&submitInfo, fence->Handle());
+
+            VkFence vkFence = fence->Handle();
+            vkWaitForFences(device->Handle(), 1, &vkFence, VK_TRUE, UINT64_MAX);
+
+            if (!pendingAcquires.buffers.empty() || !pendingAcquires.images.empty()) {
+                std::lock_guard transferLock(_transferMutex);
+                _readyAcquireBuffers.insert(_readyAcquireBuffers.end(), pendingAcquires.buffers.begin(), pendingAcquires.buffers.end());
+                _readyAcquireImages.insert(_readyAcquireImages.end(), pendingAcquires.images.begin(), pendingAcquires.images.end());
+            }
         }
-        else if (request.queueType == GpuQueueType::Compute && _computeQueue) {
-            queue = _computeQueue;
-            pool = _computePool.get();
-        }
-        else if (request.queueType == GpuQueueType::Graphics && _graphicsQueue) {
-            queue = _graphicsQueue;
-            pool = _graphicsPool.get();
-        }
 
-        auto cmd = pool->AllocateBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
-        auto fence = std::make_shared<Vk::Fence>(false);
-
-        cmd->Begin(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-        request.uploadCallback(cmd->Handle(), this);
-        auto pendingAcquires = InsertReleaseBarriers(cmd->Handle(), queue);
-        cmd->End();
-
-        VkCommandBufferSubmitInfo cmdSubmitInfo{ VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO };
-        cmdSubmitInfo.commandBuffer = cmd->Handle();
-
-        VkSubmitInfo2 submitInfo{ VK_STRUCTURE_TYPE_SUBMIT_INFO_2 };
-        submitInfo.commandBufferInfoCount = 1;
-        submitInfo.pCommandBufferInfos = &cmdSubmitInfo;
-
-        queue->Submit(&submitInfo, fence->Handle());
-
-        VkFence vkFence = fence->Handle();
-        vkWaitForFences(device->Handle(), 1, &vkFence, VK_TRUE, UINT64_MAX);
-
-        if (!pendingAcquires.buffers.empty() || !pendingAcquires.images.empty()) {
-            std::lock_guard transferLock(_transferMutex);
-            _readyAcquireBuffers.insert(_readyAcquireBuffers.end(), pendingAcquires.buffers.begin(), pendingAcquires.buffers.end());
-            _readyAcquireImages.insert(_readyAcquireImages.end(), pendingAcquires.images.begin(), pendingAcquires.images.end());
-        }
-
-        if (request.onFinished) {
-            request.onFinished();
+        if (callbackToRun) {
+            callbackToRun();
         }
     }
 

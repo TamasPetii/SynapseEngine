@@ -3,7 +3,8 @@
 #include "Engine/Vk/Context.h"
 #include "Engine/Vk/Core/Device.h"
 #include <glm/gtc/matrix_transform.hpp>
-#include "Engine/Image/Source/Procedural/BrdfLutImageSource.h"
+#include "Engine/Image/Source/Procedural/Cpu/BrdfLut/BrdfLutImageSource.h"
+#include "Engine/Image/Source/Procedural/Gpu/BrdfLut/BrdfLutGpuImageSource.h"
 
 namespace Syn {
     EnvironmentManager::EnvironmentManager(
@@ -18,7 +19,7 @@ namespace Syn {
     {
         if (_callbacks.loadProceduralImage) {
             _brdfLutId = _callbacks.loadProceduralImage("BrdfLut", []() {
-                return std::make_unique<BrdfLutImageSource>(512, 1024);
+                return std::make_unique<BrdfLutGpuImageSource>(512, 1024);
                 });
         }
     }

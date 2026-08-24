@@ -21,6 +21,7 @@
 #include "Engine/Logger/SynLog.h"
 #include "Engine/Serialization/Serializer.h"
 #include "Engine/Serialization/Schema/Models/StaticMeshSchema.h"
+#include "Engine/EnginePaths.h"
 
 namespace Syn
 {
@@ -58,16 +59,13 @@ namespace Syn
     {
         std::filesystem::path srcPath(filePath);
 
-        const char* appDataPath = std::getenv("APPDATA");
-        std::filesystem::path baseDir = appDataPath ? appDataPath : ".";
-        std::filesystem::path saveDir = baseDir / "Synapse" / "Cache" / "Models";
+        std::filesystem::path saveDir = EnginePaths::GetModelsCacheDir();
+        std::filesystem::path cachePath = saveDir / srcPath.filename();
+        cachePath.replace_extension(".synmodel");
 
         if (!std::filesystem::exists(saveDir)) {
             std::filesystem::create_directories(saveDir);
         }
-
-        std::filesystem::path cachePath = saveDir / srcPath.filename();
-        cachePath.replace_extension(".synmodel");
 
         auto serializer = ServiceLocator::Get<Serializer>();
 

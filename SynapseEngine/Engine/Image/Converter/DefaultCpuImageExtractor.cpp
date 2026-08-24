@@ -26,5 +26,6 @@ namespace Syn
         outCpuData.mipLevels = gpuData.mipLevels;
         outCpuData.format = gpuData.format;
         outCpuData.isCompressed = gpuData.isCompressed;
+        outCpuData.autoCache = gpuData.autoCache;
     }
 }

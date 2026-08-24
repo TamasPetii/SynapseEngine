@@ -31,5 +31,6 @@ namespace Syn
         uint32_t mipLevels = 1;
         VkFormat format = VK_FORMAT_UNDEFINED;
         bool isCompressed = false;
+        bool autoCache = false;
     };
 }
