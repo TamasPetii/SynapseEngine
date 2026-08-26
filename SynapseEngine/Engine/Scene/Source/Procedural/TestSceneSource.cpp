@@ -340,7 +340,7 @@ namespace Syn
             monkeyAudio.isSpatialized = true;
             monkeyAudio.loop = true;
             monkeyAudio.play = true;
-            monkeyAudio.volume = 1.0f;
+            monkeyAudio.volume = 0.3f;
             monkeyAudio.minDistance = 2.0f;
             monkeyAudio.maxDistance = 50.0f;
 

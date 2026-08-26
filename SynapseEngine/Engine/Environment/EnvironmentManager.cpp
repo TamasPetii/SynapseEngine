@@ -19,7 +19,7 @@ namespace Syn {
     {
         if (_callbacks.loadProceduralImage) {
             _brdfLutId = _callbacks.loadProceduralImage("BrdfLut", []() {
-                return std::make_unique<BrdfLutGpuImageSource>(512, 1024);
+                return std::make_unique<BrdfLutImageSource>(512, 1024);
                 });
         }
     }
