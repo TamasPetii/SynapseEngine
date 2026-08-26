@@ -24,7 +24,13 @@
 #include "Engine/Vk/Command/CommandPool.h"
 #include "Engine/Vk/Image/Sampler.h"
 #include "Engine/Manager/AddressResourceManager.h"
+#include "Engine/Image/Writer/IImageWriterRegistry.h"
+#include "Engine/Image/Downloader/IGpuImageDownloader.h"
+#include "Engine/Image/Converter/IRawImageExtractor.h"
+#include "Engine/Vk/Image/ImageUtils.h"
 #include <functional>
+#include <optional>
+#include <filesystem>
 
 namespace Syn {
     using ImageSourceFactory = std::function<std::unique_ptr<IImageSource>()>;
@@ -43,6 +49,9 @@ namespace Syn {
             std::shared_ptr<ImageBuilder> builder,
             std::unique_ptr<IGpuImageUploader> uploader,
             std::unique_ptr<ICpuImageExtractor> cpuExtractor,
+            std::shared_ptr<IImageWriterRegistry> writerRegistry,
+            std::unique_ptr<IGpuImageDownloader> downloader,
+            std::unique_ptr<IRawImageExtractor> extractor,
             ImageManagerCallbacks callbacks);
 
         ~ImageManager() override = default;
@@ -51,6 +60,9 @@ namespace Syn {
         uint32_t LoadImageFromSourceAsync(const std::string& name, ImageSourceFactory factory);
         uint32_t LoadImageSync(const std::string& filePath);
         uint32_t LoadImageFromSourceSync(const std::string& name, ImageSourceFactory factory);
+
+        void SaveImageAsync(uint32_t imageId, const std::string& path);
+        void SaveImageSync(uint32_t imageId, const std::string& path);
 
         Vk::Sampler* GetSampler(const std::string& name) const;
         uint32_t GetSamplerIndex(const std::string& name) const;
@@ -64,11 +76,18 @@ namespace Syn {
         void CreateSamplers();
         void LoadDefaultImageSync();
         uint32_t RegisterSampler(const std::string& name, const Vk::SamplerConfig& config);
+
+        void InternalSaveImage(uint32_t imageId, const std::string& path, bool isAsync);
+        uint32_t InternalLoadFromSource(const std::string& name, ImageSourceFactory factory, bool isAsync);
+
     private:
         ImageManagerCallbacks _callbacks;
         std::shared_ptr<ImageBuilder> _builder;
         std::unique_ptr<IGpuImageUploader> _uploader;
         std::unique_ptr<ICpuImageExtractor> _cpuExtractor;
+        std::shared_ptr<IImageWriterRegistry> _writerRegistry;
+        std::unique_ptr<IGpuImageDownloader> _downloader;
+        std::unique_ptr<IRawImageExtractor> _extractor;
 
         std::vector<std::unique_ptr<Vk::Sampler>> _samplers;
         std::unordered_map<std::string, uint32_t> _samplerNameToIndex;

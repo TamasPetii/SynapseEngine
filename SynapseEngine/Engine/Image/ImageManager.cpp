@@ -22,7 +22,8 @@
 #include "Engine/Logger/SynLog.h"
 #include "SamplerNames.h"
 #include "ImageNames.h"
-#include "Engine/Image/Source/Procedural/DefaultImageSource.h"
+#include "Engine/EnginePaths.h"
+#include "Engine/Image/Source/Procedural/Cpu/Default/DefaultImageSource.h"
 
 namespace Syn
 {
@@ -31,12 +32,18 @@ namespace Syn
         std::shared_ptr<ImageBuilder> builder,
         std::unique_ptr<IGpuImageUploader> uploader,
         std::unique_ptr<ICpuImageExtractor> cpuExtractor,
+        std::shared_ptr<IImageWriterRegistry> writerRegistry,
+        std::unique_ptr<IGpuImageDownloader> downloader,
+        std::unique_ptr<IRawImageExtractor> extractor,
         ImageManagerCallbacks callbacks)
         : AddressResourceManager<Texture, uint32_t>(framesInFlight, 1024, 256, 512),
         _callbacks(std::move(callbacks)),
         _builder(builder),
         _uploader(std::move(uploader)),
-        _cpuExtractor(std::move(cpuExtractor))
+        _cpuExtractor(std::move(cpuExtractor)),
+        _writerRegistry(std::move(writerRegistry)),
+        _downloader(std::move(downloader)),
+        _extractor(std::move(extractor))
     {
         CreateSamplers();
         LoadDefaultImageSync();
@@ -235,51 +242,63 @@ namespace Syn
             });
     }
 
-    uint32_t ImageManager::LoadImageFromSourceAsync(const std::string& name, ImageSourceFactory factory) {
-        return InternalLoadAsync(name, [this, factory]() {
-            if (auto source = factory()) {
-                return _builder->BuildFromSource(*source);
-            }
-            return std::shared_ptr<Texture>(nullptr);
-            });
-    }
-
     uint32_t ImageManager::LoadImageSync(const std::string& filePath) {
         return InternalLoadSync(filePath, [this, filePath]() {
             return _builder->BuildFromFile(filePath);
             });
     }
 
-    uint32_t ImageManager::LoadImageFromSourceSync(const std::string& name, ImageSourceFactory factory) {
-        return InternalLoadSync(name, [this, factory]() {
-            if (auto source = factory()) {
-                return _builder->BuildFromSource(*source);
-            }
-            return std::shared_ptr<Texture>(nullptr);
-            });
-    }
-
     void ImageManager::StartGpuUpload(EntryType& entry) {
-        bool needsGraphics = entry.resource->transientGpuData->autoGenerateMipmaps;
+        bool needsGraphics = entry.resource->transientGpuData->autoGenerateMipmaps || entry.resource->transientGpuData->isGpuGenerated;
 
         uint32_t entryId = _pathToId.at(entry.path);
         std::shared_ptr<Texture> res = entry.resource;
+
+        std::string cacheName = entry.path;
+        bool shouldCache = res->transientGpuData->autoCache;
+        VkFormat format = res->transientGpuData->format;
 
         Vk::GpuUploadRequest request{
             .uploadCallback = [this, entryId, res](VkCommandBuffer cmd, Vk::GpuUploader* gpuUploader) {
                 auto uploadResult = _uploader->Upload(*(res->transientGpuData), cmd, gpuUploader);
                 res->image = uploadResult.texture;
+
                 std::lock_guard lock(_mutex);
-                _entries[entryId].stagingBuffer = std::move(uploadResult.stagingBuffer);
+                if (uploadResult.stagingBuffer) {
+                    _entries[entryId].stagingBuffer = std::move(uploadResult.stagingBuffer);
+                }
             },
-            .onFinished = [this, entryId]() {
-                std::lock_guard lock(_mutex);
-                auto& entry = _entries[entryId];
-                FinalizeResource(entry);
-                entry.stagingBuffer.reset();
-                SetResourceState(entryId, ResourceState::Ready);
-                MarkDirty(entryId);
-                Info("Image '{}' is ready", entry.path);
+            .onFinished = [this, entryId, shouldCache, cacheName, format]() {
+                {
+                    std::lock_guard lock(_mutex);
+                    auto& entry = _entries[entryId];
+                    FinalizeResource(entry);
+
+                    if (entry.stagingBuffer) {
+                        entry.stagingBuffer.reset();
+                    }
+
+                    SetResourceState(entryId, ResourceState::Ready);
+                    MarkDirty(entryId);
+                    Info("Image '{}' is ready", entry.path);
+                }
+
+                if (shouldCache) 
+                {
+                    std::filesystem::path saveDir = EnginePaths::GetImagesCacheDir();
+
+                    if (!std::filesystem::exists(saveDir)) {
+                        std::filesystem::create_directories(saveDir);
+                    }
+
+                    bool isFloat = Vk::ImageUtils::IsFloatFormat(format);
+                    std::string ext = isFloat ? ".hdr" : ".png";
+                    std::filesystem::path fullPath = saveDir / (cacheName + ext);
+
+                    Info("Auto-caching procedural image to: {}", fullPath.string());
+
+                    SaveImageAsync(entryId, fullPath.string());
+                }
             },
             .queueType = needsGraphics ? Vk::GpuQueueType::Graphics : Vk::GpuQueueType::Transfer
         };
@@ -325,5 +344,97 @@ namespace Syn
                 }
             }
         );
+    }
+
+    void ImageManager::InternalSaveImage(uint32_t imageId, const std::string& path, bool isAsync)
+    {
+        auto res = GetResource(imageId);
+        if (!res || !res->image) {
+            Error("ImageManager: Cannot save image, resource is invalid or not loaded on GPU.");
+            return;
+        }
+
+        auto downloadResult = std::make_shared<ImageDownloadResult>();
+        auto targetImage = res->image;
+
+        Vk::GpuUploadRequest request{
+            .uploadCallback = [this, targetImage, downloadResult](VkCommandBuffer cmd, Vk::GpuUploader* gpuUploader) {
+                *downloadResult = _downloader->Download(*targetImage, cmd);
+            },
+            .onFinished = [this, targetImage, downloadResult, path]() {
+                if (!downloadResult->stagingBuffer) return;
+
+                RawImage rawImage = _extractor->Extract(*downloadResult, *targetImage);
+
+                std::string ext = std::filesystem::path(path).extension().string();
+                auto writer = _writerRegistry->GetWriterForExtension(ext);
+
+                if (writer) {
+                    writer->WriteFile(path, rawImage);
+                    Info("ImageManager: Successfully saved image to {}", path);
+                }
+                else {
+                    Error("ImageManager: No writer found for extension of path {}", path);
+                }
+            },
+            .queueType = Vk::GpuQueueType::Graphics
+        };
+
+        auto gpuUploader = ServiceLocator::Get<Vk::GpuUploader>();
+
+        if (isAsync) {
+            gpuUploader->Submit(std::move(request));
+        }
+        else {
+            gpuUploader->UploadSync(std::move(request));
+        }
+    }
+
+    void ImageManager::SaveImageAsync(uint32_t imageId, const std::string& path)
+    {
+        InternalSaveImage(imageId, path, true);
+    }
+
+    void ImageManager::SaveImageSync(uint32_t imageId, const std::string& path)
+    {
+        InternalSaveImage(imageId, path, false);
+    }
+
+    uint32_t ImageManager::InternalLoadFromSource(const std::string& name, ImageSourceFactory factory, bool isAsync) 
+    {
+        std::filesystem::path cacheDir = EnginePaths::GetImagesCacheDir();
+
+        std::filesystem::path hdrPath = cacheDir / (name + ".hdr");
+        std::filesystem::path pngPath = cacheDir / (name + ".png");
+
+        std::string foundPath;
+        if (std::filesystem::exists(hdrPath)) {
+            foundPath = hdrPath.string();
+        }
+        else if (std::filesystem::exists(pngPath)) {
+            foundPath = pngPath.string();
+        }
+
+        if (!foundPath.empty()) {
+            Info("Loading procedurally cached image{}: {}", isAsync ? "" : " (Sync)", std::filesystem::path(foundPath).filename().string());
+            return isAsync ? LoadImageAsync(foundPath) : LoadImageSync(foundPath);
+        }
+
+        auto task = [this, factory]() {
+            if (auto source = factory()) {
+                return _builder->BuildFromSource(*source);
+            }
+            return std::shared_ptr<Texture>(nullptr);
+            };
+
+        return isAsync ? InternalLoadAsync(name, task) : InternalLoadSync(name, task);
+    }
+
+    uint32_t ImageManager::LoadImageFromSourceAsync(const std::string& name, ImageSourceFactory factory) {
+        return InternalLoadFromSource(name, factory, true);
+    }
+
+    uint32_t ImageManager::LoadImageFromSourceSync(const std::string& name, ImageSourceFactory factory) {
+        return InternalLoadFromSource(name, factory, false);
     }
 }

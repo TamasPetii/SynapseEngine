@@ -294,4 +294,59 @@ namespace Syn::Vk {
     uint32_t ImageUtils::CalculateMipLevels(uint32_t width, uint32_t height) {
         return static_cast<uint32_t>(std::floor(std::log2(std::max(width, height)))) + 1;
     }
+
+    size_t ImageUtils::GetBytesPerPixel(VkFormat format) {
+        switch (format) {
+            case VK_FORMAT_R8_UNORM: return 1;
+            case VK_FORMAT_R8G8_UNORM:
+            case VK_FORMAT_R16_SFLOAT: return 2;
+            case VK_FORMAT_R8G8B8_UNORM: return 3;
+            case VK_FORMAT_R8G8B8A8_UNORM:
+            case VK_FORMAT_B8G8R8A8_UNORM:
+            case VK_FORMAT_R16G16_SFLOAT:
+            case VK_FORMAT_R32_SFLOAT: return 4;
+            case VK_FORMAT_R16G16B16_SFLOAT: return 6;
+            case VK_FORMAT_R16G16B16A16_SFLOAT:
+            case VK_FORMAT_R32G32_SFLOAT: return 8;
+            case VK_FORMAT_R32G32B32_SFLOAT: return 12;
+            case VK_FORMAT_R32G32B32A32_SFLOAT: return 16;
+            default: return 4;
+        }
+    }
+
+    uint32_t ImageUtils::GetChannelCount(VkFormat format) {
+        switch (format) {
+            case VK_FORMAT_R8_UNORM:
+            case VK_FORMAT_R16_SFLOAT:
+            case VK_FORMAT_R32_SFLOAT: return 1;
+
+            case VK_FORMAT_R8G8_UNORM:
+            case VK_FORMAT_R16G16_SFLOAT:
+            case VK_FORMAT_R32G32_SFLOAT: return 2;
+
+            case VK_FORMAT_R8G8B8_UNORM:
+            case VK_FORMAT_R16G16B16_SFLOAT:
+            case VK_FORMAT_R32G32B32_SFLOAT: return 3;
+
+            case VK_FORMAT_R8G8B8A8_UNORM:
+            case VK_FORMAT_B8G8R8A8_UNORM:
+            case VK_FORMAT_R16G16B16A16_SFLOAT:
+            case VK_FORMAT_R32G32B32A32_SFLOAT: return 4;
+            default: return 0;
+        }
+    }
+
+    bool ImageUtils::IsFloatFormat(VkFormat format) {
+        switch (format) {
+            case VK_FORMAT_R16_SFLOAT:
+            case VK_FORMAT_R16G16_SFLOAT:
+            case VK_FORMAT_R16G16B16_SFLOAT:
+            case VK_FORMAT_R16G16B16A16_SFLOAT:
+            case VK_FORMAT_R32_SFLOAT:
+            case VK_FORMAT_R32G32_SFLOAT:
+            case VK_FORMAT_R32G32B32_SFLOAT:
+            case VK_FORMAT_R32G32B32A32_SFLOAT: return true;
+            default: return false;
+        }
+    }
 }

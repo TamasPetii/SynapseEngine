@@ -70,6 +70,15 @@ namespace Syn
                         else if (!lightComp.useShadow && hasShadow) {
                             registry->RemoveComponents<SpotLightShadowComponent>(entity);
                         }
+
+                        if (spotLightPool->IsStatic(entity)) {
+                            spotLightPool->MarkStaticDirty(entity);
+                        }
+                        else if (spotLightPool->IsDynamic(entity)) {
+                            spotLightPool->SetBit<CHANGED_BIT>(entity);
+                        }
+
+                        lightComp.version++;
                     }
                 }
                 };

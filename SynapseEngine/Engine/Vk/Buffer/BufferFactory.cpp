@@ -98,7 +98,7 @@ namespace Syn::Vk {
     std::unique_ptr<Buffer> BufferFactory::CreateStaging(VkDeviceSize size) {
         BufferConfig config;
         config.size = size;
-        config.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+        config.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
         config.memoryUsage = VMA_MEMORY_USAGE_AUTO;
         config.allocationFlags = VMA_ALLOCATION_CREATE_MAPPED_BIT | VMA_ALLOCATION_CREATE_HOST_ACCESS_SEQUENTIAL_WRITE_BIT;
         config.useDeviceAddress = false;

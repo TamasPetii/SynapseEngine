@@ -30,6 +30,9 @@ namespace Syn
         cookedImage.isCompressed = rawImage.isCompressed;
         cookedImage.pixels = rawImage.pixels;
         cookedImage.mipData = rawImage.mipData;
+        cookedImage.isGpuGenerated = rawImage.isGpuGenerated;
+        cookedImage.gpuGeneratorCallback = rawImage.gpuGeneratorCallback;
+		cookedImage.autoCache = rawImage.autoCache;
 
         if (!cookedImage.isCompressed && cookedImage.mipLevels == 1) {
             cookedImage.autoGenerateMipmaps = true;

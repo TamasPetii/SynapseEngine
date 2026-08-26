@@ -19,7 +19,9 @@
 #include <vector>
 #include <cstdint>
 #include <vulkan/vulkan.h>
+#include <functional>
 #include "Engine/Image/Data/Common/MipLevelInfo.h"
+#include "Engine/Vk/Image/Image.h"
 
 namespace Syn
 {
@@ -32,8 +34,11 @@ namespace Syn
         VkFormat format = VK_FORMAT_UNDEFINED;
 
         bool isCompressed = false;
+        bool isGpuGenerated = false;
+        bool autoCache = false;
 
         std::vector<uint8_t> pixels;
         std::vector<MipLevelInfo> mipData;
+        std::function<void(VkCommandBuffer, class Vk::Image&)> gpuGeneratorCallback;
     };
 }

@@ -81,6 +81,10 @@
 #include "Engine/Video/Parser/H264ExtradataParser.h"
 #include "Engine/Mesh/MeshSourceNames.h"
 #include "Engine/Environment/Uploader/DefaultEnvironmentUploader.h"
+#include "Engine/Image/Writer/ImageWriterRegistry.h"
+#include "Engine/Image/Writer/StbImageWriter.h"
+#include "Engine/Image/Downloader/DefaultGpuImageDownloader.h"
+#include "Engine/Image/Converter/DefaultRawImageExtractor.h"
 
 namespace Syn {
     ResourceManager::ResourceManager(uint32_t framesInFlight) : _framesInFlight(framesInFlight) {
@@ -143,8 +147,10 @@ namespace Syn {
         _imageBuilder->RegisterLoader(std::make_shared<GliImageLoader>(), 1);
         _imageBuilder->RegisterLoader(std::make_shared<SvgImageLoader>(), 1);
         _imageBuilder->RegisterLoader(std::make_shared<HdriImageLoader>(), 1);
-
         ServiceLocator::Provide<ImageBuilder>(_imageBuilder.get());
+
+        auto writerRegistry = std::make_shared<ImageWriterRegistry>();
+        writerRegistry->Register(std::make_shared<StbImageWriter>(), 1);
 
         ImageManagerCallbacks callbacks{
             .registerSampler = [this](uint32_t index, VkSampler sampler) {
@@ -169,6 +175,9 @@ namespace Syn {
             _imageBuilder,
             std::make_unique<DefaultGpuImageUploader>(),
             std::make_unique<DefaultCpuImageExtractor>(),
+            writerRegistry,
+            std::make_unique<DefaultGpuImageDownloader>(),
+            std::make_unique<DefaultRawImageExtractor>(),
             callbacks
         );
 

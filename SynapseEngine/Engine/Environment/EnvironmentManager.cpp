@@ -3,7 +3,8 @@
 #include "Engine/Vk/Context.h"
 #include "Engine/Vk/Core/Device.h"
 #include <glm/gtc/matrix_transform.hpp>
-#include "Engine/Image/Source/Procedural/BrdfLutImageSource.h"
+#include "Engine/Image/Source/Procedural/Cpu/BrdfLut/BrdfLutImageSource.h"
+#include "Engine/Image/Source/Procedural/Gpu/BrdfLut/BrdfLutGpuImageSource.h"
 
 namespace Syn {
     EnvironmentManager::EnvironmentManager(

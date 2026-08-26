@@ -85,7 +85,7 @@ void Synapse::OnInit() {
 
     _engine = std::make_unique<Syn::Engine>(params);
 
-    std::string iconPath = Syn::PathUtils::GetAbsolutePathString(std::string(ASSET_PATH) + "/dark_icon.svg");
+    std::string iconPath = Syn::PathUtils::GetAbsolutePathString(std::string(ASSET_PATH) + "/logo.svg");
     Syn::SvgImageLoader svgLoader;
     if (auto rawImageOpt = svgLoader.LoadFile(iconPath)) {
         const auto& rawImage = rawImageOpt.value();

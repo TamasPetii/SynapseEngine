@@ -68,6 +68,15 @@ namespace Syn
                         else if (!lightComp.useShadow && hasShadow) {
                             registry->RemoveComponents<PointLightShadowComponent>(entity);
                         }
+
+                        if (pointLightPool->IsStatic(entity)) {
+                            pointLightPool->MarkStaticDirty(entity);
+                        }
+                        else if (pointLightPool->IsDynamic(entity)) {
+                            pointLightPool->SetBit<CHANGED_BIT>(entity);
+                        }
+
+                        lightComp.version++;
                     }
                 }
                 };

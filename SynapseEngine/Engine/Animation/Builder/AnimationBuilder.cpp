@@ -20,6 +20,7 @@
 #include "Engine/ServiceLocator.h"
 #include "Engine/Logger/SynLog.h"
 #include "Engine/Serialization/Serializer.h"
+#include "Engine/EnginePaths.h"
 
 namespace Syn
 {
@@ -48,16 +49,13 @@ namespace Syn
     {
         std::filesystem::path srcPath(filePath);
 
-        const char* appDataPath = std::getenv("APPDATA");
-        std::filesystem::path baseDir = appDataPath ? appDataPath : ".";
-        std::filesystem::path saveDir = baseDir / "Synapse" / "Cache" / "Animations";
+        std::filesystem::path saveDir = EnginePaths::GetAnimationsCacheDir();
+        std::filesystem::path cachePath = saveDir / srcPath.filename();
+        cachePath.replace_extension(".synanim");
 
         if (!std::filesystem::exists(saveDir)) {
             std::filesystem::create_directories(saveDir);
         }
-
-        std::filesystem::path cachePath = saveDir / srcPath.filename();
-        cachePath.replace_extension(".synanim");
 
         auto animation = std::make_shared<Animation>();
         animation->transientCpuData = std::make_unique<CookedAnimation>();

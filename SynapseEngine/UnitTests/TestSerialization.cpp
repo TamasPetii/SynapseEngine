@@ -59,6 +59,7 @@
 #include "Engine/Serialization/Schema/Material/MaterialSchema.h"
 
 #include "Engine/Component/Components.h"
+#include "Engine/EnginePaths.h"
 
 using namespace Syn;
 
@@ -83,9 +84,7 @@ protected:
         auto service = std::make_unique<DefaultSerializationService>(std::move(registry));
         serializer = std::make_unique<Serializer>(std::move(service));
 
-        const char* appDataPath = std::getenv("APPDATA");
-        std::filesystem::path baseDir = appDataPath ? appDataPath : ".";
-        saveDir = baseDir / "Synapse" / "TestSaves";
+        saveDir = Syn::EnginePaths::GetTestSavesDir();
 
         if (!std::filesystem::exists(saveDir)) {
             std::filesystem::create_directories(saveDir);
