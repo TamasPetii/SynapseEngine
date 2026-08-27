@@ -2,6 +2,14 @@
 
 High-performance GPU-driven rendering engine built around a fully data-oriented architecture, designed to scale to millions of entities in real-time.
 
+**Technical deep dive:** The presentation is available in the repository: [PDF](Docs/Presentation/SynapseEnginePresentation.pdf). 
+
+[![Synapse Engine Presentation Preview](Docs/Images/PresentationCover.png)](Docs/Presentation/SynapseEnginePresentation.pdf)
+
+*(The source diagrams are also available for download as a [.drawio file](Docs/Presentation/SynapseEnginePresentationFigures.drawio), so you can export all the figures if needed!)*
+
+
+
 ## Overview
 
 Synapse Engine is a research-oriented real-time rendering engine focusing on eliminating CPU bottlenecks and maximizing GPU utilization through a fully compute-driven pipeline. 
