@@ -23,6 +23,7 @@ namespace Syn {
     public:
         std::string GetName() const override { return "PresentationTransitionPass"; }
         std::string GetGroup() const override { return PassGroupNames::PresentPasses; }
+        bool CanExecuteWhileCompiling() const override { return true; }
     protected:
         void PrepareFrame(const RenderContext& context) override;
     };

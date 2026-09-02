@@ -21,6 +21,7 @@
 
 struct DirectionLightShadowCullingPC {
     uint64_t frameGlobalContextBufferAddr;
+    uint     isStaticPhase;
 };
 
 #endif

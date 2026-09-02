@@ -217,6 +217,7 @@ git submodule update --init --recursive
 cd External/vcpkg
 .\bootstrap-vcpkg.bat
 cd ..\..
+cd SynapseEngine/
 ```
 
 ---
@@ -377,4 +378,4 @@ If you want to use SynapseEngine in a closed-source product, commercial game, pr
 
 For commercial licensing inquiries:
 
-tamaspeti3451@gmail.com
+contact@synapseengine.dev

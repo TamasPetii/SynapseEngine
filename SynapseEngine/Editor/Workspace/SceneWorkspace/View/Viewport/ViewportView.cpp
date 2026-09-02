@@ -311,6 +311,10 @@ namespace Syn {
                 std::string shadowMaxBaseView = RenderTargetViewNames::DirectionLightShadowDepthPyramidMax;
                 std::string shadowMaxView = shadowMaxBaseView + Vk::ImageViewNames::Mip + std::to_string(shadowHzbMaxMip);
 
+                RadioButton("DirLight Depth Atlas", RenderTargetGroupNames::Main, RenderTargetNames::DirectionLightShadowAtlas, Vk::ImageViewNames::Default);
+                RadioButton("DirLight Trans Color", RenderTargetGroupNames::Main, RenderTargetNames::DirectionLightShadowColorAtlas, RenderTargetViewNames::DirectionLightShadowTransparentColor);
+                RadioButton("DirLight Trans Depth", RenderTargetGroupNames::Main, RenderTargetNames::DirectionLightShadowColorAtlas, RenderTargetViewNames::DirectionLightShadowTransparentDepth);
+
                 RadioButton("DirLight HZB Max (R)", RenderTargetGroupNames::Main, RenderTargetNames::DirectionLightShadowDepthPyramid, shadowMaxView);
 
                 if (state.currentView.contains(shadowMaxBaseView)) {
@@ -338,9 +342,10 @@ namespace Syn {
                     ImGui::Unindent();
                 }
 
-                RadioButton("DirLight Trans Color", RenderTargetGroupNames::Main, RenderTargetNames::DirectionLightShadowColorAtlas, RenderTargetViewNames::DirectionLightShadowTransparentColor);
-                RadioButton("DirLight Trans Depth", RenderTargetGroupNames::Main, RenderTargetNames::DirectionLightShadowColorAtlas, RenderTargetViewNames::DirectionLightShadowTransparentDepth);
-
+                RadioButton("DirLight Static Depth Atlas", RenderTargetGroupNames::Main, RenderTargetNames::DirectionLightStaticShadowAtlas, Vk::ImageViewNames::Default);
+                RadioButton("DirLight Static Trans Color", RenderTargetGroupNames::Main, RenderTargetNames::DirectionLightStaticShadowColorAtlas, RenderTargetViewNames::DirectionLightShadowTransparentColor);
+                RadioButton("DirLight Static Trans Depth", RenderTargetGroupNames::Main, RenderTargetNames::DirectionLightStaticShadowColorAtlas, RenderTargetViewNames::DirectionLightShadowTransparentDepth);
+                
                 static int spotShadowHzbMaxMip = 0;
                 spotShadowHzbMaxMip = std::clamp(spotShadowHzbMaxMip, 0, int(SPOT_SHADOW_HIZ_MIP_LEVELS - 1));
                 std::string spotShadowMaxBaseView = RenderTargetViewNames::SpotLightShadowDepthPyramidMax;

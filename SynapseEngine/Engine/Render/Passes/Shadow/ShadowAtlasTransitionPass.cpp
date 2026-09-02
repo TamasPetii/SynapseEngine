@@ -35,14 +35,6 @@ namespace Syn {
         auto spotColorAtlas = drawData->SpotLightShadow.shadowColorAtlas[fIdx].get();
 
         _imageTransitions.push_back({
-            .image = dirShadowAtlas,
-            .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-            .dstStage = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
-            .dstAccess = VK_ACCESS_2_SHADER_READ_BIT,
-            .discardContent = false
-            });
-
-        _imageTransitions.push_back({
             .image = pointShadowAtlas,
             .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
             .dstStage = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
@@ -80,6 +72,22 @@ namespace Syn {
             .dstStage = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
             .dstAccess = VK_ACCESS_2_SHADER_READ_BIT,
             .discardContent = false
+            });
+
+        _imageTransitions.push_back({
+            .image = dirShadowAtlas,
+            .newLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+            .dstStage = VK_PIPELINE_STAGE_2_EARLY_FRAGMENT_TESTS_BIT | VK_PIPELINE_STAGE_2_LATE_FRAGMENT_TESTS_BIT,
+            .dstAccess = VK_ACCESS_2_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+            .discardContent = true
+            });
+
+        _imageTransitions.push_back({
+            .image = dirColorAtlas,
+            .newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+            .dstStage = VK_PIPELINE_STAGE_2_COLOR_ATTACHMENT_OUTPUT_BIT,
+            .dstAccess = VK_ACCESS_2_COLOR_ATTACHMENT_WRITE_BIT,
+            .discardContent = true
             });
     }
 }

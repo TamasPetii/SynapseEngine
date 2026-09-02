@@ -60,7 +60,6 @@ namespace Syn {
     void DirectionLightShadowModelCullingPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         auto settings = scene->GetSettings();
-
         auto transformPool = scene->GetRegistry()->GetPool<TransformComponent>();
         auto lightPool = scene->GetRegistry()->GetPool<DirectionLightShadowComponent>();
 
@@ -70,14 +69,18 @@ namespace Syn {
             return;
         }
 
-        _totalModelsToTest = static_cast<uint32_t>(transformPool->Size());
+        uint32_t totalCount = static_cast<uint32_t>(transformPool->Size());
+        uint32_t staticCount = static_cast<uint32_t>(transformPool->GetStorage().GetStaticEntities().size());
         _activeLights = context.scene->GetSceneDrawData()->DirectionLightShadow.visibleLightCount;
 
-        if (settings->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::StaticBvh ||
-            settings->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh)
-        {
-            uint32_t staticCount = static_cast<uint32_t>(transformPool->GetStorage().GetStaticEntities().size());
-            _totalModelsToTest -= staticCount;
+        bool bvhEnabled = (settings->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::StaticBvh ||
+                           settings->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh);
+
+        if (_isStaticPhase) {
+            _totalModelsToTest = bvhEnabled ? 0 : staticCount;
+        }
+        else {
+            _totalModelsToTest = totalCount - staticCount;
         }
 
         auto drawData = scene->GetSceneDrawData();
@@ -85,6 +88,7 @@ namespace Syn {
 
         Vk::PushConstant<DirectionLightShadowCullingPC> pc;
         pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
+        pc->isStaticPhase = _isStaticPhase ? 1 : 0;
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -104,7 +108,7 @@ namespace Syn {
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 
-        //pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
+        pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
     }
 
     void DirectionLightShadowModelCullingPass::Dispatch(const RenderContext& context) {

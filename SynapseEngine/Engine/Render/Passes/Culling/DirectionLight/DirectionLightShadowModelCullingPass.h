@@ -21,6 +21,8 @@
 namespace Syn {
     class SYN_API DirectionLightShadowModelCullingPass : public ComputePass {
     public:
+        DirectionLightShadowModelCullingPass(bool isStaticPhase) : _isStaticPhase(isStaticPhase) {}
+
         std::string GetName() const override { return "DirectionLightShadowModelCullingPass"; }
         std::string GetGroup() const override { return PassGroupNames::DirectionLightShadowCullingPasses; }
 
@@ -31,6 +33,7 @@ namespace Syn {
         void BindDescriptors(const RenderContext& context) override;
         void Dispatch(const RenderContext& context) override;
     private:
+        bool _isStaticPhase;
         uint32_t _totalModelsToTest = 0;
         uint32_t _activeLights = 0;
     };

@@ -26,6 +26,7 @@ namespace Syn {
 
         void Initialize() override;
         void Execute(const RenderContext& context) override;
+        bool CanExecuteWhileCompiling() const override { return true; }
     protected:
         void PrepareFrame(const RenderContext& context) override;
     };

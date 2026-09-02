@@ -54,7 +54,7 @@ namespace Syn
         atlasSpec.height = SHADOW_ATLAS_SIZE;
         atlasSpec.type = VK_IMAGE_TYPE_2D;
         atlasSpec.format = VK_FORMAT_D32_SFLOAT;
-        atlasSpec.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT;
+        atlasSpec.usage = VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
         atlasSpec.aspectMask = VK_IMAGE_ASPECT_DEPTH_BIT;
 
         Vk::ImageConfig hizSpec{};
@@ -109,6 +109,8 @@ namespace Syn
             shadowAtlas.push_back(std::make_unique<Vk::Image>(atlasSpec));
             shadowDepthPyramid.push_back(std::make_unique<Vk::Image>(hizSpec));
             shadowColorAtlas.push_back(std::make_unique<Vk::Image>(colorAtlasSpec));
+            staticShadowAtlas.push_back(std::make_unique<Vk::Image>(atlasSpec));
+            staticShadowColorAtlas.push_back(std::make_unique<Vk::Image>(colorAtlasSpec));
         }
     }
 

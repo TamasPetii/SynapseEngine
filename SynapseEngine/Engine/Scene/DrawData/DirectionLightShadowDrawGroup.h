@@ -78,5 +78,8 @@ namespace Syn
         std::vector<std::unique_ptr<Vk::Image>> shadowAtlas;
         std::vector<std::unique_ptr<Vk::Image>> shadowDepthPyramid;
         std::vector<std::unique_ptr<Vk::Image>> shadowColorAtlas;
+
+        std::vector<std::unique_ptr<Vk::Image>> staticShadowAtlas;
+        std::vector<std::unique_ptr<Vk::Image>> staticShadowColorAtlas;
     };
 }

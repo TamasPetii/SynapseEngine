@@ -39,5 +39,4 @@ namespace Syn::UI {
         ImGui::PopStyleColor(3);
         return clicked;
     }
-
 }

@@ -17,202 +17,36 @@
 #include "RendererFactory.h"
 #include "Engine/Vk/Image/ImageConfig.h"
 
-#include "Engine/Render/Passes/Billboard/BillboardTransitionPass.h"
-#include "Engine/Render/Passes/Billboard/CameraBillboardPass.h"
-#include "Engine/Render/Passes/Billboard/DirectionLightBillboardPass.h"
-#include "Engine/Render/Passes/Billboard/PointLightBillboardPass.h"
-#include "Engine/Render/Passes/Billboard/SpotLightBillboardPass.h"
-#include "Engine/Render/Passes/Billboard/AudioListenerBillboardPass.h"
-#include "Engine/Render/Passes/Billboard/AudioSourceBillboardPass.h"
+#include "Engine/Render/Pipelines/Setup/SetupAndInitPipeline.h"
+#include "Engine/Render/Pipelines/Morton/MortonBvhBuilderPipeline.h"
+#include "Engine/Render/Pipelines/Culling/MainCameraGeometryCullingPipeline.h"
 
-#include "Engine/Render/Passes/PostProcess/Bloom/BloomPrefilterPass.h"
-#include "Engine/Render/Passes/PostProcess/Bloom/BloomUpsamplePass.h"
-#include "Engine/Render/Passes/PostProcess/Bloom/BloomDownsamplePass.h"
-#include "Engine/Render/Passes/PostProcess/Bloom/BloomCompositePass.h"
+#include "Engine/Render/Pipelines/Shadow/DirectionLight/Static/DirectionLightStaticShadowPipeline.h"
+#include "Engine/Render/Pipelines/Shadow/DirectionLight/Dynamic/DirectionLightDynamicShadowPipeline.h"
+#include "Engine/Render/Pipelines/Shadow/SpotLight/SpotLightShadowPipeline.h"
+#include "Engine/Render/Pipelines/Shadow/PointLight/PointLightShadowPipeline.h"
+
+#include "Engine/Render/Pipelines/Shading/ForwardPlus/ForwardPlusOpaqueDepthPipeline.h"
+#include "Engine/Render/Pipelines/Shading/ForwardPlus/ForwardPlusTransparentDepthPipeline.h"
+#include "Engine/Render/Pipelines/Shading/Deferred/DeferredGBufferPipeline.h"
+#include "Engine/Render/Pipelines/Hiz/DepthPyramidHizPipeline.h"
+
+#include "Engine/Render/Pipelines/PostProcess/Ssao/SsaoPipeline.h"
+#include "Engine/Render/Pipelines/Shading/Deferred/DeferredLightingPipeline.h"
+#include "Engine/Render/Pipelines/Shading/ForwardPlus/ForwardPlusClusteringPipeline.h"
+#include "Engine/Render/Pipelines/Shading/ForwardPlus/ForwardPlusOpaqueLightingPipeline.h"
+
+#include "Engine/Render/Pipelines/PostProcess/Environment/EnvironmentPipeline.h"
+#include "Engine/Render/Pipelines/Wireframe/WireframePipeline.h"
+#include "Engine/Render/Pipelines/Billboard/BillboardPipeline.h"
+#include "Engine/Render/Pipelines/Shading/Wboit/TransparentWboitPipeline.h"
+#include "Engine/Render/Pipelines/PostProcess/Bloom/BloomPipeline.h"
+#include "Engine/Render/Pipelines/Preview/EditorPreviewPipeline.h"
+#include "Engine/Render/Pipelines/Present/PresentationPipeline.h"
+
 #include "Engine/Render/Passes/PostProcess/Outline/SelectionOutlinePass.h"
-#include "Engine/Render/Passes/PostProcess/Sky/SkySpherePass.h"
-#include "Engine/Render/Passes/PostProcess/Sky/SkyBoxPass.h"
-
-#include "Engine/Render/Passes/Preview/PreviewPreTransitionPass.h"
-#include "Engine/Render/Passes/Preview/PreviewPostTransitionPass.h"
-#include "Engine/Render/Passes/Preview/ModelPreviewPass.h"
-#include "Engine/Render/Passes/Preview/AnimationPreviewPass.h"
-#include "Engine/Render/Passes/Preview/MaterialPreviewPass.h"
-#include "Engine/Render/Passes/Preview/AudioPreviewPass.h"
-#include "Engine/Render/Passes/Preview/MaterialPreviewBloomPass.h"
-
-#include "Engine/Render/Passes/Culling/Geometry/GeometryModelCullingPass.h"
-#include "Engine/Render/Passes/Culling/Geometry/GeometryStaticModelCullingPass.h"
-#include "Engine/Render/Passes/Culling/Geometry/GeometryStaticChunkCullingPass.h"
-#include "Engine/Render/Passes/Culling/Geometry/GeometryMortonModelCullingPass.h"
-#include "Engine/Render/Passes/Culling/Geometry/GeometryMortonChunkCullingPass.h"
-#include "Engine/Render/Passes/Culling/Geometry/GeometryMeshCullingPass.h"
-#include "Engine/Render/Passes/Culling/Geometry/GeometryCullingCommandResetPass.h"
-
-#include "Engine/Render/Passes/Culling/DirectionLight/DirectionLightShadowModelCullingPass.h"
-#include "Engine/Render/Passes/Culling/DirectionLight/DirectionLightShadowStaticModelCullingPass.h"
-#include "Engine/Render/Passes/Culling/DirectionLight/DirectionLightShadowStaticChunkCullingPass.h"
-#include "Engine/Render/Passes/Culling/DirectionLight/DirectionLightShadowMortonModelCullingPass.h"
-#include "Engine/Render/Passes/Culling/DirectionLight/DirectionLightShadowMortonChunkCullingPass.h"
-#include "Engine/Render/Passes/Culling/DirectionLight/DirectionLightShadowMeshCullingPass.h"
-#include "Engine/Render/Passes/Culling/DirectionLight/DirectionLightShadowCullingCommandResetPass.h"
-
-#include "Engine/Render/Passes/Culling/SpotLight/SpotLightCullingPass.h"
-#include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowBufferResetPass.h"
-#include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowAtlasRadixSortPass.h"
-#include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowAtlasAllocatorPass.h"
-#include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowCullingCommandResetPass.h"
-#include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowCullingMemoryBarrierPass.h"
-#include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowFinalizePass.h"
-#include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowFinalizeSetupPass.h"
-#include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowMeshCullingPass.h"
-#include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowModelCullingPass.h"
-#include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowRadixSortPass.h"
-#include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowMortonChunkCullingPass.h"
-#include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowMortonModelCullingPass.h"
-#include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowStaticChunkCullingPass.h"
-#include "Engine/Render/Passes/Culling/SpotLight/SpotLightShadowStaticModelCullingPass.h"
-
-#include "Engine/Render/Passes/Culling/PointLight/PointLightCullingPass.h"
-#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowBufferResetPass.h"
-#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowAtlasRadixSortPass.h"
-#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowAtlasAllocatorPass.h"
-#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowCullingCommandResetPass.h"
-#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowCullingMemoryBarrierPass.h"
-#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowFinalizePass.h"
-#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowFinalizeSetupPass.h"
-#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowMeshCullingPass.h"
-#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowModelCullingPass.h"
-#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowRadixSortPass.h"
-#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowMortonChunkCullingPass.h"
-#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowMortonModelCullingPass.h"
-#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowStaticChunkCullingPass.h"
-#include "Engine/Render/Passes/Culling/PointLight/PointLightShadowStaticModelCullingPass.h"
-
-#include "Engine/Render/Passes/Morton/ChunkBuilderPass.h"
-#include "Engine/Render/Passes/Morton/MortonGeneratorPass.h"
-#include "Engine/Render/Passes/Morton/MortonRadixSortPass.h"
-#include "Engine/Render/Passes/Morton/SceneAabbPass.h"
-
-#include "Engine/Render/Passes/Hiz/HizInitPass.h"
-#include "Engine/Render/Passes/Hiz/Geometry/GeometryHizLinearPreparePass.h"
-#include "Engine/Render/Passes/Hiz/Geometry/GeometryHizDownsamplePass.h"
-#include "Engine/Render/Passes/Shadow/ShadowAtlasTransitionPass.h"
-
-#include "Engine/Render/Passes/Hiz/DirectionLight/DirectionLightShadowHizCopyPass.h"
-#include "Engine/Render/Passes/Hiz/DirectionLight/DirectionLightShadowHizDownsamplePass.h"
-#include "Engine/Render/Passes/Hiz/SpotLight/SpotLightShadowHizCopyPass.h"
-#include "Engine/Render/Passes/Hiz/SpotLight/SpotLightShadowHizDownsamplePass.h"
-#include "Engine/Render/Passes/Hiz/PointLight/PointLightShadowHizCopyPass.h"
-#include "Engine/Render/Passes/Hiz/PointLight/PointLightShadowHizDownsamplePass.h"
-
-#include "Engine/Render/Passes/Present/GuiPass.h"
-#include "Engine/Render/Passes/Present/CompositePass.h"
-#include "Engine/Render/Passes/Present/PresentationTransitionPass.h"
-
-#include "Engine/Render/Passes/Setup/GlobalFrameSetupPass.h"
-
-#include "Engine/Render/Passes/Shading/Common/DepthCopyPass.h"
-#include "Engine/Render/Passes/Shading/Common/OpaqueInitPass.h"
-#include "Engine/Render/Passes/Shading/Common/TransparentInitPass.h"
-
-#include "Engine/Render/Passes/Shading/Deferred/GBuffer/OpaqueDeferredTransitionPass.h"
-#include "Engine/Render/Passes/Shading/Deferred/GBuffer/MeshletOpaqueDeferredPass.h"
-#include "Engine/Render/Passes/Shading/Deferred/GBuffer/MeshletOpaqueAlphaTestedDeferredPass.h"
-#include "Engine/Render/Passes/Shading/Deferred/GBuffer/TraditionalOpaqueDeferredPass.h"
-#include "Engine/Render/Passes/Shading/Deferred/GBuffer/TraditionalOpaqueAlphaTestedDeferredPass.h"
-
-#include "Engine/Render/Passes/Shading/Deferred/Lighting/DeferredLightTransitionPass.h"
-#include "Engine/Render/Passes/Shading/Deferred/Lighting/DeferredEmissiveAoPass.h"
-#include "Engine/Render/Passes/Shading/Deferred/Lighting/DeferredPointLightPass.h"
-#include "Engine/Render/Passes/Shading/Deferred/Lighting/DeferredSpotLightPass.h"
-#include "Engine/Render/Passes/Shading/Deferred/Lighting/DeferredDirectionLightPass.h"
-
-#include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterSetupPass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterPointLightCountPass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterSpotLightCountPass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterPrefixSumPass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterPointLightWritePass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterSpotLightWritePass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterLightWriteSyncPass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterDispatchSetupPass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterPointLightSinglePass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Clustering/ClusterSpotLightSinglePass.h"
-
-#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/OpaqueDepthTransitionPrepass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/MeshletOpaqueDepthPrepass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/MeshletOpaqueAlphaTestedDepthPrepass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/TraditionalOpaqueDepthPrepass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/TraditionalOpaqueAlphaTestedDepthPrepass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/TransparentDepthTransitionPrepass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/MeshletTransparentDepthPrepass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/MeshletTransparentAlphaTestedDepthPrepass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/TraditionalTransparentDepthPrepass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/TraditionalTransparentAlphaTestedDepthPrepass.h"
-
-#include "Engine/Render/Passes/Shading/ForwardPlus/Lighting/OpaqueForwardTransitionPass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Lighting/MeshletOpaqueForwardPass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Lighting/MeshletOpaqueAlphaTestedForwardPass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Lighting/TraditionalOpaqueForwardPass.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Lighting/TraditionalOpaqueAlphaTestedForwardPass.h"
-
-#include "Engine/Render/Passes/Shading/Wboit/TransparentForwardTransitionPass.h"
-#include "Engine/Render/Passes/Shading/Wboit/MeshletTransparentForwardPass.h"
-#include "Engine/Render/Passes/Shading/Wboit/TraditionalTransparentForwardPass.h"
-#include "Engine/Render/Passes/Shading/Wboit/TransparentCompositeTransitionPass.h"
-#include "Engine/Render/Passes/Shading/Wboit/TransparentCompositePass.h"
-
-#include "Engine/Render/Passes/Wireframe/Mesh/WireframeMeshSetupPass.h"
-#include "Engine/Render/Passes/Wireframe/Mesh/WireframeMeshAabbPass.h"
-#include "Engine/Render/Passes/Wireframe/Mesh/WireframeMeshSpherePass.h"
-#include "Engine/Render/Passes/Wireframe/Light/PointLightAabbWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/Light/PointLightSphereWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/Light/SpotLightAabbWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/Light/SpotLightSphereWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/Light/SpotLightConeWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/Light/SpotLightPyramidWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/Chunk/StaticChunkAabbWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/Chunk/MortonChunkAabbWireframePass.h"
-#include "Engine/Render/Passes/Wireframe/Physics/WireframePhysicsPass.h"
-#include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletAabbPass.h"
-#include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletSpherePass.h"
-#include "Engine/Render/Passes/Wireframe/Meshlet/WireframeMeshletConePass.h"
-
-#include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowInitPass.h"
-#include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowTraditionalOpaquePass.h"
-#include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowTraditionalOpaqueAlphaTestedPass.h"
-#include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowMeshletOpaquePass.h"
-#include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowMeshletOpaqueAlphaTestedPass.h"
-#include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowTraditionalTransparentPass.h"
-#include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowMeshletTransparentPass.h"
-#include "Engine/Render/Passes/Shadow/DirectionLight/DirectionLightShadowTransparentTransitionPass.h"
-
-#include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowInitPass.h"
-#include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowTraditionalOpaquePass.h"
-#include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowTraditionalOpaqueAlphaTestedPass.h"
-#include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowMeshletOpaquePass.h"
-#include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowMeshletOpaqueAlphaTestedPass.h"
-#include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowTraditionalTransparentPass.h"
-#include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowMeshletTransparentPass.h"
-#include "Engine/Render/Passes/Shadow/SpotLight/SpotLightShadowTransparentTransitionPass.h"
-
-#include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowInitPass.h"
-#include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowTraditionalOpaquePass.h"
-#include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowTraditionalOpaqueAlphaTestedPass.h"
-#include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowMeshletOpaquePass.h"
-#include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowMeshletOpaqueAlphaTestedPass.h"
-#include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowTraditionalTransparentPass.h"
-#include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowMeshletTransparentPass.h"
-#include "Engine/Render/Passes/Shadow/PointLight/PointLightShadowTransparentTransitionPass.h"
-
-#include "Engine/Render/Passes/PostProcess/Ssao/SsaoInitPass.h"
-#include "Engine/Render/Passes/PostProcess/Ssao/SsaoPass.h"
-#include "Engine/Render/Passes/PostProcess/Ssao/SsaoBlurPass.h"
-#include "Engine/Render/Passes/PostProcess/InfiniteGrid/InfiniteGridPass.h"
-
 #include "Engine/Render/Passes/Shading/Visibility/DebugVisibilityPass.h"
-#include "Engine/Render/Passes/Video/VideoConversionPass.h"
-#include "Engine/Render/Passes/Present/SwapchainPresentPass.h"
+#include "Engine/Render/Passes/Shadow/ShadowFinalTransitionPass.h"
 
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "RenderNames.h"
@@ -223,294 +57,54 @@ namespace Syn
         auto renderManager = std::make_unique<RenderManager>(framesInFlight);
         auto rtManager = renderManager->GetRenderTargetManager();
 
-        auto pipeline = std::make_unique<RenderPipeline>();
+        auto pipeline = std::make_unique<RenderPipeline>("ScenePipeline");
 
-		//Setup Passes
-		pipeline->AddPass(std::make_unique<GlobalFrameSetupPass>());
-        pipeline->AddPass(std::make_unique<VideoConversionPass>());
-		pipeline->AddPass(std::make_unique<OpaqueInitPass>());
-		pipeline->AddPass(std::make_unique<TransparentInitPass>());
-		pipeline->AddPass(std::make_unique<HizInitPass>());
+        // Setup & Culling
+        pipeline->AddPass(std::make_unique<SetupAndInitPipeline>());
+        pipeline->AddPass(std::make_unique<MortonBvhBuilderPipeline>());
+        pipeline->AddPass(std::make_unique<MainCameraGeometryCullingPipeline>());
 
-        //Morton Gpu Driven Bvh Builder
-        pipeline->AddPass(std::make_unique<SceneAabbPass>());
-        pipeline->AddPass(std::make_unique<MortonGeneratorPass>());
-        pipeline->AddPass(std::make_unique<MortonRadixSortPass>());
-        pipeline->AddPass(std::make_unique<ChunkBuilderPass>());
+        // Shadows (Static & Dynamic)
+        pipeline->AddPass(std::make_unique<DirectionLightStaticShadowPipeline>());
+        pipeline->AddPass(std::make_unique<DirectionLightDynamicShadowPipeline>());
+        pipeline->AddPass(std::make_unique<SpotLightShadowPipeline>());
+        pipeline->AddPass(std::make_unique<PointLightShadowPipeline>());
+        pipeline->AddPass(std::make_unique<ShadowFinalTransitionPass>());
 
-		//Geometry Culling Passes
-		pipeline->AddPass(std::make_unique<GeometryCullingCommandResetPass>());
-        pipeline->AddPass(std::make_unique<GeometryMortonChunkCullingPass>());
-        pipeline->AddPass(std::make_unique<GeometryMortonModelCullingPass>());
-        pipeline->AddPass(std::make_unique<GeometryStaticChunkCullingPass>());
-        pipeline->AddPass(std::make_unique<GeometryStaticModelCullingPass>());
-        pipeline->AddPass(std::make_unique<GeometryModelCullingPass>());
-        pipeline->AddPass(std::make_unique<GeometryMeshCullingPass>());
+        // Opaque Depth Prepasses
+        pipeline->AddPass(std::make_unique<ForwardPlusOpaqueDepthPipeline>());
+        pipeline->AddPass(std::make_unique<DeferredGBufferPipeline>());
 
-        //Gpu Driven Direction Light Culling
-        pipeline->AddPass(std::make_unique<DirectionLightShadowCullingCommandResetPass>());
-        pipeline->AddPass(std::make_unique<DirectionLightShadowMortonChunkCullingPass>());
-        pipeline->AddPass(std::make_unique<DirectionLightShadowMortonModelCullingPass>());
-        pipeline->AddPass(std::make_unique<DirectionLightShadowStaticChunkCullingPass>());
-        pipeline->AddPass(std::make_unique<DirectionLightShadowStaticModelCullingPass>());
-        pipeline->AddPass(std::make_unique<DirectionLightShadowModelCullingPass>());
-        pipeline->AddPass(std::make_unique<DirectionLightShadowMeshCullingPass>());
+        // Transparent Depth & Hi-Z
+        pipeline->AddPass(std::make_unique<ForwardPlusTransparentDepthPipeline>());
+        pipeline->AddPass(std::make_unique<DepthPyramidHizPipeline>());
 
-        //Gpu Driven Spot Light and Shadow Culling
-        pipeline->AddPass(std::make_unique<SpotLightShadowBufferResetPass>());
-        pipeline->AddPass(std::make_unique<SpotLightShadowCullingCommandResetPass>());
-        pipeline->AddPass(std::make_unique<SpotLightCullingPass>());
-        pipeline->AddPass(std::make_unique<SpotLightShadowAtlasRadixSortPass>());
-        pipeline->AddPass(std::make_unique<SpotLightShadowAtlasAllocatorPass>());
-        pipeline->AddPass(std::make_unique<SpotLightShadowMortonChunkCullingPass>());
-        pipeline->AddPass(std::make_unique<SpotLightShadowMortonModelCullingPass>());
-        pipeline->AddPass(std::make_unique<SpotLightShadowStaticChunkCullingPass>());
-        pipeline->AddPass(std::make_unique<SpotLightShadowStaticModelCullingPass>());
-        pipeline->AddPass(std::make_unique<SpotLightShadowModelCullingPass>());
-        pipeline->AddPass(std::make_unique<SpotLightShadowMeshCullingPass>());
-        pipeline->AddPass(std::make_unique<SpotLightShadowCullingMemoryBarrierPass>());
-        pipeline->AddPass(std::make_unique<SpotLightShadowRadixSortPass>());
-        pipeline->AddPass(std::make_unique<SpotLightShadowFinalizeSetupPass>());
-        pipeline->AddPass(std::make_unique<SpotLightShadowFinalizePass>());
+        // SSAO
+        pipeline->AddPass(std::make_unique<SsaoPipeline>());
 
-        //Gpu Driven Point Light Culling
-        pipeline->AddPass(std::make_unique<PointLightShadowBufferResetPass>());
-        pipeline->AddPass(std::make_unique<PointLightShadowCullingCommandResetPass>());
-        pipeline->AddPass(std::make_unique<PointLightCullingPass>());
-        pipeline->AddPass(std::make_unique<PointLightShadowAtlasRadixSortPass>());
-        pipeline->AddPass(std::make_unique<PointLightShadowAtlasAllocatorPass>());
-        pipeline->AddPass(std::make_unique<PointLightShadowMortonChunkCullingPass>());
-        pipeline->AddPass(std::make_unique<PointLightShadowMortonModelCullingPass>());
-        pipeline->AddPass(std::make_unique<PointLightShadowStaticChunkCullingPass>());
-        pipeline->AddPass(std::make_unique<PointLightShadowStaticModelCullingPass>());
-        pipeline->AddPass(std::make_unique<PointLightShadowModelCullingPass>());
-        pipeline->AddPass(std::make_unique<PointLightShadowMeshCullingPass>());
-        pipeline->AddPass(std::make_unique<PointLightShadowCullingMemoryBarrierPass>());
-        pipeline->AddPass(std::make_unique<PointLightShadowRadixSortPass>());
-        pipeline->AddPass(std::make_unique<PointLightShadowFinalizeSetupPass>());
-        pipeline->AddPass(std::make_unique<PointLightShadowFinalizePass>());
+        // Opaque Lighting
+        pipeline->AddPass(std::make_unique<DeferredLightingPipeline>());
+        pipeline->AddPass(std::make_unique<ForwardPlusClusteringPipeline>());
+        pipeline->AddPass(std::make_unique<ForwardPlusOpaqueLightingPipeline>());
 
-        //DirectionLight Shadow Passes
-        pipeline->AddPass(std::make_unique<DirectionLightShadowInitPass>());
-        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque1Sided));
-        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
-        pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
-        pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
-        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
-        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
-        pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
-        pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
-        pipeline->AddPass(std::make_unique<DirectionLightShadowTransparentTransitionPass>());
-        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalTransparentPass>(MaterialRenderType::Transparent1Sided));
-        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalTransparentPass>(MaterialRenderType::Transparent2Sided));
-        pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletTransparentPass>(MaterialRenderType::Transparent1Sided));
-        pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletTransparentPass>(MaterialRenderType::Transparent2Sided));
-        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalTransparentPass>(MaterialRenderType::AlphaTestedTransparent1Sided));
-        pipeline->AddPass(std::make_unique<DirectionLightShadowTraditionalTransparentPass>(MaterialRenderType::AlphaTestedTransparent2Sided));
-        pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletTransparentPass>(MaterialRenderType::AlphaTestedTransparent1Sided));
-        pipeline->AddPass(std::make_unique<DirectionLightShadowMeshletTransparentPass>(MaterialRenderType::AlphaTestedTransparent2Sided));
+        // Environment, Wireframe & Editor
+        pipeline->AddPass(std::make_unique<EnvironmentPipeline>());
+        pipeline->AddPass(std::make_unique<WireframePipeline>());
+        pipeline->AddPass(std::make_unique<BillboardPipeline>());
 
-        //SpotLight Shadow Passes
-        pipeline->AddPass(std::make_unique<SpotLightShadowInitPass>());
-        pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque1Sided));
-        pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
-        pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
-        pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
-        pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
-        pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
-        pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
-        pipeline->AddPass(std::make_unique<SpotLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
-        pipeline->AddPass(std::make_unique<SpotLightShadowTransparentTransitionPass>());
-        pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalTransparentPass>(MaterialRenderType::Transparent1Sided));
-        pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalTransparentPass>(MaterialRenderType::Transparent2Sided));
-        pipeline->AddPass(std::make_unique<SpotLightShadowMeshletTransparentPass>(MaterialRenderType::Transparent1Sided));
-        pipeline->AddPass(std::make_unique<SpotLightShadowMeshletTransparentPass>(MaterialRenderType::Transparent2Sided));
-        pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalTransparentPass>(MaterialRenderType::AlphaTestedTransparent1Sided));
-        pipeline->AddPass(std::make_unique<SpotLightShadowTraditionalTransparentPass>(MaterialRenderType::AlphaTestedTransparent2Sided));
-        pipeline->AddPass(std::make_unique<SpotLightShadowMeshletTransparentPass>(MaterialRenderType::AlphaTestedTransparent1Sided));
-        pipeline->AddPass(std::make_unique<SpotLightShadowMeshletTransparentPass>(MaterialRenderType::AlphaTestedTransparent2Sided));
+        // Transparent Shading (WBOIT)
+        pipeline->AddPass(std::make_unique<TransparentWboitPipeline>());
 
-        //Point Light Shadow Passes
-        pipeline->AddPass(std::make_unique<PointLightShadowInitPass>());
-        pipeline->AddPass(std::make_unique<PointLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque1Sided));
-        pipeline->AddPass(std::make_unique<PointLightShadowTraditionalOpaquePass>(MaterialRenderType::Opaque2Sided));
-        pipeline->AddPass(std::make_unique<PointLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque1Sided));
-        pipeline->AddPass(std::make_unique<PointLightShadowMeshletOpaquePass>(MaterialRenderType::Opaque2Sided));
-        pipeline->AddPass(std::make_unique<PointLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
-        pipeline->AddPass(std::make_unique<PointLightShadowTraditionalOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
-        pipeline->AddPass(std::make_unique<PointLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
-        pipeline->AddPass(std::make_unique<PointLightShadowMeshletOpaqueAlphaTestedPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
-        pipeline->AddPass(std::make_unique<PointLightShadowTransparentTransitionPass>());
-        pipeline->AddPass(std::make_unique<PointLightShadowTraditionalTransparentPass>(MaterialRenderType::Transparent1Sided));
-        pipeline->AddPass(std::make_unique<PointLightShadowTraditionalTransparentPass>(MaterialRenderType::Transparent2Sided));
-        pipeline->AddPass(std::make_unique<PointLightShadowMeshletTransparentPass>(MaterialRenderType::Transparent1Sided));
-        pipeline->AddPass(std::make_unique<PointLightShadowMeshletTransparentPass>(MaterialRenderType::Transparent2Sided));
-        pipeline->AddPass(std::make_unique<PointLightShadowTraditionalTransparentPass>(MaterialRenderType::AlphaTestedTransparent1Sided));
-        pipeline->AddPass(std::make_unique<PointLightShadowTraditionalTransparentPass>(MaterialRenderType::AlphaTestedTransparent2Sided));
-        pipeline->AddPass(std::make_unique<PointLightShadowMeshletTransparentPass>(MaterialRenderType::AlphaTestedTransparent1Sided));
-        pipeline->AddPass(std::make_unique<PointLightShadowMeshletTransparentPass>(MaterialRenderType::AlphaTestedTransparent2Sided));
-
-		//Forward+ Depth Opaque Prepasses
-		pipeline->AddPass(std::make_unique<OpaqueDepthTransitionPrepass>());
-		pipeline->AddPass(std::make_unique<MeshletOpaqueDepthPrepass>(MaterialRenderType::Opaque1Sided));
-		pipeline->AddPass(std::make_unique<MeshletOpaqueDepthPrepass>(MaterialRenderType::Opaque2Sided));
-		pipeline->AddPass(std::make_unique<TraditionalOpaqueDepthPrepass>(MaterialRenderType::Opaque1Sided));
-		pipeline->AddPass(std::make_unique<TraditionalOpaqueDepthPrepass>(MaterialRenderType::Opaque2Sided));
-        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedOpaque1Sided));
-        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedOpaque2Sided));
-        pipeline->AddPass(std::make_unique<TraditionalOpaqueAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedOpaque1Sided));
-        pipeline->AddPass(std::make_unique<TraditionalOpaqueAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedOpaque2Sided));
-
-        //Deferred Depth Opaque Prepasses
-		pipeline->AddPass(std::make_unique<OpaqueDeferredTransitionPass>());
-		pipeline->AddPass(std::make_unique<MeshletOpaqueDeferredPass>(MaterialRenderType::Opaque1Sided));
-        pipeline->AddPass(std::make_unique<MeshletOpaqueDeferredPass>(MaterialRenderType::Opaque2Sided));
-		pipeline->AddPass(std::make_unique<TraditionalOpaqueDeferredPass>(MaterialRenderType::Opaque1Sided));
-		pipeline->AddPass(std::make_unique<TraditionalOpaqueDeferredPass>(MaterialRenderType::Opaque2Sided));
-        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedDeferredPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
-        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedDeferredPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
-        pipeline->AddPass(std::make_unique<TraditionalOpaqueAlphaTestedDeferredPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
-        pipeline->AddPass(std::make_unique<TraditionalOpaqueAlphaTestedDeferredPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
-
-        //Copy Opaque Depth to Transparent Depth Buffer
-		pipeline->AddPass(std::make_unique<DepthCopyPass>());
-
-        //Forward+ Depth Transparent Prepasses
-		pipeline->AddPass(std::make_unique<TransparentDepthTransitionPrepass>());
-        pipeline->AddPass(std::make_unique<MeshletTransparentDepthPrepass>(MaterialRenderType::Transparent1Sided));
-        pipeline->AddPass(std::make_unique<MeshletTransparentDepthPrepass>(MaterialRenderType::Transparent2Sided));
-        pipeline->AddPass(std::make_unique<TraditionalTransparentDepthPrepass>(MaterialRenderType::Transparent1Sided));
-        pipeline->AddPass(std::make_unique<TraditionalTransparentDepthPrepass>(MaterialRenderType::Transparent2Sided));
-        pipeline->AddPass(std::make_unique<MeshletTransparentAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedTransparent1Sided));
-        pipeline->AddPass(std::make_unique<MeshletTransparentAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedTransparent2Sided));
-        pipeline->AddPass(std::make_unique<TraditionalTransparentAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedTransparent1Sided));
-        pipeline->AddPass(std::make_unique<TraditionalTransparentAlphaTestedDepthPrepass>(MaterialRenderType::AlphaTestedTransparent2Sided));
-
-		//Build Hi-Z depth pyramid (Opaque|Transparent)
-        pipeline->AddPass(std::make_unique<GeometryHizLinearPreparePass>());
-        pipeline->AddPass(std::make_unique<GeometryHizDownsamplePass>());
-
-        /*
-        pipeline->AddPass(std::make_unique<DirectionLightShadowHizCopyPass>());
-        pipeline->AddPass(std::make_unique<DirectionLightShadowHizDownsamplePass>());
-        pipeline->AddPass(std::make_unique<SpotLightShadowHizCopyPass>());
-        pipeline->AddPass(std::make_unique<SpotLightShadowHizDownsamplePass>());
-        pipeline->AddPass(std::make_unique<PointLightShadowHizCopyPass>());
-        pipeline->AddPass(std::make_unique<PointLightShadowHizDownsamplePass>()); 
-        */
-
-        pipeline->AddPass(std::make_unique<ShadowAtlasTransitionPass>());
-
-        //Ssao Passes
-        pipeline->AddPass(std::make_unique<SsaoInitPass>());
-        pipeline->AddPass(std::make_unique<SsaoPass>());
-        pipeline->AddPass(std::make_unique<SsaoBlurPass>());
-
-        // Deferred Opaque Lighting Passes
-        pipeline->AddPass(std::make_unique<DeferredLightTransitionPass>());
-        pipeline->AddPass(std::make_unique<DeferredEmissiveAoPass>());
-        pipeline->AddPass(std::make_unique<DeferredDirectionLightPass>());
-        pipeline->AddPass(std::make_unique<DeferredPointLightPass>());
-        pipeline->AddPass(std::make_unique<DeferredSpotLightPass>());
-
-        //Forward+ Cluster Passes
-		pipeline->AddPass(std::make_unique<ClusterSetupPass>());
-        pipeline->AddPass(std::make_unique<ClusterDispatchSetupPass>());
-        pipeline->AddPass(std::make_unique<ClusterPointLightSinglePass>());
-        pipeline->AddPass(std::make_unique<ClusterSpotLightSinglePass>());
-		pipeline->AddPass(std::make_unique<ClusterPointLightCountPass>());
-		pipeline->AddPass(std::make_unique<ClusterSpotLightCountPass>());
-		pipeline->AddPass(std::make_unique<ClusterPrefixSumPass>());
-		pipeline->AddPass(std::make_unique<ClusterPointLightWritePass>());
-		pipeline->AddPass(std::make_unique<ClusterSpotLightWritePass>());
-		pipeline->AddPass(std::make_unique<ClusterLightWriteSyncPass>());
-
-		//Forward+ Opaque Lighting Passes
-        pipeline->AddPass(std::make_unique<OpaqueForwardTransitionPass>());
-		pipeline->AddPass(std::make_unique<MeshletOpaqueForwardPass>(MaterialRenderType::Opaque1Sided));
-		pipeline->AddPass(std::make_unique<MeshletOpaqueForwardPass>(MaterialRenderType::Opaque2Sided));
-		pipeline->AddPass(std::make_unique<TraditionalOpaqueForwardPass>(MaterialRenderType::Opaque1Sided));
-		pipeline->AddPass(std::make_unique<TraditionalOpaqueForwardPass>(MaterialRenderType::Opaque2Sided));
-        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedForwardPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
-        pipeline->AddPass(std::make_unique<MeshletOpaqueAlphaTestedForwardPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
-        pipeline->AddPass(std::make_unique<TraditionalOpaqueAlphaTestedForwardPass>(MaterialRenderType::AlphaTestedOpaque1Sided));
-        pipeline->AddPass(std::make_unique<TraditionalOpaqueAlphaTestedForwardPass>(MaterialRenderType::AlphaTestedOpaque2Sided));
-
-        // SkySphere
-        pipeline->AddPass(std::make_unique<SkySpherePass>());
-        pipeline->AddPass(std::make_unique<SkyBoxPass>());
-
-        //Grid
-        pipeline->AddPass(std::make_unique<InfiniteGridPass>());
-
-        // Wireframe Passes
-        pipeline->AddPass(std::make_unique<WireframeMeshSetupPass>());
-        pipeline->AddPass(std::make_unique<WireframeMeshAabbPass>());
-        pipeline->AddPass(std::make_unique<WireframeMeshSpherePass>());
-        pipeline->AddPass(std::make_unique<WireframeMeshletAabbPass>());
-        pipeline->AddPass(std::make_unique<WireframeMeshletSpherePass>());
-        pipeline->AddPass(std::make_unique<WireframeMeshletConePass>());
-        pipeline->AddPass(std::make_unique<PointLightAabbWireframePass>());
-        pipeline->AddPass(std::make_unique<PointLightSphereWireframePass>());
-        pipeline->AddPass(std::make_unique<SpotLightAabbWireframePass>());
-        pipeline->AddPass(std::make_unique<SpotLightSphereWireframePass>());
-        pipeline->AddPass(std::make_unique<SpotLightConeWireframePass>());
-        pipeline->AddPass(std::make_unique<SpotLightPyramidWireframePass>());
-        pipeline->AddPass(std::make_unique<StaticChunkAabbWireframePass>());
-        pipeline->AddPass(std::make_unique<MortonChunkAabbWireframePass>());
-        pipeline->AddPass(std::make_unique<WireframePhysicsPass>());
-
-        //Billboard Passes
-        pipeline->AddPass(std::make_unique<BillboardTransitionPass>());
-        pipeline->AddPass(std::make_unique<CameraBillboardPass>());
-        pipeline->AddPass(std::make_unique<DirectionLightBillboardPass>());
-        pipeline->AddPass(std::make_unique<PointLightBillboardPass>());
-        pipeline->AddPass(std::make_unique<SpotLightBillboardPass>());
-        pipeline->AddPass(std::make_unique<AudioSourceBillboardPass>());
-        pipeline->AddPass(std::make_unique<AudioListenerBillboardPass>());
-        
-		//Forward+ Transparent Lighting Passes (WBOIT)
-		pipeline->AddPass(std::make_unique<TransparentForwardTransitionPass>());
-        pipeline->AddPass(std::make_unique<MeshletTransparentForwardPass>(MaterialRenderType::Transparent1Sided));
-		pipeline->AddPass(std::make_unique<MeshletTransparentForwardPass>(MaterialRenderType::Transparent2Sided));
-		pipeline->AddPass(std::make_unique<TraditionalTransparentForwardPass>(MaterialRenderType::Transparent1Sided));
-		pipeline->AddPass(std::make_unique<TraditionalTransparentForwardPass>(MaterialRenderType::Transparent2Sided));
-        pipeline->AddPass(std::make_unique<MeshletTransparentForwardPass>(MaterialRenderType::AlphaTestedTransparent1Sided));
-        pipeline->AddPass(std::make_unique<MeshletTransparentForwardPass>(MaterialRenderType::AlphaTestedTransparent2Sided));
-        pipeline->AddPass(std::make_unique<TraditionalTransparentForwardPass>(MaterialRenderType::AlphaTestedTransparent1Sided));
-        pipeline->AddPass(std::make_unique<TraditionalTransparentForwardPass>(MaterialRenderType::AlphaTestedTransparent2Sided));
-
-		//Transparent Composite Passes (WBOIT)
-        pipeline->AddPass(std::make_unique<TransparentCompositeTransitionPass>());
-        pipeline->AddPass(std::make_unique<TransparentCompositePass>());
-
-        // Bloom Post-processing passes
-        pipeline->AddPass(std::make_unique<BloomPrefilterPass>());
-        pipeline->AddPass(std::make_unique<BloomDownsamplePass>());
-        pipeline->AddPass(std::make_unique<BloomUpsamplePass>());
-        pipeline->AddPass(std::make_unique<BloomCompositePass>());
-
-		//Outline Post-processing Pass
+        // Post-Process & Debug 
+        pipeline->AddPass(std::make_unique<BloomPipeline>());
         pipeline->AddPass(std::make_unique<SelectionOutlinePass>());
+        pipeline->AddPass(std::make_unique<DebugVisibilityPass>());
+        pipeline->AddPass(std::make_unique<EditorPreviewPipeline>());
 
-		//Debug Visibility Pass
-        pipeline->AddPass(std::make_unique<DebugVisibilityPass>());     
+        // Present
+        pipeline->AddPass(std::make_unique<PresentationPipeline>());
 
-        //Preview Passes
-        pipeline->AddPass(std::make_unique<PreviewPreTransitionPass>());
-        pipeline->AddPass(std::make_unique<MaterialPreviewPass>());
-        pipeline->AddPass(std::make_unique<ModelPreviewPass>());
-        pipeline->AddPass(std::make_unique<AudioPreviewPass>());
-        pipeline->AddPass(std::make_unique<AnimationPreviewPass>());
-        pipeline->AddPass(std::make_unique<MaterialPreviewBloomPass>());
-        pipeline->AddPass(std::make_unique<PreviewPostTransitionPass>());
-
-		//Gui and Present Passes
-		pipeline->AddPass(std::make_unique<PresentationTransitionPass>());
-        pipeline->AddPass(std::make_unique<GuiPass>());
-		pipeline->AddPass(std::make_unique<SwapchainPresentPass>());
-        pipeline->InitializeAll();
-
+        pipeline->Initialize();
         renderManager->RegisterPipeline(RenderPipelineNames::ScenePipeline, std::move(pipeline));
 
         rtManager->CreateGroup(RenderTargetGroupNames::Main);

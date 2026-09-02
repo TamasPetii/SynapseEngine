@@ -61,6 +61,7 @@ namespace Syn {
 
         Vk::PushConstant<DirectionLightShadowCullingPC> pc;
         pc->frameGlobalContextBufferAddr = scene->GetSceneDrawData()->frameContextBuffer.GetAddress(context.frameIndex);
+        pc->isStaticPhase = 1;
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -79,7 +80,7 @@ namespace Syn {
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 
-        //pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
+        pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
     }
 
     void DirectionLightShadowMortonChunkCullingPass::Dispatch(const RenderContext& context) {
