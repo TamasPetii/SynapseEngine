@@ -32,7 +32,7 @@
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
 #include "Engine/Component/Core/TransformComponent.h"
-#include "Engine/Component/Light/Point/PointLightComponent.h"
+#include "Engine/Component/Light/Point/PointLightShadowComponent.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
 
 namespace Syn {
@@ -41,7 +41,7 @@ namespace Syn {
 
     bool PointLightShadowModelCullingPass::ShouldExecute(const RenderContext& context) const
     {
-        auto pool = context.scene->GetRegistry()->GetPool<PointLightComponent>();
+        auto pool = context.scene->GetRegistry()->GetPool<PointLightShadowComponent>();
         return context.scene->GetSettings()->culling.pointLightShadowCullingDevice == CullingDeviceType::GPU
             && pool && pool->Size() > 0;
     }
@@ -60,7 +60,7 @@ namespace Syn {
     void PointLightShadowModelCullingPass::PushConstants(const RenderContext& context) {
         auto scene = context.scene;
         auto transformPool = scene->GetRegistry()->GetPool<TransformComponent>();
-        auto lightPool = scene->GetRegistry()->GetPool<PointLightComponent>();
+        auto lightPool = scene->GetRegistry()->GetPool<PointLightShadowComponent>();
 
         if (!transformPool || transformPool->Size() == 0 || !lightPool || lightPool->Size() == 0) {
             _shouldDispatch = false;

@@ -50,16 +50,16 @@ void main()
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
     // Resolve dense transform index handling static/dynamic offsets
-    uint offset = ctx.staticTransformCount * ctx.enableDirectionLightBvhCulling;
+    uint offset = (pc.isStaticPhase == 0) ? ctx.staticTransformCount : 0;
+    uint maxElements = (pc.isStaticPhase == 0) ? (ctx.allTransformCount - ctx.staticTransformCount) : ctx.staticTransformCount;
     uint transformDenseIndex = gl_GlobalInvocationID.x + offset;
-    uint transformCount = ctx.allTransformCount - offset;
-    
+
     // Thread mapping: X = Model, Y = Light Index, Z = Cascade Index
     uint lightIdx = gl_GlobalInvocationID.y;
     uint cascadeIdx = gl_GlobalInvocationID.z;
 
     // 1. Thread Bounds Checking
-    if (gl_GlobalInvocationID.x >= transformCount) return;
+    if (gl_GlobalInvocationID.x >= maxElements) return;
     if (lightIdx >= ctx.activeDirectionLightShadowCount) return; 
     if (cascadeIdx >= 4) return;
 

@@ -21,6 +21,7 @@
 #include "Engine/Render/Pipelines/Morton/MortonBvhBuilderPipeline.h"
 #include "Engine/Render/Pipelines/Culling/MainCameraGeometryCullingPipeline.h"
 
+#include "Engine/Render/Pipelines/Shadow/DirectionLight/DirectionLightCpuShadowPipeline.h"
 #include "Engine/Render/Pipelines/Shadow/DirectionLight/Static/DirectionLightStaticShadowPipeline.h"
 #include "Engine/Render/Pipelines/Shadow/DirectionLight/Dynamic/DirectionLightDynamicShadowPipeline.h"
 #include "Engine/Render/Pipelines/Shadow/SpotLight/SpotLightShadowPipeline.h"
@@ -65,6 +66,7 @@ namespace Syn
         pipeline->AddPass(std::make_unique<MainCameraGeometryCullingPipeline>());
 
         // Shadows (Static & Dynamic)
+        pipeline->AddPass(std::make_unique<DirectionLightCpuShadowPipeline>());
         pipeline->AddPass(std::make_unique<DirectionLightStaticShadowPipeline>());
         pipeline->AddPass(std::make_unique<DirectionLightDynamicShadowPipeline>());
         pipeline->AddPass(std::make_unique<SpotLightShadowPipeline>());

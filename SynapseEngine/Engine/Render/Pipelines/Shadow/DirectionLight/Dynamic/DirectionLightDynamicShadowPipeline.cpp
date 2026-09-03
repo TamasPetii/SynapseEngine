@@ -25,4 +25,9 @@ namespace Syn {
         AddPass(std::make_unique<DirectionLightDynamicShadowCullingPipeline>());
         AddPass(std::make_unique<DirectionLightDynamicShadowRenderPipeline>());
     }
+
+    bool DirectionLightDynamicShadowPipeline::ShouldExecute(const RenderContext& context) const {
+        if (!context.scene) return false;
+        return context.scene->GetSettings()->culling.directionLightShadowCullingDevice == CullingDeviceType::GPU;
+    }
 }

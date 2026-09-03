@@ -18,6 +18,8 @@
 #include "DirectionLightStaticShadowCullingPipeline.h"
 #include "DirectionLightStaticShadowRenderPipeline.h"
 #include "DirectionLightStaticShadowHizPipeline.h"
+#include "Engine/Component/Light/Direction/DirectionLightShadowComponent.h"
+#include "Engine/Component/Core/TransformComponent.h"
 
 namespace Syn {
     DirectionLightStaticShadowPipeline::DirectionLightStaticShadowPipeline()
@@ -29,8 +31,34 @@ namespace Syn {
     }
 
     bool DirectionLightStaticShadowPipeline::ShouldExecute(const RenderContext& context) const {
-        if (!context.scene) return false;
-        // TODO: Return true only if DirectionLight moved or static geometry changed
-        return true;
+        if (context.scene->GetSettings()->culling.directionLightShadowCullingDevice != CullingDeviceType::GPU) {
+            return false;
+        }
+
+        auto registry = context.scene->GetRegistry();
+        auto shadowPool = registry->GetPool<DirectionLightShadowComponent>();
+        auto transformPool = registry->GetPool<TransformComponent>();
+
+        if (!shadowPool || !transformPool) 
+            return false;
+
+        if (!transformPool->GetDirtyStatics().empty())
+            return true;
+
+        for (EntityID entity : shadowPool->GetDenseEntities()) 
+        {
+            if (transformPool->IsBitSet<TRANSFORM_ROT_CHANGED>(entity)) {
+                return true;
+            }
+
+            const auto& shadowComp = shadowPool->Get(entity);
+            for (int i = 0; i < 4; ++i) {
+                if (shadowComp.isStaticDirty[i]) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

@@ -115,38 +115,71 @@ namespace Syn
                             centerFar - camUp * farHeight + camRight * farWidth
                         };
 
-                        // Calculate bounding sphere center and radius
-                        glm::vec3 center(0.0f);
+                        // Calculate actual camera frustum center and radius
+                        glm::vec3 frustumCenter(0.0f);
                         for (int j = 0; j < 8; ++j) {
-                            center += corners[j];
+                            frustumCenter += corners[j];
                         }
-                        center /= 8.0f;
+                        frustumCenter /= 8.0f;
 
-                        float radius = 0.0f;
+                        float frustumRadius = 0.0f;
                         for (int j = 0; j < 8; ++j) {
-                            radius = std::max(radius, glm::distance(center, corners[j]));
-                        }
-
-                        // Light view matrix looking at the sphere center
-                        glm::mat4 lightView = glm::lookAt(center - lightComp.direction * radius, center, up);
-
-                        float orthoExtent = radius * 1.05f;
-
-                        // Calculate Orthographic AABB in light space
-                        glm::vec3 minOrtho(-orthoExtent, -orthoExtent, 0.0f);
-                        glm::vec3 maxOrtho(orthoExtent, orthoExtent, 0.0f);
-
-                        // Expand Z bounds to capture objects behind the camera
-                        float minZ = std::numeric_limits<float>::max();
-                        float maxZ = std::numeric_limits<float>::lowest();
-                        for (int j = 0; j < 8; ++j) {
-                            glm::vec3 trf = glm::vec3(lightView * glm::vec4(corners[j], 1.0f));
-                            minZ = std::min(minZ, trf.z);
-                            maxZ = std::max(maxZ, trf.z);
+                            frustumRadius = std::max(frustumRadius, glm::distance(frustumCenter, corners[j]));
                         }
 
-                        float zNear = -maxZ - 1000.0f;
-                        float zFar = -minZ + 500.0f;
+                        // Round radius to prevent float precision flickering on micro-rotations
+                        frustumRadius = std::ceil(frustumRadius * 16.0f) / 16.0f;
+
+                        // Padded Bounding Sphere (20% padding)
+                        float paddedRadius = frustumRadius * 1.20f;
+                        float threshold = paddedRadius - frustumRadius;
+
+                        // Check anchor distance
+                        float dist = glm::distance(frustumCenter, shadowComp.cascadeAnchors[i]);
+
+                        // Threshold crossed or first initialization (Invalidation)
+                        if (dist > threshold || shadowComp.cascadeRadius[i] == 0.0f)
+                        {
+                            // Extract dynamic resolution from Atlas Rect UV coordinates
+                            float uvWidth = shadowComp.cascadeAtlasRects[i].z;
+                            float cascadeResolution = uvWidth > 0.0f ? (uvWidth * SHADOW_ATLAS_SIZE) : 2048.0f;
+                            float worldUnitsPerTexel = (paddedRadius * 2.0f) / cascadeResolution;
+
+                            // Map center to light space for texel snapping
+                            glm::mat4 lightSpace = glm::lookAt(glm::vec3(0.0f), lightComp.direction, up);
+                            glm::vec3 lightSpaceCenter = glm::vec3(lightSpace * glm::vec4(frustumCenter, 1.0f));
+
+                            // Snap to texel size to avoid edge shimmering
+                            lightSpaceCenter.x = std::floor(lightSpaceCenter.x / worldUnitsPerTexel) * worldUnitsPerTexel;
+                            lightSpaceCenter.y = std::floor(lightSpaceCenter.y / worldUnitsPerTexel) * worldUnitsPerTexel;
+
+                            // Transform back to world space for the fixed anchor
+                            glm::mat4 invLightSpace = glm::inverse(lightSpace);
+                            glm::vec3 snappedCenter = glm::vec3(invLightSpace * glm::vec4(lightSpaceCenter, 1.0f));
+
+                            shadowComp.cascadeAnchors[i] = snappedCenter;
+                            shadowComp.cascadeRadius[i] = paddedRadius;
+                            shadowComp.isStaticDirty[i] = true;
+                        }
+                        else
+                        {
+                            shadowComp.isStaticDirty[i] = false;
+                        }
+
+                        // Generate matrices based on the fixed anchor
+                        glm::vec3 cascadeAnchorCenter = shadowComp.cascadeAnchors[i];
+                        float cascadeAnchorRadius = shadowComp.cascadeRadius[i];
+
+                        // Light view matrix looking at the sphere anchor center
+                        glm::mat4 lightView = glm::lookAt(cascadeAnchorCenter - lightComp.direction * cascadeAnchorRadius, cascadeAnchorCenter, up);
+
+                        // Fixed orthographic extents based on padded radius
+                        glm::vec3 minOrtho(-cascadeAnchorRadius, -cascadeAnchorRadius, 0.0f);
+                        glm::vec3 maxOrtho(cascadeAnchorRadius, cascadeAnchorRadius, 0.0f);
+
+                        // Fix Z-bounds to the anchor to maintain static shadow depth buffer integrity
+                        float zNear = -cascadeAnchorRadius - 1000.0f;
+                        float zFar = cascadeAnchorRadius + 500.0f;
 
                         minOrtho.z = -zFar;
                         maxOrtho.z = -zNear;
@@ -157,6 +190,7 @@ namespace Syn
                         // Create projection and view-projection matrices
                         glm::mat4 orthoProj = glm::orthoZO(minOrtho.x, maxOrtho.x, minOrtho.y, maxOrtho.y, zNear, zFar);
                         glm::mat4 viewProj = orthoProj * lightView;
+
                         shadowComp.cascadeViews[i] = lightView;
                         shadowComp.cascadeProjs[i] = orthoProj;
                         shadowComp.cascadeViewProjs[i] = viewProj;
@@ -184,18 +218,10 @@ namespace Syn
 
                         if constexpr (ENABLE_DEBUG_LOGGING) {
                             Info("  Cascade {}: Splits [{} - {}]", i, splits[i], splits[i + 1]);
-                            Info("    Center: ({:.2f}, {:.2f}, {:.2f}) | Radius: {:.2f}", center.x, center.y, center.z, radius);
+                            Info("    Anchor Center: ({:.2f}, {:.2f}, {:.2f}) | Padded Radius: {:.2f}", cascadeAnchorCenter.x, cascadeAnchorCenter.y, cascadeAnchorCenter.z, cascadeAnchorRadius);
+                            Info("    Is Static Dirty: {}", shadowComp.isStaticDirty[i]);
                             Info("    OrthoMin: ({:.2f}, {:.2f}, {:.2f})", minOrtho.x, minOrtho.y, minOrtho.z);
                             Info("    OrthoMax: ({:.2f}, {:.2f}, {:.2f})", maxOrtho.x, maxOrtho.y, maxOrtho.z);
-
-                            const auto& planes = shadowComp.cascadeFrustums[i].planes;
-                            Info("    Frustum Planes (nx, ny, nz, d):");
-                            Info("      Near:   ({:.2f}, {:.2f}, {:.2f}, {:.2f})", planes[0].x, planes[0].y, planes[0].z, planes[0].w);
-                            Info("      Right:  ({:.2f}, {:.2f}, {:.2f}, {:.2f})", planes[1].x, planes[1].y, planes[1].z, planes[1].w);
-                            Info("      Left:   ({:.2f}, {:.2f}, {:.2f}, {:.2f})", planes[2].x, planes[2].y, planes[2].z, planes[2].w);
-                            Info("      Top:    ({:.2f}, {:.2f}, {:.2f}, {:.2f})", planes[3].x, planes[3].y, planes[3].z, planes[3].w);
-                            Info("      Bottom: ({:.2f}, {:.2f}, {:.2f}, {:.2f})", planes[4].x, planes[4].y, planes[4].z, planes[4].w);
-                            Info("      Far:    ({:.2f}, {:.2f}, {:.2f}, {:.2f})", planes[5].x, planes[5].y, planes[5].z, planes[5].w);
                         }
                     }
 

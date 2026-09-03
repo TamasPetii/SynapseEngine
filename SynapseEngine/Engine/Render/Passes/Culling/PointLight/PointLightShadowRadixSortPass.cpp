@@ -17,7 +17,7 @@
 #include "PointLightShadowRadixSortPass.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/Scene/Scene.h"
-#include "Engine/Component/Light/Point/PointLightComponent.h"
+#include "Engine/Component/Light/Point/PointLightShadowComponent.h"
 #include "Engine/Vk/Buffer/BufferUtils.h"
 #include "Engine/Vk/Context.h"
 
@@ -42,7 +42,7 @@ namespace Syn {
     }
 
     bool PointLightShadowRadixSortPass::ShouldExecute(const RenderContext& context) const {
-        auto pool = context.scene->GetRegistry()->GetPool<PointLightComponent>();
+        auto pool = context.scene->GetRegistry()->GetPool<PointLightShadowComponent>();
         return context.scene->GetSettings()->culling.pointLightShadowCullingDevice == CullingDeviceType::GPU
             && pool && pool->Size() > 0;
     }

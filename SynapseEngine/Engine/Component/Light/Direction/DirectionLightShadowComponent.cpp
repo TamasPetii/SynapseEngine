@@ -29,6 +29,9 @@ namespace Syn
         cascadeAtlasRects.fill(glm::vec4(0.0f));
         cascadeAabbMin.fill(glm::vec3(0.0f));
         cascadeAabbMax.fill(glm::vec3(0.0f));
+        cascadeAnchors.fill(glm::vec3(0.0f));
+        cascadeRadius.fill(0.0f);
+        isStaticDirty.fill(true);
     }
 
     DirectionLightShadowGPU::DirectionLightShadowGPU(const DirectionLightShadowComponent& component)

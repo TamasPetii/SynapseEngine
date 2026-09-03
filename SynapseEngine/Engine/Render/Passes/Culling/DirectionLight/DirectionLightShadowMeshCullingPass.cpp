@@ -78,8 +78,8 @@ namespace Syn {
     void DirectionLightShadowMeshCullingPass::BindDescriptors(const RenderContext& context) {
         auto imageManager = ServiceLocator::Get<ImageManager>();
 
-        uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
-        auto depthPyramid = context.scene->GetSceneDrawData()->DirectionLightShadow.shadowDepthPyramid[prevFrameIndex].get();
+        uint32_t pyramidIdx = _isStaticPhase ? ((context.frameIndex + context.framesInFlight - 1) % context.framesInFlight) : context.frameIndex;
+        auto depthPyramid = context.scene->GetSceneDrawData()->DirectionLightShadow.shadowDepthPyramid[pyramidIdx].get();
         auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);
 
         Vk::PushDescriptorWriter pushWriter;

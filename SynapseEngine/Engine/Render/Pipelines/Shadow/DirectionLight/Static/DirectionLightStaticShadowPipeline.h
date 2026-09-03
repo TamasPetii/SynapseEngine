@@ -21,7 +21,7 @@ namespace Syn {
     class SYN_API DirectionLightStaticShadowPipeline : public RenderPipeline {
     public:
         DirectionLightStaticShadowPipeline();
-        virtual bool ShouldExecute(const RenderContext& context) const override;
+        bool ShouldExecute(const RenderContext& context) const override;
         bool IsProfileable() const override { return false; }
     };
 }
