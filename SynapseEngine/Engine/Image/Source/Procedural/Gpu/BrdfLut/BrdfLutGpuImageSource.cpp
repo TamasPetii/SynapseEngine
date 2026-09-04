@@ -37,7 +37,7 @@ namespace Syn
         image.format = VK_FORMAT_R32G32_SFLOAT;
         image.isCompressed = false;
         image.isGpuGenerated = true;
-        image.autoCache = false;
+        image.autoCache = true;
 
         image.gpuGeneratorCallback = [pipeline = _pipeline](VkCommandBuffer cmd, Vk::Image& targetImage) {
             GpuProceduralContext ctx{ cmd, &targetImage };

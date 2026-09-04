@@ -174,7 +174,7 @@ namespace Syn {
         pushWriter.AddCombinedImageSampler(
             5,
             spotColorAtlas->GetView(Vk::ImageViewNames::Default),
-            linearSampler,
+            sampler,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 

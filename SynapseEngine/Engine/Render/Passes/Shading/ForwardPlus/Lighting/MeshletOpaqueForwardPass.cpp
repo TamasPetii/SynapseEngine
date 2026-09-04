@@ -183,6 +183,7 @@ namespace Syn {
         auto pointColorAtlas = drawData->PointLightShadow.shadowColorAtlas[fIdx].get();
         auto spotColorAtlas = drawData->SpotLightShadow.shadowColorAtlas[fIdx].get();
         auto linearSampler = imageManager->GetSampler(SamplerNames::LinearClampEdge);
+        auto nearestSampler = imageManager->GetSampler(SamplerNames::NearestClampEdge);
 
         Vk::PushDescriptorWriter pushWriter;
 
@@ -193,9 +194,9 @@ namespace Syn {
         pushWriter.AddCombinedImageSampler(3, pointShadowAtlas->GetView(Vk::ImageViewNames::Default), shadowSampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
         pushWriter.AddCombinedImageSampler(4, spotShadowAtlas->GetView(Vk::ImageViewNames::Default), shadowSampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
-        pushWriter.AddCombinedImageSampler(5, dirColorAtlas->GetView(Vk::ImageViewNames::Default), linearSampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-        pushWriter.AddCombinedImageSampler(6, pointColorAtlas->GetView(Vk::ImageViewNames::Default), linearSampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-        pushWriter.AddCombinedImageSampler(7, spotColorAtlas->GetView(Vk::ImageViewNames::Default), linearSampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        pushWriter.AddCombinedImageSampler(5, dirColorAtlas->GetView(Vk::ImageViewNames::Default), nearestSampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        pushWriter.AddCombinedImageSampler(6, pointColorAtlas->GetView(Vk::ImageViewNames::Default), nearestSampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        pushWriter.AddCombinedImageSampler(7, spotColorAtlas->GetView(Vk::ImageViewNames::Default), nearestSampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
 

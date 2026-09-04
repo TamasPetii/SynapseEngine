@@ -46,7 +46,21 @@ namespace Syn
             result = stbi_write_png(path.string().c_str(), image.width, image.height, channels, image.pixels.data(), image.width * channels);
         }
         else if (ext == ".hdr" && isFloat) {
-            result = stbi_write_hdr(path.string().c_str(), image.width, image.height, channels, reinterpret_cast<const float*>(image.pixels.data()));
+            if (channels == 2) {
+                std::vector<float> paddedData(image.width * image.height * 3);
+                const float* floatData = reinterpret_cast<const float*>(image.pixels.data());
+
+                for (size_t i = 0; i < image.width * image.height; ++i) {
+                    paddedData[i * 3 + 0] = floatData[i * 2 + 0];
+                    paddedData[i * 3 + 1] = floatData[i * 2 + 1];
+                    paddedData[i * 3 + 2] = 0.0f;
+                }
+
+                result = stbi_write_hdr(path.string().c_str(), image.width, image.height, 3, paddedData.data());
+            }
+            else {
+                result = stbi_write_hdr(path.string().c_str(), image.width, image.height, channels, reinterpret_cast<const float*>(image.pixels.data()));
+            }
         }
         else if (ext == ".png" && isFloat) {
             std::vector<uint8_t> converted(image.width * image.height * channels);
