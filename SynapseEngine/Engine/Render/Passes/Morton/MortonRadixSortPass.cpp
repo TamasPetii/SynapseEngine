@@ -60,8 +60,11 @@ namespace Syn {
             return false;
         }
 
-        if (!_wasEnabled) {
+        uint32_t currentVersion = context.scene->GetSceneDrawData()->Chunks.mortonRebuildVersion.load(std::memory_order_relaxed);
+
+        if (!_wasEnabled || _lastMortonVersion != currentVersion) {
             _needsRebuild = true;
+            _lastMortonVersion = currentVersion;
         }
         _wasEnabled = true;
 

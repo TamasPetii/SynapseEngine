@@ -149,7 +149,7 @@ namespace Syn
             });
 
         // 3. Ecs Sync
-        tf::Task syncEcsTask = this->EmplaceTask(subflow, "SyncECS_And_TriggerUpload", [this, transformPool, frameIndex]() {
+        tf::Task syncEcsTask = this->EmplaceTask(subflow, "SyncECS_And_TriggerUpload", [this, transformPool, scene, frameIndex]() {
             std::println("[StaticSpatialSah] SyncECS_And_TriggerUpload TASK fut (Frame: {})", frameIndex);
             size_t staticCount = _spatialItems.size();
             std::vector<TransformComponent> sortedTransforms(staticCount);
@@ -173,6 +173,7 @@ namespace Syn
             transformPool->IncrementMappingVersion();
 
             transformPool->SetStateBitSet<FORCE_STATIC_GPU_UPLOAD>();
+            scene->GetSceneDrawData()->Chunks.mortonRebuildVersion.fetch_add(1, std::memory_order_relaxed);
             });
 
         if (gatherTaskOpt) {

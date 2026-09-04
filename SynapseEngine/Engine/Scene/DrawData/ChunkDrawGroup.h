@@ -57,6 +57,8 @@ namespace Syn
         std::vector<ChunkDataGPU> chunks;
         std::atomic<uint32_t> chunkCounter{ 0 };
 
+        std::atomic<uint32_t> mortonRebuildVersion{ 0 };
+
         VkDrawIndirectCommand wireframeCmdTemplate{};
         VkDispatchIndirectCommand dispatchCmdTemplate{};
     };

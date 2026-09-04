@@ -34,5 +34,6 @@ namespace Syn {
         mutable bool _wasEnabled = false;
         mutable bool _needsRebuild = true;
         uint32_t _countdown = 0;
+        mutable uint32_t _lastMortonVersion = 0;
     };
 }
