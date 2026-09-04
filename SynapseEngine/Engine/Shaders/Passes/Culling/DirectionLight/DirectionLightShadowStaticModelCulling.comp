@@ -87,18 +87,18 @@ void main() {
         uint entityId = link.entityIndex;
         
         uint tagSparseIndex = GET_SPARSE_INDEX(ctx.tagSparseMapBufferAddr, entityId);
-        if (tagSparseIndex == INVALID_INDEX) return;
+        if (tagSparseIndex == INVALID_INDEX) continue;
 
         uint entityFlags = GET_TAG_DATA(ctx.tagDataBufferAddr, tagSparseIndex);
         bool isActive = (entityFlags & (1u << 0)) != 0;
 
-        if (!isActive) return;
+        if (!isActive) continue;
 
         TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, denseIndex);
         ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, link.modelDenseIndex);
         
         bool castShadow = (modelComp.flags & (1u << 0)) != 0;
-        if (modelComp.modelIndex == INVALID_INDEX || !castShadow) return;
+        if (modelComp.modelIndex == INVALID_INDEX || !castShadow) continue;
 
         ModelAllocationInfo mAlloc = GET_MODEL_ALLOC(ctx.globalModelAllocationBufferAddr, modelComp.modelIndex);
         GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, modelComp.modelIndex);
@@ -106,6 +106,7 @@ void main() {
         GpuMeshCollider localGlobalCollider = addrs.globalCollider;
 
         // Evaluate Animation frame collider if applicable (mostly statics here, but keeps engine unified)
+        bool hasAnimation = false;
         if(ctx.animationSparseMapBufferAddr != 0) {
             uint animSparseIndex = GET_SPARSE_INDEX(ctx.animationSparseMapBufferAddr, entityId);
             if (animSparseIndex != INVALID_INDEX) {
@@ -114,10 +115,15 @@ void main() {
                     GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
 
                     if (animAddrs.isReady == 1) 
+                    {
                         localGlobalCollider = GET_MESH_COLLIDER(animAddrs.frameGlobalColliders, animComp.frameIndex);
+                        hasAnimation = true;
+                    }
                 }
             }
         }
+
+        if (hasAnimation) continue;
 
         // Transform global collider to world space
         GpuMeshCollider worldCollider = TransformCollider(localGlobalCollider, transform.transform);

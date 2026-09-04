@@ -135,6 +135,26 @@ void main() {
             }
         }
 
+        if (isVisible && ctx.enableMeshletOcclusionCulling == 1 && pc.isStaticPhase == 0) {
+            DirectionLightShadowComponent shadowComp = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIdx);
+            mat4 shadowViewProj = shadowComp.cascadeViewProjsVulkan[cascadeIdx];
+            vec4 shadowAtlasRect = shadowComp.cascadeAtlasRects[cascadeIdx];
+            
+            float shadowScreenSizePixels = 0.0;
+            if (IsSphereOccludedAtlasOrtho(
+                worldCollider.center, 
+                worldCollider.radius, 
+                shadowViewProj, 
+                shadowAtlasRect, 
+                shadowDepthPyramid, 
+                float(ctx.directionLightShadowAtlasSize), 
+                ctx.directionLightShadowHizMipLevels, 
+                shadowScreenSizePixels
+            )) {
+                isVisible = false;
+            }
+        }
+
         // 11. Emit surviving meshlets
         if (isVisible) {
             uint slot = atomicAdd(survivingMeshletCount, 1);

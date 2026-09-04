@@ -81,5 +81,9 @@ namespace Syn
 
         std::vector<std::unique_ptr<Vk::Image>> staticShadowAtlas;
         std::vector<std::unique_ptr<Vk::Image>> staticShadowColorAtlas;
+
+        std::atomic<uint32_t> staticCacheModelVersion{ 0 };
+        std::atomic<uint32_t> staticModelSwapVersion{ 0 };
+        std::atomic<uint32_t> processedStaticModelSwapVersion{ 0 };
     };
 }

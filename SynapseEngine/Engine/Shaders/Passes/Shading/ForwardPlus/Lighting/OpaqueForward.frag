@@ -51,6 +51,8 @@ layout(set = 2, binding = 4) uniform sampler2DShadow spotLightShadowAtlas;
 layout(set = 2, binding = 5) uniform sampler2D dirLightShadowColorAtlas;
 layout(set = 2, binding = 6) uniform sampler2D pointLightShadowColorAtlas;
 layout(set = 2, binding = 7) uniform sampler2D spotLightShadowColorAtlas;
+layout(set = 2, binding = 8) uniform sampler2DShadow dirLightStaticShadowAtlas;
+layout(set = 2, binding = 9) uniform sampler2D dirLightStaticShadowColorAtlas;
 
 #include "../../../../Includes/PushConstants/TraditionalMeshletPassPC.glsl"
 
@@ -156,6 +158,8 @@ void main() {
             viewDepth,
             dirLightShadowAtlas,
             dirLightShadowColorAtlas,
+            dirLightStaticShadowAtlas,
+            dirLightStaticShadowColorAtlas,
             debugCascadeIndex
         );
 

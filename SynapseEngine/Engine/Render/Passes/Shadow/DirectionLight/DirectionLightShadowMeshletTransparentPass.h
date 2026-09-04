@@ -22,7 +22,7 @@
 namespace Syn {
     class SYN_API DirectionLightShadowMeshletTransparentPass : public GraphicsPass {
     public:
-        DirectionLightShadowMeshletTransparentPass(MaterialRenderType renderType);
+        DirectionLightShadowMeshletTransparentPass(MaterialRenderType renderType, bool isStaticPhase);
 
         std::string GetName() const override { return _passName; }
         std::string GetGroup() const override { return PassGroupNames::DirectionLightShadowPasses; }
@@ -38,5 +38,6 @@ namespace Syn {
     private:
         MaterialRenderType _renderType;
         std::string _passName;
+        bool _isStaticPhase;
     };
 }

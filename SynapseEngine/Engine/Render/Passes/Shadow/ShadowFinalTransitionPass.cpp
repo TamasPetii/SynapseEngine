@@ -11,6 +11,8 @@ namespace Syn {
                 std::vector<Vk::Image*> shadowImages = {
                     drawData->DirectionLightShadow.shadowAtlas[fIdx].get(),
                     drawData->DirectionLightShadow.shadowColorAtlas[fIdx].get(),
+                    drawData->DirectionLightShadow.staticShadowAtlas[fIdx].get(),
+                    drawData->DirectionLightShadow.staticShadowColorAtlas[fIdx].get(),
                     drawData->SpotLightShadow.shadowAtlas[fIdx].get(),
                     drawData->SpotLightShadow.shadowColorAtlas[fIdx].get(),
                     drawData->PointLightShadow.shadowAtlas[fIdx].get(),

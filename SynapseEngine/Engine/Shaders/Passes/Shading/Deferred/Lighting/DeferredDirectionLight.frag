@@ -41,6 +41,9 @@ layout(set = 2, binding = 2) uniform sampler2D depthTexture;
 layout(set = 2, binding = 3) uniform sampler2D ssaoTexture;
 layout(set = 2, binding = 4) uniform sampler2DShadow dirLightShadowAtlas;
 layout(set = 2, binding = 5) uniform sampler2D dirLightShadowColorAtlas;
+layout(set = 2, binding = 6) uniform sampler2DShadow dirLightStaticShadowAtlas;
+layout(set = 2, binding = 7) uniform sampler2D dirLightStaticShadowColorAtlas;
+
 
 #include "../../../../Includes/PushConstants/DeferredDirectionLightPC.glsl"
 
@@ -95,6 +98,8 @@ void main()
         viewDepth,
         dirLightShadowAtlas,
         dirLightShadowColorAtlas,
+        dirLightStaticShadowAtlas,
+        dirLightStaticShadowColorAtlas,
         debugCascadeIndex
     );
     

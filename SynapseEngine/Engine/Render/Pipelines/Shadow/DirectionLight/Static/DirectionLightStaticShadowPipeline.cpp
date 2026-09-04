@@ -38,9 +38,24 @@ namespace Syn {
         auto registry = context.scene->GetRegistry();
         auto shadowPool = registry->GetPool<DirectionLightShadowComponent>();
         auto transformPool = registry->GetPool<TransformComponent>();
+        auto drawData = context.scene->GetSceneDrawData();
 
         if (!shadowPool || !transformPool) 
             return false;
+
+        uint32_t currentModelVersion = context.scene->GetSystemContext().modelManagerVersion;
+        if (drawData->DirectionLightShadow.staticCacheModelVersion.load(std::memory_order_relaxed) != currentModelVersion) 
+        {
+            drawData->DirectionLightShadow.staticCacheModelVersion.store(currentModelVersion, std::memory_order_relaxed);
+            return true;
+        }
+
+        uint32_t currentSwapVersion = drawData->DirectionLightShadow.staticModelSwapVersion.load(std::memory_order_relaxed);
+        if (drawData->DirectionLightShadow.processedStaticModelSwapVersion.load(std::memory_order_relaxed) != currentSwapVersion)
+        {
+            drawData->DirectionLightShadow.processedStaticModelSwapVersion.store(currentSwapVersion, std::memory_order_relaxed);
+            return true;
+        }
 
         if (!transformPool->GetDirtyStatics().empty())
             return true;

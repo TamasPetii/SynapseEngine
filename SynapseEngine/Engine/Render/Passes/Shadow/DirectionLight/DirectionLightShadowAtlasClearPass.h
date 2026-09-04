@@ -14,17 +14,17 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef SYN_INCLUDES_PC_DIRECTION_LIGHT_SHADOW_TRADITIONAL_MESHLET_PASS_GLSL
-#define SYN_INCLUDES_PC_DIRECTION_LIGHT_SHADOW_TRADITIONAL_MESHLET_PASS_GLSL
+#pragma once
+#include "Engine/Render/RenderContext.h"
+#include "Engine/Render/IRenderPass.h"
 
-#include "../SharedGpuTypes.glsl"
+namespace Syn {
+    class SYN_API DirectionLightShadowAtlasClearPass : public IRenderPass {
+    public:
+        virtual std::string GetName() const override { return "DirectionLightShadowAtlasClearPass"; }
+        virtual std::string GetGroup() const override { return PassGroupNames::DirectionLightShadowPasses; }
 
-struct DirectionLightShadowTraditionalMeshletPassPC {
-    uint64_t frameGlobalContextBufferAddr;
-    uint baseDescriptorOffset;
-    uint materialRenderType;
-    uint disableConeCulling;
-    uint isStaticPhase;
-};
-
-#endif
+        virtual bool ShouldExecute(const RenderContext& context) const override;
+        virtual void Execute(const RenderContext& context) override;
+    };
+}

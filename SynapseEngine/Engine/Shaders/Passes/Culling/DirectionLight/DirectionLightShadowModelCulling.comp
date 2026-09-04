@@ -50,16 +50,14 @@ void main()
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
     // Resolve dense transform index handling static/dynamic offsets
-    uint offset = (pc.isStaticPhase == 0) ? ctx.staticTransformCount : 0;
-    uint maxElements = (pc.isStaticPhase == 0) ? (ctx.allTransformCount - ctx.staticTransformCount) : ctx.staticTransformCount;
-    uint transformDenseIndex = gl_GlobalInvocationID.x + offset;
+    uint transformDenseIndex = gl_GlobalInvocationID.x;
+    uint maxElements = (pc.isStaticPhase == 1) ? ctx.staticTransformCount : ctx.allTransformCount;
+
+    if (transformDenseIndex >= maxElements) return;
 
     // Thread mapping: X = Model, Y = Light Index, Z = Cascade Index
     uint lightIdx = gl_GlobalInvocationID.y;
     uint cascadeIdx = gl_GlobalInvocationID.z;
-
-    // 1. Thread Bounds Checking
-    if (gl_GlobalInvocationID.x >= maxElements) return;
     if (lightIdx >= ctx.activeDirectionLightShadowCount) return; 
     if (cascadeIdx >= 4) return;
 
@@ -92,6 +90,7 @@ void main()
     GpuMeshCollider localGlobalCollider = addrs.globalCollider;
     
     // Evaluate Animation frame collider if the entity is skinned
+    bool hasAnimation = false;
     if(ctx.animationSparseMapBufferAddr != 0) {
         uint animSparseIndex = GET_SPARSE_INDEX(ctx.animationSparseMapBufferAddr, entityId);
         if (animSparseIndex != INVALID_INDEX) {
@@ -100,11 +99,22 @@ void main()
                 GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
 
                 if (animAddrs.isReady == 1)
+                {
                     localGlobalCollider = GET_MESH_COLLIDER(animAddrs.frameGlobalColliders, animComp.frameIndex);
+                    hasAnimation = true;
+                }  
             }
         }
     }
+
+    bool isStaticTransform = transformDenseIndex < ctx.staticTransformCount;
     
+    // Static phase: If it has an animation, SKIP (the dynamic phase will handle it)
+    if (pc.isStaticPhase == 1 && hasAnimation) return;
+    
+    // Dynamic phase: If it's static AND has no animation, SKIP (the static phase already handled it)
+    if (pc.isStaticPhase == 0 && isStaticTransform && !hasAnimation) return;
+
     // Transform global collider to world space
     GpuMeshCollider worldCollider = TransformCollider(localGlobalCollider, transform.transform);
 

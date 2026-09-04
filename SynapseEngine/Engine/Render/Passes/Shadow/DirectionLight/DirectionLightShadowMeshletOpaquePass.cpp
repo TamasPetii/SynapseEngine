@@ -40,8 +40,8 @@ namespace Syn {
         return pool && pool->Size() > 0;
     }
 
-    DirectionLightShadowMeshletOpaquePass::DirectionLightShadowMeshletOpaquePass(MaterialRenderType renderType)
-        : _renderType(renderType)
+    DirectionLightShadowMeshletOpaquePass::DirectionLightShadowMeshletOpaquePass(MaterialRenderType renderType, bool isStaticPhase)
+        : _renderType(renderType), _isStaticPhase(isStaticPhase)
     {
         assert(_renderType == MaterialRenderType::Opaque1Sided || _renderType == MaterialRenderType::Opaque2Sided);
 
@@ -120,6 +120,7 @@ namespace Syn {
         pc->baseDescriptorOffset = drawData->Models.activeTraditionalCount + drawData->Models.meshletCmdOffsets[_renderType];
         pc->materialRenderType = static_cast<uint32_t>(_renderType);
         pc->disableConeCulling = _renderType == MaterialRenderType::Opaque2Sided ? 1 : 0;
+        pc->isStaticPhase = _isStaticPhase ? 1 : 0;
 		pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -127,8 +128,7 @@ namespace Syn {
     {
         auto imageManager = ServiceLocator::Get<ImageManager>();
 
-        uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
-        auto depthPyramid = context.scene->GetSceneDrawData()->DirectionLightShadow.shadowDepthPyramid[prevFrameIndex].get();
+        auto depthPyramid = context.scene->GetSceneDrawData()->DirectionLightShadow.shadowDepthPyramid[context.frameIndex].get();
         auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);
 
         Vk::PushDescriptorWriter pushWriter;
@@ -140,7 +140,7 @@ namespace Syn {
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 
-        //pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
+        pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }
 
     void DirectionLightShadowMeshletOpaquePass::Draw(const RenderContext& context)

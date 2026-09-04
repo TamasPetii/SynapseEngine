@@ -163,5 +163,21 @@ namespace Syn {
         Vk::BufferUtils::InsertBarrier(context.cmd, readyBarrier);
 
         vkCmdDispatchIndirect(context.cmd, cullBuffer, 0);
+
+        Vk::BufferBarrierInfo indirectBarrier{};
+        indirectBarrier.buffer = drawData->PointLightShadow.indirectBuffer.GetHandle(fIdx);
+        indirectBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        indirectBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        indirectBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        indirectBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT | VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, indirectBarrier);
+
+        Vk::BufferBarrierInfo instanceBarrier{};
+        instanceBarrier.buffer = drawData->PointLightShadow.instanceBuffer.GetHandle(fIdx);
+        instanceBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        instanceBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        instanceBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        instanceBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, instanceBarrier);
     }
 }

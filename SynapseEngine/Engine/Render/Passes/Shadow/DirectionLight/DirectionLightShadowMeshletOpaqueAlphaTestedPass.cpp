@@ -42,8 +42,8 @@ namespace Syn {
         return pool && pool->Size() > 0;
     }
 
-    DirectionLightShadowMeshletOpaqueAlphaTestedPass::DirectionLightShadowMeshletOpaqueAlphaTestedPass(MaterialRenderType renderType)
-        : _renderType(renderType)
+    DirectionLightShadowMeshletOpaqueAlphaTestedPass::DirectionLightShadowMeshletOpaqueAlphaTestedPass(MaterialRenderType renderType, bool isStaticPhase)
+        : _renderType(renderType), _isStaticPhase(isStaticPhase)
     {
         assert(_renderType == MaterialRenderType::AlphaTestedOpaque1Sided || _renderType == MaterialRenderType::AlphaTestedOpaque2Sided);
 
@@ -131,6 +131,7 @@ namespace Syn {
         pc->baseDescriptorOffset = drawData->Models.activeTraditionalCount + drawData->Models.meshletCmdOffsets[_renderType];
         pc->materialRenderType = static_cast<uint32_t>(_renderType);
         pc->disableConeCulling = _renderType == MaterialRenderType::Opaque2Sided ? 1 : 0;
+        pc->isStaticPhase = _isStaticPhase ? 1 : 0;
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -138,8 +139,7 @@ namespace Syn {
     {
         auto imageManager = ServiceLocator::Get<ImageManager>();
 
-        uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
-        auto depthPyramid = context.scene->GetSceneDrawData()->DirectionLightShadow.shadowDepthPyramid[prevFrameIndex].get();
+        auto depthPyramid = context.scene->GetSceneDrawData()->DirectionLightShadow.shadowDepthPyramid[context.frameIndex].get();
         auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);
 
         Vk::PushDescriptorWriter pushWriter;
@@ -151,7 +151,7 @@ namespace Syn {
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 
-        //pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
+        pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
 
         auto videoManager = ServiceLocator::Get<VideoManager>();
         std::vector<std::pair<uint32_t, Vk::DescriptorBuffer*>> buffersToBind;

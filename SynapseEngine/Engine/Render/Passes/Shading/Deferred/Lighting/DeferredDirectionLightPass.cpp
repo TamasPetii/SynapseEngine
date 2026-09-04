@@ -118,6 +118,10 @@ namespace Syn {
         auto dirColorAtlas = drawData->DirectionLightShadow.shadowColorAtlas[fIdx].get();
         auto shadowSampler = imageManager->GetSampler(SamplerNames::ShadowSampler);
 
+        auto staticDirShadowAtlas = drawData->DirectionLightShadow.staticShadowAtlas[fIdx].get();
+        auto staticDirColorAtlas = drawData->DirectionLightShadow.staticShadowColorAtlas[fIdx].get();
+
+
         Vk::PushDescriptorWriter pushWriter;
 
         pushWriter.AddCombinedImageSampler(
@@ -161,6 +165,9 @@ namespace Syn {
             sampler,
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
+
+        pushWriter.AddCombinedImageSampler(6, staticDirShadowAtlas->GetView(Vk::ImageViewNames::Default), shadowSampler->Handle(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+        pushWriter.AddCombinedImageSampler(7, staticDirColorAtlas->GetView(Vk::ImageViewNames::Default), sampler, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
         pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_GRAPHICS);
     }

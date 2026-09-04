@@ -80,7 +80,7 @@ namespace Syn {
             _totalModelsToTest = bvhEnabled ? 0 : staticCount;
         }
         else {
-            _totalModelsToTest = totalCount - staticCount;
+            _totalModelsToTest = totalCount;
         }
 
         auto drawData = scene->GetSceneDrawData();
@@ -122,6 +122,22 @@ namespace Syn {
         // 3D Grid Dispatch: X = Dynamics, Y = Lights, Z = Cascades
         uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_totalModelsToTest, ComputeGroupSize::Buffer32D);
         vkCmdDispatch(context.cmd, groupCountX, _activeLights, CASCADES_PER_LIGHT);
+
+        Vk::BufferBarrierInfo countBarrier{};
+        countBarrier.buffer = drawData->DirectionLightShadow.modelDispatchBuffer.GetHandle(fIdx);
+        countBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        countBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        countBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        countBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, countBarrier);
+
+        Vk::BufferBarrierInfo listBarrier{};
+        listBarrier.buffer = compManager->GetComponentBuffer(BufferNames::DirectionLightShadowModelVisibleData, fIdx).buffer->Handle();
+        listBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        listBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        listBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        listBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, listBarrier);
 
         Vk::BufferBarrierInfo indirectBarrier{};
         indirectBarrier.buffer = drawData->DirectionLightShadow.indirectBuffer.GetHandle(fIdx);

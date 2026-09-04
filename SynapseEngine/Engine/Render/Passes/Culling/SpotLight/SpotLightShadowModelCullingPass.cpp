@@ -157,5 +157,21 @@ namespace Syn {
         Vk::BufferUtils::InsertBarrier(context.cmd, readyBarrier);
 
         vkCmdDispatchIndirect(context.cmd, cullBuffer, 0);
+
+        Vk::BufferBarrierInfo drawCmdBarrier{};
+        drawCmdBarrier.buffer = drawData->PointLightShadow.indirectBuffer.GetHandle(fIdx);
+        drawCmdBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        drawCmdBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        drawCmdBarrier.dstStage = VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT | VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        drawCmdBarrier.dstAccess = VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, drawCmdBarrier);
+
+        Vk::BufferBarrierInfo instanceBarrier{};
+        instanceBarrier.buffer = drawData->PointLightShadow.instanceBuffer.GetHandle(fIdx);
+        instanceBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        instanceBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        instanceBarrier.dstStage = VK_PIPELINE_STAGE_2_VERTEX_SHADER_BIT | VK_PIPELINE_STAGE_2_TASK_SHADER_BIT_EXT | VK_PIPELINE_STAGE_2_MESH_SHADER_BIT_EXT;
+        instanceBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, instanceBarrier);
     }
 }
