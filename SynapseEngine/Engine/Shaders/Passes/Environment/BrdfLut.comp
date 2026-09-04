@@ -66,7 +66,9 @@ void main() {
 
             float Vis = 0.5 / (ggxV + ggxL + 1e-5);
             float G_Vis = Vis * (4.0 * NdotL * VdotH) / max(NdotH, 0.001);
-            float Fc = pow(clamp(1.0 - VdotH, 0.0, 1.0), 5.0);
+            float Fc_base = clamp(1.0 - VdotH, 0.0, 1.0);
+            float Fc2 = Fc_base * Fc_base;
+            float Fc = Fc2 * Fc2 * Fc_base;
 
             if (!isnan(G_Vis) && !isinf(G_Vis)) {
                 A += (1.0 - Fc) * G_Vis;

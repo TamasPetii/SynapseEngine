@@ -49,7 +49,7 @@ vec3 SimulateEnvironmentLight(
     const float MAX_REFLECTION_LOD = 4.0;
     vec3 prefiltered = SampleEnvironmentPrefilteredCube(envIndex, samplerIndex, R, roughness * MAX_REFLECTION_LOD).rgb;
     
-    vec2 brdf = SampleTexture2D(brdfLutIndex, samplerIndex, vec2(NdotV, roughness)).rg;
+    vec2 brdf = SampleTexture2DLod(brdfLutIndex, samplerIndex, vec2(NdotV, roughness), 0.0).rg;
 
     vec3 iblRadiance = SimulateIBL(
         albedo, normal, viewDir, roughness, metalness,
