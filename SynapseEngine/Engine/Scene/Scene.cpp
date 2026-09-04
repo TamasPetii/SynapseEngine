@@ -468,6 +468,17 @@ namespace Syn
                 return pool && !pool->GetStorage().GetStaticEntities().empty();
             },
             ComponentMemoryType::GpuOnly);
+
+        RegisterGenericBuffer<uint32_t>(BufferNames::DirectionLightShadowAnimatedStaticList,
+            [this]() -> uint32_t {
+                auto pool = _registry->GetPool<AnimationComponent>();
+                return pool ? static_cast<uint32_t>(pool->Size()) : 0;
+            },
+            [this]() -> bool {
+                auto pool = _registry->GetPool<AnimationComponent>();
+                return pool && pool->Size() > 0;
+            },
+            ComponentMemoryType::GpuOnly);
     }
 
     void Scene::BuildTaskflowGraph(tf::Taskflow& taskflow, SystemPhase phase)

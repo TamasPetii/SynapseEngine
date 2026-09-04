@@ -28,7 +28,7 @@ namespace Syn
         _passes.push_back(std::move(pass));
     }
 
-    void RenderPipeline::InitializeAll()
+    void RenderPipeline::Initialize()
     {
         for (auto& pass : _passes) {
             pass->Initialize();
@@ -45,14 +45,20 @@ namespace Syn
 
         if (context.scene)
         {
-            for (auto& pass : _passes) {
-                if (isCompiling && pass->GetName() != "SwapchainPresentPass") {
+            for (auto& pass : _passes) 
+            {
+                if (isCompiling && !pass->CanExecuteWhileCompiling()) {
                     continue;
                 }
 
                 if (pass->ShouldExecute(context))
                 {
-                    uint32_t measureIdx = profiler->StartPass(context.cmd, context.frameIndex, pass->GetGroup(), pass->GetName());
+                    bool isProfileable = pass->IsProfileable();
+                    uint32_t measureIdx = 0;
+
+                    if (isProfileable) {
+                        measureIdx = profiler->StartPass(context.cmd, context.frameIndex, pass->GetGroup(), pass->GetName());
+                    }
 
                     bool collectStats = pass->ShouldCollectStatistics();
                     uint32_t statIdx = 0;
@@ -67,7 +73,9 @@ namespace Syn
                         statCollector->EndPass(context.cmd, context.frameIndex, statIdx);
                     }
 
-                    profiler->EndPass(context.cmd, context.frameIndex, measureIdx);
+                    if (isProfileable) {
+                        profiler->EndPass(context.cmd, context.frameIndex, measureIdx);
+                    }
                 }
             }
         }

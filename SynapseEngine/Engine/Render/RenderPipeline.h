@@ -18,23 +18,32 @@
 #include "Engine/SynApi.h"
 #include <vector>
 #include <memory>
+#include <string>
 
 #include "IRenderPass.h"
 
 namespace Syn
 {
-    class SYN_API RenderPipeline
+    class SYN_API RenderPipeline : public IRenderPass
     {
     public:
-        RenderPipeline() = default;
+        RenderPipeline(const std::string& name = "RenderPipeline", const std::string& group = PassGroupNames::UndefinedPasses)
+            : _name(name), _groupName(group) {}
 
         RenderPipeline(const RenderPipeline&) = delete;
         RenderPipeline& operator=(const RenderPipeline&) = delete;
 
         void AddPass(std::unique_ptr<IRenderPass> pass);
-        void InitializeAll();
-        void Execute(const RenderContext& context);
-    private:
+
+        virtual void Initialize() override;
+        virtual void Execute(const RenderContext& context) override;
+        virtual bool ShouldExecute(const RenderContext& context) const override { return !_passes.empty(); }
+        virtual std::string GetName() const override { return _name; }
+        virtual std::string GetGroup() const override { return _groupName; }
+        virtual bool CanExecuteWhileCompiling() const override { return true; }
+    protected:
         std::vector<std::unique_ptr<IRenderPass>> _passes;
+        std::string _name;
+        std::string _groupName;
     };
 }

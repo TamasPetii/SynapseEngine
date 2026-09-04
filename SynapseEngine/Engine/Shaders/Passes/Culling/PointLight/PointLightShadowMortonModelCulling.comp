@@ -87,18 +87,18 @@ void main() {
         uint entityId = link.entityIndex;
 
         uint tagSparseIndex = GET_SPARSE_INDEX(ctx.tagSparseMapBufferAddr, entityId);
-        if (tagSparseIndex == INVALID_INDEX) return;
+        if (tagSparseIndex == INVALID_INDEX) continue;
 
         uint entityFlags = GET_TAG_DATA(ctx.tagDataBufferAddr, tagSparseIndex);
         bool isActive = (entityFlags & (1u << 0)) != 0;
 
-        if (!isActive) return;
+        if (!isActive) continue;
 
         TransformComponent transform = GET_TRANSFORM(ctx.transformBufferAddr, denseIndex);
         ModelComponent modelComp = GET_MODEL_COMP(ctx.modelBufferAddr, link.modelDenseIndex);
         
         bool castShadow = (modelComp.flags & (1u << 0)) != 0;
-        if (modelComp.modelIndex == INVALID_INDEX || !castShadow) return;
+        if (modelComp.modelIndex == INVALID_INDEX || !castShadow) continue;
 
         ModelAllocationInfo mAlloc = GET_MODEL_ALLOC(ctx.globalModelAllocationBufferAddr, modelComp.modelIndex);
         GpuModelAddresses addrs = GET_MODEL_ADDRESSES(ctx.modelAddressBufferAddr, modelComp.modelIndex);

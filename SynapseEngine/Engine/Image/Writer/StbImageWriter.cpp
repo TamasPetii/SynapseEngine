@@ -1,3 +1,19 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
 #include "StbImageWriter.h"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
@@ -30,7 +46,21 @@ namespace Syn
             result = stbi_write_png(path.string().c_str(), image.width, image.height, channels, image.pixels.data(), image.width * channels);
         }
         else if (ext == ".hdr" && isFloat) {
-            result = stbi_write_hdr(path.string().c_str(), image.width, image.height, channels, reinterpret_cast<const float*>(image.pixels.data()));
+            if (channels == 2) {
+                std::vector<float> paddedData(image.width * image.height * 3);
+                const float* floatData = reinterpret_cast<const float*>(image.pixels.data());
+
+                for (size_t i = 0; i < image.width * image.height; ++i) {
+                    paddedData[i * 3 + 0] = floatData[i * 2 + 0];
+                    paddedData[i * 3 + 1] = floatData[i * 2 + 1];
+                    paddedData[i * 3 + 2] = 0.0f;
+                }
+
+                result = stbi_write_hdr(path.string().c_str(), image.width, image.height, 3, paddedData.data());
+            }
+            else {
+                result = stbi_write_hdr(path.string().c_str(), image.width, image.height, channels, reinterpret_cast<const float*>(image.pixels.data()));
+            }
         }
         else if (ext == ".png" && isFloat) {
             std::vector<uint8_t> converted(image.width * image.height * channels);

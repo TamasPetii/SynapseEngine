@@ -71,14 +71,15 @@ namespace Syn {
 
         Vk::PushConstant<DirectionLightShadowCullingPC> pc;
         pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
+        pc->isStaticPhase = _isStaticPhase ? 1 : 0;
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
     void DirectionLightShadowMeshCullingPass::BindDescriptors(const RenderContext& context) {
         auto imageManager = ServiceLocator::Get<ImageManager>();
 
-        uint32_t prevFrameIndex = (context.frameIndex + context.framesInFlight - 1) % context.framesInFlight;
-        auto depthPyramid = context.scene->GetSceneDrawData()->DirectionLightShadow.shadowDepthPyramid[prevFrameIndex].get();
+        uint32_t pyramidIdx = _isStaticPhase ? ((context.frameIndex + context.framesInFlight - 1) % context.framesInFlight) : context.frameIndex;
+        auto depthPyramid = context.scene->GetSceneDrawData()->DirectionLightShadow.shadowDepthPyramid[pyramidIdx].get();
         auto maxSampler = imageManager->GetSampler(SamplerNames::MaxReduction);
 
         Vk::PushDescriptorWriter pushWriter;
@@ -90,7 +91,7 @@ namespace Syn {
             VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
         );
 
-        //pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
+        pushWriter.Push(context.cmd, _shaderProgram->GetLayout(), 2, VK_PIPELINE_BIND_POINT_COMPUTE);
     }
 
     void DirectionLightShadowMeshCullingPass::Dispatch(const RenderContext& context) {

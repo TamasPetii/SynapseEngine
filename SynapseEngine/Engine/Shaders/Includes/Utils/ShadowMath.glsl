@@ -21,6 +21,74 @@
 #include "../Common/PointLight.glsl"
 #include "../Common/SpotLight.glsl"
 
+vec3 SampleShadowAtlasPCF(
+    sampler2DShadow shadowAtlas,
+    sampler2D shadowColorAtlas,
+    vec2 uv, vec2 minUV, vec2 maxUV, 
+    float currentDepth, vec2 texelSize,
+    uint usePCF
+) {
+    // Opaque Shadow (Hardware PCF or Hard Shadow)
+    float opaqueShadow = 0.0;
+    
+    if (usePCF == 1) 
+    {
+        for (int x = 0; x <= 1; ++x) {
+            for (int y = 0; y <= 1; ++y) {
+                vec2 offset = (vec2(x, y) - 0.5) * texelSize;
+                vec2 sampleUV = clamp(uv + offset, minUV, maxUV);
+                opaqueShadow += texture(shadowAtlas, vec3(sampleUV, currentDepth));
+            }
+        }
+        opaqueShadow /= 4.0;
+    } 
+    else 
+    {
+        vec2 sampleUV = clamp(uv, minUV, maxUV);
+        opaqueShadow = texture(shadowAtlas, vec3(sampleUV, currentDepth));
+    }
+
+    // Early out: if fully occluded by opaque geometry
+    if (opaqueShadow == 0.0) 
+        return vec3(0.0);
+
+    // Transparent Shadow
+    vec3 transparentShadow = vec3(0.0);
+    
+    if (usePCF == 1) {
+        // Optimized 2x2 PCF using Nearest sampler
+        for (int x = 0; x <= 1; ++x) {
+            for (int y = 0; y <= 1; ++y) {
+                vec2 offset = (vec2(x, y) - 0.5) * texelSize;
+                vec2 sampleUV = clamp(uv + offset, minUV, maxUV);
+            
+                vec4 transData = textureLod(shadowColorAtlas, sampleUV, 0.0);
+            
+                if (currentDepth > transData.a) {
+                    transparentShadow += transData.rgb;
+                } else {
+                    transparentShadow += vec3(1.0);
+                }
+            }
+        }
+        transparentShadow /= 4.0;
+    } 
+    else 
+    {
+        // Hard Transparent Shadow (Single fetch)
+        vec2 sampleUV = clamp(uv, minUV, maxUV);
+        vec4 transData = textureLod(shadowColorAtlas, sampleUV, 0.0);
+        
+        if (currentDepth > transData.a) {
+            transparentShadow = transData.rgb;
+        } else {
+            transparentShadow = vec3(1.0);
+        }
+    }
+    
+    return vec3(opaqueShadow) * transparentShadow;
+}
+
 vec3 CalculateDirectionalLightShadow(
     const uint64_t dirLightShadowDataBufferAddr,
     const uint64_t dirLightShadowSparseMapBufferAddr,
@@ -29,8 +97,10 @@ vec3 CalculateDirectionalLightShadow(
     vec3 normal,
     vec3 lightDir,
     float viewDepth,
-    sampler2DShadow shadowAtlas,
-    sampler2D shadowColorAtlas,
+    sampler2DShadow dynamicShadowAtlas,
+    sampler2D dynamicShadowColorAtlas,
+    sampler2DShadow staticShadowAtlas,
+    sampler2D staticShadowColorAtlas,
     out uint outCascadeIndex
 ) {
     outCascadeIndex = 0;
@@ -73,37 +143,19 @@ vec3 CalculateDirectionalLightShadow(
     uv = uv * rect.zw + rect.xy;
 
     // Clamp UV with half-texel margin to prevent cascade bleeding
-    vec2 texelSize = 1.0 / vec2(textureSize(shadowAtlas, 0));
+    vec2 texelSize = 1.0 / vec2(textureSize(dynamicShadowAtlas, 0));
     vec2 minUV = rect.xy + (texelSize * 0.5); 
     vec2 maxUV = rect.xy + rect.zw - (texelSize * 0.5);
     uv = clamp(uv, minUV, maxUV);
 
-    // 3x3 PCF filtering
-    float opaqueShadow = 0.0;
-    vec3 transparentShadow = vec3(0.0);
+    vec3 dynamicShadow = SampleShadowAtlasPCF(dynamicShadowAtlas, dynamicShadowColorAtlas, uv, minUV, maxUV, currentDepth, texelSize, 1);
 
-    for (int x = -1; x <= 1; ++x) {
-        for (int y = -1; y <= 1; ++y) {
-            vec2 offset = vec2(x, y) * texelSize;
-            vec2 sampleUV = clamp(uv + offset, minUV, maxUV);
-            
-            // Opaque Shadow (Hardware PCF)
-            opaqueShadow += texture(shadowAtlas, vec3(sampleUV, currentDepth));
+    if (dynamicShadow == vec3(0.0))
+        return vec3(0.0);
 
-            // Transparent Shadow (Color Filter & Alpha Depth)
-            vec4 transData = textureLod(shadowColorAtlas, sampleUV, 0.0);
-            
-            if (currentDepth > transData.a) {
-                // Pixel is in shadow, apply the colored filter
-                transparentShadow += transData.rgb; 
-            } else {
-                // Pixel is in front or is the transparent surface itself, let light pass through
-                transparentShadow += vec3(1.0);     
-            }
-        }
-    }
-    
-    return vec3(opaqueShadow / 9.0) * (transparentShadow / 9.0);
+    vec3 staticShadow = SampleShadowAtlasPCF(staticShadowAtlas, staticShadowColorAtlas, uv, minUV, maxUV, currentDepth, texelSize, 1);
+
+    return dynamicShadow * staticShadow;
 }
 
 vec3 CalculateSpotLightShadow(
@@ -158,29 +210,7 @@ vec3 CalculateSpotLightShadow(
     vec2 maxUV = rect.xy + rect.zw - (texelSize * 0.5);
     uv = clamp(uv, minUV, maxUV);
 
-    // 4. 3x3 PCF filter
-    float opaqueShadow = 0.0;
-    vec3 transparentShadow = vec3(0.0);
-
-    for (int x = -1; x <= 1; ++x) {
-        for (int y = -1; y <= 1; ++y) {
-            vec2 offset = vec2(x, y) * texelSize;
-            vec2 sampleUV = clamp(uv + offset, minUV, maxUV);
-            
-            // Opaque Shadow
-            opaqueShadow += texture(shadowAtlas, vec3(sampleUV, currentDepth));
-
-            // Transparent Shadow
-            vec4 transData = textureLod(shadowColorAtlas, sampleUV, 0.0);
-            if (currentDepth > transData.a) {
-                transparentShadow += transData.rgb;
-            } else {
-                transparentShadow += vec3(1.0);
-            }
-        }
-    }
-    
-    return vec3(opaqueShadow / 9.0) * (transparentShadow / 9.0);
+    return SampleShadowAtlasPCF(shadowAtlas, shadowColorAtlas, uv, minUV, maxUV, currentDepth, texelSize, 1);
 }
 
 vec3 CalculatePointLightShadow(
@@ -253,29 +283,7 @@ vec3 CalculatePointLightShadow(
     vec2 maxUV = rect.xy + rect.zw - (texelSize * 0.5);
     uv = clamp(uv, minUV, maxUV);
 
-    // 5. 3x3 PCF filter
-    float opaqueShadow = 0.0;
-    vec3 transparentShadow = vec3(0.0);
-
-    for (int x = -1; x <= 1; ++x) {
-        for (int y = -1; y <= 1; ++y) {
-            vec2 offset = vec2(x, y) * texelSize;
-            vec2 sampleUV = clamp(uv + offset, minUV, maxUV);
-            
-            // Opaque Shadow
-            opaqueShadow += texture(shadowAtlas, vec3(sampleUV, currentDepth));
-
-            // Transparent Shadow
-            vec4 transData = textureLod(shadowColorAtlas, sampleUV, 0.0);
-            if (currentDepth > transData.a) {
-                transparentShadow += transData.rgb;
-            } else {
-                transparentShadow += vec3(1.0);
-            }
-        }
-    }
-    
-    return vec3(opaqueShadow / 9.0) * (transparentShadow / 9.0);
+    return SampleShadowAtlasPCF(shadowAtlas, shadowColorAtlas, uv, minUV, maxUV, currentDepth, texelSize, 1);
 }
 
 #endif

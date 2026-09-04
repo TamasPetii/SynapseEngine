@@ -133,6 +133,8 @@ namespace Syn
         static constexpr const char* DirectionLightShadowWorkGraphMortonModelCullingComp = "Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphMortonModelCulling.comp";
         static constexpr const char* DirectionLightShadowWorkGraphMeshCullingComp = "Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowWorkGraphMeshCulling.comp";
 
+        static constexpr const char* DirectionLightShadowAnimatedExtractionComp = "Engine/Shaders/Passes/Culling/DirectionLight/DirectionLightShadowAnimatedExtraction.comp";
+
         static constexpr const char* SpotLightCulling = "Engine/Shaders/Passes/Culling/SpotLight/SpotLightCulling.comp";
         static constexpr const char* SpotLightShadowFrag = "Engine/Shaders/Passes/Shadow/SpotLight/SpotLightShadow.frag";
         static constexpr const char* SpotLightShadowTransparentFrag = "Engine/Shaders/Passes/Shadow/SpotLight/SpotLightShadowTransparent.frag";

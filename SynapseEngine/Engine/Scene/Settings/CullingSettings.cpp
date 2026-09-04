@@ -19,12 +19,12 @@
 namespace Syn
 {
     CullingSettings::CullingSettings()
-        : geometryCullingDevice(CullingDeviceType::CPU)
-        , spotLightCullingDevice(CullingDeviceType::CPU)
-        , pointLightCullingDevice(CullingDeviceType::CPU)
-        , directionLightShadowCullingDevice(CullingDeviceType::CPU)
-        , spotLightShadowCullingDevice(CullingDeviceType::CPU)
-        , pointLightShadowCullingDevice(CullingDeviceType::CPU)
+        : geometryCullingDevice(CullingDeviceType::GPU)
+        , spotLightCullingDevice(CullingDeviceType::GPU)
+        , pointLightCullingDevice(CullingDeviceType::GPU)
+        , directionLightShadowCullingDevice(CullingDeviceType::GPU)
+        , spotLightShadowCullingDevice(CullingDeviceType::GPU)
+        , pointLightShadowCullingDevice(CullingDeviceType::GPU)
         , geometrySpatialAcceleration(SpatialAccelerationType::None)
         , directionLightShadowSpatialAcceleration(SpatialAccelerationType::None)
         , spotLightShadowSpatialAcceleration(SpatialAccelerationType::None)

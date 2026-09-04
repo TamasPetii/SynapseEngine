@@ -49,17 +49,26 @@ void main()
 {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
-    // Resolve dense transform index handling static/dynamic offsets
-    uint offset = ctx.staticTransformCount * ctx.enableDirectionLightBvhCulling;
-    uint transformDenseIndex = gl_GlobalInvocationID.x + offset;
-    uint transformCount = ctx.allTransformCount - offset;
-    
+   uint transformDenseIndex = 0;
+
+    if (pc.dataSource == 0) {
+        transformDenseIndex = gl_GlobalInvocationID.x;
+        if (transformDenseIndex >= ctx.staticTransformCount) return;
+    } 
+    else if (pc.dataSource == 1) {
+        uint maxElements = ctx.allTransformCount - ctx.staticTransformCount;
+        if (gl_GlobalInvocationID.x >= maxElements) return;
+        transformDenseIndex = gl_GlobalInvocationID.x + ctx.staticTransformCount;
+    } 
+    else {
+        uint listSize = GET_DISPATCH_CMD(ctx.directionLightShadowAnimatedStaticDispatchBufferAddr).groupCountX;
+        if (gl_GlobalInvocationID.x >= listSize) return;
+        transformDenseIndex = GET_INSTANCE(ctx.directionLightShadowAnimatedStaticListBufferAddr, gl_GlobalInvocationID.x);
+    }
+
     // Thread mapping: X = Model, Y = Light Index, Z = Cascade Index
     uint lightIdx = gl_GlobalInvocationID.y;
     uint cascadeIdx = gl_GlobalInvocationID.z;
-
-    // 1. Thread Bounds Checking
-    if (gl_GlobalInvocationID.x >= transformCount) return;
     if (lightIdx >= ctx.activeDirectionLightShadowCount) return; 
     if (cascadeIdx >= 4) return;
 
@@ -92,6 +101,7 @@ void main()
     GpuMeshCollider localGlobalCollider = addrs.globalCollider;
     
     // Evaluate Animation frame collider if the entity is skinned
+    bool hasAnimation = false;
     if(ctx.animationSparseMapBufferAddr != 0) {
         uint animSparseIndex = GET_SPARSE_INDEX(ctx.animationSparseMapBufferAddr, entityId);
         if (animSparseIndex != INVALID_INDEX) {
@@ -100,11 +110,19 @@ void main()
                 GpuAnimationAddresses animAddrs = GET_ANIM_ADDRESSES(ctx.animationAddressBufferAddr, animComp.animationIndex);
 
                 if (animAddrs.isReady == 1)
+                {
                     localGlobalCollider = GET_MESH_COLLIDER(animAddrs.frameGlobalColliders, animComp.frameIndex);
+                    hasAnimation = true;
+                }  
             }
         }
     }
+
+    bool isStaticTransform = transformDenseIndex < ctx.staticTransformCount;
     
+    // Static phase: If it has an animation, SKIP (the dynamic phase will handle it)
+    if (pc.dataSource == 0 && hasAnimation) return;
+
     // Transform global collider to world space
     GpuMeshCollider worldCollider = TransformCollider(localGlobalCollider, transform.transform);
 
@@ -132,12 +150,12 @@ void main()
         return;
 
     // 8. Occlusion Culling using Directional Light HZB
-    if (ctx.enableModelOcclusionCulling == 1) {
+    if (ctx.enableModelOcclusionCulling == 1 && pc.isStaticPhase == 0) {
         mat4 shadowViewProj = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeViewProjsVulkan[cascadeIdx];
         vec4 shadowAtlasRect = GET_DIRECTION_LIGHT_SHADOW(ctx.directionLightShadowDataBufferAddr, lightShadowDenseIndex).cascadeAtlasRects[cascadeIdx];
         
         float shadowScreenSizePixels = 0.0;  
-        if (false && IsSphereOccludedAtlasOrtho(worldCollider.center, worldCollider.radius, shadowViewProj, shadowAtlasRect, shadowDepthPyramid, float(ctx.directionLightShadowAtlasSize), ctx.directionLightShadowHizMipLevels, shadowScreenSizePixels)) {
+        if (IsSphereOccludedAtlasOrtho(worldCollider.center, worldCollider.radius, shadowViewProj, shadowAtlasRect, shadowDepthPyramid, float(ctx.directionLightShadowAtlasSize), ctx.directionLightShadowHizMipLevels, shadowScreenSizePixels)) {
             return;
         }
     }

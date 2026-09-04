@@ -83,6 +83,16 @@ namespace Syn {
             { mortonChunkBuf, 0, sizeof(VkDispatchIndirectCommand), &drawData->DirectionLightShadow.dispatchCmdTemplate }
         };
 
+        VkDispatchIndirectCommand animatedCmd{};
+        if (_isStaticPhase) {
+            animatedCmd.x = 0;
+            animatedCmd.y = drawData->DirectionLightShadow.visibleLightCount;
+            animatedCmd.z = CASCADES_PER_LIGHT;
+
+            VkBuffer animatedStaticBuf = drawData->DirectionLightShadow.animatedStaticDispatchBuffer.GetHandle(fIdx);
+            updates.push_back({ animatedStaticBuf, 0, sizeof(VkDispatchIndirectCommand), &animatedCmd });
+        }
+
         for (const auto& updateInfo : updates) {
             Vk::BufferUtils::UpdateBuffer(context.cmd, updateInfo);
 
@@ -94,5 +104,13 @@ namespace Syn {
             updateBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT | VK_ACCESS_2_SHADER_STORAGE_READ_BIT;
             Vk::BufferUtils::InsertBarrier(context.cmd, updateBarrier);
         }
+
+        Vk::BufferBarrierInfo countBarrier{};
+        countBarrier.buffer = drawData->Models.drawCountBuffer.GetHandle(fIdx);
+        countBarrier.srcStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT;
+        countBarrier.srcAccess = VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT;
+        countBarrier.dstStage = VK_PIPELINE_STAGE_2_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_2_DRAW_INDIRECT_BIT;
+        countBarrier.dstAccess = VK_ACCESS_2_SHADER_STORAGE_READ_BIT | VK_ACCESS_2_SHADER_STORAGE_WRITE_BIT | VK_ACCESS_2_INDIRECT_COMMAND_READ_BIT;
+        Vk::BufferUtils::InsertBarrier(context.cmd, countBarrier);
     }
 }

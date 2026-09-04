@@ -26,7 +26,7 @@
 #include "Engine/Image/SamplerNames.h"
 #include "Engine/Image/ImageManager.h"
 #include "Engine/Vk/Image/ImageViewNames.h"
-#include "Engine/Component/Light/Point/PointLightComponent.h"
+#include "Engine/Component/Light/Point/PointLightShadowComponent.h"
 #include "Engine/Component/Core/TransformComponent.h"
 #include "Engine/Vk/Rendering/PushConstant.h"
 
@@ -35,7 +35,7 @@ namespace Syn {
 #include "Engine/Shaders/Includes/PushConstants/PointLightShadowCullingPC.glsl"
 
     bool PointLightShadowMortonChunkCullingPass::ShouldExecute(const RenderContext& context) const {
-        auto pool = context.scene->GetRegistry()->GetPool<PointLightComponent>();
+        auto pool = context.scene->GetRegistry()->GetPool<PointLightShadowComponent>();
         return context.scene->GetSettings()->culling.pointLightShadowCullingDevice == CullingDeviceType::GPU
             && context.scene->GetSettings()->culling.pointLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh
             && pool && pool->Size() > 0;

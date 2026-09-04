@@ -21,6 +21,8 @@
 
 struct DirectionLightShadowCullingPC {
     uint64_t frameGlobalContextBufferAddr;
+    uint isStaticPhase;
+    uint dataSource; // 0 = Static, 1 = Dynamic Region, 2 = Extracted List
 };
 
 #endif

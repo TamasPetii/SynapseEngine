@@ -36,83 +36,59 @@ namespace Syn {
         std::string cacheKey = std::format("{}_{}_{}_{}", groupName, targetName, viewName, currentFrame);
 
         if (_viewportTextures.find(cacheKey) == _viewportTextures.end()) {
-            if (targetName == RenderTargetNames::DirectionLightShadowDepthPyramid) {
-                auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
-                auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::NearestClampEdge);
-                TextureHandle handle = _textureManager->RegisterTexture(
-                    drawData->DirectionLightShadow.shadowDepthPyramid[currentFrame]->GetView(viewName),
-                    sampler->Handle()
-                );
-                _viewportTextures[cacheKey] = handle;
+            VkImageView targetView = VK_NULL_HANDLE;
+            VkSampler targetSampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::NearestClampEdge)->Handle();
+
+            if (auto activeScene = _sceneManager->GetActiveScene(); activeScene && activeScene->GetSceneDrawData()) {
+                auto drawData = activeScene->GetSceneDrawData();
+
+                if (targetName == RenderTargetNames::PreviewAtlas) {
+                    targetView = ServiceLocator::Get<PreviewManager>()->GetAtlasImage()->GetView(viewName);
+                }
+                else if (targetName == RenderTargetNames::DirectionLightShadowAtlas) {
+                    targetView = drawData->DirectionLightShadow.shadowAtlas[currentFrame]->GetView(viewName);
+                }
+                else if (targetName == RenderTargetNames::DirectionLightStaticShadowAtlas) {
+                    targetView = drawData->DirectionLightShadow.staticShadowAtlas[currentFrame]->GetView(viewName);
+                }
+                else if (targetName == RenderTargetNames::DirectionLightShadowColorAtlas) {
+                    targetView = drawData->DirectionLightShadow.shadowColorAtlas[currentFrame]->GetView(viewName);
+                }
+                else if (targetName == RenderTargetNames::DirectionLightStaticShadowColorAtlas) {
+                    targetView = drawData->DirectionLightShadow.staticShadowColorAtlas[currentFrame]->GetView(viewName);
+                }
+                else if (targetName == RenderTargetNames::DirectionLightShadowDepthPyramid) {
+                    targetView = drawData->DirectionLightShadow.shadowDepthPyramid[currentFrame]->GetView(viewName);
+                }
+                else if (targetName == RenderTargetNames::SpotLightShadowColorAtlas) {
+                    targetView = drawData->SpotLightShadow.shadowColorAtlas[currentFrame]->GetView(viewName);
+                }
+                else if (targetName == RenderTargetNames::SpotLightShadowDepthPyramid) {
+                    targetView = drawData->SpotLightShadow.shadowDepthPyramid[currentFrame]->GetView(viewName);
+                }
+                else if (targetName == RenderTargetNames::PointLightShadowColorAtlas) {
+                    targetView = drawData->PointLightShadow.shadowColorAtlas[currentFrame]->GetView(viewName);
+                }
+                else if (targetName == RenderTargetNames::PointLightShadowDepthPyramid) {
+                    targetView = drawData->PointLightShadow.shadowDepthPyramid[currentFrame]->GetView(viewName);
+                }
             }
-            else if (targetName == RenderTargetNames::SpotLightShadowDepthPyramid) {
-                auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
-                auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::NearestClampEdge);
-                TextureHandle handle = _textureManager->RegisterTexture(
-                    drawData->SpotLightShadow.shadowDepthPyramid[currentFrame]->GetView(viewName),
-                    sampler->Handle()
-                );
-                _viewportTextures[cacheKey] = handle;
+
+            if (targetView == VK_NULL_HANDLE) {
+                auto rtManager = renderManager->GetRenderTargetManager();
+                if (auto group = rtManager->GetGroup(groupName, currentFrame)) {
+                    if (auto image = group->GetImage(targetName)) {
+                        targetView = image->GetView(viewName);
+                    }
+                }
             }
-            else if (targetName == RenderTargetNames::PointLightShadowDepthPyramid) {
-                auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
-                auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::NearestClampEdge);
-                TextureHandle handle = _textureManager->RegisterTexture(
-                    drawData->PointLightShadow.shadowDepthPyramid[currentFrame]->GetView(viewName),
-                    sampler->Handle()
-                );
-                _viewportTextures[cacheKey] = handle;
-            }
-            else if (targetName == RenderTargetNames::PreviewAtlas) {
-                auto imageView = ServiceLocator::Get<PreviewManager>()->GetAtlasImage()->GetView(viewName);
-                auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::LinearClampEdge);
-                TextureHandle handle = _textureManager->RegisterTexture(
-                    imageView,
-                    sampler->Handle()
-                );
-                _viewportTextures[cacheKey] = handle;
-            }
-            else if (targetName == RenderTargetNames::DirectionLightShadowColorAtlas) {
-                auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
-                auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::NearestClampEdge);
-                TextureHandle handle = _textureManager->RegisterTexture(
-                    drawData->DirectionLightShadow.shadowColorAtlas[currentFrame]->GetView(viewName),
-                    sampler->Handle()
-                );
-                _viewportTextures[cacheKey] = handle;
-            }
-            else if (targetName == RenderTargetNames::SpotLightShadowColorAtlas) {
-                auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
-                auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::NearestClampEdge);
-                TextureHandle handle = _textureManager->RegisterTexture(
-                    drawData->SpotLightShadow.shadowColorAtlas[currentFrame]->GetView(viewName),
-                    sampler->Handle()
-                );
-                _viewportTextures[cacheKey] = handle;
-            }
-            else if (targetName == RenderTargetNames::PointLightShadowColorAtlas) {
-                auto drawData = _sceneManager->GetActiveScene()->GetSceneDrawData();
-                auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::NearestClampEdge);
-                TextureHandle handle = _textureManager->RegisterTexture(
-                    drawData->PointLightShadow.shadowColorAtlas[currentFrame]->GetView(viewName),
-                    sampler->Handle()
-                );
+
+            if (targetView != VK_NULL_HANDLE) {
+                TextureHandle handle = _textureManager->RegisterTexture(targetView, targetSampler);
                 _viewportTextures[cacheKey] = handle;
             }
             else {
-                auto rtManager = renderManager->GetRenderTargetManager();
-                auto group = rtManager->GetGroup(groupName, currentFrame);
-                if (!group) return InvalidTextureHandle;
-                
-                auto image = group->GetImage(targetName);
-                if (!image) return InvalidTextureHandle;
-                
-                auto view = image->GetView(viewName);
-                if (!view) return InvalidTextureHandle;
-
-                auto sampler = ServiceLocator::Get<ImageManager>()->GetSampler(SamplerNames::NearestClampEdge);
-                TextureHandle handle = _textureManager->RegisterTexture(image->GetView(viewName), sampler->Handle());
-                _viewportTextures[cacheKey] = handle;
+                return InvalidTextureHandle;
             }
         }
 

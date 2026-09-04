@@ -54,6 +54,9 @@ namespace Syn
 		static constexpr const char* DirectionLightShadowAtlas = "DirectionLightShadowAtlas";
         static constexpr const char* DirectionLightShadowDepthPyramid = "DirectionLightShadowDepthPyramid";
         static constexpr const char* DirectionLightShadowColorAtlas = "DirectionLightShadowColorAtlas";
+        static constexpr const char* DirectionLightStaticShadowAtlas = "DirectionLightStaticShadowAtlas";
+        static constexpr const char* DirectionLightStaticShadowColorAtlas = "DirectionLightStaticShadowColorAtlas";
+        
 
         static constexpr const char* SpotLightShadowAtlas = "SpotLightShadowAtlas";
         static constexpr const char* SpotLightShadowDepthPyramid = "SpotLightShadowDepthPyramid";

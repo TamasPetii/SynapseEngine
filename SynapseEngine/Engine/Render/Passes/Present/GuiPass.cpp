@@ -29,41 +29,11 @@ namespace Syn
     }
 
     void GuiPass::PrepareFrame(const RenderContext& context) {
-        if (!context.onRenderGui) return;
-
         auto vkContext = ServiceLocator::Get<Vk::Context>();
         auto swapChain = vkContext->GetSwapChain();
 
         auto swapchainImage = swapChain->GetImage(context.swapchainImageIndex);
         VkExtent2D extent = { swapchainImage->GetExtent().width, swapchainImage->GetExtent().height };
-
-        auto group = context.renderTargetManager->GetGroup(RenderTargetGroupNames::Main, context.frameIndex);
-
-        std::vector<std::string> debugTargets = {
-            RenderTargetNames::Main,
-            RenderTargetNames::ColorMetallic,
-            RenderTargetNames::NormalRoughness,
-            RenderTargetNames::EmissiveAo,
-            RenderTargetNames::EntityIndex,
-            RenderTargetNames::DepthPyramid,
-            RenderTargetNames::Bloom,
-            RenderTargetNames::OpaqueDepth,
-            RenderTargetNames::TransparentAccum,
-            RenderTargetNames::TransparentReveal
-        };
-
-        for (const auto& targetName : debugTargets) {
-            auto image = group->GetImage(targetName);
-            if (image) {
-                _imageTransitions.push_back({
-                    .image = image,
-                    .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-                    .dstStage = VK_PIPELINE_STAGE_2_FRAGMENT_SHADER_BIT,
-                    .dstAccess = VK_ACCESS_2_SHADER_READ_BIT,
-                    .discardContent = false
-                    });
-            }
-        }
 
         _imageTransitions.push_back({
             .image = swapchainImage,
@@ -113,7 +83,9 @@ namespace Syn
             Vk::RenderUtils::BeginRendering(context.cmd, _renderInfo.value());
         }
 
-        context.onRenderGui(context.cmd);
+        if (context.onRenderGui) {
+            context.onRenderGui(context.cmd);
+        }
 
         if (_useDynamicRendering && _renderInfo.has_value()) {
             Vk::RenderUtils::EndRendering(context.cmd);

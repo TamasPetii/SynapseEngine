@@ -35,6 +35,10 @@ namespace Syn
         std::array<glm::mat4, 4> cascadeViewProjs;
         std::array<glm::mat4, 4> cascadeViewProjsVulkan;
         std::array<glm::vec4, 4> cascadeAtlasRects;
+
+        std::array<glm::vec3, 4> cascadeAnchors;
+        std::array<float, 4> cascadeRadius;
+        std::array<bool, 4> isStaticDirty;
     private:
         std::array<glm::vec3, 4> cascadeAabbMin;
         std::array<glm::vec3, 4> cascadeAabbMax;
