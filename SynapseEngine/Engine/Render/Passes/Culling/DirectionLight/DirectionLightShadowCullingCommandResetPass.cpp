@@ -83,6 +83,16 @@ namespace Syn {
             { mortonChunkBuf, 0, sizeof(VkDispatchIndirectCommand), &drawData->DirectionLightShadow.dispatchCmdTemplate }
         };
 
+        VkDispatchIndirectCommand animatedCmd{};
+        if (_isStaticPhase) {
+            animatedCmd.x = 0;
+            animatedCmd.y = drawData->DirectionLightShadow.visibleLightCount;
+            animatedCmd.z = CASCADES_PER_LIGHT;
+
+            VkBuffer animatedStaticBuf = drawData->DirectionLightShadow.animatedStaticDispatchBuffer.GetHandle(fIdx);
+            updates.push_back({ animatedStaticBuf, 0, sizeof(VkDispatchIndirectCommand), &animatedCmd });
+        }
+
         for (const auto& updateInfo : updates) {
             Vk::BufferUtils::UpdateBuffer(context.cmd, updateInfo);
 

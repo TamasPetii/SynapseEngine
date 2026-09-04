@@ -1,0 +1,57 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_KHR_shader_subgroup_basic : require
+#extension GL_KHR_shader_subgroup_arithmetic : require
+#extension GL_KHR_shader_subgroup_ballot : require
+
+#include "../../../Includes/Core.glsl"
+#include "../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../Includes/Common/Camera.glsl"
+#include "../../../Includes/Common/Transform.glsl"
+#include "../../../Includes/Common/Model.glsl"
+#include "../../../Includes/Common/Mesh.glsl"
+#include "../../../Includes/Common/Animation.glsl"
+#include "../../../Includes/Common/Material.glsl"
+#include "../../../Includes/Common/Culling.glsl"
+#include "../../../Includes/Common/DirectionLight.glsl"
+#include "../../../Includes/Utils/CullingMath.glsl"
+#include "../../../Includes/Utils/Occlusion.glsl"
+#include "../../../Includes/Utils/CullingUtils.glsl"
+
+layout(local_size_x = 256, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../../Includes/PushConstants/DirectionLightShadowCullingPC.glsl"
+layout(push_constant) uniform PushConstants {
+    DirectionLightShadowCullingPC pc;
+};
+
+void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    uint transformDenseIndex = gl_GlobalInvocationID.x;
+    if (transformDenseIndex >= ctx.staticTransformCount) return;
+
+    TransformModelLink link = GET_TRANSFORM_MODEL_LINK(ctx.transformModelLinkBufferAddr, transformDenseIndex);
+    if (link.modelDenseIndex == INVALID_INDEX) return;
+    
+    if (ctx.animationSparseMapBufferAddr == 0) return;
+    uint animSparseIndex = GET_SPARSE_INDEX(ctx.animationSparseMapBufferAddr, link.entityIndex);
+    if (animSparseIndex == INVALID_INDEX) return;
+
+    AnimationComponent animComp = GET_ANIM_COMP(ctx.animationBufferAddr, animSparseIndex);
+    if (animComp.animationIndex == INVALID_INDEX) return;
+
+    uint needsWrite = 1;
+    uint subgroupWriteCount = subgroupAdd(needsWrite);
+    uint localOffset = subgroupExclusiveAdd(needsWrite);
+    uint baseOffset = 0;
+    
+    if (subgroupElect()) {
+        baseOffset = atomicAdd(GET_DISPATCH_CMD(ctx.directionLightShadowAnimatedStaticDispatchBufferAddr).groupCountX, subgroupWriteCount);
+    }
+    baseOffset = subgroupBroadcastFirst(baseOffset);
+
+    uint finalIndex = baseOffset + localOffset;
+    
+    GET_INSTANCE(ctx.directionLightShadowAnimatedStaticListBufferAddr, finalIndex) = transformDenseIndex;
+}

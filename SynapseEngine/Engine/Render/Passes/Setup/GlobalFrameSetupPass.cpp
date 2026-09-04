@@ -130,6 +130,8 @@ namespace Syn {
 		ctx.directionLightShadowChunkVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightShadowStaticChunkVisibleIndex, fIdx);
         ctx.directionLightShadowMortonChunkCountBufferAddr = drawData->DirectionLightShadow.mortonChunkDispatchBuffer.GetAddress(fIdx);
         ctx.directionLightShadowMortonChunkVisibleIndexBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightShadowMortonChunkVisibleIndex, fIdx);
+        ctx.directionLightShadowAnimatedStaticDispatchBufferAddr = drawData->DirectionLightShadow.animatedStaticDispatchBuffer.GetAddress(fIdx);
+        ctx.directionLightShadowAnimatedStaticListBufferAddr = compManager->GetBufferAddr(BufferNames::DirectionLightShadowAnimatedStaticList, fIdx);
 
         //Spot Light Buffers
         ctx.spotLightSparseMapBufferAddr = compManager->GetBufferAddr(BufferNames::SpotLightSparseMap, fIdx);

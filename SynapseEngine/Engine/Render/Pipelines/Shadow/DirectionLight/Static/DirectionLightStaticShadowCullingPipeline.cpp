@@ -22,17 +22,19 @@
 #include "Engine/Render/Passes/Culling/DirectionLight/DirectionLightShadowStaticModelCullingPass.h"
 #include "Engine/Render/Passes/Culling/DirectionLight/DirectionLightShadowModelCullingPass.h"
 #include "Engine/Render/Passes/Culling/DirectionLight/DirectionLightShadowMeshCullingPass.h"
+#include "Engine/Render/Passes/Culling/DirectionLight/DirectionLightShadowAnimatedExtractionPass.h"
 
 namespace Syn {
     DirectionLightStaticShadowCullingPipeline::DirectionLightStaticShadowCullingPipeline()
         : RenderPipeline("DirectionLightStaticShadowCullingPhase", PassGroupNames::UndefinedPasses)
     {
-        AddPass(std::make_unique<DirectionLightShadowCullingCommandResetPass>());
+        AddPass(std::make_unique<DirectionLightShadowCullingCommandResetPass>(true));
+        AddPass(std::make_unique<DirectionLightShadowAnimatedExtractionPass>());
         AddPass(std::make_unique<DirectionLightShadowMortonChunkCullingPass>());
         AddPass(std::make_unique<DirectionLightShadowMortonModelCullingPass>());
         AddPass(std::make_unique<DirectionLightShadowStaticChunkCullingPass>());
         AddPass(std::make_unique<DirectionLightShadowStaticModelCullingPass>());
-        AddPass(std::make_unique<DirectionLightShadowModelCullingPass>(true));
+        AddPass(std::make_unique<DirectionLightShadowModelCullingPass>(true, 0));
         AddPass(std::make_unique<DirectionLightShadowMeshCullingPass>(true));
     }
 }

@@ -49,11 +49,22 @@ void main()
 {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
 
-    // Resolve dense transform index handling static/dynamic offsets
-    uint transformDenseIndex = gl_GlobalInvocationID.x;
-    uint maxElements = (pc.isStaticPhase == 1) ? ctx.staticTransformCount : ctx.allTransformCount;
+   uint transformDenseIndex = 0;
 
-    if (transformDenseIndex >= maxElements) return;
+    if (pc.dataSource == 0) {
+        transformDenseIndex = gl_GlobalInvocationID.x;
+        if (transformDenseIndex >= ctx.staticTransformCount) return;
+    } 
+    else if (pc.dataSource == 1) {
+        uint maxElements = ctx.allTransformCount - ctx.staticTransformCount;
+        if (gl_GlobalInvocationID.x >= maxElements) return;
+        transformDenseIndex = gl_GlobalInvocationID.x + ctx.staticTransformCount;
+    } 
+    else {
+        uint listSize = GET_DISPATCH_CMD(ctx.directionLightShadowAnimatedStaticDispatchBufferAddr).groupCountX;
+        if (gl_GlobalInvocationID.x >= listSize) return;
+        transformDenseIndex = GET_INSTANCE(ctx.directionLightShadowAnimatedStaticListBufferAddr, gl_GlobalInvocationID.x);
+    }
 
     // Thread mapping: X = Model, Y = Light Index, Z = Cascade Index
     uint lightIdx = gl_GlobalInvocationID.y;
@@ -110,10 +121,7 @@ void main()
     bool isStaticTransform = transformDenseIndex < ctx.staticTransformCount;
     
     // Static phase: If it has an animation, SKIP (the dynamic phase will handle it)
-    if (pc.isStaticPhase == 1 && hasAnimation) return;
-    
-    // Dynamic phase: If it's static AND has no animation, SKIP (the static phase already handled it)
-    if (pc.isStaticPhase == 0 && isStaticTransform && !hasAnimation) return;
+    if (pc.dataSource == 0 && hasAnimation) return;
 
     // Transform global collider to world space
     GpuMeshCollider worldCollider = TransformCollider(localGlobalCollider, transform.transform);

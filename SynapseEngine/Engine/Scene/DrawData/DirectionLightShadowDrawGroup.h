@@ -85,5 +85,6 @@ namespace Syn
         std::atomic<uint32_t> staticCacheModelVersion{ 0 };
         std::atomic<uint32_t> staticModelSwapVersion{ 0 };
         std::atomic<uint32_t> processedStaticModelSwapVersion{ 0 };
+        RenderBuffer animatedStaticDispatchBuffer;
     };
 }

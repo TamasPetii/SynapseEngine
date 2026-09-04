@@ -23,8 +23,9 @@ namespace Syn {
     DirectionLightDynamicShadowCullingPipeline::DirectionLightDynamicShadowCullingPipeline()
         : RenderPipeline("DirectionLightDynamicShadowCullingPhase", PassGroupNames::UndefinedPasses)
     {
-        AddPass(std::make_unique<DirectionLightShadowCullingCommandResetPass>());
-        AddPass(std::make_unique<DirectionLightShadowModelCullingPass>(false));
+        AddPass(std::make_unique<DirectionLightShadowCullingCommandResetPass>(false));
+        AddPass(std::make_unique<DirectionLightShadowModelCullingPass>(false, 1));
+        AddPass(std::make_unique<DirectionLightShadowModelCullingPass>(false, 2)); //Static Animations!
         AddPass(std::make_unique<DirectionLightShadowMeshCullingPass>(false));
     }
 }

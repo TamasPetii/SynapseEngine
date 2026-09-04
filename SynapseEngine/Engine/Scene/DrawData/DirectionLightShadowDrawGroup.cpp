@@ -49,6 +49,9 @@ namespace Syn
         mortonChunkDispatchBuffer.Initialize({ "DirectionLightShadowDrawGroup_MortonChunkDispatchBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
         mortonChunkDispatchBuffer.UpdateCapacityAll(1);
 
+        animatedStaticDispatchBuffer.Initialize({ "DirectionLightShadowDrawGroup_AnimatedStaticDispatchBuffer", BufferStrategy::GpuOnly, frameCount, sizeof(VkDispatchIndirectCommand), indirectStorageUsage, 1, 1 });
+        animatedStaticDispatchBuffer.UpdateCapacityAll(1);
+
         Vk::ImageConfig atlasSpec{};
         atlasSpec.width = SHADOW_ATLAS_SIZE;
         atlasSpec.height = SHADOW_ATLAS_SIZE;

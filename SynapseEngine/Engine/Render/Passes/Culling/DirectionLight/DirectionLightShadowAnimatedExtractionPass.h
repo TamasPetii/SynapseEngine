@@ -14,15 +14,22 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
 
-#ifndef SYN_INCLUDES_PC_DIRECTION_LIGHT_SHADOW_CULLING_PASS_GLSL
-#define SYN_INCLUDES_PC_DIRECTION_LIGHT_SHADOW_CULLING_PASS_GLSL
+#pragma once
+#include "Engine/SynApi.h"
+#include "Engine/Render/Passes/ComputePass.h"
 
-#include "../SharedGpuTypes.glsl"
+namespace Syn {
+    class SYN_API DirectionLightShadowAnimatedExtractionPass : public ComputePass {
+    public:
+        DirectionLightShadowAnimatedExtractionPass() = default;
 
-struct DirectionLightShadowCullingPC {
-    uint64_t frameGlobalContextBufferAddr;
-    uint isStaticPhase;
-    uint dataSource; // 0 = Static, 1 = Dynamic Region, 2 = Extracted List
-};
+        std::string GetName() const override { return "DirectionLightShadowAnimatedExtractionPass"; }
+        std::string GetGroup() const override { return PassGroupNames::DirectionLightShadowCullingPasses; }
 
-#endif
+        void Initialize() override;
+    protected:
+        bool ShouldExecute(const RenderContext& context) const override;
+        void PushConstants(const RenderContext& context) override;
+        void Dispatch(const RenderContext& context) override;
+    };
+}

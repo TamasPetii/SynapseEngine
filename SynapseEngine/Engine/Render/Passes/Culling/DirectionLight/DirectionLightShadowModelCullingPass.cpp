@@ -76,11 +76,14 @@ namespace Syn {
         bool bvhEnabled = (settings->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::StaticBvh ||
                            settings->culling.directionLightShadowSpatialAcceleration == SpatialAccelerationType::MortonBvh);
 
-        if (_isStaticPhase) {
-            _totalModelsToTest = bvhEnabled ? 0 : staticCount;
+        if (_dataSource == 0) {
+            _totalModelsToTest = staticCount;
+        }
+        else if (_dataSource == 1) {
+            _totalModelsToTest = totalCount - staticCount;
         }
         else {
-            _totalModelsToTest = totalCount;
+            _totalModelsToTest = 1;
         }
 
         auto drawData = scene->GetSceneDrawData();
@@ -89,6 +92,7 @@ namespace Syn {
         Vk::PushConstant<DirectionLightShadowCullingPC> pc;
         pc->frameGlobalContextBufferAddr = drawData->frameContextBuffer.GetAddress(fIdx);
         pc->isStaticPhase = _isStaticPhase ? 1 : 0;
+		pc->dataSource = _dataSource;
         pc.Push(context.cmd, _shaderProgram->GetLayout());
     }
 
@@ -119,9 +123,16 @@ namespace Syn {
         auto compManager = scene->GetComponentBufferManager();
         uint32_t fIdx = context.frameIndex;
 
-        // 3D Grid Dispatch: X = Dynamics, Y = Lights, Z = Cascades
-        uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_totalModelsToTest, ComputeGroupSize::Buffer32D);
-        vkCmdDispatch(context.cmd, groupCountX, _activeLights, CASCADES_PER_LIGHT);
+        // 3D Grid Dispatch: X = Entity, Y = Lights, Z = Cascades
+        if (_dataSource == 0 || _dataSource == 1) {
+            uint32_t groupCountX = ComputeGroupSize::CalculateDispatchCount(_totalModelsToTest, ComputeGroupSize::Buffer32D);
+            vkCmdDispatch(context.cmd, groupCountX, _activeLights, CASCADES_PER_LIGHT); 
+        }
+		else if (_dataSource == 2) //Static Animation Dispatch
+        {
+            VkBuffer cullBuffer = drawData->DirectionLightShadow.animatedStaticDispatchBuffer.GetHandle(fIdx);
+            vkCmdDispatchIndirect(context.cmd, cullBuffer, 0);
+        }
 
         Vk::BufferBarrierInfo countBarrier{};
         countBarrier.buffer = drawData->DirectionLightShadow.modelDispatchBuffer.GetHandle(fIdx);
