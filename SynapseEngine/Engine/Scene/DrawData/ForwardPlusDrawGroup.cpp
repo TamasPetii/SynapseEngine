@@ -52,14 +52,14 @@ namespace Syn
 
         uint32_t gridX = ComputeGroupSize::CalculateDispatchCount(width, tileSize);
         uint32_t gridY = ComputeGroupSize::CalculateDispatchCount(height, tileSize);
-        uint32_t gridZ = 16;
+        uint32_t gridZ = 32;
 
         maxClusters = gridX * gridY * gridZ;
 
         tileGridBuffer.UpdateCapacity(frameIndex, gridX * gridY);
         clusterListBuffer.UpdateCapacity(frameIndex, maxClusters);
 
-        uint32_t expectedAverageLightsPerCluster = 2048;
+        uint32_t expectedAverageLightsPerCluster = 512;
         uint32_t totalLightIndices = maxClusters * expectedAverageLightsPerCluster;
 
         pointLightIndexBuffer.UpdateCapacity(frameIndex, totalLightIndices);

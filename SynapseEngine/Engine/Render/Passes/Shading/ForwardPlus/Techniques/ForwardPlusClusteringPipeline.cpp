@@ -18,12 +18,13 @@
 #include "Engine/Scene/Scene.h"
 
 #include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/DHAC/Pipeline/ForwardPlusPipelineDHAC.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/DOOM/Pipeline/ForwardPlusPipelineDoom.h"
 
 namespace Syn {
     ForwardPlusClusteringPipeline::ForwardPlusClusteringPipeline()
         : RenderPipeline("ForwardPlusClusteringPipeline", PassGroupNames::UndefinedPasses)
     {
-        //AddPass(std::make_unique<ForwardPlusPipelineDoom>());
+        AddPass(std::make_unique<ForwardPlusPipelineDoom>());
         //AddPass(std::make_unique<ForwardPlusPipelineHarada>());
         //AddPass(std::make_unique<ForwardPlusPipelineWicked>());
         AddPass(std::make_unique<ForwardPlusPipelineDHAC>());

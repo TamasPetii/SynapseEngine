@@ -317,8 +317,8 @@ namespace Syn
         if (spawnMonkey)
         {
             //uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Suzanne/glTF/Suzanne.gltf"));
-            uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString("C:/Users/User/Desktop/Models/Dragon/dragon.obj")); 
-            //uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "DamagedHelmet/glTF/DamagedHelmet.gltf"));
+            //uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString("C:/Users/User/Desktop/Models/Dragon/dragon.obj")); 
+            uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "DamagedHelmet/glTF/DamagedHelmet.gltf"));
 
             EntityID monkeyId = scene.CreateEntity();
             registry.AddComponent<TagComponent>(monkeyId);

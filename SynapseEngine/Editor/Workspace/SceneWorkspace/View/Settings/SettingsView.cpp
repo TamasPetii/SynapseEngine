@@ -61,7 +61,17 @@ namespace Syn {
                         changed = true;
                     }
 
-                    if (settings.lighting.pipelineType == PipelineType::ForwardPlus) {
+                    if (settings.lighting.pipelineType == PipelineType::ForwardPlus) 
+                    {
+                        const char* techniqueNames[] = { "DHAC", "DOOM", "HARADA", "WICKED" };
+                        int currentTechnique = (int)settings.lighting.forwardPlusTechnique;
+
+                        Syn::UI::BeginProperty("Technique");
+                        if (ImGui::Combo("##FwPlusTechnique", &currentTechnique, techniqueNames, IM_ARRAYSIZE(techniqueNames))) {
+                            settings.lighting.forwardPlusTechnique = (ForwardPlusTechnique)currentTechnique;
+                            changed = true;
+                        }
+
                         const char* sliderNames[] = { "8", "16", "32", "64", "128", "256", "512" };
 
                         const uint32_t sizes[] = {

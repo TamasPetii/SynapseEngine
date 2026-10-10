@@ -80,6 +80,11 @@ namespace Syn
         static constexpr const char* ClusterPointLightWriteDHAC = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/DHAC/ClusterPointLightWrite.comp";
         static constexpr const char* ClusterSpotLightWriteDHAC = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/DHAC/ClusterSpotLightWrite.comp";
 
+        static constexpr const char* ClusterSetupDOOM = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/DOOM/ClusterSetup.comp";
+        static constexpr const char* ClusterDispatchSetupDOOM = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/DOOM/ClusterDispatchSetup.comp";
+        static constexpr const char* ClusterPointLightSingleDOOM = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/DOOM/ClusterPointLightSingle.comp";
+        static constexpr const char* ClusterSpotLightSingleDOOM = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/DOOM/ClusterSpotLightSingle.comp";
+
         static constexpr const char* PreDepthFrag = "Engine/Shaders/Passes/Shading/ForwardPlus/DepthPrepass/PreDepth.frag";
         static constexpr const char* MeshletPreDepthMesh = "Engine/Shaders/Passes/Shading/ForwardPlus/DepthPrepass/MeshletPreDepth.mesh";
         static constexpr const char* TraditionalPreDepthVert = "Engine/Shaders/Passes/Shading/ForwardPlus/DepthPrepass/TraditionalPreDepth.vert";

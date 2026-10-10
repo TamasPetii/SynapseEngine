@@ -42,6 +42,7 @@
 #include "Engine/Logger/LogUtils.h"
 #include "Engine/Scene/SceneManager.h"
 #include "Engine/Scene/Source/Procedural/TestSceneSource.h"
+#include "Engine/Scene/Source/Procedural/SeedTestSceneSource.h"
 #include "Engine/Scene/Source/Procedural/MaterialPreviewSceneSource.h"
 #include "Engine/Scene/Source/Procedural/ModelPreviewSceneSource.h"
 #include "Engine/Scene/Source/File/FileSceneSource.h"
@@ -385,7 +386,7 @@ namespace Syn
 		ServiceLocator::Provide<SceneManager>(_sceneManager.get());
 
 		_sceneManager->RegisterScene(SceneNames::Main, [frames]() {
-			return std::make_unique<Scene>(frames, std::make_unique<TestSceneSource>());
+			return std::make_unique<Scene>(frames, std::make_unique<SeedTestSceneSource>());
 			});
 
 		_sceneManager->RegisterScene(SceneNames::MaterialPreview, [frames]() {

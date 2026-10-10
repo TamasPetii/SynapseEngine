@@ -10,7 +10,7 @@
   },
   "entities": {
     "animated_characters": 0,
-    "static_geometry": 1000,
+    "static_geometry": 500000,
     "physics_boxes": 0,
     "physics_spheres": 0,
     "physics_capsules": 0
@@ -18,9 +18,9 @@
   "lights": {
     "directional_count": 1,
     "directional_shadow_count": 0,
-    "point_count": 32,
+    "point_count": 1024,
     "point_shadow_count": 0,
-    "spot_count": 32,
+    "spot_count": 1024,
     "spot_shadow_count": 0
   }
 }
