@@ -21,8 +21,9 @@ namespace Syn
 {
     LightingSettings::LightingSettings()
         : pipelineType(PipelineType::ForwardPlus)
+        , forwardPlusTechnique(ForwardPlusTechnique::DHAC)
         , tileSize(ComputeGroupSize::Image64D)
-        , msaaSamples(4)
+        , msaaSamples(1)
         , ambientStrength(0.05f)
         , emissiveStrength(1.00f)
         , enableDeferredEmissiveAo(true)

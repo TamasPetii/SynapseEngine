@@ -70,15 +70,15 @@ namespace Syn
         static constexpr const char* DeferredDirectionLightVert = "Engine/Shaders/Passes/Shading/Deferred/Lighting/DeferredDirectionLight.vert";
         static constexpr const char* DeferredDirectionLightFrag = "Engine/Shaders/Passes/Shading/Deferred/Lighting/DeferredDirectionLight.frag";
 
-        static constexpr const char* ClusterSpotLightSingle = "Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterSpotLightSingle.comp";
-        static constexpr const char* ClusterPointLightSingle = "Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterPointLightSingle.comp";
-        static constexpr const char* ClusterDispatchSetup = "Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterDispatchSetup.comp";
-        static constexpr const char* ClusterSetup = "Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterSetup.comp";
-        static constexpr const char* ClusterPointLightCount = "Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterPointLightCount.comp";
-        static constexpr const char* ClusterSpotLightCount = "Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterSpotLightCount.comp";
-        static constexpr const char* ClusterPrefixSum = "Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterPrefixSum.comp";
-        static constexpr const char* ClusterPointLightWrite = "Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterPointLightWrite.comp";
-        static constexpr const char* ClusterSpotLightWrite = "Engine/Shaders/Passes/Shading/ForwardPlus/Clustering/ClusterSpotLightWrite.comp";
+        static constexpr const char* ClusterSpotLightSingleDHAC = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/DHAC/ClusterSpotLightSingle.comp";
+        static constexpr const char* ClusterPointLightSingleDHAC = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/DHAC/ClusterPointLightSingle.comp";
+        static constexpr const char* ClusterDispatchSetupDHAC = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/DHAC/ClusterDispatchSetup.comp";
+        static constexpr const char* ClusterSetupDHAC = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/DHAC/ClusterSetup.comp";
+        static constexpr const char* ClusterPointLightCountDHAC = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/DHAC/ClusterPointLightCount.comp";
+        static constexpr const char* ClusterSpotLightCountDHAC = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/DHAC/ClusterSpotLightCount.comp";
+        static constexpr const char* ClusterPrefixSumDHAC = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/DHAC/ClusterPrefixSum.comp";
+        static constexpr const char* ClusterPointLightWriteDHAC = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/DHAC/ClusterPointLightWrite.comp";
+        static constexpr const char* ClusterSpotLightWriteDHAC = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/DHAC/ClusterSpotLightWrite.comp";
 
         static constexpr const char* PreDepthFrag = "Engine/Shaders/Passes/Shading/ForwardPlus/DepthPrepass/PreDepth.frag";
         static constexpr const char* MeshletPreDepthMesh = "Engine/Shaders/Passes/Shading/ForwardPlus/DepthPrepass/MeshletPreDepth.mesh";

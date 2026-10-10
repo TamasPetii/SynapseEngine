@@ -17,33 +17,33 @@
 #include "RendererFactory.h"
 #include "Engine/Vk/Image/ImageConfig.h"
 
-#include "Engine/Render/Pipelines/Setup/SetupAndInitPipeline.h"
-#include "Engine/Render/Pipelines/Morton/MortonBvhBuilderPipeline.h"
-#include "Engine/Render/Pipelines/Culling/MainCameraGeometryCullingPipeline.h"
+#include "Engine/Render/Passes/Setup/Pipeline/SetupAndInitPipeline.h"
+#include "Engine/Render/Passes/Morton/Pipeline/MortonBvhBuilderPipeline.h"
+#include "Engine/Render/Passes/Culling/Geometry/Pipeline/MainCameraGeometryCullingPipeline.h"
 
-#include "Engine/Render/Pipelines/Shadow/DirectionLight/DirectionLightCpuShadowPipeline.h"
-#include "Engine/Render/Pipelines/Shadow/DirectionLight/Static/DirectionLightStaticShadowPipeline.h"
-#include "Engine/Render/Pipelines/Shadow/DirectionLight/Dynamic/DirectionLightDynamicShadowPipeline.h"
-#include "Engine/Render/Pipelines/Shadow/SpotLight/SpotLightShadowPipeline.h"
-#include "Engine/Render/Pipelines/Shadow/PointLight/PointLightShadowPipeline.h"
+#include "Engine/Render/Passes/Shadow/DirectionLight/Pipeline/DirectionLightCpuShadowPipeline.h"
+#include "Engine/Render/Passes/Shadow/DirectionLight/Pipeline/Static/DirectionLightStaticShadowPipeline.h"
+#include "Engine/Render/Passes/Shadow/DirectionLight/Pipeline/Dynamic/DirectionLightDynamicShadowPipeline.h"
+#include "Engine/Render/Passes/Shadow/SpotLight/Pipeline/SpotLightShadowPipeline.h"
+#include "Engine/Render/Passes/Shadow/PointLight/Pipeline/PointLightShadowPipeline.h"
 
-#include "Engine/Render/Pipelines/Shading/ForwardPlus/ForwardPlusOpaqueDepthPipeline.h"
-#include "Engine/Render/Pipelines/Shading/ForwardPlus/ForwardPlusTransparentDepthPipeline.h"
-#include "Engine/Render/Pipelines/Shading/Deferred/DeferredGBufferPipeline.h"
-#include "Engine/Render/Pipelines/Hiz/DepthPyramidHizPipeline.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/Pipeline/ForwardPlusOpaqueDepthPipeline.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/DepthPrepass/Pipeline/ForwardPlusTransparentDepthPipeline.h"
+#include "Engine/Render/Passes/Shading/Deferred/Pipeline/DeferredGBufferPipeline.h"
+#include "Engine/Render/Passes/Hiz/Pipeline/DepthPyramidHizPipeline.h"
 
-#include "Engine/Render/Pipelines/PostProcess/Ssao/SsaoPipeline.h"
-#include "Engine/Render/Pipelines/Shading/Deferred/DeferredLightingPipeline.h"
-#include "Engine/Render/Pipelines/Shading/ForwardPlus/ForwardPlusClusteringPipeline.h"
-#include "Engine/Render/Pipelines/Shading/ForwardPlus/ForwardPlusOpaqueLightingPipeline.h"
+#include "Engine/Render/Passes/PostProcess/Ssao/Pipeline/SsaoPipeline.h"
+#include "Engine/Render/Passes/Shading/Deferred/Pipeline/DeferredLightingPipeline.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Lighting/Pipeline/ForwardPlusOpaqueLightingPipeline.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/ForwardPlusClusteringPipeline.h"
 
-#include "Engine/Render/Pipelines/PostProcess/Environment/EnvironmentPipeline.h"
-#include "Engine/Render/Pipelines/Wireframe/WireframePipeline.h"
-#include "Engine/Render/Pipelines/Billboard/BillboardPipeline.h"
-#include "Engine/Render/Pipelines/Shading/Wboit/TransparentWboitPipeline.h"
-#include "Engine/Render/Pipelines/PostProcess/Bloom/BloomPipeline.h"
-#include "Engine/Render/Pipelines/Preview/EditorPreviewPipeline.h"
-#include "Engine/Render/Pipelines/Present/PresentationPipeline.h"
+#include "Engine/Render/Passes/PostProcess/Environment/Pipeline/EnvironmentPipeline.h"
+#include "Engine/Render/Passes/Wireframe/Pipeline/WireframePipeline.h"
+#include "Engine/Render/Passes/Billboard/Pipeline/BillboardPipeline.h"
+#include "Engine/Render/Passes/Shading/Wboit/Pipeline/TransparentWboitPipeline.h"
+#include "Engine/Render/Passes/PostProcess/Bloom/Pipeline/BloomPipeline.h"
+#include "Engine/Render/Passes/Preview/Pipeline/EditorPreviewPipeline.h"
+#include "Engine/Render/Passes/Present/Pipeline/PresentationPipeline.h"
 
 #include "Engine/Render/Passes/PostProcess/Outline/SelectionOutlinePass.h"
 #include "Engine/Render/Passes/Shading/Visibility/DebugVisibilityPass.h"
@@ -114,7 +114,7 @@ namespace Syn
         uint32_t initWidth = 4;
         uint32_t initHeight = 4;
 
-        uint32_t msaaSamples = 4;
+        uint32_t msaaSamples = 1;
         VkSampleCountFlagBits sampleCount = static_cast<VkSampleCountFlagBits>(msaaSamples);
 
         Vk::ImageConfig mainImageSpec{};

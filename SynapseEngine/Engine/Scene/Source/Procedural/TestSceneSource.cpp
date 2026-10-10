@@ -317,9 +317,8 @@ namespace Syn
         if (spawnMonkey)
         {
             //uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "Suzanne/glTF/Suzanne.gltf"));
-            //uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString("C:/Users/User/Desktop/Models/Dragon/dragon.obj"));
-        
-            uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "DamagedHelmet/glTF/DamagedHelmet.gltf"));
+            uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString("C:/Users/User/Desktop/Models/Dragon/dragon.obj")); 
+            //uint32_t monkeyModelIndex = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(modelPath + "DamagedHelmet/glTF/DamagedHelmet.gltf"));
 
             EntityID monkeyId = scene.CreateEntity();
             registry.AddComponent<TagComponent>(monkeyId);
@@ -474,7 +473,7 @@ namespace Syn
                 MaterialInfo matInfo{};
                 matInfo.color = glm::vec4(r, g, b, 0.1f + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 0.9f));
                 matInfo.doubleSided = rand() % 2;
-                matInfo.isTransparent = rand() % 2;
+                matInfo.isTransparent = /*rand() % 2*/ false;
                 matInfo.emissiveFactor = glm::vec3(r, g, b);
                 matInfo.emissiveIntensity = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2;
                 matInfo.metallicFactor = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
@@ -632,7 +631,7 @@ namespace Syn
             registry.GetComponent<TransformComponent>(e).rotation = glm::vec3(92.0f, 320.0f, 215.0f);
             auto& light = registry.GetComponent<DirectionLightComponent>(e);
             light.color = glm::vec3(1.0f, 0.95f, 0.85f) * 0.55f;
-            light.strength = 5.0f;
+            light.strength = 1.0f;
             light.useShadow = dirLightShadowCount != 0;
 
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
@@ -659,7 +658,7 @@ namespace Syn
             light.position = transform.translation;
             light.color = glm::vec3(static_cast<float>(rand()) / RAND_MAX, static_cast<float>(rand()) / RAND_MAX, static_cast<float>(rand()) / RAND_MAX);
             light.radius = 5.0f + (rand() % 50);
-            light.strength = 5.0f + (rand() % 25);
+            light.strength = 3.0f /*+ (rand() % 5)*/;
             light.useShadow = (i < pointShadowCount);
 
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
@@ -689,7 +688,7 @@ namespace Syn
             light.range = 25.0f + (rand() % 50);
             light.innerAngle = 15.0f + (rand() % 10);
             light.outerAngle = light.innerAngle + 10.0f + (rand() % 15);
-            light.strength = 5.0f + (rand() % 25);
+            light.strength = 3.0f /*+ (rand() % 1)*/;
             light.useShadow = (i < spotShadowCount);
 
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);

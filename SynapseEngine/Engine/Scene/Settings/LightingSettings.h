@@ -26,11 +26,21 @@ namespace Syn
         ForwardPlus
     };
 
+    enum SYN_API ForwardPlusTechnique
+    {
+        DHAC,
+        DOOM,
+        HARADA,
+        WICKED,
+    };
+
     struct SYN_API LightingSettings
     {
         LightingSettings();
 
         PipelineType pipelineType;
+        ForwardPlusTechnique forwardPlusTechnique;
+
         uint32_t tileSize;
         uint32_t msaaSamples;
 
