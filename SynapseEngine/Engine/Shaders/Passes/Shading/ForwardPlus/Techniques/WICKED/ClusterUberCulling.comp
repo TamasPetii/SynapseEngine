@@ -1,0 +1,314 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_KHR_shader_subgroup_basic : require
+#extension GL_KHR_shader_subgroup_arithmetic : require
+#extension GL_KHR_shader_subgroup_ballot : require
+
+#include "../../../../../Includes/Core.glsl"
+#include "../../../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../../../Includes/Common/Camera.glsl"
+#include "../../../../../Includes/Common/Cluster.glsl"
+#include "../../../../../Includes/Common/PointLight.glsl"
+#include "../../../../../Includes/Common/SpotLight.glsl"
+#include "../../../../../Includes/Common/IndirectCommand.glsl"
+#include "../../../../../Includes/Utils/CullingMath.glsl"
+#include "../../../../../Includes/Utils/CullingUtils.glsl"
+#include "../../../../../Includes/Utils/ClusterMath.glsl"
+
+#define THREAD_DIM 16
+#define USE_CLUSTER_FRUSTUM_VS_POINT_SPHERE_CULLING
+#define USE_CLUSTER_FRUSTUM_VS_SPOT_SPHERE_CULLING
+
+layout(local_size_x = THREAD_DIM, local_size_y = THREAD_DIM, local_size_z = 1) in;
+
+#include "../../../../../Includes/PushConstants/ClusterSetupPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    ClusterSetupPC pc;
+};
+
+layout(set = 2, binding = 0) uniform sampler2D opaqueDepth; 
+
+#define MAX_LIGHTS_PER_CLUSTER 512
+
+shared uint s_rawMinZ_uint;
+shared uint s_rawMaxZ_uint;
+shared float s_finalMinZ;
+shared float s_finalMaxZ;
+shared uint s_depthMask;
+
+shared vec3 s_clusterAABBMin;
+shared vec3 s_clusterAABBMax;
+shared vec3 s_clusterSphereCenter;
+shared float s_clusterSphereRadius;
+
+shared uint s_localPointLightCount;
+shared uint s_localSpotLightCount;
+
+#if defined(USE_CLUSTER_FRUSTUM_VS_POINT_SPHERE_CULLING) || defined(USE_CLUSTER_FRUSTUM_VS_SPOT_SPHERE_CULLING)
+shared vec4 s_clusterPlanes[6];
+#endif
+
+uint ConstructEntityMask(float minZ, float maxZ, float depthRangeMin, float depthRangeRecip) {
+    uint maskStart = clamp(uint(floor((minZ - depthRangeMin) * depthRangeRecip)), 0u, 31u);
+    uint maskEnd   = clamp(uint(floor((maxZ - depthRangeMin) * depthRangeRecip)), 0u, 31u);
+    uint lightMask = 0xFFFFFFFFu;
+    lightMask >>= (31u - (maskEnd - maskStart));
+    lightMask <<= maskStart;
+    return lightMask;
+}
+
+void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    uint threadIdx = gl_LocalInvocationIndex;
+    ivec2 tileId = ivec2(gl_WorkGroupID.xy);
+    uint flattenTileIdx = tileId.y * ctx.tileCountX + tileId.x;
+
+    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
+
+    if (threadIdx == 0) {
+        s_rawMinZ_uint = floatBitsToUint(2.0); 
+        s_rawMaxZ_uint = floatBitsToUint(0.0);          
+        s_depthMask = 0u;       
+    }
+
+    barrier();
+
+    uint pixelsPerThreadX = ctx.tileSize / THREAD_DIM;
+    uint pixelsPerThreadY = ctx.tileSize / THREAD_DIM;
+    uint startX = tileId.x * ctx.tileSize + gl_LocalInvocationID.x * pixelsPerThreadX;
+    uint startY = tileId.y * ctx.tileSize + gl_LocalInvocationID.y * pixelsPerThreadY;
+
+    float threadRawMinZ = 2.0;
+    float threadRawMaxZ = 0.0;
+
+    for (uint y = 0; y < pixelsPerThreadY; ++y) {
+        for (uint x = 0; x < pixelsPerThreadX; ++x) {
+            ivec2 pixelCoord = min(ivec2(startX + x, startY + y), ivec2(ctx.screenWidth - 1, ctx.screenHeight - 1));
+            float rawDepth = texelFetch(opaqueDepth, pixelCoord, 0).r;
+            
+            if (rawDepth >= 0.99999) continue;
+
+            threadRawMinZ = min(threadRawMinZ, rawDepth);
+            threadRawMaxZ = max(threadRawMaxZ, rawDepth);
+        }
+    }
+
+    float sgRawMinZ = subgroupMin(threadRawMinZ);
+    float sgRawMaxZ = subgroupMax(threadRawMaxZ);
+
+    if (subgroupElect()) {
+        if (sgRawMinZ <= 1.0) {
+            atomicMin(s_rawMinZ_uint, floatBitsToUint(sgRawMinZ));
+            atomicMax(s_rawMaxZ_uint, floatBitsToUint(sgRawMaxZ));
+        }
+    }
+    
+    barrier();
+
+    if (threadIdx == 0) {
+        float rawMinZ = uintBitsToFloat(s_rawMinZ_uint);
+        float rawMaxZ = uintBitsToFloat(s_rawMaxZ_uint);
+        
+        s_finalMinZ = GET_CAMERA_NEAR(camera);
+        s_finalMaxZ = GET_CAMERA_FAR(camera);
+
+        if (rawMinZ <= 1.0) {
+            vec4 minView = camera.projVulkanInv * vec4(0.0, 0.0, rawMinZ, 1.0);
+            vec4 maxView = camera.projVulkanInv * vec4(0.0, 0.0, rawMaxZ, 1.0);
+            
+            s_finalMinZ = abs(minView.z / minView.w);
+            s_finalMaxZ = abs(maxView.z / maxView.w);
+        }
+
+        GetClusterViewSpaceAABB(
+            flattenTileIdx, ctx.tileCountX, ctx.tileSize, ctx.screenWidth, ctx.screenHeight, 
+            s_finalMinZ, s_finalMaxZ, camera.projVulkanInv, 
+            s_clusterAABBMin, s_clusterAABBMax
+        );
+
+        vec3 extents = (s_clusterAABBMax - s_clusterAABBMin) * 0.5;
+        s_clusterSphereCenter = s_clusterAABBMin + extents;
+        s_clusterSphereRadius = length(extents);
+
+#if defined(USE_CLUSTER_FRUSTUM_VS_POINT_SPHERE_CULLING) || defined(USE_CLUSTER_FRUSTUM_VS_SPOT_SPHERE_CULLING)
+        GetClusterFrustumPlanes(
+            tileId, ctx.tileSize, ctx.screenWidth, ctx.screenHeight,
+            s_finalMinZ, s_finalMaxZ, camera.projVulkanInv,
+            s_clusterPlanes
+        );
+#endif
+
+        s_localPointLightCount = 0;
+        s_localSpotLightCount = 0;
+    }
+
+    barrier();
+
+    float finalMinZ = s_finalMinZ;
+    float finalMaxZ = s_finalMaxZ;
+    float depthRangeRecip = 31.0 / max(0.0001, (finalMaxZ - finalMinZ));
+    uint threadDepthMask = 0u;
+
+    float pInv22 = camera.projVulkanInv[2][2];
+    float pInv32 = camera.projVulkanInv[3][2];
+    float pInv23 = camera.projVulkanInv[2][3];
+    float pInv33 = camera.projVulkanInv[3][3];
+
+    for (uint y = 0; y < pixelsPerThreadY; ++y) {
+        for (uint x = 0; x < pixelsPerThreadX; ++x) {
+            ivec2 pixelCoord = min(ivec2(startX + x, startY + y), ivec2(ctx.screenWidth - 1, ctx.screenHeight - 1));
+            float rawDepth = texelFetch(opaqueDepth, pixelCoord, 0).r;
+            
+            if (rawDepth >= 0.99999) continue;
+
+            float vz = pInv22 * rawDepth + pInv32;
+            float vw = pInv23 * rawDepth + pInv33;
+            float viewZ = abs(vz / vw);
+
+            uint cellIndex = clamp(uint(floor((viewZ - finalMinZ) * depthRangeRecip)), 0u, 31u);
+            threadDepthMask |= (1u << cellIndex);
+        }
+    }
+
+    uint sgDepthMask = subgroupOr(threadDepthMask);
+
+    if (subgroupElect()) {
+        atomicOr(s_depthMask, sgDepthMask);
+    }
+
+    barrier();
+
+    uint totalThreads = THREAD_DIM * THREAD_DIM;
+    uint globalOffset = flattenTileIdx * MAX_LIGHTS_PER_CLUSTER;
+    uint depthMask = s_depthMask;
+    uint totalPointLights = GET_VK_DRAW_CMD(ctx.pointLightIndirectCommandBufferAddr, 0).instanceCount;
+
+    for (uint i = threadIdx; i < totalPointLights; i += totalThreads) {
+        uint entityIdx = GET_POINT_VISIBLE_LIGHT(ctx.pointLightVisibleIndexBufferAddr, i);
+        uint denseIdx = GET_SPARSE_INDEX(ctx.pointLightSparseMapBufferAddr, entityIdx);
+        PointLightColliderGPU collider = GET_POINT_LIGHT_COLLIDER(ctx.pointLightColliderBufferAddr, denseIdx);
+        
+        vec3 viewSpaceCenter = (camera.view * vec4(collider.center, 1.0)).xyz;
+
+#ifdef USE_CLUSTER_FRUSTUM_VS_POINT_SPHERE_CULLING
+        uint cullResult = TestSphereFrustum(viewSpaceCenter, collider.radius, s_clusterPlanes);
+        bool isIntersecting = (cullResult != 0u);
+#else
+        bool isIntersecting = TestSphereAABB(viewSpaceCenter, collider.radius, s_clusterAABBMin, s_clusterAABBMax);
+#endif
+        
+        if (isIntersecting) {
+            float viewZCenter = abs(viewSpaceCenter.z);
+            float lightMinZ = viewZCenter - collider.radius;
+            float lightMaxZ = viewZCenter + collider.radius;
+            uint lightMask = ConstructEntityMask(lightMinZ, lightMaxZ, finalMinZ, depthRangeRecip);
+            
+            if ((depthMask & lightMask) == 0) {
+                isIntersecting = false;
+            }
+        }
+
+        uvec4 ballot = subgroupBallot(isIntersecting);
+        uint activeCount = subgroupBallotBitCount(ballot);
+        
+        uint baseOffset = 0;
+        if (subgroupElect() && activeCount > 0) {
+            baseOffset = atomicAdd(s_localPointLightCount, activeCount);
+        }
+        baseOffset = subgroupBroadcastFirst(baseOffset);
+
+        uint isIntersectingInt = isIntersecting ? 1 : 0;
+        uint threadOffset = subgroupExclusiveAdd(isIntersectingInt);
+
+        if (isIntersecting) {
+            uint localIdx = baseOffset + threadOffset;
+            if (localIdx < MAX_LIGHTS_PER_CLUSTER) {
+                GET_LIGHT_INDEX(ctx.forwardPlusPointLightIndexListBufferAddr, globalOffset + localIdx) = entityIdx;
+            }
+        }
+    }
+    
+    barrier();
+
+    uint totalSpotLights = GET_VK_DRAW_CMD(ctx.spotLightIndirectCommandBufferAddr, 0).instanceCount;
+
+    for (uint i = threadIdx; i < totalSpotLights; i += totalThreads) {
+        uint entityIdx = GET_SPOT_VISIBLE_LIGHT(ctx.spotLightVisibleIndexBufferAddr, i);
+        uint denseIdx = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, entityIdx);
+        SpotLightColliderGPU collider = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, denseIdx);
+        
+        vec3 viewSpacePos = (camera.view * vec4(collider.worldPos, 1.0)).xyz;
+        vec3 viewSpaceDir = normalize(mat3(camera.view) * collider.worldDir);
+
+#ifdef USE_CLUSTER_FRUSTUM_VS_SPOT_SPHERE_CULLING
+        uint cullResult = TestSphereFrustum(viewSpacePos, collider.range, s_clusterPlanes);
+        bool isIntersecting = (cullResult != 0u);
+#else
+        bool isIntersecting = TestConeSphere(
+            viewSpacePos, viewSpaceDir, 
+            collider.range, collider.outerAngleCos, collider.outerAngleSin,
+            s_clusterSphereCenter, s_clusterSphereRadius
+        );
+#endif
+
+        if (isIntersecting) {
+            float viewZPos = abs(viewSpacePos.z);
+            float lightMinZ = viewZPos - collider.range;
+            float lightMaxZ = viewZPos + collider.range;
+            uint lightMask = ConstructEntityMask(lightMinZ, lightMaxZ, finalMinZ, depthRangeRecip);
+            
+            if ((depthMask & lightMask) == 0) {
+                isIntersecting = false; 
+            }
+        }
+        
+        uvec4 ballot = subgroupBallot(isIntersecting);
+        uint activeCount = subgroupBallotBitCount(ballot);
+        
+        uint baseOffset = 0;
+        if (subgroupElect() && activeCount > 0) {
+            baseOffset = atomicAdd(s_localSpotLightCount, activeCount);
+        }
+        baseOffset = subgroupBroadcastFirst(baseOffset);
+
+        uint isIntersectingInt = isIntersecting ? 1 : 0;
+        uint threadOffset = subgroupExclusiveAdd(isIntersectingInt);
+
+        if (isIntersecting) {
+            uint localIdx = baseOffset + threadOffset;
+            if (localIdx < MAX_LIGHTS_PER_CLUSTER) {
+                GET_LIGHT_INDEX(ctx.forwardPlusSpotLightIndexListBufferAddr, globalOffset + localIdx) = entityIdx;
+            }
+        }
+    }
+
+    barrier();
+
+    if (threadIdx == 0) {
+        TileData tileData;
+        tileData.minZ = finalMinZ;
+        tileData.maxZ = finalMaxZ;
+        tileData.sliceCount = 1;
+        tileData.clusterBaseOffset = flattenTileIdx;
+        GET_TILE_DATA(ctx.forwardPlusTileGridListBufferAddr, flattenTileIdx) = tileData;
+
+        ClusterData clusterData;
+        clusterData.tileIndex = flattenTileIdx;
+        clusterData.sliceIndex = 0;
+        clusterData.minZ = finalMinZ;
+        clusterData.maxZ = finalMaxZ;
+        clusterData.pointLightCount = min(s_localPointLightCount, MAX_LIGHTS_PER_CLUSTER);
+        clusterData.pointLightOffset = globalOffset;
+        clusterData.spotLightCount = min(s_localSpotLightCount, MAX_LIGHTS_PER_CLUSTER);
+        clusterData.spotLightOffset = globalOffset;
+
+        GET_CLUSTER_DATA(ctx.forwardPlusClusterListBufferAddr, flattenTileIdx) = clusterData;
+
+        atomicAdd(GET_CLUSTER_COUNT(ctx.forwardPlusClusterCountBufferAddr), 1);
+    }
+}

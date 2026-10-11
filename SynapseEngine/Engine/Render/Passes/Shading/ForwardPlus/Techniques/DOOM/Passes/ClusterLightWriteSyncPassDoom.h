@@ -7,5 +7,6 @@ namespace Syn
     public:
         void Execute(const RenderContext& context) override;
         std::string GetName() const override { return "ClusterLightWriteSyncPassDoom"; }
+        std::string GetGroup() const override { return PassGroupNames::ForwardPlusClusterPasses; }
     };
 }

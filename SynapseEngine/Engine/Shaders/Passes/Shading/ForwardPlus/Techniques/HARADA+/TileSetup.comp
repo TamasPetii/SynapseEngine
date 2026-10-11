@@ -1,0 +1,99 @@
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_KHR_shader_subgroup_basic : require
+#extension GL_KHR_shader_subgroup_arithmetic : require
+#extension GL_KHR_shader_subgroup_ballot : require
+
+#include "../../../../../Includes/Core.glsl"
+#include "../../../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../../../Includes/Common/Camera.glsl"
+#include "../../../../../Includes/Common/Cluster.glsl"
+
+#define THREAD_DIM 8
+layout(local_size_x = THREAD_DIM, local_size_y = THREAD_DIM, local_size_z = 1) in;
+
+#include "../../../../../Includes/PushConstants/ClusterSetupPC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    ClusterSetupPC pc;
+};
+
+layout(set = 2, binding = 0) uniform sampler2D opaqueDepth; 
+
+shared uint s_minZ_uint;
+shared uint s_maxZ_uint;
+
+void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    uint threadIdx = gl_LocalInvocationIndex;
+    ivec2 tileId = ivec2(gl_WorkGroupID.xy);
+    uint flattenTileIdx = tileId.y * ctx.tileCountX + tileId.x;
+
+    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
+
+    if (threadIdx == 0) {
+        s_minZ_uint = floatBitsToUint(2.0); 
+        s_maxZ_uint = floatBitsToUint(0.0);          
+    }
+
+    barrier();
+
+    uint pixelsPerThreadX = ctx.tileSize / THREAD_DIM;
+    uint pixelsPerThreadY = ctx.tileSize / THREAD_DIM;
+    uint startX = tileId.x * ctx.tileSize + gl_LocalInvocationID.x * pixelsPerThreadX;
+    uint startY = tileId.y * ctx.tileSize + gl_LocalInvocationID.y * pixelsPerThreadY;
+
+    float threadRawMinZ = 2.0;
+    float threadRawMaxZ = 0.0;
+
+    for (uint y = 0; y < pixelsPerThreadY; ++y) {
+        for (uint x = 0; x < pixelsPerThreadX; ++x) {
+            ivec2 pixelCoord = min(ivec2(startX + x, startY + y), ivec2(ctx.screenWidth - 1, ctx.screenHeight - 1));
+            float rawDepth = texelFetch(opaqueDepth, pixelCoord, 0).r;
+            
+            if (rawDepth >= 0.99999) continue;
+
+            threadRawMinZ = min(threadRawMinZ, rawDepth);
+            threadRawMaxZ = max(threadRawMaxZ, rawDepth);
+        }
+    }
+
+    float sgRawMinZ = subgroupMin(threadRawMinZ);
+    float sgRawMaxZ = subgroupMax(threadRawMaxZ);
+
+    if (subgroupElect()) {
+        if (sgRawMinZ <= 1.0) {
+            atomicMin(s_minZ_uint, floatBitsToUint(sgRawMinZ));
+            atomicMax(s_maxZ_uint, floatBitsToUint(sgRawMaxZ));
+        }
+    }
+
+    barrier();
+
+    if (threadIdx == 0) {
+        float rawMinZ = uintBitsToFloat(s_minZ_uint);
+        float rawMaxZ = uintBitsToFloat(s_maxZ_uint);
+
+        float finalMinZ = GET_CAMERA_NEAR(camera);
+        float finalMaxZ = GET_CAMERA_FAR(camera);
+
+        if (rawMinZ <= 1.0) {
+            vec4 minView = camera.projVulkanInv * vec4(0.0, 0.0, rawMinZ, 1.0);
+            vec4 maxView = camera.projVulkanInv * vec4(0.0, 0.0, rawMaxZ, 1.0);
+            
+            finalMinZ = abs(minView.z / minView.w);
+            finalMaxZ = abs(maxView.z / maxView.w);
+        }
+
+        TileData tileData;
+        tileData.minZ = finalMinZ;
+        tileData.maxZ = finalMaxZ;
+        tileData.sliceCount = 0; 
+        tileData.clusterBaseOffset = 0;
+        GET_TILE_DATA(ctx.forwardPlusTileGridListBufferAddr, flattenTileIdx) = tileData;
+    }
+}

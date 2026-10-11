@@ -85,6 +85,16 @@ namespace Syn
         static constexpr const char* ClusterPointLightSingleDOOM = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/DOOM/ClusterPointLightSingle.comp";
         static constexpr const char* ClusterSpotLightSingleDOOM = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/DOOM/ClusterSpotLightSingle.comp";
 
+        static constexpr const char* ClusterUberCullingHARADA = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/HARADA/ClusterUberCulling.comp";
+
+        static constexpr const char* TileSetupHaradaPlus = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/HARADA+/TileSetup.comp";
+        static constexpr const char* ClusterSetupHaradaPlus = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/HARADA+/ClusterSetup.comp";
+        static constexpr const char* ClusterDispatchSetupHaradaPlus = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/HARADA+/ClusterDispatchSetup.comp";
+        static constexpr const char* ClusterPointLightSingleHaradaPlus = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/HARADA+/ClusterPointLightSingle.comp";
+        static constexpr const char* ClusterSpotLightSingleHaradaPlus = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/HARADA+/ClusterSpotLightSingle.comp";
+
+        static constexpr const char* ClusterUberCullingWicked = "Engine/Shaders/Passes/Shading/ForwardPlus/Techniques/WICKED/ClusterUberCulling.comp";
+
         static constexpr const char* PreDepthFrag = "Engine/Shaders/Passes/Shading/ForwardPlus/DepthPrepass/PreDepth.frag";
         static constexpr const char* MeshletPreDepthMesh = "Engine/Shaders/Passes/Shading/ForwardPlus/DepthPrepass/MeshletPreDepth.mesh";
         static constexpr const char* TraditionalPreDepthVert = "Engine/Shaders/Passes/Shading/ForwardPlus/DepthPrepass/TraditionalPreDepth.vert";

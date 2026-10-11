@@ -47,4 +47,32 @@ bool IsModelSimpleEnoughForFastPath(uint meshCount, uint vertexCount) {
     return (meshCount <= MAX_FAST_PATH_MESHES && vertexCount < MAX_FAST_PATH_VERTICES);
 }
 
+void GetClusterFrustumPlanes(
+    ivec2 tileId, uint tileSize, float screenWidth, float screenHeight,
+    float minZ, float maxZ, mat4 projInv, out vec4 planes[6]
+) {
+    vec2 minUV = vec2(tileId) * float(tileSize) / vec2(screenWidth, screenHeight);
+    vec2 maxUV = vec2(tileId + 1) * float(tileSize) / vec2(screenWidth, screenHeight);
+    
+    vec2 ndcMin = minUV * 2.0 - 1.0;
+    vec2 ndcMax = maxUV * 2.0 - 1.0;
+
+    vec4 vTL = projInv * vec4(ndcMin.x, ndcMin.y, 1.0, 1.0);
+    vec4 vTR = projInv * vec4(ndcMax.x, ndcMin.y, 1.0, 1.0);
+    vec4 vBL = projInv * vec4(ndcMin.x, ndcMax.y, 1.0, 1.0);
+    vec4 vBR = projInv * vec4(ndcMax.x, ndcMax.y, 1.0, 1.0);
+    
+    vec3 pTL = vTL.xyz / vTL.w;
+    vec3 pTR = vTR.xyz / vTR.w;
+    vec3 pBL = vBL.xyz / vBL.w;
+    vec3 pBR = vBR.xyz / vBR.w;
+
+    planes[0] = vec4(0.0, 0.0, -1.0, minZ);
+    planes[1] = vec4(normalize(cross(pTR, pBR)), 0.0);
+    planes[2] = vec4(normalize(cross(pBL, pTL)), 0.0);
+    planes[3] = vec4(normalize(cross(pTL, pTR)), 0.0);
+    planes[4] = vec4(normalize(cross(pBR, pBL)), 0.0);
+    planes[5] = vec4(0.0, 0.0, 1.0, -maxZ);
+}
+
 #endif

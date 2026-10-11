@@ -63,7 +63,7 @@ namespace Syn {
 
                     if (settings.lighting.pipelineType == PipelineType::ForwardPlus) 
                     {
-                        const char* techniqueNames[] = { "DHAC", "DOOM", "HARADA", "WICKED" };
+                        const char* techniqueNames[] = { "DHAC", "DOOM", "HARADA", "HARADA+", "WICKED" };
                         int currentTechnique = (int)settings.lighting.forwardPlusTechnique;
 
                         Syn::UI::BeginProperty("Technique");

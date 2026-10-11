@@ -31,6 +31,7 @@ namespace Syn
         DHAC,
         DOOM,
         HARADA,
+        HARADA_PLUS,
         WICKED,
     };
 

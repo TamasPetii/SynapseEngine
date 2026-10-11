@@ -19,15 +19,20 @@
 
 #include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/DHAC/Pipeline/ForwardPlusPipelineDHAC.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/DOOM/Pipeline/ForwardPlusPipelineDoom.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/HARADA/Pipeline/ForwardPlusPipelineHarada.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/HARADA+/Pipeline/ForwardPlusPipelineHaradaPlus.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/WICKED/Pipeline/ForwardPlusPipelineWicked.h"
 
-namespace Syn {
+namespace Syn 
+{
     ForwardPlusClusteringPipeline::ForwardPlusClusteringPipeline()
         : RenderPipeline("ForwardPlusClusteringPipeline", PassGroupNames::UndefinedPasses)
     {
-        AddPass(std::make_unique<ForwardPlusPipelineDoom>());
-        //AddPass(std::make_unique<ForwardPlusPipelineHarada>());
-        //AddPass(std::make_unique<ForwardPlusPipelineWicked>());
         AddPass(std::make_unique<ForwardPlusPipelineDHAC>());
+        AddPass(std::make_unique<ForwardPlusPipelineDoom>());
+        AddPass(std::make_unique<ForwardPlusPipelineHarada>());
+        AddPass(std::make_unique<ForwardPlusPipelineHaradaPlus>());
+        AddPass(std::make_unique<ForwardPlusPipelineWicked>());
     }
 
     bool ForwardPlusClusteringPipeline::ShouldExecute(const RenderContext& context) const {

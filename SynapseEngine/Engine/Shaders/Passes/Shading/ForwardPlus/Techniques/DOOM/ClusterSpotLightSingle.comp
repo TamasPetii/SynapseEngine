@@ -13,6 +13,7 @@
 #include "../../../../../Includes/Common/SpotLight.glsl"
 #include "../../../../../Includes/Common/IndirectCommand.glsl"
 #include "../../../../../Includes/Utils/CullingMath.glsl"
+#include "../../../../../Includes/Utils/CullingUtils.glsl"
 #include "../../../../../Includes/Utils/ClusterMath.glsl"
 
 layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
@@ -24,10 +25,15 @@ layout(push_constant) uniform PushConstants {
 };
 
 #define MAX_LIGHTS_PER_CLUSTER 512
+#define USE_CLUSTER_FRUSTUM_VS_SPOT_SPHERE_CULLING
 
 shared uint s_localSpotLightCount;
 shared vec3 s_clusterSphereCenter;
 shared float s_clusterSphereRadius;
+
+#ifdef USE_CLUSTER_FRUSTUM_VS_SPOT_SPHERE_CULLING
+shared vec4 s_clusterPlanes[6];
+#endif
 
 void main() {
     FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
@@ -55,6 +61,15 @@ void main() {
         vec3 extents = (aabbMax - aabbMin) * 0.5;
         s_clusterSphereCenter = aabbMin + extents;
         s_clusterSphereRadius = length(extents);
+
+#ifdef USE_CLUSTER_FRUSTUM_VS_SPOT_SPHERE_CULLING
+        ivec2 tileId = ivec2(cluster.tileIndex % ctx.tileCountX, cluster.tileIndex / ctx.tileCountX);
+        GetClusterFrustumPlanes(
+            tileId, ctx.tileSize, ctx.screenWidth, ctx.screenHeight,
+            cluster.minZ, cluster.maxZ, camera.projVulkanInv,
+            s_clusterPlanes
+        );
+#endif
     }
     
     barrier();
@@ -70,11 +85,16 @@ void main() {
         vec3 viewSpacePos = (camera.view * vec4(collider.worldPos, 1.0)).xyz;
         vec3 viewSpaceDir = normalize(mat3(camera.view) * collider.worldDir);
 
+#ifdef USE_CLUSTER_FRUSTUM_VS_SPOT_SPHERE_CULLING
+        uint cullResult = TestSphereFrustum(viewSpacePos, collider.range, s_clusterPlanes);
+        bool isIntersecting = (cullResult != 0u);
+#else
         bool isIntersecting = TestConeSphere(
             viewSpacePos, viewSpaceDir, 
             collider.range, collider.outerAngleCos, collider.outerAngleSin,
             s_clusterSphereCenter, s_clusterSphereRadius
         );
+#endif
         
         uvec4 ballot = subgroupBallot(isIntersecting);
         uint activeCount = subgroupBallotBitCount(ballot);
