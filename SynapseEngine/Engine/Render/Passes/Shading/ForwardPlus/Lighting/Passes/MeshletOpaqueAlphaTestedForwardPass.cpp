@@ -118,20 +118,21 @@ namespace Syn {
         _graphicsState.renderArea = extent;
 
         uint32_t msaaSamples = context.scene->GetSettings()->lighting.msaaSamples;
+        bool useMsaa = msaaSamples > 1;
         _graphicsState.raster.samples = static_cast<VkSampleCountFlagBits>(msaaSamples);
 
         _colorAttachments.push_back(Vk::RenderUtils::CreateAttachment({
-            .imageView = group->GetImage(RenderTargetNames::MainMSAA)->GetView(Vk::ImageViewNames::Default),
+            .imageView = group->GetImage(useMsaa ? RenderTargetNames::MainMSAA : RenderTargetNames::Main)->GetView(Vk::ImageViewNames::Default),
             .layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
             .storeOp = VK_ATTACHMENT_STORE_OP_STORE,
-            .resolveImageView = group->GetImage(RenderTargetNames::Main)->GetView(Vk::ImageViewNames::Default),
+            .resolveImageView = useMsaa ? group->GetImage(RenderTargetNames::Main)->GetView(Vk::ImageViewNames::Default) : VK_NULL_HANDLE,
             .resolveImageLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-            .resolveMode = VK_RESOLVE_MODE_AVERAGE_BIT
+            .resolveMode = useMsaa ? VK_RESOLVE_MODE_AVERAGE_BIT : VK_RESOLVE_MODE_NONE
             }));
 
         _depthAttachment = Vk::RenderUtils::CreateAttachment({
-            .imageView = group->GetImage(RenderTargetNames::OpaqueDepthMSAA)->GetView(Vk::ImageViewNames::Default),
+            .imageView = group->GetImage(useMsaa ? RenderTargetNames::OpaqueDepthMSAA : RenderTargetNames::OpaqueDepth)->GetView(Vk::ImageViewNames::Default),
             .layout = VK_IMAGE_LAYOUT_DEPTH_ATTACHMENT_OPTIMAL,
             .loadOp = VK_ATTACHMENT_LOAD_OP_LOAD,
             .storeOp = VK_ATTACHMENT_STORE_OP_STORE,

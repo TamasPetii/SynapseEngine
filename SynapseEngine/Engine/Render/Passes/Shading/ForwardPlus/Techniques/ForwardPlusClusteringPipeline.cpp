@@ -18,10 +18,10 @@
 #include "Engine/Scene/Scene.h"
 
 #include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/DHAC/Pipeline/ForwardPlusPipelineDHAC.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/DOOM/Pipeline/ForwardPlusPipelineDoom.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/HARADA/Pipeline/ForwardPlusPipelineHarada.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/HARADA+/Pipeline/ForwardPlusPipelineHaradaPlus.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/WICKED/Pipeline/ForwardPlusPipelineWicked.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/VFC/Pipeline/ForwardPlusPipelineVFC.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/DBC/Pipeline/ForwardPlusPipelineDBC.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/DBAC/Pipeline/ForwardPlusPipelineDBAC.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/DBBC/Pipeline/ForwardPlusPipelineDBBC.h"
 
 namespace Syn 
 {
@@ -29,10 +29,10 @@ namespace Syn
         : RenderPipeline("ForwardPlusClusteringPipeline", PassGroupNames::UndefinedPasses)
     {
         AddPass(std::make_unique<ForwardPlusPipelineDHAC>());
-        AddPass(std::make_unique<ForwardPlusPipelineDoom>());
-        AddPass(std::make_unique<ForwardPlusPipelineHarada>());
-        AddPass(std::make_unique<ForwardPlusPipelineHaradaPlus>());
-        AddPass(std::make_unique<ForwardPlusPipelineWicked>());
+        AddPass(std::make_unique<ForwardPlusPipelineDBAC>());
+        AddPass(std::make_unique<ForwardPlusPipelineDBBC>());
+        AddPass(std::make_unique<ForwardPlusPipelineDBC>());
+        AddPass(std::make_unique<ForwardPlusPipelineVFC>());
     }
 
     bool ForwardPlusClusteringPipeline::ShouldExecute(const RenderContext& context) const {

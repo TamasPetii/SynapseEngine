@@ -105,7 +105,7 @@ vec3 CalculateDirectionalLightShadow(
 ) {
     outCascadeIndex = 0;
 
-    if (dirLightShadowSparseMapBufferAddr == 0) return vec3(1.0);
+    if (dirLightShadowDataBufferAddr == 0 || dirLightShadowSparseMapBufferAddr == 0) return vec3(1.0);
     
     uint shadowDenseIndex = GET_SPARSE_INDEX(dirLightShadowSparseMapBufferAddr, lightEntityIndex);
     if (shadowDenseIndex == INVALID_INDEX) return vec3(1.0);
@@ -168,7 +168,7 @@ vec3 CalculateSpotLightShadow(
     sampler2DShadow shadowAtlas,
     sampler2D shadowColorAtlas
 ) {
-    if (spotLightShadowSparseMapBufferAddr == 0) return vec3(1.0);
+    if (spotLightShadowDataBufferAddr == 0 || spotLightShadowSparseMapBufferAddr == 0) return vec3(1.0);
 
     uint shadowDenseIndex = GET_SPARSE_INDEX(spotLightShadowSparseMapBufferAddr, lightEntityIndex);
     if (shadowDenseIndex == INVALID_INDEX) return vec3(1.0);
@@ -223,7 +223,7 @@ vec3 CalculatePointLightShadow(
     sampler2DShadow shadowAtlas,
     sampler2D shadowColorAtlas
 ) {
-    if (pointLightShadowSparseMapBufferAddr == 0) return vec3(1.0);
+    if (pointLightShadowDataBufferAddr == 0 || pointLightShadowSparseMapBufferAddr == 0) return vec3(1.0);
 
     uint shadowDenseIndex = GET_SPARSE_INDEX(pointLightShadowSparseMapBufferAddr, lightEntityIndex);
     if (shadowDenseIndex == INVALID_INDEX) return vec3(1.0);

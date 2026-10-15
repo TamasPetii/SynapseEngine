@@ -20,8 +20,9 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_vulkan.h>
 #include <ImGuizmo.h>
-#include "GuiTextureManager.h"
 #include <print>
+#include <filesystem>
+#include "GuiTextureManager.h"
 #include "Engine/ServiceLocator.h"
 #include "Engine/FrameContext.h"
 #include "Editor/FileDialog/ImGuiFileDialogImpl.h"
@@ -39,11 +40,14 @@ namespace Syn {
 		_textureManager = std::make_unique<GuiTextureManager>();
         _fileDialog = std::make_unique<ImGuiFileDialogImpl>();
 
+        static const std::string iniFilePath = (std::filesystem::path(SYN_PROJECT_ROOT) / "imgui.ini").lexically_normal().string();
+
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+        io.IniFilename = iniFilePath.c_str();
 
         ImGui_ImplGlfw_InitForVulkan(window, false);
 

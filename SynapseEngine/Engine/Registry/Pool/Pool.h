@@ -153,6 +153,8 @@ namespace Syn
             });
 
         _mapping.Remove(entity);
+
+        IncrementMappingVersion();
     }
 
     template<typename T, typename StoragePolicy, typename MappingPolicy>

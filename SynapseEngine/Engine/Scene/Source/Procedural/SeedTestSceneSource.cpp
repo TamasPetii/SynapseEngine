@@ -118,6 +118,11 @@ namespace Syn
         int spotLightCount = config.value("/lights/spot_count"_json_pointer, 50);
         int spotShadowCount = config.value("/lights/spot_shadow_count"_json_pointer, 5);
 
+        uint32_t level0Estimate = 512;
+        uint32_t level1Estimate = 512 + charCount + staticGeoCount + physBoxCount + physSphereCount + physCapsuleCount + dirLightCount + pointLightCount + spotLightCount;
+        std::vector<uint32_t> levelEstimates = { level0Estimate, level1Estimate };
+        hm->ReserveLevels(levelEstimates);
+
         std::vector<uint32_t> geoIds = {
             modelManager->GetResourceIndex(MeshSourceNames::Cube),
             modelManager->GetResourceIndex(MeshSourceNames::Sphere),

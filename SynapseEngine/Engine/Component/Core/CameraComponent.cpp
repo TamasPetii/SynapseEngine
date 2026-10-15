@@ -20,7 +20,7 @@
 namespace Syn
 {
 	CameraComponent::CameraComponent()
-		: speed{ 10.f }
+		: speed{ 50.f }
 		, sensitivity{ 0.3f }
 		, width{ 1920 }
 		, height{ 1080 }

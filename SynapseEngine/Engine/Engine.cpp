@@ -386,7 +386,8 @@ namespace Syn
 		ServiceLocator::Provide<SceneManager>(_sceneManager.get());
 
 		_sceneManager->RegisterScene(SceneNames::Main, [frames]() {
-			return std::make_unique<Scene>(frames, std::make_unique<SeedTestSceneSource>());
+			//return std::make_unique<Scene>(frames, std::make_unique<SeedTestSceneSource>());
+			return std::make_unique<Scene>(frames, std::make_unique<TestSceneSource>());
 			});
 
 		_sceneManager->RegisterScene(SceneNames::MaterialPreview, [frames]() {

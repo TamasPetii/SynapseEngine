@@ -36,14 +36,12 @@ namespace Syn {
         AddPass(std::make_unique<GeometryHizLinearPreparePass>());
         AddPass(std::make_unique<GeometryHizDownsamplePass>());
 
-        /*
         AddPass(std::make_unique<DirectionLightShadowHizCopyPass>());
         AddPass(std::make_unique<DirectionLightShadowHizDownsamplePass>());
         AddPass(std::make_unique<SpotLightShadowHizCopyPass>());
         AddPass(std::make_unique<SpotLightShadowHizDownsamplePass>());
         AddPass(std::make_unique<PointLightShadowHizCopyPass>());
         AddPass(std::make_unique<PointLightShadowHizDownsamplePass>());
-        */
 
         AddPass(std::make_unique<ShadowAtlasTransitionPass>());
     }

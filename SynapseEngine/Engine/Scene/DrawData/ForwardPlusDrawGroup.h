@@ -26,14 +26,14 @@ namespace Syn
 
     struct SYN_API ForwardPlusDispatchArgs {
         ForwardPlusDispatchCmd pointFastPath;
-        ForwardPlusDispatchCmd pointSlowCount;
-        ForwardPlusDispatchCmd pointSlowWrite;
+        ForwardPlusDispatchCmd pointScalableCount;
+        ForwardPlusDispatchCmd pointScalablePrefixSum;
+        ForwardPlusDispatchCmd pointScalableWrite;
 
         ForwardPlusDispatchCmd spotFastPath;
-        ForwardPlusDispatchCmd spotSlowCount;
-        ForwardPlusDispatchCmd spotSlowWrite;
-
-        ForwardPlusDispatchCmd prefixSum;
+        ForwardPlusDispatchCmd spotScalableCount;
+        ForwardPlusDispatchCmd spotScalablePrefixSum;
+        ForwardPlusDispatchCmd spotScalableWrite;
     };
 
     struct SYN_API ForwardPlusDrawGroup : public IDrawGroup 

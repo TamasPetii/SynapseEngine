@@ -31,6 +31,8 @@ namespace Syn
     class SYN_API HierarchyManager
     {
     public:
+        static constexpr uint32_t DEFAULT_LEVEL_CAPACITY = 512u;
+
         HierarchyManager(Registry* registry);
 
         HierarchyManager(const HierarchyManager&) = delete;
@@ -50,6 +52,9 @@ namespace Syn
 
         template<typename TComponent>
         HierarchyWorkQueue* EnsureWorkQueue();
+
+        void ReserveLevel(uint32_t level, uint32_t capacity);
+        void ReserveLevels(std::span<const uint32_t> capacities);
     private:
         void InsertIntoLevel(EntityID entity, uint32_t level);
         void RemoveFromLevel(EntityID entity);

@@ -107,6 +107,10 @@ namespace Syn
         _registry = std::make_unique<Registry>();
         _sceneSettings = std::make_unique<SceneSettings>();
 
+        _hierarchyManager = std::make_unique<HierarchyManager>(_registry.get());
+        _hierarchyManager->EnsureWorkQueue<TransformComponent>();
+        _hierarchyManager->EnsureWorkQueue<TagComponent>();
+
 		_registry->EnsurePool<TransformComponent>();
         _registry->EnsurePool<CameraComponent>();
         _registry->EnsurePool<TagComponent>();
@@ -129,8 +133,6 @@ namespace Syn
 		_registry->EnsurePool<HierarchyComponent>();
 
         _physicsEngine = ServiceLocator::Get<PhysicsFactory>()();
-
-        _hierarchyManager = std::make_unique<HierarchyManager>(_registry.get());
 
         if(source)
 			source->Populate(*this);

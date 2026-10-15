@@ -16,30 +16,36 @@
 
 #include "ForwardPlusPipelineDHAC.h"
 #include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/DHAC/Passes/ClusterSetupPassDHAC.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/DHAC/Passes/ClusterDispatchSetupPassDHAC.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/DHAC/Passes/ClusterPointLightSinglePassDHAC.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/DHAC/Passes/ClusterSpotLightSinglePassDHAC.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/DHAC/Passes/ClusterPointLightCountPassDHAC.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/DHAC/Passes/ClusterSpotLightCountPassDHAC.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/DHAC/Passes/ClusterPrefixSumPassDHAC.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/DHAC/Passes/ClusterPointLightWritePassDHAC.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/DHAC/Passes/ClusterSpotLightWritePassDHAC.h"
-#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/DHAC/Passes/ClusterLightWriteSyncPassDHAC.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/Common/ClusterDispatchSetupPass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/Common/ClusterPointLightSinglePass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/Common/ClusterSpotLightSinglePass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/Common/ClusterPointLightCountPass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/Common/ClusterSpotLightCountPass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/Common/ClusterPointLightWritePass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/Common/ClusterSpotLightWritePass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/Common/ClusterLightWriteSyncPass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/Common/ClusterPointLightPrefixSumPass.h"
+#include "Engine/Render/Passes/Shading/ForwardPlus/Techniques/Common/ClusterSpotLightPrefixSumPass.h"
 
 namespace Syn {
     ForwardPlusPipelineDHAC::ForwardPlusPipelineDHAC()
         : RenderPipeline("ForwardPlusPipelineDHAC", PassGroupNames::UndefinedPasses)
     {
         AddPass(std::make_unique<ClusterSetupPassDHAC>());
-        AddPass(std::make_unique<ClusterDispatchSetupPassDHAC>());
-        AddPass(std::make_unique<ClusterPointLightSinglePassDHAC>());
-        AddPass(std::make_unique<ClusterSpotLightSinglePassDHAC>());
-        AddPass(std::make_unique<ClusterPointLightCountPassDHAC>());
-        AddPass(std::make_unique<ClusterSpotLightCountPassDHAC>());
-        AddPass(std::make_unique<ClusterPrefixSumPassDHAC>());
-        AddPass(std::make_unique<ClusterPointLightWritePassDHAC>());
-        AddPass(std::make_unique<ClusterSpotLightWritePassDHAC>());
-        AddPass(std::make_unique<ClusterLightWriteSyncPassDHAC>());
+        AddPass(std::make_unique<ClusterDispatchSetupPass>());
+
+        AddPass(std::make_unique<ClusterPointLightSinglePass>());
+        AddPass(std::make_unique<ClusterSpotLightSinglePass>());
+
+        AddPass(std::make_unique<ClusterPointLightCountPass>());
+        AddPass(std::make_unique<ClusterPointLightPrefixSumPass>());
+        AddPass(std::make_unique<ClusterPointLightWritePass>());
+
+        AddPass(std::make_unique<ClusterSpotLightCountPass>());
+        AddPass(std::make_unique<ClusterSpotLightPrefixSumPass>());
+        AddPass(std::make_unique<ClusterSpotLightWritePass>());
+
+        AddPass(std::make_unique<ClusterLightWriteSyncPass>());
     }
 
     bool ForwardPlusPipelineDHAC::ShouldExecute(const RenderContext& context) const {

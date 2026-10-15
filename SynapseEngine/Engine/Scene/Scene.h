@@ -153,7 +153,7 @@ namespace Syn
             },
             [this]() -> bool {
                 auto pool = _registry->GetPool<TComponent>();
-                return pool && pool->Size() > 0;
+                return pool && !pool->GetSparseIndices().empty();
             });
     }
 }

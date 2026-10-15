@@ -23,14 +23,14 @@
 
 struct ForwardPlusDispatchArgs {
     uvec4 pointFastPath;
-    uvec4 pointSlowCount;
-    uvec4 pointSlowWrite;
-    
+    uvec4 pointScalableCount;
+    uvec4 pointScalablePrefixSum;
+    uvec4 pointScalableWrite;
+
     uvec4 spotFastPath;
-    uvec4 spotSlowCount;
-    uvec4 spotSlowWrite;
-    
-    uvec4 prefixSum;
+    uvec4 spotScalableCount;
+    uvec4 spotScalablePrefixSum;
+    uvec4 spotScalableWrite;
 };
 
 layout(buffer_reference, std430) restrict buffer ForwardPlusDispatchArgsBuffer { 

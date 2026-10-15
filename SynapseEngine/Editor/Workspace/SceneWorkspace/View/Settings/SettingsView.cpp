@@ -61,21 +61,103 @@ namespace Syn {
                         changed = true;
                     }
 
-                    if (settings.lighting.pipelineType == PipelineType::ForwardPlus) 
+                    if (settings.lighting.pipelineType == PipelineType::ForwardPlus)
                     {
-                        const char* techniqueNames[] = { "DHAC", "DOOM", "HARADA", "HARADA+", "WICKED" };
+                        const char* techniqueNames[] = {
+                            "DHAC (Synapse)",
+                            "DBAC (Synapse)",
+                            "DBBC (Wicked)",
+                            "DBC (Harada)",
+                            "VFC (DOOM)"
+                        };
+
                         int currentTechnique = (int)settings.lighting.forwardPlusTechnique;
 
                         Syn::UI::BeginProperty("Technique");
+
+                        const float buttonSize = ImGui::GetFrameHeight();
+                        const float spacing = ImGui::GetStyle().ItemInnerSpacing.x;
+
+                        ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.35f, 0.35f, 1.0f));
+                        if (ImGui::Button("?##TechHelp", ImVec2(buttonSize, buttonSize))) {
+                            ImGui::OpenPopup("ForwardPlusHelpPopup");
+                        }
+                        ImGui::PopStyleColor();
+                        const bool isHelpHovered = ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort);
+
+                        ImGui::SameLine(0.0f, spacing);
+                        ImGui::SetNextItemWidth(-FLT_MIN);
                         if (ImGui::Combo("##FwPlusTechnique", &currentTechnique, techniqueNames, IM_ARRAYSIZE(techniqueNames))) {
                             settings.lighting.forwardPlusTechnique = (ForwardPlusTechnique)currentTechnique;
                             changed = true;
                         }
 
+                        auto drawHelpContent = []() {
+                            const ImVec4 synBlue = ImVec4(0.18f, 0.69f, 0.92f, 1.0f); // A Global Pipeline kékje
+                            const ImVec4 synRed = ImVec4(1.0f, 0.35f, 0.35f, 1.0f);
+
+                            ImGui::PushTextWrapPos(ImGui::GetFontSize() * 42.0f);
+                            ImGui::TextColored(synRed, "Forward+ Light Culling Techniques:");
+                            ImGui::Separator();
+
+                            auto drawTechItem = [&](const char* title, const char* desc) {
+                                ImGui::PushStyleColor(ImGuiCol_Text, synBlue);
+                                ImGui::Bullet();
+                                ImGui::PopStyleColor();
+
+                                ImGui::BeginGroup();
+                                ImGui::TextColored(synBlue, "%s", title);
+                                ImGui::TextUnformatted(desc);
+                                ImGui::EndGroup();
+                                };
+
+                            drawTechItem(
+                                "DHAC [Dual-HiZ Adaptive Clustered - Synapse Engine]:",
+                                "Adaptive Z-sliced clustering using O(1) Min/Max Dual-HiZ pyramid lookups."
+                            );
+                            ImGui::Spacing();
+
+                            drawTechItem(
+                                "DBAC [Depth-Bounded Adaptive Clustered - Synapse Engine]:",
+                                "Adaptive Z-sliced clustering using per-tile raw depth-buffer min/max reduction."
+                            );
+                            ImGui::Spacing();
+
+                            drawTechItem(
+                                "DBBC [Depth-Bounded Bitmask Clustered - Wicked Engine]:",
+                                "Single depth-bounded tile frustum combined with 2.5D depth-slice bitmask culling."
+                            );
+                            ImGui::Spacing();
+
+                            drawTechItem(
+                                "DBC [Depth-Bounded Clustered - Harada 2012]:",
+                                "Classic depth-bounded Forward+ building a single min/max frustum per tile."
+                            );
+                            ImGui::Spacing();
+
+                            drawTechItem(
+                                "VFC [View-Frustum Clustered - DOOM 2016]:",
+                                "Full camera view-frustum 3D grid partitioning in X/Y/Z without depth bounds."
+                            );
+
+                            ImGui::PopTextWrapPos();
+                            };
+
+                        if (isHelpHovered) {
+                            ImGui::BeginTooltip();
+                            drawHelpContent();
+                            ImGui::EndTooltip();
+                        }
+
+                        if (ImGui::BeginPopup("ForwardPlusHelpPopup")) {
+                            drawHelpContent();
+                            ImGui::EndPopup();
+                        }
+
                         const char* sliderNames[] = { "8", "16", "32", "64", "128", "256", "512" };
 
                         const uint32_t sizes[] = {
-                            ComputeGroupSize::Image8D, 
+                            ComputeGroupSize::Image8D,
                             ComputeGroupSize::Image16D,
                             ComputeGroupSize::Image32D,
                             ComputeGroupSize::Image64D,
@@ -105,6 +187,7 @@ namespace Syn {
                     Syn::UI::EndPropertyGrid();
                 }
             }
+
             Syn::UI::EndCard();
 
             constexpr const char* CardCullingTitle = "Culling & Optimization";

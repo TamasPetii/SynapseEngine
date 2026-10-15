@@ -97,6 +97,8 @@ namespace Syn
         bool spawnFloor = config.value("/environment/spawn_floor"_json_pointer, true);
         bool spawnPbrSponza = config.value("/environment/spawn_pbr_sponza"_json_pointer, true);
         bool spawnMonkey = config.value("/environment/spawn_monkey"_json_pointer, true);
+        bool useNvidiaBistro = config.value("/environment/use_nvidia_bistro"_json_pointer, false);
+        std::string pathNvidiaBistro = config.value("/environment/path_nvidia_bistro"_json_pointer, "");
         bool useUniqueMaterials = config.value("/materials/use_unique_materials"_json_pointer, true);
 
         int sharedMatCount = config.value("/materials/shared_material_count"_json_pointer, 25);
@@ -113,6 +115,11 @@ namespace Syn
         int pointShadowCount = config.value("/lights/point_shadow_count"_json_pointer, 5);
         int spotLightCount = config.value("/lights/spot_count"_json_pointer, 50);
         int spotShadowCount = config.value("/lights/spot_shadow_count"_json_pointer, 5);
+
+        uint32_t level0Estimate = 512;
+        uint32_t level1Estimate = 512 + charCount + staticGeoCount + physBoxCount + physSphereCount + physCapsuleCount + dirLightCount + pointLightCount + spotLightCount;
+        std::vector<uint32_t> levelEstimates = { level0Estimate, level1Estimate };
+        hm->ReserveLevels(levelEstimates);
 
         std::vector<uint32_t> geoIds = {
             modelManager->GetResourceIndex(MeshSourceNames::Cube),
@@ -384,6 +391,60 @@ namespace Syn
             hm->AttachChild(rootEnvironment, sponzaEntity);
         }
 
+        if (useNvidiaBistro && !pathNvidiaBistro.empty())
+        {
+            uint32_t bistroExteriorId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(pathNvidiaBistro + "/BistroExterior.fbx"));
+
+            EntityID bistroExteriorEntity = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(bistroExteriorEntity);
+            registry.AddComponent<MaterialOverrideComponent>(bistroExteriorEntity);
+            registry.AddComponent<PipelineOverrideComponent>(bistroExteriorEntity);
+            registry.GetComponent<TagComponent>(bistroExteriorEntity).name = "Bistro_Exterior";
+            registry.GetComponent<TagComponent>(bistroExteriorEntity).tag = "Model";
+            registry.AddComponent<TransformComponent>(bistroExteriorEntity);
+            registry.AddComponent<ModelComponent>(bistroExteriorEntity);
+            registry.AddComponent<MeshColliderComponent>(bistroExteriorEntity);
+            registry.AddComponent<RigidBodyComponent>(bistroExteriorEntity);
+
+            registry.GetComponent<TransformComponent>(bistroExteriorEntity).translation = glm::vec3(0.0f, 0.0f, 0.0f);
+            registry.GetComponent<TransformComponent>(bistroExteriorEntity).scale = glm::vec3(5.0f, 5.0f, 5.0f);
+            registry.GetComponent<ModelComponent>(bistroExteriorEntity).modelIndex = bistroExteriorId;
+            registry.GetComponent<RigidBodyComponent>(bistroExteriorEntity).motionType = PhysicsMotionType::Static;
+
+            registry.GetPool<RigidBodyComponent>()->SetCategory(bistroExteriorEntity, StorageCategory::Stream);
+            registry.GetPool<MeshColliderComponent>()->SetCategory(bistroExteriorEntity, StorageCategory::Stream);
+            registry.GetPool<TransformComponent>()->SetCategory(bistroExteriorEntity, StorageCategory::Static);
+            registry.GetPool<ModelComponent>()->SetCategory(bistroExteriorEntity, StorageCategory::Static);
+            registry.GetPool<MaterialOverrideComponent>()->SetCategory(bistroExteriorEntity, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(bistroExteriorEntity, StorageCategory::Static);
+            registry.GetPool<TagComponent>()->SetCategory(bistroExteriorEntity, StorageCategory::Static);
+
+            hm->AttachChild(rootEnvironment, bistroExteriorEntity);
+
+            uint32_t bistroInteriorId = modelManager->LoadModelAsync(PathUtils::GetAbsolutePathString(pathNvidiaBistro + "/BistroInterior.fbx"));
+
+            EntityID bistroInteriorEntity = scene.CreateEntity();
+            registry.AddComponent<TagComponent>(bistroInteriorEntity);
+            registry.AddComponent<MaterialOverrideComponent>(bistroInteriorEntity);
+            registry.AddComponent<PipelineOverrideComponent>(bistroInteriorEntity);
+            registry.GetComponent<TagComponent>(bistroInteriorEntity).name = "Bistro_Interior";
+            registry.GetComponent<TagComponent>(bistroInteriorEntity).tag = "Model";
+            registry.AddComponent<TransformComponent>(bistroInteriorEntity);
+            registry.AddComponent<ModelComponent>(bistroInteriorEntity);
+
+            registry.GetComponent<TransformComponent>(bistroInteriorEntity).translation = glm::vec3(0.0f, 0.0f, 0.0f);
+            registry.GetComponent<TransformComponent>(bistroInteriorEntity).scale = glm::vec3(5.0f, 5.0f, 5.0f);
+            registry.GetComponent<ModelComponent>(bistroInteriorEntity).modelIndex = bistroInteriorId;
+
+            registry.GetPool<TransformComponent>()->SetCategory(bistroInteriorEntity, StorageCategory::Static);
+            registry.GetPool<ModelComponent>()->SetCategory(bistroInteriorEntity, StorageCategory::Static);
+            registry.GetPool<MaterialOverrideComponent>()->SetCategory(bistroInteriorEntity, StorageCategory::Static);
+            registry.GetPool<PipelineOverrideComponent>()->SetCategory(bistroInteriorEntity, StorageCategory::Static);
+            registry.GetPool<TagComponent>()->SetCategory(bistroInteriorEntity, StorageCategory::Static);
+
+            hm->AttachChild(rootEnvironment, bistroInteriorEntity);
+        }
+
         if (spawnFloor)
         {
             EntityID floorEntity = scene.CreateEntity();
@@ -473,7 +534,7 @@ namespace Syn
                 MaterialInfo matInfo{};
                 matInfo.color = glm::vec4(r, g, b, 0.1f + (static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 0.9f));
                 matInfo.doubleSided = rand() % 2;
-                matInfo.isTransparent = /*rand() % 2*/ false;
+                matInfo.isTransparent = rand() % 2;
                 matInfo.emissiveFactor = glm::vec3(r, g, b);
                 matInfo.emissiveIntensity = static_cast<float>(rand()) / static_cast<float>(RAND_MAX) * 2;
                 matInfo.metallicFactor = static_cast<float>(rand()) / static_cast<float>(RAND_MAX);
@@ -631,7 +692,7 @@ namespace Syn
             registry.GetComponent<TransformComponent>(e).rotation = glm::vec3(92.0f, 320.0f, 215.0f);
             auto& light = registry.GetComponent<DirectionLightComponent>(e);
             light.color = glm::vec3(1.0f, 0.95f, 0.85f) * 0.55f;
-            light.strength = 1.0f;
+            light.strength = 5.0f;
             light.useShadow = dirLightShadowCount != 0;
 
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
@@ -658,7 +719,7 @@ namespace Syn
             light.position = transform.translation;
             light.color = glm::vec3(static_cast<float>(rand()) / RAND_MAX, static_cast<float>(rand()) / RAND_MAX, static_cast<float>(rand()) / RAND_MAX);
             light.radius = 5.0f + (rand() % 50);
-            light.strength = 3.0f /*+ (rand() % 5)*/;
+            light.strength = 5.0f /*+ (rand() % 5)*/;
             light.useShadow = (i < pointShadowCount);
 
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);
@@ -688,7 +749,7 @@ namespace Syn
             light.range = 25.0f + (rand() % 50);
             light.innerAngle = 15.0f + (rand() % 10);
             light.outerAngle = light.innerAngle + 10.0f + (rand() % 15);
-            light.strength = 3.0f /*+ (rand() % 1)*/;
+            light.strength = 5.0f /*+ (rand() % 1)*/;
             light.useShadow = (i < spotShadowCount);
 
             registry.GetPool<TransformComponent>()->SetCategory(e, StorageCategory::Stream);

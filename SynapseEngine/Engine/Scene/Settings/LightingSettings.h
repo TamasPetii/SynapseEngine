@@ -29,10 +29,10 @@ namespace Syn
     enum SYN_API ForwardPlusTechnique
     {
         DHAC,
-        DOOM,
-        HARADA,
-        HARADA_PLUS,
-        WICKED,
+        DBAC,
+        DBBC,
+        DBC,
+        VFC
     };
 
     struct SYN_API LightingSettings

@@ -72,6 +72,9 @@ namespace Syn
 
         SYN_INLINE std::span<const EntityID> GetQueue(uint32_t level) const
         {
+            [[unlikely]]
+            if (level >= _queues.size()) return {};
+
             size_t activeCount = _queues[level].count.load(std::memory_order_relaxed);
             return std::span<const EntityID>(_queues[level].entities.data(), activeCount);
         }

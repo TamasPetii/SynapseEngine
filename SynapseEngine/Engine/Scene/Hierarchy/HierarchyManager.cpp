@@ -16,6 +16,7 @@
 
 #include "HierarchyManager.h"
 #include <queue>
+#include <algorithm>
 #include "Engine/Logger/SynLog.h"
 
 namespace Syn
@@ -23,6 +24,38 @@ namespace Syn
     HierarchyManager::HierarchyManager(Registry* registry)
         : _registry(registry)
     {}
+
+    void HierarchyManager::ReserveLevel(uint32_t level, uint32_t capacity)
+    {
+        while (_levels.size() <= level) {
+            _levels.push_back(HierarchyLevelData{ 0, 0, 0 });
+        }
+
+        if (_levels[level].capacity < capacity) {
+            _levels[level].capacity = capacity;
+            RebuildTopologicalArray();
+        }
+    }
+
+    void HierarchyManager::ReserveLevels(std::span<const uint32_t> capacities)
+    {
+        if (_levels.size() < capacities.size()) {
+            _levels.resize(capacities.size(), HierarchyLevelData{ 0, 0, 0 });
+        }
+
+        bool needsRebuild = false;
+        for (size_t i = 0; i < capacities.size(); ++i)
+        {
+            if (_levels[i].capacity < capacities[i]) {
+                _levels[i].capacity = capacities[i];
+                needsRebuild = true;
+            }
+        }
+
+        if (needsRebuild) {
+            RebuildTopologicalArray();
+        }
+    }
 
     bool HierarchyManager::CanAttach(EntityID parent, EntityID child) const
     {
@@ -45,37 +78,53 @@ namespace Syn
 
     void HierarchyManager::RebuildTopologicalArray()
     {
-        std::vector<EntityID> newArray;
         std::vector<HierarchyLevelData> newLevels = _levels;
 
-        uint32_t currentOffset = 0;
-        auto hierarchyPool = _registry->GetPool<HierarchyComponent>();
+        // Calculate total capacity and only grow levels that are full or uninitialized
+        uint32_t totalCapacity = 0;
+        for (auto& level : newLevels)
+        {
+            if (level.activeCount >= level.capacity)
+            {
+                level.capacity = std::max({ level.capacity * 2, level.activeCount * 2, DEFAULT_LEVEL_CAPACITY });
+            }
+            totalCapacity += level.capacity;
+        }
 
+        std::vector<EntityID> newArray;
+        newArray.resize(totalCapacity, NULL_ENTITY);
+
+        auto hierarchyPool = _registry->GetPool<HierarchyComponent>();
+        uint32_t currentOffset = 0;
+
+        // Copy existing entities and conditionally update indices
         for (size_t i = 0; i < newLevels.size(); ++i)
         {
             auto& level = newLevels[i];
-
-            // Allocate new capacity with 25% growth + 32 padding
-            uint32_t newCapacity = level.activeCount + (level.activeCount / 4) + 32;
+            const auto& oldLevel = _levels[i];
 
             level.startIndex = currentOffset;
-            level.capacity = newCapacity;
 
-            newArray.resize(currentOffset + newCapacity, NULL_ENTITY);
-
-            // Copy existing active entities to the new tightly packed array
-            const auto& oldLevel = _levels[i];
-            for (uint32_t k = 0; k < oldLevel.activeCount; ++k)
+            if (oldLevel.activeCount > 0)
             {
-                EntityID entity = _topologicalArray[oldLevel.startIndex + k];
-                newArray[currentOffset + k] = entity;
+                // Fast memory copy for the current level block
+                std::copy(_topologicalArray.begin() + oldLevel.startIndex,
+                    _topologicalArray.begin() + oldLevel.startIndex + oldLevel.activeCount,
+                    newArray.begin() + currentOffset);
 
-                // Update physical index in the component
-                auto& comp = hierarchyPool->Get(entity);
-                comp.topoIndex = currentOffset + k;
+                // Update component indices ONLY if the block's physical offset changed
+                if (oldLevel.startIndex != currentOffset)
+                {
+                    for (uint32_t k = 0; k < oldLevel.activeCount; ++k)
+                    {
+                        EntityID entity = newArray[currentOffset + k];
+                        auto& comp = hierarchyPool->Get(entity);
+                        comp.topoIndex = currentOffset + k;
+                    }
+                }
             }
 
-            currentOffset += newCapacity;
+            currentOffset += level.capacity;
         }
 
         _topologicalArray = std::move(newArray);
@@ -141,10 +190,14 @@ namespace Syn
         if (levelDelta == 0) return;
 
         auto hierarchyPool = _registry->GetPool<HierarchyComponent>();
+        auto& rootComp = hierarchyPool->Get(root);
+
+        // Fast exit if the entity is a leaf node (no children to shift)
+        if (rootComp.firstChild == NULL_ENTITY) return;
+
         std::vector<EntityID> queue;
 
         // Push immediate children to the BFS queue
-        auto& rootComp = hierarchyPool->Get(root);
         EntityID currChild = rootComp.firstChild;
         while (currChild != NULL_ENTITY) {
             queue.push_back(currChild);
@@ -288,7 +341,7 @@ namespace Syn
 
         InsertIntoLevel(entity, 0);
 
-		_version++;
+        _version++;
     }
 
     void HierarchyManager::OnEntityDestroyed(EntityID entity)

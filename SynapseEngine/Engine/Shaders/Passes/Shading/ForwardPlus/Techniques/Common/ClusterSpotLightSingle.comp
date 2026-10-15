@@ -1,0 +1,149 @@
+// Copyright (C) 2026 Tamás Péter
+// This file is part of SynapseEngine.
+//
+// SynapseEngine is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Affero General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// SynapseEngine is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU Affero General Public License for more details.
+//
+// You should have received a copy of the GNU Affero General Public License
+// along with SynapseEngine. If not, see <https://www.gnu.org/licenses/>.
+
+#version 460
+#extension GL_GOOGLE_include_directive : require
+#extension GL_EXT_buffer_reference2 : require
+#extension GL_EXT_shader_explicit_arithmetic_types_int64 : require
+#extension GL_KHR_shader_subgroup_basic : require
+#extension GL_KHR_shader_subgroup_arithmetic : require
+#extension GL_KHR_shader_subgroup_ballot : require
+
+#include "../../../../../Includes/Core.glsl"
+#include "../../../../../Includes/Common/FrameGlobalContext.glsl"
+#include "../../../../../Includes/Common/Camera.glsl"
+#include "../../../../../Includes/Common/Cluster.glsl"
+#include "../../../../../Includes/Common/SpotLight.glsl"
+#include "../../../../../Includes/Common/IndirectCommand.glsl"
+#include "../../../../../Includes/Utils/CullingMath.glsl"
+#include "../../../../../Includes/Utils/ClusterMath.glsl"
+#include "../../../../../Includes/Utils/CullingUtils.glsl"
+
+layout(local_size_x = 32, local_size_y = 1, local_size_z = 1) in;
+
+#include "../../../../../Includes/PushConstants/ClusterLightWritePC.glsl"
+
+layout(push_constant) uniform PushConstants {
+    ClusterLightWritePC pc;
+};
+
+#define MAX_LIGHTS_PER_CLUSTER 512
+
+shared uint s_localSpotLightCount;
+shared vec3 s_clusterSphereCenter;
+shared float s_clusterSphereRadius;
+
+#ifdef USE_CLUSTER_FRUSTUM_VS_SPOT_SPHERE_CULLING
+shared vec4 s_clusterPlanes[6];
+#endif
+
+void main() {
+    FrameGlobalContext ctx = GET_FRAME_CONTEXT(pc.frameGlobalContextBufferAddr);
+
+    uint threadId = gl_LocalInvocationID.x;
+    uint clusterIdx = gl_WorkGroupID.x;
+
+    uint activeClusterCount = GET_CLUSTER_COUNT(ctx.forwardPlusClusterCountBufferAddr);
+    if (clusterIdx >= activeClusterCount) return;
+
+    uint cameraIdx = GET_SPARSE_INDEX(ctx.cameraSparseMapBufferAddr, ctx.mainCameraEntity);
+    CameraComponent camera = GET_CAMERA(ctx.cameraBufferAddr, cameraIdx);
+    
+    if (threadId == 0) 
+    {
+        ClusterData cluster = GET_CLUSTER_DATA(ctx.forwardPlusClusterListBufferAddr, clusterIdx);
+        s_localSpotLightCount = 0;
+
+        vec3 aabbMin, aabbMax;
+        GetClusterViewSpaceAABB(
+            cluster.tileIndex, ctx.tileCountX, ctx.tileSize, ctx.screenWidth, ctx.screenHeight, 
+            cluster.minZ, cluster.maxZ, camera.projVulkanInv, 
+            aabbMin, aabbMax
+        );
+
+        vec3 extents = (aabbMax - aabbMin) * 0.5;
+        s_clusterSphereCenter = aabbMin + extents;
+        s_clusterSphereRadius = length(extents);
+
+#ifdef USE_CLUSTER_FRUSTUM_VS_SPOT_SPHERE_CULLING
+        ivec2 tileId = ivec2(cluster.tileIndex % ctx.tileCountX, cluster.tileIndex / ctx.tileCountX);
+        GetClusterFrustumPlanes(
+            tileId, ctx.tileSize, ctx.screenWidth, ctx.screenHeight,
+            cluster.minZ, cluster.maxZ, camera.projVulkanInv,
+            s_clusterPlanes
+        );
+#endif
+    }
+    
+    barrier();
+
+    uint totalLights = GET_VK_DRAW_CMD(ctx.spotLightIndirectCommandBufferAddr, 0).instanceCount;
+    uint globalOffset = clusterIdx * MAX_LIGHTS_PER_CLUSTER;
+
+    for (uint base = 0; base < totalLights; base += gl_WorkGroupSize.x) {
+        uint i = base + threadId;
+        uint entityIdx = INVALID_INDEX;
+        bool isIntersecting = false;
+
+        if (i < totalLights) {
+            entityIdx = GET_SPOT_VISIBLE_LIGHT(ctx.spotLightVisibleIndexBufferAddr, i);
+            uint denseIdx = GET_SPARSE_INDEX(ctx.spotLightSparseMapBufferAddr, entityIdx);
+            SpotLightColliderGPU collider = GET_SPOT_LIGHT_COLLIDER(ctx.spotLightColliderBufferAddr, denseIdx);
+            
+            vec3 viewSpacePos = (camera.view * vec4(collider.worldPos, 1.0)).xyz;
+            vec3 viewSpaceDir = normalize(mat3(camera.view) * collider.worldDir);
+
+#ifdef USE_CLUSTER_FRUSTUM_VS_SPOT_SPHERE_CULLING
+            uint cullResult = TestSphereFrustum(viewSpacePos, collider.range, s_clusterPlanes);
+            isIntersecting = (cullResult != 0u);
+#else
+            isIntersecting = TestConeSphere(
+                viewSpacePos, viewSpaceDir, 
+                collider.range, collider.outerAngleCos, collider.outerAngleSin,
+                s_clusterSphereCenter, s_clusterSphereRadius
+            );
+#endif
+        }
+        
+        uvec4 ballot = subgroupBallot(isIntersecting);
+        uint activeCount = subgroupBallotBitCount(ballot);
+        
+        uint baseOffset = 0;
+        if (subgroupElect() && activeCount > 0) {
+            baseOffset = atomicAdd(s_localSpotLightCount, activeCount);
+        }
+        baseOffset = subgroupBroadcastFirst(baseOffset);
+
+        uint isIntersectingInt = isIntersecting ? 1 : 0;
+        uint threadOffset = subgroupExclusiveAdd(isIntersectingInt);
+
+        if (isIntersecting) {
+            uint localIdx = baseOffset + threadOffset;
+
+            if (localIdx < MAX_LIGHTS_PER_CLUSTER) {
+                uint finalIdx = globalOffset + localIdx;
+                GET_LIGHT_INDEX(ctx.forwardPlusSpotLightIndexListBufferAddr, finalIdx) = entityIdx;
+            }
+        }
+    }
+
+    barrier();
+
+    if (threadId == 0) {
+        GET_CLUSTER_DATA(ctx.forwardPlusClusterListBufferAddr, clusterIdx).spotLightCount = min(s_localSpotLightCount, MAX_LIGHTS_PER_CLUSTER);
+        GET_CLUSTER_DATA(ctx.forwardPlusClusterListBufferAddr, clusterIdx).spotLightOffset = globalOffset;
+    }
+}
